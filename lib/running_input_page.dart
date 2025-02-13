@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class RunningInputPage extends StatefulWidget {
+  const RunningInputPage({super.key});
+
   @override
   _RunningInputPageState createState() => _RunningInputPageState();
 }
 
 class _RunningInputPageState extends State<RunningInputPage> {
   // Theme colors
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
   
   String selectedIntensity = 'Medium';
   double distance = 5.0;
@@ -22,10 +23,10 @@ class _RunningInputPageState extends State<RunningInputPage> {
         backgroundColor: primaryYellow,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Running',
           style: TextStyle(
             color: Colors.black87,
@@ -36,12 +37,12 @@ class _RunningInputPageState extends State<RunningInputPage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Distance Section
-              Text(
+              const Text(
                 'Distance',
                 style: TextStyle(
                   fontSize: 16,
@@ -49,13 +50,13 @@ class _RunningInputPageState extends State<RunningInputPage> {
                   color: Colors.black87,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
                       blurRadius: 5,
@@ -71,17 +72,17 @@ class _RunningInputPageState extends State<RunningInputPage> {
                         Row(
                           children: [
                             Icon(Icons.route, color: primaryPink),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              '${distance.toStringAsFixed(1)}',
-                              style: TextStyle(
+                              distance.toStringAsFixed(1),
+                              style: const TextStyle(
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
                               ),
                             ),
-                            SizedBox(width: 4),
-                            Text(
+                            const SizedBox(width: 4),
+                            const Text(
                               'km',
                               style: TextStyle(
                                 fontSize: 16,
@@ -92,7 +93,7 @@ class _RunningInputPageState extends State<RunningInputPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     SliderTheme(
                       data: SliderThemeData(
                         activeTrackColor: primaryPink,
@@ -112,7 +113,7 @@ class _RunningInputPageState extends State<RunningInputPage> {
                         },
                       ),
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
@@ -135,10 +136,10 @@ class _RunningInputPageState extends State<RunningInputPage> {
                 ),
               ),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               // Intensity Selection
-              Text(
+              const Text(
                 'Intensity',
                 style: TextStyle(
                   fontSize: 16,
@@ -146,21 +147,21 @@ class _RunningInputPageState extends State<RunningInputPage> {
                   color: Colors.black87,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   _buildIntensityButton('Light', '🚶‍♂️'),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   _buildIntensityButton('Medium', '🏃‍♂️'),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   _buildIntensityButton('High', '🏃‍♂️💨'),
                 ],
               ),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               // Notes Section
-              Text(
+              const Text(
                 'Notes',
                 style: TextStyle(
                   fontSize: 16,
@@ -168,13 +169,13 @@ class _RunningInputPageState extends State<RunningInputPage> {
                   color: Colors.black87,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
                       blurRadius: 5,
@@ -182,7 +183,7 @@ class _RunningInputPageState extends State<RunningInputPage> {
                     ),
                   ],
                 ),
-                child: TextField(
+                child: const TextField(
                   maxLines: 3,
                   decoration: InputDecoration(
                     border: InputBorder.none,
@@ -196,8 +197,8 @@ class _RunningInputPageState extends State<RunningInputPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
@@ -212,7 +213,7 @@ class _RunningInputPageState extends State<RunningInputPage> {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Run saved successfully!'),
+                  content: const Text('Run saved successfully!'),
                   backgroundColor: primaryPink,
                 ),
               );
@@ -220,12 +221,12 @@ class _RunningInputPageState extends State<RunningInputPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryPink,
-              padding: EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Save Run',
               style: TextStyle(
                 fontSize: 16,
@@ -245,7 +246,7 @@ class _RunningInputPageState extends State<RunningInputPage> {
       child: GestureDetector(
         onTap: () => setState(() => selectedIntensity = label),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? primaryPink.withOpacity(0.1) : Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -253,7 +254,7 @@ class _RunningInputPageState extends State<RunningInputPage> {
               color: isSelected ? primaryPink : Colors.black12,
               width: isSelected ? 2 : 1,
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 3,
@@ -265,9 +266,9 @@ class _RunningInputPageState extends State<RunningInputPage> {
             children: [
               Text(
                 emoji,
-                style: TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 20),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 label,
                 textAlign: TextAlign.center,

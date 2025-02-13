@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
 class RecentlyFoodsSection extends StatefulWidget {
-  const RecentlyFoodsSection({Key? key}) : super(key: key);
+  const RecentlyFoodsSection({super.key});
 
   @override
   State<RecentlyFoodsSection> createState() => _RecentlyFoodsSectionState();
 }
 
 class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
-  final Color coinColor = Color(0xFFFFD700);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+  final Color coinColor = const Color(0xFFFFD700);
   
   Set<String> favorites = {'Chicken Breast'};
 
@@ -30,11 +30,11 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
   void _showRewardDialog(String title, String amount, String type) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
         backgroundColor: Colors.transparent,
         elevation: 0,
         content: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.black87,
             borderRadius: BorderRadius.circular(12),
@@ -47,10 +47,10 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
                 color: type == 'coins' ? coinColor : primaryYellow,
                 size: 20,
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 '$title $amount',
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
             ],
           ),
@@ -112,13 +112,13 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
 
   Widget _buildSectionTitle(String title, {bool showAll = false}) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
@@ -126,7 +126,7 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
           ),
           if (showAll)
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: primaryPink.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
@@ -151,7 +151,7 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
     
     return Container(
       width: 200,
-      margin: EdgeInsets.only(right: 12),
+      margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -159,7 +159,7 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -203,8 +203,8 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
             child: GestureDetector(
               onTap: () => toggleFavorite(food['name']!),
               child: Container(
-                padding: EdgeInsets.all(6),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
                   boxShadow: [
@@ -229,11 +229,11 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
               top: 8,
               left: 8,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
                       blurRadius: 4,
@@ -244,10 +244,10 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
                 child: Row(
                   children: [
                     Icon(Icons.monetization_on, color: coinColor, size: 14),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
                       '+${food['reward']['coins']}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.black87,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -263,7 +263,7 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
             right: 0,
             bottom: 0,
             child: Container(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -273,35 +273,35 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
                 children: [
                   Text(
                     food['name']!,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                       color: Colors.black87,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
                       Icon(Icons.local_fire_department,
                           color: primaryPink, size: 14),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         food['calories']!,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.black54,
                           fontSize: 13,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Row(
                     children: [
                       Icon(Icons.access_time, color: primaryGreen, size: 14),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         food['time']!,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.black54,
                           fontSize: 12,
                         ),
@@ -309,11 +309,11 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
                     ],
                   ),
                   if (tags.isNotEmpty) ...[
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
                     Wrap(
                       spacing: 4,
                       children: tags.map((tag) => Container(
-                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
                           color: primaryGreen.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
@@ -341,7 +341,7 @@ class _RecentlyFoodsSectionState extends State<RecentlyFoodsSection> {
 Widget _buildQuickAddCard(Map<String, dynamic> food) {
     return Container(
       width: 160,
-      margin: EdgeInsets.only(right: 12),
+      margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -349,7 +349,7 @@ Widget _buildQuickAddCard(Map<String, dynamic> food) {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -359,7 +359,7 @@ Widget _buildQuickAddCard(Map<String, dynamic> food) {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 child: Image.network(
                   food['image']!,
                   width: double.infinity,
@@ -390,27 +390,27 @@ Widget _buildQuickAddCard(Map<String, dynamic> food) {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       food['name']!,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                         color: Colors.black87,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         Icon(Icons.local_fire_department,
                             color: primaryPink, size: 14),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           food['calories']!,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.black54,
                             fontSize: 13,
                           ),
@@ -418,15 +418,15 @@ Widget _buildQuickAddCard(Map<String, dynamic> food) {
                       ],
                     ),
                     if (food['reward'] != null) ...[
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Row(
                         children: [
                           Icon(Icons.monetization_on,
                               color: coinColor, size: 14),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
                             '+${food['reward']['coins']}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.black87,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -457,13 +457,13 @@ Widget _buildQuickAddCard(Map<String, dynamic> food) {
               child: Container(
                 decoration: BoxDecoration(
                   color: primaryPink,
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(12),
                     bottomLeft: Radius.circular(12),
                   ),
                 ),
-                padding: EdgeInsets.all(8),
-                child: Icon(
+                padding: const EdgeInsets.all(8),
+                child: const Icon(
                   Icons.add,
                   color: Colors.white,
                   size: 20,
@@ -479,15 +479,15 @@ Widget _buildQuickAddCard(Map<String, dynamic> food) {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       children: [
         // History Section with Show All
         _buildSectionTitle('History', showAll: true),
-        Container(
+        SizedBox(
           height: 220,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: historyFoods.length,
             itemBuilder: (context, index) => _buildHistoryCard(historyFoods[index]),
           ),
@@ -495,11 +495,11 @@ Widget _buildQuickAddCard(Map<String, dynamic> food) {
 
         // Quick Add Section
         _buildSectionTitle('Quick Add'),
-        Container(
+        SizedBox(
           height: 200,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: quickAddFoods.length,
             itemBuilder: (context, index) => _buildQuickAddCard(quickAddFoods[index]),
           ),
@@ -508,11 +508,11 @@ Widget _buildQuickAddCard(Map<String, dynamic> food) {
         // Favorites Section with Show All
         if (favorites.isNotEmpty) ...[
           _buildSectionTitle('Favorites', showAll: true),
-          Container(
+          SizedBox(
             height: 220,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               itemCount: historyFoods.where((food) => 
                 favorites.contains(food['name'])).length,
               itemBuilder: (context, index) {

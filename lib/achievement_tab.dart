@@ -1,34 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class AchievementTab extends StatelessWidget {
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+
+  const AchievementTab({super.key});
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildAchievementSummary(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             
             _buildSectionTitle('Latest Achievements'),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             _buildLatestAchievements(),
             
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildSectionTitle('Achievement Categories'),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             _buildCategoriesGrid(),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildSectionTitle('Milestones'),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             _buildMilestonesCard(),
           ],
         ),
@@ -38,7 +39,7 @@ class AchievementTab extends StatelessWidget {
 
   Widget _buildAchievementSummary() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -50,7 +51,7 @@ class AchievementTab extends StatelessWidget {
           BoxShadow(
             color: primaryPink.withOpacity(0.3),
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -60,7 +61,7 @@ class AchievementTab extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
+              const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -82,12 +83,12 @@ class AchievementTab extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
                     Icon(Icons.local_fire_department, color: Colors.white, size: 16),
                     SizedBox(width: 4),
@@ -104,7 +105,7 @@ class AchievementTab extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
@@ -140,7 +141,7 @@ class AchievementTab extends StatelessWidget {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: Colors.black87,
@@ -157,26 +158,26 @@ class AchievementTab extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 12,
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 2),
+        const SizedBox(height: 2),
         Text(
           subtext,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 11,
           ),
@@ -188,7 +189,7 @@ class AchievementTab extends StatelessWidget {
 
   Widget _buildLatestAchievements() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -196,7 +197,7 @@ class AchievementTab extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -207,10 +208,10 @@ class AchievementTab extends StatelessWidget {
             title: 'On Fire!',
             description: '14 day tracking streak',
             reward: '+200 coins',
-            color: Color(0xFFFFB946),
+            color: const Color(0xFFFFB946),
             isNew: true,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildAchievementItem(
             icon: Icons.fitness_center,
             title: 'Workout Master',
@@ -219,7 +220,7 @@ class AchievementTab extends StatelessWidget {
             color: primaryGreen,
             isNew: true,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildAchievementItem(
             icon: Icons.trending_down,
             title: 'Weight Loss Goal',
@@ -236,7 +237,7 @@ class AchievementTab extends StatelessWidget {
   Widget _buildCategoriesGrid() {
     return GridView.count(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
@@ -258,7 +259,7 @@ class AchievementTab extends StatelessWidget {
           'Weight Goals',
           '4/8',
           Icons.track_changes,
-          Color(0xFFFFB946),
+          const Color(0xFFFFB946),
         ),
         _buildCategoryCard(
           'Consistency',
@@ -277,7 +278,7 @@ class AchievementTab extends StatelessWidget {
     Color color,
   ) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -285,7 +286,7 @@ class AchievementTab extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -293,23 +294,23 @@ class AchievementTab extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),
           ),
-          Spacer(),
+          const Spacer(),
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Row(
             children: [
               Expanded(
@@ -323,10 +324,10 @@ class AchievementTab extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 progress,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   color: Colors.black54,
                   fontWeight: FontWeight.w500,
@@ -341,7 +342,7 @@ class AchievementTab extends StatelessWidget {
 
   Widget _buildMilestonesCard() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -349,7 +350,7 @@ class AchievementTab extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -362,7 +363,7 @@ class AchievementTab extends StatelessWidget {
             true,
             primaryGreen,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildMilestoneItem(
             'Exercise Enthusiast',
             'Complete 10 workouts',
@@ -370,13 +371,13 @@ class AchievementTab extends StatelessWidget {
             false,
             primaryPink,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildMilestoneItem(
             'Weight Goal Champion',
             'Reach your target weight',
             '2,000 coins',
             false,
-            Color(0xFFFFB946),
+            const Color(0xFFFFB946),
           ),
         ],
       ),
@@ -394,14 +395,14 @@ class AchievementTab extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: color, size: 24),
         ),
-        SizedBox(width: 16),
+        const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,16 +411,16 @@ class AchievementTab extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Colors.black87,
                     ),
                   ),
                   if (isNew) ...[
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: primaryPink.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
@@ -436,18 +437,18 @@ class AchievementTab extends StatelessWidget {
                   ],
                 ],
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Text(
                 description,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   color: Colors.black54,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 reward,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   color: Color(0xFFFFB946),
                   fontWeight: FontWeight.w500,
@@ -482,14 +483,14 @@ class AchievementTab extends StatelessWidget {
             size: 14,
           ),
         ),
-        SizedBox(width: 16),
+        const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Colors.black87,
@@ -497,7 +498,7 @@ class AchievementTab extends StatelessWidget {
               ),
               Text(
                 description,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   color: Colors.black54,
                 ),
@@ -506,14 +507,14 @@ class AchievementTab extends StatelessWidget {
           ),
         ),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: Color(0xFFFFB946).withOpacity(0.1),
+            color: const Color(0xFFFFB946).withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             reward,
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xFFFFB946),
               fontSize: 12,
               fontWeight: FontWeight.w500,

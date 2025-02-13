@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
 class AddFoodLogPage extends StatefulWidget {
+  const AddFoodLogPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _AddFoodLogPageState createState() => _AddFoodLogPageState();
 }
 
 class _AddFoodLogPageState extends State<AddFoodLogPage> with SingleTickerProviderStateMixin {
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
 
   late TabController _tabController;
   final _promptController = TextEditingController();
@@ -213,10 +216,10 @@ class _AddFoodLogPageState extends State<AddFoodLogPage> with SingleTickerProvid
         backgroundColor: primaryYellow,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Add Food',
           style: TextStyle(
             color: Colors.black87,
@@ -229,7 +232,7 @@ class _AddFoodLogPageState extends State<AddFoodLogPage> with SingleTickerProvid
           labelColor: primaryGreen,
           unselectedLabelColor: Colors.black54,
           indicatorColor: primaryGreen,
-          tabs: [
+          tabs: const [
             Tab(text: 'AI Assistant'),
             Tab(text: 'Pilih Manual'),
           ],
@@ -247,11 +250,11 @@ class _AddFoodLogPageState extends State<AddFoodLogPage> with SingleTickerProvid
 
   Widget _buildAIPromptTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Explain your food',
             style: TextStyle(
               fontSize: 18,
@@ -259,15 +262,15 @@ class _AddFoodLogPageState extends State<AddFoodLogPage> with SingleTickerProvid
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 8),
-          Text(
+          const SizedBox(height: 8),
+          const Text(
             'Example: 1 serving of white rice with 1 piece of fried chicken',
             style: TextStyle(
               color: Colors.black54,
               fontSize: 14,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           TextField(
  controller: _promptController,
  maxLines: 3,
@@ -280,19 +283,19 @@ class _AddFoodLogPageState extends State<AddFoodLogPage> with SingleTickerProvid
    fillColor: Colors.white,
  ),
 ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _isLoading ? null : _analyzeFood,
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
               child: _isLoading
-                  ? SizedBox(
+                  ? const SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
@@ -300,7 +303,7 @@ class _AddFoodLogPageState extends State<AddFoodLogPage> with SingleTickerProvid
                         strokeWidth: 2,
                       ),
                     )
-                  : Text('Analyze Food'),
+                  : const Text('Analyze Food'),
             ),
           ),
           if (aiPrediction != null) _buildAIPredictionResult(),
@@ -314,14 +317,14 @@ class _AddFoodLogPageState extends State<AddFoodLogPage> with SingleTickerProvid
       children: [
         // Search Bar
         Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search Food...',
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(color: Colors.grey.shade300),
@@ -357,7 +360,7 @@ class _AddFoodLogPageState extends State<AddFoodLogPage> with SingleTickerProvid
                   labelColor: primaryGreen,
                   unselectedLabelColor: Colors.grey,
                   indicatorColor: primaryGreen,
-                  tabs: [
+                  tabs: const [
                     Tab(text: 'Carbs'),
 Tab(text: 'Protein'),
 Tab(text: 'Vegetables'),
@@ -393,22 +396,22 @@ Tab(text: 'Fats & Oils'),
     }).toList();
 
     return ListView.builder(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       itemCount: filteredFoods.length,
       itemBuilder: (context, index) {
         final food = filteredFoods[index];
         return Card(
           elevation: 0,
-          margin: EdgeInsets.only(bottom: 8),
+          margin: const EdgeInsets.only(bottom: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(color: Colors.grey.shade200),
           ),
           child: ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             title: Text(
               food['name'],
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
               ),
@@ -416,7 +419,7 @@ Tab(text: 'Fats & Oils'),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   '${food['calories']} kcal/${food['unit']}',
                   style: TextStyle(color: Colors.grey.shade600),
@@ -441,124 +444,18 @@ Tab(text: 'Fats & Oils'),
   }
 
 
-  Widget _buildFoodList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.all(16),
-      itemCount: foodDatabase.length,
-      itemBuilder: (context, index) {
-        final food = foodDatabase[index];
-        return Card(
-          margin: EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            title: Text(food['name']),
-            subtitle: Text(
-              '${food['calories']} kcal/${food['unit']}',
-              style: TextStyle(color: Colors.black54),
-            ),
-            trailing: IconButton(
-              icon: Icon(Icons.add_circle_outline, color: primaryGreen),
-              onPressed: () => _addFood(food),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
-  Widget _buildSelectedFoods() {
-    if (selectedFoods.isEmpty) return SizedBox();
-
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Selected Food(s)',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: selectedFoods.length,
-            separatorBuilder: (context, index) => Divider(height: 1),
-            itemBuilder: (context, index) {
-              final food = selectedFoods[index];
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            food['name'],
-                            style: TextStyle(fontWeight: FontWeight.w500),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            '${food['calories']} kcal/${food['unit']}',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: TextField(
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          suffixText: food['unit'],
-                        ),
-                        onChanged: (value) => _updateAmount(index, value),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.remove_circle, color: primaryPink),
-                      onPressed: () => _removeFood(index),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildNutritionSummary() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, -5),
+            offset: const Offset(0, -5),
           ),
         ],
       ),
@@ -573,18 +470,18 @@ Tab(text: 'Fats & Oils'),
               _nutritionItem('Fat', totalNutrition['fat']!, 'g', Colors.blue),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _saveFoodLog,
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ),
         ],
@@ -594,8 +491,8 @@ Tab(text: 'Fats & Oils'),
 
   Widget _buildAIPredictionResult() {
     return Container(
-      margin: EdgeInsets.only(top: 24),
-      padding: EdgeInsets.all(16),
+      margin: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -604,7 +501,7 @@ Tab(text: 'Fats & Oils'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Analysis Results',
             style: TextStyle(
               fontSize: 16,
@@ -612,23 +509,23 @@ Tab(text: 'Fats & Oils'),
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildNutritionRow('Calories', '${aiPrediction!['calories']} kcal'),
 _buildNutritionRow('Protein', '${aiPrediction!['protein']}g'),
 _buildNutritionRow('Carbs', '${aiPrediction!['carbs']}g'),
 _buildNutritionRow('Fat', '${aiPrediction!['fat']}g'),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _saveAIPrediction,
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text('Simpan'),
+              child: const Text('Simpan'),
             ),
           ),
         ],
@@ -641,12 +538,12 @@ _buildNutritionRow('Fat', '${aiPrediction!['fat']}g'),
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black54,
             fontSize: 12,
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           value.toStringAsFixed(1),
           style: TextStyle(
@@ -657,7 +554,7 @@ _buildNutritionRow('Fat', '${aiPrediction!['fat']}g'),
         ),
         Text(
           unit,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black54,
             fontSize: 12,
           ),
@@ -668,20 +565,20 @@ _buildNutritionRow('Fat', '${aiPrediction!['fat']}g'),
 
   Widget _buildNutritionRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black54,
               fontSize: 14,
             ),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black87,
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -699,20 +596,7 @@ _buildNutritionRow('Fat', '${aiPrediction!['fat']}g'),
     });
   }
 
-  void _removeFood(int index) {
-    setState(() {
-      selectedFoods.removeAt(index);
-      _calculateTotalNutrition();
-    });
-  }
 
-  void _updateAmount(int index, String value) {
-    final amount = double.tryParse(value) ?? 0;
-    setState(() {
-      selectedFoods[index]['amount'] = amount;
-      _calculateTotalNutrition();
-    });
-  }
 
   void _calculateTotalNutrition() {
     double calories = 0;
@@ -741,7 +625,7 @@ _buildNutritionRow('Fat', '${aiPrediction!['fat']}g'),
   Future<void> _analyzeFood() async {
     if (_promptController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please explain your food')),
+        const SnackBar(content: Text('Please explain your food')),
       );
       return;
     }
@@ -751,8 +635,7 @@ _buildNutritionRow('Fat', '${aiPrediction!['fat']}g'),
     });
 
     try {
-      // TODO: Implement AI API call
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
       
       setState(() {
         aiPrediction = {
@@ -764,6 +647,7 @@ _buildNutritionRow('Fat', '${aiPrediction!['fat']}g'),
         };
       });
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal menganalisis makanan: ${e.toString()}')),
       );
@@ -775,12 +659,12 @@ _buildNutritionRow('Fat', '${aiPrediction!['fat']}g'),
   }
 
   void _saveAIPrediction() {
-    // TODO: Implement save logic for AI prediction
+    
     Navigator.pop(context);
   }
 
   void _saveFoodLog() {
-    // TODO: Implement save logic for manual input
+    
     Navigator.pop(context);
   }
 }

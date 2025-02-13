@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class NutritionPage extends StatefulWidget {
+  const NutritionPage({super.key});
+
   @override
   _NutritionPageState createState() => _NutritionPageState();
 }
@@ -10,10 +12,10 @@ class _NutritionPageState extends State<NutritionPage> {
   bool _isScrolledToTop = true;
   
   // Theme colors
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
-  final Color warningYellow = Color(0xFFF4D03F);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+  final Color warningYellow = const Color(0xFFF4D03F);
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +98,7 @@ class _NutritionPageState extends State<NutritionPage> {
             // Content
             SliverToBoxAdapter(
               child: ClipRRect(
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
                 ),
@@ -107,14 +109,14 @@ class _NutritionPageState extends State<NutritionPage> {
                     children: [
                       // Food Title Section
                       Padding(
-                        padding: EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
+                                const Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
@@ -136,12 +138,12 @@ class _NutritionPageState extends State<NutritionPage> {
                                   ],
                                 ),
                                 Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: primaryGreen,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Column(
+                                  child: const Column(
                                     children: [
                                       Text(
                                         '92',
@@ -170,9 +172,9 @@ class _NutritionPageState extends State<NutritionPage> {
 
                       // Calorie Summary Card
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Container(
-                          padding: EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: primaryYellow.withOpacity(0.15),
                             borderRadius: BorderRadius.circular(16),
@@ -182,7 +184,7 @@ class _NutritionPageState extends State<NutritionPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Column(
+                                  const Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
@@ -203,12 +205,12 @@ class _NutritionPageState extends State<NutritionPage> {
                                     ],
                                   ),
                                   Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
                                       color: primaryPink,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
-                                    child: Text(
+                                    child: const Text(
                                       '22% of daily goal',
                                       style: TextStyle(
                                         color: Colors.white,
@@ -219,7 +221,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(4),
                                 child: LinearProgressIndicator(
@@ -236,9 +238,9 @@ class _NutritionPageState extends State<NutritionPage> {
 
                       // AI Analysis
                       Padding(
-                        padding: EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         child: Container(
-                          padding: EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: primaryGreen.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(16),
@@ -250,8 +252,8 @@ class _NutritionPageState extends State<NutritionPage> {
                                 children: [
                                   Icon(CupertinoIcons.sparkles,
                                        color: primaryGreen),
-                                  SizedBox(width: 8),
-                                  Text(
+                                  const SizedBox(width: 8),
+                                  const Text(
                                     'AI Analysis',
                                     style: TextStyle(
                                       fontSize: 18,
@@ -261,8 +263,8 @@ class _NutritionPageState extends State<NutritionPage> {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 12),
-                              Text(
+                              const SizedBox(height: 12),
+                              const Text(
                                 '• High protein content aligns well with your fitness goals\n'
                                 '• Consider adding vegetables to increase fiber intake\n'
                                 '• Sodium content is within your daily limit\n'
@@ -280,11 +282,11 @@ class _NutritionPageState extends State<NutritionPage> {
 
                       // Macro Details
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Nutritional Information',
                               style: TextStyle(
                                 fontSize: 20,
@@ -292,7 +294,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                 color: Colors.black87,
                               ),
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             Container(
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -308,7 +310,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                     primaryPink,
                                     subtitle: '38% of daily goal',
                                   ),
-                                  Divider(height: 1),
+                                  const Divider(height: 1),
                                   _buildMacroItem(
                                     'Carbs',
                                     156,
@@ -316,7 +318,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                     primaryGreen,
                                     subtitle: '62% of daily goal',
                                   ),
-                                  Divider(height: 1),
+                                  const Divider(height: 1),
                                   _buildMacroItem(
                                     'Fat',
                                     25,
@@ -333,23 +335,23 @@ class _NutritionPageState extends State<NutritionPage> {
 
                       // Additional Nutrients
                       Padding(
-                        padding: EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         child: _buildNutrientsGrid(),
                       ),
 
                       // Diet Tags
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: _buildDietTags(),
                       ),
 
                       // Recommendations
                       Padding(
-                        padding: EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Recommendations',
                               style: TextStyle(
                                 fontSize: 20,
@@ -357,9 +359,9 @@ class _NutritionPageState extends State<NutritionPage> {
                                 color: Colors.black87,
                               ),
                             ),
-                            SizedBox(height: 12),
+                            const SizedBox(height: 12),
                             Container(
-                              padding: EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 color: primaryYellow.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(12),
@@ -370,8 +372,8 @@ class _NutritionPageState extends State<NutritionPage> {
                                     CupertinoIcons.lightbulb_fill,
                                     color: primaryPink,
                                   ),
-                                  SizedBox(width: 12),
-                                  Expanded(
+                                  const SizedBox(width: 12),
+                                  const Expanded(
                                     child: Text(
                                       'Add a side of vegetables to increase your fiber intake and reach your daily nutrition goals.',
                                       style: TextStyle(
@@ -387,7 +389,7 @@ class _NutritionPageState extends State<NutritionPage> {
                         ),
                       ),
 
-                      SizedBox(height: 100),
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -397,8 +399,8 @@ class _NutritionPageState extends State<NutritionPage> {
         ),
       ),
       bottomSheet: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(
             top: BorderSide(
@@ -416,15 +418,15 @@ class _NutritionPageState extends State<NutritionPage> {
                   borderRadius: BorderRadius.circular(8),
                   onTap: () {},
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(CupertinoIcons.wand_stars,
                             size: 20,
                             color: primaryPink),
-                        SizedBox(width: 6),
-                        Text(
+                        const SizedBox(width: 6),
+                        const Text(
                           'Fix',
                           style: TextStyle(
                             color: Colors.black87,
@@ -437,7 +439,7 @@ class _NutritionPageState extends State<NutritionPage> {
                 ),
               ),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Expanded(
               flex: 2,
               child: Material(
@@ -447,8 +449,8 @@ class _NutritionPageState extends State<NutritionPage> {
                   borderRadius: BorderRadius.circular(8),
                   onTap: () {},
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Row(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(CupertinoIcons.plus,
@@ -482,7 +484,7 @@ class _NutritionPageState extends State<NutritionPage> {
     {String? subtitle}
   ) {
     return Padding(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -491,7 +493,7 @@ class _NutritionPageState extends State<NutritionPage> {
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
@@ -499,7 +501,7 @@ class _NutritionPageState extends State<NutritionPage> {
               ),
               Text(
                 '$value of ${total}g',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
@@ -507,7 +509,7 @@ class _NutritionPageState extends State<NutritionPage> {
               ),
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
@@ -518,10 +520,10 @@ class _NutritionPageState extends State<NutritionPage> {
             ),
           ),
           if (subtitle != null) ...[
-            SizedBox(height: 6),
+            const SizedBox(height: 6),
             Text(
               subtitle,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.black54,
                 fontSize: 14,
               ),
@@ -542,8 +544,8 @@ class _NutritionPageState extends State<NutritionPage> {
 
     return GridView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 2,
         crossAxisSpacing: 12,
@@ -553,7 +555,7 @@ class _NutritionPageState extends State<NutritionPage> {
       itemBuilder: (context, index) {
         final nutrient = nutrients[index];
         return Container(
-          padding: EdgeInsets.all(12),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: primaryYellow.withOpacity(0.15),
             borderRadius: BorderRadius.circular(12),
@@ -564,16 +566,16 @@ class _NutritionPageState extends State<NutritionPage> {
             children: [
               Text(
                 nutrient['name']!,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 nutrient['value']!,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
@@ -581,7 +583,7 @@ class _NutritionPageState extends State<NutritionPage> {
               ),
               Text(
                 'of ${nutrient['goal']}',
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black54,
                   fontSize: 13,
                 ),
@@ -600,7 +602,7 @@ class _NutritionPageState extends State<NutritionPage> {
       runSpacing: 8,
       children: tags.map((tag) {
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: primaryGreen.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
@@ -608,7 +610,7 @@ class _NutritionPageState extends State<NutritionPage> {
           ),
           child: Text(
             tag,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black87,
               fontSize: 14,
               fontWeight: FontWeight.w500,

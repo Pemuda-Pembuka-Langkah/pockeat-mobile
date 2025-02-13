@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class RecentExerciseSection extends StatefulWidget {
+  const RecentExerciseSection({super.key});
+
   @override
   _RecentExerciseSectionState createState() => _RecentExerciseSectionState();
 }
 
 class _RecentExerciseSectionState extends State<RecentExerciseSection> {
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
-  final Color purpleColor = Color(0xFF9B6BFF);
-  final Color coinColor = Color(0xFFFFD700);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+  final Color purpleColor = const Color(0xFF9B6BFF);
+  final Color coinColor = const Color(0xFFFFD700);
 
   // Sample data for recent exercises
   final List<Map<String, dynamic>> recentExercises = [
@@ -20,7 +22,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
       'title': 'Evening Run',
       'subtitle': '5.2 km • 350 cal',
       'time': '2h ago',
-      'color': Color(0xFFFF6B6B),
+      'color': const Color(0xFFFF6B6B),
       'icon': Icons.directions_run,
       'reward': {'coins': 150, 'exp': 200},
       'streakDay': 3,
@@ -30,7 +32,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
       'title': 'Upper Body',
       'subtitle': '6 exercises • 280 cal',
       'time': '1d ago',
-      'color': Color(0xFF4ECDC4),
+      'color': const Color(0xFF4ECDC4),
       'icon': CupertinoIcons.arrow_up_circle_fill,
       'reward': {'coins': 200, 'exp': 250},
       'streakDay': 2,
@@ -40,7 +42,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
       'title': 'HIIT Session',
       'subtitle': '25 min • 320 cal',
       'time': '2d ago',
-      'color': Color(0xFF9B6BFF),
+      'color': const Color(0xFF9B6BFF),
       'icon': CupertinoIcons.text_badge_checkmark,
       'reward': {'coins': 180, 'exp': 220},
       'streakDay': 1,
@@ -54,11 +56,11 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 20, 16, 12),
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Recent Exercises',
                 style: TextStyle(
                   fontSize: 18,
@@ -67,7 +69,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: primaryPink.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -86,7 +88,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
         ),
         ListView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           itemCount: recentExercises.length,
           itemBuilder: (context, index) => _buildExerciseCard(recentExercises[index]),
         ),
@@ -97,7 +99,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
 
   Widget _buildExerciseCard(Map<String, dynamic> exercise) {
     return Container(
-      margin: EdgeInsets.fromLTRB(16, 0, 16, 12),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -105,7 +107,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -115,7 +117,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               Row(
@@ -123,7 +125,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
                 children: [
                   // Exercise Icon
                   Container(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: exercise['color'].withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -134,7 +136,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
                       size: 20,
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   // Exercise Info
                   Expanded(
                     child: Column(
@@ -145,7 +147,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
                           children: [
                             Text(
                               exercise['title'],
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black87,
@@ -153,17 +155,17 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
                             ),
                             Text(
                               exercise['time'],
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.black54,
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           exercise['subtitle'],
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
                           ),
@@ -173,10 +175,10 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
                   ),
                 ],
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               // Rewards Section
               Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: exercise['color'].withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),
@@ -192,10 +194,10 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
                           color: primaryPink,
                           size: 16,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           '${exercise['streakDay']} day streak!',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: Colors.black87,
@@ -211,7 +213,7 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
                           '+${exercise['reward']['coins']}',
                           coinColor,
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         _buildRewardBadge(
                           Icons.stars,
                           '+${exercise['reward']['exp']}',
@@ -230,11 +232,11 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
 
   Widget _buildRewardBadge(IconData icon, String value, Color color) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 2,
@@ -245,10 +247,10 @@ class _RecentExerciseSectionState extends State<RecentExerciseSection> {
       child: Row(
         children: [
           Icon(icon, size: 12, color: color),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: Colors.black87,

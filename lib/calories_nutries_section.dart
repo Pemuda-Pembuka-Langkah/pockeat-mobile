@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class NutritionProgressSection extends StatefulWidget {
+  const NutritionProgressSection({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _NutritionProgressSectionState createState() => _NutritionProgressSectionState();
 }
 
 class _NutritionProgressSectionState extends State<NutritionProgressSection> {
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
   
   bool isWeeklyView = true;
 
@@ -18,16 +20,16 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildProgressOverview(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildNutrientProgress(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildMealPatterns(),
           ],
         ),
@@ -39,7 +41,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
+        const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -78,7 +80,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
 
   Widget _buildProgressOverview() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -86,7 +88,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -96,7 +98,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
+              const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -118,7 +120,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
                 ],
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: primaryGreen.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -127,7 +129,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
                   children: [
                     Icon(Icons.local_fire_department,
                         color: primaryGreen, size: 16),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
                       '92% of goal',
                       style: TextStyle(
@@ -141,7 +143,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -150,19 +152,19 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
               _buildNutrientStat('Net', '1,400', primaryPink),
             ],
           ),
-          SizedBox(height: 20),
-          Container(
+          const SizedBox(height: 20),
+          SizedBox(
             height: 180,
             child: SfCartesianChart(
               margin: EdgeInsets.zero,
-              primaryXAxis: CategoryAxis(
+              primaryXAxis: const CategoryAxis(
                 majorGridLines: MajorGridLines(width: 0),
                 labelStyle: TextStyle(
                   color: Colors.black54,
                   fontSize: 12,
                 ),
               ),
-              primaryYAxis: NumericAxis(
+              primaryYAxis: const NumericAxis(
                 minimum: 0,
                 maximum: 3000,
                 interval: 500,
@@ -183,7 +185,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
                   dataSource: _getCalorieData(),
                   xValueMapper: (CalorieData data, _) => data.day,
                   yValueMapper: (CalorieData data, _) => data.calories,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                 ),
               ],
             ),
@@ -197,7 +199,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Nutrient Balance',
           style: TextStyle(
             fontSize: 18,
@@ -205,7 +207,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
             color: Colors.black87,
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -216,7 +218,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
                 primaryPink,
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: _buildMacroCard(
                 'Carbs',
@@ -225,18 +227,18 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
                 primaryGreen,
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: _buildMacroCard(
                 'Fat',
                 20,
                 '32g/65g',
-                Color(0xFFFFB946),
+                const Color(0xFFFFB946),
               ),
             ),
           ],
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -245,7 +247,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
-                offset: Offset(0, 2),
+                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -269,7 +271,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               'Meal Distribution',
               style: TextStyle(
                 fontSize: 18,
@@ -278,7 +280,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: primaryGreen.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
@@ -294,9 +296,9 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
             ),
           ],
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -304,17 +306,17 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
                 blurRadius: 10,
-                offset: Offset(0, 2),
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Column(
             children: [
               _buildMealRow('Breakfast', 550, 2150, '7:30 AM', primaryPink),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _buildMealRow('Lunch', 750, 2150, '12:30 PM', primaryGreen),
-              SizedBox(height: 16),
-              _buildMealRow('Dinner', 650, 2150, '7:00 PM', Color(0xFFFFB946)),
+              const SizedBox(height: 16),
+              _buildMealRow('Dinner', 650, 2150, '7:00 PM', const Color(0xFFFFB946)),
             ],
           ),
         ),
@@ -330,7 +332,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
         });
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? primaryPink : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
@@ -352,15 +354,15 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black54,
             fontSize: 14,
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Row(
           children: [
-            if (label == 'Burned') Text('-'),
+            if (label == 'Burned') const Text('-'),
             Text(
               value,
               style: TextStyle(
@@ -371,7 +373,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
             ),
           ],
         ),
-        Text(
+        const Text(
           'kcal',
           style: TextStyle(
             color: Colors.black54,
@@ -389,7 +391,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
     Color color,
   ) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -397,7 +399,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -405,12 +407,12 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black54,
               fontSize: 14,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             '$percentage%',
             style: TextStyle(
@@ -419,15 +421,15 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
               color: color,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             detail,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black54,
               fontSize: 12,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
@@ -450,8 +452,8 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
     Color color,
   ) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: Colors.black12),
         ),
@@ -462,7 +464,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
             flex: 2,
             child: Text(
               nutrient,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 color: Colors.black87,
               ),
@@ -472,7 +474,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
             flex: 2,
             child: Text(
               '$current / $target',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: Colors.black54,
@@ -511,16 +513,16 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
              children: [
                Text(
                  meal,
-                 style: TextStyle(
+                 style: const TextStyle(
                    fontSize: 14,
                    color: Colors.black87,
                    fontWeight: FontWeight.w500,
                  ),
                ),
-               SizedBox(width: 8),
+               const SizedBox(width: 8),
                Text(
                  time,
-                 style: TextStyle(
+                 style: const TextStyle(
                    fontSize: 12,
                    color: Colors.black54,
                  ),
@@ -537,7 +539,7 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
            ),
          ],
        ),
-       SizedBox(height: 8),
+       const SizedBox(height: 8),
        Row(
          children: [
            Expanded(
@@ -551,10 +553,10 @@ class _NutritionProgressSectionState extends State<NutritionProgressSection> {
                ),
              ),
            ),
-           SizedBox(width: 8),
+           const SizedBox(width: 8),
            Text(
              '${(percentage * 100).toInt()}%',
-             style: TextStyle(
+             style: const TextStyle(
                fontSize: 12,
                color: Colors.black54,
              ),

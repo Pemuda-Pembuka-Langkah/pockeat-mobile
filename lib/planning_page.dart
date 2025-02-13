@@ -2,10 +2,10 @@ import 'package:pockeat/exercise_plan_tab.dart';
 import 'package:pockeat/meal_plans_tab.dart';
 import 'package:pockeat/navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 
 class PlanningPage extends StatefulWidget {
+  const PlanningPage({super.key});
+
   @override
   _PlanningPageState createState() => _PlanningPageState();
 }
@@ -16,9 +16,9 @@ class _PlanningPageState extends State<PlanningPage>
   final ScrollController _scrollController = ScrollController();
 
   // Theme colors
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
 
   @override
   void initState() {
@@ -29,7 +29,7 @@ class _PlanningPageState extends State<PlanningPage>
       if (!_tabController.indexIsChanging) {
         _scrollController.animateTo(
           0,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
@@ -59,7 +59,7 @@ class _PlanningPageState extends State<PlanningPage>
               backgroundColor: primaryYellow,
               elevation: 0,
               toolbarHeight: 60,
-              title: Row(
+              title: const Row(
                 children: [
                   Text(
                     'Planning',
@@ -73,11 +73,11 @@ class _PlanningPageState extends State<PlanningPage>
               ),
               actions: [
                 IconButton(
-                  icon: Icon(Icons.notifications_none_outlined,
+                  icon: const Icon(Icons.notifications_none_outlined,
                       color: Colors.black87),
                   onPressed: () {},
                 ),
-                Padding(
+                const Padding(
                   padding: EdgeInsets.only(right: 16),
                   child: CircleAvatar(
                     radius: 16,
@@ -99,11 +99,11 @@ class _PlanningPageState extends State<PlanningPage>
             SliverToBoxAdapter(
               child: Container(
                 color: primaryYellow,
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
                     Container(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
@@ -115,7 +115,7 @@ class _PlanningPageState extends State<PlanningPage>
                           BoxShadow(
                             color: primaryPink.withOpacity(0.3),
                             blurRadius: 8,
-                            offset: Offset(0, 4),
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -154,10 +154,10 @@ class _PlanningPageState extends State<PlanningPage>
                       ),
                     ),
 
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
                     // Weekly Calendar
-                    Container(
+                    SizedBox(
                       height: 90,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
@@ -185,11 +185,11 @@ class _PlanningPageState extends State<PlanningPage>
 
                           return Container(
                             width: 55,
-                            margin: EdgeInsets.only(right: 8),
+                            margin: const EdgeInsets.only(right: 8),
                             decoration: BoxDecoration(
                               color: isToday ? primaryPink : Colors.white,
                               borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
+                              boxShadow: const [
                                 BoxShadow(
                                   color: Colors.black12,
                                   blurRadius: 3,
@@ -208,7 +208,7 @@ class _PlanningPageState extends State<PlanningPage>
                                     fontSize: 12,
                                   ),
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Text(
                                   dates[index],
                                   style: TextStyle(
@@ -239,11 +239,11 @@ class _PlanningPageState extends State<PlanningPage>
                 controller: _tabController,
                 labelColor: primaryPink,
                 unselectedLabelColor: Colors.black38,
-                labelStyle: TextStyle(
+                labelStyle: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
-                unselectedLabelStyle: TextStyle(
+                unselectedLabelStyle: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                 ),
@@ -251,8 +251,8 @@ class _PlanningPageState extends State<PlanningPage>
                 indicatorWeight: 2,
                 indicatorSize: TabBarIndicatorSize.label,
                 labelPadding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                tabs: [
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                tabs: const [
                   Text('Meal Plan'),
                   Text('Exercise Plan'),
                 ],
@@ -263,7 +263,7 @@ class _PlanningPageState extends State<PlanningPage>
             color: Colors.white,
             child: TabBarView(
               controller: _tabController,
-              children: [
+              children: const [
                 MealPlansTab(),
                 ExercisePlanTab(),
               ],
@@ -271,14 +271,14 @@ class _PlanningPageState extends State<PlanningPage>
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(),
+      bottomNavigationBar: const CustomBottomNavBar(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Show add plan dialog
         },
         backgroundColor: primaryPink,
-        child: Icon(Icons.add, color: Colors.white),
         elevation: 4,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -292,7 +292,7 @@ class _PlanningPageState extends State<PlanningPage>
     return Column(
       children: [
         Icon(icon, color: color, size: 24),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(

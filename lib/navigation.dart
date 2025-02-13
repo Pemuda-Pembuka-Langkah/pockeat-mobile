@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
-import 'package:flutter/cupertino.dart';
 
 
 class NavigationProvider extends ChangeNotifier {
@@ -27,7 +27,7 @@ class NavigationProvider extends ChangeNotifier {
 }
 
 class CustomBottomNavBar extends StatefulWidget {
-  const CustomBottomNavBar({Key? key}) : super(key: key);
+  const CustomBottomNavBar({super.key});
 
   @override
   State<CustomBottomNavBar> createState() => _CustomBottomNavBarState();
@@ -37,9 +37,9 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   OverlayEntry? _overlayEntry;
   
   // Theme colors
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
 
   void _showOverlay(BuildContext context, NavigationProvider navigationProvider) {
     _overlayEntry = OverlayEntry(
@@ -67,7 +67,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Padding(
-                  padding: EdgeInsets.only(right: 15),
+                  padding: const EdgeInsets.only(right: 15),
                   child: _buildFloatingButton(
                     icon: Icons.fitness_center,
                     color: primaryPink,
@@ -80,7 +80,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(left: 15),
+                  padding: const EdgeInsets.only(left: 15),
                   child: _buildFloatingButton(
                     icon: Icons.lunch_dining,
                     color: primaryGreen,
@@ -121,7 +121,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
           }
         });
 
-        return Container(
+        return SizedBox(
           height: 65,
           child: Stack(
             clipBehavior: Clip.none,
@@ -139,11 +139,11 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
                         blurRadius: 10,
-                        offset: Offset(0, -5),
+                        offset: const Offset(0, -5),
                       ),
                     ],
                   ),
-                  padding: EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -171,7 +171,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           },
                         ),
                       ),
-                      Expanded(child: SizedBox()),
+                      const Expanded(child: SizedBox()),
                       Expanded(
                         child: _buildNavItem(
                           icon: Icons.stars_outlined,
@@ -225,14 +225,14 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                               ? primaryGreen 
                               : primaryPink).withOpacity(0.3),
                             blurRadius: 8,
-                            offset: Offset(0, 4),
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: AnimatedRotation(
-                        duration: Duration(milliseconds: 200),
+                        duration: const Duration(milliseconds: 200),
                         turns: navigationProvider.isMenuOpen ? 0.125 : 0,
-                        child: Icon(
+                        child: const Icon(
                           Icons.add,
                           color: Colors.white,
                           size: 24,
@@ -286,7 +286,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
             size: 24,
             color: isSelected ? primaryPink : Colors.black38,
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
@@ -321,7 +321,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                 BoxShadow(
                   color: color.withOpacity(0.3),
                   blurRadius: 8,
-                  offset: Offset(0, 4),
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -331,7 +331,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
               size: 20,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Material(
             color: Colors.transparent,
             child: Text(

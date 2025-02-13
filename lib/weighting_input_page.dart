@@ -64,14 +64,16 @@ final Map<String, List<String>> exercisesByCategory = {
 };
 
 class WeightliftingPage extends StatefulWidget {
+  const WeightliftingPage({super.key});
+
   @override
   _WeightliftingPageState createState() => _WeightliftingPageState();
 }
 
 class _WeightliftingPageState extends State<WeightliftingPage> {
   // Theme colors
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
   
   String selectedBodyPart = 'Upper Body';
   List<Exercise> exercises = [];
@@ -135,10 +137,10 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
         backgroundColor: primaryYellow,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Weightlifting',
           style: TextStyle(
             color: Colors.black87,
@@ -148,18 +150,18 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: Colors.black54),
+            icon: const Icon(Icons.refresh, color: Colors.black54),
             onPressed: clearWorkout,
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Select Body Part',
                 style: TextStyle(
                   fontSize: 16,
@@ -167,27 +169,27 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                   color: Colors.black87,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: exercisesByCategory.keys.map((category) {
                     return Padding(
-                      padding: EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.only(right: 8),
                       child: _buildBodyPartChip(category),
                     );
                   }).toList(),
                 ),
               ),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Colors.black12,
                       blurRadius: 5,
@@ -199,14 +201,14 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Quick Add ${selectedBodyPart} Exercises',
-                      style: TextStyle(
+                      'Quick Add $selectedBodyPart Exercises',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -220,13 +222,13 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                 ),
               ),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               
               if (exercises.isNotEmpty)
                 _buildWorkoutSummary(),
 
               ...exercises.map((exercise) => Padding(
-                    padding: EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.only(bottom: 16),
                     child: _buildExerciseCard(exercise),
                   )),
             ],
@@ -245,11 +247,11 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     return GestureDetector(
       onTap: () => setState(() => selectedBodyPart = category),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? primaryGreen : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black12,
               blurRadius: 3,
@@ -272,7 +274,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     return GestureDetector(
       onTap: () => addExercise(exerciseName),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: primaryGreen.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
@@ -282,15 +284,15 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.fitness_center, size: 16, color: primaryGreen),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Text(
               exerciseName,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.black87,
                 fontSize: 14,
               ),
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Icon(Icons.add, size: 16, color: primaryGreen),
           ],
         ),
@@ -300,12 +302,12 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   Widget _buildCustomButton() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: primaryGreen,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
+      child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.add, size: 16, color: Colors.white),
@@ -326,12 +328,12 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   Widget _buildWorkoutSummary() {
     final summary = getWorkoutSummary();
     return Container(
-      padding: EdgeInsets.all(16),
-      margin: EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 5,
@@ -342,7 +344,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Workout Summary',
             style: TextStyle(
               fontSize: 16,
@@ -350,7 +352,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -385,7 +387,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: primaryGreen.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
@@ -396,10 +398,10 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
             size: 20,
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
@@ -407,7 +409,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
         ),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
             color: Colors.black54,
           ),
@@ -418,8 +420,8 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   Widget _buildBottomBar() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: const BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
@@ -434,21 +436,21 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Workout saved successfully!'),
+                content: const Text('Workout saved successfully!'),
                 backgroundColor: primaryGreen,
               ),
             );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: primaryGreen,
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
           child: Text(
             'Save Workout (${calculateTotalVolume().toStringAsFixed(1)} kg)',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.white,
@@ -464,7 +466,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 5,
@@ -475,17 +477,17 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
                     Icon(Icons.fitness_center, color: primaryGreen),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Text(
                       exercise.name,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
@@ -494,7 +496,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                   ],
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: primaryGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -513,14 +515,14 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           ),
           ListView.builder(
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: exercise.sets.length,
             itemBuilder: (context, index) {
               return _buildSetRow(index + 1, exercise.sets[index]);
             },
           ),
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: OutlinedButton(
               onPressed: () => _showAddSetDialog(exercise),
               style: OutlinedButton.styleFrom(
@@ -530,7 +532,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.add),
@@ -547,8 +549,8 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   Widget _buildSetRow(int setNumber, ExerciseSet set) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: Colors.black12),
         ),
@@ -565,23 +567,23 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
             child: Center(
               child: Text(
                 '$setNumber',
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Text(
             '${set.weight} kg',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Colors.black87,
             ),
           ),
-          Text(
+          const Text(
             ' × ',
             style: TextStyle(
               color: Colors.black38,
@@ -590,7 +592,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           ),
           Text(
             '${set.reps} reps',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Colors.black87,
@@ -608,7 +610,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
+        title: const Text(
           'Add Set',
           style: TextStyle(
             color: Colors.black87,
@@ -622,7 +624,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Weight (kg)',
-                labelStyle: TextStyle(color: Colors.black54),
+                labelStyle: const TextStyle(color: Colors.black54),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -633,12 +635,12 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
               ),
               onChanged: (value) => weight = double.tryParse(value) ?? 0,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 labelText: 'Reps',
-                labelStyle: TextStyle(color: Colors.black54),
+                labelStyle: const TextStyle(color: Colors.black54),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -657,7 +659,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
             style: TextButton.styleFrom(
               foregroundColor: Colors.black54,
             ),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -672,7 +674,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: Text('Add'),
+            child: const Text('Add'),
           ),
         ],
       ),

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:pockeat/nutrition_page.dart';
 
 class ScanFoodPage extends StatefulWidget {
+  const ScanFoodPage({super.key});
+
   @override
   _ScanFoodPageState createState() => _ScanFoodPageState();
 }
@@ -11,22 +13,23 @@ class ScanFoodPage extends StatefulWidget {
 class _ScanFoodPageState extends State<ScanFoodPage>
     with SingleTickerProviderStateMixin {
   // Theme colors
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
   // Base colors  // Main green
 
 // Progress colors - lebih vivid untuk progress
   final Color warningYellow =
-      Color(0xFFFFB946); // More orange-ish yellow for progress
-  final Color alertRed = Color(0xFFFF4949); // Brighter red for initial stage
-  final Color successGreen = Color(0xFF4CD964); // More vivid green for success
+      const Color(0xFFFFB946); // More orange-ish yellow for progress
+  final Color alertRed = const Color(0xFFFF4949); // Brighter red for initial stage
+  final Color successGreen = const Color(0xFF4CD964); // More vivid green for success
 
   double _scanProgress = 0.0;
   late AnimationController _scanLineController;
   String _statusMessage = 'Move camera closer to the food';
-  Color _progressColor = Color(0xFFFF4949); // Using primaryPink
+  Color _progressColor = const Color(0xFFFF4949); // Using primaryPink
   int _currentMode = 0;
+  // ignore: unused_field
   bool _isFoodPositioned = false;
   double _imageScale = 1.2;
   double _imageX = 50.0;
@@ -37,7 +40,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
   void initState() {
     super.initState();
     _scanLineController = AnimationController(
-      duration: Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat();
     _startScanningProcess();
@@ -51,7 +54,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
 
   void _startScanningProcess() async {
     // Stage 1 - Initial
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 500));
     setState(() {
       _statusMessage = 'Move camera back slightly';
       _scanProgress = 0.2;
@@ -63,7 +66,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
     });
 
     // Stage 2 - Adjusting
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
     setState(() {
       _statusMessage = 'Move slightly to the left';
       _scanProgress = 0.4;
@@ -75,7 +78,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
     });
 
     // Stage 3 - Almost
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
     setState(() {
       _statusMessage = 'Rotate camera to align with plate';
       _scanProgress = 0.6;
@@ -87,7 +90,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
     });
 
     // Stage 4 - Getting Close
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
     setState(() {
       _statusMessage = 'Almost there, hold steady...';
       _scanProgress = 0.8;
@@ -99,7 +102,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
     });
 
     // Stage 5 - Perfect
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
     setState(() {
       _scanProgress = 1.0;
       _progressColor = successGreen;
@@ -121,7 +124,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
           // Background Image with animation
           Center(
             child: AnimatedContainer(
-              duration: Duration(milliseconds: 500),
+              duration: const Duration(milliseconds: 500),
               curve: Curves.easeInOut,
               child: Transform.scale(
                 scale: _imageScale,
@@ -129,7 +132,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
                   offset: Offset(_imageX, _imageY),
                   child: Transform.rotate(
                     angle: _imageRotation,
-                    child: Container(
+                    child: SizedBox(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
                       child: ClipRect(
@@ -257,7 +260,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
             child: Column(
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -268,9 +271,9 @@ class _ScanFoodPageState extends State<ScanFoodPage>
                       Row(
                         children: [
                           _buildModeButton('Scan', 0),
-                          SizedBox(width: 16),
+                          const SizedBox(width: 16),
                           _buildModeButton('Tag Food', 1),
-                          SizedBox(width: 16),
+                          const SizedBox(width: 16),
                           _buildModeButton('Help', 2),
                         ],
                       ),
@@ -288,17 +291,17 @@ class _ScanFoodPageState extends State<ScanFoodPage>
             right: 0,
             bottom: 0,
             child: Container(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: primaryYellow,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Progress Bar
                   AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 300),
                     height: 8,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(4),
@@ -310,22 +313,22 @@ class _ScanFoodPageState extends State<ScanFoodPage>
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                   // Status Message
                   AnimatedSwitcher(
-                    duration: Duration(milliseconds: 200),
+                    duration: const Duration(milliseconds: 200),
                     child: Text(
                       _statusMessage,
                       key: ValueKey<String>(_statusMessage),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.black54,
                         fontSize: 16,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // Camera Controls
                   Row(
@@ -352,7 +355,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
         setState(() => _currentMode = mode);
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? primaryGreen : Colors.black.withOpacity(0.5),
           borderRadius: BorderRadius.circular(20),
@@ -389,11 +392,11 @@ class _ScanFoodPageState extends State<ScanFoodPage>
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => NutritionPage(),
+            builder: (context) => const NutritionPage(),
           ),
         );
       },
-      customBorder: CircleBorder(),
+      customBorder: const CircleBorder(),
       child: Container(
         width: 72,
         height: 72,
@@ -402,7 +405,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
           shape: BoxShape.circle,
           border: Border.all(color: Colors.white, width: 4),
         ),
-        child: Icon(Icons.camera_alt, color: Colors.white, size: 32),
+        child: const Icon(Icons.camera_alt, color: Colors.white, size: 32),
       ),
     );
   }

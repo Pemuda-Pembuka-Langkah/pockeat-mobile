@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class PetStorePage extends StatefulWidget {
+  const PetStorePage({super.key});
+
   @override
   _PetStorePageState createState() => _PetStorePageState();
 }
 
 class _PetStorePageState extends State<PetStorePage> {
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
-  final Color coinColor = Color(0xFFFFD700);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+  final Color coinColor = const Color(0xFFFFD700);
 
   String selectedCategory = 'Accessories';
 
@@ -96,10 +97,10 @@ class _PetStorePageState extends State<PetStorePage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Pet Shop',
           style: TextStyle(
             color: Colors.black87,
@@ -109,8 +110,8 @@ class _PetStorePageState extends State<PetStorePage> {
         ),
         actions: [
           Container(
-            margin: EdgeInsets.only(right: 16),
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
               color: coinColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
@@ -118,8 +119,8 @@ class _PetStorePageState extends State<PetStorePage> {
             child: Row(
               children: [
                 Icon(Icons.monetization_on, color: coinColor, size: 16),
-                SizedBox(width: 4),
-                Text(
+                const SizedBox(width: 4),
+                const Text(
                   '2,350',
                   style: TextStyle(
                     color: Colors.black87,
@@ -148,8 +149,8 @@ class _PetStorePageState extends State<PetStorePage> {
     return Container(
       width: double.infinity,
       height: 200,
-      margin: EdgeInsets.all(16),
-      padding: EdgeInsets.all(20),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: primaryYellow,
         borderRadius: BorderRadius.circular(20),
@@ -166,7 +167,7 @@ class _PetStorePageState extends State<PetStorePage> {
             right: 0,
             bottom: 0,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -174,8 +175,8 @@ class _PetStorePageState extends State<PetStorePage> {
               child: Row(
                 children: [
                   Icon(Icons.camera_alt, color: primaryPink, size: 16),
-                  SizedBox(width: 4),
-                  Text(
+                  const SizedBox(width: 4),
+                  const Text(
                     'Preview',
                     style: TextStyle(
                       color: Colors.black87,
@@ -195,7 +196,7 @@ class _PetStorePageState extends State<PetStorePage> {
   Widget _buildCategorySelector() {
     return Container(
       height: 40,
-      margin: EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
@@ -205,8 +206,8 @@ class _PetStorePageState extends State<PetStorePage> {
           return GestureDetector(
             onTap: () => setState(() => selectedCategory = category),
             child: Container(
-              margin: EdgeInsets.only(right: 8),
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: isSelected ? primaryPink : Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -234,8 +235,8 @@ class _PetStorePageState extends State<PetStorePage> {
   Widget _buildItemGrid() {
     final items = storeItems[selectedCategory] ?? [];
     return GridView.builder(
-      padding: EdgeInsets.all(16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.75,
         crossAxisSpacing: 16,
@@ -258,7 +259,7 @@ class _PetStorePageState extends State<PetStorePage> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -272,12 +273,12 @@ class _PetStorePageState extends State<PetStorePage> {
   width: double.infinity,
   decoration: BoxDecoration(
     color: primaryYellow.withOpacity(0.1),
-    borderRadius: BorderRadius.vertical(
+    borderRadius: const BorderRadius.vertical(
       top: Radius.circular(16),
     ),
   ),
   child: ClipRRect(
-    borderRadius: BorderRadius.vertical(
+    borderRadius: const BorderRadius.vertical(
       top: Radius.circular(16),
     ),
     child: item['image'] != null ? Image.asset(
@@ -302,27 +303,27 @@ class _PetStorePageState extends State<PetStorePage> {
   ),
 ),
               Padding(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       item['name'],
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                         color: Colors.black87,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       item['description'],
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
                         color: Colors.black54,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Icon(
@@ -330,10 +331,10 @@ class _PetStorePageState extends State<PetStorePage> {
                           size: 16,
                           color: coinColor,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           '${item['price']}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                             color: Colors.black87,
@@ -351,12 +352,12 @@ class _PetStorePageState extends State<PetStorePage> {
               top: 12,
               right: 12,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: primaryPink,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
+                child: const Text(
                   'NEW',
                   style: TextStyle(
                     color: Colors.white,

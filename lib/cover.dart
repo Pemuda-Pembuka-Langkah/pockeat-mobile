@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProjectCover extends StatefulWidget {
-  const ProjectCover({Key? key}) : super(key: key);
+  const ProjectCover({super.key});
 
   @override
   State<ProjectCover> createState() => _ProjectCoverState();
