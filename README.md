@@ -1,6 +1,5 @@
 # PockEat
 
-[![Development](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/development.yml/badge.svg)](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/development.yml)
 [![Staging](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/staging.yml/badge.svg)](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/staging.yml)
 [![Production](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/production.yml/badge.svg)](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/production.yml)
 [![codecov](https://codecov.io/gh/Pemuda-Pembuka-Langkah/pockeat-mobile/branch/master/graph/badge.svg)](https://codecov.io/gh/Pemuda-Pembuka-Langkah/pockeat-mobile)
