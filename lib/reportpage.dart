@@ -6,11 +6,11 @@ class ReportHeader extends StatelessWidget {
   final String programName;
 
   const ReportHeader({
-    Key? key,
+    super.key,
     this.universityName = 'UNIVERSITAS INDONESIA',
     this.facultyName = 'FAKULTAS TEKNIK',
     this.programName = 'PROGRAM STUDI TEKNIK KOMPUTER',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +63,10 @@ class ReportFooter extends StatelessWidget {
   final String year;
 
   const ReportFooter({
-    Key? key,
+    super.key,
     required this.pageNumber,
     this.year = '2025',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -101,10 +101,10 @@ class ReportPage extends StatelessWidget {
   final Widget content;
 
   const ReportPage({
-    Key? key,
+    super.key,
     required this.pageNumber,
     required this.content,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

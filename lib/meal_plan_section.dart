@@ -74,7 +74,7 @@ class MealPlanSection extends StatelessWidget {
               if (index == meals.length) {
                 return TextButton(
                   onPressed: () {
-                    // TODO: Implement add meal
+                   
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -137,7 +137,7 @@ class MealPlanSection extends StatelessWidget {
                     ),
                     IconButton(
                       onPressed: () {
-                        // TODO: Show meal options
+                    
                       },
                       icon: Icon(
                         Icons.more_vert,
@@ -159,10 +159,10 @@ class MealPlanSection extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
+          const Padding(
+            padding: EdgeInsets.all(16),
             child: Row(
-              children: const [
+              children: [
                 Text(
                   'Today\'s Plan',
                   style: TextStyle(
@@ -182,7 +182,7 @@ class MealPlanSection extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      // TODO: Implement AI meal plan generation
+                     
                     },
                     icon: const Icon(Icons.auto_awesome, size: 20),
                     label: const Text(
@@ -209,7 +209,7 @@ class MealPlanSection extends StatelessWidget {
                   width: double.infinity,
                   child: TextButton(
                     onPressed: () {
-                      // TODO: Implement custom plan
+                    
                     },
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 
 class OverviewSection extends StatelessWidget {
   // Theme colors
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+
+  const OverviewSection({super.key});
 
   Widget _buildNutrientCard({
     required String title,
@@ -16,11 +18,11 @@ class OverviewSection extends StatelessWidget {
     required Color bgColor,
   }) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 5,
@@ -34,30 +36,30 @@ class OverviewSection extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(6),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: bgColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: iconColor, size: 14),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black54,
                   fontSize: 13,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           RichText(
             text: TextSpan(
               children: [
                 TextSpan(
                   text: current,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.black87,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -65,7 +67,7 @@ class OverviewSection extends StatelessWidget {
                 ),
                 TextSpan(
                   text: '/$target',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.black38,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -82,15 +84,15 @@ class OverviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       children: [
         // Daily Calories Card
         Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: primaryPink,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 5,
@@ -104,7 +106,7 @@ class OverviewSection extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Remaining Calories',
                     style: TextStyle(
                       color: Colors.white,
@@ -113,12 +115,12 @@ class OverviewSection extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
                         Icon(
                           Icons.local_fire_department,
@@ -139,8 +141,8 @@ class OverviewSection extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 12),
-              Text(
+              const SizedBox(height: 12),
+              const Text(
                 '1,247',
                 style: TextStyle(
                   color: Colors.white,
@@ -149,13 +151,13 @@ class OverviewSection extends StatelessWidget {
                   letterSpacing: -1,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                   value: 0.38,
                   backgroundColor: Colors.white.withOpacity(0.2),
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                   minHeight: 4,
                 ),
               ),
@@ -164,7 +166,7 @@ class OverviewSection extends StatelessWidget {
         ),
 
         // Nutrients Grid
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -177,7 +179,7 @@ class OverviewSection extends StatelessWidget {
                 bgColor: primaryPink.withOpacity(0.1),
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: _buildNutrientCard(
                 title: 'Carbs',
@@ -188,27 +190,27 @@ class OverviewSection extends StatelessWidget {
                 bgColor: primaryGreen.withOpacity(0.1),
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: _buildNutrientCard(
                 title: 'Fat',
                 current: '25',
                 target: '65g',
                 icon: Icons.water_drop_outlined,
-                iconColor: Color(0xFFFFB946),
-                bgColor: Color(0xFFFFB946).withOpacity(0.1),
+                iconColor: const Color(0xFFFFB946),
+                bgColor: const Color(0xFFFFB946).withOpacity(0.1),
               ),
             ),
           ],
         ),
 
         // Pet Section
-        SizedBox(height: 24),
-        PetSection(),
+        const SizedBox(height: 24),
+        const PetSection(),
 
         // Weekly Stats
-        SizedBox(height: 24),
-        Text(
+        const SizedBox(height: 24),
+        const Text(
           'Weekly Overview',
           style: TextStyle(
             fontSize: 16,
@@ -216,13 +218,13 @@ class OverviewSection extends StatelessWidget {
             color: Colors.black87,
           ),
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 5,
@@ -236,7 +238,7 @@ class OverviewSection extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
+                  const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -257,7 +259,7 @@ class OverviewSection extends StatelessWidget {
                     ],
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: primaryGreen.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -269,7 +271,7 @@ class OverviewSection extends StatelessWidget {
                           size: 14,
                           color: primaryGreen,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           '5/7 days on track',
                           style: TextStyle(
@@ -283,8 +285,8 @@ class OverviewSection extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 24),
-              Container(
+              const SizedBox(height: 24),
+              SizedBox(
                 height: 180,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -298,19 +300,19 @@ class OverviewSection extends StatelessWidget {
 
                       return Expanded(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 3),
+                          padding: const EdgeInsets.symmetric(horizontal: 3),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(
-                                '${value}',
-                                style: TextStyle(
+                                '$value',
+                                style: const TextStyle(
                                   color: Colors.black54,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              const SizedBox(height: 4),
                               Container(
                                 height: 140 * percentage,
                                 width: double.infinity,
@@ -321,7 +323,7 @@ class OverviewSection extends StatelessWidget {
                                       : primaryPink.withOpacity(0.2),
                                 ),
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
                                 days[index],
                                 style: TextStyle(
@@ -341,9 +343,9 @@ class OverviewSection extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: primaryYellow.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
@@ -359,8 +361,8 @@ class OverviewSection extends StatelessWidget {
                         color: primaryPink,
                       ),
                     ),
-                    SizedBox(width: 8),
-                    Text(
+                    const SizedBox(width: 8),
+                    const Text(
                       'Daily Goal: 2000 kcal',
                       style: TextStyle(
                         color: Colors.black87,

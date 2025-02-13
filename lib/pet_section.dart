@@ -2,22 +2,24 @@ import 'package:pockeat/pet_store_page.dart';
 import 'package:flutter/material.dart';
 
 class PetSection extends StatefulWidget {
+  const PetSection({super.key});
+
   @override
   _PetCompanionSectionState createState() => _PetCompanionSectionState();
 }
 
 class _PetCompanionSectionState extends State<PetSection> {
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
-  final Color coinColor = Color(0xFFFFD700);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+  final Color coinColor = const Color(0xFFFFD700);
 
   bool showDetails = false;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: primaryYellow,
         borderRadius: BorderRadius.circular(16),
@@ -25,12 +27,12 @@ class _PetCompanionSectionState extends State<PetSection> {
       child: Column(
         children: [
           _buildHeader(),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           _buildMainPetCard(),
           if (showDetails) ...[
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             _buildMotivationMessage(),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             _buildGoals(),
           ],
           TextButton(
@@ -57,7 +59,7 @@ class _PetCompanionSectionState extends State<PetSection> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Fitness Companion",
                   style: TextStyle(
                     fontSize: 14,
@@ -66,16 +68,16 @@ class _PetCompanionSectionState extends State<PetSection> {
                 ),
                 Row(
                   children: [
-                    Text(
+                    const Text(
                       "Mochi",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: primaryGreen.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
@@ -96,7 +98,7 @@ class _PetCompanionSectionState extends State<PetSection> {
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -108,8 +110,8 @@ class _PetCompanionSectionState extends State<PetSection> {
                         color: coinColor,
                         size: 16,
                       ),
-                      SizedBox(width: 4),
-                      Text(
+                      const SizedBox(width: 4),
+                      const Text(
                         "2,350",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -119,20 +121,20 @@ class _PetCompanionSectionState extends State<PetSection> {
                     ],
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => PetStorePage()),
+                      MaterialPageRoute(builder: (context) => const PetStorePage()),
                     );
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Colors.black12,
                           blurRadius: 4,
@@ -144,8 +146,8 @@ class _PetCompanionSectionState extends State<PetSection> {
                       children: [
                         Icon(Icons.shopping_bag_outlined,
                             color: primaryPink, size: 16),
-                        SizedBox(width: 4),
-                        Text(
+                        const SizedBox(width: 4),
+                        const Text(
                           "Shop",
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
@@ -166,17 +168,17 @@ class _PetCompanionSectionState extends State<PetSection> {
 
   Widget _buildMainPetCard() {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
       ),
       child: Column(
         children: [
           Stack(
             children: [
-              Container(
+              SizedBox(
                 height: 180,
                 child: Image.asset('assets/images/kucing.png',
                     fit: BoxFit.contain),
@@ -185,19 +187,19 @@ class _PetCompanionSectionState extends State<PetSection> {
                 top: 4,
                 right: 8,
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(color: Colors.black12, blurRadius: 4)
                     ],
                   ),
                   child: Row(
                     children: [
                       Icon(Icons.favorite, color: primaryPink, size: 14),
-                      SizedBox(width: 4),
-                      Text(
+                      const SizedBox(width: 4),
+                      const Text(
                         "Happy",
                         style: TextStyle(
                           fontSize: 12,
@@ -210,14 +212,14 @@ class _PetCompanionSectionState extends State<PetSection> {
               ),
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildStatItem(Icons.favorite, "95%", "Health", primaryPink),
               _buildStatItem(Icons.local_fire_department, "5 days", "Streak",
                   primaryGreen),
-              _buildStatItem(Icons.star, "8", "Level", Color(0xFFFFB946)),
+              _buildStatItem(Icons.star, "8", "Level", const Color(0xFFFFB946)),
             ],
           ),
         ],
@@ -230,21 +232,21 @@ class _PetCompanionSectionState extends State<PetSection> {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.all(6),
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color, size: 20),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         Text(
           label,
-          style: TextStyle(fontSize: 11, color: Colors.black54),
+          style: const TextStyle(fontSize: 11, color: Colors.black54),
         ),
       ],
     );
@@ -252,16 +254,16 @@ class _PetCompanionSectionState extends State<PetSection> {
 
   Widget _buildMotivationMessage() {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
       ),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(6),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: primaryGreen.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
@@ -269,8 +271,8 @@ class _PetCompanionSectionState extends State<PetSection> {
             child:
                 Icon(Icons.chat_bubble_outline, color: primaryGreen, size: 18),
           ),
-          SizedBox(width: 8),
-          Expanded(
+          const SizedBox(width: 8),
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -297,22 +299,22 @@ class _PetCompanionSectionState extends State<PetSection> {
 
   Widget _buildGoals() {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             "Today's Progress",
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           _buildGoalItem("Protein Intake", 0.7, primaryPink, Icons.egg_alt),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           _buildGoalItem(
               "Exercise Time", 0.3, primaryGreen, Icons.directions_run),
         ],
@@ -325,14 +327,14 @@ class _PetCompanionSectionState extends State<PetSection> {
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(6),
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color, size: 16),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Expanded(
           child: Column(
             children: [
@@ -341,15 +343,15 @@ class _PetCompanionSectionState extends State<PetSection> {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(fontSize: 13),
+                    style: const TextStyle(fontSize: 13),
                   ),
                   Text(
                     "${(progress * 100).toInt()}%",
-                    style: TextStyle(fontSize: 13, color: Colors.black54),
+                    style: const TextStyle(fontSize: 13, color: Colors.black54),
                   ),
                 ],
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(

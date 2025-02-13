@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class WeightProgressSection extends StatefulWidget {
+  const WeightProgressSection({super.key});
+
   @override
   _WeightProgressSectionState createState() => _WeightProgressSectionState();
 }
 
 class _WeightProgressSectionState extends State<WeightProgressSection> {
   String selectedPeriod = 'Weekly';
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
-  final Color primaryYellow = Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
   
   
 
@@ -49,18 +51,18 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildCurrentWeightCard(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildGoalsCard(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildWeeklyAnalysis(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildProgressChart(),
           ],
         ),
@@ -77,18 +79,18 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
           children: [
             Row(
               children: [
-                Text(
+                const Text(
                   'Weight Progress',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 _buildAchievementBadge(),
               ],
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
               'Last 30 days',
               style: TextStyle(color: Colors.grey[600], fontSize: 14),
@@ -102,7 +104,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
 
   Widget _buildAchievementBadge() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: primaryPink.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
@@ -110,7 +112,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
       child: Row(
         children: [
           Icon(Icons.star, color: primaryPink, size: 14),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           Text(
             'Consistent',
             style: TextStyle(
@@ -126,7 +128,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
 
   Widget _buildCurrentWeightCard() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -135,7 +137,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -147,7 +149,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     '73.0 kg',
                     style: TextStyle(
                       fontSize: 28,
@@ -190,7 +192,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildProgressBarWithMetrics(),
         ],
       ),
@@ -203,7 +205,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               'Progress to Goal',
               style: TextStyle(
                 fontSize: 14,
@@ -220,7 +222,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
             ),
           ],
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Stack(
           children: [
             ClipRRect(
@@ -243,7 +245,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
             ),
           ],
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -261,92 +263,11 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
     );
   }
 
-  Widget _buildInsightCards() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Smart Insights',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: 12),
-        Container(
-          height: 130,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              _buildInsightCard(
-                icon: Icons.fitness_center,
-                title: '20% Faster',
-                description: 'Weight loss on strength training days',
-                color: primaryPink,
-              ),
-              SizedBox(width: 12),
-              _buildInsightCard(
-                icon: Icons.schedule,
-                title: 'Morning Effect',
-                description: 'Better results with AM workouts',
-                color: primaryGreen,
-              ),
-              SizedBox(width: 12),
-              _buildInsightCard(
-                icon: Icons.restaurant,
-                title: 'Protein Impact',
-                description: 'Higher loss during protein-rich weeks',
-                color: Color(0xFFFFB946),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildInsightCard({
-    required IconData icon,
-    required String title,
-    required String description,
-    required Color color,
-  }) {
-    return Container(
-      width: 160,
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color),
-          SizedBox(height: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            description,
-            style: TextStyle(
-              color: Colors.black54,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildWeeklyAnalysis() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -355,21 +276,21 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'This Week\'s Analysis',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -389,17 +310,17 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
                 icon: Icons.speed,
                 label: 'Progress Rate',
                 value: '105%',
-                color: Color(0xFFFFB946),
+                color: const Color(0xFFFFB946),
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           LinearProgressIndicator(
             value: 0.85,
             backgroundColor: Colors.grey[200],
             valueColor: AlwaysStoppedAnimation<Color>(primaryGreen),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             '85% of weekly goal achieved',
             style: TextStyle(
@@ -421,17 +342,17 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color, size: 20),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 14,
           ),
@@ -454,20 +375,20 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
     
     if (bmi < 18.5) {
       category = 'Underweight';
-      color = Color(0xFFFFB946);
+      color = const Color(0xFFFFB946);
     } else if (bmi < 25) {
       category = 'Healthy';
       color = primaryGreen;
     } else if (bmi < 30) {
       category = 'Overweight';
-      color = Color(0xFFFFB946);
+      color = const Color(0xFFFFB946);
     } else {
       category = 'Obese';
       color = primaryPink;
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
@@ -498,7 +419,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
 
   Widget _buildGoalsCard() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -507,7 +428,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -516,7 +437,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Weight Goals',
                 style: TextStyle(
                   fontSize: 16,
@@ -524,7 +445,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: primaryGreen.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -540,7 +461,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -551,15 +472,15 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
               _buildGoalDetail('To Go', '3.0 kg', '35 days left', Icons.trending_down),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Container(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: primaryYellow.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: primaryYellow.withOpacity(0.2)),
             ),
-            child: Row(
+            child: const Row(
               children: [
                 Icon(Icons.tips_and_updates, color: Color(0xFFFFB946), size: 20),
                 SizedBox(width: 8),
@@ -584,17 +505,17 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: primaryPink.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: primaryPink, size: 16),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -625,14 +546,14 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
         side: BorderSide(color: Colors.grey[200]!),
       ),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Progress Chart',
                   style: TextStyle(
                     fontSize: 16,
@@ -651,8 +572,8 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
                       child: DropdownButton<String>(
                         value: selectedPeriod,
                         isDense: true,
-                        icon: Icon(Icons.keyboard_arrow_down, size: 20),
-                        style: TextStyle(
+                        icon: const Icon(Icons.keyboard_arrow_down, size: 20),
+                        style: const TextStyle(
                           color: Colors.black87,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -677,8 +598,8 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            Container(
+            const SizedBox(height: 16),
+            SizedBox(
               height: MediaQuery.of(context).size.height * 0.3,
               child: SfCartesianChart(
                 margin: EdgeInsets.zero,
@@ -687,9 +608,9 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
                   majorGridLines: MajorGridLines(
                     width: 1,
                     color: Colors.grey[200],
-                    dashArray: [5, 5],
+                    dashArray: const [5, 5],
                   ),
-                  axisLine: AxisLine(width: 0),
+                  axisLine: const AxisLine(width: 0),
                   labelStyle: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,
@@ -702,9 +623,9 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
                   majorGridLines: MajorGridLines(
                     width: 1,
                     color: Colors.grey[200],
-                    dashArray: [5, 5],
+                    dashArray: const [5, 5],
                   ),
-                  axisLine: AxisLine(width: 0),
+                  axisLine: const AxisLine(width: 0),
                   labelStyle: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,
@@ -725,7 +646,7 @@ class _WeightProgressSectionState extends State<WeightProgressSection> {
                     name: 'Target Weight',
                     color: Colors.grey[300],
                     width: 1,
-                    dashArray: [2, 2],
+                    dashArray: const [2, 2],
                     dataSource: [
                       for (var data in periodData[selectedPeriod]!)
                         WeightDataComplete(data.label, 70.0, 0, 0, '')

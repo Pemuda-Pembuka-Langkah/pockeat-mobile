@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class ExerciseProgressSection extends StatefulWidget {
+  const ExerciseProgressSection({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _ExerciseProgressSectionState createState() => _ExerciseProgressSectionState();
 }
 
 class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
   
   bool isWeeklyView = true;
 
@@ -18,18 +20,18 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildWorkoutOverview(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildExerciseDistribution(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildPerformanceMetrics(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildWorkoutHistory(),
           ],
         ),
@@ -41,7 +43,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
+        const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -80,7 +82,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
 
   Widget _buildWorkoutOverview() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -88,7 +90,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -98,7 +100,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
+              const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -120,7 +122,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
                 ],
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: primaryGreen.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -128,7 +130,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
                 child: Row(
                   children: [
                     Icon(Icons.running_with_errors, color: primaryGreen, size: 16),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
                       '95% completed',
                       style: TextStyle(
@@ -142,28 +144,28 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildWorkoutStat('Duration', '45 min', primaryGreen),
               _buildWorkoutStat('Calories', '320', primaryPink),
-              _buildWorkoutStat('Intensity', 'High', Color(0xFFFFB946)),
+              _buildWorkoutStat('Intensity', 'High', const Color(0xFFFFB946)),
             ],
           ),
-          SizedBox(height: 20),
-          Container(
+          const SizedBox(height: 20),
+          SizedBox(
             height: 180,
             child: SfCartesianChart(
               margin: EdgeInsets.zero,
-              primaryXAxis: CategoryAxis(
+              primaryXAxis: const CategoryAxis(
                 majorGridLines: MajorGridLines(width: 0),
                 labelStyle: TextStyle(
                   color: Colors.black54,
                   fontSize: 12,
                 ),
               ),
-              primaryYAxis: NumericAxis(
+              primaryYAxis: const NumericAxis(
                 minimum: 0,
                 maximum: 500,
                 interval: 100,
@@ -184,7 +186,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
                   dataSource: _getExerciseData(),
                   xValueMapper: (ExerciseData data, _) => data.day,
                   yValueMapper: (ExerciseData data, _) => data.calories,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
                 ),
               ],
             ),
@@ -196,7 +198,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
 
   Widget _buildExerciseDistribution() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -204,14 +206,14 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Exercise Distribution',
             style: TextStyle(
               fontSize: 16,
@@ -219,12 +221,12 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _buildExerciseTypeRow('Running', 45, primaryPink),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildExerciseTypeRow('Weightlifting', 30, primaryGreen),
-          SizedBox(height: 16),
-          _buildExerciseTypeRow('HIIT', 25, Color(0xFFFFB946)),
+          const SizedBox(height: 16),
+          _buildExerciseTypeRow('HIIT', 25, const Color(0xFFFFB946)),
         ],
       ),
     );
@@ -232,7 +234,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
 
   Widget _buildPerformanceMetrics() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -240,14 +242,14 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Performance Metrics',
             style: TextStyle(
               fontSize: 16,
@@ -255,7 +257,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
@@ -267,7 +269,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
                   Icons.trending_up,
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: _buildMetricCard(
                   'Intensity',
@@ -279,7 +281,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
               ),
             ],
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -287,11 +289,11 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
                   'Streak',
                   '14',
                   'Personal best',
-                  Color(0xFFFFB946),
+                  const Color(0xFFFFB946),
                   Icons.local_fire_department,
                 ),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: _buildMetricCard(
                   'Recovery',
@@ -310,7 +312,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
 
   Widget _buildWorkoutHistory() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -318,14 +320,14 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Recent Workouts',
             style: TextStyle(
               fontSize: 16,
@@ -333,7 +335,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           _buildWorkoutItem(
             'Morning Run',
             'Running',
@@ -341,7 +343,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
             '2h ago',
             primaryPink,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildWorkoutItem(
             'Upper Body',
             'Weightlifting',
@@ -349,13 +351,13 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
             '1d ago',
             primaryGreen,
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildWorkoutItem(
             'HIIT Session',
             'HIIT',
             '30 min • 350 cal',
             '2d ago',
-            Color(0xFFFFB946),
+            const Color(0xFFFFB946),
           ),
         ],
       ),
@@ -370,7 +372,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
         });
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? primaryGreen : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
@@ -392,12 +394,12 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black54,
             fontSize: 14,
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
@@ -431,10 +433,10 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
                     size: 14,
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Text(
                   type,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Colors.black87,
                   ),
@@ -451,7 +453,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
             ),
           ],
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
@@ -473,7 +475,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
     IconData icon,
   ) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
@@ -484,17 +486,17 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
           Row(
             children: [
               Icon(icon, color: color, size: 16),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black54,
                   fontSize: 14,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
@@ -505,7 +507,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
           ),
           Text(
             subtext,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black54,
               fontSize: 12,
             ),
@@ -534,14 +536,14 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
          ),
          child: Icon(Icons.fitness_center, color: color),
        ),
-       SizedBox(width: 16),
+       const SizedBox(width: 16),
        Expanded(
          child: Column(
            crossAxisAlignment: CrossAxisAlignment.start,
            children: [
              Text(
                title,
-               style: TextStyle(
+               style: const TextStyle(
                  fontSize: 14,
                  fontWeight: FontWeight.w500,
                  color: Colors.black87,
@@ -557,7 +559,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
                      fontWeight: FontWeight.w500,
                    ),
                  ),
-                 Text(
+                 const Text(
                    ' • ',
                    style: TextStyle(
                      fontSize: 12,
@@ -566,7 +568,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
                  ),
                  Text(
                    stats,
-                   style: TextStyle(
+                   style: const TextStyle(
                      fontSize: 12,
                      color: Colors.black54,
                    ),
@@ -578,7 +580,7 @@ class _ExerciseProgressSectionState extends State<ExerciseProgressSection> {
        ),
        Text(
          time,
-         style: TextStyle(
+         style: const TextStyle(
            fontSize: 12,
            color: Colors.black54,
          ),

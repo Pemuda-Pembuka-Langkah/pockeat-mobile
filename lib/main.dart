@@ -1,17 +1,18 @@
-import 'package:pockeat/add-recipe-page.dart';
+import 'package:pockeat/add_recipe_page.dart';
 import 'package:pockeat/exercise_input_page.dart';
 import 'package:pockeat/exercise_journal_page.dart';
 import 'package:pockeat/food_input_page.dart';
 import 'package:pockeat/food_scan_page.dart';
 import 'package:pockeat/goals_and_journal_page.dart';
 import 'package:pockeat/navigation.dart';
-import 'package:pockeat/new_homepage.dart';
+import 'package:pockeat/homepage.dart';
 import 'package:pockeat/pet_store_page.dart';
 import 'package:pockeat/planning_page.dart';
 import 'package:pockeat/progress_page.dart';
 import 'package:pockeat/running_input_page.dart';
 import 'package:pockeat/weighting_input_page.dart';
 import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
 
 void main() {
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.white,
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           elevation: 0,
           iconTheme: IconThemeData(color: Colors.black),
@@ -55,7 +56,7 @@ class MyApp extends StatelessWidget {
             foregroundColor:
                 Colors.white, // Ini akan membuat teks button jadi putih
             backgroundColor: Colors.blue[400],
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -64,18 +65,18 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => HomePage(),
-        '/scan': (context) => ScanFoodPage(),
-        '/add-food-manual': (context) => AddFoodLogPage(),
-        '/analytic': (context) => ProgressPage(),
-        '/progress': (context) => ProgressTrackingPage(),
-        '/add-exercise': (context) => ExerciseInputPage(),
-        '/running-input': (context) => RunningInputPage(),
-        '/weightlifting-input': (context) => WeightliftingPage(),
-        '/smart-workout-log': (context) => SmartJournalPage(),
-        '/planning': (context) => PlanningPage(),
-        '/add-food': (context) => FoodInputPage(),
-        '/pet-store': (c) => PetStorePage()
+        '/': (context) => const HomePage(),
+        '/scan': (context) => const ScanFoodPage(),
+        '/add-food-manual': (context) => const AddFoodLogPage(),
+        '/analytic': (context) => const ProgressPage(),
+        '/progress': (context) => const ProgressTrackingPage(),
+        '/add-exercise': (context) => const ExerciseInputPage(),
+        '/running-input': (context) => const RunningInputPage(),
+        '/weightlifting-input': (context) => const WeightliftingPage(),
+        '/smart-workout-log': (context) => const SmartJournalPage(),
+        '/planning': (context) => const PlanningPage(),
+        '/add-food': (context) => const FoodInputPage(),
+        '/pet-store': (c) => const PetStorePage()
       },
     );
   }

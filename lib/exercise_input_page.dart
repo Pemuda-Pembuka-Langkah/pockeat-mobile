@@ -4,10 +4,12 @@ import 'package:flutter/cupertino.dart';
 
 class ExerciseInputPage extends StatelessWidget {
   // Warna yang lebih kontras tapi tetap cute
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color pinkColor = Color(0xFFFF6B6B);
-  final Color greenColor = Color(0xFF4ECDC4);
-  final Color purpleColor = Color(0xFF9B6BFF);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color pinkColor = const Color(0xFFFF6B6B);
+  final Color greenColor = const Color(0xFF4ECDC4);
+  final Color purpleColor = const Color(0xFF9B6BFF);
+
+  const ExerciseInputPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +19,10 @@ class ExerciseInputPage extends StatelessWidget {
         backgroundColor: primaryYellow,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Add Exercise',
           style: TextStyle(
             color: Colors.black87,
@@ -30,11 +32,11 @@ class ExerciseInputPage extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'What type of exercise\ndid you do?',
               style: TextStyle(
                 fontSize: 24,
@@ -43,7 +45,7 @@ class ExerciseInputPage extends StatelessWidget {
                 color: Colors.black87,
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
 
             // Running Option
             _buildExerciseOption(
@@ -55,7 +57,7 @@ class ExerciseInputPage extends StatelessWidget {
               route: '/running-input',
             ),
             
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             
             // Weightlifting Option
             _buildExerciseOption(
@@ -67,7 +69,7 @@ class ExerciseInputPage extends StatelessWidget {
               route: '/weightlifting-input',
             ),
             
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             
             // Smart Workout Log Option
             _buildExerciseOption(
@@ -79,16 +81,16 @@ class ExerciseInputPage extends StatelessWidget {
               route: '/smart-workout-log',
             ),
 
-            Spacer(),
+            const Spacer(),
 
 
             // Recent Workouts Preview
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 5,
@@ -99,7 +101,7 @@ class ExerciseInputPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Recent Activities',
                     style: TextStyle(
                       fontSize: 16,
@@ -107,7 +109,7 @@ class ExerciseInputPage extends StatelessWidget {
                       color: Colors.black87,
                     ),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       _buildRecentActivity(
@@ -117,7 +119,7 @@ class ExerciseInputPage extends StatelessWidget {
                         calories: '350',
                         color: pinkColor,
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       _buildRecentActivity(
                         icon: CupertinoIcons.arrow_up_circle_fill,
                         label: 'Upper Body',
@@ -144,7 +146,7 @@ class ExerciseInputPage extends StatelessWidget {
     required Color color,
     required String route,
   }) {
-    return Container(
+    return SizedBox(
       height: 100,
       child: Material(
         color: Colors.transparent,
@@ -159,12 +161,12 @@ class ExerciseInputPage extends StatelessWidget {
                 BoxShadow(
                   color: color.withOpacity(0.2),
                   blurRadius: 4,
-                  offset: Offset(0, 2),
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   // Icon Container
@@ -181,7 +183,7 @@ class ExerciseInputPage extends StatelessWidget {
                       size: 24,
                     ),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   // Text Content
                   Expanded(
                     child: Column(
@@ -190,16 +192,16 @@ class ExerciseInputPage extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Colors.black87,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           subtitle,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
                           ),
@@ -230,7 +232,7 @@ class ExerciseInputPage extends StatelessWidget {
   }) {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
@@ -238,7 +240,7 @@ class ExerciseInputPage extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: BorderRadius.circular(8),
@@ -249,14 +251,14 @@ class ExerciseInputPage extends StatelessWidget {
                 size: 16,
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Colors.black87,
@@ -266,12 +268,12 @@ class ExerciseInputPage extends StatelessWidget {
                     children: [
                       Text(
                         time,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Colors.black54,
                         ),
                       ),
-                      Text(
+                      const Text(
                         ' • ',
                         style: TextStyle(
                           fontSize: 12,
@@ -280,7 +282,7 @@ class ExerciseInputPage extends StatelessWidget {
                       ),
                       Text(
                         '$calories cal',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Colors.black54,
                         ),

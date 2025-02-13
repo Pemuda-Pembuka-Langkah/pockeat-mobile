@@ -2,43 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class GoalsTab extends StatefulWidget {
+  const GoalsTab({super.key});
+
   @override
   _GoalsTabState createState() => _GoalsTabState();
 }
 
 class _GoalsTabState extends State<GoalsTab> {
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildCurrentGoalsSummary(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             
             _buildSectionTitle('Weight Goals', primaryPink),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildWeightGoalsCard(),
             
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             
             _buildSectionTitle('Exercise Goals', primaryGreen),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildExerciseGoalsCard(),
             
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             
             _buildSectionTitle('Nutrition Goals', primaryPink),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             _buildNutritionGoalsCard(),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -47,7 +49,7 @@ class _GoalsTabState extends State<GoalsTab> {
 
   Widget _buildCurrentGoalsSummary() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -59,7 +61,7 @@ class _GoalsTabState extends State<GoalsTab> {
           BoxShadow(
             color: primaryPink.withOpacity(0.3),
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -69,7 +71,7 @@ class _GoalsTabState extends State<GoalsTab> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'Current Goals',
                 style: TextStyle(
                   color: Colors.white,
@@ -78,12 +80,12 @@ class _GoalsTabState extends State<GoalsTab> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
                     Icon(Icons.trending_up, color: Colors.white, size: 16),
                     SizedBox(width: 4),
@@ -100,7 +102,7 @@ class _GoalsTabState extends State<GoalsTab> {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
@@ -142,26 +144,26 @@ class _GoalsTabState extends State<GoalsTab> {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 12,
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 2),
+        const SizedBox(height: 2),
         Text(
           subtext,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 11,
           ),
@@ -177,7 +179,7 @@ class _GoalsTabState extends State<GoalsTab> {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
@@ -190,7 +192,7 @@ class _GoalsTabState extends State<GoalsTab> {
           child: Row(
             children: [
               Icon(Icons.edit, size: 16, color: color),
-              SizedBox(width: 4),
+              const SizedBox(width: 4),
               Text(
                 'Edit',
                 style: TextStyle(
@@ -208,7 +210,7 @@ class _GoalsTabState extends State<GoalsTab> {
 
   Widget _buildWeightGoalsCard() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -216,7 +218,7 @@ class _GoalsTabState extends State<GoalsTab> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -229,7 +231,7 @@ class _GoalsTabState extends State<GoalsTab> {
             iconColor: primaryGreen,
             subtitle: '↓ 2.5 kg from start',
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           
           _buildGoalRow(
             label: 'Target Weight',
@@ -238,19 +240,19 @@ class _GoalsTabState extends State<GoalsTab> {
             iconColor: primaryPink,
             subtitle: '3.0 kg to go',
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           
           _buildGoalRow(
             label: 'Weekly Goal',
             value: '0.5 kg/week',
             icon: CupertinoIcons.chart_bar_fill,
-            iconColor: Color(0xFFFFB946),
+            iconColor: const Color(0xFFFFB946),
             subtitle: 'Healthy rate',
           ),
           
-          SizedBox(height: 16),
-          Divider(color: Colors.black12),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
+          const Divider(color: Colors.black12),
+          const SizedBox(height: 16),
           
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -266,7 +268,7 @@ class _GoalsTabState extends State<GoalsTab> {
 
   Widget _buildExerciseGoalsCard() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -274,7 +276,7 @@ class _GoalsTabState extends State<GoalsTab> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -287,7 +289,7 @@ class _GoalsTabState extends State<GoalsTab> {
             iconColor: primaryGreen,
             subtitle: '4/5 this week',
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           _buildGoalRow(
             label: 'Duration/Session',
@@ -296,9 +298,9 @@ class _GoalsTabState extends State<GoalsTab> {
             iconColor: primaryPink,
             subtitle: 'Avg. 42 min',
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-          Text(
+          const Text(
             'Workout Distribution',
             style: TextStyle(
               fontSize: 14,
@@ -306,7 +308,7 @@ class _GoalsTabState extends State<GoalsTab> {
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           
           Row(
             children: [
@@ -318,7 +320,7 @@ class _GoalsTabState extends State<GoalsTab> {
                   primaryPink,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: _buildExerciseTypeItem(
                   'Strength',
@@ -327,27 +329,27 @@ class _GoalsTabState extends State<GoalsTab> {
                   primaryGreen,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: _buildExerciseTypeItem(
                   'HIIT',
                   '20%',
                   '1×/week',
-                  Color(0xFFFFB946),
+                  const Color(0xFFFFB946),
                 ),
               ),
             ],
           ),
 
-          SizedBox(height: 16),
-          Divider(color: Colors.black12),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
+          const Divider(color: Colors.black12),
+          const SizedBox(height: 16),
 
           _buildGoalRow(
             label: 'Monthly Target',
             value: '20 workouts',
             icon: CupertinoIcons.flag_fill,
-            iconColor: Color(0xFFFFB946),
+            iconColor: const Color(0xFFFFB946),
             subtitle: '15 completed',
           ),
         ],
@@ -357,7 +359,7 @@ class _GoalsTabState extends State<GoalsTab> {
 
   Widget _buildNutritionGoalsCard() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -365,7 +367,7 @@ class _GoalsTabState extends State<GoalsTab> {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -378,9 +380,9 @@ class _GoalsTabState extends State<GoalsTab> {
             iconColor: primaryPink,
             subtitle: '92% adherence',
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
 
-          Text(
+          const Text(
             'Macronutrient Goals',
             style: TextStyle(
               fontSize: 14,
@@ -388,7 +390,7 @@ class _GoalsTabState extends State<GoalsTab> {
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           
           Row(
             children: [
@@ -400,7 +402,7 @@ class _GoalsTabState extends State<GoalsTab> {
                   color: primaryPink,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: _buildMacroItem(
                   label: 'Carbs',
@@ -409,23 +411,23 @@ class _GoalsTabState extends State<GoalsTab> {
                   color: primaryGreen,
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: _buildMacroItem(
                   label: 'Fat',
                   percentage: '25%',
                   grams: '60g',
-                  color: Color(0xFFFFB946),
+                  color: const Color(0xFFFFB946),
                 ),
               ),
             ],
           ),
 
-          SizedBox(height: 20),
-          Divider(color: Colors.black12),
-          SizedBox(height: 16),
+          const SizedBox(height: 20),
+          const Divider(color: Colors.black12),
+          const SizedBox(height: 16),
 
-          Text(
+          const Text(
             'Additional Goals',
             style: TextStyle(
               fontSize: 14,
@@ -433,224 +435,18 @@ class _GoalsTabState extends State<GoalsTab> {
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           _buildNutrientRow('Fiber', '25g', 0.72, primaryGreen),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           _buildNutrientRow('Sugar', '<50g', 0.85, primaryPink),
-          SizedBox(height: 8),
-          _buildNutrientRow('Sodium', '<2300mg', 0.65, Color(0xFFFFB946)),
+          const SizedBox(height: 8),
+          _buildNutrientRow('Sodium', '<2300mg', 0.65, const Color(0xFFFFB946)),
         ],
       ),
     );
-  }Widget _buildAchievementsCard() {
-   return Container(
-     padding: EdgeInsets.all(20),
-     decoration: BoxDecoration(
-       color: Colors.white,
-       borderRadius: BorderRadius.circular(16),
-       boxShadow: [
-         BoxShadow(
-           color: Colors.black.withOpacity(0.05),
-           blurRadius: 10,
-           offset: Offset(0, 2),
-         ),
-       ],
-     ),
-     child: Column(
-       crossAxisAlignment: CrossAxisAlignment.start,
-       children: [
-         Row(
-           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-           children: [
-             Column(
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 Text(
-                   'Current Streak',
-                   style: TextStyle(
-                     fontSize: 14,
-                     color: Colors.black54,
-                   ),
-                 ),
-                 SizedBox(height: 4),
-                 Row(
-                   children: [
-                     Icon(Icons.local_fire_department, 
-                          color: Color(0xFFFFB946), size: 20),
-                     SizedBox(width: 4),
-                     Text(
-                       '14 Days',
-                       style: TextStyle(
-                         fontSize: 18,
-                         fontWeight: FontWeight.bold,
-                         color: Colors.black87,
-                       ),
-                     ),
-                   ],
-                 ),
-               ],
-             ),
-             Container(
-               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-               decoration: BoxDecoration(
-                 color: Color(0xFFFFB946).withOpacity(0.1),
-                 borderRadius: BorderRadius.circular(20),
-               ),
-               child: Text(
-                 'Best: 21 days',
-                 style: TextStyle(
-                   color: Color(0xFFFFB946),
-                   fontSize: 12,
-                   fontWeight: FontWeight.w500,
-                 ),
-               ),
-             ),
-           ],
-         ),
-         SizedBox(height: 20),
-         
-         Text(
-           'Recent Achievements',
-           style: TextStyle(
-             fontSize: 14,
-             fontWeight: FontWeight.w500,
-             color: Colors.black87,
-           ),
-         ),
-         SizedBox(height: 12),
-         
-         _buildAchievementItem(
-           icon: Icons.fitness_center,
-           title: 'Workout Warrior',
-           description: 'Completed 5 workouts in a week',
-           color: primaryGreen,
-           date: '2 days ago',
-         ),
-         SizedBox(height: 12),
-         _buildAchievementItem(
-           icon: Icons.restaurant_menu,
-           title: 'Protein Champion',
-           description: 'Hit protein goal for 7 days straight',
-           color: primaryPink,
-           date: '5 days ago',
-         ),
-         SizedBox(height: 12),
-         _buildAchievementItem(
-           icon: Icons.track_changes,
-           title: 'On Target',
-           description: 'Reached weekly weight loss goal',
-           color: Color(0xFFFFB946),
-           date: '1 week ago',
-         ),
+  }
 
-         SizedBox(height: 20),
-         Divider(color: Colors.black12),
-         SizedBox(height: 16),
 
-         // Stats Summary
-         Row(
-           mainAxisAlignment: MainAxisAlignment.spaceAround,
-           children: [
-             _buildAchievementStat(
-               value: '12',
-               label: 'Total\nAchievements',
-               color: primaryPink,
-             ),
-             _buildAchievementStat(
-               value: '5',
-               label: 'Current\nStreak',
-               color: primaryGreen,
-             ),
-             _buildAchievementStat(
-               value: '85%',
-               label: 'Goal\nCompletion',
-               color: Color(0xFFFFB946),
-             ),
-           ],
-         ),
-       ],
-     ),
-   );
- }
-
- Widget _buildAchievementItem({
-   required IconData icon,
-   required String title,
-   required String description,
-   required Color color,
-   required String date,
- }) {
-   return Row(
-     children: [
-       Container(
-         padding: EdgeInsets.all(8),
-         decoration: BoxDecoration(
-           color: color.withOpacity(0.1),
-           borderRadius: BorderRadius.circular(12),
-         ),
-         child: Icon(icon, color: color, size: 20),
-       ),
-       SizedBox(width: 12),
-       Expanded(
-         child: Column(
-           crossAxisAlignment: CrossAxisAlignment.start,
-           children: [
-             Text(
-               title,
-               style: TextStyle(
-                 fontSize: 14,
-                 fontWeight: FontWeight.w500,
-                 color: Colors.black87,
-               ),
-             ),
-             Text(
-               description,
-               style: TextStyle(
-                 fontSize: 12,
-                 color: Colors.black54,
-               ),
-             ),
-           ],
-         ),
-       ),
-       Text(
-         date,
-         style: TextStyle(
-           fontSize: 12,
-           color: Colors.black54,
-         ),
-       ),
-     ],
-   );
- }
-
- Widget _buildAchievementStat({
-   required String value,
-   required String label,
-   required Color color,
- }) {
-   return Column(
-     children: [
-       Text(
-         value,
-         style: TextStyle(
-           fontSize: 20,
-           fontWeight: FontWeight.bold,
-           color: color,
-         ),
-       ),
-       SizedBox(height: 4),
-       Text(
-         label,
-         textAlign: TextAlign.center,
-         style: TextStyle(
-           fontSize: 12,
-           color: Colors.black54,
-         ),
-       ),
-     ],
-   );
- }
 
  Widget _buildGoalRow({
    required String label,
@@ -662,7 +458,7 @@ class _GoalsTabState extends State<GoalsTab> {
    return Row(
      children: [
        Container(
-         padding: EdgeInsets.all(8),
+         padding: const EdgeInsets.all(8),
          decoration: BoxDecoration(
            color: iconColor.withOpacity(0.1),
            borderRadius: BorderRadius.circular(8),
@@ -673,21 +469,21 @@ class _GoalsTabState extends State<GoalsTab> {
            size: 16,
          ),
        ),
-       SizedBox(width: 12),
+       const SizedBox(width: 12),
        Expanded(
          child: Column(
            crossAxisAlignment: CrossAxisAlignment.start,
            children: [
              Text(
                label,
-               style: TextStyle(
+               style: const TextStyle(
                  color: Colors.black54,
                  fontSize: 12,
                ),
              ),
              Text(
                value,
-               style: TextStyle(
+               style: const TextStyle(
                  fontSize: 16,
                  fontWeight: FontWeight.w600,
                  color: Colors.black87,
@@ -698,7 +494,7 @@ class _GoalsTabState extends State<GoalsTab> {
        ),
        Text(
          subtitle,
-         style: TextStyle(
+         style: const TextStyle(
            color: Colors.black54,
            fontSize: 12,
          ),
@@ -713,15 +509,15 @@ class _GoalsTabState extends State<GoalsTab> {
      children: [
        Text(
          label,
-         style: TextStyle(
+         style: const TextStyle(
            color: Colors.black54,
            fontSize: 12,
          ),
        ),
-       SizedBox(height: 4),
+       const SizedBox(height: 4),
        Text(
          date,
-         style: TextStyle(
+         style: const TextStyle(
            fontSize: 14,
            fontWeight: FontWeight.w500,
            color: Colors.black87,
@@ -738,7 +534,7 @@ class _GoalsTabState extends State<GoalsTab> {
    required Color color,
  }) {
    return Container(
-     padding: EdgeInsets.all(12),
+     padding: const EdgeInsets.all(12),
      decoration: BoxDecoration(
        color: color.withOpacity(0.1),
        borderRadius: BorderRadius.circular(12),
@@ -747,12 +543,12 @@ class _GoalsTabState extends State<GoalsTab> {
        children: [
          Text(
            label,
-           style: TextStyle(
+           style: const TextStyle(
              color: Colors.black87,
              fontSize: 12,
            ),
          ),
-         SizedBox(height: 4),
+         const SizedBox(height: 4),
          Text(
            percentage,
            style: TextStyle(
@@ -761,10 +557,10 @@ class _GoalsTabState extends State<GoalsTab> {
              fontWeight: FontWeight.w600,
            ),
          ),
-         SizedBox(height: 2),
+         const SizedBox(height: 2),
          Text(
            grams,
-           style: TextStyle(
+           style: const TextStyle(
              color: Colors.black54,
              fontSize: 12,
            ),
@@ -781,7 +577,7 @@ class _GoalsTabState extends State<GoalsTab> {
    Color color,
  ) {
    return Container(
-     padding: EdgeInsets.all(12),
+     padding: const EdgeInsets.all(12),
      decoration: BoxDecoration(
        color: color.withOpacity(0.1),
        borderRadius: BorderRadius.circular(12),
@@ -790,12 +586,12 @@ class _GoalsTabState extends State<GoalsTab> {
        children: [
          Text(
            type,
-           style: TextStyle(
+           style: const TextStyle(
              color: Colors.black87,
              fontSize: 12,
            ),
          ),
-         SizedBox(height: 4),
+         const SizedBox(height: 4),
          Text(
            percentage,
            style: TextStyle(
@@ -804,10 +600,10 @@ class _GoalsTabState extends State<GoalsTab> {
              fontWeight: FontWeight.w600,
            ),
          ),
-         SizedBox(height: 2),
+         const SizedBox(height: 2),
          Text(
            frequency,
-           style: TextStyle(
+           style: const TextStyle(
              color: Colors.black54,
              fontSize: 12,
            ),
@@ -829,7 +625,7 @@ class _GoalsTabState extends State<GoalsTab> {
          flex: 2,
          child: Text(
            nutrient,
-           style: TextStyle(
+           style: const TextStyle(
              fontSize: 14,
              color: Colors.black87,
            ),
@@ -839,7 +635,7 @@ class _GoalsTabState extends State<GoalsTab> {
          flex: 1,
          child: Text(
            target,
-           style: TextStyle(
+           style: const TextStyle(
              fontSize: 14,
              fontWeight: FontWeight.w500,
              color: Colors.black54,

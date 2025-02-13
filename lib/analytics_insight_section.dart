@@ -2,32 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class InsightsAnalyticsSection extends StatelessWidget {
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+
+  const InsightsAnalyticsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             _buildTodayInsights(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildPerformanceMetrics(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildNutritionInsights(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildExerciseAnalysis(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildDetailedAnalysis(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildWeeklyPatterns(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildSmartRecommendations(),
           ],
         ),
@@ -39,7 +41,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
+        const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -60,7 +62,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
           ],
         ),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: primaryGreen.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
@@ -68,7 +70,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
           child: Row(
             children: [
               Icon(Icons.trending_up, color: primaryGreen, size: 16),
-              SizedBox(width: 4),
+              const SizedBox(width: 4),
               Text(
                 'On Track',
                 style: TextStyle(
@@ -86,7 +88,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
 
   Widget _buildTodayInsights() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -94,7 +96,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -104,8 +106,8 @@ class InsightsAnalyticsSection extends StatelessWidget {
           Row(
             children: [
               Icon(CupertinoIcons.star_fill, color: primaryPink, size: 20),
-              SizedBox(width: 8),
-              Text(
+              const SizedBox(width: 8),
+              const Text(
                 'Today\'s Focus',
                 style: TextStyle(
                   fontSize: 16,
@@ -115,14 +117,14 @@ class InsightsAnalyticsSection extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildFocusItem(
             icon: CupertinoIcons.heart_fill,
             title: 'Complete your protein target',
             subtitle: '15g remaining to reach 120g daily goal',
             color: primaryPink,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           _buildFocusItem(
             icon: CupertinoIcons.flame_fill,
             title: 'Hit your exercise goal',
@@ -143,21 +145,21 @@ class InsightsAnalyticsSection extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: color, size: 20),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 14,
                   color: Colors.black87,
@@ -165,7 +167,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
               ),
               Text(
                 subtitle,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   color: Colors.black54,
                 ),
@@ -179,7 +181,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
 
   Widget _buildPerformanceMetrics() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -187,14 +189,14 @@ class InsightsAnalyticsSection extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Performance Metrics',
             style: TextStyle(
               fontSize: 16,
@@ -202,7 +204,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -228,7 +230,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
                   label: 'Streak',
                   value: '5',
                   subtext: 'days',
-                  color: Color(0xFFFFB946),
+                  color: const Color(0xFFFFB946),
                 ),
               ),
             ],
@@ -248,13 +250,13 @@ class InsightsAnalyticsSection extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black54,
             fontSize: 12,
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
@@ -266,7 +268,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
         ),
         Text(
           subtext,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black54,
             fontSize: 12,
           ),
@@ -327,7 +329,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
     required List<Map<String, dynamic>> insights,
   }) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -335,7 +337,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -345,10 +347,10 @@ class InsightsAnalyticsSection extends StatelessWidget {
           Row(
             children: [
               Icon(icon, color: color, size: 20),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
@@ -356,14 +358,14 @@ class InsightsAnalyticsSection extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           ...insights.map((insight) => Padding(
-            padding: EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.only(bottom: 12),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -374,28 +376,28 @@ class InsightsAnalyticsSection extends StatelessWidget {
                     color: color,
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         insight['title']!,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                           color: Colors.black87,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         insight['description']!,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.black54,
                           fontSize: 12,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         insight['action']!,
                         style: TextStyle(
@@ -409,7 +411,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
                 ),
               ],
             ),
-          )).toList(),
+          )),
         ],
       ),
     );
@@ -417,7 +419,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
 
   Widget _buildDetailedAnalysis() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -425,14 +427,14 @@ class InsightsAnalyticsSection extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Detailed Analysis',
             style: TextStyle(
               fontSize: 16,
@@ -440,26 +442,26 @@ class InsightsAnalyticsSection extends StatelessWidget {
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           _buildAnalysisItem(
             title: 'Exercise vs. Diet Impact',
             value: '40% Exercise, 60% Diet',
             trend: 'Balanced approach',
             color: primaryGreen,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           _buildAnalysisItem(
             title: 'Recovery Quality',
             value: 'Optimal on rest days',
             trend: 'Sleep: 7.5h avg',
             color: primaryPink,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           _buildAnalysisItem(
             title: 'Progress Rate',
             value: '0.5kg/week',
             trend: 'Sustainable pace',
-            color: Color(0xFFFFB946),
+            color: const Color(0xFFFFB946),
           ),
         ],
       ),
@@ -479,7 +481,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
           flex: 2,
           child: Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               color: Colors.black54,
             ),
@@ -492,7 +494,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Colors.black87,
@@ -517,7 +519,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
    return _buildInsightCard(
      title: 'Weekly Patterns',
      icon: CupertinoIcons.calendar,
-     color: Color(0xFFFFB946),
+     color: const Color(0xFFFFB946),
      insights: [
        {
          'icon': CupertinoIcons.chart_bar_alt_fill,
@@ -537,7 +539,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
 
  Widget _buildSmartRecommendations() {
    return Container(
-     padding: EdgeInsets.all(16),
+     padding: const EdgeInsets.all(16),
      decoration: BoxDecoration(
        color: Colors.white,
        borderRadius: BorderRadius.circular(16),
@@ -545,7 +547,7 @@ class InsightsAnalyticsSection extends StatelessWidget {
          BoxShadow(
            color: Colors.black.withOpacity(0.05),
            blurRadius: 10,
-           offset: Offset(0, 2),
+           offset: const Offset(0, 2),
          ),
        ],
      ),
@@ -555,8 +557,8 @@ class InsightsAnalyticsSection extends StatelessWidget {
          Row(
            children: [
              Icon(CupertinoIcons.lightbulb_fill, color: primaryGreen, size: 20),
-             SizedBox(width: 8),
-             Text(
+             const SizedBox(width: 8),
+             const Text(
                'Smart Recommendations',
                style: TextStyle(
                  fontSize: 16,
@@ -566,26 +568,26 @@ class InsightsAnalyticsSection extends StatelessWidget {
              ),
            ],
          ),
-         SizedBox(height: 16),
+         const SizedBox(height: 16),
          _buildRecommendationItem(
            icon: CupertinoIcons.arrow_up_circle_fill,
            text: 'Increase protein at breakfast (target: 25-30g)',
            detail: 'Try eggs, Greek yogurt, or protein shake',
            color: primaryPink,
          ),
-         SizedBox(height: 12),
+         const SizedBox(height: 12),
          _buildRecommendationItem(
            icon: CupertinoIcons.timer,
            text: 'Schedule workouts before 10 AM',
            detail: '28% better performance in morning sessions',
            color: primaryGreen,
          ),
-         SizedBox(height: 12),
+         const SizedBox(height: 12),
          _buildRecommendationItem(
            icon: CupertinoIcons.arrow_down_circle_fill,
            text: 'Reduce evening snacking',
            detail: 'High correlation with daily calorie excess',
-           color: Color(0xFFFFB946),
+           color: const Color(0xFFFFB946),
          ),
        ],
      ),
@@ -602,30 +604,30 @@ class InsightsAnalyticsSection extends StatelessWidget {
      crossAxisAlignment: CrossAxisAlignment.start,
      children: [
        Container(
-         padding: EdgeInsets.all(8),
+         padding: const EdgeInsets.all(8),
          decoration: BoxDecoration(
            color: color.withOpacity(0.1),
            borderRadius: BorderRadius.circular(12),
          ),
          child: Icon(icon, color: color, size: 16),
        ),
-       SizedBox(width: 12),
+       const SizedBox(width: 12),
        Expanded(
          child: Column(
            crossAxisAlignment: CrossAxisAlignment.start,
            children: [
              Text(
                text,
-               style: TextStyle(
+               style: const TextStyle(
                  fontSize: 14,
                  fontWeight: FontWeight.w500,
                  color: Colors.black87,
                ),
              ),
-             SizedBox(height: 2),
+             const SizedBox(height: 2),
              Text(
                detail,
-               style: TextStyle(
+               style: const TextStyle(
                  fontSize: 12,
                  color: Colors.black54,
                ),

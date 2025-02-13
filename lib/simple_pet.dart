@@ -1,8 +1,9 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 
 class SimplePet extends StatefulWidget {
+  const SimplePet({super.key});
+
   @override
   _SimplePetState createState() => _SimplePetState();
 }
@@ -15,7 +16,7 @@ class _SimplePetState extends State<SimplePet> with SingleTickerProviderStateMix
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     )..repeat(reverse: true);
   }
@@ -25,7 +26,7 @@ class _SimplePetState extends State<SimplePet> with SingleTickerProviderStateMix
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return Container(
+        return SizedBox(
           width: 100,
           height: 100,
           child: CustomPaint(
@@ -50,11 +51,11 @@ class _SimplePetState extends State<SimplePet> with SingleTickerProviderStateMix
     final centerY = size.height / 2;
     
     // Colors
-    final hamsterColor = Color(0xFFE6C59E);
-    final darkBrown = Color(0xFF8B7355);
-    final pink = Color(0xFFFFB6C1);
-    final sportswearColor = Color(0xFFFF6B6B);  // Pink tank top
-    final shortsColor = Color(0xFF4A4A4A);      // Dark shorts
+    const hamsterColor = Color(0xFFE6C59E);
+    const darkBrown = Color(0xFF8B7355);
+    const pink = Color(0xFFFFB6C1);
+    const sportswearColor = Color(0xFFFF6B6B);  // Pink tank top
+    const shortsColor = Color(0xFF4A4A4A);      // Dark shorts
     
     // Simple legs (like Patrick's)
     // Left leg
@@ -65,7 +66,7 @@ class _SimplePetState extends State<SimplePet> with SingleTickerProviderStateMix
           width: 12,
           height: 20,
         ),
-        Radius.circular(6),
+        const Radius.circular(6),
       ),
       Paint()..color = hamsterColor,
     );
@@ -78,7 +79,7 @@ class _SimplePetState extends State<SimplePet> with SingleTickerProviderStateMix
           width: 12,
           height: 20,
         ),
-        Radius.circular(6),
+        const Radius.circular(6),
       ),
       Paint()..color = hamsterColor,
     );
@@ -88,7 +89,7 @@ class _SimplePetState extends State<SimplePet> with SingleTickerProviderStateMix
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(centerX - 30, centerY - 5, 60, 40),
-        Radius.circular(20),
+        const Radius.circular(20),
       ),
       Paint()..color = sportswearColor,
     );
@@ -97,7 +98,7 @@ class _SimplePetState extends State<SimplePet> with SingleTickerProviderStateMix
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(centerX - 25, centerY + 25, 50, 20),
-        Radius.circular(10),
+        const Radius.circular(10),
       ),
       Paint()..color = shortsColor,
     );
@@ -111,7 +112,7 @@ class _SimplePetState extends State<SimplePet> with SingleTickerProviderStateMix
           width: 12,
           height: 25,
         ),
-        Radius.circular(6),
+        const Radius.circular(6),
       ),
       Paint()..color = hamsterColor,
     );
@@ -124,7 +125,7 @@ class _SimplePetState extends State<SimplePet> with SingleTickerProviderStateMix
           width: 12,
           height: 25,
         ),
-        Radius.circular(6),
+        const Radius.circular(6),
       ),
       Paint()..color = hamsterColor,
     );
@@ -165,7 +166,7 @@ class _SimplePetState extends State<SimplePet> with SingleTickerProviderStateMix
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(centerX - 20, centerY - 25, 40, 6),
-        Radius.circular(3),
+        const Radius.circular(3),
       ),
       Paint()..color = sportswearColor,
     );

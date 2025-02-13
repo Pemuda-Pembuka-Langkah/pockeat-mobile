@@ -3,9 +3,11 @@ import 'package:flutter/cupertino.dart';
 
 class FoodInputPage extends StatelessWidget {
   // Theme colors
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+
+  const FoodInputPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,10 +17,10 @@ class FoodInputPage extends StatelessWidget {
         backgroundColor: primaryYellow,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Add Food',
           style: TextStyle(
             color: Colors.black87,
@@ -28,11 +30,11 @@ class FoodInputPage extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'How would you like to\nadd your food?',
               style: TextStyle(
                 fontSize: 24,
@@ -41,7 +43,7 @@ class FoodInputPage extends StatelessWidget {
                 color: Colors.black87,
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
 
             // Scan Option
             _buildInputOption(
@@ -53,7 +55,7 @@ class FoodInputPage extends StatelessWidget {
               route: '/scan',
             ),
             
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             
             // Manual Input Option
             _buildInputOption(
@@ -65,15 +67,15 @@ class FoodInputPage extends StatelessWidget {
               route: '/add-food-manual'
             ),
 
-            Spacer(),
+            const Spacer(),
 
             // Recent Foods Preview
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 5,
@@ -84,7 +86,7 @@ class FoodInputPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Recent Foods',
                     style: TextStyle(
                       fontSize: 16,
@@ -92,7 +94,7 @@ class FoodInputPage extends StatelessWidget {
                       color: Colors.black87,
                     ),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       _buildRecentFood(
@@ -102,7 +104,7 @@ class FoodInputPage extends StatelessWidget {
                         calories: '220',
                         color: primaryGreen,
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
                       _buildRecentFood(
                         icon: CupertinoIcons.cart,
                         label: 'Chicken Salad',
@@ -130,7 +132,7 @@ class FoodInputPage extends StatelessWidget {
     String? route,
     VoidCallback? onTap,
   }) {
-    return Container(
+    return SizedBox(
       height: 100,
       child: Material(
         color: Colors.transparent,
@@ -145,12 +147,12 @@ class FoodInputPage extends StatelessWidget {
                 BoxShadow(
                   color: color.withOpacity(0.2),
                   blurRadius: 4,
-                  offset: Offset(0, 2),
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   // Icon Container
@@ -167,7 +169,7 @@ class FoodInputPage extends StatelessWidget {
                       size: 24,
                     ),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   // Text Content
                   Expanded(
                     child: Column(
@@ -176,16 +178,16 @@ class FoodInputPage extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Colors.black87,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           subtitle,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
                           ),
@@ -216,7 +218,7 @@ class FoodInputPage extends StatelessWidget {
   }) {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
@@ -224,7 +226,7 @@ class FoodInputPage extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: BorderRadius.circular(8),
@@ -235,14 +237,14 @@ class FoodInputPage extends StatelessWidget {
                 size: 16,
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Colors.black87,
@@ -252,12 +254,12 @@ class FoodInputPage extends StatelessWidget {
                     children: [
                       Text(
                         type,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Colors.black54,
                         ),
                       ),
-                      Text(
+                      const Text(
                         ' • ',
                         style: TextStyle(
                           fontSize: 12,
@@ -266,7 +268,7 @@ class FoodInputPage extends StatelessWidget {
                       ),
                       Text(
                         '$calories cal',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Colors.black54,
                         ),

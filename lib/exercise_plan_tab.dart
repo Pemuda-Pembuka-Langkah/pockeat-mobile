@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class ExercisePlanTab extends StatefulWidget {
+  const ExercisePlanTab({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _ExercisePlanTabState createState() => _ExercisePlanTabState();
 }
 
 class _ExercisePlanTabState extends State<ExercisePlanTab> {
   // Theme colors
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +23,13 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
         children: [
           // Header
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    Text(
+                    const Text(
                       'Weekly Workout',
                       style: TextStyle(
                         fontSize: 16,
@@ -34,14 +37,14 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
                         color: Colors.black87,
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Icon(Icons.calendar_today, size: 16, color: primaryGreen),
                   ],
                 ),
                 Row(
                   children: [
                     Icon(Icons.bookmark_outline, color: primaryGreen),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Icon(Icons.share_outlined, color: primaryGreen),
                   ],
                 ),
@@ -51,8 +54,8 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
 
           // Quick Actions
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
-            padding: EdgeInsets.symmetric(vertical: 16),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -64,7 +67,7 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
                 BoxShadow(
                   color: primaryGreen.withOpacity(0.3),
                   blurRadius: 8,
-                  offset: Offset(0, 4),
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -80,14 +83,14 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
             ),
           ),
 
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
 
           // Weekly Calendar
           Container(
             height: 90,
-            padding: EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               itemCount: 7,
               itemBuilder: (context, index) {
@@ -97,11 +100,11 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
 
                 return Container(
                   width: 55,
-                  margin: EdgeInsets.only(right: 8),
+                  margin: const EdgeInsets.only(right: 8),
                   decoration: BoxDecoration(
                     color: isToday ? primaryGreen : Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Colors.black12,
                         blurRadius: 3,
@@ -119,7 +122,7 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
                           fontSize: 12,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         dates[index],
                         style: TextStyle(
@@ -135,16 +138,16 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
             ),
           ),
 
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           // Today's Summary
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
-            padding: EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Colors.black12,
                   blurRadius: 5,
@@ -156,18 +159,18 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildWorkoutDot('Morning Run', '30 min', primaryGreen),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _buildWorkoutDot('Upper Body', '45 min', primaryPink),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _buildWorkoutDot('Yoga', '20 min', primaryGreen),
               ],
             ),
           ),
 
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
 
           // Today's Workouts
-          Padding(
+          const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               "Today's Workouts",
@@ -179,7 +182,7 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
             ),
           ),
 
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
 
           // Morning Run
           _buildWorkoutCard(
@@ -198,7 +201,7 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
             ],
           ),
 
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           // Upper Body Workout
           _buildWorkoutCard(
@@ -229,7 +232,7 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
             ],
           ),
 
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           // Evening Yoga
           _buildWorkoutCard(
@@ -254,7 +257,7 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
             ],
           ),
 
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -265,10 +268,10 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, color: Colors.white, size: 24),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 12,
           ),
@@ -288,11 +291,11 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
             color: color,
           ),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Expanded(
           child: Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               color: Colors.black54,
             ),
@@ -300,7 +303,7 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
         ),
         Text(
           duration,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
             color: Colors.black87,
             fontWeight: FontWeight.w500,
@@ -319,12 +322,12 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
     required List<Widget> exercises,
   }) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black12,
               blurRadius: 5,
@@ -335,8 +338,8 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
         child: Column(
           children: [
             Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(color: Colors.black12),
                 ),
@@ -349,16 +352,16 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
                     children: [
                       Text(
                         title,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: Colors.black87,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         time,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.black54,
                           fontSize: 14,
                         ),
@@ -368,7 +371,7 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
                   Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: color.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
@@ -382,9 +385,9 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: color.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
@@ -417,8 +420,8 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
     required IconData icon,
   }) {
     return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: Colors.black12),
         ),
@@ -438,23 +441,23 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
               size: 24,
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: Colors.black87,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   target,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.black54,
                     fontSize: 12,
                   ),
@@ -464,7 +467,7 @@ class _ExercisePlanTabState extends State<ExercisePlanTab> {
           ),
           Text(
             details,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
               color: Colors.black54,

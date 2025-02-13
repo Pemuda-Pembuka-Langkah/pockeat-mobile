@@ -4,10 +4,13 @@ import 'package:pockeat/exercise_progress_section.dart';
 import 'package:pockeat/weight_progress_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+// ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
 import 'navigation.dart';
 
 class ProgressPage extends StatefulWidget {
+  const ProgressPage({super.key});
+
   @override
   _ProgressPageState createState() => _ProgressPageState();
 }
@@ -18,9 +21,9 @@ class _ProgressPageState extends State<ProgressPage>
   late TabController _progressTabController;
   final ScrollController _scrollController = ScrollController();
 
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
 
   @override
   void initState() {
@@ -33,7 +36,7 @@ class _ProgressPageState extends State<ProgressPage>
       if (!_mainTabController.indexIsChanging) {
         _scrollController.animateTo(
           0,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
@@ -43,7 +46,7 @@ class _ProgressPageState extends State<ProgressPage>
       if (!_progressTabController.indexIsChanging) {
         _scrollController.animateTo(
           0,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
@@ -76,7 +79,7 @@ class _ProgressPageState extends State<ProgressPage>
             backgroundColor: primaryYellow,
             elevation: 0,
             toolbarHeight: 60,
-            title: Text(
+            title: const Text(
               'Analytics',
               style: TextStyle(
                 color: Colors.black87,
@@ -86,13 +89,13 @@ class _ProgressPageState extends State<ProgressPage>
             ),
             actions: [
               IconButton(
-                icon: Icon(CupertinoIcons.calendar, color: Colors.black87),
+                icon: const Icon(CupertinoIcons.calendar, color: Colors.black87),
                 onPressed: () {},
               ),
               Padding(
-                padding: EdgeInsets.only(right: 16),
+                padding: const EdgeInsets.only(right: 16),
                 child: Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white,
                     boxShadow: [
@@ -103,7 +106,7 @@ class _ProgressPageState extends State<ProgressPage>
                       ),
                     ],
                   ),
-                  child: CircleAvatar(
+                  child: const CircleAvatar(
                     radius: 16,
                     backgroundColor: Colors.white,
                     child: Text(
@@ -130,19 +133,19 @@ class _ProgressPageState extends State<ProgressPage>
               controller: _mainTabController,
               labelColor: primaryPink,
               unselectedLabelColor: Colors.black54,
-              labelStyle: TextStyle(
+              labelStyle: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
-              unselectedLabelStyle: TextStyle(
+              unselectedLabelStyle: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
               ),
               indicatorColor: primaryPink,
               indicatorWeight: 2,
               indicatorSize: TabBarIndicatorSize.label,
-              labelPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              tabs: [
+              labelPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              tabs: const [
                 Text('Progress'),
                 Text('Insights'),
               ],
@@ -158,11 +161,11 @@ class _ProgressPageState extends State<ProgressPage>
               backgroundColor: Colors.white,
               toolbarHeight: 64,
               bottom: PreferredSize(
-                preferredSize: Size.fromHeight(0),
+                preferredSize: const Size.fromHeight(0),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Container(
-                    padding: EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(12),
@@ -186,18 +189,18 @@ class _ProgressPageState extends State<ProgressPage>
             // Progress Tab Content
             TabBarView(
               controller: _progressTabController,
-              children: [
+              children: const [
                 WeightProgressSection(),
                 NutritionProgressSection(),
                 ExerciseProgressSection(),
               ],
             ),
             // Insights Tab Content
-            InsightsAnalyticsSection(),
+            const InsightsAnalyticsSection(),
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(),
+      bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 
@@ -211,13 +214,13 @@ class _ProgressPageState extends State<ProgressPage>
             // Reset scroll position ketika tab berubah
             _scrollController.animateTo(
               0,
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
             );
           });
         },
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: isSelected ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
@@ -226,7 +229,7 @@ class _ProgressPageState extends State<ProgressPage>
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 4,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ]
                 : null,

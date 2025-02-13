@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 
-import 'package:flutter/material.dart';
 
-
-import 'package:flutter/material.dart';
 
 class FoodCameraScreen extends StatefulWidget {
+  const FoodCameraScreen({super.key});
+
   @override
   _FoodCameraScreenState createState() => _FoodCameraScreenState();
 }
@@ -15,6 +14,7 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
   // State variables
   final ValueNotifier<double> _detectionProgress = ValueNotifier(0.0);
   final ValueNotifier<String> _guidanceText = ValueNotifier('Center your food in frame');
+  // ignore: unused_field
   bool _isAnalyzing = false;
 
   @override
@@ -25,17 +25,17 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
 
   void _startDetection() {
     // Simulasi progress deteksi yang smooth
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 500), () {
       _detectionProgress.value = 0.3;
       _guidanceText.value = "Sedikit ke kanan...";
     });
 
-    Future.delayed(Duration(milliseconds: 1000), () {
+    Future.delayed(const Duration(milliseconds: 1000), () {
       _detectionProgress.value = 0.7;
       _guidanceText.value = "Hampir...";
     });
 
-    Future.delayed(Duration(milliseconds: 1500), () {
+    Future.delayed(const Duration(milliseconds: 1500), () {
       _detectionProgress.value = 1.0;
       _guidanceText.value = "Perfect! Tap to analyze";
     });
@@ -49,7 +49,7 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
         child: Stack(
           children: [
             // Camera Preview
-            Container(
+            SizedBox(
               width: double.infinity,
               height: double.infinity,
               child: Image.network(
@@ -68,10 +68,10 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
                     valueListenable: _guidanceText,
                     builder: (context, text, _) {
                       return Padding(
-                        padding: EdgeInsets.only(bottom: 20),
+                        padding: const EdgeInsets.only(bottom: 20),
                         child: Text(
                           text,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 17,
                             fontWeight: FontWeight.w500,
@@ -83,7 +83,7 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
                   
                   // Progress Bar
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 50),
+                    padding: const EdgeInsets.symmetric(horizontal: 50),
                     child: ValueListenableBuilder<double>(
                       valueListenable: _detectionProgress,
                       builder: (context, progress, _) {
@@ -92,7 +92,7 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
                           child: LinearProgressIndicator(
                             value: progress,
                             backgroundColor: Colors.white.withOpacity(0.2),
-                            valueColor: AlwaysStoppedAnimation<Color>(
+                            valueColor: const AlwaysStoppedAnimation<Color>(
                               Color.fromRGBO(58, 183, 149, 1)
                             ),
                             minHeight: 4,
@@ -104,7 +104,7 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
 
                   // Frame
                   Container(
-                    margin: EdgeInsets.only(top: 20),
+                    margin: const EdgeInsets.only(top: 20),
                     width: 280,
                     height: 280,
                     decoration: BoxDecoration(
@@ -125,7 +125,7 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
               left: 0,
               right: 0,
               child: Container(
-                padding: EdgeInsets.only(
+                padding: const EdgeInsets.only(
                   bottom: 40,
                   top: 20,
                   left: 30,
@@ -166,17 +166,17 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.5),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: Colors.white, size: 24),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 13,
             ),
@@ -202,8 +202,8 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
           border: Border.all(color: Colors.white, width: 4),
         ),
         child: Container(
-          margin: EdgeInsets.all(4),
-          decoration: BoxDecoration(
+          margin: const EdgeInsets.all(4),
+          decoration: const BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
           ),
@@ -221,6 +221,8 @@ class _FoodCameraScreenState extends State<FoodCameraScreen> {
 }
 // Analysis Screen setelah foto diambil
 class FoodAnalysisScreen extends StatelessWidget {
+  const FoodAnalysisScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -229,10 +231,10 @@ class FoodAnalysisScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Food Analysis',
           style: TextStyle(color: Colors.black),
         ),
@@ -253,7 +255,7 @@ class FoodAnalysisScreen extends StatelessWidget {
 
             // Analysis Results
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -261,7 +263,7 @@ class FoodAnalysisScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Nasi Goreng Special',
                         style: TextStyle(
                           fontSize: 24,
@@ -269,17 +271,17 @@ class FoodAnalysisScreen extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.edit),
+                        icon: const Icon(Icons.edit),
                         onPressed: () {},
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                   // Nutrition Grid
                   GridView.count(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     crossAxisCount: 2,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
@@ -292,23 +294,23 @@ class FoodAnalysisScreen extends StatelessWidget {
                     ],
                   ),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // Action Buttons
                   ElevatedButton(
                     onPressed: () {},
-                    child: Text('Confirm & Save'),
                     style: ElevatedButton.styleFrom(
-                      minimumSize: Size(double.infinity, 50),
+                      minimumSize: const Size(double.infinity, 50),
                     ),
+                    child: const Text('Confirm & Save'),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   OutlinedButton(
                     onPressed: () {},
-                    child: Text('Retake Photo'),
                     style: OutlinedButton.styleFrom(
-                      minimumSize: Size(double.infinity, 50),
+                      minimumSize: const Size(double.infinity, 50),
                     ),
+                    child: const Text('Retake Photo'),
                   ),
                 ],
               ),
@@ -321,7 +323,7 @@ class FoodAnalysisScreen extends StatelessWidget {
 
   Widget _buildNutritionCard(String label, String value) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -329,7 +331,7 @@ class FoodAnalysisScreen extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -343,10 +345,10 @@ class FoodAnalysisScreen extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),

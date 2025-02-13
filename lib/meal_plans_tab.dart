@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class MealPlansTab extends StatefulWidget {
+  const MealPlansTab({super.key});
+
   @override
   _MealPlansTabState createState() => _MealPlansTabState();
 }
 
 class _MealPlansTabState extends State<MealPlansTab> {
   // Theme colors
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPink = Color(0xFFFF6B6B);
-  final Color primaryGreen = Color(0xFF4ECDC4);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +22,13 @@ class _MealPlansTabState extends State<MealPlansTab> {
         children: [
           // Header
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    Text(
+                    const Text(
                       'Weekly Plan',
                       style: TextStyle(
                         fontSize: 16,
@@ -34,14 +36,14 @@ class _MealPlansTabState extends State<MealPlansTab> {
                         color: Colors.black87,
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Icon(Icons.calendar_today, size: 16, color: primaryPink),
                   ],
                 ),
                 Row(
                   children: [
                     Icon(Icons.bookmark_outline, color: primaryPink),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     Icon(Icons.share_outlined, color: primaryPink),
                   ],
                 ),
@@ -51,8 +53,8 @@ class _MealPlansTabState extends State<MealPlansTab> {
 
           // Quick Actions
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
-            padding: EdgeInsets.symmetric(vertical: 16),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -64,7 +66,7 @@ class _MealPlansTabState extends State<MealPlansTab> {
                 BoxShadow(
                   color: primaryPink.withOpacity(0.3),
                   blurRadius: 8,
-                  offset: Offset(0, 4),
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
@@ -80,14 +82,14 @@ class _MealPlansTabState extends State<MealPlansTab> {
             ),
           ),
 
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
 
           // Weekly Calendar
           Container(
             height: 90,
-            padding: EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               scrollDirection: Axis.horizontal,
               itemCount: 7,
               itemBuilder: (context, index) {
@@ -97,11 +99,11 @@ class _MealPlansTabState extends State<MealPlansTab> {
 
                 return Container(
                   width: 55,
-                  margin: EdgeInsets.only(right: 8),
+                  margin: const EdgeInsets.only(right: 8),
                   decoration: BoxDecoration(
                     color: isToday ? primaryPink : Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Colors.black12,
                         blurRadius: 3,
@@ -119,7 +121,7 @@ class _MealPlansTabState extends State<MealPlansTab> {
                           fontSize: 12,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         dates[index],
                         style: TextStyle(
@@ -135,16 +137,16 @@ class _MealPlansTabState extends State<MealPlansTab> {
             ),
           ),
 
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           // Today's Meal Summary
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
-            padding: EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Colors.black12,
                   blurRadius: 5,
@@ -156,20 +158,20 @@ class _MealPlansTabState extends State<MealPlansTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildMealDot('Breakfast', '350', primaryPink),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _buildMealDot('Lunch', '650', primaryGreen),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _buildMealDot('Dinner', '550', primaryPink),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 _buildMealDot('Snacks', '200', primaryGreen),
               ],
             ),
           ),
 
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
 
           // Today's Plan Title
-          Padding(
+          const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               "Today's Plan",
@@ -181,7 +183,7 @@ class _MealPlansTabState extends State<MealPlansTab> {
             ),
           ),
 
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
 
           // Breakfast
           _buildMealTimeCard(
@@ -207,7 +209,7 @@ class _MealPlansTabState extends State<MealPlansTab> {
             ],
           ),
 
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           // Lunch
           _buildMealTimeCard(
@@ -233,7 +235,7 @@ class _MealPlansTabState extends State<MealPlansTab> {
             ],
           ),
 
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           // Dinner
           _buildMealTimeCard(
@@ -252,7 +254,7 @@ class _MealPlansTabState extends State<MealPlansTab> {
             ],
           ),
 
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
 
           // Snacks
           _buildMealTimeCard(
@@ -278,7 +280,7 @@ class _MealPlansTabState extends State<MealPlansTab> {
             ],
           ),
 
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -289,10 +291,10 @@ class _MealPlansTabState extends State<MealPlansTab> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, color: Colors.white, size: 24),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 12,
           ),
@@ -312,11 +314,11 @@ class _MealPlansTabState extends State<MealPlansTab> {
             color: color,
           ),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Expanded(
           child: Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               color: Colors.black54,
             ),
@@ -324,7 +326,7 @@ class _MealPlansTabState extends State<MealPlansTab> {
         ),
         Text(
           '$calories kcal',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 13,
             color: Colors.black87,
             fontWeight: FontWeight.w500,
@@ -342,12 +344,12 @@ class _MealPlansTabState extends State<MealPlansTab> {
     required List<Widget> meals,
   }) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black12,
               blurRadius: 5,
@@ -358,8 +360,8 @@ class _MealPlansTabState extends State<MealPlansTab> {
         child: Column(
           children: [
             Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(color: Colors.black12),
                 ),
@@ -372,16 +374,16 @@ class _MealPlansTabState extends State<MealPlansTab> {
                     children: [
                       Text(
                         title,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: Colors.black87,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         time,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.black54,
                           fontSize: 14,
                         ),
@@ -389,7 +391,7 @@ class _MealPlansTabState extends State<MealPlansTab> {
                     ],
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: color.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -421,8 +423,8 @@ class _MealPlansTabState extends State<MealPlansTab> {
     required bool recipe,
   }) {
     return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(color: Colors.black12),
         ),
@@ -442,7 +444,7 @@ class _MealPlansTabState extends State<MealPlansTab> {
               size: 24,
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,14 +453,14 @@ class _MealPlansTabState extends State<MealPlansTab> {
                   children: [
                     Text(
                       name,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: Colors.black87,
                       ),
                     ),
                     if (recipe) ...[
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Icon(
                         Icons.receipt_long,
                         size: 16,
@@ -467,10 +469,10 @@ class _MealPlansTabState extends State<MealPlansTab> {
                     ],
                   ],
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   portion,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.black54,
                     fontSize: 12,
                   ),
@@ -482,14 +484,14 @@ class _MealPlansTabState extends State<MealPlansTab> {
             children: [
               Text(
                 '$calories kcal',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Colors.black87,
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.more_vert, color: Colors.black38),
+                icon: const Icon(Icons.more_vert, color: Colors.black38),
                 onPressed: () {},
               ),
             ],

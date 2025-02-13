@@ -47,16 +47,16 @@ Widget buildCaloriesByFoods() {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(
+      const Text(
         'Calories Distributed by Foods',
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
       ),
-      SizedBox(height: 16),
+      const SizedBox(height: 16),
       Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.grey[100],
           borderRadius: BorderRadius.circular(16),
@@ -67,7 +67,7 @@ Widget buildCaloriesByFoods() {
               children: [
                 _buildFoodCalorieItem(food),
                 if (food != foodConsumptions.last)
-                  Divider(height: 16),
+                  const Divider(height: 16),
               ],
             );
           }).toList(),
@@ -90,7 +90,7 @@ Widget _buildFoodCalorieItem(FoodConsumption food) {
           fit: BoxFit.cover,
         ),
       ),
-      SizedBox(width: 12),
+      const SizedBox(width: 12),
       // Food Details
       Expanded(
         child: Column(
@@ -98,12 +98,12 @@ Widget _buildFoodCalorieItem(FoodConsumption food) {
           children: [
             Text(
               food.name,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            SizedBox(height: 2),
+            const SizedBox(height: 2),
             Text(
               '${food.portion} × ${food.totalServings}',
               style: TextStyle(
@@ -120,7 +120,7 @@ Widget _buildFoodCalorieItem(FoodConsumption food) {
         children: [
           Text(
             '${food.totalCalories} kcal',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),

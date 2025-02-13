@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
 class SmartJournalPage extends StatefulWidget {
+  const SmartJournalPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _SmartJournalPageState createState() => _SmartJournalPageState();
 }
 
 class _SmartJournalPageState extends State<SmartJournalPage> {
   // Warna tema yang konsisten
-  final Color primaryYellow = Color(0xFFFFE893);
-  final Color primaryPurple = Color(0xFF9B6BFF);
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPurple = const Color(0xFF9B6BFF);
   
   final promptController = TextEditingController();
   Map<String, dynamic>? analysis;
@@ -19,7 +22,7 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
   void analyzeWorkout() {
     setState(() => isAnalyzing = true);
     
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () {
       setState(() {
         isAnalyzing = false;
         
@@ -60,10 +63,10 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
         backgroundColor: primaryYellow,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Smart Workout Log',
           style: TextStyle(
             color: Colors.black87,
@@ -73,12 +76,12 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Mood Section
-            Text(
+            const Text(
               'How do you feel?',
               style: TextStyle(
                 fontSize: 16,
@@ -86,16 +89,16 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
                 color: Colors.black87,
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(5, (index) => _buildMoodButton(index + 1)),
             ),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             
             // Photo Section
-            Text(
+            const Text(
               'Progress Photos (Optional)',
               style: TextStyle(
                 fontSize: 16,
@@ -103,7 +106,7 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
                 color: Colors.black87,
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               children: List.generate(3, (index) => Expanded(
                 child: Padding(
@@ -113,10 +116,10 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
               )),
             ),
 
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             
             // Workout Description Section
-            Text(
+            const Text(
               'Tell me about your workout',
               style: TextStyle(
                 fontSize: 16,
@@ -124,21 +127,21 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
                 color: Colors.black87,
               ),
             ),
-            SizedBox(height: 8),
-            Text(
+            const SizedBox(height: 8),
+            const Text(
               'Be as detailed as you like - I\'ll analyze it for you',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.black54,
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     blurRadius: 5,
@@ -151,25 +154,25 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
                   TextField(
                     controller: promptController,
                     maxLines: 4,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: InputBorder.none,
                       hintText: 'E.g. "Did a HIIT session with jumping jacks, burpees, and mountain climbers. Felt intense but good!"',
                       hintStyle: TextStyle(color: Colors.black38),
                     ),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: analyzeWorkout,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryPurple,
-                        padding: EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Let AI Analyze',
                         style: TextStyle(
                           fontSize: 16,
@@ -185,15 +188,15 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
 
             if (isAnalyzing)
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
+                padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Center(
                   child: Column(
                     children: [
                       CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(primaryPurple),
                       ),
-                      SizedBox(height: 12),
-                      Text(
+                      const SizedBox(height: 12),
+                      const Text(
                         'Analyzing your workout...',
                         style: TextStyle(color: Colors.black54),
                       ),
@@ -203,15 +206,15 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
               ),
 
             if (analysis != null && !isAnalyzing) ...[
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               _buildAnalysisCard(),
             ],
           ],
         ),
       ),
       bottomNavigationBar: analysis != null && !isAnalyzing ? Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
@@ -226,7 +229,7 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Workout logged successfully!'),
+                  content: const Text('Workout logged successfully!'),
                   backgroundColor: primaryPurple,
                 ),
               );
@@ -234,12 +237,12 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryPurple,
-              padding: EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Save Log',
               style: TextStyle(
                 fontSize: 16,
@@ -269,7 +272,7 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
             color: isSelected ? primaryPurple : Colors.black12,
             width: isSelected ? 2 : 1,
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black12,
               blurRadius: 3,
@@ -278,7 +281,7 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
           ],
         ),
         child: Center(
-          child: Text(emoji, style: TextStyle(fontSize: 24)),
+          child: Text(emoji, style: const TextStyle(fontSize: 24)),
         ),
       ),
     );
@@ -292,7 +295,7 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.black12),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black12,
               blurRadius: 3,
@@ -313,11 +316,11 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
 
   Widget _buildAnalysisCard() {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 5,
@@ -328,7 +331,7 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'AI Analysis',
             style: TextStyle(
               fontSize: 16,
@@ -336,15 +339,15 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             analysis!['summary'],
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black87,
               fontSize: 14,
             ),
           ),
-          Divider(height: 24, color: Colors.black12),
+          const Divider(height: 24, color: Colors.black12),
           _buildStatRow('Workout Type', analysis!['type']),
           _buildStatRow('Duration', analysis!['duration']),
           _buildStatRow('Intensity', analysis!['intensity']),
@@ -356,20 +359,20 @@ class _SmartJournalPageState extends State<SmartJournalPage> {
 
   Widget _buildStatRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black54,
               fontSize: 14,
             ),
           ),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.black87,
               fontWeight: FontWeight.w500,
               fontSize: 14,
