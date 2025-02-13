@@ -1,8 +1,14 @@
 # PockEat
 
-[![Staging](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/staging.yml/badge.svg)](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/staging.yml)
-[![Production](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/production.yml/badge.svg)](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/production.yml)
-[![codecov](https://codecov.io/gh/Pemuda-Pembuka-Langkah/pockeat-mobile/branch/master/graph/badge.svg)](https://codecov.io/gh/Pemuda-Pembuka-Langkah/pockeat-mobile)
+## Build Status
+Staging: [![Staging Workflow](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/staging.yml/badge.svg)](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/staging.yml)
+
+Production: [![Production Workflow](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/production.yml/badge.svg)](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/production.yml)
+
+## Code Coverage
+Master Branch: [![codecov](https://codecov.io/gh/Pemuda-Pembuka-Langkah/pockeat-mobile/branch/master/graph/badge.svg)](https://codecov.io/gh/Pemuda-Pembuka-Langkah/pockeat-mobile)
+
+Staging Branch: [![codecov](https://codecov.io/gh/Pemuda-Pembuka-Langkah/pockeat-mobile/branch/staging/graph/badge.svg)](https://codecov.io/gh/Pemuda-Pembuka-Langkah/pockeat-mobile)
 
 ## Table of Contents
 - [CI/CD Documentation](#ci-cd-documentation)
