@@ -1,0 +1,104 @@
+name: Release CI
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  test:
+    name: Tests & Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+          cache: true
+      
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Run tests
+        run: flutter test
+        
+      - name: Run Flutter Analyze
+        run: flutter analyze
+
+  build-and-release:
+    name: Build & Create Release
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+          cache: true
+          
+      - name: Get dependencies
+        run: flutter pub get
+
+      # Setup keystore
+      - name: Setup keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          echo "storeFile=keystore.jks" >> android/key.properties
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=upload" >> android/key.properties
+          echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
+        
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      # Extract tag version
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        
+      # Generate changelog dari conventional commits
+      - name: Generate Changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          configuration: |
+            {
+              "commit_pattern": "^(feat|fix|docs|style|refactor|test|chore)(?:\\(([^)]+)\\))?: (.+)",
+              "commit_groups": [
+                {
+                  "title": "## 🚀 Features",
+                  "pattern": "^feat(?:\\(([^)]+)\\))?:"
+                },
+                {
+                  "title": "## 🐛 Fixes",
+                  "pattern": "^fix(?:\\(([^)]+)\\))?:"
+                },
+                {
+                  "title": "## ⚠️ BREAKING CHANGES",
+                  "pattern": "BREAKING CHANGE:"
+                }
+              ]
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      # Create GitHub Release dengan APK dan changelog
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
