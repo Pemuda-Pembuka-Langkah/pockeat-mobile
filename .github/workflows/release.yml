@@ -60,7 +60,7 @@ jobs:
           echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
         
       - name: Build Release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --dart-define=FLAVOR=production
 
       # Extract tag version
       - name: Get version from tag

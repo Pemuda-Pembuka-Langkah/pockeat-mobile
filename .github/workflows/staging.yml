@@ -56,7 +56,7 @@ jobs:
         run: flutter pub get
         
       - name: Build Debug APK
-        run: flutter build apk --debug
+        run: flutter build apk --debug --dart-define=FLAVOR=staging
         
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4

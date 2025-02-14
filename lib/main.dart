@@ -1,4 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:pockeat/add_recipe_page.dart';
+import 'package:pockeat/config/production.dart';
+import 'package:pockeat/config/staging.dart';
 import 'package:pockeat/exercise_input_page.dart';
 import 'package:pockeat/exercise_journal_page.dart';
 import 'package:pockeat/food_input_page.dart';
@@ -15,7 +20,26 @@ import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Default ke dev untuk development yang aman
+  const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
+  
+  await Firebase.initializeApp(
+    options: flavor == 'production' 
+      ? ProductionFirebaseOptions.currentPlatform
+      : flavor == 'staging'
+        ? StagingFirebaseOptions.currentPlatform
+        : StagingFirebaseOptions.currentPlatform // Dev pake config staging tapi nanti connect ke emulator
+  );
+
+  // Setup emulator kalau di dev mode
+  if (flavor == 'dev') {
+    await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+    FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
+  }
+
   runApp(
     MultiProvider(
       providers: [

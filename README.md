@@ -12,6 +12,7 @@ Staging Branch: [![codecov](https://codecov.io/gh/Pemuda-Pembuka-Langkah/pockeat
 
 ## Table of Contents
 - [CI/CD Documentation](#ci-cd-documentation)
+  - [Environment Strategy](#environment-strategy)
   - [Branch Strategy](#branch-strategy)
   - [Workflows](#workflows)
     - [Development Workflow](#development-workflow)
@@ -21,6 +22,48 @@ Staging Branch: [![codecov](https://codecov.io/gh/Pemuda-Pembuka-Langkah/pockeat
   - [Conventional Commits](#conventional-commits)
 
 ## CI/CD Documentation
+
+### Environment Strategy
+Project ini menggunakan 3 environment yang terpisah:
+
+- **Development Environment**
+ - Menggunakan Firebase Emulator untuk development lokal
+ - Setup Firebase Emulator:
+   ```bash
+   # Install Firebase CLI
+   npm install -g firebase-tools
+
+   # Login ke Firebase
+   firebase login
+
+   # Di root project
+   firebase init emulators
+
+   # Start emulator
+   firebase emulators:start
+   ```
+ - Emulator UI tersedia di `localhost:4000`
+ - Semua data tersimpan lokal
+ - Default ketika run `flutter run`
+ - Perfect untuk rapid development tanpa mempengaruhi data production
+ - Team members hanya perlu:
+   1. Install Firebase CLI
+   2. Run `firebase login` dan `firebase emulators:start`
+   3. Run `flutter run` di terminal terpisah
+  - pastikan login pakai akun pockeatdev@gmail.com
+
+- **Staging Environment**
+ - Firebase Project: `pockeat-staging-f099c`
+ - Digunakan untuk testing dan QA
+ - Run dengan `flutter run --dart-define=FLAVOR=staging`
+ - Tempat testing integrasi dengan Firebase sebelum ke production
+
+- **Production Environment**
+ - Firebase Project: `pockeat-production`
+ - Environment untuk end users
+ - Strict security rules
+ - Run dengan `flutter run --dart-define=FLAVOR=production`
+ - Build production APK menggunakan flavor ini
 
 ### Branch Strategy
 - `PBI-*`: Feature branches for development
