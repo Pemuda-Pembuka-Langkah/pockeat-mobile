@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pockeat/navigation.dart';
 import 'package:pockeat/overview_section.dart';
 import 'package:pockeat/recently_exercise_section.dart';
@@ -21,6 +22,23 @@ class _HomePageState extends State<HomePage>
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
+  String? dbInfo;
+
+  Future<void> _checkDatabase() async {
+    try {
+      // Pakai document yang sama di semua environment
+      final docRef = FirebaseFirestore.instance.collection('app_info').doc('db_type');
+      // Read balik untuk konfirmasi
+      final doc = await docRef.get();
+      setState(() {
+        dbInfo = doc.data()?['name'];
+      });
+    } catch (e) {
+      setState(() {
+        dbInfo = 'Error: $e';
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -38,6 +56,7 @@ class _HomePageState extends State<HomePage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<NavigationProvider>(context, listen: false).setIndex(0);
     });
+    _checkDatabase();
   }
 
   @override
@@ -233,13 +252,13 @@ class _HomePageState extends State<HomePage>
                         },
                       ),
                     ),
-                    const Padding(
+                     Padding(
                       padding: EdgeInsets.fromLTRB(16, 8, 16, 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Hello, Alex',
+                            'Hello, Alex Connected to: ${dbInfo ?? 'Loading...'}',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,

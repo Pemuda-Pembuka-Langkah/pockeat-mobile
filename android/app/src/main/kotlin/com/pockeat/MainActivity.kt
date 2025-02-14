@@ -1,4 +1,4 @@
-package com.example.amankendara
+package com.pockeat
 
 import io.flutter.embedding.android.FlutterActivity
 

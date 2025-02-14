@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "pockeat-staging-f099c",
+          "appId": "1:119378561262:android:9d579c55db75a29f324bff",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "pockeat-staging-f099c",
+          "configurations": {
+            "android": "1:119378561262:android:9d579c55db75a29f324bff",
+            "ios": "1:119378561262:ios:843a9669cada44c1324bff",
+            "macos": "1:119378561262:ios:64816aecd2c59fe1324bff",
+            "web": "1:119378561262:web:8686d4c165ebeb2d324bff",
+            "windows": "1:119378561262:web:26ba0ad31c48e830324bff"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080,
+      "rules": "firestore.rules"
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
+    "singleProjectMode": true
+  }
+}
