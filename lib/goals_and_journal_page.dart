@@ -1,6 +1,5 @@
 import 'package:pockeat/achievement_tab.dart';
 import 'package:pockeat/goal_tabs.dart';
-import 'package:pockeat/journal_tab.dart';
 import 'package:pockeat/navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -127,7 +126,6 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage>
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 tabs: const [
                   Text('Goals'),
-                  Text('Journal'),
                   Text('Achievements'),
                 ],
               ),
@@ -139,7 +137,6 @@ class _ProgressTrackingPageState extends State<ProgressTrackingPage>
               controller: _tabController,
               children: const [
                 GoalsTab(),
-                JournalTab(),
                 AchievementTab(),
               ],
             ),

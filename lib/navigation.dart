@@ -186,13 +186,13 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                       ),
                       Expanded(
                         child: _buildNavItem(
-                          icon: Icons.calendar_month_outlined,
-                          label: 'Planning',
+                          icon: Icons.person_outline,
+                          label: 'Account',
                           isSelected: navigationProvider.currentIndex == 4,
                           onPressed: () {
                             navigationProvider.closeMenu();
                             navigationProvider.setIndex(4);
-                            Navigator.pushReplacementNamed(context, '/planning');
+                            Navigator.pushReplacementNamed(context, '/account');
                           },
                         ),
                       ),

@@ -9,6 +9,7 @@ import 'package:pockeat/exercise_journal_page.dart';
 import 'package:pockeat/food_input_page.dart';
 import 'package:pockeat/food_scan_page.dart';
 import 'package:pockeat/goals_and_journal_page.dart';
+import 'package:pockeat/my_account_page.dart';
 import 'package:pockeat/navigation.dart';
 import 'package:pockeat/homepage.dart';
 import 'package:pockeat/pet_store_page.dart';
@@ -100,7 +101,8 @@ class MyApp extends StatelessWidget {
         '/smart-workout-log': (context) => const SmartJournalPage(),
         '/planning': (context) => const PlanningPage(),
         '/add-food': (context) => const FoodInputPage(),
-        '/pet-store': (c) => const PetStorePage()
+        '/pet-store': (c) => const PetStorePage(),
+        '/account': (c)=> const MyAccountPage()
       },
     );
   }
