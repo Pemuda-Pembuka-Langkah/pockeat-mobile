@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 
 class SubscriptionPlansPage extends StatelessWidget {
@@ -18,7 +19,7 @@ class SubscriptionPlansPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pilih Paket'),
+        title: const Text('Choose Package'),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -32,7 +33,7 @@ class SubscriptionPlansPage extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'Pilih Paket Langganan',
+                    'Choose Subscription Package',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -41,7 +42,7 @@ class SubscriptionPlansPage extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Bandingkan dan pilih paket yang sesuai kebutuhan',
+                    'Compare and choose the package that suits your needs',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
@@ -110,7 +111,7 @@ class SubscriptionPlansPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Coba Gratis',
+                          'Free Trial',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.blue.shade700,
@@ -118,7 +119,7 @@ class SubscriptionPlansPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Akses semua fitur premium gratis selama 7 hari',
+                          'Access all premium features free for 7 days',
                           style: TextStyle(
                             color: Colors.blue.shade700,
                           ),
@@ -172,7 +173,7 @@ class SubscriptionPlansPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'Paling Populer',
+                'Most Popular',
                 style: TextStyle(
                   color: color,
                   fontWeight: FontWeight.bold,
@@ -250,7 +251,7 @@ class SubscriptionPlansPage extends StatelessWidget {
                 ),
               ),
               child: Text(
-                'Pilih Paket ${title}',
+                'Choose $title Package',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
