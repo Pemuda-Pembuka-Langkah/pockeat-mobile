@@ -1,3 +1,9 @@
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_result.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 @GenerateMocks([SmartExerciseLogRepository])
 import 'smart_exercise_log_repository_test.mocks.dart';
 
