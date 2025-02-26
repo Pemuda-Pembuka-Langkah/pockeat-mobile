@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_result.dart';
 
 
 void main() {
