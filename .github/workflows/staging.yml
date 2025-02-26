@@ -39,38 +39,50 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
         
-      - name: Install dartanalyzer_formatter
-        run: dart pub global activate dartanalyzer_formatter
+      - name: Run Flutter Analyze
+        run: flutter analyze --write=analyze_report.txt || true
         
-      - name: Run Flutter Analyze with Codecov format
+      - name: Setup Dart Code Metrics
+        run: dart pub global activate dart_code_metrics
+        
+      - name: Run Dart Code Metrics
         run: |
-          mkdir -p coverage/analyze
-          # Run flutter analyze with options to not fail on warnings or infos
-          flutter analyze --no-fatal-warnings --no-fatal-infos --format=machine > flutter_analyze_output.txt || true
-          # Even if analyzer has errors, continue with formatting for Codecov
-          dart pub global run dartanalyzer_formatter:format_analyzer_output flutter_analyze_output.txt > coverage/analyze/lcov.info || true
+          mkdir -p metrics-report
+          dart pub global run dart_code_metrics:metrics analyze lib --reporter=html --output-directory=metrics-report
+          dart pub global run dart_code_metrics:metrics check-unused-code lib --reporter=html --output-directory=metrics-report/unused-code
+          dart pub global run dart_code_metrics:metrics check-unused-files lib --reporter=html --output-directory=metrics-report/unused-files
+        
+      - name: PR Comment for Dart Code Metrics
+        if: github.event_name == 'pull_request'
+        uses: dart-code-checker/dart-code-metrics-action@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          check_unused_files: true
+          check_unused_code: true
+          pull_request_comment: true
+          
+      - name: Upload Analysis Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-analysis-reports
+          path: |
+            analyze_report.txt
+            metrics-report/
         
       - name: Install junitreport for test results
-        run: pub global activate junitreport
+        run: dart pub global activate junitreport
         
       - name: Run tests with coverage and generate JUnit report
         run: |
           mkdir -p test-results
           flutter test --coverage --machine | tee test_output.json
-          pub global run junitreport:tojunit --input test_output.json --output test-results/junit.xml
+          dart pub global run junitreport:tojunit --input test_output.json --output test-results/junit.xml
         
-      - name: Combine Coverage Reports
+      - name: Prepare coverage report
         run: |
-          # Make sure the coverage directory exists
+          # We'll just use the test coverage report directly
           mkdir -p coverage/combined
-          
-          # Copy the test coverage report
           cp coverage/lcov.info coverage/combined/lcov.info
-          
-          # Append the analysis report if it exists
-          if [ -f "coverage/analyze/lcov.info" ]; then
-            cat coverage/analyze/lcov.info >> coverage/combined/lcov.info
-          fi
         
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
