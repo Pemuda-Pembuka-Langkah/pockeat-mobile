@@ -30,17 +30,13 @@ class _ScanFoodPageState extends State<ScanFoodPage>
   final Color alertRed = const Color(0xFFFF4949); // Brighter red for initial stage
   final Color successGreen = const Color(0xFF4CD964); // More vivid green for success
 
-  double _scanProgress = 0.0;
+  final double _scanProgress = 0.0;
   late AnimationController _scanLineController;
-  String _statusMessage = 'Make sure your food is clearly visible';
-  Color _progressColor = const Color(0xFFFF4949); // Using primaryPink
+  final String _statusMessage = 'Make sure your food is clearly visible';
+  final Color _progressColor = const Color(0xFFFF4949); // Using primaryPink
   int _currentMode = 0;
   // ignore: unused_field
-  bool _isFoodPositioned = false;
-  double _imageScale = 1.2;
-  double _imageX = 50.0;
-  double _imageY = 50.0;
-  double _imageRotation = -0.1;
+  final bool _isFoodPositioned = false;
 
   bool _isCameraReady = false;
 
@@ -63,7 +59,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
         });
       }
     } catch (e) {
-      print('Error initializing camera: $e');
+      // Handle camera initialization error
     }
   }
 
@@ -71,69 +67,6 @@ class _ScanFoodPageState extends State<ScanFoodPage>
   void dispose() {
     _scanLineController.dispose();
     super.dispose();
-  }
-
-  void _startScanningProcess() async {
-    // Stage 1 - Initial
-    await Future.delayed(const Duration(milliseconds: 500));
-    setState(() {
-      _statusMessage = 'Move camera back slightly';
-      _scanProgress = 0.2;
-      _progressColor = alertRed;
-      _imageScale = 1.5;
-      _imageX = 50;
-      _imageY = 50;
-      _imageRotation = 0;
-    });
-
-    // Stage 2 - Adjusting
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      _statusMessage = 'Move slightly to the left';
-      _scanProgress = 0.4;
-      _progressColor = alertRed;
-      _imageScale = 1.3;
-      _imageX = 40;
-      _imageY = 30;
-      _imageRotation = 0;
-    });
-
-    // Stage 3 - Almost
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      _statusMessage = 'Rotate camera to align with plate';
-      _scanProgress = 0.6;
-      _progressColor = warningYellow;
-      _imageScale = 1.2;
-      _imageX = 20;
-      _imageY = 20;
-      _imageRotation = 0.1;
-    });
-
-    // Stage 4 - Getting Close
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      _statusMessage = 'Almost there, hold steady...';
-      _scanProgress = 0.8;
-      _progressColor = warningYellow;
-      _imageScale = 1.1;
-      _imageX = 10;
-      _imageY = 10;
-      _imageRotation = 0.05;
-    });
-
-    // Stage 5 - Perfect
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      _scanProgress = 1.0;
-      _progressColor = successGreen;
-      _statusMessage = 'Perfect! Tap to analyze';
-      _isFoodPositioned = true;
-      _imageScale = 1.0;
-      _imageX = 0;
-      _imageY = 0;
-      _imageRotation = 0;
-    });
   }
 
   @override
@@ -401,7 +334,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
             );
           }
         } catch (e) {
-          print('Error taking picture: $e');
+          // Handle picture taking error
         }
       },
       customBorder: const CircleBorder(),
