@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 // ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
+import 'package:camera/camera.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,7 +97,15 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const HomePage(),
-        '/scan': (context) => const ScanFoodPage(),
+        '/scan': (context) => ScanFoodPage(
+                cameraController: CameraController(
+              CameraDescription(
+                name: '0',
+                lensDirection: CameraLensDirection.back,
+                sensorOrientation: 0,
+              ),
+              ResolutionPreset.medium,
+            )),
         '/add-food-manual': (context) => const AddFoodLogPage(),
         '/analytic': (context) => const ProgressPage(),
         '/progress': (context) => const ProgressTrackingPage(),

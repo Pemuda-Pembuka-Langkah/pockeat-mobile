@@ -2,9 +2,15 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pockeat/nutrition_page.dart';
+import 'package:camera/camera.dart';
 
 class ScanFoodPage extends StatefulWidget {
-  const ScanFoodPage({super.key});
+  final CameraController cameraController;
+  
+  const ScanFoodPage({
+    super.key,
+    required this.cameraController,
+  });
 
   @override
   _ScanFoodPageState createState() => _ScanFoodPageState();
