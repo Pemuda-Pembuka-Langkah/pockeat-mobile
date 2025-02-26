@@ -22,18 +22,19 @@ void main() {
 
       // Hitung total durasi dari seluruh set
       double totalDurasi = exercises.fold(0.0, (sum, exercise) {
-        return sum + exercise.sets.fold(0.0, (setSum, set) {
-          return setSum + set.duration;
-        });
+        return sum + exercise.sets.fold(0.0, (setSum, set) => setSum + set.duration);
       });
 
-      // Durasi rata-rata per Exercise
-      double durasiRataRata = totalDurasi / exercises.length;
+      // Hitung total set
+      int totalSets = exercises.fold(0, (sum, exercise) => sum + exercise.sets.length);
 
-      // Rumus: MET × beratBadan × durasi (rata-rata)
-      double estimatedCalories = MET * beratBadan * durasiRataRata;
+      // Rata-rata durasi per set
+      double averageDuration = totalDurasi / totalSets;
 
-      // Ekspektasi untuk data di atas: 3.15 × 75 × 0.5 = 118.125
+      // Rumus: MET × beratBadan × rata-rata durasi per set
+      double estimatedCalories = MET * beratBadan * averageDuration;
+
+      // Ekspektasi: 3.15 * 75 * 0.5 = 118.125 kcal
       expect(estimatedCalories, closeTo(118.125, 0.001));
     });
 
@@ -59,45 +60,43 @@ void main() {
         () {
           double totalDurasi = exercises.fold(0.0, (sum, exercise) {
             return sum + exercise.sets.fold(0.0, (setSum, set) {
-              // Jika durasi negatif, anggap tidak valid dan
               if (set.duration < 0) {
                 throw ArgumentError('Durasi tidak boleh negatif');
               }
               return setSum + set.duration;
             });
           });
-          double durasiRataRata = totalDurasi / exercises.length;
-          double estimatedCalories = MET * beratBadan * durasiRataRata;
+          int totalSets = exercises.fold(0, (sum, exercise) => sum + exercise.sets.length);
+          double averageDuration = totalDurasi / totalSets;
+          double estimatedCalories = MET * beratBadan * averageDuration;
           return estimatedCalories;
         },
         throwsA(isA<ArgumentError>()),
       );
     });
 
-    // [Corner Case] total set = 0 atau volume = 0
+    // [Corner Case] Tidak ada set sehingga total durasi = 0
     test('Corner Case: Tidak ada set (durasi total = 0)', () {
       List<Exercise> exercises = [
         Exercise(
           name: 'Lunges',
           bodyPart: 'Lower Body',
-          sets: [], // Tidak ada set
+          sets: [],
         ),
       ];
 
       double MET = 3.15;
       double beratBadan = 75;
 
-      // Total durasi seharusnya 0
       double totalDurasi = exercises.fold(0.0, (sum, exercise) {
-        return sum + exercise.sets.fold(0.0, (setSum, set) {
-          return setSum + set.duration;
-        });
+        return sum + exercise.sets.fold(0.0, (setSum, set) => setSum + set.duration);
       });
+      int totalSets = exercises.fold(0, (sum, exercise) => sum + exercise.sets.length);
 
-      double durasiRataRata = totalDurasi / exercises.length;
-      double estimatedCalories = MET * beratBadan * durasiRataRata;
+      // Untuk kasus tidak ada set, hindari pembagian dengan 0
+      double averageDuration = totalSets > 0 ? totalDurasi / totalSets : 0;
+      double estimatedCalories = MET * beratBadan * averageDuration;
 
-      // Harusnya 0
       expect(estimatedCalories, equals(0));
     });
   });
