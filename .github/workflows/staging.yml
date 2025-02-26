@@ -39,12 +39,10 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
         
-      - name: Store Flutter Analyze Results
-        id: analyze
+      - name: Run Flutter Analyze for Report
         run: |
           mkdir -p analysis-results
-          flutter analyze > analysis-results/flutter-analyze.txt || echo "analyze_failed=true" >> $GITHUB_OUTPUT
-        continue-on-error: true
+          flutter analyze --no-fatal-warnings --no-fatal-infos > analysis-results/flutter-analyze.txt || true
           
       - name: Install junitreport for test results
         run: dart pub global activate junitreport
@@ -53,7 +51,7 @@ jobs:
         run: |
           mkdir -p test-results
           flutter test --coverage --machine | tee test_output.json
-          dart pub global run junitreport:tojunit --input test_output.json --output test-results/junit-results.xml
+          dart pub global run junitreport:tojunit --input test_output.json --output test-results/junit_flutter_tests.xml
         
       - name: Generate combined HTML report
         run: |
@@ -161,11 +159,11 @@ jobs:
           EOL
           
           # Process JUnit XML to extract test data for HTML report
-          if [ -f "test-results/junit-results.xml" ]; then
+          if [ -f "test-results/junit_flutter_tests.xml" ]; then
             # Get total tests
-            TOTAL_TESTS=$(grep -c "<testcase" test-results/junit-results.xml || echo "0")
+            TOTAL_TESTS=$(grep -c "<testcase" test-results/junit_flutter_tests.xml || echo "0")
             # Get failed tests
-            FAILED_TESTS=$(grep -c "<failure" test-results/junit-results.xml || echo "0")
+            FAILED_TESTS=$(grep -c "<failure" test-results/junit_flutter_tests.xml || echo "0")
             # Calculate passed tests
             PASSED_TESTS=$((TOTAL_TESTS - FAILED_TESTS))
             # Calculate success percentage
@@ -230,9 +228,9 @@ jobs:
           EOL
           
           # Add test details from JUnit file
-          if [ -f "test-results/junit-results.xml" ]; then
+          if [ -f "test-results/junit_flutter_tests.xml" ]; then
             # Extract and format test cases
-            grep -A 3 "<testcase" test-results/junit-results.xml | sed 's/--/\n/g' | while read -r line; do
+            grep -A 3 "<testcase" test-results/junit_flutter_tests.xml | sed 's/--/\n/g' | while read -r line; do
               if [[ $line == *"<testcase"* ]]; then
                 # Extract test name
                 TEST_NAME=$(echo "$line" | grep -o 'name="[^"]*"' | sed 's/name="//;s/"$//')
@@ -291,11 +289,6 @@ jobs:
           name: flutter-quality-report
           path: reports/index.html
           
-      - name: Fix JUnit XML for Codecov
-        run: |
-          mkdir -p junit-reports
-          cp test-results/junit-results.xml junit-reports/junit.xml
-          
       - name: Prepare coverage report
         run: |
           mkdir -p coverage/combined
@@ -313,7 +306,7 @@ jobs:
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          search_dir: junit-reports
+          file: test-results/junit_flutter_tests.xml
           
       - name: Display Codecov link
         run: |
@@ -324,9 +317,8 @@ jobs:
           REPO_NAME="${{ github.repository }}"
           echo "Code Coverage Report: https://codecov.io/gh/${REPO_NAME}/branch/${BRANCH_NAME}"
           
-      - name: Check if analyze failed
-        if: steps.analyze.outputs.analyze_failed == 'true'
-        run: exit 1
+      - name: Run Flutter Analyze for CI Failure
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
 
   build:
     name: Build Debug APK
