@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ExerciseInputPage extends StatelessWidget {
   // Warna yang lebih kontras tapi tetap cute
@@ -50,9 +51,9 @@ class ExerciseInputPage extends StatelessWidget {
             // Running Option
             _buildExerciseOption(
               context: context,
-              icon: Icons.directions_run,
-              title: 'Running',
-              subtitle: 'Track your running session',
+              icon: FontAwesomeIcons.heartPulse,
+              title: 'Cardio',
+              subtitle: 'Track your cardio session',
               color: pinkColor,
               route: '/running-input',
             ),
