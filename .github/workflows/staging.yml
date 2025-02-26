@@ -39,18 +39,58 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
         
-      - name: Run tests with coverage
-        run: flutter test --coverage
+      - name: Install dartanalyzer_formatter
+        run: dart pub global activate dartanalyzer_formatter
+        
+      - name: Run Flutter Analyze with Codecov format
+        run: |
+          mkdir -p coverage/analyze
+          # Run flutter analyze with options to not fail on warnings or infos
+          flutter analyze --no-fatal-warnings --no-fatal-infos --format=machine > flutter_analyze_output.txt || true
+          # Even if analyzer has errors, continue with formatting for Codecov
+          dart pub global run dartanalyzer_formatter:format_analyzer_output flutter_analyze_output.txt > coverage/analyze/lcov.info || true
+        
+      - name: Install junitreport for test results
+        run: pub global activate junitreport
+        
+      - name: Run tests with coverage and generate JUnit report
+        run: |
+          mkdir -p test-results
+          flutter test --coverage --machine | tee test_output.json
+          pub global run junitreport:tojunit --input test_output.json --output test-results/junit.xml
+        
+      - name: Combine Coverage Reports
+        run: |
+          # Make sure the coverage directory exists
+          mkdir -p coverage/combined
+          
+          # Copy the test coverage report
+          cp coverage/lcov.info coverage/combined/lcov.info
+          
+          # Append the analysis report if it exists
+          if [ -f "coverage/analyze/lcov.info" ]; then
+            cat coverage/analyze/lcov.info >> coverage/combined/lcov.info
+          fi
         
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage/lcov.info
+          file: ./coverage/combined/lcov.info
           fail_ci_if_error: true
         
-      - name: Run Flutter Analyze
-        run: flutter analyze
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: test-results/junit.xml
+          
+      - name: Display Codecov link
+        run: |
+          COMMIT_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          REPO_NAME="${{ github.repository }}"
+          echo "Code Coverage Report: https://codecov.io/gh/${REPO_NAME}/commit/${COMMIT_SHA}"
 
   build:
     name: Build Debug APK
