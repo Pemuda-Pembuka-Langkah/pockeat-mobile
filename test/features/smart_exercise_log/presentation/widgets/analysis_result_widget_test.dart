@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
+// Ubah dengan path yang benar untuk project Anda
 
 void main() {
   group('AnalysisResultWidget', () {
-    final mockAnalysisComplete = {
-      'type': 'HIIT Workout',
-      'duration': '30 menit',
-      'intensity': 'Tinggi',
-      'estimatedCalories': 320,
-      'summary': 'Latihan intensitas tinggi dengan interval pendek'
-    };
+    final mockAnalysisComplete = AnalysisResult(
+      exerciseType: 'HIIT Workout',
+      duration: '30 menit',
+      intensity: 'Tinggi',
+      estimatedCalories: 320,
+      summary: 'Latihan intensitas tinggi dengan interval pendek',
+      timestamp: DateTime.now(),
+      originalInput: 'HIIT latihan 30 menit',
+    );
 
-    final mockAnalysisIncomplete = {
-      'type': 'Yoga Session',
-      'duration': 'Tidak ditentukan',
-      'intensity': 'Sedang',
-      'estimatedCalories': 150,
-    };
+    final mockAnalysisIncomplete = AnalysisResult(
+      exerciseType: 'Yoga Session',
+      duration: 'Tidak ditentukan',
+      intensity: 'Sedang',
+      estimatedCalories: 150,
+      timestamp: DateTime.now(),
+      originalInput: 'Yoga dengan intensitas sedang',
+    );
 
     testWidgets('renders all analysis data correctly', (WidgetTester tester) async {
       // Arrange
@@ -25,7 +31,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: AnalysisResultWidget(
-              analysisData: mockAnalysisComplete,
+              analysisResult: mockAnalysisComplete,
               onRetry: () {},
               onSave: () {},
             ),
@@ -48,7 +54,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: AnalysisResultWidget(
-              analysisData: mockAnalysisIncomplete,
+              analysisResult: mockAnalysisIncomplete,
               onRetry: () {},
               onSave: () {},
             ),
@@ -72,7 +78,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: AnalysisResultWidget(
-              analysisData: mockAnalysisComplete,
+              analysisResult: mockAnalysisComplete,
               onRetry: () {
                 onRetryCalled = true;
               },
@@ -98,7 +104,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: AnalysisResultWidget(
-              analysisData: mockAnalysisComplete,
+              analysisResult: mockAnalysisComplete,
               onRetry: () {},
               onSave: () {
                 onSaveCalled = true;
@@ -118,19 +124,21 @@ void main() {
 
     testWidgets('displays indicator for missing information', (WidgetTester tester) async {
       // Arrange
-      final mockAnalysisWithMissingInfo = {
-        'type': 'Unknown Workout',
-        'duration': 'Tidak ditentukan',
-        'intensity': 'Tidak ditentukan',
-        'estimatedCalories': 0,
-        'missingInfo': ['duration', 'intensity'],
-      };
+      final mockAnalysisWithMissingInfo = AnalysisResult(
+        exerciseType: 'Unknown Workout',
+        duration: 'Tidak ditentukan',
+        intensity: 'Tidak ditentukan',
+        estimatedCalories: 0,
+        timestamp: DateTime.now(),
+        originalInput: 'Olahraga tadi pagi',
+        missingInfo: ['type', 'duration', 'intensity'],
+      );
       
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: AnalysisResultWidget(
-              analysisData: mockAnalysisWithMissingInfo,
+              analysisResult: mockAnalysisWithMissingInfo,
               onRetry: () {},
               onSave: () {},
             ),
@@ -141,24 +149,27 @@ void main() {
       // Assert
       expect(find.text('Informasi Kurang Lengkap'), findsOneWidget);
       expect(find.text('Silakan berikan informasi lebih detail tentang:'), findsOneWidget);
+      expect(find.text('• Jenis olahraga'), findsOneWidget);
       expect(find.text('• Durasi olahraga'), findsOneWidget);
       expect(find.text('• Intensitas olahraga'), findsOneWidget);
     });
 
     testWidgets('handles different duration formats correctly', (WidgetTester tester) async {
       // Test numerik
-      final mockNumericDuration = {
-        'type': 'Lari',
-        'duration': '45 menit',
-        'intensity': 'Sedang',
-        'estimatedCalories': 400,
-      };
+      final mockNumericDuration = AnalysisResult(
+        exerciseType: 'Lari',
+        duration: '45 menit',
+        intensity: 'Sedang',
+        estimatedCalories: 400,
+        timestamp: DateTime.now(),
+        originalInput: 'Lari selama 45 menit',
+      );
       
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: AnalysisResultWidget(
-              analysisData: mockNumericDuration,
+              analysisResult: mockNumericDuration,
               onRetry: () {},
               onSave: () {},
             ),
@@ -169,18 +180,20 @@ void main() {
       expect(find.text('45 menit'), findsOneWidget);
       
       // Test deskriptif
-      final mockDescriptiveDuration = {
-        'type': 'Lari',
-        'duration': 'setengah jam',
-        'intensity': 'Sedang',
-        'estimatedCalories': 300,
-      };
+      final mockDescriptiveDuration = AnalysisResult(
+        exerciseType: 'Lari',
+        duration: 'setengah jam',
+        intensity: 'Sedang',
+        estimatedCalories: 300,
+        timestamp: DateTime.now(),
+        originalInput: 'Lari selama setengah jam',
+      );
       
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: AnalysisResultWidget(
-              analysisData: mockDescriptiveDuration,
+              analysisResult: mockDescriptiveDuration,
               onRetry: () {},
               onSave: () {},
             ),
@@ -191,18 +204,20 @@ void main() {
       expect(find.text('setengah jam'), findsOneWidget);
       
       // Test rentang
-      final mockRangeDuration = {
-        'type': 'Lari',
-        'duration': '30-45 menit',
-        'intensity': 'Sedang',
-        'estimatedCalories': 350,
-      };
+      final mockRangeDuration = AnalysisResult(
+        exerciseType: 'Lari',
+        duration: '30-45 menit',
+        intensity: 'Sedang',
+        estimatedCalories: 350,
+        timestamp: DateTime.now(),
+        originalInput: 'Lari selama 30-45 menit',
+      );
       
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: AnalysisResultWidget(
-              analysisData: mockRangeDuration,
+              analysisResult: mockRangeDuration,
               onRetry: () {},
               onSave: () {},
             ),

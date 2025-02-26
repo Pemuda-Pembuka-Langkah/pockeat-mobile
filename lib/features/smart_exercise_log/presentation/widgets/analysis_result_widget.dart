@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_result.dart';
 
 class AnalysisResultWidget extends StatelessWidget {
-  final Map<String, dynamic> analysisData;
+  final AnalysisResult analysisResult;
   final VoidCallback onRetry;
   final VoidCallback onSave;
 
   const AnalysisResultWidget({
-    Key? key,
-    required this.analysisData,
+    super.key,
+    required this.analysisResult,
     required this.onRetry,
     required this.onSave,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    final hasMissingInfo = analysisData.containsKey('missingInfo') && 
-                         (analysisData['missingInfo'] as List).isNotEmpty;
+    final hasMissingInfo = analysisResult.missingInfo != null && 
+                         analysisResult.missingInfo!.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -47,9 +48,9 @@ class AnalysisResultWidget extends StatelessWidget {
           if (hasMissingInfo) _buildMissingInfoSection(),
           
           // Display summary if available
-          if (analysisData.containsKey('summary') && analysisData['summary'] != null) ...[
+          if (analysisResult.summary != null) ...[
             Text(
-              analysisData['summary'].toString(),
+              analysisResult.summary!,
               style: const TextStyle(
                 color: Colors.black87,
                 fontSize: 14,
@@ -61,10 +62,10 @@ class AnalysisResultWidget extends StatelessWidget {
           const Divider(height: 24, color: Colors.black12),
           
           // Display analysis data
-          _buildStatRow('Jenis Olahraga', analysisData['type'].toString()),
-          _buildStatRow('Durasi', analysisData['duration'].toString()),
-          _buildStatRow('Intensitas', analysisData['intensity'].toString()),
-          _buildStatRow('Estimasi Kalori', '${analysisData['estimatedCalories']} kkal'),
+          _buildStatRow('Jenis Olahraga', analysisResult.exerciseType),
+          _buildStatRow('Durasi', analysisResult.duration),
+          _buildStatRow('Intensitas', analysisResult.intensity),
+          _buildStatRow('Estimasi Kalori', '${analysisResult.estimatedCalories} kkal'),
           
           const SizedBox(height: 20),
           
@@ -144,7 +145,7 @@ class AnalysisResultWidget extends StatelessWidget {
   }
 
   Widget _buildMissingInfoSection() {
-    final missingInfo = analysisData['missingInfo'] as List;
+    final missingInfo = analysisResult.missingInfo!;
     final missingLabels = {
       'type': 'Jenis olahraga',
       'duration': 'Durasi olahraga',
