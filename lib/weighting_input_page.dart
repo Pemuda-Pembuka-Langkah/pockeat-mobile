@@ -19,10 +19,12 @@ class Exercise {
 class ExerciseSet {
   final double weight;
   final int reps;
+  final double duration;
 
   ExerciseSet({
     required this.weight,
     required this.reps,
+    required this.duration,
   });
 }
 
@@ -88,9 +90,9 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     });
   }
 
-  void addSet(Exercise exercise, double weight, int reps) {
+  void addSet(Exercise exercise, double weight, int reps, double duration) {
     setState(() {
-      exercise.sets.add(ExerciseSet(weight: weight, reps: reps));
+      exercise.sets.add(ExerciseSet(weight: weight, reps: reps, duration: duration));  // Menambahkan durasi
     });
   }
 
@@ -106,12 +108,14 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     int totalSets = 0;
     int totalReps = 0;
     double totalVolume = 0;
+    double totalDuration = 0;
     
     for (var exercise in exercises) {
       totalSets += exercise.sets.length;
       for (var set in exercise.sets) {
         totalReps += set.reps;
         totalVolume += (set.weight * set.reps);
+        totalDuration += set.duration;
       }
     }
 
@@ -120,6 +124,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       'sets': totalSets,
       'reps': totalReps,
       'volume': totalVolume,
+      'duration': totalDuration
     };
   }
 
@@ -214,8 +219,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                       runSpacing: 8,
                       children: [
                         ...(exercisesByCategory[selectedBodyPart] ?? [])
-                            .map((exercise) => _buildExerciseChip(exercise)),
-                        _buildCustomButton(),
+                            .map((exercise) => _buildExerciseChip(exercise))
                       ],
                     ),
                   ],
@@ -300,31 +304,6 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     );
   }
 
-  Widget _buildCustomButton() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: primaryGreen,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.add, size: 16, color: Colors.white),
-          SizedBox(width: 4),
-          Text(
-            'Custom',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildWorkoutSummary() {
     final summary = getWorkoutSummary();
     return Container(
@@ -372,8 +351,13 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                 Icons.bar_chart,
               ),
               _buildSummaryItem(
+                'Duration',
+                '${summary['duration'].toString()} minutes',
+                Icons.access_time_rounded,
+              ),
+              _buildSummaryItem(
                 'Calories',
-                'Est. ${(summary['volume'] * 0.15).toInt()} kcal',
+                'Est. ${(((summary['duration'].toInt()) / 60 * 75 * 3.15)).toStringAsFixed(2)} kcal',
                 Icons.local_fire_department,
               ),
             ],
@@ -598,6 +582,14 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
               color: Colors.black87,
             ),
           ),
+          Text(
+            ' (${set.duration} minutes)',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
         ],
       ),
     );
@@ -606,6 +598,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   void _showAddSetDialog(Exercise exercise) {
     double weight = 0;
     int reps = 0;
+    double duration = 0;
 
     showDialog(
       context: context,
@@ -651,6 +644,22 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
               ),
               onChanged: (value) => reps = int.tryParse(value) ?? 0,
             ),
+            const SizedBox(height: 16),
+            TextField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Duration (minutes)',
+                labelStyle: const TextStyle(color: Colors.black54),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: primaryGreen),
+                ),
+              ),
+              onChanged: (value) => duration = double.tryParse(value) ?? 0,
+            ),
           ],
         ),
         actions: [
@@ -663,8 +672,8 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              if (weight > 0 && reps > 0) {
-                addSet(exercise, weight, reps);
+              if (weight > 0 && reps > 0 && duration > 0) {
+                addSet(exercise, weight, reps, duration);
                 Navigator.pop(context);
               }
             },
