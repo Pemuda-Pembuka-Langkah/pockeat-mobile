@@ -40,26 +40,17 @@ jobs:
         run: flutter pub get
         
       - name: Run Flutter Analyze
-        run: flutter analyze --write=analyze_report.txt || true
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos --write=analyze_report.txt || true
         
       - name: Setup Dart Code Metrics
-        run: dart pub global activate dart_code_metrics
+        run: dart pub global activate dcm
         
       - name: Run Dart Code Metrics
         run: |
           mkdir -p metrics-report
-          dart pub global run dart_code_metrics:metrics analyze lib --reporter=html --output-directory=metrics-report
-          dart pub global run dart_code_metrics:metrics check-unused-code lib --reporter=html --output-directory=metrics-report/unused-code
-          dart pub global run dart_code_metrics:metrics check-unused-files lib --reporter=html --output-directory=metrics-report/unused-files
-        
-      - name: PR Comment for Dart Code Metrics
-        if: github.event_name == 'pull_request'
-        uses: dart-code-checker/dart-code-metrics-action@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_unused_files: true
-          check_unused_code: true
-          pull_request_comment: true
+          dart pub global run dcm:metrics analyze lib --reporter=html --output-directory=metrics-report
+          dart pub global run dcm:metrics check-unused-code lib --reporter=html --output-directory=metrics-report/unused-code
+          dart pub global run dcm:metrics check-unused-files lib --reporter=html --output-directory=metrics-report/unused-files
           
       - name: Upload Analysis Reports
         uses: actions/upload-artifact@v4
@@ -68,7 +59,7 @@ jobs:
           path: |
             analyze_report.txt
             metrics-report/
-        
+      
       - name: Install junitreport for test results
         run: dart pub global activate junitreport
         
@@ -80,7 +71,6 @@ jobs:
         
       - name: Prepare coverage report
         run: |
-          # We'll just use the test coverage report directly
           mkdir -p coverage/combined
           cp coverage/lcov.info coverage/combined/lcov.info
         
@@ -90,7 +80,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage/combined/lcov.info
           fail_ci_if_error: true
-        
+      
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/test-results-action@v1
