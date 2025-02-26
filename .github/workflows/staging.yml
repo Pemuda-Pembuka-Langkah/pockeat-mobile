@@ -39,26 +39,10 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
         
-      - name: Run Flutter Analyze
-        run: flutter analyze --no-fatal-warnings --no-fatal-infos --write=analyze_report.txt || true
-        
-      - name: Setup Dart Code Metrics
-        run: dart pub global activate dcm
-        
-      - name: Run Dart Code Metrics
-        run: |
-          mkdir -p metrics-report
-          dart pub global run dcm:metrics analyze lib --reporter=html --output-directory=metrics-report
-          dart pub global run dcm:metrics check-unused-code lib --reporter=html --output-directory=metrics-report/unused-code
-          dart pub global run dcm:metrics check-unused-files lib --reporter=html --output-directory=metrics-report/unused-files
-          
-      - name: Upload Analysis Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-analysis-reports
-          path: |
-            analyze_report.txt
-            metrics-report/
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       
       - name: Install junitreport for test results
         run: dart pub global activate junitreport
