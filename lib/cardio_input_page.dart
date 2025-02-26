@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 // Pindahkan enum ke level teratas file
 enum CardioType { running, walking, swimming }
 
-class RunningInputPage extends StatefulWidget {
-  const RunningInputPage({super.key});
+class CardioInputPage extends StatefulWidget {
+  const CardioInputPage({super.key});
 
   @override
-  _RunningInputPageState createState() => _RunningInputPageState();
+  _CardioInputPageState createState() => _CardioInputPageState();
 }
 
-class _RunningInputPageState extends State<RunningInputPage> {
+class _CardioInputPageState extends State<CardioInputPage> {
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);

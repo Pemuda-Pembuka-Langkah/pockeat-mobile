@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/running_input_page.dart';
+import 'package:pockeat/cardio_input_page.dart';
 
 void main() {
-  group('RunningInputPage Widget Tests', () {
+  group('CardioInputPage Widget Tests', () {
     testWidgets('should display initial cardio type as Running', (WidgetTester tester) async {
       // Arrange
-      await tester.pumpWidget(const MaterialApp(home: RunningInputPage()));
+      await tester.pumpWidget(const MaterialApp(home: CardioInputPage()));
 
       // Assert
       expect(find.text('Running'), findsWidgets);
@@ -15,7 +15,7 @@ void main() {
 
     testWidgets('should switch to Walking mode when walking button is tapped', (WidgetTester tester) async {
       // Arrange
-      await tester.pumpWidget(const MaterialApp(home: RunningInputPage()));
+      await tester.pumpWidget(const MaterialApp(home: CardioInputPage()));
 
       // Act
       await tester.tap(find.text('Walking'));
@@ -28,7 +28,7 @@ void main() {
 
     testWidgets('should update distance when slider is moved', (WidgetTester tester) async {
       // Arrange
-      await tester.pumpWidget(const MaterialApp(home: RunningInputPage()));
+      await tester.pumpWidget(const MaterialApp(home: CardioInputPage()));
 
       // Act
       await tester.drag(find.byType(Slider).first, const Offset(100, 0));

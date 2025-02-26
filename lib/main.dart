@@ -15,7 +15,7 @@ import 'package:pockeat/homepage.dart';
 import 'package:pockeat/pet_store_page.dart';
 import 'package:pockeat/planning_page.dart';
 import 'package:pockeat/progress_page.dart';
-import 'package:pockeat/running_input_page.dart';
+import 'package:pockeat/cardio_input_page.dart';
 import 'package:pockeat/weighting_input_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -101,7 +101,7 @@ class MyApp extends StatelessWidget {
         '/analytic': (context) => const ProgressPage(),
         '/progress': (context) => const ProgressTrackingPage(),
         '/add-exercise': (context) => const ExerciseInputPage(),
-        '/running-input': (context) => const RunningInputPage(),
+        '/running-input': (context) => const CardioInputPage(),
         '/weightlifting-input': (context) => const WeightliftingPage(),
         '/smart-workout-log': (context) => const SmartJournalPage(),
         '/planning': (context) => const PlanningPage(),
