@@ -39,11 +39,46 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
         
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      
+      - name: Run Flutter Analyze
+        run: |
+          mkdir -p analysis-results
+          flutter analyze --no-fatal-warnings --no-fatal-infos > analysis-results/flutter-analyze.txt || true
+          
+      - name: Generate HTML report from Flutter Analyze
+        run: |
+          echo '<html><head><title>Flutter Analysis Report</title>' > analysis-results/analysis-report.html
+          echo '<style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #1389FD; }
+            .error { color: red; }
+            .warning { color: orange; }
+            .info { color: blue; }
+            pre { background-color: #f5f5f5; padding: 10px; border-radius: 5px; }
+          </style>' >> analysis-results/analysis-report.html
+          echo '</head><body>' >> analysis-results/analysis-report.html
+          echo '<h1>Flutter Analysis Report</h1>' >> analysis-results/analysis-report.html
+          
+          echo '<pre>' >> analysis-results/analysis-report.html
+          cat analysis-results/flutter-analyze.txt | sed 's/\x1B\[[0-9;]*[JKmsu]//g' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' >> analysis-results/analysis-report.html
+          echo '</pre>' >> analysis-results/analysis-report.html
+          
+          # Extract and count issues
+          ERRORS=$(grep -c "error" analysis-results/flutter-analyze.txt || echo "0")
+          WARNINGS=$(grep -c "warning" analysis-results/flutter-analyze.txt || echo "0")
+          INFOS=$(grep -c "info" analysis-results/flutter-analyze.txt || echo "0")
+          
+          echo '<div style="margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 5px;">' >> analysis-results/analysis-report.html
+          echo "<p><strong>Summary:</strong> Found $ERRORS errors, $WARNINGS warnings, and $INFOS info issues.</p>" >> analysis-results/analysis-report.html
+          echo '</div>' >> analysis-results/analysis-report.html
+          
+          echo '</body></html>' >> analysis-results/analysis-report.html
+          
+      - name: Upload Analysis Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-analysis-report
+          path: analysis-results/analysis-report.html
+          
       - name: Install junitreport for test results
         run: dart pub global activate junitreport
         
@@ -53,6 +88,10 @@ jobs:
           flutter test --coverage --machine | tee test_output.json
           dart pub global run junitreport:tojunit --input test_output.json --output test-results/junit.xml
         
+      - name: Rename JUnit file to match Codecov expectations
+        run: |
+          cp test-results/junit.xml test-results/junit-flutter-tests.xml
+          
       - name: Prepare coverage report
         run: |
           mkdir -p coverage/combined
@@ -70,7 +109,7 @@ jobs:
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: test-results/junit.xml
+          file: test-results/junit-flutter-tests.xml
           
       - name: Display Codecov link
         run: |
