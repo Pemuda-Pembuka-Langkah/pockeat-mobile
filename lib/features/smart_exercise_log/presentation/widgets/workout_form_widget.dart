@@ -5,10 +5,10 @@ class WorkoutFormWidget extends StatefulWidget {
   final bool isLoading;
 
   const WorkoutFormWidget({
-    Key? key,
+    super.key,
     required this.onAnalyzePressed,
     this.isLoading = false,
-  }) : super(key: key);
+  });
 
   @override
   State<WorkoutFormWidget> createState() => _WorkoutFormWidgetState();
