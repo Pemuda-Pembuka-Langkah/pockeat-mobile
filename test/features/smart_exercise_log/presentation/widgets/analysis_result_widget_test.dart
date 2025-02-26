@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
 
 void main() {
   group('AnalysisResultWidget', () {
