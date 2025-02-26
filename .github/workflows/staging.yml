@@ -39,10 +39,12 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
         
-      - name: Run Flutter Analyze
+      - name: Store Flutter Analyze Results
+        id: analyze
         run: |
           mkdir -p analysis-results
-          flutter analyze --no-fatal-warnings --no-fatal-infos > analysis-results/flutter-analyze.txt || true
+          flutter analyze > analysis-results/flutter-analyze.txt || echo "analyze_failed=true" >> $GITHUB_OUTPUT
+        continue-on-error: true
           
       - name: Install junitreport for test results
         run: dart pub global activate junitreport
@@ -147,7 +149,10 @@ jobs:
           <body>
             <div class="header">
               <h1>Flutter Project Quality Report</h1>
-              <p>Generated on: $(date)</p>
+              <p>Generated: <span id="generated-date"></span></p>
+              <script>
+                document.getElementById('generated-date').textContent = new Date().toLocaleString();
+              </script>
             </div>
             
             <div class="summary">
@@ -199,16 +204,18 @@ jobs:
           
           # Add coverage information
           if [ -f "coverage/lcov.info" ]; then
-            # Simple but not accurate coverage estimation
-            COVERED_LINES=$(grep -c "DA:" coverage/lcov.info || echo "0")
-            TOTAL_LINES=$(grep -c "LH:" coverage/lcov.info || echo "0") 
+            # Get branch name
+            BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+            if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+              BRANCH_NAME="${GITHUB_HEAD_REF}"
+            fi
             
             cat >> reports/index.html << EOL
               </div>
               <div class="summary-card">
                 <div class="card-title">Coverage Summary</div>
-                <p><strong>Lines Covered:</strong> $COVERED_LINES</p>
-                <p><strong>Coverage Link:</strong> <a href="https://codecov.io/gh/${{ github.repository }}/commit/${{ github.sha }}">Codecov Report</a></p>
+                <p><strong>Branch:</strong> $BRANCH_NAME</p>
+                <p><strong>Coverage Link:</strong> <a href="https://codecov.io/gh/${{ github.repository }}/branch/$BRANCH_NAME">Codecov Report</a></p>
               </div>
           EOL
           else
@@ -310,9 +317,16 @@ jobs:
           
       - name: Display Codecov link
         run: |
-          COMMIT_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            BRANCH_NAME="${GITHUB_HEAD_REF}"
+          fi
           REPO_NAME="${{ github.repository }}"
-          echo "Code Coverage Report: https://codecov.io/gh/${REPO_NAME}/commit/${COMMIT_SHA}"
+          echo "Code Coverage Report: https://codecov.io/gh/${REPO_NAME}/branch/${BRANCH_NAME}"
+          
+      - name: Check if analyze failed
+        if: steps.analyze.outputs.analyze_failed == 'true'
+        run: exit 1
 
   build:
     name: Build Debug APK
