@@ -32,7 +32,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
 
   double _scanProgress = 0.0;
   late AnimationController _scanLineController;
-  String _statusMessage = 'Move camera closer to the food';
+  String _statusMessage = 'Make sure your food is clearly visible';
   Color _progressColor = const Color(0xFFFF4949); // Using primaryPink
   int _currentMode = 0;
   // ignore: unused_field
@@ -42,6 +42,8 @@ class _ScanFoodPageState extends State<ScanFoodPage>
   double _imageY = 50.0;
   double _imageRotation = -0.1;
 
+  bool _isCameraReady = false;
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +51,20 @@ class _ScanFoodPageState extends State<ScanFoodPage>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat();
-    _startScanningProcess();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    try {
+      await widget.cameraController.initialize();
+      if (mounted) {
+        setState(() {
+          _isCameraReady = true;
+        });
+      }
+    } catch (e) {
+      print('Error initializing camera: $e');
+    }
   }
 
   @override
@@ -127,31 +142,11 @@ class _ScanFoodPageState extends State<ScanFoodPage>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Background Image with animation
+          // Camera Preview
           Center(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 500),
-              curve: Curves.easeInOut,
-              child: Transform.scale(
-                scale: _imageScale,
-                child: Transform.translate(
-                  offset: Offset(_imageX, _imageY),
-                  child: Transform.rotate(
-                    angle: _imageRotation,
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      child: ClipRect(
-                        child: Image.asset(
-                          'assets/images/fried_rice.jpg',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            child: _isCameraReady 
+              ? CameraPreview(widget.cameraController)
+              : const Center(child: CircularProgressIndicator()),
           ),
 
           // Scanning Animation
@@ -394,13 +389,20 @@ class _ScanFoodPageState extends State<ScanFoodPage>
 
   Widget _buildCameraButton() {
     return InkWell(
-      onTap: () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const NutritionPage(),
-          ),
-        );
+      onTap: () async {
+        try {
+          final image = await widget.cameraController.takePicture();
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NutritionPage(imagePath: image.path),
+              ),
+            );
+          }
+        } catch (e) {
+          print('Error taking picture: $e');
+        }
       },
       customBorder: const CircleBorder(),
       child: Container(

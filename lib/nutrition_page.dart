@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:io';
 
 class NutritionPage extends StatefulWidget {
-  const NutritionPage({super.key});
+  final String imagePath;
+  const NutritionPage({super.key, required this.imagePath});
 
   @override
   _NutritionPageState createState() => _NutritionPageState();
@@ -59,8 +61,8 @@ class _NutritionPageState extends State<NutritionPage> {
     background: Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset(
-          'assets/images/fried_rice.jpg',
+        Image.file(
+          File(widget.imagePath),
           fit: BoxFit.cover,
         ),
         Container(
