@@ -21,6 +21,21 @@ jobs:
           channel: 'stable'
           cache: true
       
+      - name: Create .env file
+        run: |
+          echo "FLAVOR=staging" > .env
+          echo "STAGING_FIREBASE_PROJECT_ID=${{ secrets.STAGING_FIREBASE_PROJECT_ID }}" >> .env
+          echo "STAGING_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.STAGING_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "STAGING_FIREBASE_STORAGE_BUCKET=${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_APP_ID=${{ secrets.STAGING_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_API_KEY=${{ secrets.STAGING_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_APP_ID=${{ secrets.STAGING_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_IOS_API_KEY=${{ secrets.STAGING_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_BUNDLE_ID=${{ secrets.STAGING_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+
       - name: Get dependencies
         run: flutter pub get
         
@@ -52,11 +67,26 @@ jobs:
           channel: 'stable'
           cache: true
           
+      - name: Create .env file
+        run: |
+          echo "FLAVOR=staging" > .env
+          echo "STAGING_FIREBASE_PROJECT_ID=${{ secrets.STAGING_FIREBASE_PROJECT_ID }}" >> .env
+          echo "STAGING_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.STAGING_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "STAGING_FIREBASE_STORAGE_BUCKET=${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_APP_ID=${{ secrets.STAGING_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_API_KEY=${{ secrets.STAGING_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_APP_ID=${{ secrets.STAGING_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_IOS_API_KEY=${{ secrets.STAGING_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_BUNDLE_ID=${{ secrets.STAGING_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+      
       - name: Get dependencies
         run: flutter pub get
         
       - name: Build Debug APK
-        run: flutter build apk --debug --dart-define=FLAVOR=staging
+        run: flutter build apk --debug
         
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4

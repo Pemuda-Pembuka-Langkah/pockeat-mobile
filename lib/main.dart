@@ -18,6 +18,7 @@ import 'package:pockeat/progress_page.dart';
 import 'package:pockeat/running_input_page.dart';
 import 'package:pockeat/weighting_input_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 // ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
 
@@ -25,7 +26,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Default ke dev untuk development yang aman
-  const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
+   // Load dotenv dulu
+  await dotenv.load(fileName: '.env');
+  
+  // Ambil flavor dari dotenv
+  final flavor = dotenv.env['FLAVOR'] ?? 'dev';
   
   await Firebase.initializeApp(
     options: flavor == 'production' 

@@ -11,13 +11,28 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.29.0'
           channel: 'stable'
           cache: true
+      
+      - name: Create .env file
+        run: |
+          echo "FLAVOR=production" > .env
+          echo "PRODUCTION_FIREBASE_PROJECT_ID=${{ secrets.PRODUCTION_FIREBASE_PROJECT_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PRODUCTION_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_STORAGE_BUCKET=${{ secrets.PRODUCTION_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "PRODUCTION_FIREBASE_ANDROID_APP_ID=${{ secrets.PRODUCTION_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_ANDROID_API_KEY=${{ secrets.PRODUCTION_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_APP_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_API_KEY=${{ secrets.PRODUCTION_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_BUNDLE_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
       
       - name: Get dependencies
         run: flutter pub get
@@ -47,9 +62,24 @@ jobs:
           channel: 'stable'
           cache: true
           
+      - name: Create .env file
+        run: |
+          echo "FLAVOR=production" > .env
+          echo "PRODUCTION_FIREBASE_PROJECT_ID=${{ secrets.PRODUCTION_FIREBASE_PROJECT_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PRODUCTION_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_STORAGE_BUCKET=${{ secrets.PRODUCTION_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "PRODUCTION_FIREBASE_ANDROID_APP_ID=${{ secrets.PRODUCTION_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_ANDROID_API_KEY=${{ secrets.PRODUCTION_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_APP_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_API_KEY=${{ secrets.PRODUCTION_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_BUNDLE_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
+          
       - name: Get dependencies
         run: flutter pub get
-
+      
       # Setup keystore
       - name: Setup keystore
         run: |
@@ -60,33 +90,33 @@ jobs:
           echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
         
       - name: Build Release APK
-        run: flutter build apk --release --dart-define=FLAVOR=production
-
+        run: flutter build apk --release
+      
       # Extract tag version
       - name: Get version from tag
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
         
-      # Generate changelog dari conventional commits
+      # Generate changelog untuk GREEN (feat) dan REFACTOR
       - name: Generate Changelog
         id: changelog
         uses: mikepenz/release-changelog-builder-action@v4
         with:
           configuration: |
             {
-              "commit_pattern": "^(feat|fix|docs|style|refactor|test|chore)(?:\\(([^)]+)\\))?: (.+)",
+              "commit_pattern": "^(GREEN|REFACTOR|feat|fix)(?:\\(([^)]+)\\))?: (.+)",
               "commit_groups": [
                 {
-                  "title": "## 🚀 Features",
-                  "pattern": "^feat(?:\\(([^)]+)\\))?:"
+                  "title": "## 🟢 GREEN",
+                  "pattern": "^GREEN(?:\\(([^)]+)\\))?:|^feat(?:\\(([^)]+)\\))?:"
+                },
+                {
+                  "title": "## 🔄 REFACTOR",
+                  "pattern": "^REFACTOR(?:\\(([^)]+)\\))?:"
                 },
                 {
                   "title": "## 🐛 Fixes",
                   "pattern": "^fix(?:\\(([^)]+)\\))?:"
-                },
-                {
-                  "title": "## ⚠️ BREAKING CHANGES",
-                  "pattern": "BREAKING CHANGE:"
                 }
               ]
             }

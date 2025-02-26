@@ -20,6 +20,21 @@ jobs:
           channel: 'stable'
           cache: true
       
+      - name: Create .env file
+        run: |
+          echo "FLAVOR=production" > .env
+          echo "PRODUCTION_FIREBASE_PROJECT_ID=${{ secrets.PRODUCTION_FIREBASE_PROJECT_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PRODUCTION_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_STORAGE_BUCKET=${{ secrets.PRODUCTION_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "PRODUCTION_FIREBASE_ANDROID_APP_ID=${{ secrets.PRODUCTION_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_ANDROID_API_KEY=${{ secrets.PRODUCTION_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_APP_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_API_KEY=${{ secrets.PRODUCTION_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_BUNDLE_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
+      
       - name: Get dependencies
         run: flutter pub get
         
@@ -50,6 +65,21 @@ jobs:
           flutter-version: '3.29.0'
           channel: 'stable'
           cache: true
+      
+      - name: Create .env file
+        run: |
+          echo "FLAVOR=production" > .env
+          echo "PRODUCTION_FIREBASE_PROJECT_ID=${{ secrets.PRODUCTION_FIREBASE_PROJECT_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PRODUCTION_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_STORAGE_BUCKET=${{ secrets.PRODUCTION_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "PRODUCTION_FIREBASE_ANDROID_APP_ID=${{ secrets.PRODUCTION_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_ANDROID_API_KEY=${{ secrets.PRODUCTION_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_APP_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_API_KEY=${{ secrets.PRODUCTION_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_IOS_BUNDLE_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
           
       - name: Get dependencies
         run: flutter pub get
@@ -64,7 +94,7 @@ jobs:
           echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
         
       - name: Build Production APK
-        run: flutter build apk --release --dart-define=FLAVOR=production
+        run: flutter build apk --release
         
       - name: Upload Production APK
         uses: actions/upload-artifact@v4
