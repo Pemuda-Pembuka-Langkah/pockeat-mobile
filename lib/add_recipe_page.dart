@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AddFoodLogPage extends StatefulWidget {
-  const AddFoodLogPage({super.key});
+  AddFoodLogPage({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -9,7 +9,7 @@ class AddFoodLogPage extends StatefulWidget {
 }
 
 class _AddFoodLogPageState extends State<AddFoodLogPage> with SingleTickerProviderStateMixin {
-  final Color primaryYellow = const Color(0xFFFFE893);
+  Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
 
