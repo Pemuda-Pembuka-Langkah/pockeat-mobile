@@ -17,7 +17,7 @@ void main() {
       ];
 
       // Default MET dan berat badan (sementara placeholder dulu)
-      double MET = 3.15;
+      double met = 3.15;
       double beratBadan = 75;
 
       // Hitung total durasi dari seluruh set
@@ -32,7 +32,7 @@ void main() {
       double averageDuration = totalDurasi / totalSets;
 
       // Rumus: MET × beratBadan × rata-rata durasi per set
-      double estimatedCalories = MET * beratBadan * averageDuration;
+      double estimatedCalories = met * beratBadan * averageDuration;
 
       // Ekspektasi: 3.15 * 75 * 0.5 = 118.125 kcal
       expect(estimatedCalories, closeTo(118.125, 0.001));
@@ -53,7 +53,7 @@ void main() {
         ),
       ];
 
-      double MET = 3.15;
+      double met = 3.15;
       double beratBadan = 75;
 
       expect(
@@ -68,7 +68,7 @@ void main() {
           });
           int totalSets = exercises.fold(0, (sum, exercise) => sum + exercise.sets.length);
           double averageDuration = totalDurasi / totalSets;
-          double estimatedCalories = MET * beratBadan * averageDuration;
+          double estimatedCalories = met * beratBadan * averageDuration;
           return estimatedCalories;
         },
         throwsA(isA<ArgumentError>()),
@@ -85,7 +85,7 @@ void main() {
         ),
       ];
 
-      double MET = 3.15;
+      double met = 3.15;
       double beratBadan = 75;
 
       double totalDurasi = exercises.fold(0.0, (sum, exercise) {
@@ -95,7 +95,7 @@ void main() {
 
       // Untuk kasus tidak ada set, hindari pembagian dengan 0
       double averageDuration = totalSets > 0 ? totalDurasi / totalSets : 0;
-      double estimatedCalories = MET * beratBadan * averageDuration;
+      double estimatedCalories = met * beratBadan * averageDuration;
 
       expect(estimatedCalories, equals(0));
     });
