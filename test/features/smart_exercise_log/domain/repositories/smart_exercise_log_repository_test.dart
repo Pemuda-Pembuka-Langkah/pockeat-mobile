@@ -6,7 +6,7 @@ import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_resul
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 @GenerateMocks([SmartExerciseLogRepository])
 import 'smart_exercise_log_repository_test.mocks.dart';
-//
+// komen dikit
 void main() {
   late MockSmartExerciseLogRepository repository;
 
