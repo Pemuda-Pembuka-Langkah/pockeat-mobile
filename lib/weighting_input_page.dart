@@ -28,6 +28,9 @@ class ExerciseSet {
   });
 }
 
+const double defaultMET = 3.15;
+const double defaultWeight = 75;
+
 // Pre-defined exercises stay the same
 final Map<String, List<String>> exercisesByCategory = {
   'Upper Body': [
@@ -103,6 +106,13 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   double calculateTotalVolume() {
     return exercises.fold(0.0, (sum, exercise) => sum + calculateVolume(exercise));
   }
+
+  double calculateEstimatedCalories() {
+    final summary = getWorkoutSummary();
+    double durationInHours = summary['duration'] / 60;
+    return defaultMET * defaultWeight * durationInHours;
+  }
+
 
   Map<String, dynamic> getWorkoutSummary() {
     int totalSets = 0;
@@ -357,7 +367,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
               ),
               _buildSummaryItem(
                 'Calories',
-                'Est. ${(((summary['duration'].toInt()) / 60 * 75 * 3.15)).toStringAsFixed(2)} kcal',
+                'Est. ${calculateEstimatedCalories().toStringAsFixed(2)} kcal',
                 Icons.local_fire_department,
               ),
             ],
