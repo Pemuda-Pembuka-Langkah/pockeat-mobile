@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomePage(),
         '/scan': (context) => const ScanFoodPage(),
-        '/add-food-manual': (context) => const AddFoodLogPage(),
+        '/add-food-manual': (context) =>  AddFoodLogPage(),
         '/analytic': (context) => const ProgressPage(),
         '/progress': (context) => const ProgressTrackingPage(),
         '/add-exercise': (context) => const ExerciseInputPage(),
