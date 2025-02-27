@@ -3,16 +3,32 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_result.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 
-
-// Mock Firebase dependencies
-@GenerateMocks([
-  FirebaseFirestore, 
-  CollectionReference, 
-  DocumentReference,
-  DocumentSnapshot,
-  QuerySnapshot,
-  Query
+// Mock Firebase dependencies with explicit generic types
+@GenerateMocks([], customMocks: [
+  MockSpec<FirebaseFirestore>(
+    as: #MockFirebaseFirestore,
+  ),
+  MockSpec<CollectionReference<Map<String, dynamic>>>(
+    as: #MockCollectionReference,
+  ),
+  MockSpec<DocumentReference<Map<String, dynamic>>>(
+    as: #MockDocumentReference,
+  ),
+  MockSpec<DocumentSnapshot<Map<String, dynamic>>>(
+    as: #MockDocumentSnapshot,
+  ),
+  MockSpec<QuerySnapshot<Map<String, dynamic>>>(
+    as: #MockQuerySnapshot,
+  ),
+  MockSpec<Query<Map<String, dynamic>>>(
+    as: #MockQuery,
+  ),
+  MockSpec<QueryDocumentSnapshot<Map<String, dynamic>>>(
+    as: #MockQueryDocumentSnapshot,
+  )
 ])
 import 'smart_exercise_log_repository_test.mocks.dart';
 
@@ -25,7 +41,7 @@ void main() {
   late MockQuery mockQuery;
   
   // The actual repository implementation to test
-  late SmartExerciseLogRepositoryImpl repository;
+  late SmartExerciseLogRepository repository;
 
   setUp(() {
     // Setup mocks
@@ -151,7 +167,7 @@ void main() {
   group('getAllAnalysisResults', () {
     test('should return empty list when no results saved', () async {
       // Arrange
-      final List<MockDocumentSnapshot> emptyDocs = [];
+      final List<MockQueryDocumentSnapshot> emptyDocs = [];
       
       // Setup mock query behavior
       when(mockCollection.orderBy('timestamp', descending: true)).thenReturn(mockQuery);
@@ -170,8 +186,8 @@ void main() {
 
     test('should return all saved results', () async {
       // Arrange
-      final mockDoc1 = MockDocumentSnapshot();
-      final mockDoc2 = MockDocumentSnapshot();
+      final mockQueryDoc1 = MockQueryDocumentSnapshot();
+      final mockQueryDoc2 = MockQueryDocumentSnapshot();
       
       final mockData1 = {
         'exerciseType': 'Running',
@@ -192,12 +208,12 @@ void main() {
       };
       
       // Setup mock docs
-      when(mockDoc1.data()).thenReturn(mockData1);
-      when(mockDoc1.id).thenReturn('id-1');
-      when(mockDoc2.data()).thenReturn(mockData2);
-      when(mockDoc2.id).thenReturn('id-2');
+      when(mockQueryDoc1.data()).thenReturn(mockData1);
+      when(mockQueryDoc1.id).thenReturn('id-1');
+      when(mockQueryDoc2.data()).thenReturn(mockData2);
+      when(mockQueryDoc2.id).thenReturn('id-2');
       
-      final List<MockDocumentSnapshot> mockDocs = [mockDoc1, mockDoc2];
+      final List<MockQueryDocumentSnapshot> mockDocs = [mockQueryDoc1, mockQueryDoc2];
       
       // Setup mock query behavior
       when(mockCollection.orderBy('timestamp', descending: true)).thenReturn(mockQuery);
