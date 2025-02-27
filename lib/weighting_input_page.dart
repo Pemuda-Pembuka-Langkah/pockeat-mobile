@@ -113,28 +113,36 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     return defaultMET * defaultWeight * durationInHours;
   }
 
+  // Helper methods
+  int _calculateTotalSets() {
+    return exercises.fold(0, (sum, exercise) => sum + exercise.sets.length);
+  }
+
+  int _calculateTotalReps() {
+    return exercises.fold(0, (sum, exercise) =>
+      sum + exercise.sets.fold(0, (setSum, set) => setSum + set.reps)
+    );
+  }
+
+  double _calculateTotalVolume() {
+    return exercises.fold(0.0, (sum, exercise) =>
+      sum + exercise.sets.fold(0.0, (setSum, set) => setSum + (set.weight * set.reps))
+    );
+  }
+
+  double _calculateTotalDuration() {
+    return exercises.fold(0.0, (sum, exercise) =>
+      sum + exercise.sets.fold(0.0, (setSum, set) => setSum + set.duration)
+    );
+  }
 
   Map<String, dynamic> getWorkoutSummary() {
-    int totalSets = 0;
-    int totalReps = 0;
-    double totalVolume = 0;
-    double totalDuration = 0;
-    
-    for (var exercise in exercises) {
-      totalSets += exercise.sets.length;
-      for (var set in exercise.sets) {
-        totalReps += set.reps;
-        totalVolume += (set.weight * set.reps);
-        totalDuration += set.duration;
-      }
-    }
-
     return {
       'exercises': exercises.length,
-      'sets': totalSets,
-      'reps': totalReps,
-      'volume': totalVolume,
-      'duration': totalDuration
+      'sets': _calculateTotalSets(),
+      'reps': _calculateTotalReps(),
+      'volume': _calculateTotalVolume(),
+      'duration': _calculateTotalDuration(),
     };
   }
 
