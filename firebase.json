@@ -3,20 +3,20 @@
     "platforms": {
       "android": {
         "default": {
-          "projectId": "pockeat-staging-f099c",
-          "appId": "1:119378561262:android:9d579c55db75a29f324bff",
+          "projectId": "staging-pockeat",
+          "appId": "1:350090383584:android:f2828874805d58473f0085",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "pockeat-staging-f099c",
+          "projectId": "staging-pockeat",
           "configurations": {
-            "android": "1:119378561262:android:9d579c55db75a29f324bff",
-            "ios": "1:119378561262:ios:843a9669cada44c1324bff",
-            "macos": "1:119378561262:ios:64816aecd2c59fe1324bff",
-            "web": "1:119378561262:web:8686d4c165ebeb2d324bff",
-            "windows": "1:119378561262:web:26ba0ad31c48e830324bff"
+            "android": "1:350090383584:android:f2828874805d58473f0085",
+            "ios": "1:350090383584:ios:63bae819259c04763f0085",
+            "macos": "1:350090383584:ios:4cb7cdfacda9f5203f0085",
+            "web": "1:350090383584:web:7c334a163a4379bc3f0085",
+            "windows": "1:350090383584:web:e4631bbbcda1604c3f0085"
           }
         }
       }
