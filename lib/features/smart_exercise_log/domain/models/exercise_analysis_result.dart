@@ -6,6 +6,7 @@ class ExerciseAnalysisResult {
   final String duration;
   final String intensity;
   final int estimatedCalories;
+  final double metValue; // Field MET baru
   final String? summary;
   final DateTime timestamp;
   final String originalInput;
@@ -17,6 +18,7 @@ class ExerciseAnalysisResult {
     required this.duration,
     required this.intensity,
     required this.estimatedCalories,
+    this.metValue = 0.0, // Default value untuk MET
     this.summary,
     required this.timestamp,
     required this.originalInput,
@@ -25,24 +27,6 @@ class ExerciseAnalysisResult {
 
   bool get isComplete => missingInfo == null || missingInfo!.isEmpty;
 
-  // Factory dari Map (untuk parsing response dari API)
-  factory ExerciseAnalysisResult.fromMap(
-      Map<String, dynamic> map, String originalInput,
-      {String? id}) {
-    return ExerciseAnalysisResult(
-      id: id,
-      exerciseType: map['type'] ?? 'Unknown',
-      duration: map['duration'] ?? 'Tidak ditentukan',
-      intensity: map['intensity'] ?? 'Tidak ditentukan',
-      estimatedCalories: map['estimatedCalories'] ?? 0,
-      summary: map['summary'],
-      timestamp: DateTime.now(),
-      originalInput: originalInput,
-      missingInfo: map['missingInfo'] != null
-          ? List<String>.from(map['missingInfo'])
-          : null,
-    );
-  }
 
   // Factory dari Map (untuk parsing response dari database)
   factory ExerciseAnalysisResult.fromDbMap(
@@ -53,6 +37,7 @@ class ExerciseAnalysisResult {
       duration: map['duration'] ?? 'Tidak ditentukan',
       intensity: map['intensity'] ?? 'Tidak ditentukan',
       estimatedCalories: map['estimatedCalories'] ?? 0,
+      metValue: (map['metValue'] ?? 0.0).toDouble(), // Parsing MET value dari database
       summary: map['summary'],
       timestamp: map['timestamp'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['timestamp'])
@@ -71,6 +56,7 @@ class ExerciseAnalysisResult {
       'duration': duration,
       'intensity': intensity,
       'estimatedCalories': estimatedCalories,
+      'metValue': metValue, // Menyimpan MET value ke database
       'summary': summary,
       'timestamp': timestamp.millisecondsSinceEpoch,
       'originalInput': originalInput,
@@ -86,6 +72,7 @@ class ExerciseAnalysisResult {
     String? duration,
     String? intensity,
     int? estimatedCalories,
+    double? metValue, // Support untuk update MET value
     String? summary,
     DateTime? timestamp,
     String? originalInput,
@@ -97,6 +84,7 @@ class ExerciseAnalysisResult {
       duration: duration ?? this.duration,
       intensity: intensity ?? this.intensity,
       estimatedCalories: estimatedCalories ?? this.estimatedCalories,
+      metValue: metValue ?? this.metValue, // Mempertahankan MET value atau menggantinya
       summary: summary ?? this.summary,
       timestamp: timestamp ?? this.timestamp,
       originalInput: originalInput ?? this.originalInput,
