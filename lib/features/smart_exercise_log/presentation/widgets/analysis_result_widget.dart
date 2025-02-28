@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_result.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 class AnalysisResultWidget extends StatelessWidget {
-  final AnalysisResult analysisResult;
+  final ExerciseAnalysisResult analysisResult;
   final VoidCallback onRetry;
   final VoidCallback onSave;
 
@@ -15,8 +15,8 @@ class AnalysisResultWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasMissingInfo = analysisResult.missingInfo != null && 
-                         analysisResult.missingInfo!.isNotEmpty;
+    final hasMissingInfo = analysisResult.missingInfo != null &&
+        analysisResult.missingInfo!.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -43,10 +43,10 @@ class AnalysisResultWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Display missing information warning if needed
           if (hasMissingInfo) _buildMissingInfoSection(),
-          
+
           // Display summary if available
           if (analysisResult.summary != null) ...[
             Text(
@@ -57,18 +57,19 @@ class AnalysisResultWidget extends StatelessWidget {
               ),
             ),
           ],
-          
+
           // Always add the divider regardless of summary existence
           const Divider(height: 24, color: Colors.black12),
-          
+
           // Display analysis data
           _buildStatRow('Jenis Olahraga', analysisResult.exerciseType),
           _buildStatRow('Durasi', analysisResult.duration),
           _buildStatRow('Intensitas', analysisResult.intensity),
-          _buildStatRow('Estimasi Kalori', '${analysisResult.estimatedCalories} kkal'),
-          
+          _buildStatRow(
+              'Estimasi Kalori', '${analysisResult.estimatedCalories} kkal'),
+
           const SizedBox(height: 20),
-          
+
           // Action buttons
           Row(
             children: [
@@ -180,15 +181,15 @@ class AnalysisResultWidget extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           ...missingInfo.map((item) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text(
-              '• ${missingLabels[item] ?? item}',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          )),
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text(
+                  '• ${missingLabels[item] ?? item}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              )),
         ],
       ),
     );

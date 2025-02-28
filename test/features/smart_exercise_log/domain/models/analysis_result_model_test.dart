@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_result.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 void main() {
   group('AnalysisResult', () {
     test('should create a valid model from constructor', () {
       // Arrange
       final timestamp = DateTime.now();
-      
+
       // Act
-      final model = AnalysisResult(
+      final model = ExerciseAnalysisResult(
         exerciseType: 'HIIT Workout',
         duration: '30 menit',
         intensity: 'Tinggi',
@@ -17,7 +17,7 @@ void main() {
         timestamp: timestamp,
         originalInput: 'Lari HIIT 30 menit',
       );
-      
+
       // Assert
       expect(model.id, isNotNull);
       expect(model.id.length, greaterThan(0));
@@ -34,9 +34,9 @@ void main() {
     test('should create model with provided ID', () {
       // Arrange
       final providedId = 'test-id-123';
-      
+
       // Act
-      final model = AnalysisResult(
+      final model = ExerciseAnalysisResult(
         id: providedId,
         exerciseType: 'HIIT Workout',
         duration: '30 menit',
@@ -45,7 +45,7 @@ void main() {
         timestamp: DateTime.now(),
         originalInput: 'Lari HIIT 30 menit',
       );
-      
+
       // Assert
       expect(model.id, providedId);
     });
@@ -60,10 +60,10 @@ void main() {
         'summary': 'Latihan yoga yang menenangkan',
       };
       final originalInput = 'Yoga 45 menit santai';
-      
+
       // Act
-      final model = AnalysisResult.fromMap(map, originalInput);
-      
+      final model = ExerciseAnalysisResult.fromMap(map, originalInput);
+
       // Assert
       expect(model.id, isNotNull);
       expect(model.exerciseType, 'Yoga Session');
@@ -85,10 +85,11 @@ void main() {
       };
       final originalInput = 'Yoga 45 menit santai';
       final providedId = 'custom-id-456';
-      
+
       // Act
-      final model = AnalysisResult.fromMap(map, originalInput, id: providedId);
-      
+      final model =
+          ExerciseAnalysisResult.fromMap(map, originalInput, id: providedId);
+
       // Assert
       expect(model.id, providedId);
     });
@@ -102,10 +103,10 @@ void main() {
         'estimatedCalories': 200,
       };
       final originalInput = 'Lari dengan intensitas sedang';
-      
+
       // Act
-      final model = AnalysisResult.fromMap(map, originalInput);
-      
+      final model = ExerciseAnalysisResult.fromMap(map, originalInput);
+
       // Assert
       expect(model.exerciseType, 'Running');
       expect(model.duration, 'Tidak ditentukan');
@@ -129,10 +130,10 @@ void main() {
         'originalInput': 'Berenang 1 jam santai',
       };
       final id = 'db-id-789';
-      
+
       // Act
-      final model = AnalysisResult.fromDbMap(map, id);
-      
+      final model = ExerciseAnalysisResult.fromDbMap(map, id);
+
       // Assert
       expect(model.id, id);
       expect(model.exerciseType, 'Swimming');
@@ -147,7 +148,7 @@ void main() {
     test('should convert to map correctly', () {
       // Arrange
       final timestamp = DateTime.now();
-      final model = AnalysisResult(
+      final model = ExerciseAnalysisResult(
         id: 'test-id-123',
         exerciseType: 'Swimming',
         duration: '60 menit',
@@ -157,10 +158,10 @@ void main() {
         timestamp: timestamp,
         originalInput: 'Berenang 1 jam santai',
       );
-      
+
       // Act
       final map = model.toMap();
-      
+
       // Assert
       expect(map['exerciseType'], 'Swimming');
       expect(map['duration'], '60 menit');
@@ -176,7 +177,7 @@ void main() {
 
     test('isComplete should be false when missingInfo is not empty', () {
       // Arrange
-      final model = AnalysisResult(
+      final model = ExerciseAnalysisResult(
         exerciseType: 'Unknown Workout',
         duration: 'Tidak ditentukan',
         intensity: 'Tidak ditentukan',
@@ -185,14 +186,14 @@ void main() {
         originalInput: 'Olahraga tadi pagi',
         missingInfo: ['type', 'duration', 'intensity'],
       );
-      
+
       // Assert
       expect(model.isComplete, false);
     });
 
     test('copyWith should create a new instance with updated values', () {
       // Arrange
-      final original = AnalysisResult(
+      final original = ExerciseAnalysisResult(
         id: 'original-id',
         exerciseType: 'Running',
         duration: '30 menit',
@@ -201,14 +202,14 @@ void main() {
         timestamp: DateTime.now(),
         originalInput: 'Lari 30 menit',
       );
-      
+
       // Act
       final updated = original.copyWith(
         exerciseType: 'Sprint',
         intensity: 'Tinggi',
         estimatedCalories: 400,
       );
-      
+
       // Assert
       expect(updated.id, 'original-id'); // Unchanged
       expect(updated.exerciseType, 'Sprint'); // Changed

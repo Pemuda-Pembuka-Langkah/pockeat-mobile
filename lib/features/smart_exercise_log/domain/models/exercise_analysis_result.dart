@@ -1,6 +1,6 @@
 import 'package:uuid/uuid.dart';
 
-class AnalysisResult {
+class ExerciseAnalysisResult {
   final String id;
   final String exerciseType;
   final String duration;
@@ -11,7 +11,7 @@ class AnalysisResult {
   final String originalInput;
   final List<String>? missingInfo;
 
-  AnalysisResult({
+  ExerciseAnalysisResult({
     String? id,
     required this.exerciseType,
     required this.duration,
@@ -26,8 +26,10 @@ class AnalysisResult {
   bool get isComplete => missingInfo == null || missingInfo!.isEmpty;
 
   // Factory dari Map (untuk parsing response dari API)
-  factory AnalysisResult.fromMap(Map<String, dynamic> map, String originalInput, {String? id}) {
-    return AnalysisResult(
+  factory ExerciseAnalysisResult.fromMap(
+      Map<String, dynamic> map, String originalInput,
+      {String? id}) {
+    return ExerciseAnalysisResult(
       id: id,
       exerciseType: map['type'] ?? 'Unknown',
       duration: map['duration'] ?? 'Tidak ditentukan',
@@ -36,15 +38,16 @@ class AnalysisResult {
       summary: map['summary'],
       timestamp: DateTime.now(),
       originalInput: originalInput,
-      missingInfo: map['missingInfo'] != null 
-          ? List<String>.from(map['missingInfo']) 
+      missingInfo: map['missingInfo'] != null
+          ? List<String>.from(map['missingInfo'])
           : null,
     );
   }
 
   // Factory dari Map (untuk parsing response dari database)
-  factory AnalysisResult.fromDbMap(Map<String, dynamic> map, String id) {
-    return AnalysisResult(
+  factory ExerciseAnalysisResult.fromDbMap(
+      Map<String, dynamic> map, String id) {
+    return ExerciseAnalysisResult(
       id: id,
       exerciseType: map['exerciseType'] ?? 'Unknown',
       duration: map['duration'] ?? 'Tidak ditentukan',
@@ -55,8 +58,8 @@ class AnalysisResult {
           ? DateTime.fromMillisecondsSinceEpoch(map['timestamp'])
           : DateTime.now(),
       originalInput: map['originalInput'] ?? '',
-      missingInfo: map['missingInfo'] != null 
-          ? List<String>.from(map['missingInfo']) 
+      missingInfo: map['missingInfo'] != null
+          ? List<String>.from(map['missingInfo'])
           : null,
     );
   }
@@ -77,7 +80,7 @@ class AnalysisResult {
   }
 
   // Copy with method untuk memudahkan update
-  AnalysisResult copyWith({
+  ExerciseAnalysisResult copyWith({
     String? id,
     String? exerciseType,
     String? duration,
@@ -88,7 +91,7 @@ class AnalysisResult {
     String? originalInput,
     List<String>? missingInfo,
   }) {
-    return AnalysisResult(
+    return ExerciseAnalysisResult(
       id: id ?? this.id,
       exerciseType: exerciseType ?? this.exerciseType,
       duration: duration ?? this.duration,
