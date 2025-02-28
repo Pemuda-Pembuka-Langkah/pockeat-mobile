@@ -1,7 +1,7 @@
 // lib/pockeat/features/ai_api_scan/services/gemini_service.dart
 import 'dart:io';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/ai_api_scan/models/exercise_analysis.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 abstract class GeminiService {
   Future<FoodAnalysisResult> analyzeFoodByText(String description);

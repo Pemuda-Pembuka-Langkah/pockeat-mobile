@@ -11,8 +11,13 @@ class FoodAnalysisResult {
   });
   
   factory FoodAnalysisResult.fromJson(Map<String, dynamic> json) {
-    // Not implemented yet - will fail tests
-    throw UnimplementedError();
+    return FoodAnalysisResult(
+      foodName: json['food_name'] ?? '',
+      ingredients: (json['ingredients'] as List<dynamic>?)
+          ?.map((item) => Ingredient.fromJson(item))
+          .toList() ?? [],
+      nutritionInfo: NutritionInfo.fromJson(json['nutrition_info'] ?? {}),
+    );
   }
 }
 
@@ -28,8 +33,19 @@ class Ingredient {
   });
   
   factory Ingredient.fromJson(Map<String, dynamic> json) {
-    // Not implemented yet - will fail tests
-    throw UnimplementedError();
+    return Ingredient(
+      name: json['name'] ?? '',
+      percentage: _parseDouble(json['percentage']),
+      allergen: json['allergen'] ?? false,
+    );
+  }
+  
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is int) return value.toDouble();
+    if (value is double) return value;
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 }
 
@@ -49,12 +65,26 @@ class NutritionInfo {
     required this.fat,
     required this.sodium,
     required this.fiber,
-    required this.sugar ,
+    required this.sugar,
   });
   
   factory NutritionInfo.fromJson(Map<String, dynamic> json) {
-    // Not implemented yet - will fail tests
-    throw UnimplementedError();
+    return NutritionInfo(
+      calories: _parseDouble(json['calories']),
+      protein: _parseDouble(json['protein']),
+      carbs: _parseDouble(json['carbs']),
+      fat: _parseDouble(json['fat']),
+      sodium: _parseDouble(json['sodium']),
+      fiber: _parseDouble(json['fiber']),
+      sugar: _parseDouble(json['sugar']),
+    );
+  }
+  
+  static double _parseDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is int) return value.toDouble();
+    if (value is double) return value;
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 }
-

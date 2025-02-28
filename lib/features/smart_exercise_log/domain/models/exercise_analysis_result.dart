@@ -91,4 +91,11 @@ class ExerciseAnalysisResult {
       missingInfo: missingInfo ?? this.missingInfo,
     );
   }
+
+  static Future<ExerciseAnalysisResult> fromJson(jsonDecode) async {
+    if (jsonDecode == null) {
+      throw ArgumentError('jsonDecode cannot be null');
+    }
+    return ExerciseAnalysisResult.fromDbMap(jsonDecode, const Uuid().v4());
+  }
 }
