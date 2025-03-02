@@ -1,4 +1,3 @@
-// lib/pockeat/features/ai_api_scan/services/gemini_service_impl.dart
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -6,20 +5,21 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
+import 'package:pockeat/features/ai_api_scan/services/generative_model_wrapper.dart';
 
 class GeminiServiceImpl implements GeminiService {
-  final GenerativeModel model;
   final String apiKey;
+  final GenerativeModelWrapper _modelWrapper;
   
   GeminiServiceImpl({
     required this.apiKey,
-    GenerativeModel? model
-  }) : model = model ?? GenerativeModel(
+    GenerativeModelWrapper? modelWrapper
+  }) : _modelWrapper = modelWrapper ?? RealGenerativeModelWrapper(GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,
-      );
+      ));
 
-  factory GeminiServiceImpl.fromEnv() {
+    factory GeminiServiceImpl.fromEnv() {
     final apiKey = dotenv.env['GOOGLE_GEMINI_API_KEY'];
     if (apiKey == null || apiKey.isEmpty) {
       throw Exception('GOOGLE_GEMINI_API_KEY not found in environment variables');
@@ -78,23 +78,13 @@ class GeminiServiceImpl implements GeminiService {
       }
       ''';
       
-     //print("Sending prompt to Gemini for food description: $description");
-      final response = await model.generateContent([Content.text(prompt)]);
-      
+      final response = await _modelWrapper.generateContent([Content.text(prompt)]);
       if (response.text == null) {
-        ////print("ERROR: No response text generated from Gemini API");
         throw GeminiServiceException('No response text generated');
       }
       
-      ////print the raw response text for debugging
-      ////print("===== RAW GEMINI RESPONSE =====");
-      ////print(response.text);
-      ////print("===============================");
-      
       return _parseFoodAnalysisResponse(response.text!);
     } catch (e) {
-      ////print("ERROR during Gemini API call: $e");
-      ////print("Stack trace: ${StackTrace.current}");
       throw GeminiServiceException("Error analyzing food: $e");
     }
   }
@@ -150,8 +140,7 @@ class GeminiServiceImpl implements GeminiService {
       }
       ''';
       
-     //print("Sending image prompt to Gemini...");
-      final response = await model.generateContent([
+      final response = await _modelWrapper.generateContent([
         Content.multi([
           TextPart(prompt),
           DataPart('image/jpeg', imageBytes)
@@ -159,19 +148,11 @@ class GeminiServiceImpl implements GeminiService {
       ]);
       
       if (response.text == null) {
-       //print("ERROR: No response text generated from Gemini API for image");
         throw GeminiServiceException('No response text generated');
       }
       
-      ////print the raw response text for debugging
-     //print("===== RAW GEMINI IMAGE RESPONSE =====");
-     //print(response.text);
-     //print("====================================");
-      
       return _parseFoodAnalysisResponse(response.text!);
     } catch (e) {
-     //print("ERROR during Gemini image API call: $e");
-     //print("Stack trace: ${StackTrace.current}");
       throw GeminiServiceException("Error analyzing food image: $e");
     }
   }
@@ -227,8 +208,7 @@ class GeminiServiceImpl implements GeminiService {
       }
       ''';
       
-     //print("Sending nutrition label analysis prompt to Gemini...");
-      final response = await model.generateContent([
+      final response = await _modelWrapper.generateContent([
         Content.multi([
           TextPart(prompt),
           DataPart('image/jpeg', imageBytes)
@@ -236,19 +216,11 @@ class GeminiServiceImpl implements GeminiService {
       ]);
       
       if (response.text == null) {
-       //print("ERROR: No response text generated from Gemini API for nutrition label");
         throw GeminiServiceException('No response text generated');
       }
       
-      ////print the raw response text for debugging
-     //print("===== RAW GEMINI NUTRITION LABEL RESPONSE =====");
-     //print(response.text);
-     //print("=============================================");
-      
       return _parseFoodAnalysisResponse(response.text!);
     } catch (e) {
-     //print("ERROR during Gemini nutrition label API call: $e");
-     //print("Stack trace: ${StackTrace.current}");
       throw GeminiServiceException("Error analyzing nutrition label: $e");
     }
   }
@@ -289,69 +261,47 @@ class GeminiServiceImpl implements GeminiService {
       }
       ''';
       
-     //print("Sending exercise analysis prompt to Gemini: $description");
-      final response = await model.generateContent([Content.text(prompt)]);
-      
+      final response = await _modelWrapper.generateContent([Content.text(prompt)]);
       if (response.text == null) {
-       //print("ERROR: No response text generated from Gemini API for exercise");
         throw GeminiServiceException('No response text generated');
       }
       
-      ////print the raw response text for debugging
-     //print("===== RAW GEMINI EXERCISE RESPONSE =====");
-     //print(response.text);
-     //print("=======================================");
-      
       return _parseExerciseResponse(response.text!, description);
     } catch (e) {
-     //print("ERROR during Gemini exercise API call: $e");
-     //print("Stack trace: ${StackTrace.current}");
       throw GeminiServiceException("Error analyzing exercise: $e");
     }
   }
   
   FoodAnalysisResult _parseFoodAnalysisResponse(String responseText) {
     try {
-     //print("Attempting to extract JSON from response text...");
       // Extract JSON from response text
       final jsonString = _extractJson(responseText);
-     //print("Extracted JSON string: $jsonString");
-      
-     //print("Attempting to parse JSON data...");
       final jsonData = jsonDecode(jsonString);
-     //print("JSON successfully parsed!");
       
       // Check for error field
       if (jsonData.containsKey('error') && jsonData['error'] is String) {
-       //print("Error field found in response: ${jsonData['error']}");
-        // This is an error response in the expected format
+        // Error message in string format
         throw GeminiServiceException(jsonData['error']);
+      } else if (jsonData.containsKey('error') && jsonData['error'] is Map) {
+        // Error in object format
+        throw GeminiServiceException(jsonData['error']['message'] ?? 'Unknown error');
       }
       
       // Parse food analysis result
-     //print("Creating FoodAnalysisResult from JSON data...");
       return FoodAnalysisResult.fromJson(jsonData);
     } catch (e) {
-     //print("ERROR parsing food analysis response: $e");
-     //print("Stack trace: ${StackTrace.current}");
       throw GeminiServiceException("Failed to parse food analysis response: $e");
     }
   }
   
   ExerciseAnalysisResult _parseExerciseResponse(String responseText, String originalInput) {
     try {
-     //print("Attempting to extract JSON from exercise response text...");
       // Extract JSON from response text
       final jsonString = _extractJson(responseText);
-     //print("Extracted exercise JSON string: $jsonString");
-      
-     //print("Attempting to parse exercise JSON data...");
       final jsonData = jsonDecode(jsonString);
-     //print("Exercise JSON successfully parsed!");
       
       // Check for error 
       if (jsonData.containsKey('error')) {
-       //print("Error field found in exercise response: ${jsonData['error']}");
         // We have an error but we'll still create a result with default values
         return ExerciseAnalysisResult(
           exerciseType: 'Unknown',
@@ -374,12 +324,11 @@ class GeminiServiceImpl implements GeminiService {
       final metValue = (jsonData['met_value'] ?? 0.0).toDouble();
       
       // Create a summary
-      final summary = 'You performed $exerciseType for ${durationMinutes} minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories.';
+      final summary = 'You performed $exerciseType for $durationMinutes minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories.';
       
       // Determine duration string format
       final duration = '$durationMinutes minutes';
       
-     //print("Creating ExerciseAnalysisResult from JSON data...");
       // Create the exercise analysis result in the app's model format
       return ExerciseAnalysisResult(
         exerciseType: exerciseType,
@@ -392,8 +341,6 @@ class GeminiServiceImpl implements GeminiService {
         originalInput: originalInput,
       );
     } catch (e) {
-     //print("ERROR parsing exercise analysis response: $e");
-     //print("Stack trace: ${StackTrace.current}");
       throw GeminiServiceException("Failed to parse exercise analysis response: $e");
     }
   }
@@ -401,44 +348,21 @@ class GeminiServiceImpl implements GeminiService {
   String _extractJson(String text) {
     try {
       // Try parsing the text directly first
-     //print("Attempting to parse text directly as JSON...");
       jsonDecode(text);
-     //print("Text is valid JSON!");
       return text;
     } catch (_) {
-     //print("Direct JSON parsing failed, attempting to extract JSON from text...");
       // If direct parsing fails, try to extract JSON from the text
       final startIndex = text.indexOf('{');
       final endIndex = text.lastIndexOf('}');
       
-     //print("Found JSON markers - Start: $startIndex, End: $endIndex");
-      
       if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex) {
         final jsonString = text.substring(startIndex, endIndex + 1);
         // Validate that it's parseable
-        try {
-         //print("Validating extracted JSON string...");
-          jsonDecode(jsonString);
-         //print("Extracted JSON is valid!");
-          return jsonString;
-        } catch (e) {
-         //print("Extracted text is not valid JSON: $e");
-         //print("Invalid JSON string: $jsonString");
-          throw GeminiServiceException('Extracted text is not valid JSON: $e');
-        }
+        jsonDecode(jsonString);
+        return jsonString;
       }
       
-     //print("No valid JSON structure found in response");
       throw GeminiServiceException('No valid JSON found in response');
     }
   }
-}
-
-class GeminiServiceException implements Exception {
-  final String message;
-  
-  GeminiServiceException(this.message);
-  
-  @override
-  String toString() => 'GeminiServiceException: $message';
 }
