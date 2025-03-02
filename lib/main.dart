@@ -5,12 +5,14 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+// Import the food analysis page
+import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Default ke dev untuk development yang aman
-   // Load dotenv dulu
+  // Load dotenv dulu
   await dotenv.load(fileName: '.env');
   
   // Ambil flavor dari dotenv
@@ -32,7 +34,6 @@ void main() async {
 
   runApp(
     const MyApp(),
-
   );
 }
 
@@ -63,8 +64,7 @@ class MyApp extends StatelessWidget {
         // Tambah ini
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            foregroundColor:
-                Colors.white, // Ini akan membuat teks button jadi putih
+            foregroundColor: Colors.white, // Ini akan membuat teks button jadi putih
             backgroundColor: Colors.blue[400],
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -73,10 +73,43 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/',
+      initialRoute: '/food-analysis', // Changed to start with the food analysis page
       routes: {
-
+        '/': (context) => const HomePage(), // You'll need to create this
+        '/food-analysis': (context) => const FoodAnalysisPage(),
       },
+    );
+  }
+}
+
+// Simple home page - replace this with your actual home page
+class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('CalculATE'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Welcome to CalculATE!',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/food-analysis');
+              },
+              child: const Text('Food Analysis'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
