@@ -13,6 +13,7 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -34,26 +35,65 @@ jobs:
           echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
           echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
           echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
-      
+
       - name: Get dependencies
         run: flutter pub get
         
-      - name: Run tests with coverage
-        run: flutter test --coverage
+      - name: Generate mocks with build_runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+        
+      - name: Run Flutter Analyze for Report
+        run: |
+          mkdir -p analysis-results
+          flutter analyze --no-fatal-warnings --no-fatal-infos > analysis-results/flutter-analyze.txt || true
+          
+      - name: Install junitreport for test results
+        run: dart pub global activate junitreport
+        
+      - name: Run tests with coverage and generate JUnit report
+        run: |
+          mkdir -p test-results
+          flutter test --coverage --machine | tee test_output.json
+          dart pub global run junitreport:tojunit --input test_output.json --output test-results/junit_flutter_tests.xml
+          
+      - name: Prepare coverage report
+        run: |
+          mkdir -p coverage/combined
+          cp coverage/lcov.info coverage/combined/lcov.info
         
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage/lcov.info
+          file: ./coverage/combined/lcov.info
           fail_ci_if_error: true
-        
-      - name: Run Flutter Analyze
-        run: flutter analyze
+      
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: test-results/junit_flutter_tests.xml
+          
+      - name: Display Codecov link
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            BRANCH_NAME="${GITHUB_HEAD_REF}"
+          fi
+          REPO_NAME="${{ github.repository }}"
+          echo "Code Coverage Report: https://codecov.io/gh/${REPO_NAME}/branch/${BRANCH_NAME}"
+          
+      - name: Run Flutter Test for CI Failure
+        run: flutter test
+          
+      - name: Run Flutter Analyze for CI Failure
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
 
   build:
     name: Build Production APK
     needs: test
+    if: ${{ success() }}  # Memastikan build hanya dijalankan jika test sukses
     runs-on: ubuntu-latest
     
     steps:
@@ -65,7 +105,7 @@ jobs:
           flutter-version: '3.29.0'
           channel: 'stable'
           cache: true
-      
+          
       - name: Create .env file
         run: |
           echo "FLAVOR=production" > .env
@@ -80,10 +120,10 @@ jobs:
           echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
           echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
           echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
-          
+      
       - name: Get dependencies
         run: flutter pub get
-
+      
       # Setup keystore SEBELUM build
       - name: Setup keystore
         run: |

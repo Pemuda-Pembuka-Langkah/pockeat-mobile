@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pockeat/food_scan_page.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
 import 'package:camera/camera.dart';
 
 class MockCameraController extends Mock implements CameraController {}

@@ -1,27 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:pockeat/add_recipe_page.dart';
 import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
-import 'package:pockeat/exercise_input_page.dart';
-import 'package:pockeat/exercise_journal_page.dart';
-import 'package:pockeat/food_input_page.dart';
-import 'package:pockeat/food_scan_page.dart';
-import 'package:pockeat/goals_and_journal_page.dart';
-import 'package:pockeat/my_account_page.dart';
-import 'package:pockeat/navigation.dart';
-import 'package:pockeat/homepage.dart';
-import 'package:pockeat/pet_store_page.dart';
-import 'package:pockeat/planning_page.dart';
-import 'package:pockeat/progress_page.dart';
-import 'package:pockeat/running_input_page.dart';
-import 'package:pockeat/weighting_input_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-// ignore: depend_on_referenced_packages
-import 'package:provider/provider.dart';
 import 'package:camera/camera.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
+import 'package:pockeat/features/homepage/presentation/homepage.dart';
+import 'package:provider/provider.dart';
+import 'package:pockeat/component/navigation.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -106,17 +95,7 @@ class MyApp extends StatelessWidget {
               ),
               ResolutionPreset.medium,
             )),
-        '/add-food-manual': (context) => const AddFoodLogPage(),
-        '/analytic': (context) => const ProgressPage(),
-        '/progress': (context) => const ProgressTrackingPage(),
-        '/add-exercise': (context) => const ExerciseInputPage(),
-        '/running-input': (context) => const RunningInputPage(),
-        '/weightlifting-input': (context) => const WeightliftingPage(),
-        '/smart-workout-log': (context) => const SmartJournalPage(),
-        '/planning': (context) => const PlanningPage(),
         '/add-food': (context) => const FoodInputPage(),
-        '/pet-store': (c) => const PetStorePage(),
-        '/account': (c)=> const MyAccountPage()
       },
     );
   }
