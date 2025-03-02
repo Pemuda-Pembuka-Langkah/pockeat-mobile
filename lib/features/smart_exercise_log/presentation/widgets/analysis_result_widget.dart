@@ -35,7 +35,7 @@ class AnalysisResultWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Hasil Analisis Olahraga',
+            'Exercise Analysis Results',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -62,11 +62,11 @@ class AnalysisResultWidget extends StatelessWidget {
           const Divider(height: 24, color: Colors.black12),
 
           // Display analysis data
-          _buildStatRow('Jenis Olahraga', analysisResult.exerciseType),
-          _buildStatRow('Durasi', analysisResult.duration),
-          _buildStatRow('Intensitas', analysisResult.intensity),
+          _buildStatRow('Exercise Type', analysisResult.exerciseType),
+          _buildStatRow('Duration', analysisResult.duration),
+          _buildStatRow('Intensity', analysisResult.intensity),
           _buildStatRow(
-              'Estimasi Kalori', '${analysisResult.estimatedCalories} kkal'),
+              'Estimated Calories', '${analysisResult.estimatedCalories} kcal'),
           
           // Display MET value if greater than 0
           if (analysisResult.metValue > 0)
@@ -76,7 +76,7 @@ class AnalysisResultWidget extends StatelessWidget {
 
           // Action buttons
           if (analysisResult.isComplete) ...[
-            // Tampilkan kedua tombol jika data lengkap
+            // Show both buttons if data is complete
             Row(
               children: [
                 Expanded(
@@ -90,7 +90,7 @@ class AnalysisResultWidget extends StatelessWidget {
                       ),
                     ),
                     child: const Text(
-                      'Ulangi Input',
+                      'Try Again',
                       style: TextStyle(
                         color: Color(0xFF9B6BFF),
                         fontWeight: FontWeight.w500,
@@ -110,7 +110,7 @@ class AnalysisResultWidget extends StatelessWidget {
                       ),
                     ),
                     child: const Text(
-                      'Simpan Log',
+                      'Save Log',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w500,
@@ -121,7 +121,7 @@ class AnalysisResultWidget extends StatelessWidget {
               ],
             )
           ] else ...[
-            // Hanya tampilkan tombol 'Ulangi Input' jika data tidak lengkap
+            // Only show 'Try Again' button if data is incomplete
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
@@ -134,7 +134,7 @@ class AnalysisResultWidget extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Ulangi Input',
+                  'Try Again',
                   style: TextStyle(
                     color: Color(0xFF9B6BFF),
                     fontWeight: FontWeight.w500,
@@ -177,12 +177,13 @@ class AnalysisResultWidget extends StatelessWidget {
   Widget _buildMissingInfoSection() {
     final missingInfo = analysisResult.missingInfo!;
     final missingLabels = {
-      'type': 'Jenis olahraga',
-      'duration': 'Durasi olahraga',
-      'intensity': 'Intensitas olahraga',
+      'type': 'Exercise type',
+      'duration': 'Exercise duration',
+      'intensity': 'Exercise intensity',
     };
 
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -194,7 +195,7 @@ class AnalysisResultWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Informasi Kurang Lengkap',
+            'Incomplete Information',
             style: TextStyle(
               fontWeight: FontWeight.w600,
               color: Colors.black87,
@@ -202,7 +203,7 @@ class AnalysisResultWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Silakan berikan informasi lebih detail tentang:',
+            'Please provide more details about:',
             style: TextStyle(
               fontSize: 14,
               color: Colors.black87,

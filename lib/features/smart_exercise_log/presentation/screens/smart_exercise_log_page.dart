@@ -9,7 +9,7 @@ import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysi
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';
 
 class SmartExerciseLogPage extends StatefulWidget {
-  // Tambahkan parameter optional untuk dependency injection
+  // Add optional parameters for dependency injection
   final GeminiService? geminiService;
   final SmartExerciseLogRepository? repository;
 
@@ -24,7 +24,7 @@ class SmartExerciseLogPage extends StatefulWidget {
 }
 
 class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
-  // Warna tema yang konsisten
+  // Consistent theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPurple = const Color(0xFF9B6BFF);
   
@@ -39,7 +39,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
   @override
   void initState() {
     super.initState();
-    // Gunakan dependency yang diinjeksi atau fallback ke implementasi default
+    // Use injected dependencies or fallback to default implementation
     _geminiService = widget.geminiService ?? GeminiServiceImpl(
       apiKey: dotenv.env['GOOGLE_GEMINI_API_KEY'] ?? ''
     );
@@ -65,7 +65,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal menganalisis olahraga: ${e.toString()}'),
+            content: Text('Failed to analyze workout: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -88,7 +88,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Catatan olahraga berhasil disimpan!'),
+            content: const Text('Workout log saved successfully!'),
             backgroundColor: primaryPurple,
           ),
         );
@@ -100,7 +100,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal menyimpan catatan: ${e.toString()}'),
+            content: Text('Failed to save log: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );

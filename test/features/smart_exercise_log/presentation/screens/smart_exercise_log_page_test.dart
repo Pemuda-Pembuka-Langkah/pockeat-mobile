@@ -66,7 +66,7 @@ void main() {
     });
 
     testWidgets('shows loading indicator when analyzing workout', (WidgetTester tester) async {
-      // Arrange - Setup mock dengan delay untuk simulasi network request
+      // Arrange - Setup mock with delay to simulate network request
       when(mockGeminiService.analyzeExercise(any))
           .thenAnswer((_) async {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -82,21 +82,21 @@ void main() {
         ),
       );
 
-      // Act - Input text dan klik tombol
+      // Act - Input text and click button
       final textField = find.byType(TextField);
       await tester.enterText(textField, 'Running 30 minutes high intensity');
       
-      final analyzeButton = find.text('Analisis Olahraga');
+      final analyzeButton = find.text('Analyze Workout');
       await tester.tap(analyzeButton);
-      await tester.pump(); // Rebuild setelah setState
+      await tester.pump(); // Rebuild after setState
 
-      // Assert - Verifikasi loading indicator muncul
+      // Assert - Verify loading indicator appears
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       
-      // Tunggu sampai proses selesai
+      // Wait until process completes
       await tester.pumpAndSettle();
       
-      // Verifikasi hasil akhir
+      // Verify final results
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(AnalysisResultWidget), findsOneWidget);
     });
@@ -115,24 +115,24 @@ void main() {
         ),
       );
 
-      // Act - Input text dan klik tombol
+      // Act - Input text and click button
       await tester.enterText(find.byType(TextField), 'Running 30 minutes high intensity');
-      await tester.tap(find.text('Analisis Olahraga'));
-      await tester.pumpAndSettle(); // Tunggu animasi/operasi async
+      await tester.tap(find.text('Analyze Workout'));
+      await tester.pumpAndSettle(); // Wait for animations/async operations
 
-      // Assert - Verifikasi UI berubah dengan benar
-      expect(find.byType(WorkoutFormWidget), findsNothing); // Form disembunyikan
-      expect(find.byType(AnalysisResultWidget), findsOneWidget); // Hasil ditampilkan
+      // Assert - Verify UI changes correctly
+      expect(find.byType(WorkoutFormWidget), findsNothing); // Form is hidden
+      expect(find.byType(AnalysisResultWidget), findsOneWidget); // Results are displayed
       
-      // Verifikasi data spesifik ditampilkan
+      // Verify specific data is displayed
       expect(find.text('Running'), findsOneWidget); // Exercise type
       expect(find.text('30 minutes'), findsOneWidget); // Duration
       expect(find.text('High'), findsOneWidget); // Intensity
-      expect(find.text('300 kkal'), findsOneWidget); // Calories
+      expect(find.text('300 kcal'), findsOneWidget); // Calories
     });
 
     testWidgets('shows error message when analysis fails', (WidgetTester tester) async {
-      // Arrange - Setup mock untuk melempar error
+      // Arrange - Setup mock to throw error
       when(mockGeminiService.analyzeExercise(any))
           .thenThrow(Exception('Network error'));
 
@@ -145,15 +145,15 @@ void main() {
         ),
       );
 
-      // Act - Input text dan klik tombol
+      // Act - Input text and click button
       await tester.enterText(find.byType(TextField), 'Invalid workout');
-      await tester.tap(find.text('Analisis Olahraga'));
+      await tester.tap(find.text('Analyze Workout'));
       await tester.pumpAndSettle();
 
-      // Assert - Verifikasi pesan error muncul
+      // Assert - Verify error message appears
       expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.textContaining('Gagal menganalisis olahraga'), findsOneWidget);
-      expect(find.byType(WorkoutFormWidget), findsOneWidget); // Form masih terlihat
+      expect(find.textContaining('Failed to analyze workout'), findsOneWidget);
+      expect(find.byType(WorkoutFormWidget), findsOneWidget); // Form is still visible
     });
 
     testWidgets('saves analysis result and shows success message', (WidgetTester tester) async {
@@ -172,19 +172,19 @@ void main() {
         ),
       );
 
-      // Act - Selesaikan analisis terlebih dahulu
+      // Act - Complete analysis first
       await tester.enterText(find.byType(TextField), 'Running 30 minutes high intensity');
-      await tester.tap(find.text('Analisis Olahraga'));
+      await tester.tap(find.text('Analyze Workout'));
       await tester.pumpAndSettle();
 
-      // Kemudian klik tombol simpan
-      await tester.tap(find.text('Simpan Log'));
-      await tester.pump(); // Tampilkan SnackBar
+      // Then click save button
+      await tester.tap(find.text('Save Log'));
+      await tester.pump(); // Show SnackBar
 
-      // Assert - Verifikasi repository dipanggil dan pesan sukses muncul
+      // Assert - Verify repository is called and success message appears
       verify(mockRepository.saveAnalysisResult(any)).called(1);
       expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.text('Catatan olahraga berhasil disimpan!'), findsOneWidget);
+      expect(find.text('Workout log saved successfully!'), findsOneWidget);
     });
 
     testWidgets('shows incomplete data warning for incomplete analysis result', (WidgetTester tester) async {
@@ -203,14 +203,14 @@ void main() {
 
       // Act
       await tester.enterText(find.byType(TextField), 'Invalid workout data');
-      await tester.tap(find.text('Analisis Olahraga'));
+      await tester.tap(find.text('Analyze Workout'));
       await tester.pumpAndSettle();
 
       // Assert
-      expect(find.text('Informasi Kurang Lengkap'), findsOneWidget);
-      expect(find.text('Ulangi Input'), findsOneWidget);
-      // Verifikasi tombol Simpan tidak muncul untuk data yang tidak lengkap
-      expect(find.text('Simpan Log'), findsNothing);
+      expect(find.text('Incomplete Information'), findsOneWidget);
+      expect(find.text('Try Again'), findsOneWidget);
+      // Verify Save button does not appear for incomplete data
+      expect(find.text('Save Log'), findsNothing);
     });
 
     testWidgets('retry button resets analysis and shows form again', (WidgetTester tester) async {
@@ -227,13 +227,13 @@ void main() {
         ),
       );
 
-      // Act - Selesaikan analisis terlebih dahulu
+      // Act - Complete analysis first
       await tester.enterText(find.byType(TextField), 'Running 30 minutes high intensity');
-      await tester.tap(find.text('Analisis Olahraga'));
+      await tester.tap(find.text('Analyze Workout'));
       await tester.pumpAndSettle();
 
-      // Kemudian klik tombol ulangi
-      await tester.tap(find.text('Ulangi Input'));
+      // Then click retry button
+      await tester.tap(find.text('Try Again'));
       await tester.pump();
 
       // Assert

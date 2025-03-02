@@ -85,10 +85,10 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/food-analysis', // Changed to start with the food analysis page
+      initialRoute: '/', // Changed to start with the food analysis page
       routes: {
         '/': (context) => const HomePage(),
-        '/smartExerciseLog': (context) => const SmartExerciseLogPage(),
+        '/smart-exercise-log': (context) => const SmartExerciseLogPage(),
         '/scan': (context) => ScanFoodPage(
                 cameraController: CameraController(
               CameraDescription(

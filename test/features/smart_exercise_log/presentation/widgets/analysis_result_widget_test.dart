@@ -2,29 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
-// Ubah dengan path yang benar untuk project Anda
+// Change with the correct path for your project
 
 void main() {
   group('AnalysisResultWidget', () {
     final mockAnalysisComplete = ExerciseAnalysisResult(
       exerciseType: 'HIIT Workout',
-      duration: '30 menit',
-      intensity: 'Tinggi',
+      duration: '30 minutes',
+      intensity: 'High',
       estimatedCalories: 320,
-      metValue: 9.5, // Menambahkan MET value yang sesuai untuk HIIT
-      summary: 'Latihan intensitas tinggi dengan interval pendek',
+      metValue: 9.5, // Adding appropriate MET value for HIIT
+      summary: 'High-intensity training with short intervals',
       timestamp: DateTime.now(),
-      originalInput: 'HIIT latihan 30 menit',
+      originalInput: 'HIIT workout 30 minutes',
     );
 
+    // This variable will be used in a test to verify handling of incomplete data
     final mockAnalysisIncomplete = ExerciseAnalysisResult(
       exerciseType: 'Yoga Session',
-      duration: 'Tidak ditentukan',
-      intensity: 'Sedang',
+      duration: 'Not specified',
+      intensity: 'Medium',
       estimatedCalories: 150,
-      metValue: 3.0, // Menambahkan MET value yang sesuai untuk Yoga
+      metValue: 3.0, // Adding appropriate MET value for Yoga
       timestamp: DateTime.now(),
-      originalInput: 'Yoga dengan intensitas sedang',
+      originalInput: 'Yoga with medium intensity',
+      missingInfo: ['duration'], // Marking the duration as missing info
     );
 
     testWidgets('renders all analysis data correctly',
@@ -43,30 +45,55 @@ void main() {
       );
 
       // Assert
-      expect(find.text('Hasil Analisis Olahraga'), findsOneWidget);
+      expect(find.text('Exercise Analysis Results'), findsOneWidget);
       expect(find.text('HIIT Workout'), findsOneWidget);
-      expect(find.text('30 menit'), findsOneWidget);
-      expect(find.text('Tinggi'), findsOneWidget);
-      expect(find.text('320 kkal'), findsOneWidget);
-      // Jika widget menampilkan MET value, tambahkan assertion di sini
-      // expect(find.text('MET: 9.5'), findsOneWidget);
-      expect(find.text('Latihan intensitas tinggi dengan interval pendek'),
+      expect(find.text('30 minutes'), findsOneWidget);
+      expect(find.text('High'), findsOneWidget);
+      expect(find.text('320 kcal'), findsOneWidget);
+      // Assert MET value is displayed
+      expect(find.text('9.5'), findsOneWidget);
+      expect(find.text('High-intensity training with short intervals'),
           findsOneWidget);
+    });
+
+    testWidgets('handles incomplete analysis data correctly',
+        (WidgetTester tester) async {
+      // Use the mockAnalysisIncomplete to test handling of incomplete data
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnalysisResultWidget(
+              analysisResult: mockAnalysisIncomplete,
+              onRetry: () {},
+              onSave: () {},
+            ),
+          ),
+        ),
+      );
+      
+      // Assert that duration is shown as "Not specified"
+      expect(find.text('Not specified'), findsOneWidget);
+      // Missing info section should be displayed
+      expect(find.text('Incomplete Information'), findsOneWidget);
+      expect(find.text('• Exercise duration'), findsOneWidget);
+      // Save button should not be shown for incomplete data
+      expect(find.text('Save Log'), findsNothing);
+      expect(find.text('Try Again'), findsOneWidget);
     });
 
     testWidgets('handles missing summary gracefully but should show save button if complete',
         (WidgetTester tester) async {
       // Arrange
-      // Pastikan mockAnalysisIncomplete tidak memiliki missingInfo
+      // Create a complete analysis without a summary
       final completeAnalysisNoSummary = ExerciseAnalysisResult(
         exerciseType: 'Yoga Session',
-        duration: '45 menit',  // Berikan nilai yang jelas
-        intensity: 'Sedang',
+        duration: '45 minutes',  // Provide clear value
+        intensity: 'Medium',
         estimatedCalories: 150,
         metValue: 3.0,
         timestamp: DateTime.now(),
-        originalInput: 'Yoga dengan intensitas sedang',
-        // Tidak ada missingInfo, jadi isComplete = true
+        originalInput: 'Yoga with medium intensity',
+        // No missingInfo, so isComplete = true
       );
       
       await tester.pumpWidget(
@@ -82,16 +109,16 @@ void main() {
       );
 
       // Assert - should not find summary section
-      expect(find.text('Hasil Analisis Olahraga'), findsOneWidget);
+      expect(find.text('Exercise Analysis Results'), findsOneWidget);
       expect(find.text('Yoga Session'), findsOneWidget);
-      expect(find.text('45 menit'), findsOneWidget);
-      expect(find.text('Sedang'), findsOneWidget);
-      expect(find.text('150 kkal'), findsOneWidget);
+      expect(find.text('45 minutes'), findsOneWidget);
+      expect(find.text('Medium'), findsOneWidget);
+      expect(find.text('150 kcal'), findsOneWidget);
       expect(find.text('3.0'), findsOneWidget); // MET value
       expect(find.byType(Divider), findsWidgets); // Should still have dividers
       
-      // Tombol Simpan Log harus ada karena data lengkap meskipun tidak ada summary
-      expect(find.text('Simpan Log'), findsOneWidget);
+      // Save Log button should exist because data is complete even without summary
+      expect(find.text('Save Log'), findsOneWidget);
     });
 
     testWidgets('calls onRetry when retry button is pressed',
@@ -114,7 +141,7 @@ void main() {
       );
 
       // Act
-      await tester.tap(find.text('Ulangi Input'));
+      await tester.tap(find.text('Try Again'));
       await tester.pump();
 
       // Assert
@@ -130,7 +157,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: AnalysisResultWidget(
-              analysisResult: mockAnalysisComplete, // Data lengkap
+              analysisResult: mockAnalysisComplete, // Complete data
               onRetry: () {},
               onSave: () {
                 onSaveCalled = true;
@@ -140,11 +167,11 @@ void main() {
         ),
       );
 
-      // Verifikasi tombol save ada karena data lengkap
-      expect(find.text('Simpan Log'), findsOneWidget);
+      // Verify save button exists because data is complete
+      expect(find.text('Save Log'), findsOneWidget);
       
       // Act
-      await tester.tap(find.text('Simpan Log'));
+      await tester.tap(find.text('Save Log'));
       await tester.pump();
 
       // Assert
@@ -156,12 +183,12 @@ void main() {
       // Arrange
       final mockAnalysisWithMissingInfo = ExerciseAnalysisResult(
         exerciseType: 'Unknown Workout',
-        duration: 'Tidak ditentukan',
-        intensity: 'Tidak ditentukan',
+        duration: 'Not specified',
+        intensity: 'Not specified',
         estimatedCalories: 0,
-        metValue: 0.0, // MET value kosong untuk workout yang tidak diketahui
+        metValue: 0.0, // Empty MET value for unknown workout
         timestamp: DateTime.now(),
-        originalInput: 'Olahraga tadi pagi',
+        originalInput: 'Exercise this morning',
         missingInfo: ['type', 'duration', 'intensity'],
       );
 
@@ -178,31 +205,31 @@ void main() {
       );
 
       // Assert
-      expect(find.text('Informasi Kurang Lengkap'), findsOneWidget);
-      expect(find.text('Silakan berikan informasi lebih detail tentang:'),
+      expect(find.text('Incomplete Information'), findsOneWidget);
+      expect(find.text('Please provide more details about:'),
           findsOneWidget);
-      expect(find.text('• Jenis olahraga'), findsOneWidget);
-      expect(find.text('• Durasi olahraga'), findsOneWidget);
-      expect(find.text('• Intensitas olahraga'), findsOneWidget);
+      expect(find.text('• Exercise type'), findsOneWidget);
+      expect(find.text('• Exercise duration'), findsOneWidget);
+      expect(find.text('• Exercise intensity'), findsOneWidget);
       
-      // Tombol Ulangi Input harus ada
-      expect(find.text('Ulangi Input'), findsOneWidget);
+      // Try Again button should exist
+      expect(find.text('Try Again'), findsOneWidget);
       
-      // Tombol Simpan Log TIDAK boleh ada
-      expect(find.text('Simpan Log'), findsNothing);
+      // Save Log button should NOT exist
+      expect(find.text('Save Log'), findsNothing);
     });
 
     testWidgets('handles different duration formats correctly',
         (WidgetTester tester) async {
-      // Test numerik
+      // Test numeric
       final mockNumericDuration = ExerciseAnalysisResult(
-        exerciseType: 'Lari',
-        duration: '45 menit',
-        intensity: 'Sedang',
+        exerciseType: 'Running',
+        duration: '45 minutes',
+        intensity: 'Medium',
         estimatedCalories: 400,
-        metValue: 7.0, // MET value untuk lari
+        metValue: 7.0, // MET value for running
         timestamp: DateTime.now(),
-        originalInput: 'Lari selama 45 menit',
+        originalInput: 'Running for 45 minutes',
       );
 
       await tester.pumpWidget(
@@ -217,17 +244,17 @@ void main() {
         ),
       );
 
-      expect(find.text('45 menit'), findsOneWidget);
+      expect(find.text('45 minutes'), findsOneWidget);
 
-      // Test deskriptif
+      // Test descriptive
       final mockDescriptiveDuration = ExerciseAnalysisResult(
-        exerciseType: 'Lari',
-        duration: 'setengah jam',
-        intensity: 'Sedang',
+        exerciseType: 'Running',
+        duration: 'half an hour',
+        intensity: 'Medium',
         estimatedCalories: 300,
-        metValue: 7.0, // MET value untuk lari
+        metValue: 7.0, // MET value for running
         timestamp: DateTime.now(),
-        originalInput: 'Lari selama setengah jam',
+        originalInput: 'Running for half an hour',
       );
 
       await tester.pumpWidget(
@@ -242,17 +269,17 @@ void main() {
         ),
       );
 
-      expect(find.text('setengah jam'), findsOneWidget);
+      expect(find.text('half an hour'), findsOneWidget);
 
-      // Test rentang
+      // Test range
       final mockRangeDuration = ExerciseAnalysisResult(
-        exerciseType: 'Lari',
-        duration: '30-45 menit',
-        intensity: 'Sedang',
+        exerciseType: 'Running',
+        duration: '30-45 minutes',
+        intensity: 'Medium',
         estimatedCalories: 350,
-        metValue: 7.0, // MET value untuk lari
+        metValue: 7.0, // MET value for running
         timestamp: DateTime.now(),
-        originalInput: 'Lari selama 30-45 menit',
+        originalInput: 'Running for 30-45 minutes',
       );
 
       await tester.pumpWidget(
@@ -267,20 +294,20 @@ void main() {
         ),
       );
 
-      expect(find.text('30-45 menit'), findsOneWidget);
+      expect(find.text('30-45 minutes'), findsOneWidget);
     });
     
     testWidgets('displays and handles zero MET value correctly',
         (WidgetTester tester) async {
       // Arrange
       final mockZeroMetValue = ExerciseAnalysisResult(
-        exerciseType: 'Aktivitas Ringan',
-        duration: '15 menit',
-        intensity: 'Rendah',
+        exerciseType: 'Light Activity',
+        duration: '15 minutes',
+        intensity: 'Low',
         estimatedCalories: 50,
-        metValue: 0.0, // Sengaja menggunakan MET value 0
+        metValue: 0.0, // Deliberately using MET value 0
         timestamp: DateTime.now(),
-        originalInput: 'Aktivitas ringan selama 15 menit',
+        originalInput: 'Light activity for 15 minutes',
       );
 
       await tester.pumpWidget(
@@ -295,10 +322,10 @@ void main() {
         ),
       );
 
-      // Assert - Jika widget menampilkan MET value, verifikasi tampilan nilai 0
-      expect(find.text('Aktivitas Ringan'), findsOneWidget);
-      expect(find.text('15 menit'), findsOneWidget);
-      // expect(find.text('MET: 0.0'), findsOneWidget); // Uncomment jika widget menampilkan MET value
+      // Assert - MET value should not be displayed if it's zero
+      expect(find.text('Light Activity'), findsOneWidget);
+      expect(find.text('15 minutes'), findsOneWidget);
+      expect(find.text('0.0'), findsNothing); // MET value 0 should not be displayed
     });
   });
 }
