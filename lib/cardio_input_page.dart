@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Pindahkan enum ke level teratas file
-enum CardioType { running, walking, swimming }
+enum CardioType { running, cycling, swimming }
 
 class CardioInputPage extends StatefulWidget {
   const CardioInputPage({super.key});
@@ -15,9 +15,10 @@ class _CardioInputPageState extends State<CardioInputPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   
-  String selectedIntensity = 'Medium';
-  double distance = 5.0;
+  int selectedKm = 5;
+  int selectedMeter = 0;
   DateTime selectedStartTime = DateTime.now();
+  DateTime selectedEndTime = DateTime.now().add(const Duration(minutes: 30));
   int durationInMinutes = 30;
 
   // Tambahkan enum untuk tipe aktivitas
@@ -63,7 +64,7 @@ class _CardioInputPageState extends State<CardioInputPage> {
                 children: [
                   _buildCardioTypeButton(CardioType.running, 'Running', Icons.directions_run),
                   const SizedBox(width: 8),
-                  _buildCardioTypeButton(CardioType.walking, 'Walking', Icons.directions_walk),
+                  _buildCardioTypeButton(CardioType.cycling, 'Cycling', Icons.directions_bike),
                   const SizedBox(width: 8),
                   _buildCardioTypeButton(CardioType.swimming, 'Swimming', Icons.pool),
                 ],
@@ -73,305 +74,9 @@ class _CardioInputPageState extends State<CardioInputPage> {
               
               // Form fields sesuai tipe yang dipilih
               _buildFormFields(),
-
-              // Distance Section
-              const Text(
-                'Distance',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.route, color: primaryPink),
-                            const SizedBox(width: 8),
-                            Text(
-                              distance.toStringAsFixed(1),
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Text(
-                              'km',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black54,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    SliderTheme(
-                      data: SliderThemeData(
-                        activeTrackColor: primaryPink,
-                        inactiveTrackColor: primaryPink.withOpacity(0.2),
-                        thumbColor: primaryPink,
-                        overlayColor: primaryPink.withOpacity(0.1),
-                      ),
-                      child: Slider(
-                        value: distance,
-                        min: 0,
-                        max: 42.2, // Marathon distance
-                        divisions: 422,
-                        onChanged: (value) {
-                          setState(() {
-                            distance = value;
-                          });
-                        },
-                      ),
-                    ),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Estimated: 350 kcal',
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          '~7:30 min/km',
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
               
-              // Intensity Selection
-              const Text(
-                'Intensity',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  _buildIntensityButton('Light', '🚶‍♂️'),
-                  const SizedBox(width: 8),
-                  _buildIntensityButton('Medium', '🏃‍♂️'),
-                  const SizedBox(width: 8),
-                  _buildIntensityButton('High', '🏃‍♂️💨'),
-                ],
-              ),
-
               const SizedBox(height: 24),
 
-              // Start Time Section
-              const Text(
-                'Waktu Mulai',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: InkWell(
-                  onTap: () async {
-                    final DateTime now = DateTime.now();
-                    final DateTime? date = await showDatePicker(
-                      context: context,
-                      initialDate: selectedStartTime.isAfter(now) ? now : selectedStartTime,
-                      firstDate: DateTime(2024),
-                      lastDate: now,  // Batasi sampai hari ini
-                    );
-                    if (date != null) {
-                      final TimeOfDay? time = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.fromDateTime(
-                          selectedStartTime.isAfter(now) ? now : selectedStartTime
-                        ),
-                      );
-                      if (time != null) {
-                        // Buat DateTime dari tanggal dan waktu yang dipilih
-                        final DateTime selectedDateTime = DateTime(
-                          date.year,
-                          date.month,
-                          date.day,
-                          time.hour,
-                          time.minute,
-                        );
-                        
-                        // Cek apakah waktu yang dipilih melebihi waktu sekarang
-                        if (selectedDateTime.isAfter(now)) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Waktu tidak boleh melebihi waktu sekarang'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        } else {
-                          setState(() {
-                            selectedStartTime = selectedDateTime;
-                          });
-                        }
-                      }
-                    }
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.access_time, color: primaryPink),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${selectedStartTime.year}-${selectedStartTime.month.toString().padLeft(2, '0')}-${selectedStartTime.day.toString().padLeft(2, '0')} ${selectedStartTime.hour.toString().padLeft(2, '0')}:${selectedStartTime.minute.toString().padLeft(2, '0')}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Duration Section
-              const Text(
-                'Durasi (menit)',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.timer, color: primaryPink),
-                        const SizedBox(width: 8),
-                        Text(
-                          '$durationInMinutes menit',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    SliderTheme(
-                      data: SliderThemeData(
-                        activeTrackColor: primaryPink,
-                        inactiveTrackColor: primaryPink.withOpacity(0.2),
-                        thumbColor: primaryPink,
-                        overlayColor: primaryPink.withOpacity(0.1),
-                      ),
-                      child: Slider(
-                        value: durationInMinutes.toDouble(),
-                        min: 5,
-                        max: 180,
-                        divisions: 35,
-                        onChanged: (value) {
-                          setState(() {
-                            durationInMinutes = value.round();
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Notes Section
-              const Text(
-                'Notes',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const TextField(
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Add notes about your run...',
-                    hintStyle: TextStyle(color: Colors.black38),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -457,7 +162,7 @@ class _CardioInputPageState extends State<CardioInputPage> {
   Widget _buildFormFields() {
     return switch (selectedType) {
       CardioType.running => _buildRunningFields(),
-      CardioType.walking => _buildWalkingFields(),
+      CardioType.cycling => _buildcyclingfields(),
       CardioType.swimming => _buildSwimmingFields(),
     };
   }
@@ -465,9 +170,292 @@ class _CardioInputPageState extends State<CardioInputPage> {
   Widget _buildRunningFields() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      children: [        
+        // Time Selection Container
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // Start Time
+              Row(
+                children: [
+                  Icon(Icons.play_circle, color: primaryPink),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Start Time',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () async {
+                  final TimeOfDay? time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.fromDateTime(selectedStartTime),
+                  );
+                  if (time != null) {
+                    setState(() {
+                      selectedStartTime = DateTime(
+                        selectedStartTime.year,
+                        selectedStartTime.month,
+                        selectedStartTime.day,
+                        time.hour,
+                        time.minute,
+                      );
+                      // Automatically adjust end time if it's before start time
+                      if (selectedEndTime.isBefore(selectedStartTime)) {
+                        selectedEndTime = selectedStartTime.add(const Duration(minutes: 30));
+                      }
+                    });
+                  }
+                },
+                child: Text(
+                  TimeOfDay.fromDateTime(selectedStartTime).format(context),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 16),
+              
+              // End Time
+              Row(
+                children: [
+                  Icon(Icons.stop_circle, color: primaryPink),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'End Time',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () async {
+                  final TimeOfDay? time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.fromDateTime(selectedEndTime),
+                  );
+                  if (time != null) {
+                    setState(() {
+                      // Handle midnight crossing
+                      DateTime newEndTime = DateTime(
+                        selectedStartTime.year,
+                        selectedStartTime.month,
+                        selectedStartTime.day,
+                        time.hour,
+                        time.minute,
+                      );
+                      
+                      // If end time is before start time, assume it's the next day
+                      if (time.hour < TimeOfDay.fromDateTime(selectedStartTime).hour ||
+                          (time.hour == TimeOfDay.fromDateTime(selectedStartTime).hour &&
+                           time.minute < TimeOfDay.fromDateTime(selectedStartTime).minute)) {
+                        newEndTime = newEndTime.add(const Duration(days: 1));
+                      }
+                      
+                      selectedEndTime = newEndTime;
+                    });
+                  }
+                },
+                child: Text(
+                  TimeOfDay.fromDateTime(selectedEndTime).format(context),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 8),
+              
+              // Duration Display
+              Text(
+                'Duration: ${_formatDuration(selectedEndTime.difference(selectedStartTime))}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Distance Container (existing code)
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.route, color: primaryPink),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Distance',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Kilometer Scroll
+                  SizedBox(
+                    width: 80,
+                    height: 120,
+                    child: ListWheelScrollView(
+                      itemExtent: 40,
+                      diameterRatio: 1.5,
+                      physics: const FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setState(() {
+                          selectedKm = index;
+                        });
+                      },
+                      children: List.generate(43, (index) {
+                        return Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: selectedKm == index ? primaryPink.withOpacity(0.1) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '$index',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: selectedKm == index ? FontWeight.bold : FontWeight.normal,
+                              color: selectedKm == index ? primaryPink : Colors.black54,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  const Text(
+                    ' km  ',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  // Meter Scroll
+                  SizedBox(
+                    width: 80,
+                    height: 120,
+                    child: ListWheelScrollView(
+                      itemExtent: 40,
+                      diameterRatio: 1.5,
+                      physics: const FixedExtentScrollPhysics(),
+                      onSelectedItemChanged: (index) {
+                        setState(() {
+                          selectedMeter = index * 100;
+                        });
+                      },
+                      children: List.generate(10, (index) {
+                        return Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: selectedMeter == index * 100 ? primaryPink.withOpacity(0.1) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${index * 100}',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: selectedMeter == index * 100 ? FontWeight.bold : FontWeight.normal,
+                              color: selectedMeter == index * 100 ? primaryPink : Colors.black54,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  const Text(
+                    ' m',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Total: ${selectedKm + (selectedMeter / 1000)} km',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDuration(Duration duration) {
+    int hours = duration.inHours;
+    int minutes = duration.inMinutes.remainder(60);
+    
+    if (hours > 0) {
+      return '$hours h ${minutes.toString().padLeft(2, '0')} min';
+    } else {
+      return '$minutes min';
+    }
+  }
+
+  Widget _buildcyclingfields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Running Details',
+          'Cycling Details',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -495,7 +483,7 @@ class _CardioInputPageState extends State<CardioInputPage> {
                   Icon(Icons.speed, color: primaryPink),
                   const SizedBox(width: 8),
                   const Text(
-                    'Average Pace',
+                    'Average Speed',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.black87,
@@ -505,64 +493,7 @@ class _CardioInputPageState extends State<CardioInputPage> {
               ),
               const SizedBox(height: 8),
               const Text(
-                '5:30 /km',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWalkingFields() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Walking Details',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 5,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.directions_walk, color: primaryPink),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Steps Count',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '6,500 steps',
+                '20 km/h',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -669,50 +600,6 @@ class _CardioInputPageState extends State<CardioInputPage> {
         style: const TextStyle(
           color: Colors.black87,
           fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIntensityButton(String label, String emoji) {
-    bool isSelected = selectedIntensity == label;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => selectedIntensity = label),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? primaryPink.withOpacity(0.1) : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? primaryPink : Colors.black12,
-              width: isSelected ? 2 : 1,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 3,
-                offset: Offset(0, 1),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Text(
-                emoji,
-                style: const TextStyle(fontSize: 20),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: isSelected ? Colors.black87 : Colors.black54,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

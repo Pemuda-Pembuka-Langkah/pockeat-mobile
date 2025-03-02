@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -114,10 +113,10 @@ class ExerciseInputPage extends StatelessWidget {
                   Row(
                     children: [
                       _buildRecentActivity(
-                        icon: Icons.directions_run,
-                        label: '5km Run',
-                        time: '30min',
-                        calories: '350',
+                        icon: Icons.directions_bike,
+                        label: '10km Cycling',
+                        time: '45min',
+                        calories: '400',
                         color: pinkColor,
                       ),
                       const SizedBox(width: 12),
