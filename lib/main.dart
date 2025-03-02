@@ -5,6 +5,7 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.mocks.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,7 +76,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-
+        '/': (context) => const SmartExerciseLogPage(),
+        '/smartExerciseLog': (context) => const SmartExerciseLogPage(),
       },
     );
   }
