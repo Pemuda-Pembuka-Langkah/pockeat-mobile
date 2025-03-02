@@ -123,6 +123,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                   children: [
                                     Text(
                                       'Fried Rice',
+                                      key: Key('food_title'),
                                       style: TextStyle(
                                         fontSize: 24,
                                         fontWeight: FontWeight.w600,
@@ -132,6 +133,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                     SizedBox(height: 4),
                                     Text(
                                       '1 plate • 300g',
+                                      key: Key('food_portion'),
                                       style: TextStyle(
                                         color: Colors.black54,
                                         fontSize: 14,
@@ -149,6 +151,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                     children: [
                                       Text(
                                         '92',
+                                        key: Key('food_score'),
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 24,
@@ -157,6 +160,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                       ),
                                       Text(
                                         'Score',
+                                        key: Key('food_score_text'),
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 12,
@@ -191,6 +195,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                     children: [
                                       Text(
                                         '450',
+                                        key: Key('food_calories'),
                                         style: TextStyle(
                                           color: Colors.black87,
                                           fontSize: 32,
@@ -199,6 +204,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                       ),
                                       Text(
                                         'calories',
+                                        key: Key('food_calories_text'),
                                         style: TextStyle(
                                           color: Colors.black54,
                                           fontSize: 16,
@@ -214,6 +220,7 @@ class _NutritionPageState extends State<NutritionPage> {
                                     ),
                                     child: const Text(
                                       '22% of daily goal',
+                                      key: Key('food_calories_goal'),
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 14,

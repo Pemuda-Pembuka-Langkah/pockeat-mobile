@@ -13,10 +13,11 @@ class ScanFoodPage extends StatefulWidget {
   });
 
   @override
-  _ScanFoodPageState createState() => _ScanFoodPageState();
+  ScanFoodPageState createState() => ScanFoodPageState();
 }
 
-class _ScanFoodPageState extends State<ScanFoodPage>
+@visibleForTesting
+class ScanFoodPageState extends State<ScanFoodPage>
     with SingleTickerProviderStateMixin {
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
@@ -39,6 +40,13 @@ class _ScanFoodPageState extends State<ScanFoodPage>
   final bool _isFoodPositioned = false;
 
   bool _isCameraReady = false;
+
+  double get scanProgress => _scanProgress;
+  String get statusMessage => _statusMessage;
+  int get currentMode => _currentMode;
+  bool get isCameraReady => _isCameraReady;
+  bool get isFoodPositioned => _isFoodPositioned;
+  Color get progressColor => _progressColor;
 
   @override
   void initState() {
@@ -322,6 +330,7 @@ class _ScanFoodPageState extends State<ScanFoodPage>
 
   Widget _buildCameraButton() {
     return InkWell(
+      key: const Key('camera_button'),
       onTap: () async {
         try {
           final image = await widget.cameraController.takePicture();
