@@ -1,22 +1,31 @@
-// lib/pockeat/features/ai_api_scan/services/gemini_service_impl.dart
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
+import 'package:pockeat/features/ai_api_scan/services/generative_model_wrapper.dart';
 
 class GeminiServiceImpl implements GeminiService {
-  final GenerativeModel model;
   final String apiKey;
+  final GenerativeModelWrapper _modelWrapper;
   
   GeminiServiceImpl({
     required this.apiKey,
-    GenerativeModel? model
-  }) : model = model ?? GenerativeModel(
+    GenerativeModelWrapper? modelWrapper
+  }) : _modelWrapper = modelWrapper ?? RealGenerativeModelWrapper(GenerativeModel(
         model: 'gemini-1.5-pro',
         apiKey: apiKey,
-      );
+      ));
+
+    factory GeminiServiceImpl.fromEnv() {
+    final apiKey = dotenv.env['GOOGLE_GEMINI_API_KEY'];
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('GOOGLE_GEMINI_API_KEY not found in environment variables');
+    }
+    return GeminiServiceImpl(apiKey: apiKey);
+  }
   
   @override
   Future<FoodAnalysisResult> analyzeFoodByText(String description) async {
@@ -69,7 +78,7 @@ class GeminiServiceImpl implements GeminiService {
       }
       ''';
       
-      final response = await model.generateContent([Content.text(prompt)]);
+      final response = await _modelWrapper.generateContent([Content.text(prompt)]);
       if (response.text == null) {
         throw GeminiServiceException('No response text generated');
       }
@@ -131,7 +140,7 @@ class GeminiServiceImpl implements GeminiService {
       }
       ''';
       
-      final response = await model.generateContent([
+      final response = await _modelWrapper.generateContent([
         Content.multi([
           TextPart(prompt),
           DataPart('image/jpeg', imageBytes)
@@ -199,7 +208,7 @@ class GeminiServiceImpl implements GeminiService {
       }
       ''';
       
-      final response = await model.generateContent([
+      final response = await _modelWrapper.generateContent([
         Content.multi([
           TextPart(prompt),
           DataPart('image/jpeg', imageBytes)
@@ -252,7 +261,7 @@ class GeminiServiceImpl implements GeminiService {
       }
       ''';
       
-      final response = await model.generateContent([Content.text(prompt)]);
+      final response = await _modelWrapper.generateContent([Content.text(prompt)]);
       if (response.text == null) {
         throw GeminiServiceException('No response text generated');
       }
@@ -270,8 +279,11 @@ class GeminiServiceImpl implements GeminiService {
       final jsonData = jsonDecode(jsonString);
       
       // Check for error field
-      if (jsonData.containsKey('error') && jsonData['error'] is Map) {
-        // This is an error response in the expected format
+      if (jsonData.containsKey('error') && jsonData['error'] is String) {
+        // Error message in string format
+        throw GeminiServiceException(jsonData['error']);
+      } else if (jsonData.containsKey('error') && jsonData['error'] is Map) {
+        // Error in object format
         throw GeminiServiceException(jsonData['error']['message'] ?? 'Unknown error');
       }
       
@@ -312,7 +324,7 @@ class GeminiServiceImpl implements GeminiService {
       final metValue = (jsonData['met_value'] ?? 0.0).toDouble();
       
       // Create a summary
-      final summary = 'You performed $exerciseType for ${durationMinutes} minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories.';
+      final summary = 'You performed $exerciseType for $durationMinutes minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories.';
       
       // Determine duration string format
       final duration = '$durationMinutes minutes';
@@ -353,13 +365,4 @@ class GeminiServiceImpl implements GeminiService {
       throw GeminiServiceException('No valid JSON found in response');
     }
   }
-}
-
-class GeminiServiceException implements Exception {
-  final String message;
-  
-  GeminiServiceException(this.message);
-  
-  @override
-  String toString() => 'GeminiServiceException: $message';
 }
