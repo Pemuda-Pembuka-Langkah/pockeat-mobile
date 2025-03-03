@@ -5,69 +5,36 @@ const double k1 = 0.0001;
 const double k2 = 0.002;
 
 double calculateExerciseVolume(Exercise exercise) {
-  double totalVolume = 0.0;
-  for (var set in exercise.sets) {
-    if (set.reps > 0) {
-      totalVolume += set.weight * set.reps;
-    }
-  }
-  return totalVolume;
+  return exercise.sets.fold(0.0, (sum, set) {
+    return set.reps > 0 ? sum + (set.weight * set.reps) : sum;
+  });
 }
 
 double calculateTotalVolume(List<Exercise> exercises) {
-  double total = 0.0;
-  for (var exercise in exercises) {
-    total += calculateExerciseVolume(exercise);
-  }
-  return total;
+  return exercises.fold(0.0, (sum, exercise) => sum + calculateExerciseVolume(exercise));
 }
 
 double calculateEstimatedCalories(List<Exercise> exercises) {
-  double totalCalories = 0.0;
-  for (var exercise in exercises) {
-    totalCalories += calculateExerciseCalories(exercise);
-  }
-  return totalCalories;
+  return exercises.fold(0.0, (sum, exercise) => sum + calculateExerciseCalories(exercise));
 }
 
 double calculateExerciseCalories(Exercise exercise) {
-  double totalDurationInHours = 0.0;
-  double totalWeight = 0.0;
-  double totalReps = 0.0;
-
-  for (var set in exercise.sets) {
-    totalDurationInHours += set.duration / 60;
-    totalWeight += set.weight * set.reps;
-    totalReps += set.reps;
-  }
-
+  double totalDurationInHours = exercise.sets.fold(0.0, (sum, set) => sum + set.duration) / 60;
+  double totalWeight = exercise.sets.fold(0.0, (sum, set) => sum + (set.weight * set.reps));
+  double totalReps = exercise.sets.fold(0.0, (sum, set) => sum + set.reps);
   return exercise.metValue * defaultWeight * (totalDurationInHours + k1 * totalWeight + k2 * totalReps);
 }
 
 int calculateTotalSets(List<Exercise> exercises) {
-  int totalSets = 0;
-  for (var exercise in exercises) {
-    totalSets += exercise.sets.length;
-  }
-  return totalSets;
+  return exercises.fold(0, (sum, exercise) => sum + exercise.sets.length);
 }
 
 int calculateTotalReps(List<Exercise> exercises) {
-  int totalReps = 0;
-  for (var exercise in exercises) {
-    for (var set in exercise.sets) {
-      totalReps += set.reps;
-    }
-  }
-  return totalReps;
+  return exercises.fold(0, (sum, exercise) =>
+      sum + exercise.sets.fold(0, (setSum, set) => setSum + set.reps));
 }
 
 double calculateTotalDuration(List<Exercise> exercises) {
-  double totalDuration = 0.0;
-  for (var exercise in exercises) {
-    for (var set in exercise.sets) {
-      totalDuration += set.duration;
-    }
-  }
-  return totalDuration;
+  return exercises.fold(0.0, (sum, exercise) =>
+      sum + exercise.sets.fold(0.0, (setSum, set) => setSum + set.duration));
 }
