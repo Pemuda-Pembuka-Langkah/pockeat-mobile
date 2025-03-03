@@ -1,0 +1,35 @@
+const Map<String, Map<String, double>> exercisesByCategory = {
+  'Upper Body': {
+    'Bench Press': 5.0,
+    'Shoulder Press': 5.0,
+    'Bicep Curls': 3.5,
+    'Tricep Extensions': 3.5,
+    'Pull Ups': 8.0,
+    'Push Ups': 3.8,
+    'Lateral Raises': 4.0,
+  },
+  'Lower Body': {
+    'Squats': 6.0,
+    'Deadlifts': 7.0,
+    'Leg Press': 5.0,
+    'Lunges': 5.0,
+    'Calf Raises': 3.0,
+    'Leg Extensions': 4.0,
+    'Hamstring Curls': 4.0,
+  },
+  'Core': {
+    'Crunches': 3.0,
+    'Planks': 2.8,
+    'Russian Twists': 4.0,
+    'Leg Raises': 3.5,
+    'Ab Rollouts': 5.0,
+    'Side Planks': 2.5,
+  },
+  'Full Body': {
+    'Clean and Press': 8.0,
+    'Burpees': 8.0,
+    'Turkish Get-ups': 6.0,
+    'Thrusters': 8.0,
+    'Mountain Climbers': 8.0,
+  },
+};
