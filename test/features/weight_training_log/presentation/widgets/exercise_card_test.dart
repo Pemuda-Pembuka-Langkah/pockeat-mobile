@@ -32,7 +32,7 @@ void main() {
     );
 
     expect(find.text('Bench Press'), findsOneWidget);
-    expect(find.textContaining('980.0 kg'), findsOneWidget);
+    expect(find.textContaining('980.00 kg'), findsOneWidget);
     await tester.tap(find.text('Add Set'));
     expect(addSetCalled, true);
   });
