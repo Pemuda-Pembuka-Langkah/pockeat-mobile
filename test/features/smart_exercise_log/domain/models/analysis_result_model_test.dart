@@ -265,6 +265,92 @@ void main() {
       expect(updated.isComplete, false);
     });
     
+    // Tambahan test untuk meningkatkan coverage
+    
+    test('fromMap should handle missingInfo correctly', () {
+      // Arrange
+      final map = {
+        'type': 'Walking',
+        'duration': '30 minutes',
+        'estimatedCalories': 200,
+        'missingInfo': ['intensity']
+      };
+      final id = 'map-test-id';
+      
+      // Act
+      final model = ExerciseAnalysisResult.fromDbMap(map, id);
+      
+      // Assert
+      expect(model.missingInfo, ['intensity']);
+      expect(model.isComplete, false);
+    });
+    
+    test('fromDbMap should handle missingInfo correctly when provided', () {
+      // Arrange
+      final map = {
+        'exerciseType': 'Cycling',
+        'duration': '45 minutes',
+        'intensity': 'Medium',
+        'estimatedCalories': 300,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'originalInput': 'Cycling 45 minutes',
+        'missingInfo': ['intensity', 'duration']
+      };
+      final id = 'dbmap-test-id';
+      
+      // Act
+      final model = ExerciseAnalysisResult.fromDbMap(map, id);
+      
+      // Assert
+      expect(model.missingInfo, ['intensity', 'duration']);
+      expect(model.isComplete, false);
+    });
+    
+    test('should copy with all parameters', () {
+      // Arrange
+      final original = ExerciseAnalysisResult(
+        id: 'original-id',
+        exerciseType: 'Running',
+        duration: '30 minutes',
+        intensity: 'Medium',
+        estimatedCalories: 300,
+        metValue: 7.0,
+        summary: 'Original summary',
+        timestamp: DateTime.now(),
+        originalInput: 'Running 30 minutes',
+        missingInfo: ['intensity'],
+      );
+      
+      final newTime = DateTime.now().add(Duration(days: 1));
+      
+      // Act
+      final updated = original.copyWith(
+        id: 'new-id',
+        exerciseType: 'Sprint',
+        duration: '15 minutes',
+        intensity: 'High',
+        estimatedCalories: 250,
+        metValue: 9.0,
+        summary: 'New summary',
+        timestamp: newTime,
+        originalInput: 'Sprint 15 minutes',
+        missingInfo: [],
+      );
+      
+      // Assert
+      expect(updated.id, 'new-id');
+      expect(updated.exerciseType, 'Sprint');
+      expect(updated.duration, '15 minutes');
+      expect(updated.intensity, 'High');
+      expect(updated.estimatedCalories, 250);
+      expect(updated.metValue, 9.0);
+      expect(updated.summary, 'New summary');
+      expect(updated.timestamp, newTime);
+      expect(updated.originalInput, 'Sprint 15 minutes');
+      expect(updated.missingInfo, []);
+      expect(updated.isComplete, true);
+    });
+    
     test('fromJson should parse JSON data correctly', () {
       // Arrange
       final jsonData = {

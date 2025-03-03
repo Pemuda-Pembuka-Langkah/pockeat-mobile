@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
@@ -43,7 +44,9 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
     _geminiService = widget.geminiService ?? GeminiServiceImpl(
       apiKey: dotenv.env['GOOGLE_GEMINI_API_KEY'] ?? ''
     );
-    _repository = widget.repository ?? SmartExerciseLogRepositoryImpl();
+    _repository = widget.repository ?? SmartExerciseLogRepositoryImpl(
+      firestore: FirebaseFirestore.instance
+    );
   }
   
   Future<void> analyzeWorkout(String workoutDescription) async {
