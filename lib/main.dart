@@ -5,6 +5,13 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pockeat/features/homepage/presentation/homepage.dart';
+import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
+import 'package:camera/camera.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
+import 'package:provider/provider.dart';
+import 'package:pockeat/component/navigation.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
 // Import the food analysis page
 import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_page.dart';
 import 'package:camera/camera.dart';
@@ -86,7 +93,18 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const HomePage(), // You'll need to create this
+        '/': (context) => const HomePage(),
+        '/smart-exercise-log': (context) => const SmartExerciseLogPage(),
+        '/scan': (context) => ScanFoodPage(
+                cameraController: CameraController(
+              CameraDescription(
+                name: '0',
+                lensDirection: CameraLensDirection.back,
+                sensorOrientation: 0,
+              ),
+              ResolutionPreset.medium,
+            )),
+        '/add-food': (context) => const FoodInputPage(),
         '/food-analysis': (context) => const FoodAnalysisPage(),
         '/scan': (context) => ScanFoodPage(
                 cameraController: CameraController(

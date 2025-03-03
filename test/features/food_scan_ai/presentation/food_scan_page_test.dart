@@ -138,7 +138,7 @@ void main() {
     final NutritionPage nutritionPage = tester.widget(nutritionPageFinder);
     expect(nutritionPage.imagePath, 'test/path/image.jpg');
   });
-
+  
   testWidgets('Mode buttons should render correctly with initial state',
       (WidgetTester tester) async {
     scanFoodPage = MaterialApp(

@@ -58,6 +58,7 @@ void main() {
 
     // Initial state - app bar should be transparent
     tester.widget<Scaffold>(find.byType(Scaffold));
+
     final initialAppBar =
         tester.widget<SliverAppBar>(find.byType(SliverAppBar));
     expect(initialAppBar.backgroundColor, equals(Colors.transparent));
@@ -74,6 +75,7 @@ void main() {
 
   testWidgets('NutritionPage should display all nutrient sections',
       (WidgetTester tester) async {
+
     await tester.pumpWidget(
       const MaterialApp(
         home: NutritionPage(imagePath: testImagePath),
@@ -91,6 +93,7 @@ void main() {
     expect(find.text('Low Sugar'), findsOneWidget);
     expect(find.text('Contains Gluten'), findsOneWidget);
   });
+
 
   testWidgets('NutritionPage navigation should work correctly',
       (WidgetTester tester) async {
