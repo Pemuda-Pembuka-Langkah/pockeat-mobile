@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
+import 'package:pockeat/features/food_text_input/presentation/utils/food_entry_form_validator.dart';
 
 class FoodEntryForm extends StatefulWidget {
   final int maxFoodNameWords;
@@ -19,12 +21,11 @@ class FoodEntryForm extends StatefulWidget {
 }
 
 class _FoodEntryFormState extends State<FoodEntryForm> {
-  final _formKey = GlobalKey<FormState>();
   final _foodNameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _ingredientsController = TextEditingController();
   final _weightController = TextEditingController();
-  
+
   String? _foodNameError;
   String? _descriptionError;
   String? _ingredientsError;
@@ -39,51 +40,35 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       _weightError = null;
       _successMessage = null;
     });
-    
-    bool isValid = true;
 
-    if (_foodNameController.text.trim().isEmpty) {
-      setState(() => _foodNameError = 'Please insert food name');
-      isValid = false;
-    } else if (_foodNameController.text.split(' ').length > widget.maxFoodNameWords) {
-      setState(() => _foodNameError = 'Food name exceeds maximum word count (${widget.maxFoodNameWords})');
-      isValid = false;
-    }
-    
-    if (_descriptionController.text.trim().isEmpty) {
-      setState(() => _descriptionError = 'Please insert food description');
-      isValid = false;
-    } else if (_descriptionController.text.split(' ').length > widget.maxDescriptionWords) {
-      setState(() => _descriptionError = 'Description exceeds maximum word count (${widget.maxDescriptionWords})');
-      isValid = false;
-    }
-    
-    if (_ingredientsController.text.trim().isEmpty) {
-      setState(() => _ingredientsError = 'Please insert food ingredients');
-      isValid = false;
-    } else if (_ingredientsController.text.split(' ').length > widget.maxIngredientWords) {
-      setState(() => _ingredientsError = 'Ingredients exceeds maximum word count (${widget.maxIngredientWords})');
-      isValid = false;
-    }
-    
+    bool isValid = true;
+    _foodNameError = FormValidator.validateFoodName(_foodNameController.text, widget.maxFoodNameWords);
+    if (_foodNameError != null) isValid = false;
+
+    _descriptionError = FormValidator.validateDescription(_descriptionController.text, widget.maxDescriptionWords);
+    if (_descriptionError != null) isValid = false;
+
+    _ingredientsError = FormValidator.validateIngredients(_ingredientsController.text, widget.maxIngredientWords);
+    if (_ingredientsError != null) isValid = false;
+
     if (widget.weightRequired) {
-      if (_weightController.text.trim().isEmpty) {
-        setState(() => _weightError = 'Please enter a valid number');
-        isValid = false;
-      } else {
-        final weight = int.tryParse(_weightController.text.trim());
-        if (weight == null) {
-          setState(() => _weightError = 'Please enter a valid number');
-          isValid = false;
-        } else if (weight < 0) {
-          setState(() => _weightError = 'Weight cannot be negative');
-          isValid = false;
-        }
-      }
+      _weightError = FormValidator.validateWeight(_weightController.text);
+      if (_weightError != null) isValid = false;
     }
-    
+
     if (isValid) {
-      setState(() => _successMessage = 'Food entry is saved successfully!');
+      FoodEntry foodEntry = FoodEntry(
+        foodName: _foodNameController.text,
+        description: _descriptionController.text,
+        ingredients: _ingredientsController.text,
+        weight: widget.weightRequired ? int.tryParse(_weightController.text) : null,
+      );
+
+      setState(() {
+        _successMessage = 'Food entry is saved successfully!';
+      });
+
+      print(foodEntry);
     }
   }
 
@@ -94,12 +79,10 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
-                key: ValueKey('foodNameField'),
                 controller: _foodNameController,
                 decoration: InputDecoration(
                   labelText: 'Food Name',
@@ -107,9 +90,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                 ),
               ),
               SizedBox(height: 10),
-              
               TextField(
-                key: ValueKey('descriptionField'),
                 controller: _descriptionController,
                 decoration: InputDecoration(
                   labelText: 'Description',
@@ -118,9 +99,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                 maxLines: 3,
               ),
               SizedBox(height: 10),
-              
               TextField(
-                key: ValueKey('ingredientsField'),
                 controller: _ingredientsController,
                 decoration: InputDecoration(
                   labelText: 'Ingredients',
@@ -129,10 +108,8 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                 maxLines: 3,
               ),
               SizedBox(height: 10),
-              
               if (widget.weightRequired)
                 TextField(
-                  key: ValueKey('weightField'),
                   controller: _weightController,
                   decoration: InputDecoration(
                     labelText: 'Weight (grams)',
@@ -141,7 +118,6 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                   keyboardType: TextInputType.number,
                 ),
               SizedBox(height: 10),
-              
               if (_successMessage != null)
                 Padding(
                   padding: EdgeInsets.only(top: 10),
@@ -150,10 +126,8 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                     style: TextStyle(color: Colors.green),
                   ),
                 ),
-              
               SizedBox(height: 20),
               ElevatedButton(
-                key: ValueKey('saveButton'),
                 onPressed: _saveForm,
                 child: Text('Save'),
               ),

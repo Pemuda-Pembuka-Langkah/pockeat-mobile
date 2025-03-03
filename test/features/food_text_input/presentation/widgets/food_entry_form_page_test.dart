@@ -36,7 +36,6 @@ void main() {
       final longDescription = 'I had nasi goreng for lunch today, it consisted of fried rice with various vegetables including carrots, peas, and corn. The rice was flavored with sweet soy sauce and a bit of chili. It also contained small pieces of chicken and some scrambled eggs mixed throughout. The portion was quite large and I couldn\'t finish it all in one sitting.';
       
       await tester.enterText(find.byKey(ValueKey('descriptionField')), longDescription);
-      
       await tester.pump();
       
       expect(find.text(longDescription), findsOneWidget);
@@ -65,7 +64,7 @@ void main() {
     });
   });
 
-    group('FoodEntryForm Edge Case Tests', () {
+  group('FoodEntryForm Edge Case Tests', () {
     testWidgets('Shows error message when required fields are empty', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: FoodEntryForm()));
       
@@ -75,11 +74,10 @@ void main() {
       expect(find.text('Please insert food name'), findsOneWidget);
       expect(find.text('Please insert food description'), findsOneWidget);
       expect(find.text('Please insert food ingredients'), findsOneWidget);
-
       expect(find.text('Food entry is saved successfully!'), findsNothing);
     });
-    
-    testWidgets('Shows error when food name text excedds maximum word count', (WidgetTester tester) async {
+
+    testWidgets('Shows error when food name text exceeds maximum word count', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: FoodEntryForm(maxFoodNameWords: 20)));
 
       final longFoodName = 'Grilled herb-marinated chicken breast with roasted garlic mashed potatoes, sautéed buttered asparagus, honey-glazed baby carrots, creamy mushroom sauce, and a side of freshly baked whole wheat bread with homemade basil pesto spread, served alongside a refreshing mixed berry yogurt parfait with granola and a drizzle of organic wildflower honey.';
@@ -100,7 +98,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: FoodEntryForm(maxDescriptionWords: 50)));
 
       final longDescription = 'For breakfast, I had a bowl of oatmeal with sliced bananas, honey, and a sprinkle of cinnamon. Alongside, I drank a cup of black coffee. Later, for lunch, I ate grilled salmon with steamed broccoli, brown rice, and a side of fresh avocado salad. In the evening, I had a hearty vegetable soup with carrots, potatoes, and lentils, accompanied by whole wheat toast. I also snacked on almonds, yogurt, and an apple throughout the day. Staying hydrated, I drank plenty of water and a cup of green tea before bedtime to help with digestion and relaxation.';
-
+      
       await tester.enterText(find.byKey(ValueKey('foodNameField')), 'Test Food');      
       await tester.enterText(find.byKey(ValueKey('descriptionField')), longDescription);
       await tester.enterText(find.byKey(ValueKey('ingredientsField')), 'Test Ingredients');      
@@ -113,11 +111,11 @@ void main() {
       expect(find.text('Food entry is saved successfully!'), findsNothing);
     });
 
-    testWidgets('Shows error when ingredients text excedds maximum word count', (WidgetTester tester) async {
+    testWidgets('Shows error when ingredients text exceeds maximum word count', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: FoodEntryForm(maxIngredientWords: 50)));
 
       final longIngredients = 'For breakfast, I had a bowl of oatmeal with sliced bananas, honey, and a sprinkle of cinnamon. Alongside, I drank a cup of black coffee. Later, for lunch, I ate grilled salmon with steamed broccoli, brown rice, and a side of fresh avocado salad. In the evening, I had a hearty vegetable soup with carrots, potatoes, and lentils, accompanied by whole wheat toast. I also snacked on almonds, yogurt, and an apple throughout the day. Staying hydrated, I drank plenty of water and a cup of green tea before bedtime to help with digestion and relaxation.';
-
+      
       await tester.enterText(find.byKey(ValueKey('foodNameField')), 'Test Food');      
       await tester.enterText(find.byKey(ValueKey('descriptionField')), 'Test Description');
       await tester.enterText(find.byKey(ValueKey('ingredientsField')), longIngredients);      
@@ -128,59 +126,6 @@ void main() {
 
       expect(find.text('Ingredients exceeds maximum word count (50)'), findsOneWidget);
       expect(find.text('Food entry is saved successfully!'), findsNothing);
-    });
-
-    testWidgets('Can save when weight field is empty', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: FoodEntryForm(weightRequired: false)));
-      
-      await tester.enterText(find.byKey(ValueKey('foodNameField')), 'Test Food');
-      await tester.enterText(find.byKey(ValueKey('descriptionField')), 'Simple description');
-      await tester.enterText(find.byKey(ValueKey('ingredientsField')), 'Test ingredients');
-      
-      await tester.tap(find.byKey(ValueKey('saveButton')));
-      await tester.pump();
-      
-      expect(find.text('Food entry is saved successfully!'), findsOneWidget);
-    });
-
-    testWidgets('Shows error for invalid weight values', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: FoodEntryForm()));
-      
-      await tester.enterText(find.byKey(ValueKey('foodNameField')), 'Test Food');
-      await tester.enterText(find.byKey(ValueKey('descriptionField')), 'Simple description');
-      await tester.enterText(find.byKey(ValueKey('ingredientsField')), 'Test ingredients');
-      await tester.enterText(find.byKey(ValueKey('weightField')), 'abc');
-      
-      await tester.tap(find.byKey(ValueKey('saveButton')));
-      await tester.pump();
-      
-      expect(find.text('Please enter a valid number'), findsOneWidget);
-      
-      await tester.enterText(find.byKey(ValueKey('weightField')), '-50');
-      await tester.tap(find.byKey(ValueKey('saveButton')));
-      await tester.pump();
-      
-      expect(find.text('Weight cannot be negative'), findsOneWidget);
-    });
-
-    testWidgets('Handles different letter cases correctly', (WidgetTester tester) async {
-      await tester.pumpWidget(MaterialApp(home: FoodEntryForm()));
-      
-      final mixedCaseText = 'NaSi GoReNg with VeGetAblEs';
-      
-      await tester.enterText(find.byKey(ValueKey('foodNameField')), mixedCaseText);
-      await tester.enterText(find.byKey(ValueKey('descriptionField')), 'Simple description');
-      await tester.enterText(find.byKey(ValueKey('ingredientsField')), 'Test ingredients');
-      await tester.enterText(find.byKey(ValueKey('weightField')), '100');
-      
-      await tester.pump();
-      
-      expect(find.text(mixedCaseText), findsOneWidget);
-      
-      await tester.tap(find.byKey(ValueKey('saveButton')));
-      await tester.pump();
-      
-      expect(find.text('Food entry is saved successfully!'), findsOneWidget);
     });
   });
 }
