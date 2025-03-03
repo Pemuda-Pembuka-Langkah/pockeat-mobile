@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/generative_model_wrapper.dart';
@@ -28,6 +29,25 @@ class MockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper 
   void setException(Exception exception) {
     exceptionToThrow = exception;
   }
+}
+
+// Mock dotenv to test fromEnv factory
+class MockDotEnv {
+  static Map<String, String> values = {};
+  
+  static void setup({String? apiKey}) {
+    if (apiKey != null) {
+      values['GOOGLE_GEMINI_API_KEY'] = apiKey;
+    } else {
+      values.remove('GOOGLE_GEMINI_API_KEY');
+    }
+  }
+}
+
+// Replace actual dotenv access with our mock
+// This stub extension is necessary for testing the factory method
+extension DotEnvStub on DotEnv {
+  static Map<String, String> get env => MockDotEnv.values;
 }
 
 // Class pengganti yang sederhana - tidak perlu implementasi penuh
@@ -70,6 +90,49 @@ void main() {
       apiKey: 'fake-api-key',
       modelWrapper: mockModelWrapper,
     );
+  });
+  
+  group('GeminiServiceImpl factory constructor', () {
+    test('fromEnv should create instance when API key is present', () {
+      // Arrange
+      MockDotEnv.setup(apiKey: 'test-api-key');
+      
+      // Act
+      final service = GeminiServiceImpl.fromEnv();
+      
+      // Assert
+      expect(service, isA<GeminiServiceImpl>());
+    });
+    
+    test('fromEnv should throw exception when API key is missing', () {
+      // Arrange
+      MockDotEnv.setup(apiKey: null);
+      
+      // Act & Assert
+      expect(
+        () => GeminiServiceImpl.fromEnv(), 
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(), 
+          'message', 
+          contains('GOOGLE_GEMINI_API_KEY not found')
+        ))
+      );
+    });
+    
+    test('fromEnv should throw exception when API key is empty', () {
+      // Arrange
+      MockDotEnv.setup(apiKey: '');
+      
+      // Act & Assert
+      expect(
+        () => GeminiServiceImpl.fromEnv(), 
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(), 
+          'message', 
+          contains('GOOGLE_GEMINI_API_KEY not found')
+        ))
+      );
+    });
   });
   
   group('analyzeFoodByText', () {
@@ -342,6 +405,22 @@ void main() {
         ))
       );
     });
+    
+    // This test specifically covers the "No response text generated" exception
+    test('should throw exception when API response text is null', () async {
+      // Arrange
+      final mockBytes = Uint8List.fromList([1, 2, 3, 4]);
+      mockFile.setBytes(mockBytes);
+      mockModelWrapper.setResponse(null);
+      
+      // Act & Assert
+      expect(
+        () => geminiService.analyzeFoodByImage(mockFile),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message, 'message', contains('No response text generated')
+        ))
+      );
+    });
   });
   
   group('analyzeNutritionLabel', () {
@@ -429,6 +508,23 @@ void main() {
         ))
       );
     });
+    
+    // This test specifically covers the "No response text generated" exception
+    test('should throw exception when API response text is null', () async {
+      // Arrange
+      final mockBytes = Uint8List.fromList([1, 2, 3, 4]);
+      const servings = 1.0;
+      mockFile.setBytes(mockBytes);
+      mockModelWrapper.setResponse(null);
+      
+      // Act & Assert
+      expect(
+        () => geminiService.analyzeNutritionLabel(mockFile, servings),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message, 'message', contains('No response text generated')
+        ))
+      );
+    });
   });
   
   group('analyzeExercise', () {
@@ -490,6 +586,51 @@ void main() {
       expect(result.metValue, equals(0.0));
       expect(result.summary, contains('Could not determine exercise details'));
       expect(result.missingInfo, contains('exercise_type'));
+    });
+    
+    // This test specifically covers the "No response text generated" exception
+    test('should throw exception when API response text is null', () async {
+      // Arrange
+      const exerciseDescription = 'Running 5km in 30 minutes';
+      mockModelWrapper.setResponse(null);
+      
+      // Act & Assert
+      expect(
+        () => geminiService.analyzeExercise(exerciseDescription),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message, 'message', contains('No response text generated')
+        ))
+      );
+    });
+    
+    // This test specifically covers the general exception handling
+    test('should throw exception when API call fails', () async {
+      // Arrange
+      const exerciseDescription = 'Running 5km in 30 minutes';
+      mockModelWrapper.setException(Exception('API call failed'));
+      
+      // Act & Assert
+      expect(
+        () => geminiService.analyzeExercise(exerciseDescription),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message, 'message', contains('Error analyzing exercise')
+        ))
+      );
+    });
+    
+    // This test covers the parseExerciseResponse exception
+    test('should throw exception when response has invalid format', () async {
+      // Arrange
+      const exerciseDescription = 'Running 5km in 30 minutes';
+      mockModelWrapper.setResponse('{"invalid": "json_format"}'); // Missing required fields
+      
+      // Act & Assert
+      expect(
+        () => geminiService.analyzeExercise(exerciseDescription),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message, 'message', contains('Failed to parse exercise analysis response')
+        ))
+      );
     });
   });
   
