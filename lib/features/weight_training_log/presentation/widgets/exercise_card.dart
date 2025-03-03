@@ -17,11 +17,30 @@ class ExerciseCard extends StatelessWidget {
   }) : super(key: key);
 
   Widget _buildSetRow(int setNumber, ExerciseSet set) {
-    throw UnimplementedError();
+    return Row(
+      children: [
+        Text('$setNumber'),
+        Text('${set.weight} kg × ${set.reps} reps (${set.duration} min)'),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    throw UnimplementedError();
+    return Column(
+      children: [
+        Text(exercise.name),
+        Text('$volume kg'),
+        Text('${calculateExerciseCalories(exercise).toStringAsFixed(2)} kcal'),
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: exercise.sets.length,
+          itemBuilder: (context, index) {
+            return _buildSetRow(index + 1, exercise.sets[index]);
+          },
+        ),
+        ElevatedButton(onPressed: onAddSet, child: const Text('Add Set')),
+      ],
+    );
   }
 }
