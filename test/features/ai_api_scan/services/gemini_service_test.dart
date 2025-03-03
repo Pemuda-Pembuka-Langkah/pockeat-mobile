@@ -2,12 +2,11 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/generative_model_wrapper.dart';
 
-// Custom mock class
+
 class MockGenerativeModelWrapper extends Mock
     implements GenerativeModelWrapper {
   String? responseText;
@@ -73,6 +72,13 @@ class MockGeminiServiceImpl extends GeminiServiceImpl {
     }
     return MockGeminiServiceImpl(apiKey: apiKey);
   }
+}
+class MockEnv {
+  static final Map<String, String> _env = {
+    'GOOGLE_GEMINI_API_KEY': 'fake-api-key'
+  };
+  
+  static Map<String, String> get env => _env;
 }
 
 void main() {
