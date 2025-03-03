@@ -70,7 +70,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: FoodEntryForm()));
       
       await tester.tap(find.byKey(ValueKey('saveButton')));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.text('Please insert food name'), findsOneWidget);
       expect(find.text('Please insert food description'), findsOneWidget);
