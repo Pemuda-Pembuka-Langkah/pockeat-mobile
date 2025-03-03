@@ -14,3 +14,15 @@ class Exercise {
   })  : id = id ?? DateTime.now().toString(),
         sets = sets ?? [];
 }
+
+class ExerciseSet {
+  final double weight;
+  final int reps;
+  final double duration;
+
+  ExerciseSet({
+    required this.weight,
+    required this.reps,
+    required this.duration,
+  });
+}
