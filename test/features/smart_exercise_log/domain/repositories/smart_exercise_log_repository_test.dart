@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_result.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 
@@ -39,7 +39,7 @@ void main() {
   late MockDocumentSnapshot mockDocSnapshot;
   late MockQuerySnapshot mockQuerySnapshot;
   late MockQuery mockQuery;
-  
+
   // The actual repository implementation to test
   late SmartExerciseLogRepository repository;
 
@@ -51,10 +51,10 @@ void main() {
     mockDocSnapshot = MockDocumentSnapshot();
     mockQuerySnapshot = MockQuerySnapshot();
     mockQuery = MockQuery();
-    
+
     // Initialize the repository with mock Firestore
     repository = SmartExerciseLogRepositoryImpl(firestore: mockFirestore);
-    
+
     // Setup common mock behaviors
     when(mockFirestore.collection(any)).thenReturn(mockCollection);
     when(mockCollection.doc(any)).thenReturn(mockDocument);
@@ -63,7 +63,7 @@ void main() {
   group('saveAnalysisResult', () {
     test('should save result and return its id', () async {
       // Arrange
-      final result = AnalysisResult(
+      final result = ExerciseAnalysisResult(
         id: 'test-id-123',
         exerciseType: 'Running',
         duration: '30 menit',
@@ -72,13 +72,13 @@ void main() {
         timestamp: DateTime.now(),
         originalInput: 'Lari 30 menit dengan intensitas sedang',
       );
-      
+
       // Setup mock Firestore behavior
-      when(mockDocument.set(any)).thenAnswer((_) async => null);
+      when(mockDocument.set(any)).thenAnswer((_) => Future<void>.value());
       
       // Act
       final resultId = await repository.saveAnalysisResult(result);
-      
+
       // Assert
       expect(resultId, 'test-id-123');
       verify(mockFirestore.collection('exerciseAnalysis')).called(1);
@@ -88,7 +88,7 @@ void main() {
 
     test('should throw Exception when saving fails', () async {
       // Arrange
-      final result = AnalysisResult(
+      final result = ExerciseAnalysisResult(
         exerciseType: 'Running',
         duration: '30 menit',
         intensity: 'Sedang',
@@ -96,15 +96,14 @@ void main() {
         timestamp: DateTime.now(),
         originalInput: 'Lari 30 menit',
       );
-      
+
       // Setup mock to throw an error
-      when(mockDocument.set(any)).thenThrow(FirebaseException(plugin: 'firestore'));
-      
+      when(mockDocument.set(any))
+          .thenThrow(FirebaseException(plugin: 'firestore'));
+
       // Act & Assert
-      expect(
-        () => repository.saveAnalysisResult(result), 
-        throwsA(isA<Exception>())
-      );
+      expect(() => repository.saveAnalysisResult(result),
+          throwsA(isA<Exception>()));
     });
   });
 
@@ -119,16 +118,16 @@ void main() {
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'originalInput': 'HIIT 20 menit',
       };
-      
+
       // Setup mock document behavior
       when(mockDocument.get()).thenAnswer((_) async => mockDocSnapshot);
       when(mockDocSnapshot.exists).thenReturn(true);
       when(mockDocSnapshot.data()).thenReturn(mockData);
       when(mockDocSnapshot.id).thenReturn('test-id-123');
-      
+
       // Act
       final result = await repository.getAnalysisResultFromId('test-id-123');
-      
+
       // Assert
       expect(result, isNotNull);
       expect(result?.id, 'test-id-123');
@@ -142,10 +141,11 @@ void main() {
       // Arrange
       when(mockDocument.get()).thenAnswer((_) async => mockDocSnapshot);
       when(mockDocSnapshot.exists).thenReturn(false);
-      
+
       // Act
-      final result = await repository.getAnalysisResultFromId('non-existent-id');
-      
+      final result =
+          await repository.getAnalysisResultFromId('non-existent-id');
+
       // Assert
       expect(result, isNull);
       verify(mockFirestore.collection('exerciseAnalysis')).called(1);
@@ -154,13 +154,12 @@ void main() {
 
     test('should throw Exception when retrieval fails', () async {
       // Arrange
-      when(mockDocument.get()).thenThrow(FirebaseException(plugin: 'firestore'));
-      
+      when(mockDocument.get())
+          .thenThrow(FirebaseException(plugin: 'firestore'));
+
       // Act & Assert
-      expect(
-        () => repository.getAnalysisResultFromId('error-id'), 
-        throwsA(isA<Exception>())
-      );
+      expect(() => repository.getAnalysisResultFromId('error-id'),
+          throwsA(isA<Exception>()));
     });
   });
 
@@ -168,15 +167,16 @@ void main() {
     test('should return empty list when no results saved', () async {
       // Arrange
       final List<MockQueryDocumentSnapshot> emptyDocs = [];
-      
+
       // Setup mock query behavior
-      when(mockCollection.orderBy('timestamp', descending: true)).thenReturn(mockQuery);
+      when(mockCollection.orderBy('timestamp', descending: true))
+          .thenReturn(mockQuery);
       when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
       when(mockQuerySnapshot.docs).thenReturn(emptyDocs);
-      
+
       // Act
       final results = await repository.getAllAnalysisResults();
-      
+
       // Assert
       expect(results, isEmpty);
       verify(mockFirestore.collection('exerciseAnalysis')).called(1);
@@ -188,7 +188,7 @@ void main() {
       // Arrange
       final mockQueryDoc1 = MockQueryDocumentSnapshot();
       final mockQueryDoc2 = MockQueryDocumentSnapshot();
-      
+
       final mockData1 = {
         'exerciseType': 'Running',
         'duration': '30 menit',
@@ -197,7 +197,7 @@ void main() {
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'originalInput': 'Lari 30 menit',
       };
-      
+
       final mockData2 = {
         'exerciseType': 'Yoga',
         'duration': '45 menit',
@@ -206,23 +206,27 @@ void main() {
         'timestamp': DateTime.now().millisecondsSinceEpoch,
         'originalInput': 'Yoga 45 menit santai',
       };
-      
+
       // Setup mock docs
       when(mockQueryDoc1.data()).thenReturn(mockData1);
       when(mockQueryDoc1.id).thenReturn('id-1');
       when(mockQueryDoc2.data()).thenReturn(mockData2);
       when(mockQueryDoc2.id).thenReturn('id-2');
-      
-      final List<MockQueryDocumentSnapshot> mockDocs = [mockQueryDoc1, mockQueryDoc2];
-      
+
+      final List<MockQueryDocumentSnapshot> mockDocs = [
+        mockQueryDoc1,
+        mockQueryDoc2
+      ];
+
       // Setup mock query behavior
-      when(mockCollection.orderBy('timestamp', descending: true)).thenReturn(mockQuery);
+      when(mockCollection.orderBy('timestamp', descending: true))
+          .thenReturn(mockQuery);
       when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
       when(mockQuerySnapshot.docs).thenReturn(mockDocs);
-      
+
       // Act
       final results = await repository.getAllAnalysisResults();
-      
+
       // Assert
       expect(results.length, 2);
       expect(results[0].exerciseType, 'Running');
@@ -234,14 +238,13 @@ void main() {
 
     test('should throw Exception when retrieval fails', () async {
       // Arrange
-      when(mockCollection.orderBy('timestamp', descending: true)).thenReturn(mockQuery);
+      when(mockCollection.orderBy('timestamp', descending: true))
+          .thenReturn(mockQuery);
       when(mockQuery.get()).thenThrow(FirebaseException(plugin: 'firestore'));
-      
+
       // Act & Assert
       expect(
-        () => repository.getAllAnalysisResults(), 
-        throwsA(isA<Exception>())
-      );
+          () => repository.getAllAnalysisResults(), throwsA(isA<Exception>()));
     });
   });
 }
