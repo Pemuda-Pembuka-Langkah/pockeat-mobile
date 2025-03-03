@@ -12,14 +12,7 @@ import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
-// Import the food analysis page
 import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_page.dart';
-import 'package:camera/camera.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
-import 'package:pockeat/features/homepage/presentation/homepage.dart';
-import 'package:provider/provider.dart';
-import 'package:pockeat/component/navigation.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -106,16 +99,6 @@ class MyApp extends StatelessWidget {
             )),
         '/add-food': (context) => const FoodInputPage(),
         '/food-analysis': (context) => const FoodAnalysisPage(),
-        '/scan': (context) => ScanFoodPage(
-                cameraController: CameraController(
-              CameraDescription(
-                name: '0',
-                lensDirection: CameraLensDirection.back,
-                sensorOrientation: 0,
-              ),
-              ResolutionPreset.medium,
-            )),
-        '/add-food': (context) => const FoodInputPage(),
       },
     );
   }
