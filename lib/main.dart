@@ -5,6 +5,12 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:camera/camera.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
+import 'package:pockeat/features/homepage/presentation/homepage.dart';
+import 'package:provider/provider.dart';
+import 'package:pockeat/component/navigation.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,8 +37,12 @@ void main() async {
   }
 
   runApp(
-    const MyApp(),
-
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
@@ -75,7 +85,17 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-
+        '/': (context) => const HomePage(),
+        '/scan': (context) => ScanFoodPage(
+                cameraController: CameraController(
+              CameraDescription(
+                name: '0',
+                lensDirection: CameraLensDirection.back,
+                sensorOrientation: 0,
+              ),
+              ResolutionPreset.medium,
+            )),
+        '/add-food': (context) => const FoodInputPage(),
       },
     );
   }
