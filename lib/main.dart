@@ -5,6 +5,8 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+// Import the food analysis page
+import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_page.dart';
 import 'package:camera/camera.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
 import 'package:pockeat/features/homepage/presentation/homepage.dart';
@@ -16,7 +18,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Default ke dev untuk development yang aman
-   // Load dotenv dulu
+  // Load dotenv dulu
   await dotenv.load(fileName: '.env');
   
   // Ambil flavor dari dotenv
@@ -73,8 +75,7 @@ class MyApp extends StatelessWidget {
         // Tambah ini
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            foregroundColor:
-                Colors.white, // Ini akan membuat teks button jadi putih
+            foregroundColor: Colors.white, // Ini akan membuat teks button jadi putih
             backgroundColor: Colors.blue[400],
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -85,7 +86,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const HomePage(),
+        '/': (context) => const HomePage(), // You'll need to create this
+        '/food-analysis': (context) => const FoodAnalysisPage(),
         '/scan': (context) => ScanFoodPage(
                 cameraController: CameraController(
               CameraDescription(

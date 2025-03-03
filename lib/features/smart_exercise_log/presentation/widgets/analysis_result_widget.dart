@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_result.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 class AnalysisResultWidget extends StatelessWidget {
-  final AnalysisResult analysisResult;
+  final ExerciseAnalysisResult analysisResult;
   final VoidCallback onRetry;
   final VoidCallback onSave;
 
@@ -15,8 +15,8 @@ class AnalysisResultWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasMissingInfo = analysisResult.missingInfo != null && 
-                         analysisResult.missingInfo!.isNotEmpty;
+    final hasMissingInfo = analysisResult.missingInfo != null &&
+        analysisResult.missingInfo!.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -43,10 +43,10 @@ class AnalysisResultWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Display missing information warning if needed
           if (hasMissingInfo) _buildMissingInfoSection(),
-          
+
           // Display summary if available
           if (analysisResult.summary != null) ...[
             Text(
@@ -57,62 +57,92 @@ class AnalysisResultWidget extends StatelessWidget {
               ),
             ),
           ],
-          
+
           // Always add the divider regardless of summary existence
           const Divider(height: 24, color: Colors.black12),
-          
+
           // Display analysis data
           _buildStatRow('Jenis Olahraga', analysisResult.exerciseType),
           _buildStatRow('Durasi', analysisResult.duration),
           _buildStatRow('Intensitas', analysisResult.intensity),
-          _buildStatRow('Estimasi Kalori', '${analysisResult.estimatedCalories} kkal'),
+          _buildStatRow(
+              'Estimasi Kalori', '${analysisResult.estimatedCalories} kkal'),
           
+          // Display MET value if greater than 0
+          if (analysisResult.metValue > 0)
+            _buildStatRow('MET', analysisResult.metValue.toStringAsFixed(1)),
+
           const SizedBox(height: 20),
-          
+
           // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onRetry,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: const BorderSide(color: Color(0xFF9B6BFF)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+          if (analysisResult.isComplete) ...[
+            // Tampilkan kedua tombol jika data lengkap
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onRetry,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      side: const BorderSide(color: Color(0xFF9B6BFF)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    'Ulangi Input',
-                    style: TextStyle(
-                      color: Color(0xFF9B6BFF),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: onSave,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF9B6BFF),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Simpan Log',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
+                    child: const Text(
+                      'Ulangi Input',
+                      style: TextStyle(
+                        color: Color(0xFF9B6BFF),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onSave,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF9B6BFF),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Simpan Log',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ] else ...[
+            // Hanya tampilkan tombol 'Ulangi Input' jika data tidak lengkap
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: onRetry,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: const BorderSide(color: Color(0xFF9B6BFF)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Ulangi Input',
+                  style: TextStyle(
+                    color: Color(0xFF9B6BFF),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
-            ],
-          ),
+            )
+          ],
         ],
       ),
     );
@@ -180,15 +210,15 @@ class AnalysisResultWidget extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           ...missingInfo.map((item) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text(
-              '• ${missingLabels[item] ?? item}',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          )),
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Text(
+                  '• ${missingLabels[item] ?? item}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              )),
         ],
       ),
     );
