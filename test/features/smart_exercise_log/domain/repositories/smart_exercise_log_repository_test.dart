@@ -74,8 +74,8 @@ void main() {
       );
 
       // Setup mock Firestore behavior
-      when(mockDocument.set(any)).thenAnswer((_) async => null);
-
+      when(mockDocument.set(any)).thenAnswer((_) => Future<void>.value());
+      
       // Act
       final resultId = await repository.saveAnalysisResult(result);
 

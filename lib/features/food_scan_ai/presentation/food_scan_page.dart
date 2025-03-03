@@ -293,6 +293,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
   Widget _buildModeButton(String text, int mode) {
     bool isSelected = _currentMode == mode;
     return GestureDetector(
+      key: Key('mode_button_$mode'),
       onTap: () {
         setState(() => _currentMode = mode);
       },
@@ -315,6 +316,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
 
   Widget _buildCircularButton(IconData icon, {VoidCallback? onTap}) {
     return GestureDetector(
+      key: Key('circular_button_$icon'),
       onTap: onTap,
       child: Container(
         width: 40,
