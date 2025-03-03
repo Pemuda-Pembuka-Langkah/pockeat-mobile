@@ -25,56 +25,64 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
   final _ingredientsController = TextEditingController();
   final _weightController = TextEditingController();
   String? _errorMessage;
+  String? _foodNameError;
+  String? _foodDescriptionError;
+  String? _foodIngredientsError;
+  String? _weightError;
 
   void _saveForm() {
     setState(() {
-      _errorMessage = null;
+      _foodNameError = null;
+      _foodDescriptionError = null;
+      _foodIngredientsError = null;
     });
     
+    bool isValid = true;
+
     if (_foodNameController.text.trim().isEmpty) {
-      setState(() => _errorMessage = 'Please insert food name');
-      return;
+      setState(() => _foodNameError = 'Please insert food name');
+      isValid = false;
     }
     
     if (_descriptionController.text.trim().isEmpty) {
-      setState(() => _errorMessage = 'Please insert food description');
-      return;
+      setState(() => _foodDescriptionError = 'Please insert food description');
+      isValid = false;
     }
     
     if (_ingredientsController.text.trim().isEmpty) {
-      setState(() => _errorMessage = 'Please insert food ingredients');
-      return;
+      setState(() => _foodIngredientsError = 'Please insert food ingredients');
+      isValid = false;
     }
     
     if (widget.weightRequired && _weightController.text.trim().isEmpty) {
-      setState(() => _errorMessage = 'Please enter a valid number');
+      setState(() => _weightError = 'Please enter a valid number');
       return;
     }
     
     if (widget.weightRequired) {
       final weight = int.tryParse(_weightController.text.trim());
       if (weight == null) {
-        setState(() => _errorMessage = 'Please enter a valid number');
+        setState(() => _weightError = 'Please enter a valid number');
         return;
       }
       if (weight < 0) {
-        setState(() => _errorMessage = 'Weight cannot be negative');
+        setState(() => _weightError = 'Weight cannot be negative');
         return;
       }
     }
     
     if (_foodNameController.text.split(' ').length > widget.maxFoodNameWords) {
-      setState(() => _errorMessage = 'Food name exceeds maximum word count (${widget.maxFoodNameWords})');
+      setState(() => _foodNameError = 'Food name exceeds maximum word count (${widget.maxFoodNameWords})');
       return;
     }
     
     if (_descriptionController.text.split(' ').length > widget.maxDescriptionWords) {
-      setState(() => _errorMessage = 'Description exceeds maximum word count (${widget.maxDescriptionWords})');
+      setState(() => _foodDescriptionError = 'Description exceeds maximum word count (${widget.maxDescriptionWords})');
       return;
     }
     
     if (_ingredientsController.text.split(' ').length > widget.maxIngredientWords) {
-      setState(() => _errorMessage = 'Ingredients exceeds maximum word count (${widget.maxIngredientWords})');
+      setState(() => _foodIngredientsError = 'Ingredients exceeds maximum word count (${widget.maxIngredientWords})');
       return;
     }
     
