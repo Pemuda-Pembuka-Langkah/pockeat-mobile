@@ -424,6 +424,7 @@ class _NutritionPageState extends State<NutritionPage> {
                 color: primaryYellow.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(8),
                 child: InkWell(
+                  key: const Key('fix_button'),
                   borderRadius: BorderRadius.circular(8),
                   onTap: () {},
                   child: Container(
@@ -455,6 +456,7 @@ class _NutritionPageState extends State<NutritionPage> {
                 color: primaryPink,
                 borderRadius: BorderRadius.circular(8),
                 child: InkWell(
+                  key: const Key('add_to_log_button'),
                   borderRadius: BorderRadius.circular(8),
                   onTap: () {},
                   child: Container(
