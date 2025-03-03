@@ -18,6 +18,7 @@ class MockGenerativeModelWrapper extends Mock
       throw exceptionToThrow!;
     }
 
+
     // Return minimal fake response object
     return _MockGenerateContentResponse(responseText);
   }
@@ -26,12 +27,15 @@ class MockGenerativeModelWrapper extends Mock
     responseText = text;
   }
 
+
   void setException(Exception exception) {
     exceptionToThrow = exception;
   }
 }
 
+
 // Simple response class
+
 class _MockGenerateContentResponse {
   final String? text;
   _MockGenerateContentResponse(this.text);
@@ -41,6 +45,7 @@ class MockFile extends Mock implements File {
   Uint8List? bytesToReturn;
   Exception? exceptionToThrow;
 
+
   @override
   Future<Uint8List> readAsBytes() async {
     if (exceptionToThrow != null) {
@@ -48,6 +53,7 @@ class MockFile extends Mock implements File {
     }
     return bytesToReturn ?? Uint8List(0);
   }
+
 
   void setBytes(Uint8List bytes) {
     bytesToReturn = bytes;
@@ -57,6 +63,7 @@ class MockFile extends Mock implements File {
     exceptionToThrow = exception;
   }
 }
+
 
 // Mock the dotenv.env property instead of using real files
 class MockGeminiServiceImpl extends GeminiServiceImpl {
@@ -81,20 +88,24 @@ class MockEnv {
   static Map<String, String> get env => _env;
 }
 
+
 void main() {
   late MockGenerativeModelWrapper mockModelWrapper;
   late MockFile mockFile;
   late GeminiServiceImpl geminiService;
 
+
   setUp(() {
     mockModelWrapper = MockGenerativeModelWrapper();
     mockFile = MockFile();
+
 
     geminiService = GeminiServiceImpl(
       apiKey: 'fake-api-key',
       modelWrapper: mockModelWrapper,
     );
   });
+
 
   // Skip DotEnv tests - they require more complex mocking
   // We'll test the constructor directly instead
@@ -126,6 +137,7 @@ void main() {
   group('analyzeFoodByText', () {
     test('should return food analysis when API returns valid response',
         () async {
+
       // Arrange
       const foodDescription = 'Apple pie with cinnamon';
       const validJsonResponse = '''
@@ -165,11 +177,13 @@ void main() {
       }
       ''';
 
+
       // Mock the response
       mockModelWrapper.setResponse(validJsonResponse);
 
       // Act
       final result = await geminiService.analyzeFoodByText(foodDescription);
+
 
       // Assert
       expect(result.foodName, equals('Apple Pie'));
@@ -181,6 +195,7 @@ void main() {
       expect(result.nutritionInfo.protein, equals(2));
       expect(result.nutritionInfo.carbs, equals(40));
     });
+
 
     test('should throw exception when API response is null', () async {
       // Arrange
@@ -201,6 +216,7 @@ void main() {
       const foodDescription = 'Apple pie with cinnamon';
       const invalidResponse = 'This is not a valid JSON';
 
+
       // Mock the response
       mockModelWrapper.setResponse(invalidResponse);
 
@@ -210,6 +226,7 @@ void main() {
           throwsA(isA<GeminiServiceException>().having((e) => e.message,
               'message', contains('No valid JSON found in response'))));
     });
+
 
     test('should handle error response with string error', () async {
       // Arrange
@@ -230,6 +247,7 @@ void main() {
         }
       }
       ''';
+
 
       // Mock the response
       mockModelWrapper.setResponse(errorJsonResponse);
@@ -261,6 +279,7 @@ void main() {
       }
       ''';
 
+
       // Mock the response
       mockModelWrapper.setResponse(errorJsonResponse);
 
@@ -291,6 +310,7 @@ void main() {
         () async {
       // Arrange
       final mockBytes = Uint8List.fromList([1, 2, 3, 4]); // Dummy image bytes
+
 
       const validJsonResponse = '''
       {
@@ -324,6 +344,7 @@ void main() {
       }
       ''';
 
+
       // Mock file read
       mockFile.setBytes(mockBytes);
 
@@ -333,12 +354,14 @@ void main() {
       // Act
       final result = await geminiService.analyzeFoodByImage(mockFile);
 
+
       // Assert
       expect(result.foodName, equals('Burger'));
       expect(result.ingredients.length, equals(3));
       expect(result.nutritionInfo.calories, equals(450));
       expect(result.nutritionInfo.sodium, equals(800));
     });
+
 
     test('should throw exception when file read fails', () async {
       // Arrange
@@ -350,6 +373,7 @@ void main() {
           throwsA(isA<GeminiServiceException>().having((e) => e.message,
               'message', contains('Error analyzing food image'))));
     });
+
 
     test('should handle no food detected error response', () async {
       // Arrange
@@ -370,6 +394,7 @@ void main() {
         }
       }
       ''';
+
 
       // Mock
       mockFile.setBytes(mockBytes);
@@ -436,6 +461,7 @@ void main() {
       }
       ''';
 
+
       // Mock
       mockFile.setBytes(mockBytes);
       mockModelWrapper.setResponse(validJsonResponse);
@@ -450,6 +476,7 @@ void main() {
       expect(result.ingredients[0].name, equals('Whole Grain Wheat'));
       expect(result.nutritionInfo.calories, equals(120));
     });
+
 
     test('should handle no nutrition label detected error', () async {
       // Arrange
@@ -516,12 +543,14 @@ void main() {
       }
       ''';
 
+
       // Mock the response
       mockModelWrapper.setResponse(validJsonResponse);
 
       // Act
       final result = await geminiService.analyzeExercise(exerciseDescription,
           userWeightKg: userWeight);
+
 
       // Assert
       expect(result.exerciseType, equals('Running'));
@@ -531,6 +560,7 @@ void main() {
       expect(result.metValue, equals(8.5));
       expect(result.originalInput, equals(exerciseDescription));
     });
+
 
     test('should handle error but still return result with default values',
         () async {
@@ -548,6 +578,7 @@ void main() {
       }
       ''';
 
+
       // Mock the response
       mockModelWrapper.setResponse(errorJsonResponse);
 
@@ -559,6 +590,7 @@ void main() {
       expect(result.estimatedCalories, equals(0));
       expect(result.intensity, equals('Not specified'));
       expect(result.metValue, equals(0.0));
+
       expect(result.summary, contains('Could not analyze exercise'));
       expect(result.missingInfo, contains('exercise_type'));
     });
@@ -669,6 +701,7 @@ void main() {
     });
   });
 
+
   // Test for directly instantiating GenerativeModelWrapper
   group('GenerativeModelWrapper tests', () {
     test('RealGenerativeModelWrapper delegates to GenerativeModel', () async {
@@ -722,3 +755,4 @@ void main() {
   });
 });
 }
+
