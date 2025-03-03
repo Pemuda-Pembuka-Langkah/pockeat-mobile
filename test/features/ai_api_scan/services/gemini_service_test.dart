@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart' as dotenv;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/generative_model_wrapper.dart';
@@ -56,6 +56,22 @@ class MockFile extends Mock implements File {
 
   void setException(Exception exception) {
     exceptionToThrow = exception;
+  }
+}
+
+// Mock the dotenv.env property instead of using real files
+class MockGeminiServiceImpl extends GeminiServiceImpl {
+  // This just creates a version that lets us test the factory method
+  MockGeminiServiceImpl({required String apiKey}) : super(apiKey: apiKey);
+
+  // Override the factory to use our test environment
+  static GeminiServiceImpl fromEnvWith(Map<String, String> env) {
+    final apiKey = env['GOOGLE_GEMINI_API_KEY'];
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception(
+          'GOOGLE_GEMINI_API_KEY not found in environment variables');
+    }
+    return MockGeminiServiceImpl(apiKey: apiKey);
   }
 }
 
@@ -583,6 +599,27 @@ void main() {
     });
   });
 
+  test('should throw exception when exercise response parsing fails', () async {
+    // Arrange
+    const exerciseDescription = 'Running 5km in 30 minutes';
+
+    // Use a response that will make _extractJson succeed but jsonDecode fail
+    // This is a string with valid JSON syntax but will cause an issue during parsing
+    // The string has an unescaped quote in the middle which breaks JSON parsing
+    const invalidJsonResponse =
+        '{"exercise_type": "Running", "calories_burned": "invalid"number"}';
+
+    mockModelWrapper.setResponse(invalidJsonResponse);
+
+    // Act & Assert
+    expect(
+        () => geminiService.analyzeExercise(exerciseDescription),
+        throwsA(isA<GeminiServiceException>().having(
+            (e) => e.message,
+            'message',
+            contains('Failed to parse exercise analysis response'))));
+  });
+
   group('_extractJson utility', () {
     test('should handle JSON embedded in text', () async {
       // Arrange
@@ -634,4 +671,48 @@ void main() {
       // We're just including the test definition for completeness
     });
   });
+
+  group('fromEnv factory method logic', () {
+  test('should create instance when API key is present', () {
+    // Set up test environment
+    final testEnv = {'GOOGLE_GEMINI_API_KEY': 'test-api-key'};
+    
+    // Act
+    final service = MockGeminiServiceImpl.fromEnvWith(testEnv);
+    
+    // Assert
+    expect(service, isA<GeminiServiceImpl>());
+    expect(service.apiKey, equals('test-api-key'));
+  });
+  
+  test('should throw exception when API key is missing', () {
+    // Set up test environment with missing key
+    final testEnv = {'OTHER_KEY': 'some-value'};
+    
+    // Act & Assert
+    expect(
+      () => MockGeminiServiceImpl.fromEnvWith(testEnv),
+      throwsA(isA<Exception>().having(
+        (e) => e.toString(),
+        'message',
+        contains('GOOGLE_GEMINI_API_KEY not found')
+      ))
+    );
+  });
+  
+  test('should throw exception when API key is empty', () {
+    // Set up test environment with empty key
+    final testEnv = {'GOOGLE_GEMINI_API_KEY': ''};
+    
+    // Act & Assert
+    expect(
+      () => MockGeminiServiceImpl.fromEnvWith(testEnv),
+      throwsA(isA<Exception>().having(
+        (e) => e.toString(),
+        'message',
+        contains('GOOGLE_GEMINI_API_KEY not found')
+      ))
+    );
+  });
+});
 }

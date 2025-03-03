@@ -9,18 +9,14 @@ import 'package:pockeat/features/ai_api_scan/services/generative_model_wrapper.d
 class MockGenerativeModel extends Mock implements GenerativeModel {}
 
 void main() {
-  test('RealGenerativeModelWrapper delegates to GenerativeModel', () async {
-
+  test('RealGenerativeModelWrapper delegates to GenerativeModel', () {
+    // Setup
     final mockModel = MockGenerativeModel();
     final wrapper = RealGenerativeModelWrapper(mockModel);
     final contents = [Content.text('Test')];
-  
-    try {
-      await wrapper.generateContent(contents);
-    } catch (_) {
- 
-    }
-    
+
+    wrapper.generateContent(contents);
+
     verify(mockModel.generateContent(contents)).called(1);
   });
 }
