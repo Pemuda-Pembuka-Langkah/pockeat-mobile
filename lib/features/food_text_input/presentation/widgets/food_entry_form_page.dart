@@ -21,6 +21,7 @@ class FoodEntryForm extends StatefulWidget {
 }
 
 class _FoodEntryFormState extends State<FoodEntryForm> {
+  final _formKey = GlobalKey<FormState>();
   final _foodNameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _ingredientsController = TextEditingController();
@@ -41,20 +42,32 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       _successMessage = null;
     });
 
-    bool isValid = true;
-    _foodNameError = FormValidator.validateFoodName(_foodNameController.text, widget.maxFoodNameWords);
-    if (_foodNameError != null) isValid = false;
+    if (_foodNameController.text.trim().isEmpty) {
+      setState(() => _foodNameError = 'Please insert food name');
+    } else {
+      _foodNameError = FormValidator.validateFoodName(_foodNameController.text, widget.maxFoodNameWords);
+    }
 
-    _descriptionError = FormValidator.validateDescription(_descriptionController.text, widget.maxDescriptionWords);
-    if (_descriptionError != null) isValid = false;
+    if (_descriptionController.text.trim().isEmpty) {
+      setState(() => _descriptionError = 'Please insert food description');
+    } else {
+      _descriptionError = FormValidator.validateDescription(_descriptionController.text, widget.maxDescriptionWords);
+    }
 
-    _ingredientsError = FormValidator.validateIngredients(_ingredientsController.text, widget.maxIngredientWords);
-    if (_ingredientsError != null) isValid = false;
+    if (_ingredientsController.text.trim().isEmpty) {
+      setState(() => _ingredientsError = 'Please insert food ingredients');
+    } else {
+      _ingredientsError = FormValidator.validateIngredients(_ingredientsController.text, widget.maxIngredientWords);
+    }
 
     if (widget.weightRequired) {
       _weightError = FormValidator.validateWeight(_weightController.text);
-      if (_weightError != null) isValid = false;
     }
+
+    bool isValid = _foodNameError == null && 
+                  _descriptionError == null && 
+                  _ingredientsError == null && 
+                  (_weightError == null || !widget.weightRequired);
 
     if (isValid) {
       FoodEntry foodEntry = FoodEntry(
@@ -79,10 +92,12 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Form(
+          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
+                key: ValueKey('foodNameField'),
                 controller: _foodNameController,
                 decoration: InputDecoration(
                   labelText: 'Food Name',
@@ -91,6 +106,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
               ),
               SizedBox(height: 10),
               TextField(
+                key: ValueKey('descriptionField'),
                 controller: _descriptionController,
                 decoration: InputDecoration(
                   labelText: 'Description',
@@ -100,6 +116,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
               ),
               SizedBox(height: 10),
               TextField(
+                key: ValueKey('ingredientsField'),
                 controller: _ingredientsController,
                 decoration: InputDecoration(
                   labelText: 'Ingredients',
@@ -108,15 +125,15 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                 maxLines: 3,
               ),
               SizedBox(height: 10),
-              if (widget.weightRequired)
-                TextField(
-                  controller: _weightController,
-                  decoration: InputDecoration(
-                    labelText: 'Weight (grams)',
-                    errorText: _weightError,
-                  ),
-                  keyboardType: TextInputType.number,
+              TextField(
+                key: ValueKey('weightField'),
+                controller: _weightController,
+                decoration: InputDecoration(
+                  labelText: 'Weight (grams)',
+                  errorText: _weightError,
                 ),
+                keyboardType: TextInputType.number,
+              ),
               SizedBox(height: 10),
               if (_successMessage != null)
                 Padding(
@@ -128,6 +145,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                 ),
               SizedBox(height: 20),
               ElevatedButton(
+                key: ValueKey('saveButton'),
                 onPressed: _saveForm,
                 child: Text('Save'),
               ),
