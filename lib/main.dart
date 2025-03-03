@@ -12,7 +12,6 @@ import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
-// Import the food analysis page
 import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_page.dart';
 
 void main() async {
@@ -85,7 +84,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/', // Changed to start with the food analysis page
+      initialRoute: '/',
       routes: {
         '/': (context) => const HomePage(),
         '/smart-exercise-log': (context) => const SmartExerciseLogPage(),
@@ -104,4 +103,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
