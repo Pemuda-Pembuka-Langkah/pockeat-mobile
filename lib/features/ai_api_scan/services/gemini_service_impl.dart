@@ -46,7 +46,7 @@ class GeminiServiceImpl implements GeminiService {
         "ingredients": [
           {
             "name": "string",
-            "percentage": number,
+            "servings": number, # in grams
             "allergen": boolean
           }
         ],

@@ -8,7 +8,7 @@ void main() {
       final json = {
         'food_name': 'Apple',
         'ingredients': [
-          {'name': 'Apple', 'percentage': 100, 'allergen': false}
+          {'name': 'Apple', 'servings': 100, 'allergen': false}
         ],
         'nutrition_info': {
           'calories': 95,
@@ -124,16 +124,16 @@ void main() {
       });
     });
 
-    group('Ingredient percentage handling', () {
-      test('should handle different types for ingredient percentage', () {
+    group('Ingredient servings handling', () {
+      test('should handle different types for ingredient servings', () {
         // Arrange
         final json = {
           'food_name': 'Mixed Salad',
           'ingredients': [
-            {'name': 'Lettuce', 'percentage': 50.5, 'allergen': false},
-            {'name': 'Tomato', 'percentage': '25.5', 'allergen': false},
-            {'name': 'Cucumber', 'percentage': 15, 'allergen': false},
-            {'name': 'Nuts', 'percentage': '9', 'allergen': true}
+            {'name': 'Lettuce', 'servings': 50.5, 'allergen': false},
+            {'name': 'Tomato', 'servings': '25.5', 'allergen': false},
+            {'name': 'Cucumber', 'servings': 15, 'allergen': false},
+            {'name': 'Nuts', 'servings': '9', 'allergen': true}
           ],
           'nutrition_info': {
             'calories': 100,
@@ -151,19 +151,19 @@ void main() {
         
         // Assert
         expect(result.ingredients.length, 4);
-        expect(result.ingredients[0].percentage, 50.5);
-        expect(result.ingredients[1].percentage, 25.5);
-        expect(result.ingredients[2].percentage, 15.0);
-        expect(result.ingredients[3].percentage, 9.0);
+        expect(result.ingredients[0].servings, 50.5);
+        expect(result.ingredients[1].servings, 25.5);
+        expect(result.ingredients[2].servings, 15.0);
+        expect(result.ingredients[3].servings, 9.0);
       });
       
-      test('should handle invalid percentage values', () {
+      test('should handle invalid servings values', () {
         // Arrange
         final json = {
           'food_name': 'Problem Data',
           'ingredients': [
-            {'name': 'Valid', 'percentage': 80, 'allergen': false},
-            {'name': 'Invalid', 'percentage': 'unknown', 'allergen': false}
+            {'name': 'Valid', 'servings': 80, 'allergen': false},
+            {'name': 'Invalid', 'servings': 'unknown', 'allergen': false}
           ],
           'nutrition_info': {
             'calories': 100,
@@ -181,8 +181,8 @@ void main() {
         
         // Assert
         expect(result.ingredients.length, 2);
-        expect(result.ingredients[0].percentage, 80.0);
-        expect(result.ingredients[1].percentage, 0.0);  // Default for invalid string
+        expect(result.ingredients[0].servings, 80.0);
+        expect(result.ingredients[1].servings, 0.0);  // Default for invalid string
       });
     });
   });

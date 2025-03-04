@@ -146,22 +146,22 @@ void main() {
         "ingredients": [
           {
             "name": "Apples",
-            "percentage": 50,
+            "servings": 50,
             "allergen": false
           },
           {
             "name": "Flour",
-            "percentage": 25,
+            "servings": 25,
             "allergen": true
           },
           {
             "name": "Sugar",
-            "percentage": 15,
+            "servings": 15,
             "allergen": false
           },
           {
             "name": "Cinnamon",
-            "percentage": 5,
+            "servings": 5,
             "allergen": false
           }
         ],
@@ -189,7 +189,7 @@ void main() {
       expect(result.foodName, equals('Apple Pie'));
       expect(result.ingredients.length, equals(4));
       expect(result.ingredients[0].name, equals('Apples'));
-      expect(result.ingredients[0].percentage, equals(50));
+      expect(result.ingredients[0].servings, equals(50));
       expect(result.ingredients[0].allergen, equals(false));
       expect(result.nutritionInfo.calories, equals(250));
       expect(result.nutritionInfo.protein, equals(2));
@@ -318,17 +318,17 @@ void main() {
         "ingredients": [
           {
             "name": "Beef Patty",
-            "percentage": 45,
+            "servings": 45,
             "allergen": false
           },
           {
             "name": "Burger Bun",
-            "percentage": 30,
+            "servings": 30,
             "allergen": true
           },
           {
             "name": "Lettuce",
-            "percentage": 10,
+            "servings": 10,
             "allergen": false
           }
         ],
@@ -435,17 +435,17 @@ void main() {
         "ingredients": [
           {
             "name": "Whole Grain Wheat",
-            "percentage": 60,
+            "servings": 60,
             "allergen": false
           },
           {
             "name": "Sugar",
-            "percentage": 20,
+            "servings": 20,
             "allergen": false
           },
           {
             "name": "Salt",
-            "percentage": 5,
+            "servings": 5,
             "allergen": false
           }
         ],
@@ -670,7 +670,7 @@ void main() {
         "ingredients": [
           {
             "name": "Banana",
-            "percentage": 100,
+            "servings": 100,
             "allergen": false
           }
         ],

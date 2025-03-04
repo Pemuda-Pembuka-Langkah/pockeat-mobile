@@ -280,7 +280,7 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
                       Expanded(
                         child: Text(ingredient.name),
                       ),
-                      Text('${ingredient.percentage.toStringAsFixed(1)}%'),
+                      Text('${ingredient.servings.toStringAsFixed(1)}%'),
                       const SizedBox(width: 8),
                       if (ingredient.allergen)
                         Container(
