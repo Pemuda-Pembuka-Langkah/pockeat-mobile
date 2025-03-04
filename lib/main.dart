@@ -5,6 +5,7 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,7 +76,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-
+        '/weightlifting-input': (context) => const WeightliftingPage(),
       },
     );
   }
