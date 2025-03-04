@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FoodAnalysisPage extends StatefulWidget {
   const FoodAnalysisPage({Key? key}) : super(key: key);
