@@ -1,4 +1,3 @@
-// lib/features/ai_analysis/presentation/pages/food_analysis_page.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
