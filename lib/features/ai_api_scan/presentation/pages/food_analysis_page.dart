@@ -277,6 +277,55 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
             ),
             const Divider(),
 
+            // Warnings section (if any)
+            if (result.warnings.isNotEmpty) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.shade200)
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.warning_amber_rounded, color: Colors.amber.shade800),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Nutritional Warnings',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.amber.shade900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ...result.warnings.map((warning) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, size: 16, color: Colors.amber.shade700),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              warning,
+                              style: TextStyle(color: Colors.amber.shade900),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )).toList(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             // Nutrition Info
             const Text('Nutrition Information',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
@@ -293,8 +342,16 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
             Row(
               children: [
                 _nutritionItem('Fat', '${result.nutritionInfo.fat}g'),
-                _nutritionItem('Sugar', '${result.nutritionInfo.sugar}g'),
-                _nutritionItem('Fiber', '${result.nutritionInfo.fiber}g'),
+                _nutritionItem(
+                  'Sugar', 
+                  '${result.nutritionInfo.sugar}g',
+                  isHighlighted: result.warnings.contains(FoodAnalysisResult.HIGH_SUGAR_WARNING)
+                ),
+                _nutritionItem(
+                  'Sodium', 
+                  '${result.nutritionInfo.sodium}mg',
+                  isHighlighted: result.warnings.contains(FoodAnalysisResult.HIGH_SODIUM_WARNING)
+                ),
               ],
             ),
 
@@ -314,7 +371,6 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
                       ),
                       Text('${ingredient.servings.toStringAsFixed(1)} grams'),
                       const SizedBox(width: 8),
-                     
                     ],
                   ),
                 ),
@@ -325,27 +381,31 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
     );
   }
 
-  Widget _nutritionItem(String label, String value) {
+  Widget _nutritionItem(String label, String value, {bool isHighlighted = false}) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.blue[50],
+          color: isHighlighted ? Colors.amber.shade50 : Colors.blue[50],
           borderRadius: BorderRadius.circular(8),
+          border: isHighlighted 
+              ? Border.all(color: Colors.amber.shade300, width: 1.5)
+              : null,
         ),
         child: Column(
           children: [
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
+                color: isHighlighted ? Colors.amber.shade900 : null,
               ),
             ),
             Text(
               label,
               style: TextStyle(
-                color: Colors.grey[700],
+                color: isHighlighted ? Colors.amber.shade800 : Colors.grey[700],
                 fontSize: 12,
               ),
             ),
@@ -362,3 +422,4 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
     super.dispose();
   }
 }
+
