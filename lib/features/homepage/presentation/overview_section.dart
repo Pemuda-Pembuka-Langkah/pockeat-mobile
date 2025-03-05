@@ -47,9 +47,9 @@ class _OverviewSectionState extends State<OverviewSection> {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _currentPage == index 
-              ? primaryPink 
-              : primaryPink.withOpacity(0.2),
+            color: _currentPage == index
+                ? primaryPink
+                : primaryPink.withOpacity(0.2),
           ),
         ),
       ),
@@ -72,7 +72,6 @@ class _OverviewSectionState extends State<OverviewSection> {
       ),
       child: Column(
         children: [
-      
           Row(
             children: [
               const Text(
@@ -109,7 +108,8 @@ class _OverviewSectionState extends State<OverviewSection> {
                     child: CircularProgressIndicator(
                       value: 0.38,
                       backgroundColor: Colors.white.withOpacity(0.2),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.white),
                       strokeWidth: 12,
                     ),
                   ),
@@ -247,7 +247,8 @@ class _OverviewSectionState extends State<OverviewSection> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(12),
@@ -313,7 +314,8 @@ class _OverviewSectionState extends State<OverviewSection> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(12),
@@ -524,7 +526,8 @@ class _OverviewSectionState extends State<OverviewSection> {
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: primaryGreen.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -561,7 +564,7 @@ class _OverviewSectionState extends State<OverviewSection> {
                       final days = ['S', 'S', 'M', 'T', 'W', 'T', 'F'];
                       final isToday = index == 6;
                       final value = values[index];
-                      final percentage = value / 2500;
+                      final servings = value / 2500;
 
                       return Expanded(
                         child: Padding(
@@ -579,7 +582,7 @@ class _OverviewSectionState extends State<OverviewSection> {
                               ),
                               const SizedBox(height: 4),
                               Container(
-                                height: 140 * percentage,
+                                height: 140 * servings,
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(4),
@@ -610,7 +613,8 @@ class _OverviewSectionState extends State<OverviewSection> {
               ),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: primaryYellow.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),

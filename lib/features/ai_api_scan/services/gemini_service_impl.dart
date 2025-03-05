@@ -40,12 +40,12 @@ class GeminiServiceImpl implements GeminiService {
       Analyze this food description: "$description"
       
       Please analyze the ingredients and nutritional content based on this description.
-      If not described, assume a standard serving size and ingredients for 1 person only.
+      If not described, assume a standard serving size and ingredients from the description of the food with serving of 1 person only.
       
       Provide a comprehensive analysis including:
       - The name of the food
-      - A complete list of ingredients with percentage composition and allergen status
-      - Detailed nutrition information including calories, protein, carbs, fat, sodium, fiber, and sugar
+      - A complete list of ingredients with servings composition (in grams) 
+      - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
       
       Return your response as a strict JSON object with this exact format with NO COMMENTS:
       {
@@ -54,7 +54,6 @@ class GeminiServiceImpl implements GeminiService {
           {
             "name": "string",
             "servings": number,
-            "allergen": boolean
           }
         ],
         "nutrition_info": {
@@ -130,8 +129,8 @@ class GeminiServiceImpl implements GeminiService {
       
       For the identified food, provide a comprehensive analysis including:
       - The specific name of the food
-      - A detailed list of likely ingredients with estimated percentage composition and potential allergen status
-      - Detailed nutrition information including calories, protein, carbs, fat, sodium, fiber, and sugar
+      - A detailed list of likely ingredients with estimated servings composition in grams
+      - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
       
       Return your response as a strict JSON object with this exact format with NO COMMENTS:
       {
@@ -140,7 +139,6 @@ class GeminiServiceImpl implements GeminiService {
           {
             "name": "string",
             "servings": number,
-            "allergen": boolean
           }
         ],
         "nutrition_info": {
@@ -206,33 +204,20 @@ class GeminiServiceImpl implements GeminiService {
           "DEBUG: GeminiServiceImpl - Nutrition label image read successfully, size: ${imageBytes.length} bytes");
 
       final prompt = '''
-      You are a nutrition label analysis expert. Carefully analyze this image of a nutrition label or food packaging.
-      
-      The user will consume $servings serving(s).
-      
-      Please look for:
-      - The product name on the packaging
-      - The nutrition facts panel
-      - Ingredient list
-      - Allergen warnings
-      - Serving size information
-      
-      Even if the image quality is not perfect or the label is partially visible, please do your best to extract as much information as possible.
+      Analyze this nutrition label image. The user will consume $servings servings.
       
       Please provide a comprehensive analysis including:
-      - The name of the food product
-      - A complete list of ingredients with percentage composition where available and allergen status
-      - Detailed nutrition information including calories, protein, carbs, fat, sodium, fiber, and sugar
-      - Calculate the values for the user's specified serving size ($servings)
+      - The name of the food
+      - A complete list of ingredients with servings composition in grams
+      - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
       
-      Return your response as a strict JSON object with this exact format with NO COMMENTS:
+      Return your response as a strict JSON object with this exact format:
       {
         "food_name": "string",
         "ingredients": [
           {
             "name": "string",
             "servings": number,
-            "allergen": boolean
           }
         ],
         "nutrition_info": {
@@ -246,9 +231,7 @@ class GeminiServiceImpl implements GeminiService {
         }
       }
       
-      IMPORTANT: Do not include any comments, annotations or notes in the JSON. Do not use '#' or '//' characters. Only return valid JSON.
-      
-      If absolutely no nutrition label can be detected in the image, only then use this format:
+      If no nutrition label is detected in the image or you cannot analyze it properly, use this format:
       {
         "error": "No nutrition label detected",
         "food_name": "Unknown",

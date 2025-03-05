@@ -312,24 +312,9 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
                       Expanded(
                         child: Text(ingredient.name),
                       ),
-                      Text('${ingredient.servings.toStringAsFixed(1)}%'),
+                      Text('${ingredient.servings.toStringAsFixed(1)} grams'),
                       const SizedBox(width: 8),
-                      if (ingredient.allergen)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.amber[100],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'Allergen',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.amber[900],
-                            ),
-                          ),
-                        ),
+                     
                     ],
                   ),
                 ),

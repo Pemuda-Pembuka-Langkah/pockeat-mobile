@@ -5,13 +5,6 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:pockeat/features/homepage/presentation/homepage.dart';
-import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
-import 'package:camera/camera.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
-import 'package:provider/provider.dart';
-import 'package:pockeat/component/navigation.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
 // Import the food analysis page
 import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_page.dart';
 
@@ -40,12 +33,7 @@ void main() async {
   }
 
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => NavigationProvider()),
-      ],
-      child: const MyApp(),
-    ),
+    const MyApp(),
   );
 }
 
@@ -85,23 +73,43 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/', // Changed to start with the food analysis page
+      initialRoute: '/food-analysis', // Changed to start with the food analysis page
       routes: {
-        '/': (context) => const HomePage(),
-        '/smart-exercise-log': (context) => const SmartExerciseLogPage(),
-        '/scan': (context) => ScanFoodPage(
-                cameraController: CameraController(
-              CameraDescription(
-                name: '0',
-                lensDirection: CameraLensDirection.back,
-                sensorOrientation: 0,
-              ),
-              ResolutionPreset.medium,
-            )),
-        '/add-food': (context) => const FoodInputPage(),
+        '/': (context) => const HomePage(), // You'll need to create this
         '/food-analysis': (context) => const FoodAnalysisPage(),
       },
     );
   }
 }
 
+// Simple home page - replace this with your actual home page
+class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('CalculATE'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Welcome to CalculATE!',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/food-analysis');
+              },
+              child: const Text('Food Analysis'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -24,19 +24,16 @@ class FoodAnalysisResult {
 class Ingredient {
   final String name;
   final double servings;
-  final bool allergen;
-  
+
   Ingredient({
     required this.name,
     required this.servings,
-    required this.allergen,
   });
   
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     return Ingredient(
       name: json['name'] ?? '',
-      servings: _parseDouble(json['servings']),
-      allergen: json['allergen'] ?? false,
+      servings: _parseDouble(json['servings'])
     );
   }
   
