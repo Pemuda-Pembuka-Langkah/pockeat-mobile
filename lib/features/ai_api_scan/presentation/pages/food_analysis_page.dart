@@ -16,7 +16,7 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
   final TextEditingController _textController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   late GeminiServiceImpl _geminiService;
-  
+
   bool _isLoading = false;
   File? _imageFile;
   FoodAnalysisResult? _analysisResult;
@@ -25,14 +25,20 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
   @override
   void initState() {
     super.initState();
+    print("DEBUG: FoodAnalysisPage - initState called");
     _initializeGeminiService();
   }
 
   void _initializeGeminiService() {
     try {
+      print("DEBUG: FoodAnalysisPage - Initializing Gemini service");
       // Initialize the Gemini service with the API key from .env
       _geminiService = GeminiServiceImpl.fromEnv();
+      print(
+          "DEBUG: FoodAnalysisPage - Gemini service initialized successfully");
     } catch (e) {
+      print(
+          "ERROR: FoodAnalysisPage - Failed to initialize Gemini service: $e");
       setState(() {
         _errorMessage = 'Failed to initialize Gemini service: $e';
       });
@@ -41,6 +47,7 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
 
   Future<void> _analyzeByText() async {
     if (_textController.text.isEmpty) {
+      print("DEBUG: FoodAnalysisPage - Text input is empty");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a food description')),
       );
@@ -53,12 +60,17 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
       _analysisResult = null;
     });
 
+    print(
+        "DEBUG: FoodAnalysisPage - Starting text analysis with input: ${_textController.text}");
     try {
-      final result = await _geminiService.analyzeFoodByText(_textController.text);
+      final result =
+          await _geminiService.analyzeFoodByText(_textController.text);
+      print("DEBUG: FoodAnalysisPage - Text analysis completed successfully");
       setState(() {
         _analysisResult = result;
       });
     } catch (e) {
+      print("ERROR: FoodAnalysisPage - Text analysis failed: $e");
       setState(() {
         _errorMessage = 'Analysis failed: $e';
       });
@@ -70,8 +82,12 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
   }
 
   Future<void> _pickAndAnalyzeImage() async {
+    print("DEBUG: FoodAnalysisPage - Opening image picker");
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image == null) return;
+    if (image == null) {
+      print("DEBUG: FoodAnalysisPage - No image selected");
+      return;
+    }
 
     setState(() {
       _imageFile = File(image.path);
@@ -80,12 +96,16 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
       _analysisResult = null;
     });
 
+    print(
+        "DEBUG: FoodAnalysisPage - Starting image analysis with file: ${image.path}");
     try {
       final result = await _geminiService.analyzeFoodByImage(_imageFile!);
+      print("DEBUG: FoodAnalysisPage - Image analysis completed successfully");
       setState(() {
         _analysisResult = result;
       });
     } catch (e) {
+      print("ERROR: FoodAnalysisPage - Image analysis failed: $e");
       setState(() {
         _errorMessage = 'Analysis failed: $e';
       });
@@ -97,8 +117,12 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
   }
 
   Future<void> _analyzeNutritionLabel() async {
+    print("DEBUG: FoodAnalysisPage - Opening image picker for nutrition label");
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image == null) return;
+    if (image == null) {
+      print("DEBUG: FoodAnalysisPage - No image selected for nutrition label");
+      return;
+    }
 
     setState(() {
       _imageFile = File(image.path);
@@ -107,13 +131,19 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
       _analysisResult = null;
     });
 
+    print(
+        "DEBUG: FoodAnalysisPage - Starting nutrition label analysis with file: ${image.path}");
     try {
       // We're assuming one serving by default, can be customized with a dialog
-      final result = await _geminiService.analyzeNutritionLabel(_imageFile!, 1.0);
+      final result =
+          await _geminiService.analyzeNutritionLabel(_imageFile!, 1.0);
+      print(
+          "DEBUG: FoodAnalysisPage - Nutrition label analysis completed successfully");
       setState(() {
         _analysisResult = result;
       });
     } catch (e) {
+      print("ERROR: FoodAnalysisPage - Nutrition label analysis failed: $e");
       setState(() {
         _errorMessage = 'Analysis failed: $e';
       });
@@ -126,6 +156,7 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("DEBUG: FoodAnalysisPage - build method called");
     return Scaffold(
       appBar: AppBar(
         title: const Text('Food Analysis'),
@@ -141,23 +172,24 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
               controller: _textController,
               maxLines: 3,
               decoration: const InputDecoration(
-                hintText: 'Describe the food (e.g., "Chicken Caesar salad with croutons")',
+                hintText:
+                    'Describe the food (e.g., "Chicken Caesar salad with croutons")',
                 border: OutlineInputBorder(),
                 labelText: 'Food Description',
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Analysis button
             ElevatedButton(
               onPressed: _isLoading ? null : _analyzeByText,
               child: const Text('Analyze Description'),
             ),
-            
+
             const SizedBox(height: 8),
             const Center(child: Text('OR')),
             const SizedBox(height: 8),
-            
+
             // Image upload buttons
             Row(
               children: [
@@ -178,14 +210,14 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
                 ),
               ],
             ),
-            
+
             // Loading indicator
             if (_isLoading)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24.0),
                 child: Center(child: CircularProgressIndicator()),
               ),
-              
+
             // Error message
             if (_errorMessage != null)
               Padding(
@@ -201,7 +233,7 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
                   ),
                 ),
               ),
-              
+
             // Image preview
             if (_imageFile != null && !_isLoading)
               Padding(
@@ -216,10 +248,9 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
                   ),
                 ),
               ),
-              
+
             // Results
-            if (_analysisResult != null)
-              _buildResultsCard(_analysisResult!),
+            if (_analysisResult != null) _buildResultsCard(_analysisResult!),
           ],
         ),
       ),
@@ -227,6 +258,8 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
   }
 
   Widget _buildResultsCard(FoodAnalysisResult result) {
+    print(
+        "DEBUG: FoodAnalysisPage - Building results card for: ${result.foodName}");
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 16.0),
       elevation: 2,
@@ -239,16 +272,16 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
             Text(
               result.foodName,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const Divider(),
-            
+
             // Nutrition Info
-            const Text('Nutrition Information', 
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text('Nutrition Information',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 8),
-            
+
             Row(
               children: [
                 _nutritionItem('Calories', '${result.nutritionInfo.calories}'),
@@ -264,14 +297,13 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
                 _nutritionItem('Fiber', '${result.nutritionInfo.fiber}g'),
               ],
             ),
-            
+
             // Ingredients
             if (result.ingredients.isNotEmpty) ...[
               const SizedBox(height: 16),
-              const Text('Ingredients', 
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text('Ingredients',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 8),
-              
               for (var ingredient in result.ingredients)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
@@ -284,7 +316,8 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
                       const SizedBox(width: 8),
                       if (ingredient.allergen)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: Colors.amber[100],
                             borderRadius: BorderRadius.circular(4),
@@ -306,7 +339,7 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
       ),
     );
   }
-  
+
   Widget _nutritionItem(String label, String value) {
     return Expanded(
       child: Container(
@@ -339,6 +372,7 @@ class _FoodAnalysisPageState extends State<FoodAnalysisPage> {
 
   @override
   void dispose() {
+    print("DEBUG: FoodAnalysisPage - dispose called");
     _textController.dispose();
     super.dispose();
   }
