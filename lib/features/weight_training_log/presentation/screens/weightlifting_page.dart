@@ -38,250 +38,145 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     });
   }
 
-  void clearWorkout() {
-    setState(() {
-      exercises.clear();
-    });
-  }
+  void clearWorkout() => setState(() => exercises.clear());
 
   void _showAddSetDialog(Exercise exercise) {
-    double weight = 0;
+    double weight = 0, duration = 0;
     int reps = 0;
-    double duration = 0;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text(
-          'Add Set',
-          style: TextStyle(
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: _buildDialogTitle('Add Set'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              key: const Key('weightField'),
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Weight (kg)',
-                labelStyle: const TextStyle(color: Colors.black54),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: primaryGreen),
-                ),
-              ),
-              onChanged: (value) => weight = double.tryParse(value) ?? 0,
-            ),
+            _buildTextField('Weight (kg)', (value) => weight = double.tryParse(value) ?? 0),
             const SizedBox(height: 16),
-            TextField(
-              key: const Key('repsField'),
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Reps',
-                labelStyle: const TextStyle(color: Colors.black54),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: primaryGreen),
-                ),
-              ),
-              onChanged: (value) => reps = int.tryParse(value) ?? 0,
-            ),
+            _buildTextField('Reps', (value) => reps = int.tryParse(value) ?? 0),
             const SizedBox(height: 16),
-            TextField(
-              key: const Key('durationField'),
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Duration (minutes)',
-                labelStyle: const TextStyle(color: Colors.black54),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: primaryGreen),
-                ),
-              ),
-              onChanged: (value) => duration = double.tryParse(value) ?? 0,
-            ),
+            _buildTextField('Duration (minutes)', (value) => duration = double.tryParse(value) ?? 0),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.black54,
-            ),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (weight > 0 && reps > 0 && duration > 0) {
-                addSet(exercise, weight, reps, duration);
-                Navigator.pop(context);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryGreen,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Add'),
-          ),
-        ],
+        actions: _buildDialogActions(exercise, weight, reps, duration),
       ),
     );
+  }
+
+  Text _buildDialogTitle(String text) => Text(text, style: const TextStyle(fontWeight: FontWeight.w600));
+
+  TextField _buildTextField(String label, Function(String) onChanged) {
+    return TextField(
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+      onChanged: onChanged,
+    );
+  }
+
+  List<Widget> _buildDialogActions(Exercise exercise, double weight, int reps, double duration) {
+    return [
+      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+      ElevatedButton(
+        onPressed: () {
+          if (weight > 0 && reps > 0 && duration > 0) {
+            addSet(exercise, weight, reps, duration);
+            Navigator.pop(context);
+          }
+        },
+        child: const Text('Add'),
+      ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: primaryYellow,
-      appBar: AppBar(
-        backgroundColor: primaryYellow,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Weightlifting',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+      appBar: _buildAppBar(),
+      body: _buildBody(),
+      bottomNavigationBar: exercises.isNotEmpty ? _buildBottomBar() : null,
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: primaryYellow,
+      elevation: 0,
+      leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
+      title: const Text('Weightlifting', style: TextStyle(fontWeight: FontWeight.w600)),
+      actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: clearWorkout)],
+    );
+  }
+
+  Widget _buildBody() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle('Select Body Part'),
+          _buildBodyPartChips(),
+          const SizedBox(height: 24),
+          _buildExerciseQuickAdd(),
+          const SizedBox(height: 24),
+          if (exercises.isNotEmpty) WorkoutSummary(
+            exerciseCount: exercises.length,
+            totalSets: calculateTotalSets(exercises),
+            totalReps: calculateTotalReps(exercises),
+            totalVolume: calculateTotalVolume(exercises),
+            totalDuration: calculateTotalDuration(exercises),
+            estimatedCalories: calculateEstimatedCalories(exercises),
+            primaryGreen: primaryGreen,
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.black54),
-            onPressed: clearWorkout,
+          ...exercises.map((exercise) => ExerciseCard(
+                exercise: exercise,
+                primaryGreen: primaryGreen,
+                volume: calculateExerciseVolume(exercise),
+                onAddSet: () => _showAddSetDialog(exercise),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) => Text(title, style: const TextStyle(fontWeight: FontWeight.w600));
+
+  Widget _buildBodyPartChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: exercisesByCategory.keys.map((category) => BodyPartChip(
+          category: category,
+          isSelected: selectedBodyPart == category,
+          onTap: () => setState(() => selectedBodyPart = category),
+          primaryGreen: primaryGreen
+        )).toList(),
+      ),
+    );
+  }
+
+  Widget _buildExerciseQuickAdd() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle('Quick Add $selectedBodyPart Exercises'),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: (exercisesByCategory[selectedBodyPart]?.keys ?? []).map((exercise) => ExerciseChipWidget(
+                  exerciseName: exercise,
+                  onTap: () => addExercise(exercise),
+                  primaryGreen: primaryGreen,
+                )).toList(),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Select Body Part',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 12),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: exercisesByCategory.keys.map((category) {
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: BodyPartChip(
-                        category: category,
-                        isSelected: selectedBodyPart == category,
-                        onTap: () {
-                          setState(() {
-                            selectedBodyPart = category;
-                          });
-                        },
-                        primaryGreen: primaryGreen,
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 5,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Quick Add $selectedBodyPart Exercises',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        ...(exercisesByCategory[selectedBodyPart]?.keys ?? [])
-                            .map((exercise) => ExerciseChipWidget(
-                                  exerciseName: exercise,
-                                  onTap: () => addExercise(exercise),
-                                  primaryGreen: primaryGreen,
-                                ))
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              if (exercises.isNotEmpty)
-                WorkoutSummary(
-                  exerciseCount: exercises.length,
-                  totalSets: calculateTotalSets(exercises),
-                  totalReps: calculateTotalReps(exercises),
-                  totalVolume: calculateTotalVolume(exercises),
-                  totalDuration: calculateTotalDuration(exercises),
-                  estimatedCalories: calculateEstimatedCalories(exercises),
-                  primaryGreen: primaryGreen,
-                ),
-              ...exercises.map((exercise) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: ExerciseCard(
-                      exercise: exercise,
-                      primaryGreen: primaryGreen,
-                      volume: calculateExerciseVolume(exercise),
-                      onAddSet: () => _showAddSetDialog(exercise),
-                    ),
-                  )),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: exercises.isNotEmpty
-          ? BottomBar(
-              totalVolume: calculateTotalVolume(exercises),
-              primaryGreen: primaryGreen,
-              onSaveWorkout: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Workout saved successfully!'),
-                    backgroundColor: primaryGreen,
-                  ),
-                );
-              },
-            )
-          : null,
     );
   }
+
+  Widget _buildBottomBar() => BottomBar(totalVolume: calculateTotalVolume(exercises), primaryGreen: primaryGreen, onSaveWorkout: () {});
 }
