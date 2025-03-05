@@ -5,6 +5,7 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -77,6 +78,13 @@ class MyApp extends StatelessWidget {
       routes: {
 
       },
+      // TODO: Jangan lupa hapus kalo mau push
+      onGenerateRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (context) => const CardioInputPage(),
+        );
+      },
+      // TODO: Jangan lupa hapus kalo mau push
     );
   }
 }
