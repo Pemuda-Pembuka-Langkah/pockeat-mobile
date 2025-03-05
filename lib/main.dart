@@ -76,8 +76,15 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/weightlifting-input': (context) => const WeightliftingPage(),
+
       },
+      // Jangan lupa hapus kalo mau push
+      onGenerateRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (context) => const WeightliftingPage(),
+        );
+      },
+      // Jangan lupa hapus kalo mau push
     );
   }
 }
