@@ -14,7 +14,6 @@ coverage:
         # advanced
         if_ci_failed: error
         if_not_found: success
-        if_ci_failed: error
     patch:
       default:
         # basic
@@ -23,7 +22,6 @@ coverage:
         # advanced
         if_ci_failed: error
         if_not_found: success
-        if_ci_failed: error
 
 parsers:
   gcov:

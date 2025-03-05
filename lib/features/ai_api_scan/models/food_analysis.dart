@@ -19,6 +19,14 @@ class FoodAnalysisResult {
       nutritionInfo: NutritionInfo.fromJson(json['nutrition_info'] ?? {}),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'food_name': foodName,
+      'ingredients': ingredients.map((i) => i.toJson()).toList(),
+      'nutrition_info': nutritionInfo.toJson(),
+    };
+  }
 }
 
 class Ingredient {
@@ -38,6 +46,14 @@ class Ingredient {
       percentage: _parseDouble(json['percentage']),
       allergen: json['allergen'] ?? false,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'percentage': percentage,
+      'allergen': allergen,
+    };
   }
   
   static double _parseDouble(dynamic value) {
@@ -79,7 +95,18 @@ class NutritionInfo {
       sugar: _parseDouble(json['sugar']),
     );
   }
-  
+
+  Map<String, dynamic> toJson() {
+    return {
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fat': fat,
+      'sodium': sodium,
+      'fiber': fiber,
+      'sugar': sugar,
+    };
+  }
   static double _parseDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is int) return value.toDouble();
