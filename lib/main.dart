@@ -5,6 +5,7 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 import 'package:pockeat/features/homepage/presentation/homepage.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:camera/camera.dart';
@@ -13,6 +14,9 @@ import 'package:provider/provider.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
 import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_page.dart';
+// Import dependencies untuk DI
+import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -87,7 +91,15 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const HomePage(),
-        '/smart-exercise-log': (context) => const SmartExerciseLogPage(),
+        '/smart-exercise-log': (context) => SmartExerciseLogPage(
+          // Langsung berikan dependensi yang dibutuhkan
+          geminiService: GeminiServiceImpl(
+            apiKey: dotenv.env['GOOGLE_GEMINI_API_KEY'] ?? ''
+          ),
+          repository: SmartExerciseLogRepositoryImpl(
+            firestore: FirebaseFirestore.instance
+          ),
+        ),
         '/scan': (context) => ScanFoodPage(
                 cameraController: CameraController(
               CameraDescription(
@@ -98,6 +110,7 @@ class MyApp extends StatelessWidget {
               ResolutionPreset.medium,
             )),
         '/add-food': (context) => const FoodInputPage(),
+        '/add-exercise': (context) => const ExerciseInputPage(),
         '/food-analysis': (context) => const FoodAnalysisPage(),
       },
     );
