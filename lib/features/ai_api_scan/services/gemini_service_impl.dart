@@ -40,12 +40,13 @@ class GeminiServiceImpl implements GeminiService {
       Analyze this food description: "$description"
       
       Please analyze the ingredients and nutritional content based on this description.
-      If not described, assume a standard serving size and ingredients from the description of the food with serving of 1 person only.
+      If not described, assume a standard serving size and ingredients for 1 person only.
       
       Provide a comprehensive analysis including:
       - The name of the food
       - A complete list of ingredients with servings composition (in grams) 
       - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
+      - Add warnings if the food contains high sodium (>500mg) or high sugar (>20g)
       
       Return your response as a strict JSON object with this exact format with NO COMMENTS:
       {
@@ -53,7 +54,7 @@ class GeminiServiceImpl implements GeminiService {
         "ingredients": [
           {
             "name": "string",
-            "servings": number,
+            "servings": number
           }
         ],
         "nutrition_info": {
@@ -64,10 +65,15 @@ class GeminiServiceImpl implements GeminiService {
           "sodium": number,
           "fiber": number,
           "sugar": number
-        }
+        },
+        "warnings": ["string", "string"] 
       }
       
       IMPORTANT: Do not include any comments, annotations or notes in the JSON. Do not use '#' or '//' characters. Only return valid JSON.
+      For the warnings array:
+      - Include "High sodium content" (exact text) if sodium exceeds 500mg
+      - Include "High sugar content" (exact text) if sugar exceeds 20g
+      If there are no warnings, you can include an empty array [] for warnings.
       
       If you cannot identify the food or analyze it properly, use this format:
       {
@@ -82,7 +88,8 @@ class GeminiServiceImpl implements GeminiService {
           "sodium": 0,
           "fiber": 0,
           "sugar": 0
-        }
+        },
+        "warnings": []
       }
       ''';
 
@@ -131,6 +138,7 @@ class GeminiServiceImpl implements GeminiService {
       - The specific name of the food
       - A detailed list of likely ingredients with estimated servings composition in grams
       - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
+      - Add warnings if the food contains high sodium (>500mg) or high sugar (>20g)
       
       Return your response as a strict JSON object with this exact format with NO COMMENTS:
       {
@@ -138,7 +146,7 @@ class GeminiServiceImpl implements GeminiService {
         "ingredients": [
           {
             "name": "string",
-            "servings": number,
+            "servings": number
           }
         ],
         "nutrition_info": {
@@ -149,10 +157,15 @@ class GeminiServiceImpl implements GeminiService {
           "sodium": number,
           "fiber": number,
           "sugar": number
-        }
+        },
+        "warnings": ["string", "string"]
       }
       
       IMPORTANT: Do not include any comments, annotations or notes in the JSON. Do not use '#' or '//' characters. Only return valid JSON.
+      For the warnings array:
+      - Include "High sodium content" (exact text) if sodium exceeds 500mg
+      - Include "High sugar content" (exact text) if sugar exceeds 20g
+      If there are no warnings, you can include an empty array [] for warnings.
       
       If absolutely no food can be detected in the image, only then use this format:
       {
@@ -167,7 +180,8 @@ class GeminiServiceImpl implements GeminiService {
           "sodium": 0,
           "fiber": 0,
           "sugar": 0
-        }
+        },
+        "warnings": []
       }
       ''';
 
@@ -210,6 +224,7 @@ class GeminiServiceImpl implements GeminiService {
       - The name of the food
       - A complete list of ingredients with servings composition in grams
       - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
+      - Add warnings if the food contains high sodium (>500mg) or high sugar (>20g)
       
       Return your response as a strict JSON object with this exact format:
       {
@@ -217,7 +232,7 @@ class GeminiServiceImpl implements GeminiService {
         "ingredients": [
           {
             "name": "string",
-            "servings": number,
+            "servings": number
           }
         ],
         "nutrition_info": {
@@ -228,8 +243,15 @@ class GeminiServiceImpl implements GeminiService {
           "sodium": number,
           "fiber": number,
           "sugar": number
-        }
+        },
+        "warnings": ["string", "string"]
       }
+      
+      IMPORTANT: Do not include any comments, annotations or notes in the JSON. Do not use '#' or '//' characters. Only return valid JSON.
+      For the warnings array:
+      - Include "High sodium content" (exact text) if sodium exceeds 500mg
+      - Include "High sugar content" (exact text) if sugar exceeds 20g
+      If there are no warnings, you can include an empty array [] for warnings.
       
       If no nutrition label is detected in the image or you cannot analyze it properly, use this format:
       {
@@ -244,7 +266,8 @@ class GeminiServiceImpl implements GeminiService {
           "sodium": 0,
           "fiber": 0,
           "sugar": 0
-        }
+        },
+        "warnings": []
       }
       ''';
 
@@ -358,6 +381,12 @@ class GeminiServiceImpl implements GeminiService {
       final result = FoodAnalysisResult.fromJson(jsonData);
       print(
           "DEBUG: GeminiServiceImpl - FoodAnalysisResult created successfully: ${result.foodName}");
+      
+      // Log any warnings
+      if (result.warnings.isNotEmpty) {
+        print("INFO: GeminiServiceImpl - Food warnings found: ${result.warnings.join(', ')}");
+      }
+      
       return result;
     } catch (e) {
       print(
