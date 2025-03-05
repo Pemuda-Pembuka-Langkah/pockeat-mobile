@@ -1,2 +1,0 @@
-C:/Users/Asus/Documents/Semester 6/PPL/pockeat-mobile/android/app/.cxx/Debug/452d6u6e/armeabi-v7a/CMakeFiles/edit_cache.dir
-C:/Users/Asus/Documents/Semester 6/PPL/pockeat-mobile/android/app/.cxx/Debug/452d6u6e/armeabi-v7a/CMakeFiles/rebuild_cache.dir
