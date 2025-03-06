@@ -24,18 +24,18 @@ class CyclingForm extends StatefulWidget {
   }
 
   double calculateCalories() {
-    final state = (key as GlobalKey<State<CyclingForm>>).currentState;
-    if (state is _CyclingFormState) {
+    final state = (key as GlobalKey<CyclingFormState>).currentState;
+    if (state is CyclingFormState) {
       return state.calculateCalories();
     }
     return 0.0;
   }
 
   @override
-  State<CyclingForm> createState() => _CyclingFormState();
+  State<CyclingForm> createState() => CyclingFormState();
 }
 
-class _CyclingFormState extends State<CyclingForm> {
+class CyclingFormState extends State<CyclingForm> {
   CyclingActivityType selectedCyclingType = CyclingActivityType.mountain;
   int selectedKm = 5;
   int selectedMeter = 0;
@@ -55,92 +55,94 @@ class _CyclingFormState extends State<CyclingForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        PersonalDataReminder(),
-        const SizedBox(height: 16),
-        const Text(
-          'Cycling Activity Type',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PersonalDataReminder(),
+          const SizedBox(height: 16),
+          const Text(
+            'Cycling Activity Type',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        _buildCyclingTypeSelector(),
-        const SizedBox(height: 16),
-        DateSelectionWidget(
-          primaryColor: widget.primaryPink,
-          selectedDate: selectedDate,
-          onDateChanged: (newDate) {
-            setState(() {
-              selectedDate = newDate;
-              
-              // Keep the same time but update date
-              selectedStartTime = DateTime(
-                newDate.year,
-                newDate.month,
-                newDate.day,
-                selectedStartTime.hour,
-                selectedStartTime.minute,
-              );
-              
-              selectedEndTime = DateTime(
-                newDate.year,
-                newDate.month,
-                newDate.day,
-                selectedEndTime.hour,
-                selectedEndTime.minute,
-              );
-              
-              // If end time is before start time (e.g. cycling past midnight),
-              // add a day to end time
-              if (selectedEndTime.isBefore(selectedStartTime)) {
-                selectedEndTime = selectedEndTime.add(const Duration(days: 1));
-              }
-            });
-          },
-        ),
-        const SizedBox(height: 16),
-        TimeSelectionWidget(
-          primaryColor: widget.primaryPink,
-          selectedStartTime: selectedStartTime,
-          selectedEndTime: selectedEndTime,
-          onStartTimeChanged: (newStartTime) {
-            setState(() {
-              selectedStartTime = newStartTime;
-              
-              // If end time is now before start time, adjust it
-              if (selectedEndTime.isBefore(selectedStartTime)) {
-                selectedEndTime = selectedStartTime.add(const Duration(minutes: 30));
-              }
-            });
-          },
-          onEndTimeChanged: (newEndTime) {
-            setState(() {
-              selectedEndTime = newEndTime;
-            });
-          },
-        ),
-        const SizedBox(height: 16),
-        DistanceSelectionWidget(
-          primaryColor: widget.primaryPink,
-          selectedKm: selectedKm,
-          selectedMeter: selectedMeter,
-          onKmChanged: (km) {
-            setState(() {
-              selectedKm = km;
-            });
-          },
-          onMeterChanged: (meter) {
-            setState(() {
-              selectedMeter = meter;
-            });
-          },
-        ),
-      ],
+          const SizedBox(height: 12),
+          _buildCyclingTypeSelector(),
+          const SizedBox(height: 16),
+          DateSelectionWidget(
+            primaryColor: widget.primaryPink,
+            selectedDate: selectedDate,
+            onDateChanged: (newDate) {
+              setState(() {
+                selectedDate = newDate;
+                
+                // Keep the same time but update date
+                selectedStartTime = DateTime(
+                  newDate.year,
+                  newDate.month,
+                  newDate.day,
+                  selectedStartTime.hour,
+                  selectedStartTime.minute,
+                );
+                
+                selectedEndTime = DateTime(
+                  newDate.year,
+                  newDate.month,
+                  newDate.day,
+                  selectedEndTime.hour,
+                  selectedEndTime.minute,
+                );
+                
+                // If end time is before start time (e.g. cycling past midnight),
+                // add a day to end time
+                if (selectedEndTime.isBefore(selectedStartTime)) {
+                  selectedEndTime = selectedEndTime.add(const Duration(days: 1));
+                }
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          TimeSelectionWidget(
+            primaryColor: widget.primaryPink,
+            selectedStartTime: selectedStartTime,
+            selectedEndTime: selectedEndTime,
+            onStartTimeChanged: (newStartTime) {
+              setState(() {
+                selectedStartTime = newStartTime;
+                
+                // If end time is now before start time, adjust it
+                if (selectedEndTime.isBefore(selectedStartTime)) {
+                  selectedEndTime = selectedStartTime.add(const Duration(minutes: 30));
+                }
+              });
+            },
+            onEndTimeChanged: (newEndTime) {
+              setState(() {
+                selectedEndTime = newEndTime;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          DistanceSelectionWidget(
+            primaryColor: widget.primaryPink,
+            selectedKm: selectedKm,
+            selectedMeter: selectedMeter,
+            onKmChanged: (km) {
+              setState(() {
+                selectedKm = km;
+              });
+            },
+            onMeterChanged: (meter) {
+              setState(() {
+                selectedMeter = meter;
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 
