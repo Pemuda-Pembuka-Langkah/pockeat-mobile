@@ -7,12 +7,14 @@ class FoodEntryForm extends StatefulWidget {
   final int maxDescriptionWords;
   final int maxIngredientWords;
   final bool weightRequired;
+  final Function(FoodEntry)? onSaved; 
 
   const FoodEntryForm({
     this.maxFoodNameWords = 20,
     this.maxDescriptionWords = 50,
     this.maxIngredientWords = 50,
     this.weightRequired = true,
+    this.onSaved,
     Key? key,
   }) : super(key: key);
 
@@ -82,7 +84,22 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       });
 
       debugPrint(foodEntry.toString());
+      
+      if (widget.onSaved != null) {
+        widget.onSaved!(foodEntry);
+      }
     }
+    
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _foodNameController.dispose();
+    _descriptionController.dispose();
+    _ingredientsController.dispose();
+    _weightController.dispose();
+    super.dispose();
   }
 
   @override

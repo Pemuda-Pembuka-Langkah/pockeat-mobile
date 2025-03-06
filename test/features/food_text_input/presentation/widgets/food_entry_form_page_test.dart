@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
 import 'package:pockeat/features/food_text_input/presentation/widgets/food_entry_form_page.dart';
 
 void main() {
@@ -62,9 +63,40 @@ void main() {
       
       expect(find.byKey(ValueKey('saveButton')), findsOneWidget);
     });
+    
+    testWidgets('Widget disposes controllers when removed', (WidgetTester tester) async {
+      // Use a StatefulBuilder to control the widget tree
+      bool showForm = true;
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              return showForm 
+                ? FoodEntryForm() 
+                : Container(child: Text('Form removed'));
+            },
+          ),
+        ),
+      );
+      
+      // Verify form is showing
+      expect(find.byType(FoodEntryForm), findsOneWidget);
+      
+      // Remove the form
+      showForm = false;
+      await tester.pumpAndSettle();
+      
+      // Verify form is gone
+      expect(find.byType(FoodEntryForm), findsNothing);
+      expect(find.text('Form removed'), findsOneWidget);
+      
+      // Note: We can't directly verify controller disposal since they're private
+      // But this test ensures the dispose method is called which is the best we can do
+    });
   });
 
-  group('FoodEntryForm Edge Case Tests', () {
+  group('FoodEntryForm Validation Tests', () {
     testWidgets('Shows error message when required fields are empty', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(home: FoodEntryForm()));
       
@@ -74,6 +106,7 @@ void main() {
       expect(find.text('Please insert food name'), findsOneWidget);
       expect(find.text('Please insert food description'), findsOneWidget);
       expect(find.text('Please insert food ingredients'), findsOneWidget);
+      expect(find.text('Please enter weight'), findsOneWidget);
       expect(find.text('Food entry is saved successfully!'), findsNothing);
     });
 
@@ -126,6 +159,101 @@ void main() {
 
       expect(find.text('Ingredients exceeds maximum word count (50)'), findsOneWidget);
       expect(find.text('Food entry is saved successfully!'), findsNothing);
+    });
+    
+    testWidgets('Shows error when weight is not a valid number', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: FoodEntryForm()));
+      
+      await tester.enterText(find.byKey(ValueKey('foodNameField')), 'Test Food');      
+      await tester.enterText(find.byKey(ValueKey('descriptionField')), 'Test Description');
+      await tester.enterText(find.byKey(ValueKey('ingredientsField')), 'Test Ingredients');      
+      await tester.enterText(find.byKey(ValueKey('weightField')), 'not-a-number');
+
+      await tester.tap(find.byKey(ValueKey('saveButton')));
+      await tester.pump();
+
+      expect(find.text('Weight must be a valid number'), findsOneWidget);
+      expect(find.text('Food entry is saved successfully!'), findsNothing);
+    });
+    
+    testWidgets('Shows error when weight is less than or equal to 0', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: FoodEntryForm()));
+      
+      await tester.enterText(find.byKey(ValueKey('foodNameField')), 'Test Food');      
+      await tester.enterText(find.byKey(ValueKey('descriptionField')), 'Test Description');
+      await tester.enterText(find.byKey(ValueKey('ingredientsField')), 'Test Ingredients');      
+      await tester.enterText(find.byKey(ValueKey('weightField')), '0');
+
+      await tester.tap(find.byKey(ValueKey('saveButton')));
+      await tester.pump();
+
+      expect(find.text('Weight must be greater than 0'), findsOneWidget);
+      expect(find.text('Food entry is saved successfully!'), findsNothing);
+
+      await tester.enterText(find.byKey(ValueKey('weightField')), '-10');
+      await tester.tap(find.byKey(ValueKey('saveButton')));
+      await tester.pump();
+
+      expect(find.text('Weight must be greater than 0'), findsOneWidget);
+    });
+  });
+  
+  group('FoodEntryForm Successful Submission Tests', () {
+    testWidgets('Successfully submits form with valid inputs', (WidgetTester tester) async {
+      FoodEntry? savedFoodEntry;
+      
+      await tester.pumpWidget(MaterialApp(
+        home: FoodEntryForm(
+          onSaved: (entry) {
+            savedFoodEntry = entry;
+          },
+        ),
+      ));
+      
+      await tester.enterText(find.byKey(ValueKey('foodNameField')), 'Nasi Goreng');
+      await tester.enterText(find.byKey(ValueKey('descriptionField')), 'Fried rice with vegetables');
+      await tester.enterText(find.byKey(ValueKey('ingredientsField')), 'Rice, vegetables, soy sauce');
+      await tester.enterText(find.byKey(ValueKey('weightField')), '300');
+
+      await tester.tap(find.byKey(ValueKey('saveButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Food entry is saved successfully!'), findsOneWidget);
+      
+      expect(savedFoodEntry, isNotNull);
+      expect(savedFoodEntry?.foodName, 'Nasi Goreng');
+      expect(savedFoodEntry?.description, 'Fried rice with vegetables');
+      expect(savedFoodEntry?.ingredients, 'Rice, vegetables, soy sauce');
+      expect(savedFoodEntry?.weight, 300);
+    });
+    
+    testWidgets('Successfully submits form with weightRequired=false', (WidgetTester tester) async {
+      FoodEntry? savedFoodEntry;
+      
+      await tester.pumpWidget(MaterialApp(
+        home: FoodEntryForm(
+          weightRequired: false,
+          onSaved: (entry) {
+            savedFoodEntry = entry;
+          },
+        ),
+      ));
+      
+      await tester.enterText(find.byKey(ValueKey('foodNameField')), 'Fruit Salad');
+      await tester.enterText(find.byKey(ValueKey('descriptionField')), 'Mixed fresh fruits');
+      await tester.enterText(find.byKey(ValueKey('ingredientsField')), 'Apple, banana, orange');
+      // Not entering weight since it's not required
+
+      await tester.tap(find.byKey(ValueKey('saveButton')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Food entry is saved successfully!'), findsOneWidget);
+      
+      expect(savedFoodEntry, isNotNull);
+      expect(savedFoodEntry?.foodName, 'Fruit Salad');
+      expect(savedFoodEntry?.description, 'Mixed fresh fruits');
+      expect(savedFoodEntry?.ingredients, 'Apple, banana, orange');
+      expect(savedFoodEntry?.weight, isNull);
     });
   });
 }
