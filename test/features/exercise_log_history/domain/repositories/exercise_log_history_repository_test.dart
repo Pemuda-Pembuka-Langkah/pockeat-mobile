@@ -59,7 +59,7 @@ void main() {
 
     test('getAllExerciseLogs should return all logs sorted by timestamp', () async {
       // Arrange
-      when(mockSmartExerciseLogRepository.getAllAnalysisResults())
+      when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null))
           .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2, smartExerciseLog3]);
 
       // Act
@@ -71,12 +71,28 @@ void main() {
       expect(result[1].sourceId, equals('smart-2'));
       expect(result[2].sourceId, equals('smart-3'));
       
-      verify(mockSmartExerciseLogRepository.getAllAnalysisResults()).called(1);
+      verify(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null)).called(1);
+    });
+
+    test('getAllExerciseLogs with limit should return limited number of logs', () async {
+      // Arrange
+      when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: 2))
+          .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2]);
+
+      // Act
+      final result = await repository.getAllExerciseLogs(limit: 2);
+
+      // Assert
+      expect(result.length, equals(2));
+      expect(result[0].sourceId, equals('smart-1')); // Most recent first
+      expect(result[1].sourceId, equals('smart-2'));
+      
+      verify(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: 2)).called(1);
     });
 
     test('getExerciseLogsByDate should return logs for specific date', () async {
       // Arrange
-      when(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate))
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate, limit: null))
           .thenAnswer((_) async => [smartExerciseLog1]);
 
       // Act
@@ -87,12 +103,27 @@ void main() {
       expect(result[0].sourceId, equals('smart-1'));
       expect(result[0].title, equals('Running'));
       
-      verify(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate)).called(1);
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate, limit: null)).called(1);
+    });
+
+    test('getExerciseLogsByDate with limit should return limited logs for specific date', () async {
+      // Arrange
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate, limit: 1))
+          .thenAnswer((_) async => [smartExerciseLog1]);
+
+      // Act
+      final result = await repository.getExerciseLogsByDate(testDate, limit: 1);
+
+      // Assert
+      expect(result.length, equals(1));
+      expect(result[0].sourceId, equals('smart-1'));
+      
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate, limit: 1)).called(1);
     });
 
     test('getExerciseLogsByMonth should return logs for specific month and year', () async {
       // Arrange
-      when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear))
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear, limit: null))
           .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2]);
 
       // Act
@@ -103,12 +134,27 @@ void main() {
       expect(result[0].sourceId, equals('smart-1')); // Most recent first
       expect(result[1].sourceId, equals('smart-2'));
       
-      verify(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear)).called(1);
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear, limit: null)).called(1);
+    });
+
+    test('getExerciseLogsByMonth with limit should return limited logs for specific month and year', () async {
+      // Arrange
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear, limit: 1))
+          .thenAnswer((_) async => [smartExerciseLog1]);
+
+      // Act
+      final result = await repository.getExerciseLogsByMonth(testMonth, testYear, limit: 1);
+
+      // Assert
+      expect(result.length, equals(1));
+      expect(result[0].sourceId, equals('smart-1'));
+      
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear, limit: 1)).called(1);
     });
 
     test('getExerciseLogsByYear should return logs for specific year', () async {
       // Arrange
-      when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear))
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear, limit: null))
           .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2, smartExerciseLog3]);
 
       // Act
@@ -120,12 +166,28 @@ void main() {
       expect(result[1].sourceId, equals('smart-2'));
       expect(result[2].sourceId, equals('smart-3'));
       
-      verify(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear)).called(1);
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear, limit: null)).called(1);
+    });
+
+    test('getExerciseLogsByYear with limit should return limited logs for specific year', () async {
+      // Arrange
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear, limit: 2))
+          .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2]);
+
+      // Act
+      final result = await repository.getExerciseLogsByYear(testYear, limit: 2);
+
+      // Assert
+      expect(result.length, equals(2));
+      expect(result[0].sourceId, equals('smart-1')); // Most recent first
+      expect(result[1].sourceId, equals('smart-2'));
+      
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear, limit: 2)).called(1);
     });
 
     test('getExerciseLogsByActivityCategory should return logs for specific activity type', () async {
       // Arrange
-      when(mockSmartExerciseLogRepository.getAllAnalysisResults())
+      when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null))
           .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2, smartExerciseLog3]);
 
       // Act
@@ -138,14 +200,31 @@ void main() {
       expect(result[1].activityType, equals(ExerciseLogHistoryItem.TYPE_SMART_EXERCISE));
       expect(result[2].activityType, equals(ExerciseLogHistoryItem.TYPE_SMART_EXERCISE));
       
-      verify(mockSmartExerciseLogRepository.getAllAnalysisResults()).called(1);
+      verify(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null)).called(1);
+    });
+
+    test('getExerciseLogsByActivityCategory with limit should return limited logs for specific activity type', () async {
+      // Arrange
+      when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null))
+          .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2, smartExerciseLog3]);
+
+      // Act
+      final result = await repository.getExerciseLogsByActivityCategory(
+          ExerciseLogHistoryItem.TYPE_SMART_EXERCISE, limit: 2);
+
+      // Assert
+      expect(result.length, equals(2));
+      expect(result[0].activityType, equals(ExerciseLogHistoryItem.TYPE_SMART_EXERCISE));
+      expect(result[1].activityType, equals(ExerciseLogHistoryItem.TYPE_SMART_EXERCISE));
+      
+      verify(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null)).called(1);
     });
 
     // Negative test cases
     group('Error handling tests', () {
       test('getAllExerciseLogs should throw exception with proper message when SmartExerciseLogRepository fails', () async {
         // Arrange
-        when(mockSmartExerciseLogRepository.getAllAnalysisResults())
+        when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null))
             .thenThrow(Exception('Database error'));
 
         // Act & Assert
@@ -157,12 +236,12 @@ void main() {
             contains('Failed to retrieve exercise logs')
           ))
         );
-        verify(mockSmartExerciseLogRepository.getAllAnalysisResults()).called(1);
+        verify(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null)).called(1);
       });
 
       test('getExerciseLogsByDate should throw exception with proper message when SmartExerciseLogRepository fails', () async {
         // Arrange
-        when(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate))
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate, limit: null))
             .thenThrow(Exception('Network error'));
 
         // Act & Assert
@@ -174,12 +253,12 @@ void main() {
             contains('Failed to retrieve exercise logs by date')
           ))
         );
-        verify(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate)).called(1);
+        verify(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate, limit: null)).called(1);
       });
 
       test('getExerciseLogsByMonth should throw exception with proper message when SmartExerciseLogRepository fails', () async {
         // Arrange
-        when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear))
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear, limit: null))
             .thenThrow(Exception('Server error'));
 
         // Act & Assert
@@ -191,12 +270,12 @@ void main() {
             contains('Failed to retrieve exercise logs by month')
           ))
         );
-        verify(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear)).called(1);
+        verify(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear, limit: null)).called(1);
       });
 
       test('getExerciseLogsByYear should throw exception with proper message when SmartExerciseLogRepository fails', () async {
         // Arrange
-        when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear))
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear, limit: null))
             .thenThrow(Exception('Connection timeout'));
 
         // Act & Assert
@@ -208,13 +287,13 @@ void main() {
             contains('Failed to retrieve exercise logs by year')
           ))
         );
-        verify(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear)).called(1);
+        verify(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear, limit: null)).called(1);
       });
 
       test('getExerciseLogsByActivityCategory should throw exception with proper message when SmartExerciseLogRepository fails', () async {
         // Arrange
-        when(mockSmartExerciseLogRepository.getAllAnalysisResults())
-            .thenThrow(Exception('Authentication error'));
+        when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null))
+            .thenThrow(Exception('Unknown error'));
 
         // Act & Assert
         expect(
@@ -225,24 +304,7 @@ void main() {
             contains('Failed to retrieve exercise logs by activity category')
           ))
         );
-        verify(mockSmartExerciseLogRepository.getAllAnalysisResults()).called(1);
-      });
-
-      test('getExerciseLogsByActivityCategory should propagate exception from getAllExerciseLogs', () async {
-        // Arrange
-        when(mockSmartExerciseLogRepository.getAllAnalysisResults())
-            .thenThrow(Exception('Permission denied'));
-
-        // Act & Assert
-        expect(
-          () => repository.getExerciseLogsByActivityCategory(ExerciseLogHistoryItem.TYPE_SMART_EXERCISE),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Failed to retrieve exercise logs by activity category')
-          ))
-        );
-        verify(mockSmartExerciseLogRepository.getAllAnalysisResults()).called(1);
+        verify(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null)).called(1);
       });
     });
   });

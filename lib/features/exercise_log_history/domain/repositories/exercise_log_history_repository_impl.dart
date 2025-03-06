@@ -23,17 +23,17 @@ class ExerciseLogHistoryRepositoryImpl implements ExerciseLogHistoryRepository {
       // _cardioLogRepository = cardioLogRepository;
 
   @override
-  Future<List<ExerciseLogHistoryItem>> getAllExerciseLogs() async {
+  Future<List<ExerciseLogHistoryItem>> getAllExerciseLogs({int? limit}) async {
     try {
       // Ambil data dari SmartExerciseLog
-      final smartExerciseLogs = await _smartExerciseLogRepository.getAllAnalysisResults();
+      final smartExerciseLogs = await _smartExerciseLogRepository.getAllAnalysisResults(limit: limit);
       final smartExerciseItems = _convertSmartExerciseLogs(smartExerciseLogs);
 
       // Di masa depan akan ditambahkan:
-      // final weightliftingLogs = await _weightliftingLogRepository.getAllLogs();
+      // final weightliftingLogs = await _weightliftingLogRepository.getAllLogs(limit: limit);
       // final weightliftingItems = _convertWeightliftingLogs(weightliftingLogs);
       // 
-      // final cardioLogs = await _cardioLogRepository.getAllLogs();
+      // final cardioLogs = await _cardioLogRepository.getAllLogs(limit: limit);
       // final cardioItems = _convertCardioLogs(cardioLogs);
 
       // Gabungkan semua item
@@ -45,6 +45,11 @@ class ExerciseLogHistoryRepositoryImpl implements ExerciseLogHistoryRepository {
 
       // Urutkan berdasarkan timestamp (terbaru dulu)
       allItems.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      // Terapkan limit jika ada
+      if (limit != null && limit > 0 && allItems.length > limit) {
+        return allItems.take(limit).toList();
+      }
 
       return allItems;
     } catch (e) {
@@ -53,17 +58,17 @@ class ExerciseLogHistoryRepositoryImpl implements ExerciseLogHistoryRepository {
   }
 
   @override
-  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByDate(DateTime date) async {
+  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByDate(DateTime date, {int? limit}) async {
     try {
       // Ambil data dari SmartExerciseLog
-      final smartExerciseLogs = await _smartExerciseLogRepository.getAnalysisResultsByDate(date);
+      final smartExerciseLogs = await _smartExerciseLogRepository.getAnalysisResultsByDate(date, limit: limit);
       final smartExerciseItems = _convertSmartExerciseLogs(smartExerciseLogs);
 
       // Di masa depan akan ditambahkan:
-      // final weightliftingLogs = await _weightliftingLogRepository.getLogsByDate(date);
+      // final weightliftingLogs = await _weightliftingLogRepository.getLogsByDate(date, limit: limit);
       // final weightliftingItems = _convertWeightliftingLogs(weightliftingLogs);
       // 
-      // final cardioLogs = await _cardioLogRepository.getLogsByDate(date);
+      // final cardioLogs = await _cardioLogRepository.getLogsByDate(date, limit: limit);
       // final cardioItems = _convertCardioLogs(cardioLogs);
 
       // Gabungkan semua item
@@ -75,6 +80,11 @@ class ExerciseLogHistoryRepositoryImpl implements ExerciseLogHistoryRepository {
 
       // Urutkan berdasarkan timestamp (terbaru dulu)
       allItems.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      // Terapkan limit jika ada
+      if (limit != null && limit > 0 && allItems.length > limit) {
+        return allItems.take(limit).toList();
+      }
 
       return allItems;
     } catch (e) {
@@ -83,17 +93,17 @@ class ExerciseLogHistoryRepositoryImpl implements ExerciseLogHistoryRepository {
   }
 
   @override
-  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByMonth(int month, int year) async {
+  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByMonth(int month, int year, {int? limit}) async {
     try {
       // Ambil data dari SmartExerciseLog
-      final smartExerciseLogs = await _smartExerciseLogRepository.getAnalysisResultsByMonth(month, year);
+      final smartExerciseLogs = await _smartExerciseLogRepository.getAnalysisResultsByMonth(month, year, limit: limit);
       final smartExerciseItems = _convertSmartExerciseLogs(smartExerciseLogs);
 
       // Di masa depan akan ditambahkan:
-      // final weightliftingLogs = await _weightliftingLogRepository.getLogsByMonth(month, year);
+      // final weightliftingLogs = await _weightliftingLogRepository.getLogsByMonth(month, year, limit: limit);
       // final weightliftingItems = _convertWeightliftingLogs(weightliftingLogs);
       // 
-      // final cardioLogs = await _cardioLogRepository.getLogsByMonth(month, year);
+      // final cardioLogs = await _cardioLogRepository.getLogsByMonth(month, year, limit: limit);
       // final cardioItems = _convertCardioLogs(cardioLogs);
 
       // Gabungkan semua item
@@ -105,6 +115,11 @@ class ExerciseLogHistoryRepositoryImpl implements ExerciseLogHistoryRepository {
 
       // Urutkan berdasarkan timestamp (terbaru dulu)
       allItems.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      // Terapkan limit jika ada
+      if (limit != null && limit > 0 && allItems.length > limit) {
+        return allItems.take(limit).toList();
+      }
 
       return allItems;
     } catch (e) {
@@ -113,17 +128,17 @@ class ExerciseLogHistoryRepositoryImpl implements ExerciseLogHistoryRepository {
   }
 
   @override
-  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByYear(int year) async {
+  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByYear(int year, {int? limit}) async {
     try {
       // Ambil data dari SmartExerciseLog
-      final smartExerciseLogs = await _smartExerciseLogRepository.getAnalysisResultsByYear(year);
+      final smartExerciseLogs = await _smartExerciseLogRepository.getAnalysisResultsByYear(year, limit: limit);
       final smartExerciseItems = _convertSmartExerciseLogs(smartExerciseLogs);
 
       // Di masa depan akan ditambahkan:
-      // final weightliftingLogs = await _weightliftingLogRepository.getLogsByYear(year);
+      // final weightliftingLogs = await _weightliftingLogRepository.getLogsByYear(year, limit: limit);
       // final weightliftingItems = _convertWeightliftingLogs(weightliftingLogs);
       // 
-      // final cardioLogs = await _cardioLogRepository.getLogsByYear(year);
+      // final cardioLogs = await _cardioLogRepository.getLogsByYear(year, limit: limit);
       // final cardioItems = _convertCardioLogs(cardioLogs);
 
       // Gabungkan semua item
@@ -136,6 +151,11 @@ class ExerciseLogHistoryRepositoryImpl implements ExerciseLogHistoryRepository {
       // Urutkan berdasarkan timestamp (terbaru dulu)
       allItems.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
+      // Terapkan limit jika ada
+      if (limit != null && limit > 0 && allItems.length > limit) {
+        return allItems.take(limit).toList();
+      }
+
       return allItems;
     } catch (e) {
       throw Exception('Failed to retrieve exercise logs by year: $e');
@@ -143,15 +163,20 @@ class ExerciseLogHistoryRepositoryImpl implements ExerciseLogHistoryRepository {
   }
 
   @override
-  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByActivityCategory(String activityCategory) async {
+  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByActivityCategory(String activityCategory, {int? limit}) async {
     try {
       List<ExerciseLogHistoryItem> result = [];
 
       // Ambil semua log terlebih dahulu
-      final allLogs = await getAllExerciseLogs();
+      final allLogs = await getAllExerciseLogs(limit: null); // Tidak terapkan limit dulu karena akan difilter
       
       // Filter berdasarkan activityCategory
       result = allLogs.where((item) => item.activityType == activityCategory).toList();
+
+      // Terapkan limit jika ada
+      if (limit != null && limit > 0 && result.length > limit) {
+        return result.take(limit).toList();
+      }
 
       return result;
     } catch (e) {

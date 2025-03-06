@@ -35,12 +35,18 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
   }
 
   @override
-  Future<List<ExerciseAnalysisResult>> getAllAnalysisResults() async {
+  Future<List<ExerciseAnalysisResult>> getAllAnalysisResults({int? limit}) async {
     try {
-      final querySnapshot = await _firestore
+      var query = _firestore
           .collection(_collection)
-          .orderBy('timestamp', descending: true)
-          .get();
+          .orderBy('timestamp', descending: true);
+      
+      // Terapkan limit jika ada
+      if (limit != null && limit > 0) {
+        query = query.limit(limit);
+      }
+      
+      final querySnapshot = await query.get();
 
       return querySnapshot.docs
           .map((doc) => ExerciseAnalysisResult.fromDbMap(doc.data(), doc.id))
@@ -51,7 +57,7 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
   }
 
   @override
-  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByDate(DateTime date) async {
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByDate(DateTime date, {int? limit}) async {
     try {
       // Buat timestamp untuk awal hari
       final startOfDay = DateTime(date.year, date.month, date.day);
@@ -61,12 +67,18 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
       final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
       final endTimestamp = endOfDay.millisecondsSinceEpoch;
       
-      final querySnapshot = await _firestore
+      var query = _firestore
           .collection(_collection)
           .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
           .where('timestamp', isLessThanOrEqualTo: endTimestamp)
-          .orderBy('timestamp', descending: true)
-          .get();
+          .orderBy('timestamp', descending: true);
+      
+      // Terapkan limit jika ada
+      if (limit != null && limit > 0) {
+        query = query.limit(limit);
+      }
+      
+      final querySnapshot = await query.get();
       
       return querySnapshot.docs
           .map((doc) => ExerciseAnalysisResult.fromDbMap(doc.data(), doc.id))
@@ -77,7 +89,7 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
   }
   
   @override
-  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByMonth(int month, int year) async {
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByMonth(int month, int year, {int? limit}) async {
     try {
       // Validasi bulan
       if (month < 1 || month > 12) {
@@ -94,12 +106,18 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
           : DateTime(year + 1, 1, 1).subtract(const Duration(milliseconds: 1));
       final endTimestamp = endOfMonth.millisecondsSinceEpoch;
       
-      final querySnapshot = await _firestore
+      var query = _firestore
           .collection(_collection)
           .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
           .where('timestamp', isLessThanOrEqualTo: endTimestamp)
-          .orderBy('timestamp', descending: true)
-          .get();
+          .orderBy('timestamp', descending: true);
+      
+      // Terapkan limit jika ada
+      if (limit != null && limit > 0) {
+        query = query.limit(limit);
+      }
+      
+      final querySnapshot = await query.get();
       
       return querySnapshot.docs
           .map((doc) => ExerciseAnalysisResult.fromDbMap(doc.data(), doc.id))
@@ -110,7 +128,7 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
   }
   
   @override
-  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByYear(int year) async {
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByYear(int year, {int? limit}) async {
     try {
       // Buat timestamp untuk awal tahun
       final startOfYear = DateTime(year, 1, 1);
@@ -120,12 +138,18 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
       final endOfYear = DateTime(year + 1, 1, 1).subtract(const Duration(milliseconds: 1));
       final endTimestamp = endOfYear.millisecondsSinceEpoch;
       
-      final querySnapshot = await _firestore
+      var query = _firestore
           .collection(_collection)
           .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
           .where('timestamp', isLessThanOrEqualTo: endTimestamp)
-          .orderBy('timestamp', descending: true)
-          .get();
+          .orderBy('timestamp', descending: true);
+      
+      // Terapkan limit jika ada
+      if (limit != null && limit > 0) {
+        query = query.limit(limit);
+      }
+      
+      final querySnapshot = await query.get();
       
       return querySnapshot.docs
           .map((doc) => ExerciseAnalysisResult.fromDbMap(doc.data(), doc.id))
