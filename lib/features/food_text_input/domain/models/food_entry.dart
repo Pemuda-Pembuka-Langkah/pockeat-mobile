@@ -10,4 +10,9 @@ class FoodEntry {
     required this.ingredients,
     this.weight,
   });
+
+  @override
+  String toString() {
+    return 'FoodEntry(foodName: $foodName, description: $description, ingredients: $ingredients, weight: $weight)';
+  }
 }

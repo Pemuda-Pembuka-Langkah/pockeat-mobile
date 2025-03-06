@@ -44,24 +44,16 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       _successMessage = null;
     });
 
-    if (_foodNameController.text.trim().isEmpty) {
-      setState(() => _foodNameError = 'Please insert food name');
-    } else {
-      _foodNameError = FormValidator.validateFoodName(_foodNameController.text, widget.maxFoodNameWords);
-    }
-
-    if (_descriptionController.text.trim().isEmpty) {
-      setState(() => _descriptionError = 'Please insert food description');
-    } else {
-      _descriptionError = FormValidator.validateDescription(_descriptionController.text, widget.maxDescriptionWords);
-    }
-
-    if (_ingredientsController.text.trim().isEmpty) {
-      setState(() => _ingredientsError = 'Please insert food ingredients');
-    } else {
-      _ingredientsError = FormValidator.validateIngredients(_ingredientsController.text, widget.maxIngredientWords);
-    }
-
+    // Validate food name
+    _foodNameError = FormValidator.validateFoodName(_foodNameController.text, widget.maxFoodNameWords);
+    
+    // Validate description
+    _descriptionError = FormValidator.validateDescription(_descriptionController.text, widget.maxDescriptionWords);
+    
+    // Validate ingredients
+    _ingredientsError = FormValidator.validateIngredients(_ingredientsController.text, widget.maxIngredientWords);
+    
+    // Validate weight if required
     if (widget.weightRequired) {
       _weightError = FormValidator.validateWeight(_weightController.text);
     }
@@ -107,25 +99,25 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Food Entry Form')),
+      appBar: AppBar(title: const Text('Food Entry Form')),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
-                key: ValueKey('foodNameField'),
+                key: const ValueKey('foodNameField'),
                 controller: _foodNameController,
                 decoration: InputDecoration(
                   labelText: 'Food Name',
                   errorText: _foodNameError,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextField(
-                key: ValueKey('descriptionField'),
+                key: const ValueKey('descriptionField'),
                 controller: _descriptionController,
                 decoration: InputDecoration(
                   labelText: 'Description',
@@ -133,9 +125,9 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                 ),
                 maxLines: 3,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextField(
-                key: ValueKey('ingredientsField'),
+                key: const ValueKey('ingredientsField'),
                 controller: _ingredientsController,
                 decoration: InputDecoration(
                   labelText: 'Ingredients',
@@ -143,9 +135,9 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                 ),
                 maxLines: 3,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextField(
-                key: ValueKey('weightField'),
+                key: const ValueKey('weightField'),
                 controller: _weightController,
                 decoration: InputDecoration(
                   labelText: 'Weight (grams)',
@@ -153,20 +145,20 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                 ),
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               if (_successMessage != null)
                 Padding(
-                  padding: EdgeInsets.only(top: 10),
+                  padding: const EdgeInsets.only(top: 10),
                   child: Text(
                     _successMessage!,
-                    style: TextStyle(color: Colors.green),
+                    style: const TextStyle(color: Colors.green),
                   ),
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
-                key: ValueKey('saveButton'),
+                key: const ValueKey('saveButton'),
                 onPressed: _saveForm,
-                child: Text('Save'),
+                child: const Text('Save'),
               ),
             ],
           ),
