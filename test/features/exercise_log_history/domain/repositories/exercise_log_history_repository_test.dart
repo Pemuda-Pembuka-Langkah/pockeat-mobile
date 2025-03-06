@@ -141,14 +141,109 @@ void main() {
       verify(mockSmartExerciseLogRepository.getAllAnalysisResults()).called(1);
     });
 
-    test('should throw exception when SmartExerciseLogRepository throws exception', () async {
-      // Arrange
-      when(mockSmartExerciseLogRepository.getAllAnalysisResults())
-          .thenThrow(Exception('Database error'));
+    // Negative test cases
+    group('Error handling tests', () {
+      test('getAllExerciseLogs should throw exception with proper message when SmartExerciseLogRepository fails', () async {
+        // Arrange
+        when(mockSmartExerciseLogRepository.getAllAnalysisResults())
+            .thenThrow(Exception('Database error'));
 
-      // Act & Assert
-      expect(() => repository.getAllExerciseLogs(), throwsException);
-      verify(mockSmartExerciseLogRepository.getAllAnalysisResults()).called(1);
+        // Act & Assert
+        expect(
+          () => repository.getAllExerciseLogs(),
+          throwsA(isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('Failed to retrieve exercise logs')
+          ))
+        );
+        verify(mockSmartExerciseLogRepository.getAllAnalysisResults()).called(1);
+      });
+
+      test('getExerciseLogsByDate should throw exception with proper message when SmartExerciseLogRepository fails', () async {
+        // Arrange
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate))
+            .thenThrow(Exception('Network error'));
+
+        // Act & Assert
+        expect(
+          () => repository.getExerciseLogsByDate(testDate),
+          throwsA(isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('Failed to retrieve exercise logs by date')
+          ))
+        );
+        verify(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate)).called(1);
+      });
+
+      test('getExerciseLogsByMonth should throw exception with proper message when SmartExerciseLogRepository fails', () async {
+        // Arrange
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear))
+            .thenThrow(Exception('Server error'));
+
+        // Act & Assert
+        expect(
+          () => repository.getExerciseLogsByMonth(testMonth, testYear),
+          throwsA(isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('Failed to retrieve exercise logs by month')
+          ))
+        );
+        verify(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear)).called(1);
+      });
+
+      test('getExerciseLogsByYear should throw exception with proper message when SmartExerciseLogRepository fails', () async {
+        // Arrange
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear))
+            .thenThrow(Exception('Connection timeout'));
+
+        // Act & Assert
+        expect(
+          () => repository.getExerciseLogsByYear(testYear),
+          throwsA(isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('Failed to retrieve exercise logs by year')
+          ))
+        );
+        verify(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear)).called(1);
+      });
+
+      test('getExerciseLogsByActivityCategory should throw exception with proper message when SmartExerciseLogRepository fails', () async {
+        // Arrange
+        when(mockSmartExerciseLogRepository.getAllAnalysisResults())
+            .thenThrow(Exception('Authentication error'));
+
+        // Act & Assert
+        expect(
+          () => repository.getExerciseLogsByActivityCategory(ExerciseLogHistoryItem.TYPE_SMART_EXERCISE),
+          throwsA(isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('Failed to retrieve exercise logs by activity category')
+          ))
+        );
+        verify(mockSmartExerciseLogRepository.getAllAnalysisResults()).called(1);
+      });
+
+      test('getExerciseLogsByActivityCategory should propagate exception from getAllExerciseLogs', () async {
+        // Arrange
+        when(mockSmartExerciseLogRepository.getAllAnalysisResults())
+            .thenThrow(Exception('Permission denied'));
+
+        // Act & Assert
+        expect(
+          () => repository.getExerciseLogsByActivityCategory(ExerciseLogHistoryItem.TYPE_SMART_EXERCISE),
+          throwsA(isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('Failed to retrieve exercise logs by activity category')
+          ))
+        );
+        verify(mockSmartExerciseLogRepository.getAllAnalysisResults()).called(1);
+      });
     });
   });
 }
