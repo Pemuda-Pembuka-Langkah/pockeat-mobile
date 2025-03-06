@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/homepage/presentation/overview_section.dart';
 import 'package:pockeat/features/homepage/presentation/recently_foods_section.dart';
-import 'package:pockeat/features/homepage/presentation/recently_exercise_section.dart';
+import 'package:pockeat/features/exercise_log_history/presentation/widgets/recently_exercise_section.dart';
+import 'package:pockeat/features/exercise_log_history/domain/repositories/exercise_log_history_repository.dart';
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
@@ -104,6 +105,8 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    final exerciseLogHistoryRepository = Provider.of<ExerciseLogHistoryRepository>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: DefaultTabController(
@@ -258,7 +261,7 @@ class _HomePageState extends State<HomePage>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Hello, Alex Connected to: ${dbInfo ?? 'Loading...'}',
+                            'Hello, Alex',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,
@@ -313,10 +316,12 @@ class _HomePageState extends State<HomePage>
           ],
           body: TabBarView(
             controller: _tabController,
-            children: const [
-              OverviewSection(),
-              RecentlyFoodsSection(),
-              RecentExerciseSection(),
+            children: [
+              const OverviewSection(),
+              const RecentlyFoodsSection(),
+              RecentlyExerciseSection(
+                repository: exerciseLogHistoryRepository,
+              ),
             ],
           ),
         ),

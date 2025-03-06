@@ -17,6 +17,10 @@ import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_pa
 // Import dependencies untuk DI
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
+// Import for ExerciseLogHistory
+import 'package:pockeat/features/exercise_log_history/domain/repositories/exercise_log_history_repository.dart';
+import 'package:pockeat/features/exercise_log_history/domain/repositories/exercise_log_history_repository_impl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,10 +46,23 @@ void main() async {
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
 
+  // Initialize repositories
+  final firestore = FirebaseFirestore.instance;
+  final smartExerciseLogRepository = SmartExerciseLogRepositoryImpl(firestore: firestore);
+  final exerciseLogHistoryRepository = ExerciseLogHistoryRepositoryImpl(
+    smartExerciseLogRepository: smartExerciseLogRepository,
+  );
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        Provider<ExerciseLogHistoryRepository>(
+          create: (_) => exerciseLogHistoryRepository,
+        ),
+        Provider<SmartExerciseLogRepository>(
+          create: (_) => smartExerciseLogRepository,
+        ),
       ],
       child: const MyApp(),
     ),
@@ -57,6 +74,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get repositories from context
+    final geminiApiKey = dotenv.env['GOOGLE_GEMINI_API_KEY'] ?? '';
+    final smartExerciseLogRepository = Provider.of<SmartExerciseLogRepository>(context);
+    
     return MaterialApp(
       title: 'CalculATE',
       theme: ThemeData(
@@ -93,12 +114,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomePage(),
         '/smart-exercise-log': (context) => SmartExerciseLogPage(
           // Langsung berikan dependensi yang dibutuhkan
-          geminiService: GeminiServiceImpl(
-            apiKey: dotenv.env['GOOGLE_GEMINI_API_KEY'] ?? ''
-          ),
-          repository: SmartExerciseLogRepositoryImpl(
-            firestore: FirebaseFirestore.instance
-          ),
+          geminiService: GeminiServiceImpl(apiKey: geminiApiKey),
+          repository: smartExerciseLogRepository,
         ),
         '/scan': (context) => ScanFoodPage(
                 cameraController: CameraController(
