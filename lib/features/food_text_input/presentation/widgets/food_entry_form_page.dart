@@ -81,7 +81,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
         _successMessage = 'Food entry is saved successfully!';
       });
 
-      print(foodEntry);
+      debugPrint(foodEntry.toString());
     }
   }
 
