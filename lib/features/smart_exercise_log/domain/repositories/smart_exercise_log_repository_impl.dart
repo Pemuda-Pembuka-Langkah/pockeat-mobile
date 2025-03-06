@@ -49,4 +49,89 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
       throw Exception('Failed to retrieve analysis results: $e');
     }
   }
+
+  @override
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByDate(DateTime date) async {
+    try {
+      // Buat timestamp untuk awal hari
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final startTimestamp = startOfDay.millisecondsSinceEpoch;
+      
+      // Buat timestamp untuk akhir hari
+      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
+      final endTimestamp = endOfDay.millisecondsSinceEpoch;
+      
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
+          .where('timestamp', isLessThanOrEqualTo: endTimestamp)
+          .orderBy('timestamp', descending: true)
+          .get();
+      
+      return querySnapshot.docs
+          .map((doc) => ExerciseAnalysisResult.fromDbMap(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to retrieve analysis results by date: $e');
+    }
+  }
+  
+  @override
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByMonth(int month, int year) async {
+    try {
+      // Validasi bulan
+      if (month < 1 || month > 12) {
+        throw ArgumentError('Month must be between 1 and 12');
+      }
+      
+      // Buat timestamp untuk awal bulan
+      final startOfMonth = DateTime(year, month, 1);
+      final startTimestamp = startOfMonth.millisecondsSinceEpoch;
+      
+      // Buat timestamp untuk akhir bulan
+      final endOfMonth = month < 12 
+          ? DateTime(year, month + 1, 1).subtract(const Duration(milliseconds: 1))
+          : DateTime(year + 1, 1, 1).subtract(const Duration(milliseconds: 1));
+      final endTimestamp = endOfMonth.millisecondsSinceEpoch;
+      
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
+          .where('timestamp', isLessThanOrEqualTo: endTimestamp)
+          .orderBy('timestamp', descending: true)
+          .get();
+      
+      return querySnapshot.docs
+          .map((doc) => ExerciseAnalysisResult.fromDbMap(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to retrieve analysis results by month: $e');
+    }
+  }
+  
+  @override
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByYear(int year) async {
+    try {
+      // Buat timestamp untuk awal tahun
+      final startOfYear = DateTime(year, 1, 1);
+      final startTimestamp = startOfYear.millisecondsSinceEpoch;
+      
+      // Buat timestamp untuk akhir tahun
+      final endOfYear = DateTime(year + 1, 1, 1).subtract(const Duration(milliseconds: 1));
+      final endTimestamp = endOfYear.millisecondsSinceEpoch;
+      
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
+          .where('timestamp', isLessThanOrEqualTo: endTimestamp)
+          .orderBy('timestamp', descending: true)
+          .get();
+      
+      return querySnapshot.docs
+          .map((doc) => ExerciseAnalysisResult.fromDbMap(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to retrieve analysis results by year: $e');
+    }
+  }
 }

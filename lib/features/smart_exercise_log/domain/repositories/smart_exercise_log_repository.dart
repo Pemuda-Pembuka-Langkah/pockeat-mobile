@@ -16,7 +16,28 @@ abstract class SmartExerciseLogRepository {
 
   /// Mengambil semua hasil analisis
   ///
-  /// Mengembalikan [List<AnalysisResult>] berisi semua hasil analisis
-  /// Throws [StorageException] jika terjadi error saat pengambilan data
+  /// Mengembalikan [List<ExerciseAnalysisResult>] berisi semua hasil analisis
+  /// Throws [Exception] jika terjadi error saat pengambilan data
   Future<List<ExerciseAnalysisResult>> getAllAnalysisResults();
+  
+  /// Mengambil hasil analisis berdasarkan tanggal
+  /// 
+  /// Parameter [date] untuk memfilter hasil berdasarkan tanggal spesifik
+  /// Mengembalikan [List<ExerciseAnalysisResult>] berisi hasil analisis pada tanggal tersebut
+  /// Throws [Exception] jika terjadi error saat pengambilan data
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByDate(DateTime date);
+  
+  /// Mengambil hasil analisis berdasarkan bulan dan tahun
+  /// 
+  /// Parameter [month] (1-12) dan [year] untuk memfilter hasil
+  /// Mengembalikan [List<ExerciseAnalysisResult>] berisi hasil analisis pada bulan dan tahun tersebut
+  /// Throws [Exception] jika terjadi error saat pengambilan data
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByMonth(int month, int year);
+  
+  /// Mengambil hasil analisis berdasarkan tahun
+  /// 
+  /// Parameter [year] untuk memfilter hasil
+  /// Mengembalikan [List<ExerciseAnalysisResult>] berisi hasil analisis pada tahun tersebut
+  /// Throws [Exception] jika terjadi error saat pengambilan data
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByYear(int year);
 }
