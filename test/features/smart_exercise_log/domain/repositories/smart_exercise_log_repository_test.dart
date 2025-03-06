@@ -270,4 +270,362 @@ void main() {
           () => repository.getAllAnalysisResults(), throwsA(isA<Exception>()));
     });
   });
+
+  // Tests for time filtering methods
+  group('getAnalysisResultsByDate', () {
+    test('should return results for specific date', () async {
+      // Arrange
+      final testDate = DateTime(2024, 3, 15);
+      final startOfDay = DateTime(2024, 3, 15);
+      final endOfDay = DateTime(2024, 3, 15, 23, 59, 59, 999);
+      
+      final mockQueryDoc1 = MockQueryDocumentSnapshot();
+      final mockQueryDoc2 = MockQueryDocumentSnapshot();
+
+      final mockData1 = {
+        'exerciseType': 'Running',
+        'duration': '30 menit',
+        'intensity': 'Sedang',
+        'estimatedCalories': 300,
+        'timestamp': DateTime(2024, 3, 15, 10, 30).millisecondsSinceEpoch,
+        'originalInput': 'Lari 30 menit',
+      };
+
+      final mockData2 = {
+        'exerciseType': 'Yoga',
+        'duration': '45 menit',
+        'intensity': 'Rendah',
+        'estimatedCalories': 150,
+        'timestamp': DateTime(2024, 3, 15, 16, 0).millisecondsSinceEpoch,
+        'originalInput': 'Yoga 45 menit santai',
+      };
+
+      // Setup mock docs
+      when(mockQueryDoc1.data()).thenReturn(mockData1);
+      when(mockQueryDoc1.id).thenReturn('id-1');
+      when(mockQueryDoc2.data()).thenReturn(mockData2);
+      when(mockQueryDoc2.id).thenReturn('id-2');
+
+      final List<MockQueryDocumentSnapshot> mockDocs = [
+        mockQueryDoc1,
+        mockQueryDoc2
+      ];
+
+      // Setup mock query behavior
+      when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfDay.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfDay.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.orderBy('timestamp', descending: true))
+          .thenReturn(mockQuery);
+      when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+      when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+
+      // Act
+      final results = await repository.getAnalysisResultsByDate(testDate);
+
+      // Assert
+      expect(results.length, 2);
+      expect(results[0].exerciseType, 'Running');
+      expect(results[1].exerciseType, 'Yoga');
+      verify(mockFirestore.collection('exerciseAnalysis')).called(1);
+      verify(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfDay.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfDay.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.orderBy('timestamp', descending: true)).called(1);
+      verify(mockQuery.get()).called(1);
+    });
+
+    test('should return empty list when no results on date', () async {
+      // Arrange
+      final testDate = DateTime(2024, 3, 15);
+      final startOfDay = DateTime(2024, 3, 15);
+      final endOfDay = DateTime(2024, 3, 15, 23, 59, 59, 999);
+      
+      final List<MockQueryDocumentSnapshot> emptyDocs = [];
+
+      // Setup mock query behavior
+      when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfDay.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfDay.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.orderBy('timestamp', descending: true))
+          .thenReturn(mockQuery);
+      when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+      when(mockQuerySnapshot.docs).thenReturn(emptyDocs);
+
+      // Act
+      final results = await repository.getAnalysisResultsByDate(testDate);
+
+      // Assert
+      expect(results, isEmpty);
+      verify(mockFirestore.collection('exerciseAnalysis')).called(1);
+      verify(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfDay.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfDay.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.orderBy('timestamp', descending: true)).called(1);
+      verify(mockQuery.get()).called(1);
+    });
+
+    test('should throw Exception when retrieval by date fails', () async {
+      // Arrange
+      final testDate = DateTime(2024, 3, 15);
+      final startOfDay = DateTime(2024, 3, 15);
+      final endOfDay = DateTime(2024, 3, 15, 23, 59, 59, 999);
+      
+      // Setup mock to throw an error
+      when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfDay.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfDay.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.orderBy('timestamp', descending: true))
+          .thenReturn(mockQuery);
+      when(mockQuery.get())
+          .thenThrow(FirebaseException(plugin: 'firestore'));
+
+      // Act & Assert
+      expect(() => repository.getAnalysisResultsByDate(testDate),
+          throwsA(isA<Exception>()));
+    });
+  });
+
+  group('getAnalysisResultsByMonth', () {
+    test('should return results for specific month', () async {
+      // Arrange
+      final testMonth = 3; // March
+      final testYear = 2024;
+      final startOfMonth = DateTime(2024, 3, 1);
+      final endOfMonth = DateTime(2024, 4, 1).subtract(const Duration(milliseconds: 1));
+      
+      final mockQueryDoc1 = MockQueryDocumentSnapshot();
+      final mockQueryDoc2 = MockQueryDocumentSnapshot();
+
+      final mockData1 = {
+        'exerciseType': 'Running',
+        'duration': '30 menit',
+        'intensity': 'Sedang',
+        'estimatedCalories': 300,
+        'timestamp': DateTime(2024, 3, 15, 10, 30).millisecondsSinceEpoch,
+        'originalInput': 'Lari 30 menit',
+      };
+
+      final mockData2 = {
+        'exerciseType': 'Yoga',
+        'duration': '45 menit',
+        'intensity': 'Rendah',
+        'estimatedCalories': 150,
+        'timestamp': DateTime(2024, 3, 20, 16, 0).millisecondsSinceEpoch,
+        'originalInput': 'Yoga 45 menit santai',
+      };
+
+      // Setup mock docs
+      when(mockQueryDoc1.data()).thenReturn(mockData1);
+      when(mockQueryDoc1.id).thenReturn('id-1');
+      when(mockQueryDoc2.data()).thenReturn(mockData2);
+      when(mockQueryDoc2.id).thenReturn('id-2');
+
+      final List<MockQueryDocumentSnapshot> mockDocs = [
+        mockQueryDoc1,
+        mockQueryDoc2
+      ];
+
+      // Setup mock query behavior
+      when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfMonth.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfMonth.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.orderBy('timestamp', descending: true))
+          .thenReturn(mockQuery);
+      when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+      when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+
+      // Act
+      final results = await repository.getAnalysisResultsByMonth(testMonth, testYear);
+
+      // Assert
+      expect(results.length, 2);
+      expect(results[0].exerciseType, 'Running');
+      expect(results[1].exerciseType, 'Yoga');
+      verify(mockFirestore.collection('exerciseAnalysis')).called(1);
+      verify(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfMonth.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfMonth.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.orderBy('timestamp', descending: true)).called(1);
+      verify(mockQuery.get()).called(1);
+    });
+
+    test('should handle December correctly (edge case)', () async {
+      // Arrange
+      final testMonth = 12; // December
+      final testYear = 2024;
+      final startOfMonth = DateTime(2024, 12, 1);
+      final endOfMonth = DateTime(2025, 1, 1).subtract(const Duration(milliseconds: 1));
+      
+      final List<MockQueryDocumentSnapshot> emptyDocs = [];
+
+      // Setup mock query behavior
+      when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfMonth.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfMonth.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.orderBy('timestamp', descending: true))
+          .thenReturn(mockQuery);
+      when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+      when(mockQuerySnapshot.docs).thenReturn(emptyDocs);
+
+      // Act
+      final results = await repository.getAnalysisResultsByMonth(testMonth, testYear);
+
+      // Assert
+      expect(results, isEmpty);
+      verify(mockFirestore.collection('exerciseAnalysis')).called(1);
+      verify(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfMonth.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfMonth.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.orderBy('timestamp', descending: true)).called(1);
+      verify(mockQuery.get()).called(1);
+    });
+
+    test('should handle invalid month by throwing Exception', () async {
+      // Setup a mock repository with real validation
+      final repository = SmartExerciseLogRepositoryImpl(firestore: mockFirestore);
+      
+      // Act & Assert - we're expecting the actual repository to throw
+      expect(() => repository.getAnalysisResultsByMonth(13, 2024),
+          throwsA(predicate((e) => e.toString().contains('Month must be between 1 and 12'))));
+      expect(() => repository.getAnalysisResultsByMonth(0, 2024),
+          throwsA(predicate((e) => e.toString().contains('Month must be between 1 and 12'))));
+    });
+
+    test('should throw Exception when retrieval by month fails', () async {
+      // Arrange
+      final testMonth = 3;
+      final testYear = 2024;
+
+      // Setup mock Firestore to throw error at the collection level
+      when(mockFirestore.collection('exerciseAnalysis'))
+          .thenThrow(FirebaseException(plugin: 'firestore'));
+
+      // Act & Assert
+      expect(() => repository.getAnalysisResultsByMonth(testMonth, testYear),
+          throwsA(isA<Exception>()));
+    });
+  });
+
+  group('getAnalysisResultsByYear', () {
+    test('should return results for specific year', () async {
+      // Arrange
+      final testYear = 2024;
+      final startOfYear = DateTime(2024, 1, 1);
+      final endOfYear = DateTime(2025, 1, 1).subtract(const Duration(milliseconds: 1));
+      
+      final mockQueryDoc1 = MockQueryDocumentSnapshot();
+      final mockQueryDoc2 = MockQueryDocumentSnapshot();
+      final mockQueryDoc3 = MockQueryDocumentSnapshot();
+
+      final mockData1 = {
+        'exerciseType': 'Running',
+        'duration': '30 menit',
+        'intensity': 'Sedang',
+        'estimatedCalories': 300,
+        'timestamp': DateTime(2024, 3, 15).millisecondsSinceEpoch,
+        'originalInput': 'Lari 30 menit',
+      };
+
+      final mockData2 = {
+        'exerciseType': 'Yoga',
+        'duration': '45 menit',
+        'intensity': 'Rendah',
+        'estimatedCalories': 150,
+        'timestamp': DateTime(2024, 6, 20).millisecondsSinceEpoch,
+        'originalInput': 'Yoga 45 menit santai',
+      };
+      
+      final mockData3 = {
+        'exerciseType': 'Swimming',
+        'duration': '1 jam',
+        'intensity': 'Tinggi',
+        'estimatedCalories': 500,
+        'timestamp': DateTime(2024, 9, 5).millisecondsSinceEpoch,
+        'originalInput': 'Berenang 1 jam',
+      };
+
+      // Setup mock docs
+      when(mockQueryDoc1.data()).thenReturn(mockData1);
+      when(mockQueryDoc1.id).thenReturn('id-1');
+      when(mockQueryDoc2.data()).thenReturn(mockData2);
+      when(mockQueryDoc2.id).thenReturn('id-2');
+      when(mockQueryDoc3.data()).thenReturn(mockData3);
+      when(mockQueryDoc3.id).thenReturn('id-3');
+
+      final List<MockQueryDocumentSnapshot> mockDocs = [
+        mockQueryDoc1,
+        mockQueryDoc2,
+        mockQueryDoc3
+      ];
+
+      // Setup mock query behavior
+      when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfYear.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfYear.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.orderBy('timestamp', descending: true))
+          .thenReturn(mockQuery);
+      when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+      when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+
+      // Act
+      final results = await repository.getAnalysisResultsByYear(testYear);
+
+      // Assert
+      expect(results.length, 3);
+      expect(results[0].exerciseType, 'Running');
+      expect(results[1].exerciseType, 'Yoga');
+      expect(results[2].exerciseType, 'Swimming');
+      verify(mockFirestore.collection('exerciseAnalysis')).called(1);
+      verify(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfYear.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfYear.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.orderBy('timestamp', descending: true)).called(1);
+      verify(mockQuery.get()).called(1);
+    });
+
+    test('should return empty list when no results in year', () async {
+      // Arrange
+      final testYear = 2023;
+      final startOfYear = DateTime(2023, 1, 1);
+      final endOfYear = DateTime(2024, 1, 1).subtract(const Duration(milliseconds: 1));
+      
+      final List<MockQueryDocumentSnapshot> emptyDocs = [];
+
+      // Setup mock query behavior
+      when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfYear.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfYear.millisecondsSinceEpoch))
+          .thenReturn(mockQuery);
+      when(mockQuery.orderBy('timestamp', descending: true))
+          .thenReturn(mockQuery);
+      when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+      when(mockQuerySnapshot.docs).thenReturn(emptyDocs);
+
+      // Act
+      final results = await repository.getAnalysisResultsByYear(testYear);
+
+      // Assert
+      expect(results, isEmpty);
+      verify(mockFirestore.collection('exerciseAnalysis')).called(1);
+      verify(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfYear.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfYear.millisecondsSinceEpoch)).called(1);
+      verify(mockQuery.orderBy('timestamp', descending: true)).called(1);
+      verify(mockQuery.get()).called(1);
+    });
+
+    test('should throw Exception when retrieval by year fails', () async {
+      // Arrange
+      final testYear = 2024;
+
+      // Setup mock Firestore to throw error at the collection level
+      when(mockFirestore.collection('exerciseAnalysis'))
+          .thenThrow(FirebaseException(plugin: 'firestore'));
+
+      // Act & Assert
+      expect(() => repository.getAnalysisResultsByYear(testYear),
+          throwsA(isA<Exception>()));
+    });
+  });
 }
