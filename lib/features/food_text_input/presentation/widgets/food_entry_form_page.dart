@@ -7,7 +7,7 @@ class FoodEntryForm extends StatefulWidget {
   final int maxDescriptionWords;
   final int maxIngredientWords;
   final bool weightRequired;
-  final Function(FoodEntry)? onSaved; 
+  final Function(FoodEntry)? onSaved; // Add callback for testing
 
   const FoodEntryForm({
     this.maxFoodNameWords = 20,
@@ -85,11 +85,13 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
 
       debugPrint(foodEntry.toString());
       
+      // Call the callback for testing
       if (widget.onSaved != null) {
         widget.onSaved!(foodEntry);
       }
     }
     
+    // Trigger a setState to update the UI with validation errors
     setState(() {});
   }
 
