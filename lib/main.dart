@@ -17,6 +17,7 @@ import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_pa
 // Import dependencies untuk DI
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
+import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 // Import for ExerciseLogHistory
 import 'package:pockeat/features/exercise_log_history/domain/repositories/exercise_log_history_repository.dart';
@@ -129,6 +130,7 @@ class MyApp extends StatelessWidget {
         '/add-food': (context) => const FoodInputPage(),
         '/add-exercise': (context) => const ExerciseInputPage(),
         '/food-analysis': (context) => const FoodAnalysisPage(),
+        '/cardio': (context) => const CardioInputPage()
       },
     );
   }
