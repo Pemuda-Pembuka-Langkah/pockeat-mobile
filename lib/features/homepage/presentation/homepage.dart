@@ -3,7 +3,7 @@ import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/homepage/presentation/overview_section.dart';
 import 'package:pockeat/features/homepage/presentation/recently_foods_section.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/recently_exercise_section.dart';
-import 'package:pockeat/features/exercise_log_history/domain/repositories/exercise_log_history_repository.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
@@ -28,7 +28,8 @@ class _HomePageState extends State<HomePage>
   Future<void> _checkDatabase() async {
     try {
       // Pakai document yang sama di semua environment
-      final docRef = FirebaseFirestore.instance.collection('app_info').doc('db_type');
+      final docRef =
+          FirebaseFirestore.instance.collection('app_info').doc('db_type');
       // Read balik untuk konfirmasi
       final doc = await docRef.get();
       setState(() {
@@ -105,7 +106,8 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    final exerciseLogHistoryRepository = Provider.of<ExerciseLogHistoryRepository>(context);
+    final exerciseLogHistoryRepository =
+        Provider.of<ExerciseLogHistoryService>(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -255,7 +257,7 @@ class _HomePageState extends State<HomePage>
                         },
                       ),
                     ),
-                     Padding(
+                    Padding(
                       padding: EdgeInsets.fromLTRB(16, 8, 16, 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
-import 'package:pockeat/features/exercise_log_history/domain/repositories/exercise_log_history_repository.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_history_card.dart';
 
 /// A widget that displays a section of recent exercise history items.
-/// 
+///
 /// This widget connects to the ExerciseLogHistoryRepository to fetch exercise logs
 /// and displays them using the ExerciseHistoryCard widget.
 /// It handles its own navigation to exercise history pages.
 class RecentlyExerciseSection extends StatefulWidget {
-  final ExerciseLogHistoryRepository repository;
+  final ExerciseLogHistoryService repository;
   final int limit;
 
   const RecentlyExerciseSection({
@@ -19,29 +19,31 @@ class RecentlyExerciseSection extends StatefulWidget {
   });
 
   @override
-  State<RecentlyExerciseSection> createState() => _RecentlyExerciseSectionState();
+  State<RecentlyExerciseSection> createState() =>
+      _RecentlyExerciseSectionState();
 }
 
 class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> {
   late Future<List<ExerciseLogHistoryItem>> _exercisesFuture;
-  
+
   @override
   void initState() {
     super.initState();
     _loadExercises();
   }
-  
+
   @override
   void didUpdateWidget(RecentlyExerciseSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.repository != widget.repository || 
+    if (oldWidget.repository != widget.repository ||
         oldWidget.limit != widget.limit) {
       _loadExercises();
     }
   }
-  
+
   void _loadExercises() {
-    _exercisesFuture = widget.repository.getAllExerciseLogs(limit: widget.limit);
+    _exercisesFuture =
+        widget.repository.getAllExerciseLogs(limit: widget.limit);
   }
 
   void _navigateToAllExercises() {
@@ -79,7 +81,8 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> {
                 GestureDetector(
                   onTap: _navigateToAllExercises,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: primaryPink.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),

@@ -20,26 +20,27 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
 import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 // Import for ExerciseLogHistory
-import 'package:pockeat/features/exercise_log_history/domain/repositories/exercise_log_history_repository.dart';
-import 'package:pockeat/features/exercise_log_history/domain/repositories/exercise_log_history_repository_impl.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service_impl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Default ke dev untuk development yang aman
   // Load dotenv dulu
   await dotenv.load(fileName: '.env');
-  
+
   // Ambil flavor dari dotenv
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
-  
+
   await Firebase.initializeApp(
-    options: flavor == 'production' 
-      ? ProductionFirebaseOptions.currentPlatform
-      : flavor == 'staging'
-        ? StagingFirebaseOptions.currentPlatform
-        : StagingFirebaseOptions.currentPlatform // Dev pake config staging tapi nanti connect ke emulator
-  );
+      options: flavor == 'production'
+          ? ProductionFirebaseOptions.currentPlatform
+          : flavor == 'staging'
+              ? StagingFirebaseOptions.currentPlatform
+              : StagingFirebaseOptions
+                  .currentPlatform // Dev pake config staging tapi nanti connect ke emulator
+      );
 
   // Setup emulator kalau di dev mode
   if (flavor == 'dev') {
@@ -49,8 +50,9 @@ void main() async {
 
   // Initialize repositories
   final firestore = FirebaseFirestore.instance;
-  final smartExerciseLogRepository = SmartExerciseLogRepositoryImpl(firestore: firestore);
-  final exerciseLogHistoryRepository = ExerciseLogHistoryRepositoryImpl(
+  final smartExerciseLogRepository =
+      SmartExerciseLogRepositoryImpl(firestore: firestore);
+  final exerciseLogHistoryRepository = ExerciseLogHistoryServiceImpl(
     smartExerciseLogRepository: smartExerciseLogRepository,
   );
 
@@ -58,7 +60,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
-        Provider<ExerciseLogHistoryRepository>(
+        Provider<ExerciseLogHistoryService>(
           create: (_) => exerciseLogHistoryRepository,
         ),
         Provider<SmartExerciseLogRepository>(
@@ -77,8 +79,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get repositories from context
     final geminiApiKey = dotenv.env['GOOGLE_GEMINI_API_KEY'] ?? '';
-    final smartExerciseLogRepository = Provider.of<SmartExerciseLogRepository>(context);
-    
+    final smartExerciseLogRepository =
+        Provider.of<SmartExerciseLogRepository>(context);
+
     return MaterialApp(
       title: 'CalculATE',
       theme: ThemeData(
@@ -101,7 +104,8 @@ class MyApp extends StatelessWidget {
         // Tambah ini
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white, // Ini akan membuat teks button jadi putih
+            foregroundColor:
+                Colors.white, // Ini akan membuat teks button jadi putih
             backgroundColor: Colors.blue[400],
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -114,10 +118,10 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomePage(),
         '/smart-exercise-log': (context) => SmartExerciseLogPage(
-          // Langsung berikan dependensi yang dibutuhkan
-          geminiService: GeminiServiceImpl(apiKey: geminiApiKey),
-          repository: smartExerciseLogRepository,
-        ),
+              // Langsung berikan dependensi yang dibutuhkan
+              geminiService: GeminiServiceImpl(apiKey: geminiApiKey),
+              repository: smartExerciseLogRepository,
+            ),
         '/scan': (context) => ScanFoodPage(
                 cameraController: CameraController(
               CameraDescription(
