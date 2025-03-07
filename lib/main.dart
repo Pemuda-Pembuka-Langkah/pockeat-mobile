@@ -17,7 +17,10 @@ import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_pa
 // Import dependencies untuk DI
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
+<<<<<<< HEAD
 import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
+=======
+>>>>>>> a1c8b5d039a9590b2d350e974a1b4baf76ef76b3
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -113,7 +116,10 @@ class MyApp extends StatelessWidget {
         '/add-food': (context) => const FoodInputPage(),
         '/add-exercise': (context) => const ExerciseInputPage(),
         '/food-analysis': (context) => const FoodAnalysisPage(),
+<<<<<<< HEAD
         '/cardio': (context) => const CardioInputPage()
+=======
+>>>>>>> a1c8b5d039a9590b2d350e974a1b4baf76ef76b3
       },
     );
   }
