@@ -204,11 +204,13 @@ class CyclingFormState extends State<CyclingForm> {
             color: isSelected
                 ? widget.primaryPink.withOpacity(0.1)
                 : Colors.transparent,
-            border: !isLastOption
-                ? Border(
-                    right: BorderSide(color: Colors.grey[400]!),
-                  )
-                : null,
+            border: isSelected
+                ? Border.all(color: widget.primaryPink, width: 2)
+                : !isLastOption
+                    ? Border(
+                        right: BorderSide(color: Colors.grey[400]!),
+                      )
+                    : null,
           ),
           child: Column(
             children: [
