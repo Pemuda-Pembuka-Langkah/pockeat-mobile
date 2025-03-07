@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
+import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 
 void main() {
   group('ExerciseLogHistoryItem', () {
@@ -107,30 +108,10 @@ void main() {
       // Arrange - create a mock WeightliftingLog with some null values
       final weightliftingLog = _MockWeightliftingLog(
         id: 'weight-123',
-        title: null, // Test null handling
-        exerciseCount: null, // Test null handling
-        timestamp: testTimestamp,
-        caloriesBurned: null, // Test null handling
-      );
-
-      // Act
-      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightliftingLog);
-
-      // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
-      expect(item.title, equals('Weightlifting Session')); // Default value when title is null
-      expect(item.subtitle, equals('0 exercises')); // Default value when exerciseCount is null
-      expect(item.timestamp, equals(testTimestamp));
-      expect(item.caloriesBurned, equals(0)); // Default value when caloriesBurned is null
-      expect(item.sourceId, equals('weight-123'));
-    });
-
-    test('should create ExerciseLogHistoryItem from WeightliftingLog with valid values', () {
-      // Arrange - create a mock WeightliftingLog with valid values
-      final weightliftingLog = _MockWeightliftingLog(
-        id: 'weight-123',
-        title: 'Strength Training',
-        exerciseCount: 8,
+        exerciseName: 'Bench Press',
+        sets: '3',
+        reps: '8',
+        weight: '80 kg',
         timestamp: testTimestamp,
         caloriesBurned: 250,
       );
@@ -140,8 +121,32 @@ void main() {
 
       // Assert
       expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
-      expect(item.title, equals('Strength Training'));
-      expect(item.subtitle, equals('8 exercises'));
+      expect(item.title, equals('Bench Press')); 
+      expect(item.subtitle, equals('3 sets • 8 reps • 80 kg')); 
+      expect(item.timestamp, equals(testTimestamp));
+      expect(item.caloriesBurned, equals(250));
+      expect(item.sourceId, equals('weight-123'));
+    });
+
+    test('should create ExerciseLogHistoryItem from WeightliftingLog with valid values', () {
+      // Arrange - create a mock WeightliftingLog with valid values
+      final weightliftingLog = _MockWeightliftingLog(
+        id: 'weight-123',
+        exerciseName: 'Bench Press',
+        sets: '3',
+        reps: '8',
+        weight: '80 kg',
+        timestamp: testTimestamp,
+        caloriesBurned: 250,
+      );
+
+      // Act
+      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightliftingLog);
+
+      // Assert
+      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
+      expect(item.title, equals('Bench Press')); 
+      expect(item.subtitle, equals('3 sets • 8 reps • 80 kg')); 
       expect(item.timestamp, equals(testTimestamp));
       expect(item.caloriesBurned, equals(250));
       expect(item.sourceId, equals('weight-123'));
@@ -151,34 +156,12 @@ void main() {
       // Arrange - create a mock CardioLog with some null values
       final cardioLog = _MockCardioLog(
         id: 'cardio-123',
-        activityType: null, // Test null handling
-        duration: null, // Test null handling
-        distance: null, // Test null handling
-        timestamp: testTimestamp,
-        caloriesBurned: null, // Test null handling
-      );
-
-      // Act
-      final item = ExerciseLogHistoryItem.fromCardioLog(cardioLog);
-
-      // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_CARDIO));
-      expect(item.title, equals('Cardio Session')); // Default value when activityType is null
-      expect(item.subtitle, equals('0 • 0 km')); // Default values when duration and distance are null
-      expect(item.timestamp, equals(testTimestamp));
-      expect(item.caloriesBurned, equals(0)); // Default value when caloriesBurned is null
-      expect(item.sourceId, equals('cardio-123'));
-    });
-
-    test('should create ExerciseLogHistoryItem from CardioLog with valid values', () {
-      // Arrange - create a mock CardioLog with valid values
-      final cardioLog = _MockCardioLog(
-        id: 'cardio-123',
-        activityType: 'Running',
-        duration: '45 min',
-        distance: '5.2',
-        timestamp: testTimestamp,
+        date: testTimestamp,
+        startTime: testTimestamp,
+        endTime: testTimestamp.add(Duration(minutes: 30)),
+        type: CardioType.running,
         caloriesBurned: 320,
+        distance: 5.2,
       );
 
       // Act
@@ -187,7 +170,31 @@ void main() {
       // Assert
       expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_CARDIO));
       expect(item.title, equals('Running'));
-      expect(item.subtitle, equals('45 min • 5.2 km'));
+      expect(item.subtitle, equals('30 min • 5.2 km'));
+      expect(item.timestamp, equals(testTimestamp));
+      expect(item.caloriesBurned, equals(320));
+      expect(item.sourceId, equals('cardio-123'));
+    });
+
+    test('should create ExerciseLogHistoryItem from CardioLog with valid values', () {
+      // Arrange - create a mock CardioLog with valid values
+      final cardioLog = _MockCardioLog(
+        id: 'cardio-123',
+        date: testTimestamp,
+        startTime: testTimestamp,
+        endTime: testTimestamp.add(Duration(minutes: 30)),
+        type: CardioType.running,
+        caloriesBurned: 320,
+        distance: 5.2,
+      );
+
+      // Act
+      final item = ExerciseLogHistoryItem.fromCardioLog(cardioLog);
+
+      // Assert
+      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_CARDIO));
+      expect(item.title, equals('Running'));
+      expect(item.subtitle, equals('30 min • 5.2 km'));
       expect(item.timestamp, equals(testTimestamp));
       expect(item.caloriesBurned, equals(320));
       expect(item.sourceId, equals('cardio-123'));
@@ -326,34 +333,74 @@ void main() {
 
 class _MockWeightliftingLog {
   final String id;
-  final String? title;
-  final int? exerciseCount;
+  final String exerciseName;
+  final String sets;
+  final String reps;
+  final String weight;
   final DateTime timestamp;
-  final int? caloriesBurned;
+  final int caloriesBurned;
 
   _MockWeightliftingLog({
     required this.id,
-    this.title,
-    this.exerciseCount,
+    required this.exerciseName,
+    required this.sets,
+    required this.reps,
+    required this.weight,
     required this.timestamp,
-    this.caloriesBurned,
+    required this.caloriesBurned,
   });
 }
 
-class _MockCardioLog {
+class _MockCardioLog implements CardioActivity {
+  @override
   final String id;
-  final String? activityType;
-  final String? duration;
-  final String? distance;
-  final DateTime timestamp;
-  final int? caloriesBurned;
+  
+  @override
+  final DateTime date;
+  
+  @override
+  final DateTime startTime;
+  
+  @override
+  final DateTime endTime;
+  
+  @override
+  final double caloriesBurned;
+  
+  @override
+  final CardioType type;
+  
+  @override
+  Duration get duration => endTime.difference(startTime);
+  
+  // Additional properties for testing
+  final double? distance;
 
   _MockCardioLog({
     required this.id,
-    this.activityType,
-    this.duration,
+    required this.date,
+    required this.startTime,
+    required this.endTime,
+    required this.type,
+    this.caloriesBurned = 0,
     this.distance,
-    required this.timestamp,
-    this.caloriesBurned,
   });
+  
+  @override
+  double calculateCalories() {
+    return caloriesBurned;
+  }
+  
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'date': date.millisecondsSinceEpoch,
+      'startTime': startTime.millisecondsSinceEpoch,
+      'endTime': endTime.millisecondsSinceEpoch,
+      'caloriesBurned': caloriesBurned,
+      'type': type.index,
+      'distance': distance,
+    };
+  }
 }
