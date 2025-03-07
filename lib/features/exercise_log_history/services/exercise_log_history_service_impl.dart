@@ -2,25 +2,27 @@ import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
+import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
+import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 
 /// Implementasi repository Exercise Log History
 ///
 /// Repository ini menggunakan komposisi dari berbagai repository spesifik
-/// (SmartExerciseLogRepository, dan di masa depan: WeightliftingLogRepository, CardioLogRepository)
+/// (SmartExerciseLogRepository, CardioLogRepository, dan di masa depan: WeightliftingLogRepository)
 /// untuk mengambil dan mengelola history log olahraga dari berbagai sumber
 class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   final SmartExerciseLogRepository _smartExerciseLogRepository;
+  final CardioRepository _cardioRepository;
   // Di masa depan akan ditambahkan:
   // final WeightliftingLogRepository _weightliftingLogRepository;
-  // final CardioLogRepository _cardioLogRepository;
 
   ExerciseLogHistoryServiceImpl({
     required SmartExerciseLogRepository smartExerciseLogRepository,
+    required CardioRepository cardioRepository,
     // required WeightliftingLogRepository weightliftingLogRepository,
-    // required CardioLogRepository cardioLogRepository,
-  }) : _smartExerciseLogRepository = smartExerciseLogRepository;
-  // _weightliftingLogRepository = weightliftingLogRepository,
-  // _cardioLogRepository = cardioLogRepository;
+  }) : _smartExerciseLogRepository = smartExerciseLogRepository,
+       _cardioRepository = cardioRepository;
+  // _weightliftingLogRepository = weightliftingLogRepository;
 
   @override
   Future<List<ExerciseLogHistoryItem>> getAllExerciseLogs({int? limit}) async {
@@ -30,18 +32,19 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
           await _smartExerciseLogRepository.getAllAnalysisResults(limit: limit);
       final smartExerciseItems = _convertSmartExerciseLogs(smartExerciseLogs);
 
+      // Ambil data dari CardioLog
+      final cardioLogs = await _cardioRepository.getAllCardioActivities();
+      final cardioItems = _convertCardioLogs(cardioLogs);
+
       // Di masa depan akan ditambahkan:
       // final weightliftingLogs = await _weightliftingLogRepository.getAllLogs(limit: limit);
       // final weightliftingItems = _convertWeightliftingLogs(weightliftingLogs);
-      //
-      // final cardioLogs = await _cardioLogRepository.getAllLogs(limit: limit);
-      // final cardioItems = _convertCardioLogs(cardioLogs);
 
       // Gabungkan semua item
       final allItems = <ExerciseLogHistoryItem>[
         ...smartExerciseItems,
+        ...cardioItems,
         // ...weightliftingItems,
-        // ...cardioItems,
       ];
 
       // Urutkan berdasarkan timestamp (terbaru dulu)
@@ -67,18 +70,19 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
           .getAnalysisResultsByDate(date, limit: limit);
       final smartExerciseItems = _convertSmartExerciseLogs(smartExerciseLogs);
 
+      // Ambil data dari CardioLog
+      final cardioLogs = await _cardioRepository.filterByDate(date);
+      final cardioItems = _convertCardioLogs(cardioLogs);
+
       // Di masa depan akan ditambahkan:
       // final weightliftingLogs = await _weightliftingLogRepository.getLogsByDate(date, limit: limit);
       // final weightliftingItems = _convertWeightliftingLogs(weightliftingLogs);
-      //
-      // final cardioLogs = await _cardioLogRepository.getLogsByDate(date, limit: limit);
-      // final cardioItems = _convertCardioLogs(cardioLogs);
 
       // Gabungkan semua item
       final allItems = <ExerciseLogHistoryItem>[
         ...smartExerciseItems,
+        ...cardioItems,
         // ...weightliftingItems,
-        // ...cardioItems,
       ];
 
       // Urutkan berdasarkan timestamp (terbaru dulu)
@@ -105,18 +109,19 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
           .getAnalysisResultsByMonth(month, year, limit: limit);
       final smartExerciseItems = _convertSmartExerciseLogs(smartExerciseLogs);
 
+      // Ambil data dari CardioLog
+      final cardioLogs = await _cardioRepository.filterByMonth(month, year);
+      final cardioItems = _convertCardioLogs(cardioLogs);
+
       // Di masa depan akan ditambahkan:
       // final weightliftingLogs = await _weightliftingLogRepository.getLogsByMonth(month, year, limit: limit);
       // final weightliftingItems = _convertWeightliftingLogs(weightliftingLogs);
-      //
-      // final cardioLogs = await _cardioLogRepository.getLogsByMonth(month, year, limit: limit);
-      // final cardioItems = _convertCardioLogs(cardioLogs);
 
       // Gabungkan semua item
       final allItems = <ExerciseLogHistoryItem>[
         ...smartExerciseItems,
+        ...cardioItems,
         // ...weightliftingItems,
-        // ...cardioItems,
       ];
 
       // Urutkan berdasarkan timestamp (terbaru dulu)
@@ -142,18 +147,19 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
           .getAnalysisResultsByYear(year, limit: limit);
       final smartExerciseItems = _convertSmartExerciseLogs(smartExerciseLogs);
 
+      // Ambil data dari CardioLog
+      final cardioLogs = await _cardioRepository.filterByYear(year);
+      final cardioItems = _convertCardioLogs(cardioLogs);
+
       // Di masa depan akan ditambahkan:
       // final weightliftingLogs = await _weightliftingLogRepository.getLogsByYear(year, limit: limit);
       // final weightliftingItems = _convertWeightliftingLogs(weightliftingLogs);
-      //
-      // final cardioLogs = await _cardioLogRepository.getLogsByYear(year, limit: limit);
-      // final cardioItems = _convertCardioLogs(cardioLogs);
 
       // Gabungkan semua item
       final allItems = <ExerciseLogHistoryItem>[
         ...smartExerciseItems,
+        ...cardioItems,
         // ...weightliftingItems,
-        // ...cardioItems,
       ];
 
       // Urutkan berdasarkan timestamp (terbaru dulu)
@@ -206,12 +212,15 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
         .toList();
   }
 
+  // Helper method untuk mengkonversi CardioLogs menjadi ExerciseLogHistoryItems
+  List<ExerciseLogHistoryItem> _convertCardioLogs(List<CardioActivity> logs) {
+    return logs
+        .map((log) => ExerciseLogHistoryItem.fromCardioLog(log))
+        .toList();
+  }
+
   // Di masa depan akan ditambahkan:
   // List<ExerciseLogHistoryItem> _convertWeightliftingLogs(List<WeightliftingLog> logs) {
   //   return logs.map((log) => ExerciseLogHistoryItem.fromWeightliftingLog(log)).toList();
-  // }
-  //
-  // List<ExerciseLogHistoryItem> _convertCardioLogs(List<CardioLog> logs) {
-  //   return logs.map((log) => ExerciseLogHistoryItem.fromCardioLog(log)).toList();
   // }
 }

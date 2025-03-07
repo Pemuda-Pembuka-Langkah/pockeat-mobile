@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 
 /// Model untuk item history log olahraga
 /// 
@@ -66,23 +67,53 @@ class ExerciseLogHistoryItem {
     // Implementasi akan ditambahkan saat WeightliftingLog tersedia
     return ExerciseLogHistoryItem(
       activityType: TYPE_WEIGHTLIFTING,
-      title: weightliftingLog.title ?? 'Weightlifting Session',
-      subtitle: '${weightliftingLog.exerciseCount ?? 0} exercises',
+      title: weightliftingLog.exerciseName ?? 'Weightlifting Session',
+      subtitle: '${weightliftingLog.sets ?? 0} sets • ${weightliftingLog.reps ?? 0} reps • ${weightliftingLog.weight ?? "0 kg"}',
       timestamp: weightliftingLog.timestamp,
       caloriesBurned: weightliftingLog.caloriesBurned ?? 0,
       sourceId: weightliftingLog.id,
     );
   }
 
-  /// Factory constructor untuk membuat ExerciseLogHistoryItem dari CardioLog (placeholder)
-  factory ExerciseLogHistoryItem.fromCardioLog(dynamic cardioLog) {
-    // Implementasi akan ditambahkan saat CardioLog tersedia
+  /// Factory constructor untuk membuat ExerciseLogHistoryItem dari CardioLog
+  factory ExerciseLogHistoryItem.fromCardioLog(CardioActivity cardioLog) {
+    // Mendapatkan tipe aktivitas yang lebih user-friendly
+    String activityTitle;
+    switch (cardioLog.type) {
+      case CardioType.running:
+        activityTitle = 'Running';
+        break;
+      case CardioType.cycling:
+        activityTitle = 'Cycling';
+        break;
+      case CardioType.swimming:
+        activityTitle = 'Swimming';
+        break;
+      default:
+        activityTitle = 'Cardio Session';
+    }
+    
+    // Format durasi dalam format yang lebih user-friendly
+    final minutes = cardioLog.duration.inMinutes;
+    final durationText = minutes > 0 ? '$minutes min' : '${cardioLog.duration.inSeconds} sec';
+    
+    // Get distance if available (using dynamic access since it might be in different implementations)
+    String distanceText = '';
+    try {
+      final distance = cardioLog.toMap()['distance'];
+      if (distance != null) {
+        distanceText = ' • ${distance.toString()} km';
+      }
+    } catch (_) {
+      // If distance is not available, just ignore it
+    }
+    
     return ExerciseLogHistoryItem(
       activityType: TYPE_CARDIO,
-      title: cardioLog.activityType ?? 'Cardio Session',
-      subtitle: '${cardioLog.duration ?? '0'} • ${cardioLog.distance ?? '0'} km',
-      timestamp: cardioLog.timestamp,
-      caloriesBurned: cardioLog.caloriesBurned ?? 0,
+      title: activityTitle,
+      subtitle: '$durationText$distanceText',
+      timestamp: cardioLog.date,
+      caloriesBurned: cardioLog.caloriesBurned.toInt(),
       sourceId: cardioLog.id,
     );
   }
