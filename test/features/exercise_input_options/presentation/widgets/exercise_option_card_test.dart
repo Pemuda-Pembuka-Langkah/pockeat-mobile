@@ -10,11 +10,7 @@ void main() {
       // Test data
       const iconData = Icons.directions_run;
       const title = 'Running';
-<<<<<<< HEAD
       const subtitle = 'Track your cardio session';
-=======
-      const subtitle = 'Track your running session';
->>>>>>> a1c8b5d039a9590b2d350e974a1b4baf76ef76b3
       const color = Color(0xFFFF6B6B); // Pink color
       const route = '/running-input';
       
@@ -48,11 +44,7 @@ void main() {
       // Test data
       const iconData = Icons.directions_run;
       const title = 'Running';
-<<<<<<< HEAD
       const subtitle = 'Track your cardio session';
-=======
-      const subtitle = 'Track your running session';
->>>>>>> a1c8b5d039a9590b2d350e974a1b4baf76ef76b3
       const color = Color(0xFFFF6B6B); // Pink color
       const route = '/running-input';
       
@@ -99,11 +91,7 @@ void main() {
       // Test data
       const iconData = Icons.directions_run;
       const title = 'Running';
-<<<<<<< HEAD
       const subtitle = 'Track your cardio session';
-=======
-      const subtitle = 'Track your running session';
->>>>>>> a1c8b5d039a9590b2d350e974a1b4baf76ef76b3
       const color = Color(0xFFFF6B6B); // Pink color
       const route = '/running-input';
       
@@ -201,11 +189,7 @@ void main() {
             body: ExerciseOptionCard(
               icon: Icons.directions_run,
               title: 'Running',
-<<<<<<< HEAD
               subtitle: 'Track your cardio session',
-=======
-              subtitle: 'Track your running session',
->>>>>>> a1c8b5d039a9590b2d350e974a1b4baf76ef76b3
               color: Colors.transparent,
               route: '/test',
             ),
@@ -227,11 +211,7 @@ void main() {
             body: ExerciseOptionCard(
               icon: Icons.directions_run,
               title: 'Running',
-<<<<<<< HEAD
               subtitle: 'Track your cardio session',
-=======
-              subtitle: 'Track your running session',
->>>>>>> a1c8b5d039a9590b2d350e974a1b4baf76ef76b3
               color: const Color(0xFFFF6B6B),
               route: '',
             ),
