@@ -87,7 +87,7 @@ class DistanceSelectionWidget extends StatelessWidget {
                 ),
               ),
               const Text(
-                ' km  ',
+                'km',
                 style: TextStyle(
                   fontSize: 20,
                   color: Colors.black87,
@@ -130,7 +130,7 @@ class DistanceSelectionWidget extends StatelessWidget {
                 ),
               ),
               const Text(
-                ' m',
+                'm',
                 style: TextStyle(
                   fontSize: 20,
                   color: Colors.black87,
