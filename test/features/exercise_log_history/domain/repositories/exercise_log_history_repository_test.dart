@@ -220,6 +220,255 @@ void main() {
       verify(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null)).called(1);
     });
 
+    group('Limit handling tests', () {
+      test('getAllExerciseLogs should apply limit correctly when there are more items than the limit', () async {
+        // Arrange - Create a large list of logs
+        final manyLogs = List.generate(10, (index) => 
+          ExerciseAnalysisResult(
+            id: 'smart-$index',
+            exerciseType: 'Exercise $index',
+            duration: '$index minutes',
+            intensity: 'Medium',
+            estimatedCalories: 100 + index,
+            timestamp: DateTime(2025, 3, 6).subtract(Duration(days: index)),
+            originalInput: 'Exercise input $index',
+          )
+        );
+        
+        // Important: Add the correct stub with limit parameter
+        when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: 5))
+            .thenAnswer((_) async => manyLogs.take(5).toList());
+        
+        // Act
+        final result = await repository.getAllExerciseLogs(limit: 5);
+        
+        // Assert
+        expect(result.length, equals(5));
+        // Verify the logs are sorted by timestamp (newest first)
+        for (int i = 0; i < result.length - 1; i++) {
+          expect(result[i].timestamp.isAfter(result[i + 1].timestamp), isTrue);
+        }
+      });
+      
+      test('getExerciseLogsByDate should apply limit correctly when there are more items than the limit', () async {
+        // Arrange - Create a large list of logs for the same date
+        final manyLogs = List.generate(10, (index) => 
+          ExerciseAnalysisResult(
+            id: 'smart-$index',
+            exerciseType: 'Exercise $index',
+            duration: '$index minutes',
+            intensity: 'Medium',
+            estimatedCalories: 100 + index,
+            timestamp: DateTime(2025, 3, 6, 8 + index), // Same date, different hours
+            originalInput: 'Exercise input $index',
+          )
+        );
+        
+        // Important: Add the correct stub with limit parameter
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate, limit: 5))
+            .thenAnswer((_) async => manyLogs.take(5).toList());
+        
+        // Act
+        final result = await repository.getExerciseLogsByDate(testDate, limit: 5);
+        
+        // Assert
+        expect(result.length, equals(5));
+        // Verify the logs are sorted by timestamp (newest first)
+        for (int i = 0; i < result.length - 1; i++) {
+          expect(result[i].timestamp.isAfter(result[i + 1].timestamp), isTrue);
+        }
+      });
+      
+      test('getExerciseLogsByMonth should apply limit correctly when there are more items than the limit', () async {
+        // Arrange - Create a large list of logs for the same month
+        final manyLogs = List.generate(10, (index) => 
+          ExerciseAnalysisResult(
+            id: 'smart-$index',
+            exerciseType: 'Exercise $index',
+            duration: '$index minutes',
+            intensity: 'Medium',
+            estimatedCalories: 100 + index,
+            timestamp: DateTime(2025, 3, 1 + index), // Same month, different days
+            originalInput: 'Exercise input $index',
+          )
+        );
+        
+        // Important: Add the correct stub with limit parameter
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear, limit: 5))
+            .thenAnswer((_) async => manyLogs.take(5).toList());
+        
+        // Act
+        final result = await repository.getExerciseLogsByMonth(testMonth, testYear, limit: 5);
+        
+        // Assert
+        expect(result.length, equals(5));
+        // Verify the logs are sorted by timestamp (newest first)
+        for (int i = 0; i < result.length - 1; i++) {
+          expect(result[i].timestamp.isAfter(result[i + 1].timestamp), isTrue);
+        }
+      });
+      
+      test('getExerciseLogsByYear should apply limit correctly when there are more items than the limit', () async {
+        // Arrange - Create a large list of logs for the same year
+        final manyLogs = List.generate(10, (index) => 
+          ExerciseAnalysisResult(
+            id: 'smart-$index',
+            exerciseType: 'Exercise $index',
+            duration: '$index minutes',
+            intensity: 'Medium',
+            estimatedCalories: 100 + index,
+            timestamp: DateTime(2025, 1 + index, 1), // Same year, different months
+            originalInput: 'Exercise input $index',
+          )
+        );
+        
+        // Important: Add the correct stub with limit parameter
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear, limit: 5))
+            .thenAnswer((_) async => manyLogs.take(5).toList());
+        
+        // Act
+        final result = await repository.getExerciseLogsByYear(testYear, limit: 5);
+        
+        // Assert
+        expect(result.length, equals(5));
+        // Verify the logs are sorted by timestamp (newest first)
+        for (int i = 0; i < result.length - 1; i++) {
+          expect(result[i].timestamp.isAfter(result[i + 1].timestamp), isTrue);
+        }
+      });
+      
+      test('getExerciseLogsByActivityCategory should apply limit correctly when there are more items than the limit', () async {
+        // Arrange - Create a large list of logs
+        final manyLogs = List.generate(10, (index) => 
+          ExerciseAnalysisResult(
+            id: 'smart-$index',
+            exerciseType: 'Exercise $index',
+            duration: '$index minutes',
+            intensity: 'Medium',
+            estimatedCalories: 100 + index,
+            timestamp: DateTime(2025, 3, 6).subtract(Duration(days: index)),
+            originalInput: 'Exercise input $index',
+          )
+        );
+        
+        when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null))
+            .thenAnswer((_) async => manyLogs);
+        
+        // Act
+        final result = await repository.getExerciseLogsByActivityCategory(
+            ExerciseLogHistoryItem.TYPE_SMART_EXERCISE, limit: 5);
+        
+        // Assert
+        expect(result.length, equals(5));
+        // Verify the logs are sorted by timestamp (newest first)
+        for (int i = 0; i < result.length - 1; i++) {
+          expect(result[i].timestamp.isAfter(result[i + 1].timestamp), isTrue);
+        }
+      });
+    });
+
+    group('Limit handling edge cases', () {
+      test('getAllExerciseLogs should not apply limit when limit is negative', () async {
+        // Arrange - Create a list of logs
+        final logs = List.generate(5, (index) => 
+          ExerciseAnalysisResult(
+            id: 'smart-$index',
+            exerciseType: 'Exercise $index',
+            duration: '$index minutes',
+            intensity: 'Medium',
+            estimatedCalories: 100 + index,
+            timestamp: DateTime(2025, 3, 6).subtract(Duration(days: index)),
+            originalInput: 'Exercise input $index',
+          )
+        );
+        
+        // We need to set up the mock for the specific limit value we're using
+        when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: -1))
+            .thenAnswer((_) async => logs);
+        
+        // Act - Test with negative limit
+        final result = await repository.getAllExerciseLogs(limit: -1);
+        
+        // Assert
+        expect(result.length, equals(5)); // Should return all items
+      });
+      
+      test('getExerciseLogsByDate should not apply limit when limit is negative', () async {
+        // Arrange - Create a list of logs
+        final logs = List.generate(5, (index) => 
+          ExerciseAnalysisResult(
+            id: 'smart-$index',
+            exerciseType: 'Exercise $index',
+            duration: '$index minutes',
+            intensity: 'Medium',
+            estimatedCalories: 100 + index,
+            timestamp: DateTime(2025, 3, 6, 8 + index), // Same date, different hours
+            originalInput: 'Exercise input $index',
+          )
+        );
+        
+        // We need to set up the mock for the specific limit value we're using
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate, limit: -1))
+            .thenAnswer((_) async => logs);
+        
+        // Act - Test with negative limit
+        final result = await repository.getExerciseLogsByDate(testDate, limit: -1);
+        
+        // Assert
+        expect(result.length, equals(5)); // Should return all items
+      });
+      
+      test('getExerciseLogsByMonth should not apply limit when limit is negative', () async {
+        // Arrange - Create a list of logs
+        final logs = List.generate(5, (index) => 
+          ExerciseAnalysisResult(
+            id: 'smart-$index',
+            exerciseType: 'Exercise $index',
+            duration: '$index minutes',
+            intensity: 'Medium',
+            estimatedCalories: 100 + index,
+            timestamp: DateTime(2025, 3, 1 + index), // Same month, different days
+            originalInput: 'Exercise input $index',
+          )
+        );
+        
+        // We need to set up the mock for the specific limit value we're using
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear, limit: -1))
+            .thenAnswer((_) async => logs);
+        
+        // Act - Test with negative limit
+        final result = await repository.getExerciseLogsByMonth(testMonth, testYear, limit: -1);
+        
+        // Assert
+        expect(result.length, equals(5)); // Should return all items
+      });
+      
+      test('getExerciseLogsByYear should not apply limit when limit is negative', () async {
+        // Arrange - Create a list of logs
+        final logs = List.generate(5, (index) => 
+          ExerciseAnalysisResult(
+            id: 'smart-$index',
+            exerciseType: 'Exercise $index',
+            duration: '$index minutes',
+            intensity: 'Medium',
+            estimatedCalories: 100 + index,
+            timestamp: DateTime(2025, 1 + index, 1), // Same year, different months
+            originalInput: 'Exercise input $index',
+          )
+        );
+        
+        // We need to set up the mock for the specific limit value we're using
+        when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear, limit: -1))
+            .thenAnswer((_) async => logs);
+        
+        // Act - Test with negative limit
+        final result = await repository.getExerciseLogsByYear(testYear, limit: -1);
+        
+        // Assert
+        expect(result.length, equals(5)); // Should return all items
+      });
+    });
+
     // Negative test cases
     group('Error handling tests', () {
       test('getAllExerciseLogs should throw exception with proper message when SmartExerciseLogRepository fails', () async {
