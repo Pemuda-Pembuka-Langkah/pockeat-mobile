@@ -2,11 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/models.dart';
-import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
-import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
-import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
 
@@ -360,6 +356,290 @@ void main() {
         );
       });
     });
+    
+    // Tests for the new methods
+    group('filterByDate Tests', () {
+      test('should retrieve activities for a specific date', () async {
+        // Setup test date
+        final testDate = DateTime(2023, 3, 15);
+        final startOfDayMs = DateTime(2023, 3, 15, 0, 0, 0).millisecondsSinceEpoch;
+        final endOfDayMs = DateTime(2023, 3, 15, 23, 59, 59, 999).millisecondsSinceEpoch;
+        
+        // Setup mock queries
+        final mockQueryForDate1 = MockQuery<Map<String, dynamic>>();
+        final mockQueryForDate2 = MockQuery<Map<String, dynamic>>();
+        final mockQuerySnapshot = MockQuerySnapshot<Map<String, dynamic>>();
+        final mockDocs = [
+          _createMockQueryDocSnap('running', testDate),
+          _createMockQueryDocSnap('cycling', testDate),
+        ];
+        
+        when(mockCollection.where('date', isGreaterThanOrEqualTo: startOfDayMs))
+            .thenReturn(mockQueryForDate1);
+        when(mockQueryForDate1.where('date', isLessThanOrEqualTo: endOfDayMs))
+            .thenReturn(mockQueryForDate2);
+        when(mockQueryForDate2.orderBy('date', descending: true))
+            .thenReturn(mockQueryForDate2);
+        when(mockQueryForDate2.get()).thenAnswer((_) async => mockQuerySnapshot);
+        when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+        
+        // Call method under test
+        final results = await repository.filterByDate(testDate);
+        
+        // Verify interaction and results
+        verify(mockCollection.where('date', isGreaterThanOrEqualTo: startOfDayMs)).called(1);
+        verify(mockQueryForDate1.where('date', isLessThanOrEqualTo: endOfDayMs)).called(1);
+        verify(mockQueryForDate2.orderBy('date', descending: true)).called(1);
+        verify(mockQueryForDate2.get()).called(1);
+        
+        expect(results.length, 2);
+        expect(results[0].type, CardioType.running);
+        expect(results[1].type, CardioType.cycling);
+      });
+
+      test('should return empty list when no activities on date', () async {
+        // Setup test date
+        final testDate = DateTime(2023, 3, 15);
+        final startOfDayMs = DateTime(2023, 3, 15, 0, 0, 0).millisecondsSinceEpoch;
+        final endOfDayMs = DateTime(2023, 3, 15, 23, 59, 59, 999).millisecondsSinceEpoch;
+        
+        // Setup mock queries
+        final mockQueryForDate1 = MockQuery<Map<String, dynamic>>();
+        final mockQueryForDate2 = MockQuery<Map<String, dynamic>>();
+        final mockQuerySnapshot = MockQuerySnapshot<Map<String, dynamic>>();
+        
+        when(mockCollection.where('date', isGreaterThanOrEqualTo: startOfDayMs))
+            .thenReturn(mockQueryForDate1);
+        when(mockQueryForDate1.where('date', isLessThanOrEqualTo: endOfDayMs))
+            .thenReturn(mockQueryForDate2);
+        when(mockQueryForDate2.orderBy('date', descending: true))
+            .thenReturn(mockQueryForDate2);
+        when(mockQueryForDate2.get()).thenAnswer((_) async => mockQuerySnapshot);
+        when(mockQuerySnapshot.docs).thenReturn([]);
+        
+        // Call method under test
+        final results = await repository.filterByDate(testDate);
+        
+        // Verify interaction and results
+        verify(mockQueryForDate2.get()).called(1);
+        expect(results.isEmpty, true);
+      });
+      
+      test('should throw exception when query by date fails', () async {
+        // Setup test date
+        final testDate = DateTime(2023, 3, 15);
+        final startOfDayMs = DateTime(2023, 3, 15, 0, 0, 0).millisecondsSinceEpoch;
+        final endOfDayMs = DateTime(2023, 3, 15, 23, 59, 59, 999).millisecondsSinceEpoch;
+        
+        // Setup mock queries
+        final mockQueryForDate1 = MockQuery<Map<String, dynamic>>();
+        final mockQueryForDate2 = MockQuery<Map<String, dynamic>>();
+        
+        when(mockCollection.where('date', isGreaterThanOrEqualTo: startOfDayMs))
+            .thenReturn(mockQueryForDate1);
+        when(mockQueryForDate1.where('date', isLessThanOrEqualTo: endOfDayMs))
+            .thenReturn(mockQueryForDate2);
+        when(mockQueryForDate2.orderBy('date', descending: true))
+            .thenReturn(mockQueryForDate2);
+        when(mockQueryForDate2.get()).thenThrow(Exception('Test error'));
+        
+        // Verify exception is thrown
+        expect(
+          () => repository.filterByDate(testDate), 
+          throwsException
+        );
+      });
+    });
+
+    group('filterByMonth Tests', () {
+      test('should retrieve activities for a specific month', () async {
+        // Setup test month and year
+        final month = 3; // March
+        final year = 2023;
+        final startOfMonthMs = DateTime(2023, 3, 1).millisecondsSinceEpoch;
+        final endOfMonthMs = DateTime(2023, 3, 31, 23, 59, 59, 999).millisecondsSinceEpoch;
+        
+        // Setup mock queries
+        final mockQueryForMonth1 = MockQuery<Map<String, dynamic>>();
+        final mockQueryForMonth2 = MockQuery<Map<String, dynamic>>();
+        final mockQuerySnapshot = MockQuerySnapshot<Map<String, dynamic>>();
+        final mockDocs = [
+          _createMockQueryDocSnap('running', DateTime(2023, 3, 15)),
+          _createMockQueryDocSnap('cycling', DateTime(2023, 3, 20)),
+          _createMockQueryDocSnap('swimming', DateTime(2023, 3, 25)),
+        ];
+        
+        when(mockCollection.where('date', isGreaterThanOrEqualTo: startOfMonthMs))
+            .thenReturn(mockQueryForMonth1);
+        when(mockQueryForMonth1.where('date', isLessThanOrEqualTo: endOfMonthMs))
+            .thenReturn(mockQueryForMonth2);
+        when(mockQueryForMonth2.orderBy('date', descending: true))
+            .thenReturn(mockQueryForMonth2);
+        when(mockQueryForMonth2.get()).thenAnswer((_) async => mockQuerySnapshot);
+        when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+        
+        // Call method under test
+        final results = await repository.filterByMonth(month, year);
+        
+        // Verify interaction and results
+        verify(mockCollection.where('date', isGreaterThanOrEqualTo: startOfMonthMs)).called(1);
+        verify(mockQueryForMonth1.where('date', isLessThanOrEqualTo: endOfMonthMs)).called(1);
+        verify(mockQueryForMonth2.orderBy('date', descending: true)).called(1);
+        verify(mockQueryForMonth2.get()).called(1);
+        
+        expect(results.length, 3);
+      });
+
+      test('should throw Exception when invalid month provided', () async {
+        // Invalid month (13)
+        expect(
+          () => repository.filterByMonth(13, 2023),
+          throwsException
+        );
+        
+        // Invalid month (0)
+        expect(
+          () => repository.filterByMonth(0, 2023),
+          throwsException
+        );
+      });
+      
+      test('should throw exception when query by month fails', () async {
+        // Setup test month and year
+        final month = 3; // March
+        final year = 2023;
+        final startOfMonthMs = DateTime(2023, 3, 1).millisecondsSinceEpoch;
+        final endOfMonthMs = DateTime(2023, 3, 31, 23, 59, 59, 999).millisecondsSinceEpoch;
+        
+        // Setup mock queries
+        final mockQueryForMonth1 = MockQuery<Map<String, dynamic>>();
+        final mockQueryForMonth2 = MockQuery<Map<String, dynamic>>();
+        
+        when(mockCollection.where('date', isGreaterThanOrEqualTo: startOfMonthMs))
+            .thenReturn(mockQueryForMonth1);
+        when(mockQueryForMonth1.where('date', isLessThanOrEqualTo: endOfMonthMs))
+            .thenReturn(mockQueryForMonth2);
+        when(mockQueryForMonth2.orderBy('date', descending: true))
+            .thenReturn(mockQueryForMonth2);
+        when(mockQueryForMonth2.get()).thenThrow(Exception('Test error'));
+        
+        // Verify exception is thrown
+        expect(
+          () => repository.filterByMonth(month, year), 
+          throwsException
+        );
+      });
+    });
+
+    group('filterByYear Tests', () {
+      test('should retrieve activities for a specific year', () async {
+        // Setup test year
+        final year = 2023;
+        final startOfYearMs = DateTime(2023, 1, 1).millisecondsSinceEpoch;
+        final endOfYearMs = DateTime(2023, 12, 31, 23, 59, 59, 999).millisecondsSinceEpoch;
+        
+        // Setup mock queries
+        final mockQueryForYear1 = MockQuery<Map<String, dynamic>>();
+        final mockQueryForYear2 = MockQuery<Map<String, dynamic>>();
+        final mockQuerySnapshot = MockQuerySnapshot<Map<String, dynamic>>();
+        final mockDocs = [
+          _createMockQueryDocSnap('running', DateTime(2023, 1, 15)),
+          _createMockQueryDocSnap('cycling', DateTime(2023, 6, 20)),
+          _createMockQueryDocSnap('swimming', DateTime(2023, 12, 25)),
+        ];
+        
+        when(mockCollection.where('date', isGreaterThanOrEqualTo: startOfYearMs))
+            .thenReturn(mockQueryForYear1);
+        when(mockQueryForYear1.where('date', isLessThanOrEqualTo: endOfYearMs))
+            .thenReturn(mockQueryForYear2);
+        when(mockQueryForYear2.orderBy('date', descending: true))
+            .thenReturn(mockQueryForYear2);
+        when(mockQueryForYear2.get()).thenAnswer((_) async => mockQuerySnapshot);
+        when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+        
+        // Call method under test
+        final results = await repository.filterByYear(year);
+        
+        // Verify interaction and results
+        verify(mockCollection.where('date', isGreaterThanOrEqualTo: startOfYearMs)).called(1);
+        verify(mockQueryForYear1.where('date', isLessThanOrEqualTo: endOfYearMs)).called(1);
+        verify(mockQueryForYear2.orderBy('date', descending: true)).called(1);
+        verify(mockQueryForYear2.get()).called(1);
+        
+        expect(results.length, 3);
+      });
+      
+      test('should throw exception when query by year fails', () async {
+        // Setup test year
+        final year = 2023;
+        final startOfYearMs = DateTime(2023, 1, 1).millisecondsSinceEpoch;
+        final endOfYearMs = DateTime(2023, 12, 31, 23, 59, 59, 999).millisecondsSinceEpoch;
+        
+        // Setup mock queries
+        final mockQueryForYear1 = MockQuery<Map<String, dynamic>>();
+        final mockQueryForYear2 = MockQuery<Map<String, dynamic>>();
+        
+        when(mockCollection.where('date', isGreaterThanOrEqualTo: startOfYearMs))
+            .thenReturn(mockQueryForYear1);
+        when(mockQueryForYear1.where('date', isLessThanOrEqualTo: endOfYearMs))
+            .thenReturn(mockQueryForYear2);
+        when(mockQueryForYear2.orderBy('date', descending: true))
+            .thenReturn(mockQueryForYear2);
+        when(mockQueryForYear2.get()).thenThrow(Exception('Test error'));
+        
+        // Verify exception is thrown
+        expect(
+          () => repository.filterByYear(year), 
+          throwsException
+        );
+      });
+    });
+
+    group('getActivitiesWithLimit Tests', () {
+      test('should retrieve limited number of activities', () async {
+        // Setup mock queries
+        final mockQueryWithLimit = MockQuery<Map<String, dynamic>>();
+        final mockQuerySnapshot = MockQuerySnapshot<Map<String, dynamic>>();
+        final mockDocs = [
+          _createMockQueryDocSnap('running', DateTime(2023, 3, 15)),
+          _createMockQueryDocSnap('cycling', DateTime(2023, 3, 10)),
+        ];
+        
+        when(mockCollection.orderBy('date', descending: true))
+            .thenReturn(mockQueryWithLimit);
+        when(mockQueryWithLimit.limit(2))
+            .thenReturn(mockQueryWithLimit);
+        when(mockQueryWithLimit.get()).thenAnswer((_) async => mockQuerySnapshot);
+        when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+        
+        // Call method under test
+        final results = await repository.getActivitiesWithLimit(2);
+        
+        // Verify interaction and results
+        verify(mockCollection.orderBy('date', descending: true)).called(1);
+        verify(mockQueryWithLimit.limit(2)).called(1);
+        verify(mockQueryWithLimit.get()).called(1);
+        
+        expect(results.length, 2);
+      });
+      
+      test('should throw exception when query with limit fails', () async {
+        // Setup mock queries
+        final mockQueryWithLimit = MockQuery<Map<String, dynamic>>();
+        
+        when(mockCollection.orderBy('date', descending: true))
+            .thenReturn(mockQueryWithLimit);
+        when(mockQueryWithLimit.limit(5))
+            .thenReturn(mockQueryWithLimit);
+        when(mockQueryWithLimit.get()).thenThrow(Exception('Test error'));
+        
+        // Verify exception is thrown
+        expect(
+          () => repository.getActivitiesWithLimit(5), 
+          throwsException
+        );
+      });
+    });
   });
 }
 
@@ -398,4 +678,4 @@ MockQueryDocumentSnapshot<Map<String, dynamic>> _createMockQueryDocSnap(
   
   when(mockDoc.data()).thenReturn(data);
   return mockDoc;
-} 
+}

@@ -48,11 +48,8 @@ dependencies:
   google_generative_ai: ^0.4.6
   mocktail: ^1.0.4
   image_picker: ^1.1.2
-<<<<<<< HEAD
   intl: ^0.20.2
   font_awesome_flutter: ^10.8.0
-=======
->>>>>>> a1c8b5d039a9590b2d350e974a1b4baf76ef76b3
 
 dev_dependencies:
   flutter_test:
