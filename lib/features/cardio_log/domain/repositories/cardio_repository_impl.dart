@@ -94,4 +94,104 @@ class CardioRepositoryImpl implements CardioRepository {
       throw Exception('Failed to delete cardio activity: $e');
     }
   }
-} 
+  
+  @override
+  Future<List<CardioActivity>> filterByDate(DateTime date) async {
+    try {
+      // Mendapatkan waktu awal hari (00:00:00)
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final startOfDayMs = startOfDay.millisecondsSinceEpoch;
+      
+      // Mendapatkan waktu akhir hari (23:59:59.999)
+      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
+      final endOfDayMs = endOfDay.millisecondsSinceEpoch;
+      
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('date', isGreaterThanOrEqualTo: startOfDayMs)
+          .where('date', isLessThanOrEqualTo: endOfDayMs)
+          .orderBy('date', descending: true)
+          .get();
+      
+      return querySnapshot.docs
+          .map((doc) => CardioActivityFactory.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to filter cardio activities by date: $e');
+    }
+  }
+  
+  @override
+  Future<List<CardioActivity>> filterByMonth(int month, int year) async {
+    try {
+      // Validasi bulan
+      if (month < 1 || month > 12) {
+        throw ArgumentError('Month must be between 1 and 12');
+      }
+      
+      // Mendapatkan waktu awal bulan
+      final startOfMonth = DateTime(year, month, 1);
+      final startOfMonthMs = startOfMonth.millisecondsSinceEpoch;
+      
+      // Mendapatkan waktu akhir bulan (hari terakhir bulan tersebut)
+      final endOfMonth = DateTime(year, month + 1, 0, 23, 59, 59, 999);
+      final endOfMonthMs = endOfMonth.millisecondsSinceEpoch;
+      
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('date', isGreaterThanOrEqualTo: startOfMonthMs)
+          .where('date', isLessThanOrEqualTo: endOfMonthMs)
+          .orderBy('date', descending: true)
+          .get();
+      
+      return querySnapshot.docs
+          .map((doc) => CardioActivityFactory.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to filter cardio activities by month: $e');
+    }
+  }
+  
+  @override
+  Future<List<CardioActivity>> filterByYear(int year) async {
+    try {
+      // Mendapatkan waktu awal tahun
+      final startOfYear = DateTime(year, 1, 1);
+      final startOfYearMs = startOfYear.millisecondsSinceEpoch;
+      
+      // Mendapatkan waktu akhir tahun
+      final endOfYear = DateTime(year, 12, 31, 23, 59, 59, 999);
+      final endOfYearMs = endOfYear.millisecondsSinceEpoch;
+      
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('date', isGreaterThanOrEqualTo: startOfYearMs)
+          .where('date', isLessThanOrEqualTo: endOfYearMs)
+          .orderBy('date', descending: true)
+          .get();
+      
+      return querySnapshot.docs
+          .map((doc) => CardioActivityFactory.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to filter cardio activities by year: $e');
+    }
+  }
+  
+  @override
+  Future<List<CardioActivity>> getActivitiesWithLimit(int limit) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .orderBy('date', descending: true)
+          .limit(limit)
+          .get();
+      
+      return querySnapshot.docs
+          .map((doc) => CardioActivityFactory.fromMap(doc.data()))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to retrieve cardio activities with limit: $e');
+    }
+  }
+}
