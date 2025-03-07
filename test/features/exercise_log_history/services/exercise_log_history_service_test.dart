@@ -104,12 +104,12 @@ void main() {
       // Assert
       expect(result.length, equals(6));
       // Verify logs are sorted by timestamp (newest first)
-      expect(result[0].sourceId, equals('cardio-1')); // Most recent first
-      expect(result[1].sourceId, equals('smart-1'));
-      expect(result[2].sourceId, equals('cardio-2'));
-      expect(result[3].sourceId, equals('smart-2'));
-      expect(result[4].sourceId, equals('cardio-3'));
-      expect(result[5].sourceId, equals('smart-3'));
+      expect(result[0].sourceId, equals('cardio-1')); // Most recent first (2025, 3, 6, 11, 0)
+      expect(result[1].sourceId, equals('smart-1')); // (2025, 3, 6, 10, 0)
+      expect(result[2].sourceId, equals('cardio-2')); // (2025, 3, 5, 15, 0)
+      expect(result[3].sourceId, equals('smart-2')); // (2025, 3, 5, 14, 0)
+      expect(result[4].sourceId, equals('smart-3')); // (2025, 2, 15, 16, 0)
+      expect(result[5].sourceId, equals('cardio-3')); // (2025, 2, 14, 9, 0)
 
       verify(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: null))
           .called(1);
@@ -119,8 +119,9 @@ void main() {
     test('getAllExerciseLogs with limit should return limited number of logs',
         () async {
       // Arrange
-      when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: 2))
-          .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2]);
+      when(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: 3))
+          .thenAnswer((_) async =>
+              [smartExerciseLog1, smartExerciseLog2, smartExerciseLog3]);
       when(mockCardioRepository.getAllCardioActivities())
           .thenAnswer((_) async => [cardioLog1, cardioLog2, cardioLog3]);
 
@@ -129,11 +130,11 @@ void main() {
 
       // Assert
       expect(result.length, equals(3));
-      expect(result[0].sourceId, equals('cardio-1')); // Most recent first
+      expect(result[0].sourceId, equals('cardio-1'));
       expect(result[1].sourceId, equals('smart-1'));
       expect(result[2].sourceId, equals('cardio-2'));
 
-      verify(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: 2))
+      verify(mockSmartExerciseLogRepository.getAllAnalysisResults(limit: 3))
           .called(1);
       verify(mockCardioRepository.getAllCardioActivities()).called(1);
     });
@@ -190,8 +191,8 @@ void main() {
         'getExerciseLogsByMonth should return logs for specific month and year',
         () async {
       // Arrange
-      when(mockSmartExerciseLogRepository
-              .getAnalysisResultsByMonth(testMonth, testYear, limit: null))
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(
+              testMonth, testYear, limit: null))
           .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2]);
       when(mockCardioRepository.filterByMonth(testMonth, testYear))
           .thenAnswer((_) async => [cardioLog1, cardioLog2]);
@@ -207,8 +208,8 @@ void main() {
       expect(result[2].sourceId, equals('cardio-2'));
       expect(result[3].sourceId, equals('smart-2'));
 
-      verify(mockSmartExerciseLogRepository
-              .getAnalysisResultsByMonth(testMonth, testYear, limit: null))
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(
+              testMonth, testYear, limit: null))
           .called(1);
       verify(mockCardioRepository.filterByMonth(testMonth, testYear)).called(1);
     });
@@ -217,23 +218,23 @@ void main() {
         'getExerciseLogsByMonth with limit should return limited logs for specific month and year',
         () async {
       // Arrange
-      when(mockSmartExerciseLogRepository
-              .getAnalysisResultsByMonth(testMonth, testYear, limit: 1))
-          .thenAnswer((_) async => [smartExerciseLog1]);
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(
+              testMonth, testYear, limit: 2))
+          .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2]);
       when(mockCardioRepository.filterByMonth(testMonth, testYear))
           .thenAnswer((_) async => [cardioLog1, cardioLog2]);
 
       // Act
-      final result = await service
-          .getExerciseLogsByMonth(testMonth, testYear, limit: 2);
+      final result =
+          await service.getExerciseLogsByMonth(testMonth, testYear, limit: 2);
 
       // Assert
       expect(result.length, equals(2));
-      expect(result[0].sourceId, equals('cardio-1')); // Most recent first
+      expect(result[0].sourceId, equals('cardio-1'));
       expect(result[1].sourceId, equals('smart-1'));
 
-      verify(mockSmartExerciseLogRepository
-              .getAnalysisResultsByMonth(testMonth, testYear, limit: 1))
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(
+              testMonth, testYear, limit: 2))
           .called(1);
       verify(mockCardioRepository.filterByMonth(testMonth, testYear)).called(1);
     });
@@ -241,8 +242,8 @@ void main() {
     test('getExerciseLogsByYear should return logs for specific year',
         () async {
       // Arrange
-      when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear,
-              limit: null))
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(
+              testYear, limit: null))
           .thenAnswer((_) async =>
               [smartExerciseLog1, smartExerciseLog2, smartExerciseLog3]);
       when(mockCardioRepository.filterByYear(testYear))
@@ -253,25 +254,24 @@ void main() {
 
       // Assert
       expect(result.length, equals(6));
-      expect(result[0].sourceId, equals('cardio-1')); // Most recent first
+      expect(result[0].sourceId, equals('cardio-1'));
       expect(result[1].sourceId, equals('smart-1'));
       expect(result[2].sourceId, equals('cardio-2'));
       expect(result[3].sourceId, equals('smart-2'));
-      expect(result[4].sourceId, equals('cardio-3'));
-      expect(result[5].sourceId, equals('smart-3'));
+      expect(result[4].sourceId, equals('smart-3'));
+      expect(result[5].sourceId, equals('cardio-3'));
 
-      verify(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear,
-              limit: null))
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByYear(
+              testYear, limit: null))
           .called(1);
       verify(mockCardioRepository.filterByYear(testYear)).called(1);
     });
 
-    test(
-        'getExerciseLogsByYear with limit should return limited logs for specific year',
+    test('getExerciseLogsByYear with limit should return limited logs for specific year',
         () async {
       // Arrange
-      when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear,
-              limit: null))
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(
+              testYear, limit: 3))
           .thenAnswer((_) async =>
               [smartExerciseLog1, smartExerciseLog2, smartExerciseLog3]);
       when(mockCardioRepository.filterByYear(testYear))
@@ -282,12 +282,12 @@ void main() {
 
       // Assert
       expect(result.length, equals(3));
-      expect(result[0].sourceId, equals('cardio-1')); // Most recent first
+      expect(result[0].sourceId, equals('cardio-1'));
       expect(result[1].sourceId, equals('smart-1'));
       expect(result[2].sourceId, equals('cardio-2'));
 
-      verify(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear,
-              limit: null))
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByYear(
+              testYear, limit: 3))
           .called(1);
       verify(mockCardioRepository.filterByYear(testYear)).called(1);
     });
