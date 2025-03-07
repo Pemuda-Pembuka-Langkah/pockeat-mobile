@@ -22,6 +22,9 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
 // Import for ExerciseLogHistory
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service_impl.dart';
+// Import for CardioRepository
+import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
+import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,8 +55,10 @@ void main() async {
   final firestore = FirebaseFirestore.instance;
   final smartExerciseLogRepository =
       SmartExerciseLogRepositoryImpl(firestore: firestore);
+  final cardioRepository = CardioRepositoryImpl(firestore: firestore);
   final exerciseLogHistoryRepository = ExerciseLogHistoryServiceImpl(
     smartExerciseLogRepository: smartExerciseLogRepository,
+    cardioRepository: cardioRepository,
   );
 
   runApp(
@@ -65,6 +70,9 @@ void main() async {
         ),
         Provider<SmartExerciseLogRepository>(
           create: (_) => smartExerciseLogRepository,
+        ),
+        Provider<CardioRepository>(
+          create: (_) => cardioRepository,
         ),
       ],
       child: const MyApp(),
