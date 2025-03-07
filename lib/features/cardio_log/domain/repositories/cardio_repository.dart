@@ -31,4 +31,29 @@ abstract class CardioRepository {
   /// Mengembalikan [bool] true jika berhasil dihapus
   /// Throws [Exception] jika terjadi error saat penghapusan
   Future<bool> deleteCardioActivity(String id);
-} 
+  
+  /// Mengambil aktivitas kardio pada tanggal tertentu
+  ///
+  /// Mengembalikan [List<CardioActivity>] berisi aktivitas kardio pada tanggal tertentu
+  /// Throws [Exception] jika terjadi error saat pengambilan data
+  Future<List<CardioActivity>> filterByDate(DateTime date);
+  
+  /// Mengambil aktivitas kardio pada bulan dan tahun tertentu
+  ///
+  /// Mengembalikan [List<CardioActivity>] berisi aktivitas kardio pada bulan dan tahun tertentu
+  /// Throws [Exception] jika terjadi error saat pengambilan data
+  Future<List<CardioActivity>> filterByMonth(int month, int year);
+  
+  /// Mengambil aktivitas kardio pada tahun tertentu
+  ///
+  /// Mengembalikan [List<CardioActivity>] berisi aktivitas kardio pada tahun tertentu
+  /// Throws [Exception] jika terjadi error saat pengambilan data
+  Future<List<CardioActivity>> filterByYear(int year);
+  
+  /// Mengambil aktivitas kardio dengan jumlah terbatas
+  ///
+  /// Mengembalikan [List<CardioActivity>] berisi aktivitas kardio dengan jumlah terbatas
+  /// Parameter [limit] menentukan jumlah maksimum data yang diambil
+  /// Throws [Exception] jika terjadi error saat pengambilan data
+  Future<List<CardioActivity>> getActivitiesWithLimit(int limit);
+}
