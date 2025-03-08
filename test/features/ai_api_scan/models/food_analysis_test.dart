@@ -1,4 +1,3 @@
-// test/pockeat/features/ai_api_scan/models/food_analysis_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 
@@ -34,6 +33,157 @@ void main() {
       expect(result.nutritionInfo.fiber, 4.4);
       expect(result.nutritionInfo.sugar, 19.0);
     });
+
+    group('Numeric value conversion', () {
+      test('should handle string values in nutrition info', () {
+        // Arrange
+        final json = {
+          'food_name': 'Banana',
+          'ingredients': [],
+          'nutrition_info': {
+            'calories': '105',
+            'protein': '1.3',
+            'carbs': '27',
+            'fat': '0.4',
+            'sodium': '1',
+            'fiber': '3.1',
+            'sugar': '14.4'
+          }
+        };
+        
+        // Act
+        final result = FoodAnalysisResult.fromJson(json);
+        
+        // Assert
+        expect(result.nutritionInfo.calories, 105.0);
+        expect(result.nutritionInfo.protein, 1.3);
+        expect(result.nutritionInfo.carbs, 27.0);
+        expect(result.nutritionInfo.fat, 0.4);
+        expect(result.nutritionInfo.sodium, 1.0);
+        expect(result.nutritionInfo.fiber, 3.1);
+        expect(result.nutritionInfo.sugar, 14.4);
+      });
+      
+      test('should handle numeric values with different types', () {
+        // Arrange
+        final json = {
+          'food_name': 'Mixed Types',
+          'ingredients': [],
+          'nutrition_info': {
+            'calories': 100,  // int
+            'protein': 2.5,   // double
+            'carbs': '30.5',  // string
+            'fat': '0',       // string zero
+            'sodium': 5,      // int
+            'fiber': '3.5',   // string
+            'sugar': null     // null value should default to 0.0
+          }
+        };
+        
+        // Act
+        final result = FoodAnalysisResult.fromJson(json);
+        
+        // Assert
+        expect(result.nutritionInfo.calories, 100.0);
+        expect(result.nutritionInfo.protein, 2.5);
+        expect(result.nutritionInfo.carbs, 30.5);
+        expect(result.nutritionInfo.fat, 0.0);
+        expect(result.nutritionInfo.sodium, 5.0);
+        expect(result.nutritionInfo.fiber, 3.5);
+        expect(result.nutritionInfo.sugar, 0.0);  // Default for null
+      });
+      
+      test('should handle invalid string values', () {
+        // Arrange
+        final json = {
+          'food_name': 'Invalid Data',
+          'ingredients': [],
+          'nutrition_info': {
+            'calories': 'not-a-number',
+            'protein': 'abc',
+            'carbs': '5g',
+            'fat': '',
+            'sodium': 'N/A',
+            'fiber': '~2.5',
+            'sugar': '?'
+          }
+        };
+        
+        // Act
+        final result = FoodAnalysisResult.fromJson(json);
+        
+        // Assert
+        // All invalid string values should default to 0.0
+        expect(result.nutritionInfo.calories, 0.0);
+        expect(result.nutritionInfo.protein, 0.0);
+        expect(result.nutritionInfo.carbs, 0.0);
+        expect(result.nutritionInfo.fat, 0.0);
+        expect(result.nutritionInfo.sodium, 0.0);
+        expect(result.nutritionInfo.fiber, 0.0);
+        expect(result.nutritionInfo.sugar, 0.0);
+      });
+    });
+
+    group('Ingredient percentage handling', () {
+      test('should handle different types for ingredient percentage', () {
+        // Arrange
+        final json = {
+          'food_name': 'Mixed Salad',
+          'ingredients': [
+            {'name': 'Lettuce', 'percentage': 50.5, 'allergen': false},
+            {'name': 'Tomato', 'percentage': '25.5', 'allergen': false},
+            {'name': 'Cucumber', 'percentage': 15, 'allergen': false},
+            {'name': 'Nuts', 'percentage': '9', 'allergen': true}
+          ],
+          'nutrition_info': {
+            'calories': 100,
+            'protein': 2,
+            'carbs': 10,
+            'fat': 5,
+            'sodium': 10,
+            'fiber': 3,
+            'sugar': 2
+          }
+        };
+        
+        // Act
+        final result = FoodAnalysisResult.fromJson(json);
+        
+        // Assert
+        expect(result.ingredients.length, 4);
+        expect(result.ingredients[0].percentage, 50.5);
+        expect(result.ingredients[1].percentage, 25.5);
+        expect(result.ingredients[2].percentage, 15.0);
+        expect(result.ingredients[3].percentage, 9.0);
+      });
+      
+      test('should handle invalid percentage values', () {
+        // Arrange
+        final json = {
+          'food_name': 'Problem Data',
+          'ingredients': [
+            {'name': 'Valid', 'percentage': 80, 'allergen': false},
+            {'name': 'Invalid', 'percentage': 'unknown', 'allergen': false}
+          ],
+          'nutrition_info': {
+            'calories': 100,
+            'protein': 2,
+            'carbs': 10,
+            'fat': 5,
+            'sodium': 10,
+            'fiber': 3,
+            'sugar': 2
+          }
+        };
+        
+        // Act
+        final result = FoodAnalysisResult.fromJson(json);
+        
+        // Assert
+        expect(result.ingredients.length, 2);
+        expect(result.ingredients[0].percentage, 80.0);
+        expect(result.ingredients[1].percentage, 0.0);  // Default for invalid string
+      });
+    });
   });
 }
-

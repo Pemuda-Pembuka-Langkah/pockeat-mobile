@@ -1,8 +1,62 @@
+// Firebase Security Rules untuk aplikasi prototype (sebelum implementasi autentikasi)
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Rule untuk koleksi exerciseAnalysis dengan validasi data
+    match /exerciseAnalysis/{documentId} {
+      // Allow read dengan validasi API key
+      allow read: if request.auth != null;
+      
+      // Allow create dengan validasi struktur dan tipe data
+      allow create: if 
+        request.auth != null &&
+        // Validasi struktur data
+        request.resource.data.keys().hasAll(['exerciseType', 'duration', 'intensity', 'estimatedCalories', 
+                                           'metValue', 'timestamp', 'originalInput', 'isComplete']) &&
+        
+        // Validasi tipe data
+        request.resource.data.exerciseType is string &&
+        request.resource.data.duration is string &&
+        request.resource.data.intensity is string &&
+        request.resource.data.estimatedCalories is number &&
+        request.resource.data.metValue is number &&
+        request.resource.data.timestamp is number &&
+        request.resource.data.originalInput is string &&
+        request.resource.data.isComplete is bool &&
+        
+        // Validasi nilai
+        request.resource.data.estimatedCalories >= 0 &&
+        request.resource.data.metValue >= 0;
+      
+      // Allow update dengan validasi data
+      allow update: if
+        request.auth != null &&
+        // Memastikan id tidak berubah
+        request.resource.id == resource.id &&
+        
+        // Validasi struktur dan tipe data
+        request.resource.data.keys().hasAll(['exerciseType', 'duration', 'intensity', 'estimatedCalories', 
+                                           'metValue', 'timestamp', 'originalInput', 'isComplete']) &&
+        request.resource.data.exerciseType is string &&
+        request.resource.data.duration is string &&
+        request.resource.data.intensity is string &&
+        request.resource.data.estimatedCalories is number &&
+        request.resource.data.metValue is number &&
+        request.resource.data.timestamp is number &&
+        request.resource.data.originalInput is string &&
+        request.resource.data.isComplete is bool &&
+        
+        // Validasi nilai
+        request.resource.data.estimatedCalories >= 0 &&
+        request.resource.data.metValue >= 0;
+      
+      // Allow delete dengan validasi token
+      allow delete: if request.auth != null;
+    }
+    
+    // Rule untuk koleksi lainnya (default deny)
     match /{document=**} {
-      allow read, write: if true;  // Allow all operations
+      allow read, write: if true;
     }
   }
 }

@@ -6,8 +6,8 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
   final FirebaseFirestore _firestore;
   static const String _collection = 'exerciseAnalysis';
 
-  SmartExerciseLogRepositoryImpl({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  SmartExerciseLogRepositoryImpl({required FirebaseFirestore firestore})
+      : _firestore = firestore;
 
   @override
   Future<String> saveAnalysisResult(ExerciseAnalysisResult result) async {
