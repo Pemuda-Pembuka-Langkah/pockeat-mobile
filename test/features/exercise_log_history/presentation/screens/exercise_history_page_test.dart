@@ -48,9 +48,7 @@ void main() {
         service: mockService,
       ),
       routes: {
-        '/exercise-history/1': (context) => const Scaffold(body: Text('Detail Page')),
-        '/exercise-history/2': (context) => const Scaffold(body: Text('Detail Page')),
-        '/exercise-history/3': (context) => const Scaffold(body: Text('Detail Page')),
+        '/exercise-detail': (context) => const Scaffold(body: Text('Detail Page')),
       },
     );
   }

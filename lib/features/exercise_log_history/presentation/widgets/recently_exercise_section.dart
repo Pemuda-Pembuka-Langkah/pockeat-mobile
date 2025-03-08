@@ -52,8 +52,11 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> {
 
   void _navigateToExerciseDetail(ExerciseLogHistoryItem exercise) {
     Navigator.of(context).pushNamed(
-      '/exercise-history/${exercise.id}',
-      arguments: {'type': exercise.activityType},
+      '/exercise-detail',
+      arguments: {
+        'exerciseId': exercise.sourceId ?? exercise.id, // Gunakan sourceId jika ada, atau fallback ke id
+        'activityType': exercise.activityType,
+      },
     );
   }
 

@@ -26,6 +26,8 @@ import 'package:pockeat/features/exercise_log_history/presentation/screens/exerc
 // Import for CardioRepository
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
+// Import for ExerciseLogDetailPage
+import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_log_detail_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -147,6 +149,19 @@ class MyApp extends StatelessWidget {
         '/exercise-history': (context) => ExerciseHistoryPage(
               service: Provider.of<ExerciseLogHistoryService>(context),
             ),
+        '/exercise-detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return ExerciseLogDetailPage(
+            exerciseId: args['exerciseId'] as String,
+            activityType: args['activityType'] as String,
+            cardioRepository: Provider.of<CardioRepository>(context, listen: false),
+            smartExerciseRepository: Provider.of<SmartExerciseLogRepository>(context, listen: false),
+          );
+        },
+      },
+      onGenerateRoute: (settings) {
+        // Default jika tidak ada rute yang cocok
+        return null;
       },
     );
   }
