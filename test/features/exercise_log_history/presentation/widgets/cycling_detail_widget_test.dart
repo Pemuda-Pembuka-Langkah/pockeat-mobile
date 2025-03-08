@@ -1,0 +1,135 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
+import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
+import 'package:pockeat/features/exercise_log_history/presentation/widgets/cycling_detail_widget.dart';
+
+void main() {
+  final testActivity = CyclingActivity(
+    id: 'cycle-1',
+    date: DateTime(2025, 3, 2),
+    startTime: DateTime(2025, 3, 2, 10, 0),
+    endTime: DateTime(2025, 3, 2, 11, 0),
+    distanceKm: 20.0,
+    cyclingType: CyclingType.commute,
+    caloriesBurned: 450,
+  );
+
+  group('CyclingDetailWidget Tests', () {
+    testWidgets('should display cycling session title', (WidgetTester tester) async {
+      // Arrange - Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: CyclingDetailWidget(activity: testActivity),
+        ),
+      ));
+
+      // Assert - Check title is displayed
+      expect(find.text('Cycling Session'), findsOneWidget);
+    });
+
+    testWidgets('should display formatted date', (WidgetTester tester) async {
+      // Arrange - Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: CyclingDetailWidget(activity: testActivity),
+        ),
+      ));
+
+      // Expected formatted date
+      final formattedDate = DateFormat('EEEE, dd MMMM yyyy').format(testActivity.date);
+
+      // Assert - Check date is displayed
+      expect(find.text(formattedDate), findsOneWidget);
+    });
+
+    testWidgets('should display distance, duration and calories values', (WidgetTester tester) async {
+      // Arrange - Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: CyclingDetailWidget(activity: testActivity),
+        ),
+      ));
+
+      // Assert - Check metric values
+      expect(find.text('20.0 km'), findsAtLeastNWidgets(1));
+      
+      // For duration, use the formatted value method to match what's in the widget
+      final expectedDuration = _formatDuration(testActivity.duration);
+      expect(find.text(expectedDuration), findsAtLeastNWidgets(1));
+      
+      expect(find.text('450 kcal'), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('should display cycling icon', (WidgetTester tester) async {
+      // Arrange - Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: CyclingDetailWidget(activity: testActivity),
+        ),
+      ));
+
+      // Assert - Check icon
+      expect(find.byIcon(Icons.directions_bike), findsOneWidget);
+    });
+
+    testWidgets('should display cycling type in details section', (WidgetTester tester) async {
+      // Arrange - Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: CyclingDetailWidget(activity: testActivity),
+        ),
+      ));
+
+      // Assert - Check cycling type displayed
+      expect(find.text('Cycling Type'), findsOneWidget);
+      expect(find.text('Commute'), findsOneWidget); 
+    });
+
+    testWidgets('should display start and end times in details section', (WidgetTester tester) async {
+      // Arrange - Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: CyclingDetailWidget(activity: testActivity),
+        ),
+      ));
+
+      // Expected formatted times
+      final expectedStartTime = DateFormat('HH:mm').format(testActivity.startTime);
+      final expectedEndTime = DateFormat('HH:mm').format(testActivity.endTime);
+
+      // Assert - Check times displayed
+      expect(find.text('Start Time'), findsOneWidget);
+      expect(find.text(expectedStartTime), findsOneWidget);
+      
+      expect(find.text('End Time'), findsOneWidget);
+      expect(find.text(expectedEndTime), findsOneWidget);
+    });
+    
+    testWidgets('should display activity details section with average speed', (WidgetTester tester) async {
+      // Arrange - Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: CyclingDetailWidget(activity: testActivity),
+        ),
+      ));
+
+      // Assert - Check section title and average speed
+      expect(find.text('Activity Details'), findsOneWidget);
+      expect(find.text('Average Speed'), findsOneWidget);
+      
+      // Calculate expected speed value as shown in the widget
+      final speed = testActivity.distanceKm / (testActivity.duration.inSeconds / 3600);
+      expect(find.text('${speed.toStringAsFixed(1)} km/h'), findsOneWidget);
+    });
+  });
+}
+
+// Helper method to match the formatting in the widget
+String _formatDuration(Duration duration) {
+  String twoDigits(int n) => n.toString().padLeft(2, '0');
+  final hours = twoDigits(duration.inHours);
+  final minutes = twoDigits(duration.inMinutes.remainder(60));
+  final seconds = twoDigits(duration.inSeconds.remainder(60));
+  return hours == '00' ? '$minutes:$seconds' : '$hours:$minutes:$seconds';
+}
