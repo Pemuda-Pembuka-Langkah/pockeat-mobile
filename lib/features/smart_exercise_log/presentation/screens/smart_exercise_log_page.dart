@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pockeat/core/di/service_locator.dart'; // Import the service locator
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';
@@ -39,10 +38,8 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
   @override
   void initState() {
     super.initState();
-    // Use injected dependencies or fallback to default implementation
-    _geminiService = widget.geminiService ?? GeminiServiceImpl(
-      apiKey: dotenv.env['GOOGLE_GEMINI_API_KEY'] ?? ''
-    );
+    // Use injected dependencies or fallback to default implementation from service locator
+    _geminiService = widget.geminiService ?? getIt<GeminiService>();
     _repository = widget.repository ?? SmartExerciseLogRepositoryImpl();
   }
   

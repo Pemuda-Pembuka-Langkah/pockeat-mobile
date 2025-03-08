@@ -72,3 +72,7 @@ lcov.info
 # Local configuration
 local.properties
 .gradle/
+
+# Android C++ build files
+android/app/.cxx/
+

@@ -12,7 +12,8 @@ import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
-import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_page.dart';
+import 'package:pockeat/features/ai_api_scan/presentation/pages/ai_analysis_page.dart';
+import 'package:pockeat/core/di/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,7 @@ void main() async {
         : StagingFirebaseOptions.currentPlatform // Dev pake config staging tapi nanti connect ke emulator
   );
 
+  setupDependencies();
   // Setup emulator kalau di dev mode
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
@@ -54,7 +56,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CalculATE',
+      title: 'Pockeat',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
@@ -98,7 +100,7 @@ class MyApp extends StatelessWidget {
               ResolutionPreset.medium,
             )),
         '/add-food': (context) => const FoodInputPage(),
-        '/food-analysis': (context) => const FoodAnalysisPage(),
+        '/food-analysis': (context) => const AIAnalysisScreen(),
       },
     );
   }

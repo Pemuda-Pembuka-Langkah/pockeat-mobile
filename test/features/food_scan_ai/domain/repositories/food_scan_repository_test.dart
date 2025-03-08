@@ -20,13 +20,11 @@ void main() {
     ingredients: [
       Ingredient(
         name: 'Nasi',
-        percentage: 60.0,
-        allergen: false,
+        servings: 60,
       ),
       Ingredient(
         name: 'Telur',
-        percentage: 20.0,
-        allergen: true,
+        servings: 20,
       ),
     ],
     nutritionInfo: NutritionInfo(
@@ -86,13 +84,11 @@ void main() {
         ingredients: [
           Ingredient(
             name: 'Ayam',
-            percentage: 70.0,
-            allergen: false,
+            servings: 70,
           ),
           Ingredient(
             name: 'Kacang',
-            percentage: 30.0,
-            allergen: true,
+            servings: 30,
           ),
         ],
         nutritionInfo: NutritionInfo(
