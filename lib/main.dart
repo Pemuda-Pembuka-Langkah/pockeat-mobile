@@ -22,6 +22,7 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
 // Import for ExerciseLogHistory
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service_impl.dart';
+import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_history_page.dart';
 // Import for CardioRepository
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
@@ -142,7 +143,10 @@ class MyApp extends StatelessWidget {
         '/add-food': (context) => const FoodInputPage(),
         '/add-exercise': (context) => const ExerciseInputPage(),
         '/food-analysis': (context) => const FoodAnalysisPage(),
-        '/cardio': (context) => const CardioInputPage()
+        '/cardio': (context) => const CardioInputPage(),
+        '/exercise-history': (context) => ExerciseHistoryPage(
+              service: Provider.of<ExerciseLogHistoryService>(context),
+            ),
       },
     );
   }
