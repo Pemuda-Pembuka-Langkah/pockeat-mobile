@@ -77,7 +77,7 @@ class ExerciseLogHistoryItem {
         activityType: TYPE_WEIGHTLIFTING,
         title: weightLifting.name,
         subtitle: '0 sets • 0 reps • 0.0 kg',
-        timestamp: DateTime.now(), // Since timestamp isn't in the model, use current time
+        timestamp: weightLifting.timestamp,
         caloriesBurned: 0,
         sourceId: weightLifting.id,
       );
@@ -98,7 +98,7 @@ class ExerciseLogHistoryItem {
       activityType: TYPE_WEIGHTLIFTING,
       title: weightLifting.name,
       subtitle: '$totalSets sets • $totalReps reps • ${avgWeight.toStringAsFixed(1)} kg',
-      timestamp: DateTime.now(), // Since timestamp isn't in the model, use current time
+      timestamp: weightLifting.timestamp,
       caloriesBurned: caloriesBurned,
       sourceId: weightLifting.id,
     );

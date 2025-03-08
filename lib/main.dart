@@ -29,6 +29,7 @@ import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repositor
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
 // Import for ExerciseLogDetailPage
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_log_detail_page.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,9 +61,11 @@ void main() async {
   final smartExerciseLogRepository =
       SmartExerciseLogRepositoryImpl(firestore: firestore);
   final cardioRepository = CardioRepositoryImpl(firestore: firestore);
+  final weightLiftingRepository = WeightLiftingRepositoryImpl(firestore: firestore);
   final exerciseLogHistoryRepository = ExerciseLogHistoryServiceImpl(
     smartExerciseLogRepository: smartExerciseLogRepository,
     cardioRepository: cardioRepository,
+    weightLiftingRepository: weightLiftingRepository,
   );
 
   runApp(
