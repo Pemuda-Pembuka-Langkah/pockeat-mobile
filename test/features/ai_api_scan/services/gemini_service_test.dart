@@ -11,10 +11,18 @@ import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 // Define mock classes with mocktail
-class MockFoodTextAnalysisService extends Mock implements FoodTextAnalysisService {}
-class MockFoodImageAnalysisService extends Mock implements FoodImageAnalysisService {}
-class MockNutritionLabelAnalysisService extends Mock implements NutritionLabelAnalysisService {}
-class MockExerciseAnalysisService extends Mock implements ExerciseAnalysisService {}
+class MockFoodTextAnalysisService extends Mock
+    implements FoodTextAnalysisService {}
+
+class MockFoodImageAnalysisService extends Mock
+    implements FoodImageAnalysisService {}
+
+class MockNutritionLabelAnalysisService extends Mock
+    implements NutritionLabelAnalysisService {}
+
+class MockExerciseAnalysisService extends Mock
+    implements ExerciseAnalysisService {}
+
 class MockFile extends Mock implements File {}
 
 void main() {
@@ -31,12 +39,12 @@ void main() {
     mockNutritionService = MockNutritionLabelAnalysisService();
     mockExerciseService = MockExerciseAnalysisService();
     mockFile = MockFile();
-    
+
     // Register fallbacks for function argument types
     registerFallbackValue('dummy-text');
     registerFallbackValue(File('dummy-path'));
     registerFallbackValue(1.0);
-    
+
     service = GeminiServiceImpl(
       foodTextAnalysisService: mockTextService,
       foodImageAnalysisService: mockImageService,
@@ -46,7 +54,8 @@ void main() {
   });
 
   group('GeminiServiceImpl', () {
-    test('should delegate analyzeFoodByText to food text analysis service', () async {
+    test('should delegate analyzeFoodByText to food text analysis service',
+        () async {
       // Arrange
       const description = 'Apple pie';
       final expectedResult = FoodAnalysisResult(
@@ -63,20 +72,21 @@ void main() {
         ),
         warnings: [],
       );
-      
+
       // Setup the mock
       when(() => mockTextService.analyze(any()))
-        .thenAnswer((_) async => expectedResult);
-      
+          .thenAnswer((_) async => expectedResult);
+
       // Act
       final result = await service.analyzeFoodByText(description);
-      
+
       // Assert
       expect(result, equals(expectedResult));
       verify(() => mockTextService.analyze(description)).called(1);
     });
 
-    test('should delegate analyzeFoodByImage to food image analysis service', () async {
+    test('should delegate analyzeFoodByImage to food image analysis service',
+        () async {
       // Arrange
       final expectedResult = FoodAnalysisResult(
         foodName: 'Burger',
@@ -92,20 +102,21 @@ void main() {
         ),
         warnings: [],
       );
-      
+
       // Setup the mock
       when(() => mockImageService.analyze(any()))
-        .thenAnswer((_) async => expectedResult);
-      
+          .thenAnswer((_) async => expectedResult);
+
       // Act
       final result = await service.analyzeFoodByImage(mockFile);
-      
+
       // Assert
       expect(result, equals(expectedResult));
       verify(() => mockImageService.analyze(mockFile)).called(1);
     });
 
-    test('should delegate analyzeNutritionLabel to nutrition label service', () async {
+    test('should delegate analyzeNutritionLabel to nutrition label service',
+        () async {
       // Arrange
       const servings = 2.5;
       final expectedResult = FoodAnalysisResult(
@@ -122,20 +133,21 @@ void main() {
         ),
         warnings: [],
       );
-      
+
       // Setup the mock
       when(() => mockNutritionService.analyze(any(), any()))
-        .thenAnswer((_) async => expectedResult);
-      
+          .thenAnswer((_) async => expectedResult);
+
       // Act
       final result = await service.analyzeNutritionLabel(mockFile, servings);
-      
+
       // Assert
       expect(result, equals(expectedResult));
       verify(() => mockNutritionService.analyze(mockFile, servings)).called(1);
     });
 
-    test('should delegate analyzeExercise to exercise analysis service', () async {
+    test('should delegate analyzeExercise to exercise analysis service',
+        () async {
       // Arrange
       const description = 'Running 5km';
       const weight = 70.0;
@@ -145,25 +157,31 @@ void main() {
         intensity: 'Moderate',
         estimatedCalories: 350,
         metValue: 8.5,
-        summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
+        summary:
+            'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
         timestamp: DateTime.now(),
         originalInput: description,
       );
-      
+
       // Setup the mock
-      when(() => mockExerciseService.analyze(any(), userWeightKg: any(named: 'userWeightKg')))
-        .thenAnswer((_) async => expectedResult);
-      
+      when(() => mockExerciseService.analyze(any(),
+              userWeightKg: any(named: 'userWeightKg')))
+          .thenAnswer((_) async => expectedResult);
+
       // Act
-      final result = await service.analyzeExercise(description, userWeightKg: weight);
-      
+      final result =
+          await service.analyzeExercise(description, userWeightKg: weight);
+
       // Assert
       expect(result.exerciseType, equals(expectedResult.exerciseType));
       expect(result.duration, equals(expectedResult.duration));
       expect(result.intensity, equals(expectedResult.intensity));
-      expect(result.estimatedCalories, equals(expectedResult.estimatedCalories));
+      expect(
+          result.estimatedCalories, equals(expectedResult.estimatedCalories));
       expect(result.metValue, equals(expectedResult.metValue));
-      verify(() => mockExerciseService.analyze(description, userWeightKg: weight)).called(1);
+      verify(() =>
+              mockExerciseService.analyze(description, userWeightKg: weight))
+          .called(1);
     });
   });
 }
