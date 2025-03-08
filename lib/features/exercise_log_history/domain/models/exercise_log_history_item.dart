@@ -2,7 +2,7 @@ import 'package:uuid/uuid.dart';
 import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 
 /// Model untuk item history log olahraga
-/// 
+///
 /// Model ini didesain untuk menyatukan berbagai jenis aktivitas olahraga
 /// (SmartExercise, Weightlifting, Cardio) dalam satu format yang konsisten
 /// untuk ditampilkan di history log.
@@ -13,7 +13,8 @@ class ExerciseLogHistoryItem {
   final String subtitle;
   final DateTime timestamp;
   final int caloriesBurned;
-  final String? sourceId; // ID dari data sumber (misalnya ID dari SmartExerciseLog)
+  final String?
+      sourceId; // ID dari data sumber (misalnya ID dari SmartExerciseLog)
   // Konstanta untuk tipe aktivitas umum
   static const String TYPE_SMART_EXERCISE = 'smart_exercise';
   static const String TYPE_WEIGHTLIFTING = 'weightlifting';
@@ -51,24 +52,27 @@ class ExerciseLogHistoryItem {
   }
 
   /// Factory constructor untuk membuat ExerciseLogHistoryItem dari SmartExerciseLog
-  factory ExerciseLogHistoryItem.fromSmartExerciseLog(dynamic smartExerciseLog) {
+  factory ExerciseLogHistoryItem.fromSmartExerciseLog(
+      dynamic smartExerciseLog) {
     return ExerciseLogHistoryItem(
-      activityType: TYPE_SMART_EXERCISE,
-      title: smartExerciseLog.exerciseType,
-      subtitle: '${smartExerciseLog.duration} • ${smartExerciseLog.intensity}',
-      timestamp: smartExerciseLog.timestamp,
-      caloriesBurned: smartExerciseLog.estimatedCalories,
-      sourceId: smartExerciseLog.id
-    );
+        activityType: TYPE_SMART_EXERCISE,
+        title: smartExerciseLog.exerciseType,
+        subtitle:
+            '${smartExerciseLog.duration} • ${smartExerciseLog.intensity}',
+        timestamp: smartExerciseLog.timestamp,
+        caloriesBurned: smartExerciseLog.estimatedCalories,
+        sourceId: smartExerciseLog.id);
   }
 
   /// Factory constructor untuk membuat ExerciseLogHistoryItem dari WeightliftingLog (placeholder)
-  factory ExerciseLogHistoryItem.fromWeightliftingLog(dynamic weightliftingLog) {
+  factory ExerciseLogHistoryItem.fromWeightliftingLog(
+      dynamic weightliftingLog) {
     // Implementasi akan ditambahkan saat WeightliftingLog tersedia
     return ExerciseLogHistoryItem(
       activityType: TYPE_WEIGHTLIFTING,
       title: weightliftingLog.exerciseName ?? 'Weightlifting Session',
-      subtitle: '${weightliftingLog.sets ?? 0} sets • ${weightliftingLog.reps ?? 0} reps • ${weightliftingLog.weight ?? "0 kg"}',
+      subtitle:
+          '${weightliftingLog.sets ?? 0} sets • ${weightliftingLog.reps ?? 0} reps • ${weightliftingLog.weight ?? "0 kg"}',
       timestamp: weightliftingLog.timestamp,
       caloriesBurned: weightliftingLog.caloriesBurned ?? 0,
       sourceId: weightliftingLog.id,
@@ -92,11 +96,12 @@ class ExerciseLogHistoryItem {
       default:
         activityTitle = 'Cardio Session';
     }
-    
+
     // Format durasi dalam format yang lebih user-friendly
     final minutes = cardioLog.duration.inMinutes;
-    final durationText = minutes > 0 ? '$minutes min' : '${cardioLog.duration.inSeconds} sec';
-    
+    final durationText =
+        minutes > 0 ? '$minutes min' : '${cardioLog.duration.inSeconds} sec';
+
     // Get distance if available (using dynamic access since it might be in different implementations)
     String distanceText = '';
     try {
@@ -107,7 +112,7 @@ class ExerciseLogHistoryItem {
     } catch (_) {
       // If distance is not available, just ignore it
     }
-    
+
     return ExerciseLogHistoryItem(
       activityType: TYPE_CARDIO,
       title: activityTitle,
