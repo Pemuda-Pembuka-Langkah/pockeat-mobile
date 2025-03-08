@@ -8,9 +8,12 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/cycli
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/running_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/smart_exercise_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/swimming_detail_widget.dart';
+import 'package:pockeat/features/exercise_log_history/presentation/widgets/weight_lifting_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 
 /// Detail page for exercise logs with widget composition based on type
 class ExerciseLogDetailPage extends StatefulWidget {
@@ -18,6 +21,7 @@ class ExerciseLogDetailPage extends StatefulWidget {
   final String activityType;
   final CardioRepository cardioRepository;
   final SmartExerciseLogRepository smartExerciseRepository;
+  final WeightLiftingRepository weightLiftingRepository;
 
   const ExerciseLogDetailPage({
     Key? key,
@@ -25,6 +29,7 @@ class ExerciseLogDetailPage extends StatefulWidget {
     required this.activityType,
     required this.cardioRepository,
     required this.smartExerciseRepository,
+    required this.weightLiftingRepository,
   }) : super(key: key);
 
   @override
@@ -42,6 +47,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
     _detailService = ExerciseDetailServiceImpl(
       cardioRepository: widget.cardioRepository,
       smartExerciseRepository: widget.smartExerciseRepository,
+      weightLiftingRepository: widget.weightLiftingRepository,
     );
     // Initialize with a Future that includes all loading processes
     _exerciseFuture = _loadExerciseData();
@@ -58,6 +64,8 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
       return _detailService.getSmartExerciseDetail(widget.exerciseId);
     } else if (widget.activityType == ExerciseLogHistoryItem.TYPE_CARDIO) {
       return _loadCardioExerciseData();
+    } else if (widget.activityType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING) {
+      return _detailService.getWeightLiftingDetail(widget.exerciseId);
     } else {
       return null;
     }
@@ -84,7 +92,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Exercise Details'),
+        title: Text(_getPageTitle()),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -170,6 +178,8 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
         default:
           return 'Cardio Details';
       }
+    } else if (widget.activityType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING) {
+      return 'Weight Training Details';
     } else {
       return 'Exercise Details';
     }
@@ -197,6 +207,12 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
       } else {
         // If the type is not recognized but still cardio, display a generic message
         return const Center(child: Text('Unsupported cardio type'));
+      }
+    } else if (widget.activityType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING) {
+      if (exercise is WeightLifting) {
+        return WeightLiftingDetailWidget(weightLifting: exercise);
+      } else {
+        return const Center(child: Text('Invalid weight lifting data'));
       }
     } else {
       return const Center(
