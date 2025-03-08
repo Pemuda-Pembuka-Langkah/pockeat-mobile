@@ -5,7 +5,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/generative_model_wrapper.dart';
+import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 
 class GeminiServiceImpl implements GeminiService {
   final String apiKey;
