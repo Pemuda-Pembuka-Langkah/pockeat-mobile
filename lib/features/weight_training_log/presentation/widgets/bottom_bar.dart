@@ -1,0 +1,51 @@
+import 'package:flutter/material.dart';
+
+class BottomBar extends StatelessWidget {
+  final double totalVolume;
+  final Color primaryGreen;
+  final VoidCallback onSaveWorkout;
+
+  const BottomBar({
+    Key? key,
+    required this.totalVolume,
+    required this.primaryGreen,
+    required this.onSaveWorkout,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 5,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: ElevatedButton(
+          onPressed: onSaveWorkout,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryGreen,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Text(
+            'Save Workout (${totalVolume.toStringAsFixed(1)} kg)',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
