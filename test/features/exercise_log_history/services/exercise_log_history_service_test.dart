@@ -7,7 +7,9 @@ import 'package:pockeat/features/exercise_log_history/services/exercise_log_hist
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
-import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
+import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
+import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
+import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
 import 'exercise_log_history_service_test.mocks.dart';
 
 @GenerateMocks([SmartExerciseLogRepository, CardioRepository])
@@ -62,31 +64,34 @@ void main() {
     );
     
     // Cardio test data
-    final cardioLog1 = _MockRunningActivity(
+    final cardioLog1 = RunningActivity(
       id: 'cardio-1',
       date: DateTime(2025, 3, 6, 11, 0),
       startTime: DateTime(2025, 3, 6, 11, 0),
       endTime: DateTime(2025, 3, 6, 11, 30),
+      distanceKm: 5.0,
       caloriesBurned: 350,
-      type: CardioType.running,
     );
 
-    final cardioLog2 = _MockCyclingActivity(
+    final cardioLog2 = CyclingActivity(
       id: 'cardio-2',
       date: DateTime(2025, 3, 5, 15, 0),
       startTime: DateTime(2025, 3, 5, 15, 0),
       endTime: DateTime(2025, 3, 5, 16, 0),
+      distanceKm: 20.0,
+      cyclingType: CyclingType.commute,
       caloriesBurned: 450,
-      type: CardioType.cycling,
     );
 
-    final cardioLog3 = _MockSwimmingActivity(
+    final cardioLog3 = SwimmingActivity(
       id: 'cardio-3',
       date: DateTime(2025, 2, 14, 9, 0),
       startTime: DateTime(2025, 2, 14, 9, 0),
       endTime: DateTime(2025, 2, 14, 9, 45),
+      laps: 20,
+      poolLength: 50.0,
+      stroke: 'freestyle',
       caloriesBurned: 500,
-      type: CardioType.swimming,
     );
 
     test('getAllExerciseLogs should return all logs sorted by timestamp',
@@ -346,110 +351,4 @@ void main() {
       verify(mockCardioRepository.getAllCardioActivities()).called(1);
     });
   });
-}
-
-// Mock implementations for testing
-class _MockRunningActivity extends CardioActivity {
-  _MockRunningActivity({
-    required String id,
-    required DateTime date,
-    required DateTime startTime,
-    required DateTime endTime,
-    required double caloriesBurned,
-    required CardioType type,
-  }) : super(
-          id: id,
-          date: date,
-          startTime: startTime,
-          endTime: endTime,
-          caloriesBurned: caloriesBurned,
-          type: type,
-        );
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'date': date.millisecondsSinceEpoch,
-      'startTime': startTime.millisecondsSinceEpoch,
-      'endTime': endTime.millisecondsSinceEpoch,
-      'caloriesBurned': caloriesBurned,
-      'type': 'running',
-    };
-  }
-
-  @override
-  double calculateCalories() {
-    return caloriesBurned;
-  }
-}
-
-class _MockCyclingActivity extends CardioActivity {
-  _MockCyclingActivity({
-    required String id,
-    required DateTime date,
-    required DateTime startTime,
-    required DateTime endTime,
-    required double caloriesBurned,
-    required CardioType type,
-  }) : super(
-          id: id,
-          date: date,
-          startTime: startTime,
-          endTime: endTime,
-          caloriesBurned: caloriesBurned,
-          type: type,
-        );
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'date': date.millisecondsSinceEpoch,
-      'startTime': startTime.millisecondsSinceEpoch,
-      'endTime': endTime.millisecondsSinceEpoch,
-      'caloriesBurned': caloriesBurned,
-      'type': 'cycling',
-    };
-  }
-
-  @override
-  double calculateCalories() {
-    return caloriesBurned;
-  }
-}
-
-class _MockSwimmingActivity extends CardioActivity {
-  _MockSwimmingActivity({
-    required String id,
-    required DateTime date,
-    required DateTime startTime,
-    required DateTime endTime,
-    required double caloriesBurned,
-    required CardioType type,
-  }) : super(
-          id: id,
-          date: date,
-          startTime: startTime,
-          endTime: endTime,
-          caloriesBurned: caloriesBurned,
-          type: type,
-        );
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'date': date.millisecondsSinceEpoch,
-      'startTime': startTime.millisecondsSinceEpoch,
-      'endTime': endTime.millisecondsSinceEpoch,
-      'caloriesBurned': caloriesBurned,
-      'type': 'swimming',
-    };
-  }
-
-  @override
-  double calculateCalories() {
-    return caloriesBurned;
-  }
 }
