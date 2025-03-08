@@ -1,3 +1,5 @@
+import 'package:uuid/uuid.dart';
+
 class WeightLifting {
   final String id;
   final String name;
@@ -11,7 +13,7 @@ class WeightLifting {
     required this.bodyPart,
     required this.metValue,
     List<WeightLiftingSet>? sets,
-  })  : id = id ?? DateTime.now().toString(),
+  })  : id = id ?? const Uuid().v4(),
         sets = sets ?? [];
 
   // Convert Exercise object to JSON
