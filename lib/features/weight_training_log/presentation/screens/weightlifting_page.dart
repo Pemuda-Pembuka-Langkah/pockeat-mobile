@@ -11,7 +11,9 @@ import 'package:pockeat/features/weight_training_log/presentation/widgets/bottom
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WeightliftingPage extends StatefulWidget {
-  const WeightliftingPage({Key? key}) : super(key: key);
+  final WeightLiftingRepository? repository;
+  
+  const WeightliftingPage({Key? key, this.repository}) : super(key: key);
 
   @override
   _WeightliftingPageState createState() => _WeightliftingPageState();
@@ -21,7 +23,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   
-  // Add repository instance
+  // Repository instance
   late final WeightLiftingRepository _exerciseRepository;
   
   final Map<String, Map<String, double>> exercisesByCategory = WeightLiftingRepositoryImpl.exercisesByCategory;
@@ -33,8 +35,8 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize repository
-    _exerciseRepository = WeightLiftingRepositoryImpl(
+    // Initialize repository - use injected repository if available, otherwise create new one
+    _exerciseRepository = widget.repository ?? WeightLiftingRepositoryImpl(
       firestore: FirebaseFirestore.instance,
     );
   }
@@ -129,23 +131,26 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        key: const Key('addSetDialog'),
         title: _buildDialogTitle('Add Set'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildTextField('Weight (kg)', weightController),
+            _buildTextField('Weight (kg)', weightController, const Key('weightkgField')),
             const SizedBox(height: 16),
-            _buildTextField('Reps', repsController),
+            _buildTextField('Reps', repsController, const Key('repsField')),
             const SizedBox(height: 16),
-            _buildTextField('Duration (minutes)', durationController),
+            _buildTextField('Duration (minutes)', durationController, const Key('durationminutesField')),
           ],
         ),
         actions: [
           TextButton(
+            key: const Key('cancelButton'),
             onPressed: () => Navigator.pop(context), 
             child: const Text('Cancel')
           ),
           ElevatedButton(
+            key: const Key('addButton'),
             onPressed: () {
               // Parse and validate the input values
               final weight = double.tryParse(weightController.text) ?? 0;
@@ -174,8 +179,9 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   Text _buildDialogTitle(String text) => Text(text, style: const TextStyle(fontWeight: FontWeight.w600));
 
-  TextField _buildTextField(String label, TextEditingController controller) {
+  TextField _buildTextField(String label, TextEditingController controller, Key key) {
     return TextField(
+      key: key,
       controller: controller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
@@ -203,6 +209,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key('weightliftingPage'),
       backgroundColor: primaryYellow,
       appBar: _buildAppBar(),
       body: _buildBody(),
@@ -212,16 +219,24 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   AppBar _buildAppBar() {
     return AppBar(
+      key: const Key('appBar'),
       backgroundColor: primaryYellow,
       elevation: 0,
       leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
       title: const Text('Weightlifting', style: TextStyle(fontWeight: FontWeight.w600)),
-      actions: [IconButton(icon: const Icon(Icons.refresh), onPressed: clearWorkout)],
+      actions: [
+        IconButton(
+          key: const Key('saveWorkoutButton'),
+          icon: const Icon(Icons.save),
+          onPressed: saveWorkout,
+        ),
+      ],
     );
   }
 
   Widget _buildBody() {
     return SingleChildScrollView(
+      key: const Key('body'),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,6 +247,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           _buildExerciseQuickAdd(),
           const SizedBox(height: 24),
           if (exercises.isNotEmpty) WorkoutSummary(
+            key: const Key('workoutSummary'),
             exerciseCount: exercises.length,
             totalSets: calculateTotalSets(exercises),
             totalReps: calculateTotalReps(exercises),
@@ -241,6 +257,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
             primaryGreen: primaryGreen,
           ),
           ...exercises.map((exercise) => ExerciseCard(
+                key: Key('exerciseCard_${exercise.name}'),
                 exercise: exercise,
                 primaryGreen: primaryGreen,
                 volume: calculateExerciseVolume(exercise),
@@ -255,9 +272,11 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   Widget _buildBodyPartChips() {
     return SingleChildScrollView(
+      key: const Key('bodyPartChips'),
       scrollDirection: Axis.horizontal,
       child: Row(
         children: exercisesByCategory.keys.map((category) => BodyPartChip(
+          key: Key('bodyPartChip_$category'),
           category: category,
           isSelected: selectedBodyPart == category,
           onTap: () => setState(() => selectedBodyPart = category),
@@ -269,6 +288,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   Widget _buildExerciseQuickAdd() {
     return Container(
+      key: const Key('exerciseQuickAdd'),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)]),
       child: Column(
@@ -280,6 +300,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
             spacing: 8,
             runSpacing: 8,
             children: (exercisesByCategory[selectedBodyPart]?.keys ?? []).map((exercise) => ExerciseChipWidget(
+                  key: Key('exerciseChip_$exercise'),
                   exerciseName: exercise,
                   onTap: () => addExercise(exercise),
                   primaryGreen: primaryGreen,
@@ -292,6 +313,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   // Updated to use the saveWorkout method
   Widget _buildBottomBar() => BottomBar(
+    key: const Key('bottomBar'),
     totalVolume: calculateTotalVolume(exercises), 
     primaryGreen: primaryGreen, 
     onSaveWorkout: _isSaving ? null : saveWorkout,
