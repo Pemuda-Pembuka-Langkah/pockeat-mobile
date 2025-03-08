@@ -43,8 +43,15 @@ void main() async {
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
 
+  // Wrap the app with MultiProvider to make NavigationProvider available
   runApp(
-    const MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => NavigationProvider()),
+        // Add other providers here if needed
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
