@@ -11,21 +11,24 @@ class TestBaseGeminiService extends BaseGeminiService {
   TestBaseGeminiService({required super.apiKey, super.customModelWrapper});
 }
 
-class MockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {}
+// Rename to avoid conflicts with generated mock
+class ManualMockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {}
 
-@GenerateMocks([GenerativeModelWrapper])
+// Use customMocks parameter to specify unique names
+@GenerateMocks([GenerativeModelWrapper], customMocks: [MockSpec<GenerativeModelWrapper>(as: #MockGenWrapper)])
 void main() {
-  late MockGenerativeModelWrapper mockModelWrapper;
+  late ManualMockGenerativeModelWrapper mockModelWrapper;
   late TestBaseGeminiService service;
 
   setUp(() {
-    mockModelWrapper = MockGenerativeModelWrapper();
+    mockModelWrapper = ManualMockGenerativeModelWrapper();
     service = TestBaseGeminiService(
       apiKey: 'test-api-key',
       customModelWrapper: mockModelWrapper,
     );
   });
 
+  // Rest of the test remains the same
   group('BaseGeminiService', () {
     test('should initialize with provided API key', () {
       expect(service.apiKey, equals('test-api-key'));

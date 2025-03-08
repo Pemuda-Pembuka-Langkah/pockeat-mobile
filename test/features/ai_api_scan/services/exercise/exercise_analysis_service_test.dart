@@ -5,10 +5,8 @@ import 'package:mockito/annotations.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
-
-class MockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
+// Rename to avoid conflicts with generated mock
+class ManualMockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
   String? responseText;
   Exception? exceptionToThrow;
 
@@ -26,19 +24,21 @@ class _MockGenerateContentResponse {
   _MockGenerateContentResponse(this.text);
 }
 
-@GenerateMocks([GenerativeModelWrapper])
+// Use customMocks parameter to specify unique names
+@GenerateMocks([GenerativeModelWrapper], customMocks: [MockSpec<GenerativeModelWrapper>(as: #MockGenWrapper)])
 void main() {
-  late MockGenerativeModelWrapper mockModelWrapper;
+  late ManualMockGenerativeModelWrapper mockModelWrapper;
   late ExerciseAnalysisService service;
 
   setUp(() {
-    mockModelWrapper = MockGenerativeModelWrapper();
+    mockModelWrapper = ManualMockGenerativeModelWrapper();
     service = ExerciseAnalysisService(
       apiKey: 'test-api-key',
       customModelWrapper: mockModelWrapper,
     );
   });
 
+  // Rest of the test remains the same
   group('ExerciseAnalysisService', () {
     test('should analyze exercise successfully', () async {
       // Arrange

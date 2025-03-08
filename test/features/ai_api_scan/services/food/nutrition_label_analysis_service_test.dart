@@ -4,13 +4,12 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 
-class MockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
+// Rename to avoid conflicts with generated mock
+class ManualMockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
   String? responseText;
   Exception? exceptionToThrow;
 
@@ -28,7 +27,7 @@ class _MockGenerateContentResponse {
   _MockGenerateContentResponse(this.text);
 }
 
-class MockFile extends Mock implements File {
+class ManualMockFile extends Mock implements File {
   Uint8List? bytesToReturn;
   Exception? exceptionToThrow;
 
@@ -41,21 +40,29 @@ class MockFile extends Mock implements File {
   }
 }
 
-@GenerateMocks([GenerativeModelWrapper, File])
+// Use customMocks parameter to specify unique names
+@GenerateMocks(
+  [GenerativeModelWrapper, File],
+  customMocks: [
+    MockSpec<GenerativeModelWrapper>(as: #MockGenWrapper),
+    MockSpec<File>(as: #MockFileWrapper),
+  ]
+)
 void main() {
-  late MockGenerativeModelWrapper mockModelWrapper;
-  late MockFile mockFile;
+  late ManualMockGenerativeModelWrapper mockModelWrapper;
+  late ManualMockFile mockFile;
   late NutritionLabelAnalysisService service;
 
   setUp(() {
-    mockModelWrapper = MockGenerativeModelWrapper();
-    mockFile = MockFile();
+    mockModelWrapper = ManualMockGenerativeModelWrapper();
+    mockFile = ManualMockFile();
     service = NutritionLabelAnalysisService(
       apiKey: 'test-api-key',
       customModelWrapper: mockModelWrapper,
     );
   });
 
+  // Rest of the test remains the same
   group('NutritionLabelAnalysisService', () {
     test('should analyze nutrition label successfully', () async {
       // Arrange
