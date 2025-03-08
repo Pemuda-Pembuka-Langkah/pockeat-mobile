@@ -11,6 +11,7 @@ class TestBaseGeminiService extends BaseGeminiService {
   TestBaseGeminiService({required super.apiKey, super.customModelWrapper});
 }
 
+
 // Rename to avoid conflicts with generated mock
 class ManualMockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {}
 
