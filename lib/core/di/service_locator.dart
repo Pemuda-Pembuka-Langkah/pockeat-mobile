@@ -27,7 +27,6 @@ void setupDependencies() {
     ExerciseAnalysisService.fromEnv(),
   );
   
-  // Register the combined service that maintains the original API
   getIt.registerSingleton<GeminiService>(
     GeminiServiceImpl(
       foodTextAnalysisService: getIt<FoodTextAnalysisService>(),
