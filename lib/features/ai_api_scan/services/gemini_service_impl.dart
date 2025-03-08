@@ -26,14 +26,21 @@ class GeminiServiceImpl implements GeminiService {
     _nutritionLabelService = nutritionLabelService,
     _exerciseAnalysisService = exerciseAnalysisService;
 
-  factory GeminiServiceImpl.fromEnv() {
+// coverage:ignore-start
+  factory GeminiServiceImpl.fromEnv({
+    FoodTextAnalysisService? textService,
+    FoodImageAnalysisService? imageService,
+    NutritionLabelAnalysisService? nutritionService,
+    ExerciseAnalysisService? exerciseService,
+  }) {
     return GeminiServiceImpl(
-      foodTextAnalysisService: FoodTextAnalysisService.fromEnv(),
-      foodImageAnalysisService: FoodImageAnalysisService.fromEnv(),
-      nutritionLabelService: NutritionLabelAnalysisService.fromEnv(),
-      exerciseAnalysisService: ExerciseAnalysisService.fromEnv(),
+      foodTextAnalysisService: textService ?? FoodTextAnalysisService.fromEnv(),
+      foodImageAnalysisService: imageService ?? FoodImageAnalysisService.fromEnv(),
+      nutritionLabelService: nutritionService ?? NutritionLabelAnalysisService.fromEnv(),
+      exerciseAnalysisService: exerciseService ?? ExerciseAnalysisService.fromEnv(),
     );
   }
+  // coverage:ignore-end
 
   @override
   Future<FoodAnalysisResult> analyzeFoodByText(String description) {
