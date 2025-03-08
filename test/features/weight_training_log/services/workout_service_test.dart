@@ -1,29 +1,29 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/exercise.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/services/workout_service.dart';
 
 void main() {
   group('Workout Service', () {
-    final exercise1 = Exercise(
+    final exercise1 = WeightLifting(
       name: 'Bench Press',
       bodyPart: 'Upper Body',
       metValue: 5.0,
       sets: [
-        ExerciseSet(weight: 50, reps: 10, duration: 30),
-        ExerciseSet(weight: 60, reps: 8, duration: 30),
+        WeightLiftingSet(weight: 50, reps: 10, duration: 30),
+        WeightLiftingSet(weight: 60, reps: 8, duration: 30),
       ],
     );
 
-    final exercise2 = Exercise(
+    final exercise2 = WeightLifting(
       name: 'Squats',
       bodyPart: 'Lower Body',
       metValue: 6.0,
       sets: [
-        ExerciseSet(weight: 70, reps: 5, duration: 20),
+        WeightLiftingSet(weight: 70, reps: 5, duration: 20),
       ],
     );
 
-    final emptyExercise = Exercise(
+    final emptyExercise = WeightLifting(
       name: 'Empty Exercise',
       bodyPart: 'None',
       metValue: 4.0,
@@ -73,13 +73,13 @@ void main() {
     
     test('calculateExerciseVolume handles very low values correctly', () {
       // Instead of zero values, use minimal valid values
-      final lowValueExercise = Exercise(
+      final lowValueExercise = WeightLifting(
         name: 'Low Value',
         bodyPart: 'Test',
         metValue: 4.0,
         sets: [
-          ExerciseSet(weight: 0.1, reps: 1, duration: 0.1),
-          ExerciseSet(weight: 0.1, reps: 1, duration: 0.1),
+          WeightLiftingSet(weight: 0.1, reps: 1, duration: 0.1),
+          WeightLiftingSet(weight: 0.1, reps: 1, duration: 0.1),
         ],
       );
       // Since the values are minimal but not zero, expect very small result
@@ -88,24 +88,24 @@ void main() {
 
     // [Edge Cases] Nilai Ekstrem
     test('calculateExerciseCalories handles very high weight and reps correctly', () {
-      final highIntensityExercise = Exercise(
+      final highIntensityExercise = WeightLifting(
         name: 'High Intensity',
         bodyPart: 'Full Body',
         metValue: 10.0,
         sets: [
-          ExerciseSet(weight: 500, reps: 100, duration: 120),
+          WeightLiftingSet(weight: 500, reps: 100, duration: 120),
         ],
       );
       expect(calculateExerciseCalories(highIntensityExercise), greaterThan(5000.0));
     });
 
     test('calculateExerciseCalories handles minimal duration correctly', () {
-      final minimalDurationExercise = Exercise(
+      final minimalDurationExercise = WeightLifting(
         name: 'Minimal Duration',
         bodyPart: 'Test',
         metValue: 5.0,
         sets: [
-          ExerciseSet(weight: 50, reps: 10, duration: 0.1),
+          WeightLiftingSet(weight: 50, reps: 10, duration: 0.1),
         ],
       );
       // With minimal duration, should still produce positive calories

@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/exercise.dart';
-import '../models/exercise_factory.dart';
-import 'exercise_repository.dart';
+import '../models/weight_lifting.dart';
+import '../models/weight_lifting_factory.dart';
+import 'weight_lifting_repository.dart';
 
 /// Implementasi ExerciseRepository menggunakan Firebase Firestore
-class ExerciseRepositoryImpl implements ExerciseRepository {
+class WeightLiftingRepositoryImpl implements WeightLiftingRepository {
   final FirebaseFirestore _firestore;
-  static const String _collection = 'exercises';
+  static const String _collection = 'weight_lifting_logs';
   
   // Data statis untuk kategori latihan dan nilai MET
   static const Map<String, Map<String, double>> exercisesByCategory = {
@@ -45,12 +45,12 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
     },
   };
   
-  ExerciseRepositoryImpl({
+  WeightLiftingRepositoryImpl({
     required FirebaseFirestore firestore,
   }) : _firestore = firestore;
   
   @override
-  Future<String> saveExercise(Exercise exercise) async {
+  Future<String> saveExercise(WeightLifting exercise) async {
     try {
       final docRef = _firestore.collection(_collection).doc(exercise.id);
       await docRef.set(exercise.toJson());
@@ -61,7 +61,7 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
   }
   
   @override
-  Future<Exercise?> getExerciseById(String id) async {
+  Future<WeightLifting?> getExerciseById(String id) async {
     try {
       final docSnapshot = await _firestore.collection(_collection).doc(id).get();
       
@@ -70,14 +70,14 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
       }
       
       final data = docSnapshot.data() as Map<String, dynamic>;
-      return Exercise.fromJson(data);
+      return WeightLifting.fromJson(data);
     } catch (e) {
       throw Exception('Failed to retrieve exercise: $e');
     }
   }
   
   @override
-  Future<List<Exercise>> getAllExercises() async {
+  Future<List<WeightLifting>> getAllExercises() async {
     try {
       final querySnapshot = await _firestore
           .collection(_collection)
@@ -85,7 +85,7 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
           .get();
       
       return querySnapshot.docs
-          .map((doc) => Exercise.fromJson(doc.data()))
+          .map((doc) => WeightLifting.fromJson(doc.data()))
           .toList();
     } catch (e) {
       throw Exception('Failed to retrieve exercises: $e');
@@ -93,7 +93,7 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
   }
   
   @override
-  Future<List<Exercise>> getExercisesByBodyPart(String bodyPart) async {
+  Future<List<WeightLifting>> getExercisesByBodyPart(String bodyPart) async {
     try {
       final querySnapshot = await _firestore
           .collection(_collection)
@@ -101,7 +101,7 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
           .get();
       
       return querySnapshot.docs
-          .map((doc) => Exercise.fromJson(doc.data()))
+          .map((doc) => WeightLifting.fromJson(doc.data()))
           .toList();
     } catch (e) {
       throw Exception('Failed to retrieve exercises by body part: $e');
@@ -119,7 +119,7 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
   }
   
   @override
-  Future<List<Exercise>> filterByDate(DateTime date) async {
+  Future<List<WeightLifting>> filterByDate(DateTime date) async {
     try {
       // Extract date string to use as a filter
       final dateString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
@@ -130,7 +130,7 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
           .get();
       
       return querySnapshot.docs
-          .map((doc) => Exercise.fromJson(doc.data()))
+          .map((doc) => WeightLifting.fromJson(doc.data()))
           .toList();
     } catch (e) {
       throw Exception('Failed to filter exercises by date: $e');
@@ -138,7 +138,7 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
   }
   
   @override
-  Future<List<Exercise>> filterByMonth(int month, int year) async {
+  Future<List<WeightLifting>> filterByMonth(int month, int year) async {
     // Validasi bulan - dipindahkan ke luar dari try-catch
     if (month < 1 || month > 12) {
       throw ArgumentError('Month must be between 1 and 12');
@@ -158,14 +158,41 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
         return dateStr != null && dateStr.startsWith(monthPrefix);
       }).toList();
       
-      return filteredDocs.map((doc) => Exercise.fromJson(doc.data())).toList();
+      return filteredDocs.map((doc) => WeightLifting.fromJson(doc.data())).toList();
     } catch (e) {
       throw Exception('Failed to filter exercises by month: $e');
     }
   }
+
+  @override
+  Future<List<WeightLifting>> filterByYear(int year) async {
+    // Validate year
+    if (year <= 0) {
+      throw ArgumentError('Year must be a positive number');
+    }
+    
+    try {
+      // Create year prefix for string comparison
+      final yearPrefix = "$year-";
+      
+      // Need to get all exercises and filter manually since Firestore doesn't support
+      // direct substring matching in where clauses
+      final querySnapshot = await _firestore.collection(_collection).get();
+      
+      final filteredDocs = querySnapshot.docs.where((doc) {
+        final data = doc.data();
+        final dateStr = data['dateCreated'] as String?;
+        return dateStr != null && dateStr.startsWith(yearPrefix);
+      }).toList();
+      
+      return filteredDocs.map((doc) => WeightLifting.fromJson(doc.data())).toList();
+    } catch (e) {
+      throw Exception('Failed to filter exercises by year: $e');
+    }
+  }
   
   @override
-  Future<List<Exercise>> getExercisesWithLimit(int limit) async {
+  Future<List<WeightLifting>> getExercisesWithLimit(int limit) async {
     try {
       final querySnapshot = await _firestore
           .collection(_collection)
@@ -174,7 +201,7 @@ class ExerciseRepositoryImpl implements ExerciseRepository {
           .get();
       
       return querySnapshot.docs
-          .map((doc) => Exercise.fromJson(doc.data()))
+          .map((doc) => WeightLifting.fromJson(doc.data()))
           .toList();
     } catch (e) {
       throw Exception('Failed to retrieve exercises with limit: $e');

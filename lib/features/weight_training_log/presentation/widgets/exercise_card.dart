@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/exercise.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/services/workout_service.dart';
 
 class ExerciseCard extends StatelessWidget {
-  final Exercise exercise;
+  final WeightLifting exercise;
   final Color primaryGreen;
   final double volume;
   final VoidCallback onAddSet;
@@ -16,7 +16,7 @@ class ExerciseCard extends StatelessWidget {
     required this.onAddSet,
   }) : super(key: key);
 
-  Widget _buildSetRow(int setNumber, ExerciseSet set) {
+  Widget _buildSetRow(int setNumber, WeightLiftingSet set) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: const BoxDecoration(

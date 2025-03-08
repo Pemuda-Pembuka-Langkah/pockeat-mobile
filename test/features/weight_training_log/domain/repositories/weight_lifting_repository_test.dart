@@ -1,27 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/exercise.dart';
-import 'package:pockeat/features/weight_training_log/domain/repositories/exercise_repository.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
 // Generate a MockExerciseRepository class
-@GenerateMocks([ExerciseRepository])
-import 'exercise_repository_test.mocks.dart';
+@GenerateMocks([WeightLiftingRepository])
+import 'weight_lifting_repository_test.mocks.dart';
 
 void main() {
-  late MockExerciseRepository mockRepository;
-  late Exercise testExercise;
+  late MockWeightLiftingRepository mockRepository;
+  late WeightLifting testExercise;
 
   setUp(() {
-    mockRepository = MockExerciseRepository();
+    mockRepository = MockWeightLiftingRepository();
     
-    testExercise = Exercise(
+    testExercise = WeightLifting(
       id: 'test-id',
       name: 'Bench Press',
       bodyPart: 'Chest',
       metValue: 3.5,
       sets: [
-        ExerciseSet(weight: 20.0, reps: 12, duration: 60.0),
+        WeightLiftingSet(weight: 20.0, reps: 12, duration: 60.0),
       ],
     );
   });

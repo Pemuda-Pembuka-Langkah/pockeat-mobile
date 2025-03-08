@@ -1,16 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/exercise.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 
 void main() {
   group('Exercise', () {
-    late Exercise exercise;
+    late WeightLifting exercise;
     final testSets = [
-      ExerciseSet(weight: 20.0, reps: 12, duration: 60.0),
-      ExerciseSet(weight: 25.0, reps: 10, duration: 45.0),
+      WeightLiftingSet(weight: 20.0, reps: 12, duration: 60.0),
+      WeightLiftingSet(weight: 25.0, reps: 10, duration: 45.0),
     ];
 
     setUp(() {
-      exercise = Exercise(
+      exercise = WeightLifting(
         id: 'test-id',
         name: 'Bench Press',
         bodyPart: 'Chest',
@@ -28,7 +28,7 @@ void main() {
     });
 
     test('should create Exercise with generated ID when not provided', () {
-      final exerciseWithGeneratedId = Exercise(
+      final exerciseWithGeneratedId = WeightLifting(
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
@@ -39,7 +39,7 @@ void main() {
     });
 
     test('should create Exercise with empty sets when not provided', () {
-      final exerciseWithoutSets = Exercise(
+      final exerciseWithoutSets = WeightLifting(
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
@@ -71,7 +71,7 @@ void main() {
         ],
       };
 
-      final exerciseFromJson = Exercise.fromJson(json);
+      final exerciseFromJson = WeightLifting.fromJson(json);
 
       expect(exerciseFromJson.id, 'test-id');
       expect(exerciseFromJson.name, 'Bench Press');
@@ -95,7 +95,7 @@ void main() {
         'sets': [],
       };
 
-      final exerciseFromJson = Exercise.fromJson(json);
+      final exerciseFromJson = WeightLifting.fromJson(json);
       expect(exerciseFromJson.sets, []);
     });
 
@@ -107,14 +107,14 @@ void main() {
         'metValue': 3.5,
       };
 
-      final exerciseFromJson = Exercise.fromJson(json);
+      final exerciseFromJson = WeightLifting.fromJson(json);
       expect(exerciseFromJson.sets, []);
     });
   });
 
   group('ExerciseSet', () {
     test('should create ExerciseSet instance with provided values', () {
-      final exerciseSet = ExerciseSet(weight: 20.0, reps: 12, duration: 60.0);
+      final exerciseSet = WeightLiftingSet(weight: 20.0, reps: 12, duration: 60.0);
       
       expect(exerciseSet.weight, 20.0);
       expect(exerciseSet.reps, 12);
@@ -123,42 +123,42 @@ void main() {
 
     test('should throw assertion error for non-positive weight', () {
       expect(
-        () => ExerciseSet(weight: 0.0, reps: 12, duration: 60.0),
+        () => WeightLiftingSet(weight: 0.0, reps: 12, duration: 60.0),
         throwsA(isA<AssertionError>()),
       );
       
       expect(
-        () => ExerciseSet(weight: -5.0, reps: 12, duration: 60.0),
+        () => WeightLiftingSet(weight: -5.0, reps: 12, duration: 60.0),
         throwsA(isA<AssertionError>()),
       );
     });
 
     test('should throw assertion error for non-positive reps', () {
       expect(
-        () => ExerciseSet(weight: 20.0, reps: 0, duration: 60.0),
+        () => WeightLiftingSet(weight: 20.0, reps: 0, duration: 60.0),
         throwsA(isA<AssertionError>()),
       );
       
       expect(
-        () => ExerciseSet(weight: 20.0, reps: -5, duration: 60.0),
+        () => WeightLiftingSet(weight: 20.0, reps: -5, duration: 60.0),
         throwsA(isA<AssertionError>()),
       );
     });
 
     test('should throw assertion error for non-positive duration', () {
       expect(
-        () => ExerciseSet(weight: 20.0, reps: 12, duration: 0.0),
+        () => WeightLiftingSet(weight: 20.0, reps: 12, duration: 0.0),
         throwsA(isA<AssertionError>()),
       );
       
       expect(
-        () => ExerciseSet(weight: 20.0, reps: 12, duration: -30.0),
+        () => WeightLiftingSet(weight: 20.0, reps: 12, duration: -30.0),
         throwsA(isA<AssertionError>()),
       );
     });
 
     test('should convert ExerciseSet to JSON', () {
-      final exerciseSet = ExerciseSet(weight: 20.0, reps: 12, duration: 60.0);
+      final exerciseSet = WeightLiftingSet(weight: 20.0, reps: 12, duration: 60.0);
       final json = exerciseSet.toJson();
       
       expect(json['weight'], 20.0);
@@ -173,7 +173,7 @@ void main() {
         'duration': 60.0,
       };
 
-      final exerciseSet = ExerciseSet.fromJson(json);
+      final exerciseSet = WeightLiftingSet.fromJson(json);
       
       expect(exerciseSet.weight, 20.0);
       expect(exerciseSet.reps, 12);
@@ -182,34 +182,34 @@ void main() {
 
     test('should throw ArgumentError if any field is missing in JSON', () {
       expect(
-        () => ExerciseSet.fromJson({'reps': 12, 'duration': 60.0}),
+        () => WeightLiftingSet.fromJson({'reps': 12, 'duration': 60.0}),
         throwsA(isA<ArgumentError>()),
       );
       
       expect(
-        () => ExerciseSet.fromJson({'weight': 20.0, 'duration': 60.0}),
+        () => WeightLiftingSet.fromJson({'weight': 20.0, 'duration': 60.0}),
         throwsA(isA<ArgumentError>()),
       );
       
       expect(
-        () => ExerciseSet.fromJson({'weight': 20.0, 'reps': 12}),
+        () => WeightLiftingSet.fromJson({'weight': 20.0, 'reps': 12}),
         throwsA(isA<ArgumentError>()),
       );
     });
 
     test('should throw ArgumentError for non-positive values in JSON', () {
       expect(
-        () => ExerciseSet.fromJson({'weight': 0.0, 'reps': 12, 'duration': 60.0}),
+        () => WeightLiftingSet.fromJson({'weight': 0.0, 'reps': 12, 'duration': 60.0}),
         throwsA(isA<ArgumentError>()),
       );
       
       expect(
-        () => ExerciseSet.fromJson({'weight': 20.0, 'reps': 0, 'duration': 60.0}),
+        () => WeightLiftingSet.fromJson({'weight': 20.0, 'reps': 0, 'duration': 60.0}),
         throwsA(isA<ArgumentError>()),
       );
       
       expect(
-        () => ExerciseSet.fromJson({'weight': 20.0, 'reps': 12, 'duration': 0.0}),
+        () => WeightLiftingSet.fromJson({'weight': 20.0, 'reps': 12, 'duration': 0.0}),
         throwsA(isA<ArgumentError>()),
       );
     });
