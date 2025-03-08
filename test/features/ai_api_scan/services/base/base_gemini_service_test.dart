@@ -1,7 +1,6 @@
 // test/features/ai_api_scan/services/base/base_gemini_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/base_gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
@@ -11,26 +10,23 @@ class TestBaseGeminiService extends BaseGeminiService {
   TestBaseGeminiService({required super.apiKey, super.customModelWrapper});
 }
 
+class MockGenerativeModelWrapper extends Mock
+    implements GenerativeModelWrapper {}
 
-// Rename to avoid conflicts with generated mock
-class ManualMockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {}
-
-// Use customMocks parameter to specify unique names
-@GenerateMocks([GenerativeModelWrapper], customMocks: [MockSpec<GenerativeModelWrapper>(as: #MockGenWrapper)])
 void main() {
-  late ManualMockGenerativeModelWrapper mockModelWrapper;
+  late MockGenerativeModelWrapper mockModelWrapper;
   late TestBaseGeminiService service;
 
   setUp(() {
-    mockModelWrapper = ManualMockGenerativeModelWrapper();
+    mockModelWrapper = MockGenerativeModelWrapper();
     service = TestBaseGeminiService(
       apiKey: 'test-api-key',
       customModelWrapper: mockModelWrapper,
     );
   });
 
-  // Rest of the test remains the same
   group('BaseGeminiService', () {
+    // Tests remain the same
     test('should initialize with provided API key', () {
       expect(service.apiKey, equals('test-api-key'));
     });

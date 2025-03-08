@@ -1,12 +1,13 @@
 // test/features/ai_api_scan/services/exercise/exercise_analysis_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
-// Rename to avoid conflicts with generated mock
-class ManualMockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
+
+
+// Manual mock implementation
+class MockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
   String? responseText;
   Exception? exceptionToThrow;
 
@@ -24,22 +25,20 @@ class _MockGenerateContentResponse {
   _MockGenerateContentResponse(this.text);
 }
 
-// Use customMocks parameter to specify unique names
-@GenerateMocks([GenerativeModelWrapper], customMocks: [MockSpec<GenerativeModelWrapper>(as: #MockGenWrapper)])
 void main() {
-  late ManualMockGenerativeModelWrapper mockModelWrapper;
+  late MockGenerativeModelWrapper mockModelWrapper;
   late ExerciseAnalysisService service;
 
   setUp(() {
-    mockModelWrapper = ManualMockGenerativeModelWrapper();
+    mockModelWrapper = MockGenerativeModelWrapper();
     service = ExerciseAnalysisService(
       apiKey: 'test-api-key',
       customModelWrapper: mockModelWrapper,
     );
   });
 
-  // Rest of the test remains the same
   group('ExerciseAnalysisService', () {
+    // Tests remain the same
     test('should analyze exercise successfully', () async {
       // Arrange
       const exerciseDescription = 'Running 5km in 30 minutes';

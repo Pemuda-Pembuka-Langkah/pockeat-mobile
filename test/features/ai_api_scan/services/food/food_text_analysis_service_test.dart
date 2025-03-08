@@ -1,13 +1,11 @@
 // test/features/ai_api_scan/services/food/food_text_analysis_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 
-// Rename to avoid conflicts with generated mock
-class ManualMockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
+class MockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
   String? responseText;
   Exception? exceptionToThrow;
 
@@ -25,22 +23,20 @@ class _MockGenerateContentResponse {
   _MockGenerateContentResponse(this.text);
 }
 
-// Use customMocks parameter to specify unique names
-@GenerateMocks([GenerativeModelWrapper], customMocks: [MockSpec<GenerativeModelWrapper>(as: #MockGenWrapper)])
 void main() {
-  late ManualMockGenerativeModelWrapper mockModelWrapper;
+  late MockGenerativeModelWrapper mockModelWrapper;
   late FoodTextAnalysisService service;
 
   setUp(() {
-    mockModelWrapper = ManualMockGenerativeModelWrapper();
+    mockModelWrapper = MockGenerativeModelWrapper();
     service = FoodTextAnalysisService(
       apiKey: 'test-api-key',
       customModelWrapper: mockModelWrapper,
     );
   });
 
-  // Rest of the test remains the same
   group('FoodTextAnalysisService', () {
+    // Tests remain the same
     test('should analyze food by text successfully', () async {
       // Arrange
       const foodDescription = 'Apple pie with cinnamon';

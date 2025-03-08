@@ -3,13 +3,12 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_image_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 
-// Rename to avoid conflicts with generated mock
-class ManualMockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
+// Manual mock implementations
+class MockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
   String? responseText;
   Exception? exceptionToThrow;
 
@@ -27,7 +26,7 @@ class _MockGenerateContentResponse {
   _MockGenerateContentResponse(this.text);
 }
 
-class ManualMockFile extends Mock implements File {
+class MockFile extends Mock implements File {
   Uint8List? bytesToReturn;
   Exception? exceptionToThrow;
 
@@ -40,30 +39,22 @@ class ManualMockFile extends Mock implements File {
   }
 }
 
-// Use customMocks parameter to specify unique names
-@GenerateMocks(
-  [GenerativeModelWrapper, File],
-  customMocks: [
-    MockSpec<GenerativeModelWrapper>(as: #MockGenWrapper),
-    MockSpec<File>(as: #MockFileWrapper),
-  ]
-)
 void main() {
-  late ManualMockGenerativeModelWrapper mockModelWrapper;
-  late ManualMockFile mockFile;
+  late MockGenerativeModelWrapper mockModelWrapper;
+  late MockFile mockFile;
   late FoodImageAnalysisService service;
 
   setUp(() {
-    mockModelWrapper = ManualMockGenerativeModelWrapper();
-    mockFile = ManualMockFile();
+    mockModelWrapper = MockGenerativeModelWrapper();
+    mockFile = MockFile();
     service = FoodImageAnalysisService(
       apiKey: 'test-api-key',
       customModelWrapper: mockModelWrapper,
     );
   });
 
-  // Rest of the test remains the same
   group('FoodImageAnalysisService', () {
+    // Tests remain the same
     test('should analyze food by image successfully', () async {
       // Arrange
       final mockBytes = Uint8List.fromList([1, 2, 3, 4]);
