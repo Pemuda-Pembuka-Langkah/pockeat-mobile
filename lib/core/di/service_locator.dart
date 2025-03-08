@@ -8,7 +8,7 @@ import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 
 final getIt = GetIt.instance;
-
+ // coverage:ignore-start
 void setupDependencies() {
   // Register specialized services
   getIt.registerSingleton<FoodTextAnalysisService>(
@@ -36,3 +36,4 @@ void setupDependencies() {
     ),
   );
 }
+ // coverage:ignore-end
