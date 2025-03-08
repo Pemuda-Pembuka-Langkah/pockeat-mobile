@@ -11,15 +11,18 @@ import 'package:pockeat/features/exercise_log_history/services/exercise_detail_s
 import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 
 // Generate mocks for repositories
-@GenerateMocks([CardioRepository, SmartExerciseLogRepository])
+@GenerateMocks([CardioRepository, SmartExerciseLogRepository, WeightLiftingRepository])
 import 'exercise_detail_service_test.mocks.dart';
 
 void main() {
   group('ExerciseDetailService Implementation Tests', () {
     late MockCardioRepository mockCardioRepository;
     late MockSmartExerciseLogRepository mockSmartExerciseRepository;
+    late MockWeightLiftingRepository mockWeightLiftingRepository;
     late ExerciseDetailService exerciseDetailService;
 
     // Sample data for testing
@@ -63,13 +66,31 @@ void main() {
       timestamp: DateTime(2025, 3, 4),
       originalInput: 'I did push-ups for 15 minutes',
     );
+    
+    // Create a sample weight lifting exercise with a set
+    final weightLiftingSet = WeightLiftingSet(
+      weight: 60.0,
+      reps: 12,
+      duration: 45.0,
+    );
+    
+    final weightLiftingExercise = WeightLifting(
+      id: 'weight-1',
+      name: 'Bench Press',
+      bodyPart: 'Chest',
+      metValue: 6.0,
+      timestamp: DateTime(2025, 3, 5),
+      sets: [weightLiftingSet],
+    );
 
     setUp(() {
       mockCardioRepository = MockCardioRepository();
       mockSmartExerciseRepository = MockSmartExerciseLogRepository();
+      mockWeightLiftingRepository = MockWeightLiftingRepository();
       exerciseDetailService = ExerciseDetailServiceImpl(
         cardioRepository: mockCardioRepository,
         smartExerciseRepository: mockSmartExerciseRepository,
+        weightLiftingRepository: mockWeightLiftingRepository,
       );
     });
 
@@ -328,6 +349,68 @@ void main() {
         // Assert
         expect(result, equals('unknown'));
         verify(mockCardioRepository.getCardioActivityById('non-existent')).called(1);
+      });
+
+      test('getActualActivityType should identify weightlifting type correctly', () async {
+        // Arrange
+        when(mockWeightLiftingRepository.getExerciseById('weight-1'))
+            .thenAnswer((_) async => weightLiftingExercise);
+            
+        // Act
+        final result = await exerciseDetailService.getActualActivityType(
+            'weight-1', ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING);
+            
+        // Assert
+        expect(result, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
+        verify(mockWeightLiftingRepository.getExerciseById('weight-1')).called(1);
+      });
+      
+      test('getActualActivityType should return unknown for non-existent weightlifting', () async {
+        // Arrange
+        when(mockWeightLiftingRepository.getExerciseById('non-existent'))
+            .thenAnswer((_) async => null);
+            
+        // Act
+        final result = await exerciseDetailService.getActualActivityType(
+            'non-existent', ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING);
+            
+        // Assert
+        expect(result, equals('unknown'));
+        verify(mockWeightLiftingRepository.getExerciseById('non-existent')).called(1);
+      });
+    });
+    
+    group('Weight Lifting Detail Tests', () {
+      test('getWeightLiftingDetail should return weight lifting exercise when found', () async {
+        // Arrange
+        when(mockWeightLiftingRepository.getExerciseById('weight-1'))
+            .thenAnswer((_) async => weightLiftingExercise);
+            
+        // Act
+        final result = await exerciseDetailService.getWeightLiftingDetail('weight-1');
+        
+        // Assert
+        expect(result, equals(weightLiftingExercise));
+        expect(result?.id, equals('weight-1'));
+        expect(result?.name, equals('Bench Press'));
+        expect(result?.bodyPart, equals('Chest'));
+        expect(result?.sets.length, equals(1));
+        expect(result?.sets[0].weight, equals(60.0));
+        expect(result?.sets[0].reps, equals(12));
+        verify(mockWeightLiftingRepository.getExerciseById('weight-1')).called(1);
+      });
+      
+      test('getWeightLiftingDetail should return null when exercise not found', () async {
+        // Arrange
+        when(mockWeightLiftingRepository.getExerciseById('non-existent'))
+            .thenAnswer((_) async => null);
+            
+        // Act
+        final result = await exerciseDetailService.getWeightLiftingDetail('non-existent');
+        
+        // Assert
+        expect(result, isNull);
+        verify(mockWeightLiftingRepository.getExerciseById('non-existent')).called(1);
       });
     });
   });
