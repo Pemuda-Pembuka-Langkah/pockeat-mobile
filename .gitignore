@@ -64,6 +64,9 @@ lcov.info
 *.temp
 *.bak
 
+*.rules
+*.json
+
 # Generated files
 *.g.dart
 *.freezed.dart

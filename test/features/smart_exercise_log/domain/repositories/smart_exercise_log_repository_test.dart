@@ -60,6 +60,29 @@ void main() {
     when(mockCollection.doc(any)).thenReturn(mockDocument);
   });
 
+  group('SmartExerciseLogRepositoryImpl Constructor', () {
+    test('should initialize with provided FirebaseFirestore instance', () {
+      // Act
+      final repository = SmartExerciseLogRepositoryImpl(firestore: mockFirestore);
+      
+      // Setup mock behavior untuk saveAnalysisResult
+      when(mockDocument.set(any)).thenAnswer((_) => Future<void>.value());
+      
+      // Perform an operation to verify the correct instance is used
+      repository.saveAnalysisResult(ExerciseAnalysisResult(
+        exerciseType: 'Test',
+        duration: '10 minutes',
+        intensity: 'Low',
+        estimatedCalories: 100,
+        timestamp: DateTime.now(),
+        originalInput: 'Test input'
+      ));
+      
+      // Assert
+      verify(mockFirestore.collection('exerciseAnalysis')).called(1);
+    });
+  });
+
   group('saveAnalysisResult', () {
     test('should save result and return its id', () async {
       // Arrange
@@ -74,8 +97,8 @@ void main() {
       );
 
       // Setup mock Firestore behavior
-      when(mockDocument.set(any)).thenAnswer((_) async => null);
-
+      when(mockDocument.set(any)).thenAnswer((_) => Future<void>.value());
+      
       // Act
       final resultId = await repository.saveAnalysisResult(result);
 

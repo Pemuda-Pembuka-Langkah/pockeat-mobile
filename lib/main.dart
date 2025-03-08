@@ -5,28 +5,38 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-// Import the food analysis page
-import 'package:pockeat/features/ai_api_scan/presentation/pages/ai_analysis_page.dart';
+import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
+import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
+import 'package:pockeat/features/homepage/presentation/homepage.dart';
+import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
+import 'package:camera/camera.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
+import 'package:provider/provider.dart';
+import 'package:pockeat/component/navigation.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
+// Import dependencies untuk DI
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Default ke dev untuk development yang aman
   // Load dotenv dulu
   await dotenv.load(fileName: '.env');
   // Ambil flavor dari dotenv
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
-  
-  await Firebase.initializeApp(
-    options: flavor == 'production' 
-      ? ProductionFirebaseOptions.currentPlatform
-      : flavor == 'staging'
-        ? StagingFirebaseOptions.currentPlatform
-        : StagingFirebaseOptions.currentPlatform // Dev pake config staging tapi nanti connect ke emulator
-  );
 
-  setupDependencies();  
+  await Firebase.initializeApp(
+      options: flavor == 'production'
+          ? ProductionFirebaseOptions.currentPlatform
+          : flavor == 'staging'
+              ? StagingFirebaseOptions.currentPlatform
+              : StagingFirebaseOptions
+                  .currentPlatform // Dev pake config staging tapi nanti connect ke emulator
+      );
+
+  setupDependencies();
   // Setup emulator kalau di dev mode
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
@@ -65,7 +75,8 @@ class MyApp extends StatelessWidget {
         // Tambah ini
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white, // Ini akan membuat teks button jadi putih
+            foregroundColor:
+                Colors.white, // Ini akan membuat teks button jadi putih
             backgroundColor: Colors.blue[400],
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -74,43 +85,27 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/food-analysis', // Changed to start with the food analysis page
+      initialRoute: '/',
       routes: {
-        '/': (context) => const HomePage(), // You'll need to create this
-        '/food-analysis': (context) => const AIAnalysisScreen(),
+        '/': (context) => const HomePage(),
+        '/smart-exercise-log': (context) => SmartExerciseLogPage(
+              // Langsung berikan dependensi yang dibutuhkan
+              geminiService: getIt<GeminiService>(),
+              repository: SmartExerciseLogRepositoryImpl(
+                  firestore: FirebaseFirestore.instance),
+            ),
+        '/scan': (context) => ScanFoodPage(
+                cameraController: CameraController(
+              CameraDescription(
+                name: '0',
+                lensDirection: CameraLensDirection.back,
+                sensorOrientation: 0,
+              ),
+              ResolutionPreset.medium,
+            )),
+        '/add-food': (context) => const FoodInputPage(),
+        '/add-exercise': (context) => const ExerciseInputPage(),
       },
-    );
-  }
-}
-
-// Simple home page - replace this with your actual home page
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('CalculATE'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Welcome to CalculATE!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/food-analysis');
-              },
-              child: const Text('Food Analysis'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

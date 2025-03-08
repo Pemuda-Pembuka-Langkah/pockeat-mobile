@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:pockeat/core/di/service_locator.dart'; // Import the service locator
+import 'package:pockeat/core/di/service_locator.dart'; 
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';
 
 class SmartExerciseLogPage extends StatefulWidget {
-  // Add optional parameters for dependency injection
-  final GeminiService? geminiService;
-  final SmartExerciseLogRepository? repository;
+  // Required dependencies for full DI
+  final GeminiService geminiService;
+  final SmartExerciseLogRepository repository;
 
   const SmartExerciseLogPage({
     super.key, 
-    this.geminiService,
-    this.repository,
+    required this.geminiService,
+    required this.repository,
   });
 
   @override
@@ -39,8 +38,8 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
   void initState() {
     super.initState();
     // Use injected dependencies or fallback to default implementation from service locator
-    _geminiService = widget.geminiService ?? getIt<GeminiService>();
-    _repository = widget.repository ?? SmartExerciseLogRepositoryImpl();
+    _geminiService = getIt<GeminiService>();
+    _repository = widget.repository;
   }
   
   Future<void> analyzeWorkout(String workoutDescription) async {
