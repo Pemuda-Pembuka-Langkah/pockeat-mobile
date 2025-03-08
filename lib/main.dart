@@ -66,17 +66,6 @@ void main() async {
     weightLiftingRepository: weightLiftingRepository,
   );
 
-  // Initialize repositories
-  final firestore = FirebaseFirestore.instance;
-  final smartExerciseLogRepository =
-      SmartExerciseLogRepositoryImpl(firestore: firestore);
-  final cardioRepository = CardioRepositoryImpl(firestore: firestore);
-  final weightLiftingRepository = WeightLiftingRepositoryImpl(firestore: firestore);
-  final exerciseLogHistoryRepository = ExerciseLogHistoryServiceImpl(
-    smartExerciseLogRepository: smartExerciseLogRepository,
-    cardioRepository: cardioRepository,
-    weightLiftingRepository: weightLiftingRepository,
-  );
 
   runApp(
     MultiProvider(
@@ -107,7 +96,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Get repositories from context
-    final geminiApiKey = dotenv.env['GOOGLE_GEMINI_API_KEY'] ?? '';
     final smartExerciseLogRepository =
         Provider.of<SmartExerciseLogRepository>(context);
 
@@ -149,8 +137,7 @@ class MyApp extends StatelessWidget {
         '/smart-exercise-log': (context) => SmartExerciseLogPage(
               // Langsung berikan dependensi yang dibutuhkan
               geminiService: getIt<GeminiService>(),
-              repository: SmartExerciseLogRepositoryImpl(
-                  firestore: FirebaseFirestore.instance),
+              repository: smartExerciseLogRepository,
             ),
         '/scan': (context) => ScanFoodPage(
                 cameraController: CameraController(

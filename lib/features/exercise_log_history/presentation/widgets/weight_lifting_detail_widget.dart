@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:pockeat/features/weight_training_log/services/workout_service.dart' as workout_service;
 
 /// Widget to display weight lifting activity details
 class WeightLiftingDetailWidget extends StatelessWidget {
@@ -321,10 +322,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
   }
   
   double _calculateCalories() {
-    // Calculate calories burned based on MET value, duration, and weight
-    // Formula: Calories = MET value × weight (kg) × duration (hours)
-    double durationInHours = _getTotalDuration() / 3600; // convert seconds to hours
-    double standardWeight = 70.0; // default weight assumption
-    return weightLifting.metValue * standardWeight * durationInHours;
+    // Use the workout_service to calculate calories
+    return workout_service.calculateExerciseCalories(weightLifting);
   }
 }
