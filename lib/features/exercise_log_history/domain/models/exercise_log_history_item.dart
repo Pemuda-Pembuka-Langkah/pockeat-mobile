@@ -1,5 +1,7 @@
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:uuid/uuid.dart';
 import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 
 /// Model untuk item history log olahraga
 ///
@@ -53,7 +55,7 @@ class ExerciseLogHistoryItem {
 
   /// Factory constructor untuk membuat ExerciseLogHistoryItem dari SmartExerciseLog
   factory ExerciseLogHistoryItem.fromSmartExerciseLog(
-      dynamic smartExerciseLog) {
+      ExerciseAnalysisResult smartExerciseLog) {
     return ExerciseLogHistoryItem(
         activityType: TYPE_SMART_EXERCISE,
         title: smartExerciseLog.exerciseType,
@@ -64,18 +66,41 @@ class ExerciseLogHistoryItem {
         sourceId: smartExerciseLog.id);
   }
 
-  /// Factory constructor untuk membuat ExerciseLogHistoryItem dari WeightliftingLog (placeholder)
-  factory ExerciseLogHistoryItem.fromWeightliftingLog(
-      dynamic weightliftingLog) {
-    // Implementasi akan ditambahkan saat WeightliftingLog tersedia
+  /// Factory constructor untuk membuat ExerciseLogHistoryItem dari WeightLifting model
+  factory ExerciseLogHistoryItem.fromWeightliftingLog(WeightLifting weightLifting) {
+    // Calculate total sets, reps, and weight
+    int totalSets = weightLifting.sets.length;
+    
+    // For empty sets, use zeroes with proper decimal formatting
+    if (totalSets == 0) {
+      return ExerciseLogHistoryItem(
+        activityType: TYPE_WEIGHTLIFTING,
+        title: weightLifting.name,
+        subtitle: '0 sets • 0 reps • 0.0 kg',
+        timestamp: DateTime.now(), // Since timestamp isn't in the model, use current time
+        caloriesBurned: 0,
+        sourceId: weightLifting.id,
+      );
+    }
+    
+    // Calculate total reps and average weight for multiple sets
+    int totalReps = weightLifting.sets.fold(0, (sum, set) => sum + set.reps);
+    double avgWeight = weightLifting.sets.fold(0.0, (sum, set) => sum + set.weight) / totalSets;
+    
+    // Calculate calories burned based on MET value, duration, and weight
+    // Formula: Calories = MET value × weight (kg) × duration (hours)
+    double totalDuration = weightLifting.sets.fold(0.0, (sum, set) => sum + set.duration);
+    double durationInHours = totalDuration / 60; // Assuming duration is in minutes
+    double standardWeight = 70.0; // Default weight assumption
+    int caloriesBurned = (weightLifting.metValue * standardWeight * durationInHours).round();
+    
     return ExerciseLogHistoryItem(
       activityType: TYPE_WEIGHTLIFTING,
-      title: weightliftingLog.exerciseName ?? 'Weightlifting Session',
-      subtitle:
-          '${weightliftingLog.sets ?? 0} sets • ${weightliftingLog.reps ?? 0} reps • ${weightliftingLog.weight ?? "0 kg"}',
-      timestamp: weightliftingLog.timestamp,
-      caloriesBurned: weightliftingLog.caloriesBurned ?? 0,
-      sourceId: weightliftingLog.id,
+      title: weightLifting.name,
+      subtitle: '$totalSets sets • $totalReps reps • ${avgWeight.toStringAsFixed(1)} kg',
+      timestamp: DateTime.now(), // Since timestamp isn't in the model, use current time
+      caloriesBurned: caloriesBurned,
+      sourceId: weightLifting.id,
     );
   }
 
