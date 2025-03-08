@@ -8,7 +8,7 @@ void main() {
       final json = {
         'food_name': 'Apple',
         'ingredients': [
-          {'name': 'Apple', 'percentage': 100, 'allergen': false}
+          {'name': 'Apple', 'servings': 100}
         ],
         'nutrition_info': {
           'calories': 95,
@@ -32,6 +32,120 @@ void main() {
       expect(result.nutritionInfo.sodium, 2);
       expect(result.nutritionInfo.fiber, 4.4);
       expect(result.nutritionInfo.sugar, 19.0);
+      expect(result.warnings, isEmpty); // No warnings for normal sugar/sodium
+    });
+
+    group('Warning generation', () {
+      test('should generate warning for high sodium', () {
+        // Arrange
+        final json = {
+          'food_name': 'Instant Soup',
+          'ingredients': [
+            {'name': 'Sodium', 'servings': 20}
+          ],
+          'nutrition_info': {
+            'calories': 200,
+            'protein': 5,
+            'carbs': 20,
+            'fat': 10,
+            'sodium': 800, // High sodium
+            'fiber': 1,
+            'sugar': 5
+          }
+        };
+        
+        // Act
+        final result = FoodAnalysisResult.fromJson(json);
+        
+        // Assert
+        expect(result.warnings, contains('High sodium content'));
+        expect(result.warnings.length, 1);
+      });
+      
+      test('should generate warning for high sugar', () {
+        // Arrange
+        final json = {
+          'food_name': 'Candy',
+          'ingredients': [
+            {'name': 'Sugar', 'servings': 80}
+          ],
+          'nutrition_info': {
+            'calories': 300,
+            'protein': 0,
+            'carbs': 75,
+            'fat': 0,
+            'sodium': 10,
+            'fiber': 0,
+            'sugar': 70 // High sugar
+          }
+        };
+        
+        // Act
+        final result = FoodAnalysisResult.fromJson(json);
+        
+        // Assert
+        expect(result.warnings, contains('High sugar content'));
+        expect(result.warnings.length, 1);
+      });
+      
+      test('should generate multiple warnings when both sugar and sodium are high', () {
+        // Arrange
+        final json = {
+          'food_name': 'Sweetened Canned Food',
+          'ingredients': [
+            {'name': 'Sugar', 'servings': 40},
+            {'name': 'Salt', 'servings': 10}
+          ],
+          'nutrition_info': {
+            'calories': 400,
+            'protein': 5,
+            'carbs': 80,
+            'fat': 5,
+            'sodium': 1200, // High sodium
+            'fiber': 1,
+            'sugar': 50    // High sugar
+          }
+        };
+        
+        // Act
+        final result = FoodAnalysisResult.fromJson(json);
+        
+        // Assert
+        expect(result.warnings, contains('High sodium content'));
+        expect(result.warnings, contains('High sugar content'));
+        expect(result.warnings.length, 2);
+      });
+      
+      test('should use provided warnings when available in JSON', () {
+        // Arrange
+        final json = {
+          'food_name': 'Custom Food',
+          'ingredients': [
+            {'name': 'Ingredient', 'servings': 100}
+          ],
+          'nutrition_info': {
+            'calories': 200,
+            'protein': 5,
+            'carbs': 20,
+            'fat': 10,
+            'sodium': 200, // Not high
+            'fiber': 2,
+            'sugar': 5    // Not high
+          },
+          'warnings': [
+            'Contains artificial colors',
+            'Contains preservatives'
+          ]
+        };
+        
+        // Act
+        final result = FoodAnalysisResult.fromJson(json);
+        
+        // Assert
+        expect(result.warnings, contains('Contains artificial colors'));
+        expect(result.warnings, contains('Contains preservatives'));
+        expect(result.warnings.length, 2);
+      });
     });
 
     group('Numeric value conversion', () {
@@ -62,6 +176,7 @@ void main() {
         expect(result.nutritionInfo.sodium, 1.0);
         expect(result.nutritionInfo.fiber, 3.1);
         expect(result.nutritionInfo.sugar, 14.4);
+        expect(result.warnings, isEmpty); // No warnings
       });
       
       test('should handle numeric values with different types', () {
@@ -91,6 +206,7 @@ void main() {
         expect(result.nutritionInfo.sodium, 5.0);
         expect(result.nutritionInfo.fiber, 3.5);
         expect(result.nutritionInfo.sugar, 0.0);  // Default for null
+        expect(result.warnings, isEmpty); // No warnings
       });
       
       test('should handle invalid string values', () {
@@ -121,19 +237,20 @@ void main() {
         expect(result.nutritionInfo.sodium, 0.0);
         expect(result.nutritionInfo.fiber, 0.0);
         expect(result.nutritionInfo.sugar, 0.0);
+        expect(result.warnings, isEmpty); // No warnings for zero values
       });
     });
 
-    group('Ingredient percentage handling', () {
-      test('should handle different types for ingredient percentage', () {
+    group('Ingredient servings handling', () {
+      test('should handle different types for ingredient servings', () {
         // Arrange
         final json = {
           'food_name': 'Mixed Salad',
           'ingredients': [
-            {'name': 'Lettuce', 'percentage': 50.5, 'allergen': false},
-            {'name': 'Tomato', 'percentage': '25.5', 'allergen': false},
-            {'name': 'Cucumber', 'percentage': 15, 'allergen': false},
-            {'name': 'Nuts', 'percentage': '9', 'allergen': true}
+            {'name': 'Lettuce', 'servings': 50.5},
+            {'name': 'Tomato', 'servings': '25.5'},
+            {'name': 'Cucumber', 'servings': 15},
+            {'name': 'Nuts', 'servings': '9'}
           ],
           'nutrition_info': {
             'calories': 100,
@@ -151,19 +268,20 @@ void main() {
         
         // Assert
         expect(result.ingredients.length, 4);
-        expect(result.ingredients[0].percentage, 50.5);
-        expect(result.ingredients[1].percentage, 25.5);
-        expect(result.ingredients[2].percentage, 15.0);
-        expect(result.ingredients[3].percentage, 9.0);
+        expect(result.ingredients[0].servings, 50.5);
+        expect(result.ingredients[1].servings, 25.5);
+        expect(result.ingredients[2].servings, 15.0);
+        expect(result.ingredients[3].servings, 9.0);
+        expect(result.warnings, isEmpty); // No warnings
       });
       
-      test('should handle invalid percentage values', () {
+      test('should handle invalid servings values', () {
         // Arrange
         final json = {
           'food_name': 'Problem Data',
           'ingredients': [
-            {'name': 'Valid', 'percentage': 80, 'allergen': false},
-            {'name': 'Invalid', 'percentage': 'unknown', 'allergen': false}
+            {'name': 'Valid', 'servings': 80},
+            {'name': 'Invalid', 'servings': 'unknown'}
           ],
           'nutrition_info': {
             'calories': 100,
@@ -181,8 +299,9 @@ void main() {
         
         // Assert
         expect(result.ingredients.length, 2);
-        expect(result.ingredients[0].percentage, 80.0);
-        expect(result.ingredients[1].percentage, 0.0);  // Default for invalid string
+        expect(result.ingredients[0].servings, 80.0);
+        expect(result.ingredients[1].servings, 0.0);  // Default for invalid string
+        expect(result.warnings, isEmpty); // No warnings
       });
     });
   });

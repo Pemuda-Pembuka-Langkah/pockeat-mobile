@@ -5,6 +5,7 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 import 'package:pockeat/features/homepage/presentation/homepage.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
@@ -13,24 +14,19 @@ import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
-import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_page.dart';
-import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
-// Import dependencies untuk DI
-import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
-// Import for ExerciseLogHistory
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service_impl.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_history_page.dart';
-// Import for CardioRepository
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
-// Import for ExerciseLogDetailPage
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_log_detail_page.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
+import 'package:pockeat/core/di/service_locator.dart';
+import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,11 +47,24 @@ void main() async {
                   .currentPlatform // Dev pake config staging tapi nanti connect ke emulator
       );
 
+  setupDependencies();
   // Setup emulator kalau di dev mode
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
+
+  // Initialize repositories
+  final firestore = FirebaseFirestore.instance;
+  final smartExerciseLogRepository =
+      SmartExerciseLogRepositoryImpl(firestore: firestore);
+  final cardioRepository = CardioRepositoryImpl(firestore: firestore);
+  final weightLiftingRepository = WeightLiftingRepositoryImpl(firestore: firestore);
+  final exerciseLogHistoryRepository = ExerciseLogHistoryServiceImpl(
+    smartExerciseLogRepository: smartExerciseLogRepository,
+    cardioRepository: cardioRepository,
+    weightLiftingRepository: weightLiftingRepository,
+  );
 
   // Initialize repositories
   final firestore = FirebaseFirestore.instance;
@@ -85,6 +94,7 @@ void main() async {
         Provider<WeightLiftingRepository>(
           create: (_) => weightLiftingRepository,
         ),
+        // Add other providers here if needed
       ],
       child: const MyApp(),
     ),
@@ -138,8 +148,9 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomePage(),
         '/smart-exercise-log': (context) => SmartExerciseLogPage(
               // Langsung berikan dependensi yang dibutuhkan
-              geminiService: GeminiServiceImpl(apiKey: geminiApiKey),
-              repository: smartExerciseLogRepository,
+              geminiService: getIt<GeminiService>(),
+              repository: SmartExerciseLogRepositoryImpl(
+                  firestore: FirebaseFirestore.instance),
             ),
         '/scan': (context) => ScanFoodPage(
                 cameraController: CameraController(
@@ -152,7 +163,6 @@ class MyApp extends StatelessWidget {
             )),
         '/add-food': (context) => const FoodInputPage(),
         '/add-exercise': (context) => const ExerciseInputPage(),
-        '/food-analysis': (context) => const FoodAnalysisPage(),
         '/weightlifting-input': (context) => const WeightliftingPage(),
         '/cardio': (context) => const CardioInputPage(),
         '/exercise-history': (context) => ExerciseHistoryPage(
