@@ -5,6 +5,7 @@ import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 
 void main() {
   group('ExerciseLogHistoryItem', () {
@@ -78,50 +79,50 @@ void main() {
     });
 
     test('should create ExerciseLogHistoryItem from WeightliftingLog', () {
-      // Arrange - create a mock WeightliftingLog with some null values
-      final weightliftingLog = _MockWeightliftingLog(
+      // Arrange - create a real WeightLifting instance
+      final weightLifting = WeightLifting(
         id: 'weight-123',
-        exerciseName: 'Bench Press',
-        sets: '3',
-        reps: '8',
-        weight: '80 kg',
-        timestamp: testTimestamp,
-        caloriesBurned: 250,
+        name: 'Bench Press',
+        bodyPart: 'Chest',
+        metValue: 4.0,
+        sets: [
+          WeightLiftingSet(weight: 80.0, reps: 8, duration: 60.0),
+          WeightLiftingSet(weight: 80.0, reps: 8, duration: 60.0),
+          WeightLiftingSet(weight: 80.0, reps: 8, duration: 60.0),
+        ],
       );
 
       // Act
-      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightliftingLog);
+      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
 
       // Assert
       expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
       expect(item.title, equals('Bench Press')); 
-      expect(item.subtitle, equals('3 sets • 8 reps • 80 kg')); 
-      expect(item.timestamp, equals(testTimestamp));
-      expect(item.caloriesBurned, equals(250));
+      expect(item.subtitle, equals('3 sets • 24 reps • 80.0 kg')); 
       expect(item.sourceId, equals('weight-123'));
     });
 
     test('should create ExerciseLogHistoryItem from WeightliftingLog with valid values', () {
-      // Arrange - create a mock WeightliftingLog with valid values
-      final weightliftingLog = _MockWeightliftingLog(
+      // Arrange - create a real WeightLifting instance
+      final weightLifting = WeightLifting(
         id: 'weight-123',
-        exerciseName: 'Bench Press',
-        sets: '3',
-        reps: '8',
-        weight: '80 kg',
-        timestamp: testTimestamp,
-        caloriesBurned: 250,
+        name: 'Bench Press',
+        bodyPart: 'Chest',
+        metValue: 4.0,
+        sets: [
+          WeightLiftingSet(weight: 80.0, reps: 8, duration: 60.0),
+          WeightLiftingSet(weight: 80.0, reps: 8, duration: 60.0),
+          WeightLiftingSet(weight: 80.0, reps: 8, duration: 60.0),
+        ],
       );
 
       // Act
-      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightliftingLog);
+      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
 
       // Assert
       expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
       expect(item.title, equals('Bench Press')); 
-      expect(item.subtitle, equals('3 sets • 8 reps • 80 kg')); 
-      expect(item.timestamp, equals(testTimestamp));
-      expect(item.caloriesBurned, equals(250));
+      expect(item.subtitle, equals('3 sets • 24 reps • 80.0 kg')); 
       expect(item.sourceId, equals('weight-123'));
     });
 
@@ -197,6 +198,87 @@ void main() {
       expect(item.sourceId, equals('cardio-789'));
     });
     
+    test('should create ExerciseLogHistoryItem from WeightLifting with multiple sets', () {
+      // Arrange - create a WeightLifting instance with multiple sets
+      final sets = [
+        WeightLiftingSet(weight: 80.0, reps: 10, duration: 30.0),
+        WeightLiftingSet(weight: 85.0, reps: 8, duration: 25.0),
+        WeightLiftingSet(weight: 90.0, reps: 6, duration: 20.0),
+      ];
+      
+      final weightLifting = WeightLifting(
+        id: 'weight-123',
+        name: 'Bench Press',
+        bodyPart: 'Chest',
+        metValue: 6.0,
+        sets: sets,
+      );
+
+      // Act
+      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
+
+      // Assert
+      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
+      expect(item.title, equals('Bench Press'));
+      expect(item.subtitle, equals('3 sets • 24 reps • 85.0 kg'));
+      expect(item.sourceId, equals('weight-123'));
+      
+      // Calories should be calculated based on MET, duration, and weight
+      // Formula: Calories = MET value × weight (kg) × duration (hours)
+      // total duration is 75 minutes = 1.25 hours, standard weight = 70kg
+      final expectedCalories = (6.0 * 70.0 * (75.0 / 60.0)).round();
+      expect(item.caloriesBurned, equals(expectedCalories));
+    });
+    
+    test('should create ExerciseLogHistoryItem from WeightLifting with a single set', () {
+      // Arrange - create a WeightLifting instance with a single set
+      final sets = [
+        WeightLiftingSet(weight: 100.0, reps: 5, duration: 20.0),
+      ];
+      
+      final weightLifting = WeightLifting(
+        id: 'weight-456',
+        name: 'Deadlift',
+        bodyPart: 'Back',
+        metValue: 8.0,
+        sets: sets,
+      );
+
+      // Act
+      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
+
+      // Assert
+      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
+      expect(item.title, equals('Deadlift'));
+      expect(item.subtitle, equals('1 sets • 5 reps • 100.0 kg'));
+      expect(item.sourceId, equals('weight-456'));
+      
+      final expectedCalories = (8.0 * 70.0 * (20.0 / 60.0)).round();
+      expect(item.caloriesBurned, equals(expectedCalories));
+    });
+    
+    test('should create ExerciseLogHistoryItem from WeightLifting with empty sets', () {
+      // Arrange - create a WeightLifting instance with empty sets
+      final weightLifting = WeightLifting(
+        id: 'weight-789',
+        name: 'Squat',
+        bodyPart: 'Legs',
+        metValue: 7.0,
+      );
+
+      // Act
+      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
+
+      // Assert
+      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
+      expect(item.title, equals('Squat'));
+      expect(item.subtitle, equals('0 sets • 0 reps • 0.0 kg'));
+      expect(item.sourceId, equals('weight-789'));
+      
+      // With no sets, there should be 0 calories
+      expect(item.caloriesBurned, equals(0));
+    });
+    
     group('timeAgo formatting tests', () {
       test('should format time as years correctly', () {
         // Arrange
@@ -244,26 +326,23 @@ void main() {
     });
 
     test('should handle null values gracefully when creating from WeightliftingLog', () {
-      // Arrange - create a mock WeightliftingLog with null values
-      final weightliftingLog = _MockWeightliftingLog(
+      // Arrange - create a WeightLifting with empty sets
+      final weightLifting = WeightLifting(
         id: 'weight-123',
-        exerciseName: null,
-        sets: null,
-        reps: null,
-        weight: null,
-        timestamp: testTimestamp,
-        caloriesBurned: null,
+        name: 'Weightlifting Session',
+        bodyPart: 'General',
+        metValue: 4.0,
+        sets: [], // Empty sets
       );
 
       // Act
-      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightliftingLog);
+      final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
 
       // Assert
       expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
       expect(item.title, equals('Weightlifting Session')); // Default title
-      expect(item.subtitle, equals('0 sets • 0 reps • 0 kg')); // Default values
-      expect(item.timestamp, equals(testTimestamp));
-      expect(item.caloriesBurned, equals(0)); // Default to 0
+      expect(item.subtitle, equals('0 sets • 0 reps • 0.0 kg')); // Default values with decimal
+      expect(item.sourceId, equals('weight-123'));
     });
 
     test('should handle different CardioType values correctly', () {
@@ -312,25 +391,5 @@ void main() {
             reason: 'Incorrect title for CardioType ${testActivities[i].type}');
       }
     });
-  });
-}
-
-class _MockWeightliftingLog {
-  final String id;
-  final String? exerciseName;
-  final String? sets;
-  final String? reps;
-  final String? weight;
-  final DateTime timestamp;
-  final int? caloriesBurned;
-
-  _MockWeightliftingLog({
-    required this.id,
-    this.exerciseName,
-    this.sets,
-    this.reps,
-    this.weight,
-    required this.timestamp,
-    this.caloriesBurned,
   });
 }
