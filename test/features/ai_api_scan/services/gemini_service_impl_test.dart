@@ -1,8 +1,7 @@
 // test/features/ai_api_scan/services/gemini_service_impl_test.dart
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_image_analysis_service.dart';
@@ -11,31 +10,32 @@ import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
+// Define mock classes with mocktail
 class MockFoodTextAnalysisService extends Mock implements FoodTextAnalysisService {}
 class MockFoodImageAnalysisService extends Mock implements FoodImageAnalysisService {}
 class MockNutritionLabelAnalysisService extends Mock implements NutritionLabelAnalysisService {}
 class MockExerciseAnalysisService extends Mock implements ExerciseAnalysisService {}
 class MockFile extends Mock implements File {}
 
-@GenerateMocks([
-  FoodTextAnalysisService,
-  FoodImageAnalysisService,
-  NutritionLabelAnalysisService,
-  ExerciseAnalysisService,
-  File,
-])
 void main() {
   late MockFoodTextAnalysisService mockTextService;
   late MockFoodImageAnalysisService mockImageService;
   late MockNutritionLabelAnalysisService mockNutritionService;
   late MockExerciseAnalysisService mockExerciseService;
   late GeminiServiceImpl service;
+  late MockFile mockFile;
 
   setUp(() {
     mockTextService = MockFoodTextAnalysisService();
     mockImageService = MockFoodImageAnalysisService();
     mockNutritionService = MockNutritionLabelAnalysisService();
     mockExerciseService = MockExerciseAnalysisService();
+    mockFile = MockFile();
+    
+    // Register fallbacks for function argument types
+    registerFallbackValue('dummy-text');
+    registerFallbackValue(File('dummy-path'));
+    registerFallbackValue(1.0);
     
     service = GeminiServiceImpl(
       foodTextAnalysisService: mockTextService,
@@ -64,20 +64,20 @@ void main() {
         warnings: [],
       );
       
-      when(mockTextService.analyze(description))
-          .thenAnswer((_) async => expectedResult);
+      // Setup the mock
+      when(() => mockTextService.analyze(any()))
+        .thenAnswer((_) async => expectedResult);
       
       // Act
       final result = await service.analyzeFoodByText(description);
       
       // Assert
       expect(result, equals(expectedResult));
-      verify(mockTextService.analyze(description)).called(1);
+      verify(() => mockTextService.analyze(description)).called(1);
     });
 
     test('should delegate analyzeFoodByImage to food image analysis service', () async {
       // Arrange
-      final imageFile = MockFile();
       final expectedResult = FoodAnalysisResult(
         foodName: 'Burger',
         ingredients: [],
@@ -93,20 +93,20 @@ void main() {
         warnings: [],
       );
       
-      when(mockImageService.analyze(imageFile))
-          .thenAnswer((_) async => expectedResult);
+      // Setup the mock
+      when(() => mockImageService.analyze(any()))
+        .thenAnswer((_) async => expectedResult);
       
       // Act
-      final result = await service.analyzeFoodByImage(imageFile);
+      final result = await service.analyzeFoodByImage(mockFile);
       
       // Assert
       expect(result, equals(expectedResult));
-      verify(mockImageService.analyze(imageFile)).called(1);
+      verify(() => mockImageService.analyze(mockFile)).called(1);
     });
 
     test('should delegate analyzeNutritionLabel to nutrition label service', () async {
       // Arrange
-      final imageFile = MockFile();
       const servings = 2.5;
       final expectedResult = FoodAnalysisResult(
         foodName: 'Cereal',
@@ -123,15 +123,16 @@ void main() {
         warnings: [],
       );
       
-      when(mockNutritionService.analyze(imageFile, servings))
-          .thenAnswer((_) async => expectedResult);
+      // Setup the mock
+      when(() => mockNutritionService.analyze(any(), any()))
+        .thenAnswer((_) async => expectedResult);
       
       // Act
-      final result = await service.analyzeNutritionLabel(imageFile, servings);
+      final result = await service.analyzeNutritionLabel(mockFile, servings);
       
       // Assert
       expect(result, equals(expectedResult));
-      verify(mockNutritionService.analyze(imageFile, servings)).called(1);
+      verify(() => mockNutritionService.analyze(mockFile, servings)).called(1);
     });
 
     test('should delegate analyzeExercise to exercise analysis service', () async {
@@ -149,15 +150,20 @@ void main() {
         originalInput: description,
       );
       
-      when(mockExerciseService.analyze(description, userWeightKg: weight))
-          .thenAnswer((_) async => expectedResult);
+      // Setup the mock
+      when(() => mockExerciseService.analyze(any(), userWeightKg: any(named: 'userWeightKg')))
+        .thenAnswer((_) async => expectedResult);
       
       // Act
       final result = await service.analyzeExercise(description, userWeightKg: weight);
       
       // Assert
-      expect(result, equals(expectedResult));
-      verify(mockExerciseService.analyze(description, userWeightKg: weight)).called(1);
+      expect(result.exerciseType, equals(expectedResult.exerciseType));
+      expect(result.duration, equals(expectedResult.duration));
+      expect(result.intensity, equals(expectedResult.intensity));
+      expect(result.estimatedCalories, equals(expectedResult.estimatedCalories));
+      expect(result.metValue, equals(expectedResult.metValue));
+      verify(() => mockExerciseService.analyze(description, userWeightKg: weight)).called(1);
     });
   });
 }

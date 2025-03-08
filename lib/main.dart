@@ -6,7 +6,8 @@ import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Import the food analysis page
-import 'package:pockeat/features/ai_api_scan/presentation/pages/food_analysis_page.dart';
+import 'package:pockeat/features/ai_api_scan/presentation/pages/ai_analysis_page.dart';
+import 'package:pockeat/core/di/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +15,6 @@ void main() async {
   // Default ke dev untuk development yang aman
   // Load dotenv dulu
   await dotenv.load(fileName: '.env');
-  
   // Ambil flavor dari dotenv
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
   
@@ -26,6 +26,7 @@ void main() async {
         : StagingFirebaseOptions.currentPlatform // Dev pake config staging tapi nanti connect ke emulator
   );
 
+  setupDependencies();  
   // Setup emulator kalau di dev mode
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
@@ -76,7 +77,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/food-analysis', // Changed to start with the food analysis page
       routes: {
         '/': (context) => const HomePage(), // You'll need to create this
-        '/food-analysis': (context) => const FoodAnalysisPage(),
+        '/food-analysis': (context) => const AIAnalysisScreen(),
       },
     );
   }
