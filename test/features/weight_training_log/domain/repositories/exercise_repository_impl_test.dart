@@ -200,6 +200,18 @@ void main() {
       expect(result.length, 1);
       expect(result.first.bodyPart, 'Chest');
     });
+
+    test('should throw exception when retrieval fails', () async {
+      // Setup
+      when(mockCollection.where(any, isEqualTo: anyNamed('isEqualTo'))).thenReturn(mockQuery);
+      when(mockQuery.get()).thenThrow(Exception('Firestore error'));
+      
+      // Execute & Verify
+      expect(
+        () => repository.getExercisesByBodyPart('Chest'),
+        throwsException,
+      );
+    });
   });
 
   group('deleteExercise', () {
@@ -256,6 +268,18 @@ void main() {
       verify(mockCollection.where('dateCreated', isEqualTo: dateString)).called(1);
       expect(result.length, 1);
     });
+
+    test('should throw exception when filtering by date fails', () async {
+      // Setup
+      when(mockCollection.where(any, isEqualTo: anyNamed('isEqualTo'))).thenReturn(mockQuery);
+      when(mockQuery.get()).thenThrow(Exception('Firestore error'));
+      
+      // Execute & Verify
+      expect(
+        () => repository.filterByDate(DateTime(2025, 3, 8)),
+        throwsException,
+      );
+    });
   });
 
   group('filterByMonth', () {
@@ -289,6 +313,17 @@ void main() {
         throwsArgumentError,
       );
     });
+
+    test('should throw exception when filtering by month fails', () async {
+      // Setup
+      when(mockCollection.get()).thenThrow(Exception('Firestore error'));
+      
+      // Execute & Verify
+      expect(
+        () => repository.filterByMonth(3, 2025),
+        throwsException,
+      );
+    });
   });
 
   group('getExercisesWithLimit', () {
@@ -311,6 +346,88 @@ void main() {
       verify(mockCollection.orderBy('name')).called(1);
       verify(mockQuery.limit(10)).called(1);
       expect(result.length, 1);
+    });
+
+    test('should throw exception when getting exercises with limit fails', () async {
+      // Setup
+      when(mockCollection.orderBy(any)).thenReturn(mockQuery);
+      when(mockQuery.limit(any)).thenReturn(mockQuery);
+      when(mockQuery.get()).thenThrow(Exception('Firestore error'));
+      
+      // Execute & Verify
+      expect(
+        () => repository.getExercisesWithLimit(10),
+        throwsException,
+      );
+    });
+  });
+
+  group('getExerciseCategories', () {
+    test('should return list of exercise categories', () {
+      // Execute
+      final result = repository.getExerciseCategories();
+      
+      // Verify
+      expect(result, isA<List<String>>());
+      expect(result, contains('Upper Body'));
+      expect(result, contains('Lower Body'));
+      expect(result, contains('Core'));
+      expect(result, contains('Full Body'));
+      expect(result.length, 4);
+    });
+  });
+
+  group('getExercisesByCategoryName', () {
+    test('should return exercises for a valid category', () {
+      // Execute
+      final result = repository.getExercisesByCategoryName('Upper Body');
+      
+      // Verify
+      expect(result, isA<Map<String, double>>());
+      expect(result.containsKey('Bench Press'), isTrue);
+      expect(result['Bench Press'], 5.0);
+    });
+
+    test('should return empty map for invalid category', () {
+      // Execute
+      final result = repository.getExercisesByCategoryName('Invalid Category');
+      
+      // Verify
+      expect(result, isEmpty);
+    });
+  });
+
+  group('getExerciseMETValue', () {
+    test('should return MET value when category and exercise name are provided', () {
+      // Execute
+      final result = repository.getExerciseMETValue('Bench Press', 'Upper Body');
+      
+      // Verify
+      expect(result, 5.0);
+    });
+
+    test('should return MET value when only exercise name is provided', () {
+      // Execute
+      final result = repository.getExerciseMETValue('Bench Press');
+      
+      // Verify
+      expect(result, 5.0);
+    });
+
+    test('should return default MET value when exercise not found in specified category', () {
+      // Execute
+      final result = repository.getExerciseMETValue('Bench Press', 'Lower Body');
+      
+      // Verify
+      expect(result, 3.0);
+    });
+
+    test('should return default MET value when exercise not found in any category', () {
+      // Execute
+      final result = repository.getExerciseMETValue('Unknown Exercise');
+      
+      // Verify
+      expect(result, 3.0);
     });
   });
 }
