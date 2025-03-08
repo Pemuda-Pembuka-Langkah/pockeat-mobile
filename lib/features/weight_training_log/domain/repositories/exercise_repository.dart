@@ -1,35 +1,44 @@
-const Map<String, Map<String, double>> exercisesByCategory = {
-  'Upper Body': {
-    'Bench Press': 5.0,
-    'Shoulder Press': 5.0,
-    'Bicep Curls': 3.5,
-    'Tricep Extensions': 3.5,
-    'Pull Ups': 8.0,
-    'Push Ups': 3.8,
-    'Lateral Raises': 4.0,
-  },
-  'Lower Body': {
-    'Squats': 6.0,
-    'Deadlifts': 7.0,
-    'Leg Press': 5.0,
-    'Lunges': 5.0,
-    'Calf Raises': 3.0,
-    'Leg Extensions': 4.0,
-    'Hamstring Curls': 4.0,
-  },
-  'Core': {
-    'Crunches': 3.0,
-    'Planks': 2.8,
-    'Russian Twists': 4.0,
-    'Leg Raises': 3.5,
-    'Ab Rollouts': 5.0,
-    'Side Planks': 2.5,
-  },
-  'Full Body': {
-    'Clean and Press': 8.0,
-    'Burpees': 8.0,
-    'Turkish Get-ups': 6.0,
-    'Thrusters': 8.0,
-    'Mountain Climbers': 8.0,
-  },
-};
+import '../models/exercise.dart';
+
+/// Repository untuk mengakses data latihan beban
+abstract class ExerciseRepository {
+  /// Menyimpan latihan beban ke database
+  ///
+  /// Mengembalikan [String] berupa id dari hasil yang disimpan
+  /// Throws [Exception] jika terjadi error saat penyimpanan
+  Future<String> saveExercise(Exercise exercise);
+  
+  /// Mengambil latihan beban berdasarkan ID
+  ///
+  /// Mengembalikan [Exercise] jika ditemukan, null jika tidak ada
+  Future<Exercise?> getExerciseById(String id);
+  
+  /// Mengambil semua latihan beban
+  Future<List<Exercise>> getAllExercises();
+  
+  /// Mengambil latihan beban berdasarkan bagian tubuh
+  Future<List<Exercise>> getExercisesByBodyPart(String bodyPart);
+  
+  /// Menghapus latihan beban berdasarkan ID
+  ///
+  /// Mengembalikan [bool] true jika berhasil dihapus
+  Future<bool> deleteExercise(String id);
+  
+  /// Mengambil latihan beban pada tanggal tertentu
+  Future<List<Exercise>> filterByDate(DateTime date);
+  
+  /// Mengambil latihan beban pada bulan dan tahun tertentu
+  Future<List<Exercise>> filterByMonth(int month, int year);
+  
+  /// Mengambil latihan beban dengan jumlah terbatas
+  Future<List<Exercise>> getExercisesWithLimit(int limit);
+  
+  /// Mengambil daftar kategori latihan yang tersedia
+  List<String> getExerciseCategories();
+  
+  /// Mengambil daftar latihan berdasarkan kategori
+  Map<String, double> getExercisesByCategoryName(String category);
+  
+  /// Mengambil nilai MET untuk latihan tertentu
+  double getExerciseMETValue(String exerciseName, [String? category]);
+}

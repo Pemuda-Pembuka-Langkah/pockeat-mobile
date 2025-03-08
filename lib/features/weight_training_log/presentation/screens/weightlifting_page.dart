@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/exercise.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/exercise_repository.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/exercise_repository_impl.dart';
 import 'package:pockeat/features/weight_training_log/services/workout_service.dart';
 import 'package:pockeat/features/weight_training_log/presentation/widgets/body_part_chip.dart';
 import 'package:pockeat/features/weight_training_log/presentation/widgets/exercise_chip.dart';
@@ -18,6 +19,8 @@ class WeightliftingPage extends StatefulWidget {
 class _WeightliftingPageState extends State<WeightliftingPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryGreen = const Color(0xFF4ECDC4);
+
+  final Map<String, Map<String, double>> exercisesByCategory = ExerciseRepositoryImpl.exercisesByCategory;
 
   String selectedBodyPart = 'Upper Body';
   List<Exercise> exercises = [];
