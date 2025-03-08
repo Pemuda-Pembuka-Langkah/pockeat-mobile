@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/exercise.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/exercise_factory.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting_factory.dart';
 
 void main() {
   group('ExerciseFactory', () {
@@ -16,7 +16,7 @@ void main() {
         ],
       };
 
-      final exercise = ExerciseFactory.fromMap(map);
+      final exercise = WeightLiftingFactory.fromMap(map);
       
       expect(exercise.id, 'test-id');
       expect(exercise.name, 'Bench Press');
@@ -37,7 +37,7 @@ void main() {
         {'weight': 25.0, 'reps': 10, 'duration': 45.0},
       ];
 
-      final exercise = ExerciseFactory.fromFormData(
+      final exercise = WeightLiftingFactory.fromFormData(
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
@@ -57,7 +57,7 @@ void main() {
     });
 
     test('should create Exercise from form data without sets', () {
-      final exercise = ExerciseFactory.fromFormData(
+      final exercise = WeightLiftingFactory.fromFormData(
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
@@ -70,7 +70,7 @@ void main() {
     });
 
     test('should create Exercise with empty sets if setsData is empty', () {
-      final exercise = ExerciseFactory.fromFormData(
+      final exercise = WeightLiftingFactory.fromFormData(
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
@@ -87,7 +87,7 @@ void main() {
         {'weight': 0.0, 'reps': 10, 'duration': 45.0},    // Should be filtered out (weight <= 0)
       ];
 
-      final exercise = ExerciseFactory.fromFormData(
+      final exercise = WeightLiftingFactory.fromFormData(
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,

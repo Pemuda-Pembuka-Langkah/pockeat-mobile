@@ -1,16 +1,16 @@
-class Exercise {
+class WeightLifting {
   final String id;
   final String name;
   final String bodyPart;
   final double metValue;
-  List<ExerciseSet> sets;
+  List<WeightLiftingSet> sets;
 
-  Exercise({
+  WeightLifting({
     String? id,
     required this.name,
     required this.bodyPart,
     required this.metValue,
-    List<ExerciseSet>? sets,
+    List<WeightLiftingSet>? sets,
   })  : id = id ?? DateTime.now().toString(),
         sets = sets ?? [];
 
@@ -26,26 +26,26 @@ class Exercise {
   }
 
   // Create Exercise object from JSON
-  factory Exercise.fromJson(Map<String, dynamic> json) {
-    return Exercise(
+  factory WeightLifting.fromJson(Map<String, dynamic> json) {
+    return WeightLifting(
       id: json['id'],
       name: json['name'],
       bodyPart: json['bodyPart'],
       metValue: json['metValue'],
       sets: json['sets'] != null
-          ? List<ExerciseSet>.from(
-              json['sets'].map((x) => ExerciseSet.fromJson(x)))
+          ? List<WeightLiftingSet>.from(
+              json['sets'].map((x) => WeightLiftingSet.fromJson(x)))
           : [],
     );
   }
 }
 
-class ExerciseSet {
+class WeightLiftingSet {
   final double weight;
   final int reps;
   final double duration;
 
-  ExerciseSet({
+  WeightLiftingSet({
     required this.weight,
     required this.reps,
     required this.duration,
@@ -63,7 +63,7 @@ class ExerciseSet {
   }
 
   // Create ExerciseSet object from JSON
-  factory ExerciseSet.fromJson(Map<String, dynamic> json) {
+  factory WeightLiftingSet.fromJson(Map<String, dynamic> json) {
 
     if (json['weight'] == null || json['reps'] == null || json['duration'] == null) {
       throw ArgumentError('Missing required fields in ExerciseSet JSON');
@@ -77,7 +77,7 @@ class ExerciseSet {
       throw ArgumentError('Weight, reps, and duration must be greater than 0');
     }
 
-    return ExerciseSet(
+    return WeightLiftingSet(
       weight: weight,
       reps: reps,
       duration: duration,

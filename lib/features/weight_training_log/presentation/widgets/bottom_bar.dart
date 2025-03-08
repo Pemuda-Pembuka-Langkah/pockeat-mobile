@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BottomBar extends StatelessWidget {
   final double totalVolume;
   final Color primaryGreen;
-  final VoidCallback onSaveWorkout;
+  final VoidCallback? onSaveWorkout;
 
   const BottomBar({
     Key? key,
@@ -30,20 +30,43 @@ class BottomBar extends StatelessWidget {
         child: ElevatedButton(
           onPressed: onSaveWorkout,
           style: ElevatedButton.styleFrom(
-            backgroundColor: primaryGreen,
+            backgroundColor: onSaveWorkout == null ? Colors.grey : primaryGreen,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: Text(
-            'Save Workout (${totalVolume.toStringAsFixed(1)} kg)',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
+          child: onSaveWorkout == null
+              ? const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Saving...',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                )
+              : Text(
+                  'Save Workout (${totalVolume.toStringAsFixed(1)} kg)',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
         ),
       ),
     );

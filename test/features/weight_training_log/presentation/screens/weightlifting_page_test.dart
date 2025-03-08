@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/exercise.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/presentation/widgets/bottom_bar.dart';
 import 'package:pockeat/features/weight_training_log/presentation/widgets/workout_summary.dart';
 

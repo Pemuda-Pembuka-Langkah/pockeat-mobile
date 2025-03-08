@@ -1,20 +1,20 @@
-import 'exercise.dart';
+import 'weight_lifting.dart';
 
 /// Factory class untuk membuat objek Exercise dari berbagai sumber data
-class ExerciseFactory {
+class WeightLiftingFactory {
   /// Membuat Exercise dari Map (umumnya dari database)
-  static Exercise fromMap(Map<String, dynamic> map) {
-    return Exercise.fromJson(map);
+  static WeightLifting fromMap(Map<String, dynamic> map) {
+    return WeightLifting.fromJson(map);
   }
   
   /// Membuat Exercise dari form data yang dikumpulkan dari UI
-  static Exercise fromFormData({
+  static WeightLifting fromFormData({
     required String name,
     required String bodyPart,
     required double metValue,
     List<Map<String, dynamic>>? setsData,
   }) {
-    List<ExerciseSet> sets = [];
+    List<WeightLiftingSet> sets = [];
     
     if (setsData != null && setsData.isNotEmpty) {
       for (var setData in setsData) {
@@ -30,7 +30,7 @@ class ExerciseFactory {
           // Skip if any value is not positive
           if (weight <= 0 || reps <= 0 || duration <= 0) continue;
           
-          sets.add(ExerciseSet(
+          sets.add(WeightLiftingSet(
             weight: weight,
             reps: reps,
             duration: duration,
@@ -39,7 +39,7 @@ class ExerciseFactory {
       }
     }
     
-    return Exercise(
+    return WeightLifting(
       name: name,
       bodyPart: bodyPart,
       metValue: metValue,

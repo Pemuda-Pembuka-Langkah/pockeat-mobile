@@ -1,23 +1,23 @@
-import '../models/exercise.dart';
+import '../models/weight_lifting.dart';
 
 /// Repository untuk mengakses data latihan beban
-abstract class ExerciseRepository {
+abstract class WeightLiftingRepository {
   /// Menyimpan latihan beban ke database
   ///
   /// Mengembalikan [String] berupa id dari hasil yang disimpan
   /// Throws [Exception] jika terjadi error saat penyimpanan
-  Future<String> saveExercise(Exercise exercise);
+  Future<String> saveExercise(WeightLifting exercise);
   
   /// Mengambil latihan beban berdasarkan ID
   ///
-  /// Mengembalikan [Exercise] jika ditemukan, null jika tidak ada
-  Future<Exercise?> getExerciseById(String id);
+  /// Mengembalikan [WeightLifting] jika ditemukan, null jika tidak ada
+  Future<WeightLifting?> getExerciseById(String id);
   
   /// Mengambil semua latihan beban
-  Future<List<Exercise>> getAllExercises();
+  Future<List<WeightLifting>> getAllExercises();
   
   /// Mengambil latihan beban berdasarkan bagian tubuh
-  Future<List<Exercise>> getExercisesByBodyPart(String bodyPart);
+  Future<List<WeightLifting>> getExercisesByBodyPart(String bodyPart);
   
   /// Menghapus latihan beban berdasarkan ID
   ///
@@ -25,13 +25,16 @@ abstract class ExerciseRepository {
   Future<bool> deleteExercise(String id);
   
   /// Mengambil latihan beban pada tanggal tertentu
-  Future<List<Exercise>> filterByDate(DateTime date);
+  Future<List<WeightLifting>> filterByDate(DateTime date);
   
   /// Mengambil latihan beban pada bulan dan tahun tertentu
-  Future<List<Exercise>> filterByMonth(int month, int year);
+  Future<List<WeightLifting>> filterByMonth(int month, int year);
+
+  /// Mengambil latihan beban pada tahun tertentu
+  Future<List<WeightLifting>> filterByYear(int year);
   
   /// Mengambil latihan beban dengan jumlah terbatas
-  Future<List<Exercise>> getExercisesWithLimit(int limit);
+  Future<List<WeightLifting>> getExercisesWithLimit(int limit);
   
   /// Mengambil daftar kategori latihan yang tersedia
   List<String> getExerciseCategories();

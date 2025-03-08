@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/exercise.dart';
-import 'package:pockeat/features/weight_training_log/domain/repositories/exercise_repository_impl.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
 
 // Generate mocks for Firebase
 @GenerateMocks([
@@ -16,10 +16,10 @@ import 'package:pockeat/features/weight_training_log/domain/repositories/exercis
   QueryDocumentSnapshot,
 ])
 // This import should be after the annotation
-import 'exercise_repository_impl_test.mocks.dart';
+import 'weight_lifting_repository_impl_test.mocks.dart';
 
 void main() {
-  late ExerciseRepositoryImpl repository;
+  late WeightLiftingRepositoryImpl repository;
   late MockFirebaseFirestore mockFirestore;
   late MockCollectionReference<Map<String, dynamic>> mockCollection;
   late MockDocumentReference<Map<String, dynamic>> mockDocRef;
@@ -28,13 +28,13 @@ void main() {
   late List<MockQueryDocumentSnapshot<Map<String, dynamic>>> mockDocs;
   late MockDocumentSnapshot<Map<String, dynamic>> mockDocSnapshot;
   
-  final testExercise = Exercise(
+  final testExercise = WeightLifting(
     id: 'test-id',
     name: 'Bench Press',
     bodyPart: 'Chest',
     metValue: 3.5,
     sets: [
-      ExerciseSet(weight: 20.0, reps: 12, duration: 60.0),
+      WeightLiftingSet(weight: 20.0, reps: 12, duration: 60.0),
     ],
   );
 
@@ -50,7 +50,7 @@ void main() {
     // Setup behavior for collections
     when(mockFirestore.collection(any)).thenReturn(mockCollection);
     
-    repository = ExerciseRepositoryImpl(firestore: mockFirestore);
+    repository = WeightLiftingRepositoryImpl(firestore: mockFirestore);
   });
 
   group('saveExercise', () {
@@ -63,7 +63,7 @@ void main() {
       final result = await repository.saveExercise(testExercise);
       
       // Verify
-      verify(mockFirestore.collection('exercises')).called(1);
+      verify(mockFirestore.collection('weight_lifting_logs')).called(1);
       verify(mockCollection.doc(testExercise.id)).called(1);
       verify(mockDocRef.set(testExercise.toJson())).called(1);
       expect(result, testExercise.id);
@@ -96,7 +96,7 @@ void main() {
       final result = await repository.getExerciseById('test-id');
       
       // Verify
-      verify(mockFirestore.collection('exercises')).called(1);
+      verify(mockFirestore.collection('weight_lifting_logs')).called(1);
       verify(mockCollection.doc('test-id')).called(1);
       verify(mockDocRef.get()).called(1);
       expect(result?.id, testExercise.id);
@@ -145,7 +145,7 @@ void main() {
       final result = await repository.getAllExercises();
       
       // Verify
-      verify(mockFirestore.collection('exercises')).called(1);
+      verify(mockFirestore.collection('weight_lifting_logs')).called(1);
       verify(mockCollection.orderBy('name')).called(1);
       verify(mockQuery.get()).called(1);
       expect(result.length, 1);
@@ -195,7 +195,7 @@ void main() {
       final result = await repository.getExercisesByBodyPart('Chest');
       
       // Verify
-      verify(mockFirestore.collection('exercises')).called(1);
+      verify(mockFirestore.collection('weight_lifting_logs')).called(1);
       verify(mockCollection.where('bodyPart', isEqualTo: 'Chest')).called(1);
       expect(result.length, 1);
       expect(result.first.bodyPart, 'Chest');
@@ -224,7 +224,7 @@ void main() {
       final result = await repository.deleteExercise('test-id');
       
       // Verify
-      verify(mockFirestore.collection('exercises')).called(1);
+      verify(mockFirestore.collection('weight_lifting_logs')).called(1);
       verify(mockCollection.doc('test-id')).called(1);
       verify(mockDocRef.delete()).called(1);
       expect(result, true);
@@ -264,7 +264,7 @@ void main() {
       final result = await repository.filterByDate(testDate);
       
       // Verify
-      verify(mockFirestore.collection('exercises')).called(1);
+      verify(mockFirestore.collection('weight_lifting_logs')).called(1);
       verify(mockCollection.where('dateCreated', isEqualTo: dateString)).called(1);
       expect(result.length, 1);
     });
@@ -302,7 +302,7 @@ void main() {
       final result = await repository.filterByMonth(testMonth, testYear);
       
       // Verify
-      verify(mockFirestore.collection('exercises')).called(1);
+      verify(mockFirestore.collection('weight_lifting_logs')).called(1);
       expect(result.length, 1);
     });
 
@@ -342,7 +342,7 @@ void main() {
       final result = await repository.getExercisesWithLimit(10);
       
       // Verify
-      verify(mockFirestore.collection('exercises')).called(1);
+      verify(mockFirestore.collection('weight_lifting_logs')).called(1);
       verify(mockCollection.orderBy('name')).called(1);
       verify(mockQuery.limit(10)).called(1);
       expect(result.length, 1);

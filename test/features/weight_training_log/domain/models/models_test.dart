@@ -1,21 +1,21 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/models.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/exercise.dart' as actual_exercise;
-import 'package:pockeat/features/weight_training_log/domain/models/exercise_factory.dart' as actual_factory;
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart' as actual_exercise;
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting_factory.dart' as actual_factory;
 import 'package:pockeat/features/weight_training_log/domain/models/user_constanta.dart' as actual_constanta;
 
 void main() {
   group('Models exports', () {
     test('should export Exercise correctly', () {
       // Create instances of both types to verify they are the same type
-      final directExercise = actual_exercise.Exercise(
+      final directExercise = actual_exercise.WeightLifting(
         name: 'Test',
         bodyPart: 'Test',
         metValue: 1.0,
       );
       
       // This will only compile if Exercise is properly exported
-      final exportedExercise = Exercise(
+      final exportedExercise = WeightLifting(
         name: 'Test',
         bodyPart: 'Test',
         metValue: 1.0,
@@ -25,14 +25,14 @@ void main() {
     });
 
     test('should export ExerciseSet correctly', () {
-      final directSet = actual_exercise.ExerciseSet(
+      final directSet = actual_exercise.WeightLiftingSet(
         weight: 10.0,
         reps: 10,
         duration: 30.0,
       );
       
       // This will only compile if ExerciseSet is properly exported via Exercise
-      final exportedSet = ExerciseSet(
+      final exportedSet = WeightLiftingSet(
         weight: 10.0,
         reps: 10,
         duration: 30.0,
@@ -43,7 +43,7 @@ void main() {
 
     test('should export ExerciseFactory correctly', () {
       // Verify types match
-      expect(actual_factory.ExerciseFactory, ExerciseFactory);
+      expect(actual_factory.WeightLiftingFactory, WeightLiftingFactory);
     });
 
     test('should export UserConstanta correctly', () {
