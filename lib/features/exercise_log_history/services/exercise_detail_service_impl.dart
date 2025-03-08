@@ -3,18 +3,23 @@ import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repositor
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 
 /// Implementasi dari ExerciseDetailService menggunakan komposisi repository
 class ExerciseDetailServiceImpl implements ExerciseDetailService {
   final CardioRepository _cardioRepository;
   final SmartExerciseLogRepository _smartExerciseRepository;
+  final WeightLiftingRepository _weightLiftingRepository;
 
   /// Konstruktor dengan dependency injection
   ExerciseDetailServiceImpl({
     required CardioRepository cardioRepository,
     required SmartExerciseLogRepository smartExerciseRepository,
+    required WeightLiftingRepository weightLiftingRepository,
   })  : _cardioRepository = cardioRepository,
-        _smartExerciseRepository = smartExerciseRepository;
+        _smartExerciseRepository = smartExerciseRepository,
+        _weightLiftingRepository = weightLiftingRepository;
 
   @override
   Future<dynamic> getSmartExerciseDetail(String id) async {
@@ -36,6 +41,11 @@ class ExerciseDetailServiceImpl implements ExerciseDetailService {
 
     throw Exception(
         'Requested type ${T.toString()} does not match actual type ${cardioActivity.runtimeType}');
+  }
+  
+  @override
+  Future<WeightLifting?> getWeightLiftingDetail(String id) async {
+    return await _weightLiftingRepository.getExerciseById(id);
   }
 
   @override
@@ -82,6 +92,17 @@ class ExerciseDetailServiceImpl implements ExerciseDetailService {
         case CardioType.swimming:
           return 'swimming';
       }
+    }
+    
+    // Jika tipe dasar adalah weightlifting, kembalikan tipe itu
+    if (basicType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING) {
+      final weightLifting = await _weightLiftingRepository.getExerciseById(id);
+      
+      if (weightLifting == null) {
+        return 'unknown';
+      }
+      
+      return ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING;
     }
 
     // Default jika tipe dasar tidak dikenali

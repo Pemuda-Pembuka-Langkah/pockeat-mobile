@@ -18,8 +18,8 @@ import 'package:pockeat/features/weight_training_log/presentation/screens/weight
 // Import dependencies untuk DI
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
-import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
+import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
 // Import for ExerciseLogHistory
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service_impl.dart';
@@ -29,6 +29,7 @@ import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repositor
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
 // Import for ExerciseLogDetailPage
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_log_detail_page.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
 
 void main() async {
@@ -80,6 +81,9 @@ void main() async {
         ),
         Provider<CardioRepository>(
           create: (_) => cardioRepository,
+        ),
+        Provider<WeightLiftingRepository>(
+          create: (_) => weightLiftingRepository,
         ),
       ],
       child: const MyApp(),
@@ -161,6 +165,7 @@ class MyApp extends StatelessWidget {
             activityType: args['activityType'] as String,
             cardioRepository: Provider.of<CardioRepository>(context, listen: false),
             smartExerciseRepository: Provider.of<SmartExerciseLogRepository>(context, listen: false),
+            weightLiftingRepository: Provider.of<WeightLiftingRepository>(context, listen: false),
           );
         },
       },
