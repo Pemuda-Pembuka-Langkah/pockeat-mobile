@@ -10,11 +10,11 @@ class FoodImageAnalysisService extends BaseGeminiService {
     required super.apiKey,
     super.customModelWrapper,
   });
-
+// coverage:ignore-start
   factory FoodImageAnalysisService.fromEnv() {
     return FoodImageAnalysisService(apiKey: BaseGeminiService.getApiKeyFromEnv());
   }
-
+// coverage:ignore-end
   Future<FoodAnalysisResult> analyze(File imageFile) async {
     try {
       final imageBytes = await imageFile.readAsBytes();

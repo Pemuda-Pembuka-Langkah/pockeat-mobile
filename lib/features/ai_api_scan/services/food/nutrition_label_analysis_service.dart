@@ -11,10 +11,12 @@ class NutritionLabelAnalysisService extends BaseGeminiService {
     required super.apiKey,
     super.customModelWrapper,
   });
-
+// coverage:ignore-start
   factory NutritionLabelAnalysisService.fromEnv() {
     return NutritionLabelAnalysisService(apiKey: BaseGeminiService.getApiKeyFromEnv());
   }
+  // coverage:ignore-end
+  
 
   Future<FoodAnalysisResult> analyze(File imageFile, double servings) async {
     try {

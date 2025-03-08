@@ -10,10 +10,11 @@ class FoodTextAnalysisService extends BaseGeminiService {
     required super.apiKey,
     super.customModelWrapper,
   });
-
+// coverage:ignore-start
   factory FoodTextAnalysisService.fromEnv() {
     return FoodTextAnalysisService(apiKey: BaseGeminiService.getApiKeyFromEnv());
   }
+  // coverage:ignore-end
 
   Future<FoodAnalysisResult> analyze(String description) async {
     try {
