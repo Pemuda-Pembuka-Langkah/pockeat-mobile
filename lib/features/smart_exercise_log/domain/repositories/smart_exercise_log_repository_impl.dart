@@ -41,7 +41,7 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
           .collection(_collection)
           .orderBy('timestamp', descending: true);
       
-      // Terapkan limit jika ada
+      // Apply limit if provided
       if (limit != null && limit > 0) {
         query = query.limit(limit);
       }
@@ -59,11 +59,11 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
   @override
   Future<List<ExerciseAnalysisResult>> getAnalysisResultsByDate(DateTime date, {int? limit}) async {
     try {
-      // Buat timestamp untuk awal hari
+      // Create timestamp for the start of the day
       final startOfDay = DateTime(date.year, date.month, date.day);
       final startTimestamp = startOfDay.millisecondsSinceEpoch;
       
-      // Buat timestamp untuk akhir hari
+      // Create timestamp for the end of the day
       final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
       final endTimestamp = endOfDay.millisecondsSinceEpoch;
       
@@ -73,7 +73,7 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
           .where('timestamp', isLessThanOrEqualTo: endTimestamp)
           .orderBy('timestamp', descending: true);
       
-      // Terapkan limit jika ada
+      // Apply limit if provided
       if (limit != null && limit > 0) {
         query = query.limit(limit);
       }
@@ -91,16 +91,16 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
   @override
   Future<List<ExerciseAnalysisResult>> getAnalysisResultsByMonth(int month, int year, {int? limit}) async {
     try {
-      // Validasi bulan
+      // Validate month
       if (month < 1 || month > 12) {
         throw ArgumentError('Month must be between 1 and 12');
       }
       
-      // Buat timestamp untuk awal bulan
+      // Create timestamp for the start of the month
       final startOfMonth = DateTime(year, month, 1);
       final startTimestamp = startOfMonth.millisecondsSinceEpoch;
       
-      // Buat timestamp untuk akhir bulan
+      // Create timestamp for the end of the month
       final endOfMonth = month < 12 
           ? DateTime(year, month + 1, 1).subtract(const Duration(milliseconds: 1))
           : DateTime(year + 1, 1, 1).subtract(const Duration(milliseconds: 1));
@@ -112,7 +112,7 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
           .where('timestamp', isLessThanOrEqualTo: endTimestamp)
           .orderBy('timestamp', descending: true);
       
-      // Terapkan limit jika ada
+      // Apply limit if provided
       if (limit != null && limit > 0) {
         query = query.limit(limit);
       }
@@ -130,11 +130,11 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
   @override
   Future<List<ExerciseAnalysisResult>> getAnalysisResultsByYear(int year, {int? limit}) async {
     try {
-      // Buat timestamp untuk awal tahun
+      // Create timestamp for the start of the year
       final startOfYear = DateTime(year, 1, 1);
       final startTimestamp = startOfYear.millisecondsSinceEpoch;
       
-      // Buat timestamp untuk akhir tahun
+      // Create timestamp for the end of the year
       final endOfYear = DateTime(year + 1, 1, 1).subtract(const Duration(milliseconds: 1));
       final endTimestamp = endOfYear.millisecondsSinceEpoch;
       
@@ -144,7 +144,7 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
           .where('timestamp', isLessThanOrEqualTo: endTimestamp)
           .orderBy('timestamp', descending: true);
       
-      // Terapkan limit jika ada
+      // Apply limit if provided
       if (limit != null && limit > 0) {
         query = query.limit(limit);
       }
