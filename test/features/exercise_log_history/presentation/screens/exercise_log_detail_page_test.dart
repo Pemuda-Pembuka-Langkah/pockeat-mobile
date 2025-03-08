@@ -14,11 +14,14 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/smart
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/swimming_detail_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 
 // Generate mock classes for repositories
 @GenerateMocks([
   CardioRepository, 
-  SmartExerciseLogRepository
+  SmartExerciseLogRepository,
+  WeightLiftingRepository
 ])
 import 'exercise_log_detail_page_test.mocks.dart';
 
@@ -66,13 +69,30 @@ void main() {
     originalInput: 'I did push-ups for 15 minutes',
   );
 
+  final weightLiftingExercise = WeightLifting(
+    id: 'weight-1',
+    name: 'Bench Press',
+    bodyPart: 'Chest',
+    metValue: 6.0,
+    timestamp: DateTime(2025, 3, 5),
+    sets: [
+      WeightLiftingSet(
+        weight: 60.0,
+        reps: 12,
+        duration: 45.0,
+      )
+    ],
+  );
+
   group('ExerciseLogDetailPage Widget Tests', () {
     late MockCardioRepository mockCardioRepository;
     late MockSmartExerciseLogRepository mockSmartExerciseRepository;
+    late MockWeightLiftingRepository mockWeightLiftingRepository;
 
     setUp(() {
       mockCardioRepository = MockCardioRepository();
       mockSmartExerciseRepository = MockSmartExerciseLogRepository();
+      mockWeightLiftingRepository = MockWeightLiftingRepository();
     });
 
     testWidgets('should show loading indicator while data is loading', 
@@ -89,6 +109,7 @@ void main() {
           activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
+          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
       
@@ -112,6 +133,7 @@ void main() {
           activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
+          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
       
@@ -135,6 +157,7 @@ void main() {
           activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
+          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
       
@@ -157,6 +180,7 @@ void main() {
           activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
+          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
       
@@ -179,6 +203,7 @@ void main() {
           activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
+          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
       
@@ -201,6 +226,7 @@ void main() {
           activityType: ExerciseLogHistoryItem.TYPE_SMART_EXERCISE,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
+          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
       
@@ -223,6 +249,7 @@ void main() {
           activityType: ExerciseLogHistoryItem.TYPE_SMART_EXERCISE,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
+          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
       
@@ -230,6 +257,38 @@ void main() {
       
       // Assert - should show the error message that appears when data is null
       expect(find.text('An error occurred while loading exercise data'), findsOneWidget);
+    });
+    
+    testWidgets('should display weight lifting details when exercise type is weightlifting', 
+      (WidgetTester tester) async {
+      // Arrange
+      when(mockWeightLiftingRepository.getExerciseById('weight-1'))
+          .thenAnswer((_) async => weightLiftingExercise);
+
+      // Act - Create widget and pump it
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'weight-1',
+          activityType: ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING,
+          cardioRepository: mockCardioRepository,
+          smartExerciseRepository: mockSmartExerciseRepository,
+          weightLiftingRepository: mockWeightLiftingRepository,
+        ),
+      ));
+
+      // Wait for async operations to complete
+      await tester.pumpAndSettle();
+
+      // Assert - basic info
+      expect(find.text('Bench Press'), findsOneWidget);
+      expect(find.text('Body Part: Chest'), findsOneWidget);
+      
+      // Assert - set information
+      expect(find.text('Set 1'), findsOneWidget);
+      expect(find.text('Weight (kg)'), findsAtLeastNWidgets(1));
+      expect(find.text('60.0'), findsOneWidget);
+      expect(find.text('Repetitions'), findsAtLeastNWidgets(1));
+      expect(find.text('12'), findsOneWidget);
     });
   });
 }
