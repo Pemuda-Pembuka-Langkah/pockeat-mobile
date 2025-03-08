@@ -2,187 +2,215 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/exercise.dart';
 
 void main() {
-  group('Exercise Model', () {
-    test('should create an Exercise with default id and empty sets when none provided', () {
-      final exercise = Exercise(
-        name: 'Bench Press',
-        bodyPart: 'Upper Body',
-        metValue: 5.0,
-      );
-      expect(exercise.name, 'Bench Press');
-      expect(exercise.bodyPart, 'Upper Body');
-      expect(exercise.metValue, 5.0);
-      expect(exercise.sets, isEmpty);
-      expect(exercise.id, isNotNull);
-    });
+  group('Exercise', () {
+    late Exercise exercise;
+    final testSets = [
+      ExerciseSet(weight: 20.0, reps: 12, duration: 60.0),
+      ExerciseSet(weight: 25.0, reps: 10, duration: 45.0),
+    ];
 
-    test('should create an Exercise with provided sets', () {
-      final set = ExerciseSet(weight: 50, reps: 10, duration: 30);
-      final exercise = Exercise(
-        name: 'Squats',
-        bodyPart: 'Lower Body',
-        metValue: 6.0,
-        sets: [set],
-      );
-      expect(exercise.sets, isNotEmpty);
-      expect(exercise.sets.first.weight, 50);
-    });
-
-    test('should create an Exercise with provided id', () {
-      final exercise = Exercise(
-        id: 'custom-id',
-        name: 'Deadlift',
-        bodyPart: 'Full Body',
-        metValue: 8.0,
-      );
-      expect(exercise.id, 'custom-id');
-    });
-
-    test('should convert Exercise to JSON correctly', () {
-      final set = ExerciseSet(weight: 60, reps: 12, duration: 45);
-      final exercise = Exercise(
-        id: 'exercise-123',
+    setUp(() {
+      exercise = Exercise(
+        id: 'test-id',
         name: 'Bench Press',
         bodyPart: 'Chest',
-        metValue: 4.5,
-        sets: [set],
+        metValue: 3.5,
+        sets: testSets,
       );
-
-      final json = exercise.toJson();
-      
-      expect(json['id'], 'exercise-123');
-      expect(json['name'], 'Bench Press');
-      expect(json['bodyPart'], 'Chest');
-      expect(json['metValue'], 4.5);
-      expect(json['sets'], isA<List>());
-      expect(json['sets'].length, 1);
-      expect(json['sets'][0]['weight'], 60);
-      expect(json['sets'][0]['reps'], 12);
-      expect(json['sets'][0]['duration'], 45);
     });
 
-    test('should create an Exercise from JSON correctly', () {
+    test('should create Exercise instance with provided values', () {
+      expect(exercise.id, 'test-id');
+      expect(exercise.name, 'Bench Press');
+      expect(exercise.bodyPart, 'Chest');
+      expect(exercise.metValue, 3.5);
+      expect(exercise.sets, testSets);
+    });
+
+    test('should create Exercise with generated ID when not provided', () {
+      final exerciseWithGeneratedId = Exercise(
+        name: 'Bench Press',
+        bodyPart: 'Chest',
+        metValue: 3.5,
+      );
+
+      expect(exerciseWithGeneratedId.id, isNotEmpty);
+      expect(exerciseWithGeneratedId.id, isA<String>());
+    });
+
+    test('should create Exercise with empty sets when not provided', () {
+      final exerciseWithoutSets = Exercise(
+        name: 'Bench Press',
+        bodyPart: 'Chest',
+        metValue: 3.5,
+      );
+
+      expect(exerciseWithoutSets.sets, []);
+    });
+
+    test('should convert Exercise to JSON', () {
+      final json = exercise.toJson();
+      
+      expect(json['id'], 'test-id');
+      expect(json['name'], 'Bench Press');
+      expect(json['bodyPart'], 'Chest');
+      expect(json['metValue'], 3.5);
+      expect(json['sets'], isA<List>());
+      expect(json['sets'].length, 2);
+    });
+
+    test('should create Exercise from JSON', () {
       final json = {
-        'id': 'exercise-456',
-        'name': 'Pull Ups',
-        'bodyPart': 'Upper Body',
-        'metValue': 5.0,
+        'id': 'test-id',
+        'name': 'Bench Press',
+        'bodyPart': 'Chest',
+        'metValue': 3.5,
         'sets': [
-          {'weight': 5.0, 'reps': 12, 'duration': 15.0}
+          {'weight': 20.0, 'reps': 12, 'duration': 60.0},
+          {'weight': 25.0, 'reps': 10, 'duration': 45.0},
         ],
       };
 
-      final exercise = Exercise.fromJson(json);
+      final exerciseFromJson = Exercise.fromJson(json);
 
-      expect(exercise.id, 'exercise-456');
-      expect(exercise.name, 'Pull Ups');
-      expect(exercise.bodyPart, 'Upper Body');
-      expect(exercise.metValue, 5.0);
-      expect(exercise.sets.length, 1);
-      expect(exercise.sets.first.weight, 5.0);
-      expect(exercise.sets.first.reps, 12);
-      expect(exercise.sets.first.duration, 15.0);
+      expect(exerciseFromJson.id, 'test-id');
+      expect(exerciseFromJson.name, 'Bench Press');
+      expect(exerciseFromJson.bodyPart, 'Chest');
+      expect(exerciseFromJson.metValue, 3.5);
+      expect(exerciseFromJson.sets.length, 2);
+      expect(exerciseFromJson.sets[0].weight, 20.0);
+      expect(exerciseFromJson.sets[0].reps, 12);
+      expect(exerciseFromJson.sets[0].duration, 60.0);
+      expect(exerciseFromJson.sets[1].weight, 25.0);
+      expect(exerciseFromJson.sets[1].reps, 10);
+      expect(exerciseFromJson.sets[1].duration, 45.0);
     });
 
-    test('should create an Exercise from JSON when sets is null', () {
+    test('should handle empty sets in JSON', () {
       final json = {
-        'id': 'exercise-789',
-        'name': 'Lunges',
-        'bodyPart': 'Legs',
-        'metValue': 4.0,
-        'sets': null,
-      };
-
-      final exercise = Exercise.fromJson(json);
-
-      expect(exercise.id, 'exercise-789');
-      expect(exercise.name, 'Lunges');
-      expect(exercise.bodyPart, 'Legs');
-      expect(exercise.metValue, 4.0);
-      expect(exercise.sets, isEmpty);
-    });
-
-    test('should create an Exercise from JSON when sets is empty', () {
-      final json = {
-        'id': 'exercise-101',
-        'name': 'Push Ups',
+        'id': 'test-id',
+        'name': 'Bench Press',
         'bodyPart': 'Chest',
-        'metValue': 3.8,
+        'metValue': 3.5,
         'sets': [],
       };
 
-      final exercise = Exercise.fromJson(json);
+      final exerciseFromJson = Exercise.fromJson(json);
+      expect(exerciseFromJson.sets, []);
+    });
 
-      expect(exercise.id, 'exercise-101');
-      expect(exercise.name, 'Push Ups');
-      expect(exercise.bodyPart, 'Chest');
-      expect(exercise.metValue, 3.8);
-      expect(exercise.sets, isEmpty);
+    test('should handle null sets in JSON', () {
+      final json = {
+        'id': 'test-id',
+        'name': 'Bench Press',
+        'bodyPart': 'Chest',
+        'metValue': 3.5,
+      };
+
+      final exerciseFromJson = Exercise.fromJson(json);
+      expect(exerciseFromJson.sets, []);
     });
   });
 
-  group('ExerciseSet Model', () {
-    test('should create an ExerciseSet with given values', () {
-      final set = ExerciseSet(weight: 60, reps: 8, duration: 20);
-      expect(set.weight, 60);
-      expect(set.reps, 8);
-      expect(set.duration, 20);
-    });
-
-    test('should throw ArgumentError if any value is 0 or negative', () {
-      expect(() => ExerciseSet(weight: 0, reps: 10, duration: 20), throwsA(isA<AssertionError>()));
-      expect(() => ExerciseSet(weight: -1, reps: 10, duration: 20), throwsA(isA<AssertionError>()));
-      expect(() => ExerciseSet(weight: 50, reps: 0, duration: 20), throwsA(isA<AssertionError>()));
-      expect(() => ExerciseSet(weight: 50, reps: -1, duration: 20), throwsA(isA<AssertionError>()));
-      expect(() => ExerciseSet(weight: 50, reps: 10, duration: 0), throwsA(isA<AssertionError>()));
-      expect(() => ExerciseSet(weight: 50, reps: 10, duration: -1), throwsA(isA<AssertionError>()));
-    });
-
-    test('should convert ExerciseSet to JSON correctly', () {
-      final set = ExerciseSet(weight: 75, reps: 5, duration: 60);
-      final json = set.toJson();
+  group('ExerciseSet', () {
+    test('should create ExerciseSet instance with provided values', () {
+      final exerciseSet = ExerciseSet(weight: 20.0, reps: 12, duration: 60.0);
       
-      expect(json['weight'], 75);
-      expect(json['reps'], 5);
-      expect(json['duration'], 60);
+      expect(exerciseSet.weight, 20.0);
+      expect(exerciseSet.reps, 12);
+      expect(exerciseSet.duration, 60.0);
     });
 
-    test('should create ExerciseSet from JSON correctly', () {
-      final json = {'weight': 85.5, 'reps': 6, 'duration': 45.5};
-      final set = ExerciseSet.fromJson(json);
+    test('should throw assertion error for non-positive weight', () {
+      expect(
+        () => ExerciseSet(weight: 0.0, reps: 12, duration: 60.0),
+        throwsA(isA<AssertionError>()),
+      );
       
-      expect(set.weight, 85.5);
-      expect(set.reps, 6);
-      expect(set.duration, 45.5);
-    });
-
-    test('should throw ArgumentError if any value is 0 or negative in JSON', () {
       expect(
-        () => ExerciseSet.fromJson({'weight': 0, 'reps': 10, 'duration': 30}),
-        throwsArgumentError,
-      );
-      expect(
-        () => ExerciseSet.fromJson({'weight': 50, 'reps': 0, 'duration': 30}),
-        throwsArgumentError,
-      );
-      expect(
-        () => ExerciseSet.fromJson({'weight': 50, 'reps': 10, 'duration': 0}),
-        throwsArgumentError,
+        () => ExerciseSet(weight: -5.0, reps: 12, duration: 60.0),
+        throwsA(isA<AssertionError>()),
       );
     });
 
-    test('should throw ArgumentError if any value is null in JSON', () {
+    test('should throw assertion error for non-positive reps', () {
       expect(
-        () => ExerciseSet.fromJson({'weight': null, 'reps': 10, 'duration': 30}),
-        throwsArgumentError,
+        () => ExerciseSet(weight: 20.0, reps: 0, duration: 60.0),
+        throwsA(isA<AssertionError>()),
       );
+      
       expect(
-        () => ExerciseSet.fromJson({'weight': 50, 'reps': null, 'duration': 30}),
-        throwsArgumentError,
+        () => ExerciseSet(weight: 20.0, reps: -5, duration: 60.0),
+        throwsA(isA<AssertionError>()),
       );
+    });
+
+    test('should throw assertion error for non-positive duration', () {
       expect(
-        () => ExerciseSet.fromJson({'weight': 50, 'reps': 10, 'duration': null}),
-        throwsArgumentError,
+        () => ExerciseSet(weight: 20.0, reps: 12, duration: 0.0),
+        throwsA(isA<AssertionError>()),
+      );
+      
+      expect(
+        () => ExerciseSet(weight: 20.0, reps: 12, duration: -30.0),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('should convert ExerciseSet to JSON', () {
+      final exerciseSet = ExerciseSet(weight: 20.0, reps: 12, duration: 60.0);
+      final json = exerciseSet.toJson();
+      
+      expect(json['weight'], 20.0);
+      expect(json['reps'], 12);
+      expect(json['duration'], 60.0);
+    });
+
+    test('should create ExerciseSet from JSON', () {
+      final json = {
+        'weight': 20.0,
+        'reps': 12,
+        'duration': 60.0,
+      };
+
+      final exerciseSet = ExerciseSet.fromJson(json);
+      
+      expect(exerciseSet.weight, 20.0);
+      expect(exerciseSet.reps, 12);
+      expect(exerciseSet.duration, 60.0);
+    });
+
+    test('should throw ArgumentError if any field is missing in JSON', () {
+      expect(
+        () => ExerciseSet.fromJson({'reps': 12, 'duration': 60.0}),
+        throwsA(isA<ArgumentError>()),
+      );
+      
+      expect(
+        () => ExerciseSet.fromJson({'weight': 20.0, 'duration': 60.0}),
+        throwsA(isA<ArgumentError>()),
+      );
+      
+      expect(
+        () => ExerciseSet.fromJson({'weight': 20.0, 'reps': 12}),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('should throw ArgumentError for non-positive values in JSON', () {
+      expect(
+        () => ExerciseSet.fromJson({'weight': 0.0, 'reps': 12, 'duration': 60.0}),
+        throwsA(isA<ArgumentError>()),
+      );
+      
+      expect(
+        () => ExerciseSet.fromJson({'weight': 20.0, 'reps': 0, 'duration': 60.0}),
+        throwsA(isA<ArgumentError>()),
+      );
+      
+      expect(
+        () => ExerciseSet.fromJson({'weight': 20.0, 'reps': 12, 'duration': 0.0}),
+        throwsA(isA<ArgumentError>()),
       );
     });
   });
