@@ -22,6 +22,9 @@ import 'package:pockeat/features/weight_training_log/domain/models/weight_liftin
     [CardioRepository, SmartExerciseLogRepository, WeightLiftingRepository])
 import 'exercise_log_detail_page_test.mocks.dart';
 
+// Mock NavigatorObserver for testing navigation
+class MockNavigatorObserver extends Mock implements NavigatorObserver {}
+
 void main() {
   // Sample data for testing
   final runningActivity = RunningActivity(
@@ -286,6 +289,170 @@ void main() {
 
       // Check that at least one weight value is displayed
       expect(find.textContaining('60'), findsAtLeastNWidgets(1));
+    });
+
+    group('Delete functionality tests', () {
+      testWidgets('should show delete button in AppBar', (WidgetTester tester) async {
+        // Arrange
+        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
+            .thenAnswer((_) async => smartExercise);
+
+        // Act
+        await tester.pumpWidget(MaterialApp(
+          home: ExerciseLogDetailPage(
+            exerciseId: 'smart-1',
+            activityType: ExerciseLogHistoryItem.typeSmartExercise,
+            cardioRepository: mockCardioRepository,
+            smartExerciseRepository: mockSmartExerciseRepository,
+            weightLiftingRepository: mockWeightLiftingRepository,
+          ),
+        ));
+
+        await tester.pumpAndSettle();
+
+        // Assert - verify delete button is visible in AppBar
+        expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+        expect(find.byTooltip('Delete'), findsOneWidget);
+      });
+
+      testWidgets('should show confirmation dialog when delete button is pressed',
+          (WidgetTester tester) async {
+        // Arrange
+        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
+            .thenAnswer((_) async => smartExercise);
+
+        // Act
+        await tester.pumpWidget(MaterialApp(
+          home: ExerciseLogDetailPage(
+            exerciseId: 'smart-1',
+            activityType: ExerciseLogHistoryItem.typeSmartExercise,
+            cardioRepository: mockCardioRepository,
+            smartExerciseRepository: mockSmartExerciseRepository,
+            weightLiftingRepository: mockWeightLiftingRepository,
+          ),
+        ));
+
+        await tester.pumpAndSettle();
+
+        // Tap the delete button
+        await tester.tap(find.byIcon(Icons.delete_outline));
+        await tester.pumpAndSettle();
+
+        // Assert - verify confirmation dialog appears
+        expect(find.text('Delete Exercise'), findsOneWidget);
+        expect(
+            find.text(
+                'Are you sure you want to delete this exercise log? This action cannot be undone.'),
+            findsOneWidget);
+        expect(find.text('Cancel'), findsOneWidget);
+        expect(find.text('Delete'), findsAtLeastNWidgets(1));
+      });
+
+      testWidgets('should close dialog when Cancel is pressed',
+          (WidgetTester tester) async {
+        // Arrange
+        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
+            .thenAnswer((_) async => smartExercise);
+
+        // Act
+        await tester.pumpWidget(MaterialApp(
+          home: ExerciseLogDetailPage(
+            exerciseId: 'smart-1',
+            activityType: ExerciseLogHistoryItem.typeSmartExercise,
+            cardioRepository: mockCardioRepository,
+            smartExerciseRepository: mockSmartExerciseRepository,
+            weightLiftingRepository: mockWeightLiftingRepository,
+          ),
+        ));
+
+        await tester.pumpAndSettle();
+
+        // Tap the delete button to show dialog
+        await tester.tap(find.byIcon(Icons.delete_outline));
+        await tester.pumpAndSettle();
+
+        // Tap Cancel
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+
+        // Assert - verify dialog is dismissed
+        expect(find.text('Delete Exercise'), findsNothing);
+      });
+
+      testWidgets('should call delete service when deletion is confirmed',
+          (WidgetTester tester) async {
+        // Arrange
+        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
+            .thenAnswer((_) async => smartExercise);
+        when(mockSmartExerciseRepository.deleteById(any))
+            .thenAnswer((_) async => true);
+
+        // Create a key for the scaffold to avoid navigation issues in tests
+        final scaffoldKey = GlobalKey<ScaffoldState>();
+
+        // Act
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            key: scaffoldKey,
+            body: ExerciseLogDetailPage(
+              exerciseId: 'smart-1',
+              activityType: ExerciseLogHistoryItem.typeSmartExercise,
+              cardioRepository: mockCardioRepository,
+              smartExerciseRepository: mockSmartExerciseRepository,
+              weightLiftingRepository: mockWeightLiftingRepository,
+            ),
+          ),
+        ));
+
+        await tester.pumpAndSettle();
+
+        // Tap the delete button
+        await tester.tap(find.byIcon(Icons.delete_outline));
+        await tester.pumpAndSettle();
+
+        // Tap Delete in dialog
+        await tester.tap(find.text('Delete').last);
+        await tester.pump();
+
+        // Most important thing to verify is that the service was called
+        verify(mockSmartExerciseRepository.deleteById('smart-1')).called(1);
+      });
+
+      testWidgets('should handle exceptions during deletion gracefully',
+          (WidgetTester tester) async {
+        // Arrange
+        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
+            .thenAnswer((_) async => smartExercise);
+        when(mockSmartExerciseRepository.deleteById(any))
+            .thenThrow(Exception('Test exception'));
+
+        // Act
+        await tester.pumpWidget(MaterialApp(
+          home: ExerciseLogDetailPage(
+            exerciseId: 'smart-1',
+            activityType: ExerciseLogHistoryItem.typeSmartExercise,
+            cardioRepository: mockCardioRepository,
+            smartExerciseRepository: mockSmartExerciseRepository,
+            weightLiftingRepository: mockWeightLiftingRepository,
+          ),
+        ));
+
+        await tester.pumpAndSettle();
+
+        // Tap the delete button
+        await tester.tap(find.byIcon(Icons.delete_outline));
+        await tester.pumpAndSettle();
+
+        // Tap Delete in dialog
+        await tester.tap(find.text('Delete').last);
+        await tester.pump(); // Allow dialog to close
+
+        // Complete the future and allow error handling to occur
+        await tester.pumpAndSettle();
+        
+        // Verify service method was called
+        verify(mockSmartExerciseRepository.deleteById('smart-1')).called(1);
+      });
     });
   });
 }
