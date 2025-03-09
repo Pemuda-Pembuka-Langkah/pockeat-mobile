@@ -55,26 +55,26 @@ class CalorieCalculator {
   
   // Fungsi untuk mendapatkan MET lari berdasarkan kecepatan
   static double getRunningMETBySpeed(double speedKmPerHour) {
-    if (speedKmPerHour < 8.0) {
+    if (speedKmPerHour < 8.0) { 
       return 7.0;       // Jogging lambat
-    } else if (speedKmPerHour < 8.5) {
-      return 8.5;  // 8-8.4 km/h
-    } else if (speedKmPerHour < 9.0) {
-      return 9.0;  // 8.5-8.9 km/h
-    } else if (speedKmPerHour < 10.0) {
-      return 9.3; // 9-10 km/h
-    } else if (speedKmPerHour < 11.0) {
-      return 10.5; // 10-11 km/h
-    } else if (speedKmPerHour < 12.0) {
-      return 11.0; // 11-12 km/h
-    } else if (speedKmPerHour < 14.0) {
-      return 12.5; // 12-14 km/h
-    } else if (speedKmPerHour < 16.0) {
-      return 14.8; // 14-16 km/h
-    } else if (speedKmPerHour < 17.5) {
-      return 16.8; // 16-17.5 km/h
-    } else {
-      return 18.5; // > 17.5 km/h
+    } else if (speedKmPerHour < 8.5) { 
+      return 8.5;       // 8-8.4 km/h
+    } else if (speedKmPerHour < 9.0) { 
+      return 9.0;       // 8.5-8.9 km/h
+    } else if (speedKmPerHour < 10.0) { 
+      return 9.3;       // 9-10 km/h
+    } else if (speedKmPerHour < 11.0) { 
+      return 10.5;      // 10-11 km/h
+    } else if (speedKmPerHour < 12.0) { 
+      return 11.0;      // 11-12 km/h
+    } else if (speedKmPerHour < 14.0) { 
+      return 12.5;      // 12-14 km/h
+    } else if (speedKmPerHour < 16.0) { 
+      return 14.8;      // 14-16 km/h
+    } else if (speedKmPerHour < 17.5) { 
+      return 16.8;      // 16-17.5 km/h
+    } else { 
+      return 18.5;      // > 17.5 km/h
     }
   }
   
@@ -99,7 +99,8 @@ class CalorieCalculator {
     // Jika tipe bersepeda spesifik, gunakan nilai MET tetap
     if (cyclingType == 'mountain') {
       return cyclingMET['mountain']!;
-    } else if (cyclingType == 'stationary') {
+    }
+    if (cyclingType == 'stationary') {
       return cyclingMET['stationary']!;
     }
     
@@ -107,15 +108,15 @@ class CalorieCalculator {
     if (speedKmPerHour < 16.0) {
       return 4.0;       // < 16 km/h
     } else if (speedKmPerHour < 19.0) {
-      return 6.8;  // 16-19 km/h
+      return 6.8;       // 16-19 km/h
     } else if (speedKmPerHour < 22.0) {
-      return 8.0;  // 19-22 km/h
+      return 8.0;       // 19-22 km/h
     } else if (speedKmPerHour < 25.0) {
-      return 10.0; // 22-25 km/h
+      return 10.0;      // 22-25 km/h
     } else if (speedKmPerHour < 30.0) {
-      return 12.0; // 25-30 km/h
+      return 12.0;      // 25-30 km/h
     } else {
-      return 16.0; // > 30 km/h
+      return 16.0;      // > 30 km/h
     }
   }
   
