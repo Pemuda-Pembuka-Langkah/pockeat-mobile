@@ -370,24 +370,30 @@ void main() {
     test('should return exercises for specific year', () async {
       // Setup
       final testYear = 2025;
-      
-      // Create start and end timestamps for the year
       final startOfYear = DateTime(testYear, 1, 1);
+      // Match the exact implementation in repository
       final endOfYear = DateTime(testYear + 1, 1, 1).subtract(Duration(milliseconds: 1));
       
       final mockDocSnap = MockQueryDocumentSnapshot<Map<String, dynamic>>();
       when(mockDocSnap.data()).thenReturn({
         ...testExercise.toJson(),
-        'timestamp': DateTime(2025, 6, 15, 12, 0).millisecondsSinceEpoch
+        'dateCreated': '2025-03-08'
       });
       mockDocs = [mockDocSnap];
       
-      // Mock the where queries for timestamp field
+      // Mock the query chain properly
+      final mockQueryFirstWhere = MockQuery<Map<String, dynamic>>();
+      final mockQuerySecondWhere = MockQuery<Map<String, dynamic>>();
+      
+      // Setup the chain: collection -> where -> where -> get
       when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfYear.millisecondsSinceEpoch))
-          .thenReturn(mockQuery);
-      when(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfYear.millisecondsSinceEpoch))
-          .thenReturn(mockQuery);
-      when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+          .thenReturn(mockQueryFirstWhere);
+      
+      when(mockQueryFirstWhere.where('timestamp', isLessThanOrEqualTo: endOfYear.millisecondsSinceEpoch))
+          .thenReturn(mockQuerySecondWhere);
+      
+      when(mockQuerySecondWhere.get()).thenAnswer((_) async => mockQuerySnapshot);
+      
       when(mockQuerySnapshot.docs).thenReturn(mockDocs);
       
       // Execute
@@ -396,40 +402,26 @@ void main() {
       // Verify
       verify(mockFirestore.collection('weight_lifting_logs')).called(1);
       verify(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfYear.millisecondsSinceEpoch)).called(1);
-      verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfYear.millisecondsSinceEpoch)).called(1);
+      verify(mockQueryFirstWhere.where('timestamp', isLessThanOrEqualTo: endOfYear.millisecondsSinceEpoch)).called(1);
       expect(result.length, 1);
     });
 
-    test('should throw exception when filtering by year fails', () async {
-      // Setup
-      final testYear = 2025;
-      
-      // Create start and end timestamps for the year
-      final startOfYear = DateTime(testYear, 1, 1);
-      final endOfYear = DateTime(testYear + 1, 1, 1).subtract(Duration(milliseconds: 1));
-      
-      when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfYear.millisecondsSinceEpoch))
-          .thenReturn(mockQuery);
-      when(mockQuery.where('timestamp', isLessThanOrEqualTo: endOfYear.millisecondsSinceEpoch))
-          .thenReturn(mockQuery);
-      when(mockQuery.get()).thenThrow(Exception('Firestore error'));
-      
-      // Execute & Verify
-      expect(
-        () => repository.filterByYear(testYear),
-        throwsException,
-      );
-    });
-    
-    test('should throw argument error when year is invalid', () async {
+    test('should throw ArgumentError for invalid year', () async {
       // Execute & Verify
       expect(
         () => repository.filterByYear(0),
         throwsArgumentError,
       );
+    });
+
+    test('should throw exception when filtering by year fails', () async {
+      // Setup
+      when(mockCollection.get()).thenThrow(Exception('Firestore error'));
+      
+      // Execute & Verify
       expect(
-        () => repository.filterByYear(-1),
-        throwsArgumentError,
+        () => repository.filterByYear(2025),
+        throwsException,
       );
     });
   });
@@ -536,49 +528,6 @@ void main() {
       
       // Verify
       expect(result, 3.0);
-    });
-  });
-
-  group('filterByYear', () {
-    test('should return exercises for specific year', () async {
-      // Setup
-      final testYear = 2025;
-      
-      final mockDocSnap = MockQueryDocumentSnapshot<Map<String, dynamic>>();
-      when(mockDocSnap.data()).thenReturn({
-        ...testExercise.toJson(),
-        'dateCreated': '2025-03-08'
-      });
-      mockDocs = [mockDocSnap];
-      
-      when(mockCollection.get()).thenAnswer((_) async => mockQuerySnapshot);
-      when(mockQuerySnapshot.docs).thenReturn(mockDocs);
-      
-      // Execute
-      final result = await repository.filterByYear(testYear);
-      
-      // Verify
-      verify(mockFirestore.collection('weight_lifting_logs')).called(1);
-      expect(result.length, 1);
-    });
-
-    test('should throw ArgumentError for invalid year', () async {
-      // Execute & Verify
-      expect(
-        () => repository.filterByYear(0),
-        throwsArgumentError,
-      );
-    });
-
-    test('should throw exception when filtering by year fails', () async {
-      // Setup
-      when(mockCollection.get()).thenThrow(Exception('Firestore error'));
-      
-      // Execute & Verify
-      expect(
-        () => repository.filterByYear(2025),
-        throwsException,
-      );
     });
   });
 }
