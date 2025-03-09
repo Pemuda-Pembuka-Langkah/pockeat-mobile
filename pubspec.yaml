@@ -48,6 +48,8 @@ dependencies:
   google_generative_ai: ^0.4.6
   mocktail: ^1.0.4
   image_picker: ^1.1.2
+  intl: ^0.20.2
+  font_awesome_flutter: ^10.8.0
   flutter_bloc: ^9.1.0
   get_it: ^8.0.3
 
@@ -63,6 +65,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
   build_runner: ^2.3.3
+  test_cov_console: ^0.2.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

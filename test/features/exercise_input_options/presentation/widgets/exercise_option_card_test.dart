@@ -10,7 +10,7 @@ void main() {
       // Test data
       const iconData = Icons.directions_run;
       const title = 'Running';
-      const subtitle = 'Track your running session';
+      const subtitle = 'Track your cardio session';
       const color = Color(0xFFFF6B6B); // Pink color
       const route = '/running-input';
       
@@ -44,7 +44,7 @@ void main() {
       // Test data
       const iconData = Icons.directions_run;
       const title = 'Running';
-      const subtitle = 'Track your running session';
+      const subtitle = 'Track your cardio session';
       const color = Color(0xFFFF6B6B); // Pink color
       const route = '/running-input';
       
@@ -91,7 +91,7 @@ void main() {
       // Test data
       const iconData = Icons.directions_run;
       const title = 'Running';
-      const subtitle = 'Track your running session';
+      const subtitle = 'Track your cardio session';
       const color = Color(0xFFFF6B6B); // Pink color
       const route = '/running-input';
       
@@ -189,7 +189,7 @@ void main() {
             body: ExerciseOptionCard(
               icon: Icons.directions_run,
               title: 'Running',
-              subtitle: 'Track your running session',
+              subtitle: 'Track your cardio session',
               color: Colors.transparent,
               route: '/test',
             ),
@@ -211,7 +211,7 @@ void main() {
             body: ExerciseOptionCard(
               icon: Icons.directions_run,
               title: 'Running',
-              subtitle: 'Track your running session',
+              subtitle: 'Track your cardio session',
               color: const Color(0xFFFF6B6B),
               route: '',
             ),

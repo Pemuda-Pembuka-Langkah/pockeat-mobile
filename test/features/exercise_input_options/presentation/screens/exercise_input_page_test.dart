@@ -42,12 +42,12 @@ void main() {
       );
 
       // Verifikasi tiga jenis exercise muncul
-      expect(find.text('Running'), findsOneWidget);
+      expect(find.text('Cardio'), findsOneWidget);
       expect(find.text('Weightlifting'), findsOneWidget);
       expect(find.text('Smart Exercise Log'), findsOneWidget);
       
       // Verifikasi subtitle untuk tiap exercise
-      expect(find.text('Track your running session'), findsOneWidget);
+      expect(find.text('Track your cardio session'), findsOneWidget);
       expect(find.text('Log your strength training'), findsOneWidget);
       expect(find.text('Let AI analyze your workout'), findsOneWidget);
     });
@@ -140,12 +140,12 @@ void main() {
       );
 
       // Tap pada card
-      await tester.tap(find.text('Running'));
+      await tester.tap(find.text('Cardio'));
       await tester.pumpAndSettle();
 
       // Verifikasi route benar
-      expect(navigatedRoute, equals('/running-input'));
-      expect(find.textContaining('Route: /running-input'), findsOneWidget);
+      expect(navigatedRoute, equals('/cardio'));
+      expect(find.textContaining('Route: /cardio'), findsOneWidget);
     });
 
     testWidgets('renders correctly on small screen', (WidgetTester tester) async {
