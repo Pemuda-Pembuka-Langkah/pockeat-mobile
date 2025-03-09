@@ -1,4 +1,6 @@
 /// Export semua model terkait cardio activity
+library;
+
 export 'cardio_activity.dart';
 export 'running_activity.dart';
 export 'cycling_activity.dart';

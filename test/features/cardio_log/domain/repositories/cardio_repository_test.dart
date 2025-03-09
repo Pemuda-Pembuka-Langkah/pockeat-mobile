@@ -647,7 +647,7 @@ void main() {
 MockQueryDocumentSnapshot<Map<String, dynamic>> _createMockQueryDocSnap(
     String type, DateTime date) {
   final mockDoc = MockQueryDocumentSnapshot<Map<String, dynamic>>();
-  final String testId = 'test-${type}-${date.millisecondsSinceEpoch}';
+  final String testId = 'test-$type-${date.millisecondsSinceEpoch}';
   final startTime = date.add(const Duration(hours: 9));
   final endTime = date.add(const Duration(hours: 10));
   
