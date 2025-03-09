@@ -60,14 +60,19 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
     });
   }
 
-  void _navigateToExerciseDetail(ExerciseLogHistoryItem exercise) {
-    Navigator.of(context).pushNamed(
+  void _navigateToExerciseDetail(ExerciseLogHistoryItem exercise) async {
+    final result = await Navigator.of(context).pushNamed(
       '/exercise-detail',
       arguments: {
         'exerciseId': exercise.sourceId ?? exercise.id, // Gunakan sourceId jika ada, atau fallback ke id
         'activityType': exercise.activityType,
       },
     );
+    
+    // Refresh list if exercise was deleted (result == true)
+    if (result == true) {
+      _loadExercises();
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {

@@ -5,7 +5,7 @@ import 'package:mockito/annotations.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_history_page.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
-import 'package:intl/intl.dart'; // Add this line
+import 'package:intl/intl.dart';
 
 // Generate mock classes
 @GenerateMocks([ExerciseLogHistoryService])
@@ -558,6 +558,59 @@ void main() {
       expect(find.text('No exercises found for $testYear'), findsOneWidget);
       
       // 4. All filter empty message (already covered in existing tests)
+    });
+    
+    testWidgets('should call _loadExercises when returning with delete result',
+        (WidgetTester tester) async {
+      // Arrange - Spy on service to track calls
+      int callCount = 0;
+      when(mockService.getAllExerciseLogs()).thenAnswer((_) {
+        callCount++;
+        return Future.value(sampleExerciseLogs);
+      });
+
+      // Build widget
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseHistoryPage(service: mockService),
+        onGenerateRoute: (settings) {
+          if (settings.name == '/exercise-detail') {
+            // This simulates the detail page
+            return MaterialPageRoute(
+              builder: (context) => Scaffold(
+                appBar: AppBar(title: const Text('Detail Page')),
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Important: Simulate returning `true` as if an exercise was deleted
+                      Navigator.of(context).pop(true);
+                    },
+                    child: const Text('Delete and Go Back'),
+                  ),
+                ),
+              ),
+            );
+          }
+          return null;
+        },
+      ));
+
+      // Initial load
+      await tester.pumpAndSettle();
+      expect(callCount, 1, reason: 'Service should be called once during initialization');
+
+      // Navigate to detail
+      await tester.tap(find.text('Push-ups'));
+      await tester.pumpAndSettle();
+      
+      // Should still be just one call after navigation
+      expect(callCount, 1, reason: 'Service should not be called again just for navigating');
+      
+      // Now tap the delete button to pop with result=true
+      await tester.tap(find.text('Delete and Go Back'));
+      await tester.pumpAndSettle();
+      
+      // After returning with delete result, service should be called again
+      expect(callCount, 2, reason: 'Service should be called a second time after delete');
     });
   });
 }
