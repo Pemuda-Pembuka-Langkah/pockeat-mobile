@@ -96,6 +96,16 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
         title: Text(_getPageTitle()),
         backgroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.delete_outline,
+              color: Colors.red,
+            ),
+            onPressed: () => _showDeleteConfirmation(context),
+            tooltip: 'Delete',
+          ),
+        ],
       ),
       backgroundColor: const Color(0xFFF9F9F9),
       body: SafeArea(
@@ -223,6 +233,93 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
         'Unsupported activity type',
         style: TextStyle(color: Colors.red),
       ));
+    }
+  }
+
+  // Method untuk menampilkan dialog konfirmasi delete
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete Exercise'),
+          content: const Text(
+            'Are you sure you want to delete this exercise log? This action cannot be undone.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            TextButton(
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                _deleteExercise(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Method untuk menghapus exercise log
+  Future<void> _deleteExercise(BuildContext context) async {
+    // Menampilkan loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    try {
+      // Panggil service untuk menghapus exercise log
+      final result = await _detailService.deleteExerciseLog(
+        widget.exerciseId,
+        widget.activityType,
+      );
+
+      // Menghilangkan loading indicator
+      Navigator.of(context).pop();
+
+      // Cek hasil delete
+      if (result) {
+        // Success case - kembali ke halaman sebelumnya
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Exercise log deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pop(true); // Return true sebagai indikator sukses
+      } else {
+        // Failure case - tetap di halaman dan tampilkan error
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to delete exercise log'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      // Error case - tetap di halaman dan tampilkan error
+      Navigator.of(context).pop(); // Menghilangkan loading indicator
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting exercise log: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }
