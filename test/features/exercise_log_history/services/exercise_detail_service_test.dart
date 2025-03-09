@@ -440,5 +440,127 @@ void main() {
             .called(1);
       });
     });
+
+    group('Delete Exercise Log Tests', () {
+      test('deleteExerciseLog should return true when smart exercise deleted successfully', () async {
+        // Arrange
+        const exerciseId = 'smart-1';
+        when(mockSmartExerciseRepository.deleteById(exerciseId))
+            .thenAnswer((_) async => true);
+        
+        // Act
+        final result = await exerciseDetailService.deleteExerciseLog(
+            exerciseId, ExerciseLogHistoryItem.typeSmartExercise);
+        
+        // Assert
+        expect(result, isTrue);
+        verify(mockSmartExerciseRepository.deleteById(exerciseId)).called(1);
+      });
+      
+      test('deleteExerciseLog should return false when smart exercise not found', () async {
+        // Arrange
+        const exerciseId = 'non-existent-smart';
+        when(mockSmartExerciseRepository.deleteById(exerciseId))
+            .thenAnswer((_) async => false);
+        
+        // Act
+        final result = await exerciseDetailService.deleteExerciseLog(
+            exerciseId, ExerciseLogHistoryItem.typeSmartExercise);
+        
+        // Assert
+        expect(result, isFalse);
+        verify(mockSmartExerciseRepository.deleteById(exerciseId)).called(1);
+      });
+      
+      test('deleteExerciseLog should return true when cardio activity deleted successfully', () async {
+        // Arrange
+        const exerciseId = 'run-1';
+        when(mockCardioRepository.deleteCardioActivity(exerciseId))
+            .thenAnswer((_) async => true);
+        
+        // Act
+        final result = await exerciseDetailService.deleteExerciseLog(
+            exerciseId, ExerciseLogHistoryItem.typeCardio);
+        
+        // Assert
+        expect(result, isTrue);
+        verify(mockCardioRepository.deleteCardioActivity(exerciseId)).called(1);
+      });
+      
+      test('deleteExerciseLog should return false when cardio activity not found', () async {
+        // Arrange
+        const exerciseId = 'non-existent-cardio';
+        when(mockCardioRepository.deleteCardioActivity(exerciseId))
+            .thenAnswer((_) async => false);
+        
+        // Act
+        final result = await exerciseDetailService.deleteExerciseLog(
+            exerciseId, ExerciseLogHistoryItem.typeCardio);
+        
+        // Assert
+        expect(result, isFalse);
+        verify(mockCardioRepository.deleteCardioActivity(exerciseId)).called(1);
+      });
+      
+      test('deleteExerciseLog should return true when weightlifting exercise deleted successfully', () async {
+        // Arrange
+        const exerciseId = 'weight-1';
+        when(mockWeightLiftingRepository.deleteExercise(exerciseId))
+            .thenAnswer((_) async => true);
+        
+        // Act
+        final result = await exerciseDetailService.deleteExerciseLog(
+            exerciseId, ExerciseLogHistoryItem.typeWeightlifting);
+        
+        // Assert
+        expect(result, isTrue);
+        verify(mockWeightLiftingRepository.deleteExercise(exerciseId)).called(1);
+      });
+      
+      test('deleteExerciseLog should return false when weightlifting exercise not found', () async {
+        // Arrange
+        const exerciseId = 'non-existent-weight';
+        when(mockWeightLiftingRepository.deleteExercise(exerciseId))
+            .thenAnswer((_) async => false);
+        
+        // Act
+        final result = await exerciseDetailService.deleteExerciseLog(
+            exerciseId, ExerciseLogHistoryItem.typeWeightlifting);
+        
+        // Assert
+        expect(result, isFalse);
+        verify(mockWeightLiftingRepository.deleteExercise(exerciseId)).called(1);
+      });
+      
+      test('deleteExerciseLog should return false when activity type is unknown', () async {
+        // Arrange
+        const exerciseId = 'some-id';
+        
+        // Act
+        final result = await exerciseDetailService.deleteExerciseLog(
+            exerciseId, 'unknown_type');
+        
+        // Assert
+        expect(result, isFalse);
+        verifyNever(mockSmartExerciseRepository.deleteById(argThat(isA<String>())));
+        verifyNever(mockCardioRepository.deleteCardioActivity(argThat(isA<String>())));
+        verifyNever(mockWeightLiftingRepository.deleteExercise(argThat(isA<String>())));
+      });
+      
+      test('deleteExerciseLog should handle exceptions gracefully', () async {
+        // Arrange
+        const exerciseId = 'error-id';
+        when(mockSmartExerciseRepository.deleteById(exerciseId))
+            .thenThrow(Exception('Test error'));
+        
+        // Act
+        final result = await exerciseDetailService.deleteExerciseLog(
+            exerciseId, ExerciseLogHistoryItem.typeSmartExercise);
+        
+        // Assert
+        expect(result, isFalse);
+        verify(mockSmartExerciseRepository.deleteById(exerciseId)).called(1);
+      });
+    });
   });
 }
