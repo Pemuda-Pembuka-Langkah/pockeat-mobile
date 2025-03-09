@@ -49,7 +49,7 @@ class FormValidator {
     }
     
     if (weight <= 0) {
-      return 'Weight cannot be negative';
+      return 'Weight must be greater than 0';
     }
     
     return null;
