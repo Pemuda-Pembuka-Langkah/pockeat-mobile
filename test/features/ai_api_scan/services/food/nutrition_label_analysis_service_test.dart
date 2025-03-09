@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
@@ -110,6 +111,7 @@ void main() {
       );
     });
 
+
     test('should throw exception when API returns error response', () async {
       // Arrange
       final mockBytes = Uint8List.fromList([1, 2, 3, 4]);
@@ -125,4 +127,22 @@ void main() {
       );
     });
   });
+
+    test('should throw exception when response text is null', () async {
+      // Arrange
+      final mockBytes = Uint8List.fromList([1, 2, 3, 4]);
+      const servings = 1.0;
+      mockFile.bytesToReturn = mockBytes;
+      mockModelWrapper.responseText = null; // Setting response text to null
+
+      // Act & Assert
+      expect(
+        () => service.analyze(mockFile, servings),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message, 
+          'error message', 
+          'No response text generated'
+        )),
+      );
+    });
 }
