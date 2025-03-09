@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
@@ -17,6 +18,7 @@ void main() {
   group('SmartExerciseLogPage Widget Tests', () {
     late MockGeminiService mockGeminiService;
     late MockSmartExerciseLogRepository mockRepository;
+    final getIt = GetIt.instance;
 
     // Sample exercise analysis result for testing
     final mockAnalysisResult = ExerciseAnalysisResult(
@@ -46,6 +48,21 @@ void main() {
     setUp(() {
       mockGeminiService = MockGeminiService();
       mockRepository = MockSmartExerciseLogRepository();
+      
+      // Reset GetIt before each test
+      if (GetIt.I.isRegistered<GeminiService>()) {
+        GetIt.I.unregister<GeminiService>();
+      }
+      
+      // Register mock services in GetIt
+      getIt.registerSingleton<GeminiService>(mockGeminiService);
+    });
+
+    tearDown(() {
+      // Clean up GetIt after each test
+      if (GetIt.I.isRegistered<GeminiService>()) {
+        GetIt.I.unregister<GeminiService>();
+      }
     });
 
     testWidgets('renders initial UI with workout form', (WidgetTester tester) async {
