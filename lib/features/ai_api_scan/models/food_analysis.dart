@@ -3,20 +3,50 @@ class FoodAnalysisResult {
   final String foodName;
   final List<Ingredient> ingredients;
   final NutritionInfo nutritionInfo;
+  final List<String> warnings;
+  
+  // Constants for warning messages to ensure consistency
+  static const String highSodiumWarning = "High sodium content";
+  static const String highSugarWarning = "High sugar content";
+  
+  // Thresholds for warnings
+  static const double highSodiumThreshold = 500.0; // mg
+  static const double highSugarThreshold = 20.0; // g
   
   FoodAnalysisResult({
     required this.foodName,
     required this.ingredients,
     required this.nutritionInfo,
+    this.warnings = const [],
   });
   
   factory FoodAnalysisResult.fromJson(Map<String, dynamic> json) {
+    final nutritionInfo = NutritionInfo.fromJson(json['nutrition_info'] ?? {});
+    
+    // Generate warnings for high sodium or sugar if not provided in the JSON
+    List<String> warnings = [];
+    
+    // If warnings are provided in the JSON, use those
+    if (json['warnings'] != null) {
+      warnings = List<String>.from(json['warnings']);
+    } 
+    // Otherwise generate warnings based on nutrition values
+    else {
+      if (nutritionInfo.sodium > highSodiumThreshold) {
+        warnings.add(highSodiumWarning);
+      }
+      if (nutritionInfo.sugar > highSugarThreshold) {
+        warnings.add(highSugarWarning);
+      }
+    }
+    
     return FoodAnalysisResult(
       foodName: json['food_name'] ?? '',
       ingredients: (json['ingredients'] as List<dynamic>?)
           ?.map((item) => Ingredient.fromJson(item))
           .toList() ?? [],
-      nutritionInfo: NutritionInfo.fromJson(json['nutrition_info'] ?? {}),
+      nutritionInfo: nutritionInfo,
+      warnings: warnings,
     );
   }
 
@@ -31,28 +61,23 @@ class FoodAnalysisResult {
 
 class Ingredient {
   final String name;
-  final double percentage;
-  final bool allergen;
-  
+  final double servings;
+
   Ingredient({
     required this.name,
-    required this.percentage,
-    required this.allergen,
+    required this.servings,
   });
   
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     return Ingredient(
       name: json['name'] ?? '',
-      percentage: _parseDouble(json['percentage']),
-      allergen: json['allergen'] ?? false,
+      servings: _parseDouble(json['servings'])
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'name': name,
-      'percentage': percentage,
-      'allergen': allergen,
     };
   }
   
