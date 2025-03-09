@@ -24,7 +24,7 @@ void main() {
     test('Validates weight correctly', () {
       expect(FormValidator.validateWeight(''), 'Please enter a valid number');
       expect(FormValidator.validateWeight('abc'), 'Please enter a valid number');
-      expect(FormValidator.validateWeight('-5'), 'Weight cannot be negative');
+      expect(FormValidator.validateWeight('-5'), 'Weight must be greater than 0');
       expect(FormValidator.validateWeight('100'), null);
     });
   });

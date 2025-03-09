@@ -64,6 +64,9 @@ lcov.info
 *.temp
 *.bak
 
+*.rules
+*.json
+
 # Generated files
 *.g.dart
 *.freezed.dart
@@ -72,3 +75,7 @@ lcov.info
 # Local configuration
 local.properties
 .gradle/
+
+# Android C++ build files
+android/app/.cxx/
+
