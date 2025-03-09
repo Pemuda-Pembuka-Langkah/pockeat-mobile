@@ -14,6 +14,7 @@ import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
+import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
 // Import dependencies untuk DI
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 import 'package:pockeat/core/di/service_locator.dart';
@@ -112,6 +113,7 @@ class MyApp extends StatelessWidget {
             )),
         '/add-food': (context) => const FoodInputPage(),
         '/add-exercise': (context) => const ExerciseInputPage(),
+        '/weightlifting-input': (context) => const WeightliftingPage(),
       },
     );
   }
