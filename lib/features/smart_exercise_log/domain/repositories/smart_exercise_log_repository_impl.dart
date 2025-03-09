@@ -158,4 +158,24 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
       throw Exception('Failed to retrieve analysis results by year: $e');
     }
   }
+  
+  @override
+  Future<bool> deleteById(String id) async {
+    try {
+      // Check if document exists first
+      final docRef = _firestore.collection(_collection).doc(id);
+      final docSnapshot = await docRef.get();
+      
+      // If document doesn't exist, return false
+      if (!docSnapshot.exists) {
+        return false;
+      }
+      
+      // Delete the document and return true
+      await docRef.delete();
+      return true;
+    } catch (e) {
+      throw Exception('Failed to delete analysis result: $e');
+    }
+  }
 }

@@ -44,4 +44,11 @@ abstract class SmartExerciseLogRepository {
   /// Returns [List<ExerciseAnalysisResult>] containing analysis results on the specified year
   /// Throws [Exception] if an error occurs during data retrieval
   Future<List<ExerciseAnalysisResult>> getAnalysisResultsByYear(int year, {int? limit});
+  
+  /// Deletes an analysis result by its ID
+  /// 
+  /// Parameter [id] the unique identifier of the analysis result to delete
+  /// Returns [bool] true if successfully deleted, false if the document doesn't exist
+  /// Throws [Exception] if an error occurs during deletion
+  Future<bool> deleteById(String id);
 }
