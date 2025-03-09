@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/weight_lifting.dart';
-import '../models/weight_lifting_factory.dart';
 import 'weight_lifting_repository.dart';
 
 /// Implementasi ExerciseRepository menggunakan Firebase Firestore
@@ -121,12 +120,14 @@ class WeightLiftingRepositoryImpl implements WeightLiftingRepository {
   @override
   Future<List<WeightLifting>> filterByDate(DateTime date) async {
     try {
-      // Extract date string to use as a filter
-      final dateString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+      // Create start and end timestamps for the given date
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
       
       final querySnapshot = await _firestore
           .collection(_collection)
-          .where('dateCreated', isEqualTo: dateString)
+          .where('timestamp', isGreaterThanOrEqualTo: startOfDay.millisecondsSinceEpoch)
+          .where('timestamp', isLessThanOrEqualTo: endOfDay.millisecondsSinceEpoch)
           .get();
       
       return querySnapshot.docs
@@ -145,20 +146,21 @@ class WeightLiftingRepositoryImpl implements WeightLiftingRepository {
     }
     
     try {
-      // Create month prefix for string comparison
-      final monthPrefix = "$year-${month.toString().padLeft(2, '0')}";
+      // Create start and end timestamps for the given month
+      final startOfMonth = DateTime(year, month, 1);
+      final endOfMonth = month < 12 
+          ? DateTime(year, month + 1, 1).subtract(Duration(milliseconds: 1))
+          : DateTime(year + 1, 1, 1).subtract(Duration(milliseconds: 1));
       
-      // Need to get all exercises and filter manually since Firestore doesn't support
-      // direct substring matching in where clauses
-      final querySnapshot = await _firestore.collection(_collection).get();
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('timestamp', isGreaterThanOrEqualTo: startOfMonth.millisecondsSinceEpoch)
+          .where('timestamp', isLessThanOrEqualTo: endOfMonth.millisecondsSinceEpoch)
+          .get();
       
-      final filteredDocs = querySnapshot.docs.where((doc) {
-        final data = doc.data();
-        final dateStr = data['dateCreated'] as String?;
-        return dateStr != null && dateStr.startsWith(monthPrefix);
-      }).toList();
-      
-      return filteredDocs.map((doc) => WeightLifting.fromJson(doc.data())).toList();
+      return querySnapshot.docs
+          .map((doc) => WeightLifting.fromJson(doc.data()))
+          .toList();
     } catch (e) {
       throw Exception('Failed to filter exercises by month: $e');
     }
@@ -172,20 +174,19 @@ class WeightLiftingRepositoryImpl implements WeightLiftingRepository {
     }
     
     try {
-      // Create year prefix for string comparison
-      final yearPrefix = "$year-";
+      // Create start and end timestamps for the given year
+      final startOfYear = DateTime(year, 1, 1);
+      final endOfYear = DateTime(year + 1, 1, 1).subtract(Duration(milliseconds: 1));
       
-      // Need to get all exercises and filter manually since Firestore doesn't support
-      // direct substring matching in where clauses
-      final querySnapshot = await _firestore.collection(_collection).get();
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('timestamp', isGreaterThanOrEqualTo: startOfYear.millisecondsSinceEpoch)
+          .where('timestamp', isLessThanOrEqualTo: endOfYear.millisecondsSinceEpoch)
+          .get();
       
-      final filteredDocs = querySnapshot.docs.where((doc) {
-        final data = doc.data();
-        final dateStr = data['dateCreated'] as String?;
-        return dateStr != null && dateStr.startsWith(yearPrefix);
-      }).toList();
-      
-      return filteredDocs.map((doc) => WeightLifting.fromJson(doc.data())).toList();
+      return querySnapshot.docs
+          .map((doc) => WeightLifting.fromJson(doc.data()))
+          .toList();
     } catch (e) {
       throw Exception('Failed to filter exercises by year: $e');
     }

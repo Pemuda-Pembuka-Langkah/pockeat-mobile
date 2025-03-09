@@ -333,7 +333,7 @@ void main() {
       test('should delete cardio activity successfully', () async {
         // Setup mock document
         when(mockCollection.doc('test-id')).thenReturn(mockDocument);
-        when(mockDocument.delete()).thenAnswer((_) async => null);
+        when(mockDocument.delete()).thenAnswer((_) async {});
         
         // Call method under test
         final result = await repository.deleteCardioActivity('test-id');
