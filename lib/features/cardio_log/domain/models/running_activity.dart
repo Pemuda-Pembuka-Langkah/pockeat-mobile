@@ -1,4 +1,3 @@
-import 'package:uuid/uuid.dart';
 import '../../services/calorie_calculator.dart';
 import 'cardio_activity.dart';
 
@@ -7,17 +6,13 @@ class RunningActivity extends CardioActivity {
   final double distanceKm;
 
   RunningActivity({
-    String? id,
-    required DateTime date,
-    required DateTime startTime,
-    required DateTime endTime,
+    super.id,
+    required super.date,
+    required super.startTime,
+    required super.endTime,
     required this.distanceKm,
     double? caloriesBurned,
   }) : super(
-          id: id,
-          date: date,
-          startTime: startTime,
-          endTime: endTime,
           caloriesBurned: caloriesBurned ?? 0.0,
           type: CardioType.running,
         );

@@ -8,9 +8,9 @@ class RunningDetailWidget extends StatelessWidget {
   final Color primaryPink = const Color(0xFFFF6B6B); // Cardio color
   
   const RunningDetailWidget({
-    Key? key,
+    super.key,
     required this.activity,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

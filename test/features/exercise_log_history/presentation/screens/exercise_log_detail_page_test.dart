@@ -18,11 +18,8 @@ import 'package:pockeat/features/weight_training_log/domain/repositories/weight_
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 
 // Generate mock classes for repositories
-@GenerateMocks([
-  CardioRepository, 
-  SmartExerciseLogRepository,
-  WeightLiftingRepository
-])
+@GenerateMocks(
+    [CardioRepository, SmartExerciseLogRepository, WeightLiftingRepository])
 import 'exercise_log_detail_page_test.mocks.dart';
 
 void main() {
@@ -95,172 +92,174 @@ void main() {
       mockWeightLiftingRepository = MockWeightLiftingRepository();
     });
 
-    testWidgets('should show loading indicator while data is loading', 
-      (WidgetTester tester) async {
+    testWidgets('should show loading indicator while data is loading',
+        (WidgetTester tester) async {
       // Arrange
       // Use a completer to keep the Future in a pending state
-      when(mockCardioRepository.getCardioActivityById(any))
-          .thenAnswer((_) => Future.delayed(const Duration(seconds: 1), () => runningActivity));
-      
+      when(mockCardioRepository.getCardioActivityById(any)).thenAnswer((_) =>
+          Future.delayed(const Duration(seconds: 1), () => runningActivity));
+
       // Act - Create widget and pump it
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'run-1',
-          activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
+          activityType: ExerciseLogHistoryItem.typeCardio,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
           weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
-      
+
       // Assert - should show loading indicator
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      
+
       // Clean up - complete the futures so the test can finish
       await tester.pumpAndSettle();
     });
-    
+
     testWidgets('should display error message when data loading fails',
-      (WidgetTester tester) async {
+        (WidgetTester tester) async {
       // Arrange
       when(mockCardioRepository.getCardioActivityById(any))
           .thenAnswer((_) => Future.error('Failed to load data'));
-      
+
       // Act
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'run-1',
-          activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
+          activityType: ExerciseLogHistoryItem.typeCardio,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
           weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
-      
+
       // Wait for error to appear
       await tester.pumpAndSettle();
-      
+
       // Assert - should show error message
       expect(find.text('Error loading data'), findsOneWidget);
     });
-    
+
     testWidgets('should display RunningDetailWidget for running activity',
-      (WidgetTester tester) async {
+        (WidgetTester tester) async {
       // Arrange
       when(mockCardioRepository.getCardioActivityById(any))
           .thenAnswer((_) async => runningActivity);
-      
+
       // Act
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'run-1',
-          activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
+          activityType: ExerciseLogHistoryItem.typeCardio,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
           weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
-      
+
       await tester.pumpAndSettle(); // Wait for all animations to complete
-      
+
       // Assert - should render RunningDetailWidget
       expect(find.byType(RunningDetailWidget), findsOneWidget);
     });
-    
+
     testWidgets('should display CyclingDetailWidget for cycling activity',
-      (WidgetTester tester) async {
+        (WidgetTester tester) async {
       // Arrange
       when(mockCardioRepository.getCardioActivityById(any))
           .thenAnswer((_) async => cyclingActivity);
-      
+
       // Act
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'cycle-1',
-          activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
+          activityType: ExerciseLogHistoryItem.typeCardio,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
           weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
-      
+
       await tester.pumpAndSettle(); // Wait for all animations to complete
-      
+
       // Assert - should render CyclingDetailWidget
       expect(find.byType(CyclingDetailWidget), findsOneWidget);
     });
-    
+
     testWidgets('should display SwimmingDetailWidget for swimming activity',
-      (WidgetTester tester) async {
+        (WidgetTester tester) async {
       // Arrange
       when(mockCardioRepository.getCardioActivityById(any))
           .thenAnswer((_) async => swimmingActivity);
-      
+
       // Act
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'swim-1',
-          activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
+          activityType: ExerciseLogHistoryItem.typeCardio,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
           weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
-      
+
       await tester.pumpAndSettle(); // Wait for all animations to complete
-      
+
       // Assert - should render SwimmingDetailWidget
       expect(find.byType(SwimmingDetailWidget), findsOneWidget);
     });
-    
+
     testWidgets('should display SmartExerciseDetailWidget for smart exercise',
-      (WidgetTester tester) async {
+        (WidgetTester tester) async {
       // Arrange
       when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
           .thenAnswer((_) async => smartExercise);
-      
+
       // Act
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'smart-1',
-          activityType: ExerciseLogHistoryItem.TYPE_SMART_EXERCISE,
+          activityType: ExerciseLogHistoryItem.typeSmartExercise,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
           weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
-      
+
       await tester.pumpAndSettle(); // Wait for all animations to complete
-      
+
       // Assert - should render SmartExerciseDetailWidget
       expect(find.byType(SmartExerciseDetailWidget), findsOneWidget);
     });
-    
+
     testWidgets('should show error message when exercise data is not found',
-      (WidgetTester tester) async {
+        (WidgetTester tester) async {
       // Arrange
       when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
           .thenAnswer((_) async => null);
-      
+
       // Act
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'non-existent-id',
-          activityType: ExerciseLogHistoryItem.TYPE_SMART_EXERCISE,
+          activityType: ExerciseLogHistoryItem.typeSmartExercise,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
           weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
-      
+
       await tester.pumpAndSettle(); // Wait for all animations to complete
-      
+
       // Assert - should show the error message that appears when data is null
-      expect(find.text('An error occurred while loading exercise data'), findsOneWidget);
+      expect(find.text('An error occurred while loading exercise data'),
+          findsOneWidget);
     });
-    
-    testWidgets('should display weight lifting details when exercise type is weightlifting', 
-      (WidgetTester tester) async {
+
+    testWidgets(
+        'should display weight lifting details when exercise type is weightlifting',
+        (WidgetTester tester) async {
       // Arrange
       when(mockWeightLiftingRepository.getExerciseById('weight-1'))
           .thenAnswer((_) async => weightLiftingExercise);
@@ -269,7 +268,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'weight-1',
-          activityType: ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING,
+          activityType: ExerciseLogHistoryItem.typeWeightlifting,
           cardioRepository: mockCardioRepository,
           smartExerciseRepository: mockSmartExerciseRepository,
           weightLiftingRepository: mockWeightLiftingRepository,
@@ -281,10 +280,10 @@ void main() {
 
       // Assert - basic info (using more flexible expectations)
       expect(find.text('Bench Press'), findsOneWidget);
-      
+
       // Check that the body part is displayed somewhere (may appear multiple times)
       expect(find.textContaining('Chest'), findsAtLeastNWidgets(1));
-      
+
       // Check that at least one weight value is displayed
       expect(find.textContaining('60'), findsAtLeastNWidgets(1));
     });

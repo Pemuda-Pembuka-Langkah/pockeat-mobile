@@ -8,9 +8,9 @@ class SmartExerciseDetailWidget extends StatelessWidget {
   final Color purpleColor = const Color(0xFF9B6BFF); // Smart exercise color
   
   const SmartExerciseDetailWidget({
-    Key? key,
+    super.key,
     required this.exercise,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

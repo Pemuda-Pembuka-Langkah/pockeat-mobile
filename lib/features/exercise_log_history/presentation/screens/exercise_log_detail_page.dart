@@ -24,13 +24,13 @@ class ExerciseLogDetailPage extends StatefulWidget {
   final WeightLiftingRepository weightLiftingRepository;
 
   const ExerciseLogDetailPage({
-    Key? key,
+    super.key,
     required this.exerciseId,
     required this.activityType,
     required this.cardioRepository,
     required this.smartExerciseRepository,
     required this.weightLiftingRepository,
-  }) : super(key: key);
+  });
 
   @override
   State<ExerciseLogDetailPage> createState() => _ExerciseLogDetailPageState();
@@ -60,11 +60,12 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
         widget.exerciseId, widget.activityType);
 
     // Step 2: Load data based on the activity type
-    if (widget.activityType == ExerciseLogHistoryItem.TYPE_SMART_EXERCISE) {
+    if (widget.activityType == ExerciseLogHistoryItem.typeSmartExercise) {
       return _detailService.getSmartExerciseDetail(widget.exerciseId);
-    } else if (widget.activityType == ExerciseLogHistoryItem.TYPE_CARDIO) {
+    } else if (widget.activityType == ExerciseLogHistoryItem.typeCardio) {
       return _loadCardioExerciseData();
-    } else if (widget.activityType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING) {
+    } else if (widget.activityType ==
+        ExerciseLogHistoryItem.typeWeightlifting) {
       return _detailService.getWeightLiftingDetail(widget.exerciseId);
     } else {
       return null;
@@ -165,9 +166,9 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
   }
 
   String _getPageTitle() {
-    if (widget.activityType == ExerciseLogHistoryItem.TYPE_SMART_EXERCISE) {
+    if (widget.activityType == ExerciseLogHistoryItem.typeSmartExercise) {
       return 'Smart Exercise Details';
-    } else if (widget.activityType == ExerciseLogHistoryItem.TYPE_CARDIO) {
+    } else if (widget.activityType == ExerciseLogHistoryItem.typeCardio) {
       switch (_cardioType) {
         case 'running':
           return 'Running Details';
@@ -178,7 +179,8 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
         default:
           return 'Cardio Details';
       }
-    } else if (widget.activityType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING) {
+    } else if (widget.activityType ==
+        ExerciseLogHistoryItem.typeWeightlifting) {
       return 'Weight Training Details';
     } else {
       return 'Exercise Details';
@@ -195,9 +197,9 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
     }
 
     // Determine the correct widget based on the exercise type
-    if (widget.activityType == ExerciseLogHistoryItem.TYPE_SMART_EXERCISE) {
+    if (widget.activityType == ExerciseLogHistoryItem.typeSmartExercise) {
       return SmartExerciseDetailWidget(exercise: exercise);
-    } else if (widget.activityType == ExerciseLogHistoryItem.TYPE_CARDIO) {
+    } else if (widget.activityType == ExerciseLogHistoryItem.typeCardio) {
       if (exercise is RunningActivity) {
         return RunningDetailWidget(activity: exercise);
       } else if (exercise is CyclingActivity) {
@@ -208,7 +210,8 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
         // If the type is not recognized but still cardio, display a generic message
         return const Center(child: Text('Unsupported cardio type'));
       }
-    } else if (widget.activityType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING) {
+    } else if (widget.activityType ==
+        ExerciseLogHistoryItem.typeWeightlifting) {
       if (exercise is WeightLifting) {
         return WeightLiftingDetailWidget(weightLifting: exercise);
       } else {

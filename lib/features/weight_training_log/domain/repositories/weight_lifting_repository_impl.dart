@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/weight_lifting.dart';
-import '../models/weight_lifting_factory.dart';
 import 'weight_lifting_repository.dart';
 
 /// Implementasi ExerciseRepository menggunakan Firebase Firestore

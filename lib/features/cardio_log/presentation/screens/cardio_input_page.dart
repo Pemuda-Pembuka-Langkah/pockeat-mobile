@@ -15,9 +15,9 @@ class CardioInputPage extends StatefulWidget {
   final CardioRepository? repository;
 
   const CardioInputPage({
-    Key? key, 
+    super.key, 
     this.repository,
-  }) : super(key: key);
+  });
 
   @override
   CardioInputPageState createState() => CardioInputPageState();
@@ -370,36 +370,40 @@ class CardioInputPageState extends State<CardioInputPage> {
       await _repository.saveCardioActivity(activity);
           
       // Show success message to user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Activity successfully saved! Calories burned: ${calories.toStringAsFixed(0)} kcal',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Activity successfully saved! Calories burned: ${calories.toStringAsFixed(0)} kcal',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
+            backgroundColor: primaryPink,
+            duration: const Duration(seconds: 2),
           ),
-          backgroundColor: primaryPink,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+        );
+      }
       _navigateAfterSave();
       
     } catch (e) {
       // Show error message to user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Failed to save activity. Please try again.',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed to save activity. Please try again.',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+        );
+      }
     }
   }
   

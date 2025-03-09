@@ -6,11 +6,11 @@ class BottomBar extends StatelessWidget {
   final VoidCallback? onSaveWorkout;
 
   const BottomBar({
-    Key? key,
+    super.key,
     required this.totalVolume,
     required this.primaryGreen,
     required this.onSaveWorkout,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

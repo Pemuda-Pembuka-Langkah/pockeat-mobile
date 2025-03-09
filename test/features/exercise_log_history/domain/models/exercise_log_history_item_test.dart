@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
-import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
@@ -17,7 +16,7 @@ void main() {
       // Arrange
       final item = ExerciseLogHistoryItem(
         id: testId,
-        activityType: ExerciseLogHistoryItem.TYPE_SMART_EXERCISE,
+        activityType: ExerciseLogHistoryItem.typeSmartExercise,
         title: 'Running',
         subtitle: '30 minutes • High intensity',
         timestamp: testTimestamp,
@@ -27,8 +26,8 @@ void main() {
 
       // Assert
       expect(item.id, equals(testId));
-      expect(item.activityType,
-          equals(ExerciseLogHistoryItem.TYPE_SMART_EXERCISE));
+      expect(
+          item.activityType, equals(ExerciseLogHistoryItem.typeSmartExercise));
       expect(item.title, equals('Running'));
       expect(item.subtitle, equals('30 minutes • High intensity'));
       expect(item.timestamp, equals(testTimestamp));
@@ -41,7 +40,7 @@ void main() {
         () {
       // Arrange
       final item = ExerciseLogHistoryItem(
-        activityType: ExerciseLogHistoryItem.TYPE_SMART_EXERCISE,
+        activityType: ExerciseLogHistoryItem.typeSmartExercise,
         title: 'Running',
         subtitle: '30 minutes • High intensity',
         timestamp: testTimestamp,
@@ -67,10 +66,12 @@ void main() {
       );
 
       // Act
-      final item = ExerciseLogHistoryItem.fromSmartExerciseLog(exerciseAnalysisResult);
+      final item =
+          ExerciseLogHistoryItem.fromSmartExerciseLog(exerciseAnalysisResult);
 
       // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_SMART_EXERCISE));
+      expect(
+          item.activityType, equals(ExerciseLogHistoryItem.typeSmartExercise));
       expect(item.title, equals('Running'));
       expect(item.subtitle, equals('30 min • High'));
       expect(item.timestamp, equals(testTimestamp));
@@ -96,13 +97,16 @@ void main() {
       final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
 
       // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
-      expect(item.title, equals('Bench Press')); 
-      expect(item.subtitle, equals('3 sets • 24 reps • 80.0 kg')); 
+      expect(
+          item.activityType, equals(ExerciseLogHistoryItem.typeWeightlifting));
+      expect(item.title, equals('Bench Press'));
+      expect(item.subtitle, equals('3 sets • 24 reps • 80.0 kg'));
       expect(item.sourceId, equals('weight-123'));
     });
 
-    test('should create ExerciseLogHistoryItem from WeightliftingLog with valid values', () {
+    test(
+        'should create ExerciseLogHistoryItem from WeightliftingLog with valid values',
+        () {
       // Arrange - create a real WeightLifting instance
       final weightLifting = WeightLifting(
         id: 'weight-123',
@@ -120,13 +124,16 @@ void main() {
       final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
 
       // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
-      expect(item.title, equals('Bench Press')); 
-      expect(item.subtitle, equals('3 sets • 24 reps • 80.0 kg')); 
+      expect(
+          item.activityType, equals(ExerciseLogHistoryItem.typeWeightlifting));
+      expect(item.title, equals('Bench Press'));
+      expect(item.subtitle, equals('3 sets • 24 reps • 80.0 kg'));
       expect(item.sourceId, equals('weight-123'));
     });
 
-    test('should create ExerciseLogHistoryItem from CardioLog - Running activity', () {
+    test(
+        'should create ExerciseLogHistoryItem from CardioLog - Running activity',
+        () {
       // Arrange - create a RunningActivity instance
       final runningActivity = RunningActivity(
         id: 'cardio-123',
@@ -141,7 +148,7 @@ void main() {
       final item = ExerciseLogHistoryItem.fromCardioLog(runningActivity);
 
       // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_CARDIO));
+      expect(item.activityType, equals(ExerciseLogHistoryItem.typeCardio));
       expect(item.title, equals('Running'));
       expect(item.subtitle, equals('30 min'));
       expect(item.timestamp, equals(testTimestamp));
@@ -149,7 +156,9 @@ void main() {
       expect(item.sourceId, equals('cardio-123'));
     });
 
-    test('should create ExerciseLogHistoryItem from CardioLog - Cycling activity', () {
+    test(
+        'should create ExerciseLogHistoryItem from CardioLog - Cycling activity',
+        () {
       // Arrange - create a CyclingActivity instance
       final cyclingActivity = CyclingActivity(
         id: 'cardio-456',
@@ -165,15 +174,17 @@ void main() {
       final item = ExerciseLogHistoryItem.fromCardioLog(cyclingActivity);
 
       // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_CARDIO));
+      expect(item.activityType, equals(ExerciseLogHistoryItem.typeCardio));
       expect(item.title, equals('Cycling'));
       expect(item.subtitle, equals('45 min'));
       expect(item.timestamp, equals(testTimestamp));
       expect(item.caloriesBurned, equals(400));
       expect(item.sourceId, equals('cardio-456'));
     });
-    
-    test('should create ExerciseLogHistoryItem from CardioLog - Swimming activity', () {
+
+    test(
+        'should create ExerciseLogHistoryItem from CardioLog - Swimming activity',
+        () {
       // Arrange - create a SwimmingActivity instance
       final swimmingActivity = SwimmingActivity(
         id: 'cardio-789',
@@ -190,22 +201,24 @@ void main() {
       final item = ExerciseLogHistoryItem.fromCardioLog(swimmingActivity);
 
       // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_CARDIO));
+      expect(item.activityType, equals(ExerciseLogHistoryItem.typeCardio));
       expect(item.title, equals('Swimming'));
       expect(item.subtitle, contains('40 min'));
       expect(item.timestamp, equals(testTimestamp));
       expect(item.caloriesBurned, equals(350));
       expect(item.sourceId, equals('cardio-789'));
     });
-    
-    test('should create ExerciseLogHistoryItem from WeightLifting with multiple sets', () {
+
+    test(
+        'should create ExerciseLogHistoryItem from WeightLifting with multiple sets',
+        () {
       // Arrange - create a WeightLifting instance with multiple sets
       final sets = [
         WeightLiftingSet(weight: 80.0, reps: 10, duration: 30.0),
         WeightLiftingSet(weight: 85.0, reps: 8, duration: 25.0),
         WeightLiftingSet(weight: 90.0, reps: 6, duration: 20.0),
       ];
-      
+
       final weightLifting = WeightLifting(
         id: 'weight-123',
         name: 'Bench Press',
@@ -218,24 +231,27 @@ void main() {
       final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
 
       // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
+      expect(
+          item.activityType, equals(ExerciseLogHistoryItem.typeWeightlifting));
       expect(item.title, equals('Bench Press'));
       expect(item.subtitle, equals('3 sets • 24 reps • 85.0 kg'));
       expect(item.sourceId, equals('weight-123'));
-      
+
       // Calories should be calculated based on MET, duration, and weight
       // Formula: Calories = MET value × weight (kg) × duration (hours)
       // total duration is 75 minutes = 1.25 hours, standard weight = 70kg
       final expectedCalories = (6.0 * 70.0 * (75.0 / 60.0)).round();
       expect(item.caloriesBurned, equals(expectedCalories));
     });
-    
-    test('should create ExerciseLogHistoryItem from WeightLifting with a single set', () {
+
+    test(
+        'should create ExerciseLogHistoryItem from WeightLifting with a single set',
+        () {
       // Arrange - create a WeightLifting instance with a single set
       final sets = [
         WeightLiftingSet(weight: 100.0, reps: 5, duration: 20.0),
       ];
-      
+
       final weightLifting = WeightLifting(
         id: 'weight-456',
         name: 'Deadlift',
@@ -248,16 +264,19 @@ void main() {
       final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
 
       // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
+      expect(
+          item.activityType, equals(ExerciseLogHistoryItem.typeWeightlifting));
       expect(item.title, equals('Deadlift'));
       expect(item.subtitle, equals('1 sets • 5 reps • 100.0 kg'));
       expect(item.sourceId, equals('weight-456'));
-      
+
       final expectedCalories = (8.0 * 70.0 * (20.0 / 60.0)).round();
       expect(item.caloriesBurned, equals(expectedCalories));
     });
-    
-    test('should create ExerciseLogHistoryItem from WeightLifting with empty sets', () {
+
+    test(
+        'should create ExerciseLogHistoryItem from WeightLifting with empty sets',
+        () {
       // Arrange - create a WeightLifting instance with empty sets
       final weightLifting = WeightLifting(
         id: 'weight-789',
@@ -270,32 +289,33 @@ void main() {
       final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
 
       // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
+      expect(
+          item.activityType, equals(ExerciseLogHistoryItem.typeWeightlifting));
       expect(item.title, equals('Squat'));
       expect(item.subtitle, equals('0 sets • 0 reps • 0.0 kg'));
       expect(item.sourceId, equals('weight-789'));
-      
+
       // With no sets, there should be 0 calories
       expect(item.caloriesBurned, equals(0));
     });
-    
+
     group('timeAgo formatting tests', () {
       test('should format time as years correctly', () {
         // Arrange
         final item = ExerciseLogHistoryItem(
           id: 'test-id',
-          activityType: ExerciseLogHistoryItem.TYPE_SMART_EXERCISE,
+          activityType: ExerciseLogHistoryItem.typeSmartExercise,
           title: 'Test Exercise',
           subtitle: 'Test Subtitle',
           timestamp: DateTime(2023, 3, 8), // ~2 years ago
           caloriesBurned: 100,
         );
-        
+
         // Mock current time for consistent testing
         final now = DateTime(2025, 3, 8);
         final difference = now.difference(item.timestamp);
         final years = (difference.inDays / 365).floor();
-        
+
         // Assert
         expect(years, equals(2));
         // We can't directly test timeAgo because it uses DateTime.now()
@@ -307,25 +327,28 @@ void main() {
         // Arrange
         final item = ExerciseLogHistoryItem(
           id: 'test-id',
-          activityType: ExerciseLogHistoryItem.TYPE_SMART_EXERCISE,
+          activityType: ExerciseLogHistoryItem.typeSmartExercise,
           title: 'Test Exercise',
           subtitle: 'Test Subtitle',
-          timestamp: DateTime(2025, 1, 1), // Using first day of January for more reliable 2 months
+          timestamp: DateTime(2025, 1,
+              1), // Using first day of January for more reliable 2 months
           caloriesBurned: 100,
         );
-        
+
         // Mock current time for consistent testing
         final now = DateTime(2025, 3, 8);
         final difference = now.difference(item.timestamp);
         final months = (difference.inDays / 30).floor();
-        
+
         // Assert
         expect(months, equals(2));
         expect('${months}mo ago', equals('2mo ago'));
       });
     });
 
-    test('should handle null values gracefully when creating from WeightliftingLog', () {
+    test(
+        'should handle null values gracefully when creating from WeightliftingLog',
+        () {
       // Arrange - create a WeightLifting with empty sets
       final weightLifting = WeightLifting(
         id: 'weight-123',
@@ -339,9 +362,11 @@ void main() {
       final item = ExerciseLogHistoryItem.fromWeightliftingLog(weightLifting);
 
       // Assert
-      expect(item.activityType, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
+      expect(
+          item.activityType, equals(ExerciseLogHistoryItem.typeWeightlifting));
       expect(item.title, equals('Weightlifting Session')); // Default title
-      expect(item.subtitle, equals('0 sets • 0 reps • 0.0 kg')); // Default values with decimal
+      expect(item.subtitle,
+          equals('0 sets • 0 reps • 0.0 kg')); // Default values with decimal
       expect(item.sourceId, equals('weight-123'));
     });
 
@@ -375,19 +400,19 @@ void main() {
           caloriesBurned: 350,
         ),
       ];
-      
+
       final expectedTitles = [
         'Running',
         'Cycling',
         'Swimming',
       ];
-      
+
       for (int i = 0; i < testActivities.length; i++) {
         // Act
         final item = ExerciseLogHistoryItem.fromCardioLog(testActivities[i]);
 
         // Assert
-        expect(item.title, equals(expectedTitles[i]), 
+        expect(item.title, equals(expectedTitles[i]),
             reason: 'Incorrect title for CardioType ${testActivities[i].type}');
       }
     });

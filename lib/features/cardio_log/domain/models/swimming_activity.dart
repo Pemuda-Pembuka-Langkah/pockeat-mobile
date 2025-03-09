@@ -1,4 +1,3 @@
-import 'package:uuid/uuid.dart';
 import '../../services/calorie_calculator.dart';
 import 'cardio_activity.dart';
 
@@ -9,19 +8,15 @@ class SwimmingActivity extends CardioActivity {
   final String stroke;
 
   SwimmingActivity({
-    String? id,
-    required DateTime date,
-    required DateTime startTime,
-    required DateTime endTime,
+    super.id,
+    required super.date,
+    required super.startTime,
+    required super.endTime,
     required this.laps,
     required this.poolLength,
     required this.stroke,
     double? caloriesBurned,
   }) : super(
-          id: id,
-          date: date,
-          startTime: startTime,
-          endTime: endTime,
           caloriesBurned: caloriesBurned ?? 0.0,
           type: CardioType.swimming,
         );

@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 
 /// A reusable widget that displays an exercise history item in a card format.
-/// 
+///
 /// This widget is extracted from the RecentExerciseSection's buildExerciseCard
 /// but uses the ExerciseLogHistoryItem model instead of a Map.
 class ExerciseHistoryCard extends StatelessWidget {
@@ -24,11 +24,11 @@ class ExerciseHistoryCard extends StatelessWidget {
   /// Get the appropriate icon based on activity type
   IconData _getIconForActivityType(String activityType) {
     switch (activityType) {
-      case ExerciseLogHistoryItem.TYPE_CARDIO:
+      case ExerciseLogHistoryItem.typeCardio:
         return Icons.directions_run;
-      case ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING:
+      case ExerciseLogHistoryItem.typeWeightlifting:
         return CupertinoIcons.arrow_up_circle_fill;
-      case ExerciseLogHistoryItem.TYPE_SMART_EXERCISE:
+      case ExerciseLogHistoryItem.typeSmartExercise:
         return CupertinoIcons.text_badge_checkmark;
       default:
         return Icons.fitness_center;
@@ -38,11 +38,11 @@ class ExerciseHistoryCard extends StatelessWidget {
   /// Get the appropriate color based on activity type
   Color _getColorForActivityType(String activityType) {
     switch (activityType) {
-      case ExerciseLogHistoryItem.TYPE_CARDIO:
+      case ExerciseLogHistoryItem.typeCardio:
         return primaryPink;
-      case ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING:
+      case ExerciseLogHistoryItem.typeWeightlifting:
         return primaryGreen;
-      case ExerciseLogHistoryItem.TYPE_SMART_EXERCISE:
+      case ExerciseLogHistoryItem.typeSmartExercise:
         return purpleColor;
       default:
         return Colors.blue;

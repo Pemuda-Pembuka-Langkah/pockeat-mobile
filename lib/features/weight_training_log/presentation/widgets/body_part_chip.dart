@@ -7,12 +7,12 @@ class BodyPartChip extends StatelessWidget {
   final Color primaryGreen;
 
   const BodyPartChip({
-    Key? key,
+    super.key,
     required this.category,
     required this.isSelected,
     required this.onTap,
     required this.primaryGreen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

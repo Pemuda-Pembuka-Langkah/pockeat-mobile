@@ -13,7 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class WeightliftingPage extends StatefulWidget {
   final WeightLiftingRepository? repository;
   
-  const WeightliftingPage({Key? key, this.repository}) : super(key: key);
+  const WeightliftingPage({super.key, this.repository});
 
   @override
   _WeightliftingPageState createState() => _WeightliftingPageState();
@@ -72,8 +72,6 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     
     try {
       // Add current date to each exercise before saving
-      final now = DateTime.now();
-      final dateString = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
       
       // Save each exercise
       List<Future<String>> saveFutures = [];
@@ -191,20 +189,6 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     );
   }
 
-  List<Widget> _buildDialogActions(WeightLifting exercise, double weight, int reps, double duration) {
-    return [
-      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-      ElevatedButton(
-        onPressed: () {
-          if (weight > 0 && reps > 0 && duration > 0) {
-            addSet(exercise, weight, reps, duration);
-            Navigator.pop(context);
-          }
-        },
-        child: const Text('Add'),
-      ),
-    ];
-  }
 
   @override
   Widget build(BuildContext context) {

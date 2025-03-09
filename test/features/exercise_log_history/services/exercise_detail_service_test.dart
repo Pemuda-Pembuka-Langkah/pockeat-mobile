@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
@@ -15,7 +14,8 @@ import 'package:pockeat/features/weight_training_log/domain/models/weight_liftin
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 
 // Generate mocks for repositories
-@GenerateMocks([CardioRepository, SmartExerciseLogRepository, WeightLiftingRepository])
+@GenerateMocks(
+    [CardioRepository, SmartExerciseLogRepository, WeightLiftingRepository])
 import 'exercise_detail_service_test.mocks.dart';
 
 void main() {
@@ -66,14 +66,14 @@ void main() {
       timestamp: DateTime(2025, 3, 4),
       originalInput: 'I did push-ups for 15 minutes',
     );
-    
+
     // Create a sample weight lifting exercise with a set
     final weightLiftingSet = WeightLiftingSet(
       weight: 60.0,
       reps: 12,
       duration: 45.0,
     );
-    
+
     final weightLiftingExercise = WeightLifting(
       id: 'weight-1',
       name: 'Bench Press',
@@ -95,30 +95,38 @@ void main() {
     });
 
     group('Smart Exercise Detail Tests', () {
-      test('getSmartExerciseDetail should return exercise data when found', () async {
+      test('getSmartExerciseDetail should return exercise data when found',
+          () async {
         // Arrange
         when(mockSmartExerciseRepository.getAnalysisResultFromId('smart-1'))
             .thenAnswer((_) async => smartExerciseResult);
 
         // Act
-        final result = await exerciseDetailService.getSmartExerciseDetail('smart-1');
+        final result =
+            await exerciseDetailService.getSmartExerciseDetail('smart-1');
 
         // Assert
         expect(result, equals(smartExerciseResult));
-        verify(mockSmartExerciseRepository.getAnalysisResultFromId('smart-1')).called(1);
+        verify(mockSmartExerciseRepository.getAnalysisResultFromId('smart-1'))
+            .called(1);
       });
 
-      test('getSmartExerciseDetail should return null when not found', () async {
+      test('getSmartExerciseDetail should return null when not found',
+          () async {
         // Arrange
-        when(mockSmartExerciseRepository.getAnalysisResultFromId('non-existent'))
+        when(mockSmartExerciseRepository
+                .getAnalysisResultFromId('non-existent'))
             .thenAnswer((_) async => null);
 
         // Act
-        final result = await exerciseDetailService.getSmartExerciseDetail('non-existent');
+        final result =
+            await exerciseDetailService.getSmartExerciseDetail('non-existent');
 
         // Assert
         expect(result, isNull);
-        verify(mockSmartExerciseRepository.getAnalysisResultFromId('non-existent')).called(1);
+        verify(mockSmartExerciseRepository
+                .getAnalysisResultFromId('non-existent'))
+            .called(1);
       });
     });
 
@@ -175,13 +183,15 @@ void main() {
 
         // Act & Assert
         expect(
-          () => exerciseDetailService.getCardioActivityDetail<CyclingActivity>('run-1'),
+          () => exerciseDetailService
+              .getCardioActivityDetail<CyclingActivity>('run-1'),
           throwsA(isA<Exception>()),
         );
         verify(mockCardioRepository.getCardioActivityById('run-1')).called(1);
       });
 
-      test('getCardioActivityDetail should return null when activity not found', () async {
+      test('getCardioActivityDetail should return null when activity not found',
+          () async {
         // Arrange
         when(mockCardioRepository.getCardioActivityById('non-existent'))
             .thenAnswer((_) async => null);
@@ -192,7 +202,8 @@ void main() {
 
         // Assert
         expect(result, isNull);
-        verify(mockCardioRepository.getCardioActivityById('non-existent')).called(1);
+        verify(mockCardioRepository.getCardioActivityById('non-existent'))
+            .called(1);
       });
     });
 
@@ -204,13 +215,14 @@ void main() {
           title: 'Morning Running Session',
           subtitle: 'Morning run in the park',
           timestamp: DateTime(2025, 3, 1),
-          activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
+          activityType: ExerciseLogHistoryItem.typeCardio,
           caloriesBurned: 350,
           sourceId: 'run-src-1',
         );
 
         // Act
-        final result = exerciseDetailService.getCardioTypeFromHistoryItem(historyItem);
+        final result =
+            exerciseDetailService.getCardioTypeFromHistoryItem(historyItem);
 
         // Assert
         expect(result, equals('running'));
@@ -223,51 +235,57 @@ void main() {
           title: 'Cycling to Work',
           subtitle: 'Commute cycling',
           timestamp: DateTime(2025, 3, 2),
-          activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
+          activityType: ExerciseLogHistoryItem.typeCardio,
           caloriesBurned: 450,
           sourceId: 'cycle-src-1',
         );
 
         // Act
-        final result = exerciseDetailService.getCardioTypeFromHistoryItem(historyItem);
+        final result =
+            exerciseDetailService.getCardioTypeFromHistoryItem(historyItem);
 
         // Assert
         expect(result, equals('cycling'));
       });
 
-      test('getCardioTypeFromHistoryItem should detect swimming from title', () {
+      test('getCardioTypeFromHistoryItem should detect swimming from title',
+          () {
         // Arrange
         final historyItem = ExerciseLogHistoryItem(
           id: 'swim-1',
           title: 'Swimming Session',
           subtitle: 'Freestyle laps',
           timestamp: DateTime(2025, 3, 3),
-          activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
+          activityType: ExerciseLogHistoryItem.typeCardio,
           caloriesBurned: 500,
           sourceId: 'swim-src-1',
         );
 
         // Act
-        final result = exerciseDetailService.getCardioTypeFromHistoryItem(historyItem);
+        final result =
+            exerciseDetailService.getCardioTypeFromHistoryItem(historyItem);
 
         // Assert
         expect(result, equals('swimming'));
       });
 
-      test('getCardioTypeFromHistoryItem should return unknown for non-cardio type', () {
+      test(
+          'getCardioTypeFromHistoryItem should return unknown for non-cardio type',
+          () {
         // Arrange
         final historyItem = ExerciseLogHistoryItem(
           id: 'smart-1',
           title: 'Push-ups Session',
           subtitle: 'Strength training',
           timestamp: DateTime(2025, 3, 4),
-          activityType: ExerciseLogHistoryItem.TYPE_SMART_EXERCISE,
+          activityType: ExerciseLogHistoryItem.typeSmartExercise,
           caloriesBurned: 120,
           sourceId: 'smart-src-1',
         );
 
         // Act
-        final result = exerciseDetailService.getCardioTypeFromHistoryItem(historyItem);
+        final result =
+            exerciseDetailService.getCardioTypeFromHistoryItem(historyItem);
 
         // Assert
         expect(result, equals('unknown'));
@@ -275,120 +293,125 @@ void main() {
     });
 
     group('Actual Activity Type Tests', () {
-      test('getActualActivityType should return smart_exercise type directly', () async {
+      test('getActualActivityType should return smart_exercise type directly',
+          () async {
         // Act
         final result = await exerciseDetailService.getActualActivityType(
-          'smart-1', 
-          ExerciseLogHistoryItem.TYPE_SMART_EXERCISE
-        );
+            'smart-1', ExerciseLogHistoryItem.typeSmartExercise);
 
         // Assert
-        expect(result, equals(ExerciseLogHistoryItem.TYPE_SMART_EXERCISE));
+        expect(result, equals(ExerciseLogHistoryItem.typeSmartExercise));
         verifyZeroInteractions(mockCardioRepository);
       });
 
-      test('getActualActivityType should detect running for cardio type', () async {
+      test('getActualActivityType should detect running for cardio type',
+          () async {
         // Arrange
         when(mockCardioRepository.getCardioActivityById('run-1'))
             .thenAnswer((_) async => runningActivity);
 
         // Act
         final result = await exerciseDetailService.getActualActivityType(
-          'run-1', 
-          ExerciseLogHistoryItem.TYPE_CARDIO
-        );
+            'run-1', ExerciseLogHistoryItem.typeCardio);
 
         // Assert
         expect(result, equals('running'));
         verify(mockCardioRepository.getCardioActivityById('run-1')).called(1);
       });
 
-      test('getActualActivityType should detect cycling for cardio type', () async {
+      test('getActualActivityType should detect cycling for cardio type',
+          () async {
         // Arrange
         when(mockCardioRepository.getCardioActivityById('cycle-1'))
             .thenAnswer((_) async => cyclingActivity);
 
         // Act
         final result = await exerciseDetailService.getActualActivityType(
-          'cycle-1', 
-          ExerciseLogHistoryItem.TYPE_CARDIO
-        );
+            'cycle-1', ExerciseLogHistoryItem.typeCardio);
 
         // Assert
         expect(result, equals('cycling'));
         verify(mockCardioRepository.getCardioActivityById('cycle-1')).called(1);
       });
 
-      test('getActualActivityType should detect swimming for cardio type', () async {
+      test('getActualActivityType should detect swimming for cardio type',
+          () async {
         // Arrange
         when(mockCardioRepository.getCardioActivityById('swim-1'))
             .thenAnswer((_) async => swimmingActivity);
 
         // Act
         final result = await exerciseDetailService.getActualActivityType(
-          'swim-1', 
-          ExerciseLogHistoryItem.TYPE_CARDIO
-        );
+            'swim-1', ExerciseLogHistoryItem.typeCardio);
 
         // Assert
         expect(result, equals('swimming'));
         verify(mockCardioRepository.getCardioActivityById('swim-1')).called(1);
       });
 
-      test('getActualActivityType should return unknown when cardio activity not found', () async {
+      test(
+          'getActualActivityType should return unknown when cardio activity not found',
+          () async {
         // Arrange
         when(mockCardioRepository.getCardioActivityById('non-existent'))
             .thenAnswer((_) async => null);
 
         // Act
         final result = await exerciseDetailService.getActualActivityType(
-          'non-existent', 
-          ExerciseLogHistoryItem.TYPE_CARDIO
-        );
+            'non-existent', ExerciseLogHistoryItem.typeCardio);
 
         // Assert
         expect(result, equals('unknown'));
-        verify(mockCardioRepository.getCardioActivityById('non-existent')).called(1);
+        verify(mockCardioRepository.getCardioActivityById('non-existent'))
+            .called(1);
       });
 
-      test('getActualActivityType should identify weightlifting type correctly', () async {
+      test('getActualActivityType should identify weightlifting type correctly',
+          () async {
         // Arrange
         when(mockWeightLiftingRepository.getExerciseById('weight-1'))
             .thenAnswer((_) async => weightLiftingExercise);
-            
+
         // Act
         final result = await exerciseDetailService.getActualActivityType(
-            'weight-1', ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING);
-            
+            'weight-1', ExerciseLogHistoryItem.typeWeightlifting);
+
         // Assert
-        expect(result, equals(ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING));
-        verify(mockWeightLiftingRepository.getExerciseById('weight-1')).called(1);
+        expect(result, equals(ExerciseLogHistoryItem.typeWeightlifting));
+        verify(mockWeightLiftingRepository.getExerciseById('weight-1'))
+            .called(1);
       });
-      
-      test('getActualActivityType should return unknown for non-existent weightlifting', () async {
+
+      test(
+          'getActualActivityType should return unknown for non-existent weightlifting',
+          () async {
         // Arrange
         when(mockWeightLiftingRepository.getExerciseById('non-existent'))
             .thenAnswer((_) async => null);
-            
+
         // Act
         final result = await exerciseDetailService.getActualActivityType(
-            'non-existent', ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING);
-            
+            'non-existent', ExerciseLogHistoryItem.typeWeightlifting);
+
         // Assert
         expect(result, equals('unknown'));
-        verify(mockWeightLiftingRepository.getExerciseById('non-existent')).called(1);
+        verify(mockWeightLiftingRepository.getExerciseById('non-existent'))
+            .called(1);
       });
     });
-    
+
     group('Weight Lifting Detail Tests', () {
-      test('getWeightLiftingDetail should return weight lifting exercise when found', () async {
+      test(
+          'getWeightLiftingDetail should return weight lifting exercise when found',
+          () async {
         // Arrange
         when(mockWeightLiftingRepository.getExerciseById('weight-1'))
             .thenAnswer((_) async => weightLiftingExercise);
-            
+
         // Act
-        final result = await exerciseDetailService.getWeightLiftingDetail('weight-1');
-        
+        final result =
+            await exerciseDetailService.getWeightLiftingDetail('weight-1');
+
         // Assert
         expect(result, equals(weightLiftingExercise));
         expect(result?.id, equals('weight-1'));
@@ -397,20 +420,24 @@ void main() {
         expect(result?.sets.length, equals(1));
         expect(result?.sets[0].weight, equals(60.0));
         expect(result?.sets[0].reps, equals(12));
-        verify(mockWeightLiftingRepository.getExerciseById('weight-1')).called(1);
+        verify(mockWeightLiftingRepository.getExerciseById('weight-1'))
+            .called(1);
       });
-      
-      test('getWeightLiftingDetail should return null when exercise not found', () async {
+
+      test('getWeightLiftingDetail should return null when exercise not found',
+          () async {
         // Arrange
         when(mockWeightLiftingRepository.getExerciseById('non-existent'))
             .thenAnswer((_) async => null);
-            
+
         // Act
-        final result = await exerciseDetailService.getWeightLiftingDetail('non-existent');
-        
+        final result =
+            await exerciseDetailService.getWeightLiftingDetail('non-existent');
+
         // Assert
         expect(result, isNull);
-        verify(mockWeightLiftingRepository.getExerciseById('non-existent')).called(1);
+        verify(mockWeightLiftingRepository.getExerciseById('non-existent'))
+            .called(1);
       });
     });
   });

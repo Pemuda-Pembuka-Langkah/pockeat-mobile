@@ -42,7 +42,7 @@ class ExerciseDetailServiceImpl implements ExerciseDetailService {
     throw Exception(
         'Requested type ${T.toString()} does not match actual type ${cardioActivity.runtimeType}');
   }
-  
+
   @override
   Future<WeightLifting?> getWeightLiftingDetail(String id) async {
     return await _weightLiftingRepository.getExerciseById(id);
@@ -51,7 +51,7 @@ class ExerciseDetailServiceImpl implements ExerciseDetailService {
   @override
   String getCardioTypeFromHistoryItem(ExerciseLogHistoryItem exerciseItem) {
     // Pastikan ini adalah tipe cardio
-    if (exerciseItem.activityType != ExerciseLogHistoryItem.TYPE_CARDIO) {
+    if (exerciseItem.activityType != ExerciseLogHistoryItem.typeCardio) {
       return 'unknown';
     }
 
@@ -71,12 +71,12 @@ class ExerciseDetailServiceImpl implements ExerciseDetailService {
   @override
   Future<String> getActualActivityType(String id, String basicType) async {
     // Jika tipe dasar adalah smart_exercise, kembalikan itu langsung
-    if (basicType == ExerciseLogHistoryItem.TYPE_SMART_EXERCISE) {
-      return ExerciseLogHistoryItem.TYPE_SMART_EXERCISE;
+    if (basicType == ExerciseLogHistoryItem.typeSmartExercise) {
+      return ExerciseLogHistoryItem.typeSmartExercise;
     }
 
     // Jika tipe dasar adalah cardio, cek repository untuk mendapatkan tipe spesifik
-    if (basicType == ExerciseLogHistoryItem.TYPE_CARDIO) {
+    if (basicType == ExerciseLogHistoryItem.typeCardio) {
       final cardioActivity = await _cardioRepository.getCardioActivityById(id);
 
       if (cardioActivity == null) {
@@ -93,16 +93,16 @@ class ExerciseDetailServiceImpl implements ExerciseDetailService {
           return 'swimming';
       }
     }
-    
+
     // Jika tipe dasar adalah weightlifting, kembalikan tipe itu
-    if (basicType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING) {
+    if (basicType == ExerciseLogHistoryItem.typeWeightlifting) {
       final weightLifting = await _weightLiftingRepository.getExerciseById(id);
-      
+
       if (weightLifting == null) {
         return 'unknown';
       }
-      
-      return ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING;
+
+      return ExerciseLogHistoryItem.typeWeightlifting;
     }
 
     // Default jika tipe dasar tidak dikenali

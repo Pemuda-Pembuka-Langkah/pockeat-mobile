@@ -333,7 +333,7 @@ void main() {
       test('should delete cardio activity successfully', () async {
         // Setup mock document
         when(mockCollection.doc('test-id')).thenReturn(mockDocument);
-        when(mockDocument.delete()).thenAnswer((_) async => null);
+        when(mockDocument.delete()).thenAnswer((_) async {});
         
         // Call method under test
         final result = await repository.deleteCardioActivity('test-id');
@@ -647,7 +647,7 @@ void main() {
 MockQueryDocumentSnapshot<Map<String, dynamic>> _createMockQueryDocSnap(
     String type, DateTime date) {
   final mockDoc = MockQueryDocumentSnapshot<Map<String, dynamic>>();
-  final String testId = 'test-${type}-${date.millisecondsSinceEpoch}';
+  final String testId = 'test-$type-${date.millisecondsSinceEpoch}';
   final startTime = date.add(const Duration(hours: 9));
   final endTime = date.add(const Duration(hours: 10));
   

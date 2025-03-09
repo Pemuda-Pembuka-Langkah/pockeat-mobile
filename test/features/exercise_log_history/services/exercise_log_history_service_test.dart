@@ -147,7 +147,7 @@ void main() {
       // Verify there are weightlifting items
       final weightliftingItems = result
           .where((item) =>
-              item.activityType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING)
+              item.activityType == ExerciseLogHistoryItem.typeWeightlifting)
           .toList();
       expect(weightliftingItems.length, 2);
       expect(weightliftingItems[0].title, 'Bench Press');
@@ -174,19 +174,19 @@ void main() {
       // Verify if different types exist
       final smartItems = result
           .where((item) =>
-              item.activityType == ExerciseLogHistoryItem.TYPE_SMART_EXERCISE)
+              item.activityType == ExerciseLogHistoryItem.typeSmartExercise)
           .toList();
       expect(smartItems.length, 2);
 
       final cardioItems = result
           .where(
-              (item) => item.activityType == ExerciseLogHistoryItem.TYPE_CARDIO)
+              (item) => item.activityType == ExerciseLogHistoryItem.typeCardio)
           .toList();
       expect(cardioItems.length, 2);
 
       final weightliftingItems = result
           .where((item) =>
-              item.activityType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING)
+              item.activityType == ExerciseLogHistoryItem.typeWeightlifting)
           .toList();
       expect(weightliftingItems.length, 2);
       expect(weightliftingItems[0].title, 'Bench Press');
@@ -209,19 +209,25 @@ void main() {
 
       // Assert
       expect(result.length, 6); // 2 smart + 2 cardio + 2 weightlifting
-      
+
       // Check that all source types are present
-      final smartItems = result.where((item) => 
-          item.activityType == ExerciseLogHistoryItem.TYPE_SMART_EXERCISE).toList();
-      final cardioItems = result.where((item) => 
-          item.activityType == ExerciseLogHistoryItem.TYPE_CARDIO).toList();
-      final weightliftingItems = result.where((item) => 
-          item.activityType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING).toList();
-      
+      final smartItems = result
+          .where((item) =>
+              item.activityType == ExerciseLogHistoryItem.typeSmartExercise)
+          .toList();
+      final cardioItems = result
+          .where(
+              (item) => item.activityType == ExerciseLogHistoryItem.typeCardio)
+          .toList();
+      final weightliftingItems = result
+          .where((item) =>
+              item.activityType == ExerciseLogHistoryItem.typeWeightlifting)
+          .toList();
+
       expect(smartItems.length, 2);
       expect(cardioItems.length, 2);
       expect(weightliftingItems.length, 2);
-      
+
       // Verify the source IDs are present
       final sourceIds = result.map((item) => item.sourceId).toList();
       expect(sourceIds.contains('smart-1'), isTrue);
@@ -230,18 +236,22 @@ void main() {
       expect(sourceIds.contains('cardio-2'), isTrue);
       expect(sourceIds.contains('weight-1'), isTrue);
       expect(sourceIds.contains('weight-2'), isTrue);
-      
+
       // Verify correct timestamp sorting
       for (int i = 0; i < result.length - 1; i++) {
         // Each timestamp should be less than or equal to the previous one (newest first)
-        expect(result[i].timestamp.isAfter(result[i + 1].timestamp) || 
-               result[i].timestamp.isAtSameMomentAs(result[i + 1].timestamp), isTrue);
+        expect(
+            result[i].timestamp.isAfter(result[i + 1].timestamp) ||
+                result[i].timestamp.isAtSameMomentAs(result[i + 1].timestamp),
+            isTrue);
       }
-      
-      verify(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear))
+
+      verify(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(
+              testMonth, testYear))
           .called(1);
       verify(mockCardioRepository.filterByMonth(testMonth, testYear)).called(1);
-      verify(mockWeightLiftingRepository.filterByMonth(testMonth, testYear)).called(1);
+      verify(mockWeightLiftingRepository.filterByMonth(testMonth, testYear))
+          .called(1);
     });
 
     test('should get logs by year including weightlifting logs', () async {
@@ -261,19 +271,25 @@ void main() {
 
       // Assert
       expect(result.length, 8); // 3 smart + 3 cardio + 2 weightlifting
-      
+
       // Check that all source types are present
-      final smartItems = result.where((item) => 
-          item.activityType == ExerciseLogHistoryItem.TYPE_SMART_EXERCISE).toList();
-      final cardioItems = result.where((item) => 
-          item.activityType == ExerciseLogHistoryItem.TYPE_CARDIO).toList();
-      final weightliftingItems = result.where((item) => 
-          item.activityType == ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING).toList();
-      
+      final smartItems = result
+          .where((item) =>
+              item.activityType == ExerciseLogHistoryItem.typeSmartExercise)
+          .toList();
+      final cardioItems = result
+          .where(
+              (item) => item.activityType == ExerciseLogHistoryItem.typeCardio)
+          .toList();
+      final weightliftingItems = result
+          .where((item) =>
+              item.activityType == ExerciseLogHistoryItem.typeWeightlifting)
+          .toList();
+
       expect(smartItems.length, 3);
       expect(cardioItems.length, 3);
       expect(weightliftingItems.length, 2);
-      
+
       // Verify the source IDs are present
       final sourceIds = result.map((item) => item.sourceId).toList();
       expect(sourceIds.contains('cardio-1'), isTrue);
@@ -347,10 +363,9 @@ void main() {
       expect(result[0].timestamp, recentDate); // Most recent first
 
       // Updated order based on timestamp rather than activity type
-      expect(
-          result[0].activityType, ExerciseLogHistoryItem.TYPE_SMART_EXERCISE);
-      expect(result[1].activityType, ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING);
-      expect(result[2].activityType, ExerciseLogHistoryItem.TYPE_CARDIO);
+      expect(result[0].activityType, ExerciseLogHistoryItem.typeSmartExercise);
+      expect(result[1].activityType, ExerciseLogHistoryItem.typeWeightlifting);
+      expect(result[2].activityType, ExerciseLogHistoryItem.typeCardio);
     });
   });
 }

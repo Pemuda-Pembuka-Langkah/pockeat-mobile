@@ -1,9 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
-import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
-import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
-import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
-import 'package:pockeat/features/cardio_log/domain/models/cardio_activity_factory.dart';
 import 'package:pockeat/features/cardio_log/domain/models/models.dart';
 
 // Extension untuk menambahkan property yang dibutuhkan dalam test

@@ -25,8 +25,8 @@ abstract class CardioActivity {
     required this.caloriesBurned,
     required this.type,
   }) : 
-    this.id = id ?? const Uuid().v4(),
-    this.duration = endTime.difference(startTime);
+    id = id ?? const Uuid().v4(),
+    duration = endTime.difference(startTime);
 
   /// Metode untuk konversi ke Map (untuk penyimpanan)
   Map<String, dynamic> toMap();

@@ -18,9 +18,9 @@ class ExerciseLogHistoryItem {
   final String?
       sourceId; // ID dari data sumber (misalnya ID dari SmartExerciseLog)
   // Konstanta untuk tipe aktivitas umum
-  static const String TYPE_SMART_EXERCISE = 'smart_exercise';
-  static const String TYPE_WEIGHTLIFTING = 'weightlifting';
-  static const String TYPE_CARDIO = 'cardio';
+  static const String typeSmartExercise = 'smart_exercise';
+  static const String typeWeightlifting = 'weightlifting';
+  static const String typeCardio = 'cardio';
   // Bisa ditambahkan tipe lain sesuai kebutuhan
 
   ExerciseLogHistoryItem({
@@ -57,7 +57,7 @@ class ExerciseLogHistoryItem {
   factory ExerciseLogHistoryItem.fromSmartExerciseLog(
       ExerciseAnalysisResult smartExerciseLog) {
     return ExerciseLogHistoryItem(
-        activityType: TYPE_SMART_EXERCISE,
+        activityType: typeSmartExercise,
         title: smartExerciseLog.exerciseType,
         subtitle:
             '${smartExerciseLog.duration} • ${smartExerciseLog.intensity}',
@@ -67,14 +67,15 @@ class ExerciseLogHistoryItem {
   }
 
   /// Factory constructor untuk membuat ExerciseLogHistoryItem dari WeightLifting model
-  factory ExerciseLogHistoryItem.fromWeightliftingLog(WeightLifting weightLifting) {
+  factory ExerciseLogHistoryItem.fromWeightliftingLog(
+      WeightLifting weightLifting) {
     // Calculate total sets, reps, and weight
     int totalSets = weightLifting.sets.length;
-    
+
     // For empty sets, use zeroes with proper decimal formatting
     if (totalSets == 0) {
       return ExerciseLogHistoryItem(
-        activityType: TYPE_WEIGHTLIFTING,
+        activityType: typeWeightlifting,
         title: weightLifting.name,
         subtitle: '0 sets • 0 reps • 0.0 kg',
         timestamp: weightLifting.timestamp,
@@ -82,22 +83,28 @@ class ExerciseLogHistoryItem {
         sourceId: weightLifting.id,
       );
     }
-    
+
     // Calculate total reps and average weight for multiple sets
     int totalReps = weightLifting.sets.fold(0, (sum, set) => sum + set.reps);
-    double avgWeight = weightLifting.sets.fold(0.0, (sum, set) => sum + set.weight) / totalSets;
-    
+    double avgWeight =
+        weightLifting.sets.fold(0.0, (sum, set) => sum + set.weight) /
+            totalSets;
+
     // Calculate calories burned based on MET value, duration, and weight
     // Formula: Calories = MET value × weight (kg) × duration (hours)
-    double totalDuration = weightLifting.sets.fold(0.0, (sum, set) => sum + set.duration);
-    double durationInHours = totalDuration / 60; // Assuming duration is in minutes
+    double totalDuration =
+        weightLifting.sets.fold(0.0, (sum, set) => sum + set.duration);
+    double durationInHours =
+        totalDuration / 60; // Assuming duration is in minutes
     double standardWeight = 70.0; // Default weight assumption
-    int caloriesBurned = (weightLifting.metValue * standardWeight * durationInHours).round();
-    
+    int caloriesBurned =
+        (weightLifting.metValue * standardWeight * durationInHours).round();
+
     return ExerciseLogHistoryItem(
-      activityType: TYPE_WEIGHTLIFTING,
+      activityType: typeWeightlifting,
       title: weightLifting.name,
-      subtitle: '$totalSets sets • $totalReps reps • ${avgWeight.toStringAsFixed(1)} kg',
+      subtitle:
+          '$totalSets sets • $totalReps reps • ${avgWeight.toStringAsFixed(1)} kg',
       timestamp: weightLifting.timestamp,
       caloriesBurned: caloriesBurned,
       sourceId: weightLifting.id,
@@ -118,8 +125,6 @@ class ExerciseLogHistoryItem {
       case CardioType.swimming:
         activityTitle = 'Swimming';
         break;
-      default:
-        activityTitle = 'Cardio Session';
     }
 
     // Format durasi dalam format yang lebih user-friendly
@@ -129,17 +134,13 @@ class ExerciseLogHistoryItem {
 
     // Get distance if available (using dynamic access since it might be in different implementations)
     String distanceText = '';
-    try {
-      final distance = cardioLog.toMap()['distance'];
-      if (distance != null) {
-        distanceText = ' • ${distance.toString()} km';
-      }
-    } catch (_) {
-      // If distance is not available, just ignore it
+    final distance = cardioLog.toMap()['distance'];
+    if (distance != null) {
+      distanceText = ' • ${distance.toString()} km';
     }
 
     return ExerciseLogHistoryItem(
-      activityType: TYPE_CARDIO,
+      activityType: typeCardio,
       title: activityTitle,
       subtitle: '$durationText$distanceText',
       timestamp: cardioLog.date,
@@ -152,7 +153,7 @@ class ExerciseLogHistoryItem {
   factory ExerciseLogHistoryItem.fromMap(Map<String, dynamic> map, String id) {
     return ExerciseLogHistoryItem(
       id: id,
-      activityType: map['activityType'] ?? TYPE_SMART_EXERCISE,
+      activityType: map['activityType'] ?? typeSmartExercise,
       title: map['title'] ?? 'Unknown Exercise',
       subtitle: map['subtitle'] ?? '',
       timestamp: map['timestamp'] != null

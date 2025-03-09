@@ -38,6 +38,6 @@ abstract class ExerciseDetailService {
   /// Method ini akan memeriksa repository yang sesuai untuk menentukan tipe aktivitas yang sebenarnya
   /// [id] adalah ID dari aktivitas
   /// [basicType] adalah tipe dasar (smart_exercise, cardio, atau weightlifting)
-  /// Return Future<String> yang merepresentasikan tipe sebenarnya ('running', 'cycling', 'swimming', 'smart_exercise', 'weightlifting')
+  /// Return `Future<String>` yang merepresentasikan tipe sebenarnya ('running', 'cycling', 'swimming', 'smart_exercise', 'weightlifting')
   Future<String> getActualActivityType(String id, String basicType);
 }

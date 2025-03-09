@@ -10,9 +10,9 @@ class WeightLiftingDetailWidget extends StatelessWidget {
   final Color primaryGreen = const Color(0xFF4ECDC4); // Weightlifting color
   
   const WeightLiftingDetailWidget({
-    Key? key,
+    super.key,
     required this.weightLifting,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {
@@ -238,7 +238,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
                         ),
                         _buildMetricColumn(
                           'Volume',
-                          '${(set.weight * set.reps).toStringAsFixed(1)}',
+                          (set.weight * set.reps).toStringAsFixed(1),
                         ),
                       ],
                     ),
@@ -247,7 +247,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

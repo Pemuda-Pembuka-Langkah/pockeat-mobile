@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -27,7 +25,7 @@ void main() {
     mockExercises = [
       ExerciseLogHistoryItem(
         id: 'test-id-1',
-        activityType: ExerciseLogHistoryItem.TYPE_SMART_EXERCISE,
+        activityType: ExerciseLogHistoryItem.typeSmartExercise,
         title: 'Morning Run',
         subtitle: '30 minutes • 5 km',
         timestamp: DateTime.now().subtract(Duration(hours: 2)),
@@ -35,7 +33,7 @@ void main() {
       ),
       ExerciseLogHistoryItem(
         id: 'test-id-2',
-        activityType: ExerciseLogHistoryItem.TYPE_WEIGHTLIFTING,
+        activityType: ExerciseLogHistoryItem.typeWeightlifting,
         title: 'Strength Training',
         subtitle: '8 exercises',
         timestamp: DateTime.now().subtract(Duration(days: 1)),
@@ -263,7 +261,7 @@ void main() {
       final newMockExercises = [
         ExerciseLogHistoryItem(
           id: 'new-test-id',
-          activityType: ExerciseLogHistoryItem.TYPE_CARDIO,
+          activityType: ExerciseLogHistoryItem.typeCardio,
           title: 'New Exercise',
           subtitle: 'New subtitle',
           timestamp: DateTime.now(),
