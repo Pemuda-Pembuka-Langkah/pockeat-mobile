@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pockeat/core/di/service_locator.dart'; 
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
@@ -36,8 +37,8 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
   @override
   void initState() {
     super.initState();
-    // Use injected dependencies directly
-    _geminiService = widget.geminiService;
+    // Use injected dependencies or fallback to default implementation from service locator
+    _geminiService = getIt<GeminiService>();
     _repository = widget.repository;
   }
   
