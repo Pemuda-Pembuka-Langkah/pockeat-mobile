@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/weight_training_log/services/workout_service.dart';
 
 class WorkoutSummary extends StatelessWidget {
   final int exerciseCount;
@@ -11,7 +10,7 @@ class WorkoutSummary extends StatelessWidget {
   final Color primaryGreen;
 
   const WorkoutSummary({
-    Key? key,
+    super.key,
     required this.exerciseCount,
     required this.totalSets,
     required this.totalReps,
@@ -19,7 +18,7 @@ class WorkoutSummary extends StatelessWidget {
     required this.totalDuration,
     required this.estimatedCalories,
     required this.primaryGreen,
-  }) : super(key: key);
+  });
 
   Widget _buildSummaryItem(String label, String value, IconData icon) {
     return Column(

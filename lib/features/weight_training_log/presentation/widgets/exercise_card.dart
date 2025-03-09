@@ -9,12 +9,12 @@ class ExerciseCard extends StatelessWidget {
   final VoidCallback onAddSet;
 
   const ExerciseCard({
-    Key? key,
+    super.key,
     required this.exercise,
     required this.primaryGreen,
     required this.volume,
     required this.onAddSet,
-  }) : super(key: key);
+  });
 
   Widget _buildSetRow(int setNumber, WeightLiftingSet set) {
     return Container(
