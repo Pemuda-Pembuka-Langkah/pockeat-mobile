@@ -7,16 +7,17 @@ class FoodEntryForm extends StatefulWidget {
   final int maxDescriptionWords;
   final int maxIngredientWords;
   final bool weightRequired;
-  final Function(FoodEntry)? onSaved; // Add callback for testing
+  final Function(FoodEntry)? onSaved; 
 
   const FoodEntryForm({
-    this.maxFoodNameWords = 20,
-    this.maxDescriptionWords = 50,
-    this.maxIngredientWords = 50,
-    this.weightRequired = true,
-    this.onSaved,
-    Key? key,
-  }) : super(key: key);
+  this.maxFoodNameWords = 20,
+  this.maxDescriptionWords = 50,
+  this.maxIngredientWords = 50,
+  this.weightRequired = true,
+  this.onSaved,
+  super.key,
+  });
+
 
   @override
   _FoodEntryFormState createState() => _FoodEntryFormState();
@@ -44,47 +45,43 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       _successMessage = null;
     });
 
-    // Validate food name
     _foodNameError = FormValidator.validateFoodName(_foodNameController.text, widget.maxFoodNameWords);
     
-    // Validate description
     _descriptionError = FormValidator.validateDescription(_descriptionController.text, widget.maxDescriptionWords);
     
-    // Validate ingredients
     _ingredientsError = FormValidator.validateIngredients(_ingredientsController.text, widget.maxIngredientWords);
     
-    // Validate weight if required
     if (widget.weightRequired) {
       _weightError = FormValidator.validateWeight(_weightController.text);
     }
 
+    setState(() {});  
+
     bool isValid = _foodNameError == null && 
                   _descriptionError == null && 
-                  _ingredientsError == null && 
-                  (_weightError == null || !widget.weightRequired);
+                  _ingredientsError == null &&
+                  (!widget.weightRequired || _weightError == null);
 
     if (isValid) {
+      final weight = widget.weightRequired && _weightController.text.trim().isNotEmpty 
+          ? double.tryParse(_weightController.text)?.toInt() 
+          : null;
+      
       FoodEntry foodEntry = FoodEntry(
         foodName: _foodNameController.text,
         description: _descriptionController.text,
         ingredients: _ingredientsController.text,
-        weight: widget.weightRequired ? int.tryParse(_weightController.text) : null,
+        weight: weight,
       );
+
+      if (widget.onSaved != null) {
+        widget.onSaved!(foodEntry);
+      }
 
       setState(() {
         _successMessage = 'Food entry is saved successfully!';
       });
-
-      debugPrint(foodEntry.toString());
-      
-      // Call the callback for testing
-      if (widget.onSaved != null) {
-        widget.onSaved!(foodEntry);
-      }
     }
-    
-    // Trigger a setState to update the UI with validation errors
-    setState(() {});
   }
 
   @override
