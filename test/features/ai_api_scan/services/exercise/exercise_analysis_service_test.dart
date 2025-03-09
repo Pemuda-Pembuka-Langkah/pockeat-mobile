@@ -121,4 +121,54 @@ void main() {
       );
     });
   });
+
+  group('ExerciseAnalysisService error handling', () {
+  test('parseExerciseResponse should throw GeminiServiceException when extractJson fails', () {
+    // Arrange - String tanpa format JSON yang jelas
+    final invalidText = 'Ini bukan JSON sama sekali';
+    
+    // Act & Assert
+    expect(
+      () => service.parseExerciseResponse(invalidText, 'jogging'),
+      throwsA(
+        isA<GeminiServiceException>()
+          .having((e) => e.message, 'message', contains('Failed to parse exercise analysis response'))
+      ),
+    );
+  });
+  
+  test('parseExerciseResponse should throw GeminiServiceException when jsonDecode fails', () {
+    // Arrange - String dengan format JSON yang cacat
+    // Format menyerupai JSON tapi invalid (kurung kurawal tidak seimbang)
+    final malformedJson = '{"exercise_type": "Running", "calories_burned": 300,';
+    
+    // Act & Assert
+    expect(
+      () => service.parseExerciseResponse(malformedJson, 'running'),
+      throwsA(
+        isA<GeminiServiceException>()
+          .having((e) => e.message, 'message', contains('Failed to parse exercise analysis response'))
+      ),
+    );
+  });
+  
+  test('parseExerciseResponse should propagate exception message from parsing failure', () {
+    final brokenJson = '{ "this": "is", broken": "json" }';
+    
+    // Act
+    try {
+      service.parseExerciseResponse(brokenJson, 'exercise');
+      fail('Expected exception was not thrown');
+    } catch (e) {
+     
+      expect(e, isA<GeminiServiceException>());
+      expect((e as GeminiServiceException).message, startsWith('Failed to parse exercise analysis response:'));
+
+      expect(e.message, contains('FormatException'));
+      expect(e.message, contains('SyntaxException'));
+    }
+  });
+});
+
+  
 }
