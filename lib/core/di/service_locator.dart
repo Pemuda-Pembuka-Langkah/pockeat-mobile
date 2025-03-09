@@ -6,6 +6,8 @@ import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_se
 import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
+import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 
 final getIt = GetIt.instance;
 
@@ -25,6 +27,14 @@ void setupDependencies() {
   
   getIt.registerSingleton<ExerciseAnalysisService>(
     ExerciseAnalysisService.fromEnv(),
+  );
+
+  getIt.registerSingleton<FoodScanPhotoService>(
+    FoodScanPhotoService(),
+  );
+
+  getIt.registerSingleton<FoodScanRepository>(
+    FoodScanRepository(),
   );
   
   // Register the combined service that maintains the original API
