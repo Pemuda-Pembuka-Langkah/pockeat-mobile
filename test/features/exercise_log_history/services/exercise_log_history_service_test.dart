@@ -367,5 +367,70 @@ void main() {
       expect(result[1].activityType, ExerciseLogHistoryItem.typeWeightlifting);
       expect(result[2].activityType, ExerciseLogHistoryItem.typeCardio);
     });
+
+    test('should apply limit parameter when getting all exercise logs', () async {
+      // Arrange - setup more data than limit
+      when(mockSmartExerciseLogRepository.getAllAnalysisResults(
+              limit: anyNamed('limit')))
+          .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2, smartExerciseLog3]);
+
+      when(mockCardioRepository.getAllCardioActivities())
+          .thenAnswer((_) async => [cardioLog1, cardioLog2, cardioLog3]);
+
+      when(mockWeightLiftingRepository.getAllExercises())
+          .thenAnswer((_) async => [weightLiftingLog1, weightLiftingLog2]);
+
+      // Act - request with limit of 4
+      final result = await service.getAllExerciseLogs(limit: 4);
+
+      // Assert
+      expect(result.length, 4); // Should be limited to 4 even though we have 8 items
+      
+      // Verify the items are sorted by timestamp (newest first)
+      for (int i = 0; i < result.length - 1; i++) {
+        expect(
+            result[i].timestamp.isAfter(result[i + 1].timestamp) ||
+                result[i].timestamp.isAtSameMomentAs(result[i + 1].timestamp),
+            isTrue);
+      }
+    });
+
+    // Error handling tests
+    test('should throw exception when getAllExerciseLogs fails', () async {
+      // Arrange - setup repository to throw
+      when(mockSmartExerciseLogRepository.getAllAnalysisResults(
+              limit: anyNamed('limit')))
+          .thenThrow(Exception('Repository failure'));
+
+      // Act and Assert
+      expect(() => service.getAllExerciseLogs(), throwsException);
+    });
+
+    test('should throw exception when getExerciseLogsByDate fails', () async {
+      // Arrange - setup repository to throw
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByDate(testDate))
+          .thenThrow(Exception('Repository failure'));
+
+      // Act and Assert
+      expect(() => service.getExerciseLogsByDate(testDate), throwsException);
+    });
+
+    test('should throw exception when getExerciseLogsByMonth fails', () async {
+      // Arrange - setup repository to throw
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear))
+          .thenThrow(Exception('Repository failure'));
+
+      // Act and Assert
+      expect(() => service.getExerciseLogsByMonth(testMonth, testYear), throwsException);
+    });
+
+    test('should throw exception when getExerciseLogsByYear fails', () async {
+      // Arrange - setup repository to throw
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear))
+          .thenThrow(Exception('Repository failure'));
+
+      // Act and Assert
+      expect(() => service.getExerciseLogsByYear(testYear), throwsException);
+    });
   });
 }
