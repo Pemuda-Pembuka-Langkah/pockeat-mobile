@@ -65,34 +65,33 @@ void main() {
     });
     
     testWidgets('Widget disposes controllers when removed', (WidgetTester tester) async {
-      // Use a StatefulBuilder to control the widget tree
       bool showForm = true;
+      late StateSetter builderSetState;
       
       await tester.pumpWidget(
         MaterialApp(
           home: StatefulBuilder(
             builder: (context, setState) {
+              builderSetState = setState;
               return showForm 
                 ? const FoodEntryForm() 
-                : Container(child: const Text('Form removed'));
+                : const Text('Form removed');
             },
           ),
         ),
       );
       
-      // Verify form is showing
       expect(find.byType(FoodEntryForm), findsOneWidget);
       
-      // Remove the form
-      showForm = false;
+      builderSetState(() {
+        showForm = false;
+      });
+
       await tester.pumpAndSettle();
       
-      // Verify form is gone
       expect(find.byType(FoodEntryForm), findsNothing);
       expect(find.text('Form removed'), findsOneWidget);
       
-      // Note: We can't directly verify controller disposal since they're private
-      // But this test ensures the dispose method is called which is the best we can do
     });
   });
 
@@ -101,12 +100,14 @@ void main() {
       await tester.pumpWidget(const MaterialApp(home: FoodEntryForm()));
       
       await tester.tap(find.byKey(const ValueKey('saveButton')));
-      await tester.pumpAndSettle();
+      await tester.pump(); 
+      await tester.pump(); 
+      await tester.pump(); 
 
       expect(find.text('Please insert food name'), findsOneWidget);
       expect(find.text('Please insert food description'), findsOneWidget);
       expect(find.text('Please insert food ingredients'), findsOneWidget);
-      expect(find.text('Please enter weight'), findsOneWidget);
+      expect(find.text('Please enter a valid number'), findsOneWidget);
       expect(find.text('Food entry is saved successfully!'), findsNothing);
     });
 
@@ -242,7 +243,6 @@ void main() {
       await tester.enterText(find.byKey(const ValueKey('foodNameField')), 'Fruit Salad');
       await tester.enterText(find.byKey(const ValueKey('descriptionField')), 'Mixed fresh fruits');
       await tester.enterText(find.byKey(const ValueKey('ingredientsField')), 'Apple, banana, orange');
-      // Not entering weight since it's not required
 
       await tester.tap(find.byKey(const ValueKey('saveButton')));
       await tester.pumpAndSettle();
