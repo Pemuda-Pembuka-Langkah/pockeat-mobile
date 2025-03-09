@@ -11,7 +11,7 @@ import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 class AIAnalysisScreen extends StatefulWidget {
-  const AIAnalysisScreen({Key? key}) : super(key: key);
+  const AIAnalysisScreen({super.key});
 
   @override
   State<AIAnalysisScreen> createState() => _AIAnalysisScreenState();
