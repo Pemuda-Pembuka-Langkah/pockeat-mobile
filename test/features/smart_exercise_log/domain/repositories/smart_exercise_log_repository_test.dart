@@ -736,4 +736,68 @@ void main() {
       );
     });
   });
+
+  group('deleteById', () {
+    test('should delete document and return true when document exists', () async {
+      // Arrange
+      const testId = 'test-deletion-id';
+      
+      // Setup mock document to exist
+      when(mockDocument.get()).thenAnswer((_) async => mockDocSnapshot);
+      when(mockDocSnapshot.exists).thenReturn(true);
+      
+      // Setup successful deletion
+      when(mockDocument.delete()).thenAnswer((_) async => {});
+      
+      // Act
+      final result = await repository.deleteById(testId);
+      
+      // Assert
+      expect(result, true);
+      verify(mockFirestore.collection('exerciseAnalysis')).called(1);
+      verify(mockCollection.doc(testId)).called(1);
+      verify(mockDocument.delete()).called(1);
+    });
+    
+    test('should return false when document does not exist', () async {
+      // Arrange
+      const testId = 'non-existent-id';
+      
+      // Setup mock document to not exist
+      when(mockDocument.get()).thenAnswer((_) async => mockDocSnapshot);
+      when(mockDocSnapshot.exists).thenReturn(false);
+      
+      // Act
+      final result = await repository.deleteById(testId);
+      
+      // Assert
+      expect(result, false);
+      verify(mockFirestore.collection('exerciseAnalysis')).called(1);
+      verify(mockCollection.doc(testId)).called(1);
+      // Delete should not be called if document doesn't exist
+      verifyNever(mockDocument.delete());
+    });
+    
+    test('should throw exception when deletion fails', () async {
+      // Arrange
+      const testId = 'error-id';
+      
+      // Setup mock document to exist but deletion to fail
+      when(mockDocument.get()).thenAnswer((_) async => mockDocSnapshot);
+      when(mockDocSnapshot.exists).thenReturn(true);
+      when(mockDocument.delete()).thenThrow(FirebaseException(
+        plugin: 'firestore',
+        message: 'Failed to delete document'
+      ));
+      
+      // Act & Assert
+      expect(
+        () => repository.deleteById(testId),
+        throwsA(isA<Exception>()),
+      );
+      
+      verify(mockFirestore.collection('exerciseAnalysis')).called(1);
+      verify(mockCollection.doc(testId)).called(1);
+    });
+  });
 }
