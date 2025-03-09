@@ -151,24 +151,7 @@ class MyApp extends StatelessWidget {
         '/add-food': (context) => const FoodInputPage(),
         '/add-exercise': (context) => const ExerciseInputPage(),
         '/weightlifting-input': (context) => const WeightliftingPage(),
-        '/cardio': (context) => const CardioInputPage(),
-        '/exercise-history': (context) => ExerciseHistoryPage(
-              service: Provider.of<ExerciseLogHistoryService>(context),
-            ),
-        '/exercise-detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-          return ExerciseLogDetailPage(
-            exerciseId: args['exerciseId'] as String,
-            activityType: args['activityType'] as String,
-            cardioRepository: Provider.of<CardioRepository>(context, listen: false),
-            smartExerciseRepository: Provider.of<SmartExerciseLogRepository>(context, listen: false),
-            weightLiftingRepository: Provider.of<WeightLiftingRepository>(context, listen: false),
-          );
-        },
-      },
-      onGenerateRoute: (settings) {
-        // Default jika tidak ada rute yang cocok
-        return null;
+>>>>>>>>> Temporary merge branch 2
       },
     );
   }

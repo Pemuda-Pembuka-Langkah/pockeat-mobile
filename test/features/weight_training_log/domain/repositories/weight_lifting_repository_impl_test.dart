@@ -538,4 +538,47 @@ void main() {
       expect(result, 3.0);
     });
   });
+
+  group('filterByYear', () {
+    test('should return exercises for specific year', () async {
+      // Setup
+      final testYear = 2025;
+      
+      final mockDocSnap = MockQueryDocumentSnapshot<Map<String, dynamic>>();
+      when(mockDocSnap.data()).thenReturn({
+        ...testExercise.toJson(),
+        'dateCreated': '2025-03-08'
+      });
+      mockDocs = [mockDocSnap];
+      
+      when(mockCollection.get()).thenAnswer((_) async => mockQuerySnapshot);
+      when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+      
+      // Execute
+      final result = await repository.filterByYear(testYear);
+      
+      // Verify
+      verify(mockFirestore.collection('weight_lifting_logs')).called(1);
+      expect(result.length, 1);
+    });
+
+    test('should throw ArgumentError for invalid year', () async {
+      // Execute & Verify
+      expect(
+        () => repository.filterByYear(0),
+        throwsArgumentError,
+      );
+    });
+
+    test('should throw exception when filtering by year fails', () async {
+      // Setup
+      when(mockCollection.get()).thenThrow(Exception('Firestore error'));
+      
+      // Execute & Verify
+      expect(
+        () => repository.filterByYear(2025),
+        throwsException,
+      );
+    });
+  });
 }
