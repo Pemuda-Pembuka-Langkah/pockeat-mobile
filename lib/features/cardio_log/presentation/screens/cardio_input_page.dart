@@ -15,7 +15,7 @@ class CardioInputPage extends StatefulWidget {
   final CardioRepository? repository;
 
   const CardioInputPage({
-    Key? key, 
+    Key? key,
     this.repository,
   }) : super(key: key);
 
@@ -32,13 +32,16 @@ class CardioInputPageState extends State<CardioInputPage> {
   late CardioRepository _repository;
 
   // GlobalKeys for each form
-  final GlobalKey<RunningFormState> _runningFormKey = GlobalKey<RunningFormState>();
-  final GlobalKey<CyclingFormState> _cyclingFormKey = GlobalKey<CyclingFormState>();
-  final GlobalKey<SwimmingFormState> _swimmingFormKey = GlobalKey<SwimmingFormState>();
+  final GlobalKey<RunningFormState> _runningFormKey =
+      GlobalKey<RunningFormState>();
+  final GlobalKey<CyclingFormState> _cyclingFormKey =
+      GlobalKey<CyclingFormState>();
+  final GlobalKey<SwimmingFormState> _swimmingFormKey =
+      GlobalKey<SwimmingFormState>();
 
   // Type of activity selected
   CardioType selectedType = CardioType.running;
-  
+
   // Current form widgets
   RunningForm? runningForm;
   CyclingForm? cyclingForm;
@@ -47,11 +50,11 @@ class CardioInputPageState extends State<CardioInputPage> {
   // Variables to track the latest data from forms
   double runningDistance = 5.0;
   Duration runningDuration = const Duration(minutes: 30);
-  
+
   double cyclingDistance = 5.0;
   Duration cyclingDuration = const Duration(minutes: 30);
   String cyclingType = "mountain";
-  
+
   int swimmingLaps = 10;
   double poolLength = 25.0;
   String swimmingStroke = "Freestyle (Front Crawl)";
@@ -61,7 +64,8 @@ class CardioInputPageState extends State<CardioInputPage> {
   void initState() {
     super.initState();
     // Initialize repository, use injected repository or create a new one
-    _repository = widget.repository ?? CardioRepositoryImpl(firestore: FirebaseFirestore.instance);
+    _repository = widget.repository ??
+        CardioRepositoryImpl(firestore: FirebaseFirestore.instance);
   }
 
   @override
@@ -138,7 +142,7 @@ class CardioInputPageState extends State<CardioInputPage> {
             onPressed: () {
               // Get data directly from active form
               double calories = 0;
-              
+
               switch (selectedType) {
                 case CardioType.running:
                   if (runningForm != null) {
@@ -146,14 +150,14 @@ class CardioInputPageState extends State<CardioInputPage> {
                     calories = runningForm!.calculateCalories();
                   }
                   break;
-                  
+
                 case CardioType.cycling:
                   if (cyclingForm != null) {
                     // Get values directly from cycling form
                     calories = cyclingForm!.calculateCalories();
                   }
                   break;
-                  
+
                 case CardioType.swimming:
                   if (swimmingForm != null) {
                     // Get values directly from swimming form
@@ -161,7 +165,7 @@ class CardioInputPageState extends State<CardioInputPage> {
                   }
                   break;
               }
-              
+
               // Create and save activity object
               _saveActivity(calories);
             },
@@ -254,7 +258,7 @@ class CardioInputPageState extends State<CardioInputPage> {
           },
         );
         return runningForm!;
-      
+
       case CardioType.cycling:
         cyclingForm = CyclingForm(
           key: _cyclingFormKey,
@@ -274,7 +278,7 @@ class CardioInputPageState extends State<CardioInputPage> {
           },
         );
         return cyclingForm!;
-      
+
       case CardioType.swimming:
         swimmingForm = SwimmingForm(
           key: _swimmingFormKey,
@@ -315,49 +319,46 @@ class CardioInputPageState extends State<CardioInputPage> {
         return 'Swim';
     }
   }
-  
+
   // Function to save activity
   Future<void> _saveActivity(double calories) async {
     try {
       CardioActivity? activity;
-      DateTime now = DateTime.now();
-      
+
       switch (selectedType) {
         case CardioType.running:
+          // Access form state directly using the key
+          final formState = _runningFormKey.currentState!;
+
           activity = RunningActivity(
-            date: DateTime(now.year, now.month, now.day),
-            startTime: DateTime(
-              now.year, now.month, now.day, 
-              now.hour, now.minute
-            ).subtract(runningDuration),
-            endTime: DateTime(now.year, now.month, now.day, now.hour, now.minute),
+            date: formState.selectedDate,
+            startTime: formState.selectedStartTime,
+            endTime: formState.selectedEndTime,
             distanceKm: runningDistance,
             caloriesBurned: calories,
           );
           break;
-          
+
         case CardioType.cycling:
+          final formState = _cyclingFormKey.currentState!;
+
           activity = CyclingActivity(
-            date: DateTime(now.year, now.month, now.day),
-            startTime: DateTime(
-              now.year, now.month, now.day, 
-              now.hour, now.minute
-            ).subtract(cyclingDuration),
-            endTime: DateTime(now.year, now.month, now.day, now.hour, now.minute),
+            date: formState.selectedDate,
+            startTime: formState.selectedStartTime,
+            endTime: formState.selectedEndTime,
             distanceKm: cyclingDistance,
             cyclingType: _parseCyclingType(cyclingType),
             caloriesBurned: calories,
           );
           break;
-          
+
         case CardioType.swimming:
+          final formState = _swimmingFormKey.currentState!;
+
           activity = SwimmingActivity(
-            date: DateTime(now.year, now.month, now.day),
-            startTime: DateTime(
-              now.year, now.month, now.day, 
-              now.hour, now.minute
-            ).subtract(swimmingDuration),
-            endTime: DateTime(now.year, now.month, now.day, now.hour, now.minute),
+            date: formState.selectedDate,
+            startTime: formState.selectedStartTime,
+            endTime: formState.selectedEndTime,
             laps: swimmingLaps,
             poolLength: poolLength,
             stroke: swimmingStroke,
@@ -365,10 +366,10 @@ class CardioInputPageState extends State<CardioInputPage> {
           );
           break;
       }
-      
+
       // Save using repository
       await _repository.saveCardioActivity(activity);
-          
+
       // Show success message to user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -384,7 +385,6 @@ class CardioInputPageState extends State<CardioInputPage> {
         ),
       );
       _navigateAfterSave();
-      
     } catch (e) {
       // Show error message to user
       ScaffoldMessenger.of(context).showSnackBar(
@@ -402,13 +402,13 @@ class CardioInputPageState extends State<CardioInputPage> {
       );
     }
   }
-  
+
   // Separate method for navigation to make testing easier
   void _navigateAfterSave() {
     // Simply show a success message without navigation for better testability
     // Navigation can be handled by the parent widget if needed
   }
-  
+
   // Helper method to convert string to CyclingType
   CyclingType _parseCyclingType(String typeString) {
     switch (typeString) {
