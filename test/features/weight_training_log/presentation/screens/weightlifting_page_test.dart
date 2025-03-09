@@ -589,5 +589,140 @@ void main() {
       // Dialog should be dismissed
       expect(find.text('Test Dialog'), findsNothing);
     });
+
+    testWidgets('should test dialog actions validation with different input combinations', 
+        (WidgetTester tester) async {
+      // Set a fixed screen size
+      tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      
+      // Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: WeightliftingPage(repository: mockRepository),
+      ));
+      
+      // Add exercise to enable dialog testing
+      final exerciseItem = find.text('Bench Press');
+      await tester.tap(exerciseItem.first);
+      await tester.pumpAndSettle();
+      
+      // Test for each invalid combination to ensure full coverage
+      // of the "if (weight > 0 && reps > 0 && duration > 0)" condition
+      final combinations = [
+        {'weight': '0', 'reps': '10', 'duration': '1.5'}, // Invalid weight
+        {'weight': '50', 'reps': '0', 'duration': '1.5'}, // Invalid reps
+        {'weight': '50', 'reps': '10', 'duration': '0'},  // Invalid duration
+        {'weight': '50', 'reps': '10', 'duration': '1.5'} // All valid
+      ];
+      
+      for (final inputValues in combinations) {
+        // Open add set dialog
+        final addSetButton = find.descendant(
+          of: find.byType(ExerciseCard),
+          matching: find.byType(OutlinedButton)
+        );
+        await tester.tap(addSetButton.first);
+        await tester.pumpAndSettle();
+        
+        // Find the text fields
+        final textFields = find.byType(TextField);
+        
+        // Enter the values from our test combination
+        await tester.enterText(textFields.at(0), inputValues['weight']!);
+        await tester.enterText(textFields.at(1), inputValues['reps']!);
+        await tester.enterText(textFields.at(2), inputValues['duration']!);
+        await tester.pumpAndSettle();
+        
+        // Try to add the set
+        await tester.tap(find.text('Add').last);
+        await tester.pumpAndSettle();
+        
+        final bool isValid = inputValues['weight'] != '0' && 
+                            inputValues['reps'] != '0' && 
+                            inputValues['duration'] != '0';
+        
+        if (isValid) {
+          // If all inputs are valid, the dialog should be closed
+          expect(find.text('Cancel'), findsNothing, 
+              reason: "Dialog should be closed with valid inputs: ${inputValues.toString()}");
+        } else {
+          // If any input is invalid, the dialog should still be open
+          expect(find.text('Cancel'), findsOneWidget, 
+              reason: "Dialog should remain open with invalid inputs: ${inputValues.toString()}");
+          
+          // Close the dialog manually to prepare for the next iteration
+          await tester.tap(find.text('Cancel'));
+          await tester.pumpAndSettle();
+        }
+      }
+      
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    });
+
+    // Additional test specifically for the validation condition in _buildDialogActions
+    testWidgets('should validate all conditions in dialog actions', (WidgetTester tester) async {
+      // Set a fixed screen size
+      tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      
+      // Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: WeightliftingPage(repository: mockRepository),
+      ));
+      
+      // Add an exercise
+      await tester.tap(find.text('Bench Press').first);
+      await tester.pumpAndSettle();
+      
+      // Function to test a specific condition
+      Future<void> testCondition({
+        required String weight, 
+        required String reps, 
+        required String duration, 
+        required bool shouldClose
+      }) async {
+        // Open dialog
+        await tester.tap(find.descendant(
+          of: find.byType(ExerciseCard),
+          matching: find.byType(OutlinedButton)
+        ).first);
+        await tester.pumpAndSettle();
+        
+        // Enter values
+        final textFields = find.byType(TextField);
+        await tester.enterText(textFields.at(0), weight);
+        await tester.enterText(textFields.at(1), reps);
+        await tester.enterText(textFields.at(2), duration);
+        
+        // Tap Add button
+        await tester.tap(find.text('Add').last);
+        await tester.pumpAndSettle();
+        
+        // Check result
+        if (shouldClose) {
+          expect(find.byType(AlertDialog), findsNothing);
+        } else {
+          expect(find.byType(AlertDialog), findsOneWidget);
+          // Close dialog manually for next test
+          await tester.tap(find.text('Cancel'));
+          await tester.pumpAndSettle();
+        }
+      }
+      
+      // Test specific validation branches to ensure full coverage
+      // Test when weight = 0 (invalid)
+      await testCondition(weight: '0', reps: '10', duration: '1.5', shouldClose: false);
+      
+      // Test when reps = 0 (invalid)
+      await testCondition(weight: '50', reps: '0', duration: '1.5', shouldClose: false);
+      
+      // Test when duration = 0 (invalid)
+      await testCondition(weight: '50', reps: '10', duration: '0', shouldClose: false);
+      
+      // Test when all are valid
+      await testCondition(weight: '50', reps: '10', duration: '1.5', shouldClose: true);
+      
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    });
   });
 }
