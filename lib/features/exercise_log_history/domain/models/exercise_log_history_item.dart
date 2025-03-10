@@ -60,7 +60,7 @@ class ExerciseLogHistoryItem {
         activityType: typeSmartExercise,
         title: smartExerciseLog.exerciseType,
         subtitle:
-            '${smartExerciseLog.duration} • ${smartExerciseLog.intensity}',
+            '${smartExerciseLog.duration} • ${smartExerciseLog.estimatedCalories} cal',
         timestamp: smartExerciseLog.timestamp,
         caloriesBurned: smartExerciseLog.estimatedCalories,
         sourceId: smartExerciseLog.id);
@@ -77,34 +77,29 @@ class ExerciseLogHistoryItem {
       return ExerciseLogHistoryItem(
         activityType: typeWeightlifting,
         title: weightLifting.name,
-        subtitle: '0 sets • 0 reps • 0.0 kg',
+        subtitle: '0 min • 0 cal',
         timestamp: weightLifting.timestamp,
         caloriesBurned: 0,
         sourceId: weightLifting.id,
       );
     }
 
-    // Calculate total reps and average weight for multiple sets
-    int totalReps = weightLifting.sets.fold(0, (sum, set) => sum + set.reps);
-    double avgWeight =
-        weightLifting.sets.fold(0.0, (sum, set) => sum + set.weight) /
-            totalSets;
-
-    // Calculate calories burned based on MET value, duration, and weight
-    // Formula: Calories = MET value × weight (kg) × duration (hours)
-    double totalDuration =
+    // Calculate total duration in minutes
+    double totalDurationInMinutes =
         weightLifting.sets.fold(0.0, (sum, set) => sum + set.duration);
-    double durationInHours =
-        totalDuration / 60; // Assuming duration is in minutes
-    double standardWeight = 70.0; // Default weight assumption
-    int caloriesBurned =
-        (weightLifting.metValue * standardWeight * durationInHours).round();
+        
+    // Calculate calories burned using workout service formula
+    double totalDurationInHours = totalDurationInMinutes / 60;
+    double totalWeight = weightLifting.sets.fold(0.0, (sum, set) => sum + (set.weight * set.reps));
+    double totalReps = weightLifting.sets.fold(0.0, (sum, set) => sum + set.reps);
+    int caloriesBurned = (weightLifting.metValue * 75.0 * 
+        (totalDurationInHours + 0.0001 * totalWeight + 0.002 * totalReps)).round();
 
     return ExerciseLogHistoryItem(
       activityType: typeWeightlifting,
       title: weightLifting.name,
       subtitle:
-          '$totalSets sets • $totalReps reps • ${avgWeight.toStringAsFixed(1)} kg',
+          '${totalDurationInMinutes.toStringAsFixed(0)} min • $caloriesBurned cal',
       timestamp: weightLifting.timestamp,
       caloriesBurned: caloriesBurned,
       sourceId: weightLifting.id,
@@ -132,17 +127,10 @@ class ExerciseLogHistoryItem {
     final durationText =
         minutes > 0 ? '$minutes min' : '${cardioLog.duration.inSeconds} sec';
 
-    // Get distance if available (using dynamic access since it might be in different implementations)
-    String distanceText = '';
-    final distance = cardioLog.toMap()['distance'];
-    if (distance != null) {
-      distanceText = ' • ${distance.toString()} km';
-    }
-
     return ExerciseLogHistoryItem(
       activityType: typeCardio,
       title: activityTitle,
-      subtitle: '$durationText$distanceText',
+      subtitle: '$durationText • ${cardioLog.caloriesBurned.toInt()} cal',
       timestamp: cardioLog.date,
       caloriesBurned: cardioLog.caloriesBurned.toInt(),
       sourceId: cardioLog.id,

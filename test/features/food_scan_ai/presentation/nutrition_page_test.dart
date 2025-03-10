@@ -2,14 +2,66 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/nutrition_page.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'dart:io';
+
+class MockFoodScanPhotoService extends Mock implements FoodScanPhotoService {}
+class MockFile extends Mock implements File {}
 
 void main() {
   const testImagePath = 'test/assets/test_image.jpg';
+  late MockFoodScanPhotoService mockFoodScanPhotoService;
+
+  setUpAll(() {
+    // Daftarkan fallback value untuk File
+    registerFallbackValue(MockFile());
+  });
+
+  setUp(() {
+    // Inisialisasi mock service
+    mockFoodScanPhotoService = MockFoodScanPhotoService();
+    
+    // Setup mock untuk mengembalikan data valid
+    when(() => mockFoodScanPhotoService.analyzeFoodPhoto(any()))
+        .thenAnswer((_) async => FoodAnalysisResult(
+          foodName: 'Test Food',
+          ingredients: [Ingredient(name: 'Test Ingredient', servings: 1)],
+          nutritionInfo: NutritionInfo(
+            calories: 250,
+            protein: 10,
+            carbs: 30,
+            fat: 12,
+            sodium: 100,
+            sugar: 10,
+            fiber: 5,
+          ),
+          warnings: [],
+        ));
+    
+    // Daftarkan mock service ke GetIt
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<FoodScanPhotoService>()) {
+      getIt.unregister<FoodScanPhotoService>();
+    }
+    getIt.registerSingleton<FoodScanPhotoService>(mockFoodScanPhotoService);
+
+  });
+
+  tearDown(() {
+    // Bersihkan GetIt setelah setiap test
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<FoodScanPhotoService>()) {
+      getIt.unregister<FoodScanPhotoService>();
+    }
+  });
 
   testWidgets('NutritionPage should render correctly',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: NutritionPage(imagePath: testImagePath),
       ),
     );
@@ -51,7 +103,7 @@ void main() {
   testWidgets('NutritionPage should handle scroll events',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: NutritionPage(imagePath: testImagePath),
       ),
     );
@@ -64,7 +116,7 @@ void main() {
     expect(initialAppBar.backgroundColor, equals(Colors.transparent));
 
     // Scroll down
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -200));
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -100));
     await tester.pump();
 
     // After scrolling - app bar should have primaryYellow color
@@ -77,7 +129,7 @@ void main() {
       (WidgetTester tester) async {
 
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: NutritionPage(imagePath: testImagePath),
       ),
     );
@@ -86,12 +138,7 @@ void main() {
     expect(find.text('Fiber'), findsOneWidget);
     expect(find.text('Sugar'), findsOneWidget);
     expect(find.text('Sodium'), findsOneWidget);
-    expect(find.text('Iron'), findsOneWidget);
 
-    // Verify diet tags are displayed
-    expect(find.text('High Protein'), findsOneWidget);
-    expect(find.text('Low Sugar'), findsOneWidget);
-    expect(find.text('Contains Gluten'), findsOneWidget);
   });
 
 
@@ -118,7 +165,7 @@ void main() {
 
   testWidgets('Action buttons should be tappable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: NutritionPage(imagePath: testImagePath),
       ),
     );

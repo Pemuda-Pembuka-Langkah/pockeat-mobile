@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
+import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/core/di/service_locator.dart';
 
 class NutritionPage extends StatefulWidget {
   final String imagePath;
-  const NutritionPage({super.key, required this.imagePath});
+  final FoodScanPhotoService foodScanPhotoService;
+
+  NutritionPage({super.key, required this.imagePath})
+      : foodScanPhotoService = getIt<FoodScanPhotoService>();
 
   @override
   _NutritionPageState createState() => _NutritionPageState();
@@ -12,12 +18,70 @@ class NutritionPage extends StatefulWidget {
 
 class _NutritionPageState extends State<NutritionPage> {
   bool _isScrolledToTop = true;
-  
+  bool _isLoading = true;
+  String _foodName = 'Analyzing...';
+  double _calories = 0;
+  Map<String, dynamic> _nutritionData = {};
+  List<String> _warnings = [];
+  late FoodAnalysisResult food;
+
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color warningYellow = const Color(0xFFF4D03F);
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => _analyzeFoodImage());
+  }
+
+  Future<void> _analyzeFoodImage() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final result = await widget.foodScanPhotoService
+          .analyzeFoodPhoto(File(widget.imagePath));
+
+      setState(() {
+        _foodName = result.foodName;
+        _calories = result.nutritionInfo.calories.toDouble();
+        _nutritionData = {
+          'protein': result.nutritionInfo.protein,
+          'carbs': result.nutritionInfo.carbs,
+          'fat': result.nutritionInfo.fat,
+          'fiber': result.nutritionInfo.fiber,
+          'sugar': result.nutritionInfo.sugar,
+          'sodium': result.nutritionInfo.sodium,
+        };
+        _isLoading = false;
+        _warnings = result.warnings;
+        food = result;
+      });
+    } catch (e) {
+      setState(() {
+        _foodName = 'Analysis Failed';
+        _isLoading = false;
+      });
+      // Tampilkan error dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: Text('Failed to analyze food: $e'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,68 +99,67 @@ class _NutritionPageState extends State<NutritionPage> {
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
-  expandedHeight: 300,
-  pinned: true,
-  backgroundColor: _isScrolledToTop 
-      ? Colors.transparent 
-      : primaryYellow,
-  elevation: 0,
-  title: Text(
-    'Nutrition Analysis',
-    style: TextStyle(
-      color: _isScrolledToTop ? Colors.white : Colors.black87,
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-    ),
-  ),
-  leading: CupertinoButton(
-    child: Icon(
-      Icons.arrow_back_ios,
-      color: _isScrolledToTop ? Colors.white : Colors.black87,
-      size: 20,
-    ),
-    onPressed: () => Navigator.pop(context),
-  ),
-  flexibleSpace: FlexibleSpaceBar(
-    background: Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.file(
-          File(widget.imagePath),
-          fit: BoxFit.cover,
-        ),
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.center,
-              colors: [
-                Colors.black.withOpacity(0.4),
-                Colors.transparent,
+              expandedHeight: 300,
+              pinned: true,
+              backgroundColor:
+                  _isScrolledToTop ? Colors.transparent : primaryYellow,
+              elevation: 0,
+              title: Text(
+                'Nutrition Analysis',
+                style: TextStyle(
+                  color: _isScrolledToTop ? Colors.white : Colors.black87,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              leading: CupertinoButton(
+                child: Icon(
+                  Icons.arrow_back_ios,
+                  color: _isScrolledToTop ? Colors.white : Colors.black87,
+                  size: 20,
+                ),
+                onPressed: () => Navigator.pop(context),
+              ),
+              flexibleSpace: FlexibleSpaceBar(
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.file(
+                      File(widget.imagePath),
+                      fit: BoxFit.cover,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.center,
+                          colors: [
+                            Colors.black.withOpacity(0.4),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                CupertinoButton(
+                  child: Icon(
+                    CupertinoIcons.share,
+                    color: _isScrolledToTop ? Colors.white : Colors.black87,
+                  ),
+                  onPressed: () {},
+                ),
+                CupertinoButton(
+                  child: Icon(
+                    CupertinoIcons.ellipsis,
+                    color: _isScrolledToTop ? Colors.white : Colors.black87,
+                  ),
+                  onPressed: () {},
+                ),
               ],
             ),
-          ),
-        ),
-      ],
-    ),
-  ),
-  actions: [
-    CupertinoButton(
-      child: Icon(
-        CupertinoIcons.share,
-        color: _isScrolledToTop ? Colors.white : Colors.black87,
-      ),
-      onPressed: () {},
-    ),
-    CupertinoButton(
-      child: Icon(
-        CupertinoIcons.ellipsis,
-        color: _isScrolledToTop ? Colors.white : Colors.black87,
-      ),
-      onPressed: () {},
-    ),
-  ],
-),
             // Content
             SliverToBoxAdapter(
               child: ClipRRect(
@@ -117,32 +180,41 @@ class _NutritionPageState extends State<NutritionPage> {
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Fried Rice',
-                                      key: Key('food_title'),
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.black87,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        _isLoading ? 'Analyzing...' : _foodName,
+                                        key: const Key('food_title'),
+                                        style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
+                                        overflow: TextOverflow.visible,
+                                        maxLines: 2,
+                                        softWrap: true,
                                       ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      '1 plate • 300g',
-                                      key: Key('food_portion'),
-                                      style: TextStyle(
-                                        color: Colors.black54,
-                                        fontSize: 14,
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        _isLoading ? '' : '1 plate • 300g',
+                                        key: const Key('food_portion'),
+                                        style: const TextStyle(
+                                          color: Colors.black54,
+                                          fontSize: 14,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
+                                const SizedBox(width: 12),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: primaryGreen,
                                     borderRadius: BorderRadius.circular(12),
@@ -188,13 +260,15 @@ class _NutritionPageState extends State<NutritionPage> {
                           child: Column(
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        '450',
+                                        _isLoading ? '--' : '$_calories',
                                         key: Key('food_calories'),
                                         style: TextStyle(
                                           color: Colors.black87,
@@ -213,7 +287,8 @@ class _NutritionPageState extends State<NutritionPage> {
                                     ],
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
                                       color: primaryPink,
                                       borderRadius: BorderRadius.circular(20),
@@ -236,7 +311,8 @@ class _NutritionPageState extends State<NutritionPage> {
                                 child: LinearProgressIndicator(
                                   value: 0.22,
                                   backgroundColor: Colors.white,
-                                  valueColor: AlwaysStoppedAnimation<Color>(primaryPink),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      primaryPink),
                                   minHeight: 8,
                                 ),
                               ),
@@ -260,7 +336,7 @@ class _NutritionPageState extends State<NutritionPage> {
                               Row(
                                 children: [
                                   Icon(CupertinoIcons.sparkles,
-                                       color: primaryGreen),
+                                      color: primaryGreen),
                                   const SizedBox(width: 8),
                                   const Text(
                                     'AI Analysis',
@@ -314,26 +390,38 @@ class _NutritionPageState extends State<NutritionPage> {
                                 children: [
                                   _buildMacroItem(
                                     'Protein',
-                                    45,
+                                    _isLoading
+                                        ? 0
+                                        : (_nutritionData['protein'] ?? 0),
                                     120,
                                     primaryPink,
-                                    subtitle: '38% of daily goal',
+                                    subtitle: _isLoading
+                                        ? 'Loading...'
+                                        : '${(_nutritionData['protein'] ?? 0) * 100 ~/ 120}% of daily goal',
                                   ),
                                   const Divider(height: 1),
                                   _buildMacroItem(
                                     'Carbs',
-                                    156,
+                                    _isLoading
+                                        ? 0
+                                        : (_nutritionData['carbs'] ?? 0),
                                     250,
                                     primaryGreen,
-                                    subtitle: '62% of daily goal',
+                                    subtitle: _isLoading
+                                        ? 'Loading...'
+                                        : '${(_nutritionData['carbs'] ?? 0) * 100 ~/ 250}% of daily goal',
                                   ),
                                   const Divider(height: 1),
                                   _buildMacroItem(
                                     'Fat',
-                                    25,
+                                    _isLoading
+                                        ? 0
+                                        : (_nutritionData['fat'] ?? 0),
                                     65,
                                     warningYellow,
-                                    subtitle: '38% of daily goal',
+                                    subtitle: _isLoading
+                                        ? 'Loading...'
+                                        : '${(_nutritionData['fat'] ?? 0) * 100 ~/ 65}% of daily goal',
                                   ),
                                 ],
                               ),
@@ -433,8 +521,7 @@ class _NutritionPageState extends State<NutritionPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(CupertinoIcons.wand_stars,
-                            size: 20,
-                            color: primaryPink),
+                            size: 20, color: primaryPink),
                         const SizedBox(width: 6),
                         const Text(
                           'Fix',
@@ -458,15 +545,35 @@ class _NutritionPageState extends State<NutritionPage> {
                 child: InkWell(
                   key: const Key('add_to_log_button'),
                   borderRadius: BorderRadius.circular(8),
-                  onTap: () {},
+                  onTap: () async {
+                    if (!_isLoading) {
+                      try {
+                        final message = await widget.foodScanPhotoService
+                            .saveFoodAnalysis(food);
+
+                        if (!mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(message)),
+                        );
+                      } catch (e) {
+                        if (!mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('Gagal menyimpan: ${e.toString()}')),
+                        );
+                      }
+                    }
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(CupertinoIcons.plus,
-                            color: Colors.white,
-                            size: 20),
+                            color: Colors.white, size: 20),
                         SizedBox(width: 6),
                         Text(
                           'Add to Log',
@@ -487,13 +594,8 @@ class _NutritionPageState extends State<NutritionPage> {
     );
   }
 
-  Widget _buildMacroItem(
-    String label, 
-    int value, 
-    int total, 
-    Color color, 
-    {String? subtitle}
-  ) {
+  Widget _buildMacroItem(String label, double value, double total, Color color,
+      {String? subtitle}) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -547,10 +649,26 @@ class _NutritionPageState extends State<NutritionPage> {
 
   Widget _buildNutrientsGrid() {
     final nutrients = [
-      {'name': 'Fiber', 'value': '3.5g', 'goal': '25g'},
-      {'name': 'Sugar', 'value': '2.1g', 'goal': '25g'},
-      {'name': 'Sodium', 'value': '520mg', 'goal': '2300mg'},
-      {'name': 'Iron', 'value': '2.3mg', 'goal': '18mg'},
+      {
+        'name': 'Fiber',
+        'value': _isLoading ? '0g' : '${_nutritionData['fiber'] ?? 0}g',
+        'goal': '25g'
+      },
+      {
+        'name': 'Sugar',
+        'value': _isLoading ? '0g' : '${_nutritionData['sugar'] ?? 0}g',
+        'goal': '25g'
+      },
+      {
+        'name': 'Sodium',
+        'value': _isLoading ? '0mg' : '${_nutritionData['sodium'] ?? 0}mg',
+        'goal': '2300mg'
+      },
+      {
+        'name': 'Calories',
+        'value': _isLoading ? '0' : '$_calories',
+        'goal': '2000'
+      },
     ];
 
     return GridView.builder(
@@ -566,7 +684,7 @@ class _NutritionPageState extends State<NutritionPage> {
       itemBuilder: (context, index) {
         final nutrient = nutrients[index];
         return Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: primaryYellow.withOpacity(0.15),
             borderRadius: BorderRadius.circular(12),
@@ -579,25 +697,30 @@ class _NutritionPageState extends State<NutritionPage> {
                 nutrient['name']!,
                 style: const TextStyle(
                   color: Colors.black87,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                nutrient['value']!,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              Text(
-                'of ${nutrient['goal']}',
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 13,
-                ),
+              const SizedBox(height: 2),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    nutrient['value']!,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    'of ${nutrient['goal']}',
+                    style: const TextStyle(
+                      color: Colors.black54,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -607,28 +730,60 @@ class _NutritionPageState extends State<NutritionPage> {
   }
 
   Widget _buildDietTags() {
-    final tags = ['High Protein', 'Low Sugar', 'Contains Gluten'];
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: tags.map((tag) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: primaryGreen.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: primaryGreen.withOpacity(0.3)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Warnings',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
           ),
-          child: Text(
-            tag,
-            style: const TextStyle(
-              color: Colors.black87,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+        ),
+        const SizedBox(height: 12),
+        if (_warnings.isEmpty)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: primaryGreen.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: primaryGreen.withOpacity(0.3)),
             ),
+            child: const Text(
+              'The food is safe for consumption',
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          )
+        else
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _warnings.map((warning) {
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: warningYellow.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: warningYellow.withOpacity(0.3)),
+                ),
+                child: Text(
+                  warning,
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              );
+            }).toList(),
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 }

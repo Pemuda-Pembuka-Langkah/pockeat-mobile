@@ -54,10 +54,18 @@ void main() {
       // Assert - Check metric values
       expect(find.text('20.0 km'), findsAtLeastNWidgets(1));
       
-      // For duration, use the formatted value method to match what's in the widget
-      final expectedDuration = _formatDuration(testActivity.duration);
+      // For duration, use the formatted value method to match exactly what's in the widget
+      // Updated to include the "min" suffix that was added in the new design
+      final hours = testActivity.duration.inHours.toString().padLeft(2, '0');
+      final minutes = testActivity.duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+      final seconds = testActivity.duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+      final expectedDuration = hours == '00' ? '$minutes:$seconds min' : '$hours:$minutes:$seconds';
       expect(find.text(expectedDuration), findsAtLeastNWidgets(1));
       
+      // Check for numeric calories in metrics card
+      expect(find.text('450'), findsAtLeastNWidgets(1));
+      
+      // And with unit in details section
       expect(find.text('450 kcal'), findsAtLeastNWidgets(1));
     });
 
@@ -83,7 +91,7 @@ void main() {
 
       // Assert - Check cycling type displayed
       expect(find.text('Cycling Type'), findsOneWidget);
-      expect(find.text('Commute'), findsOneWidget); 
+      expect(find.text('Commute/Road Cycling'), findsOneWidget); 
     });
 
     testWidgets('should display start and end times in details section', (WidgetTester tester) async {
@@ -114,22 +122,21 @@ void main() {
         ),
       ));
 
-      // Assert - Check section title and average speed
+      // Assert - Check section title
       expect(find.text('Activity Details'), findsOneWidget);
+      
+      // Check for average speed label in the metrics card
+      expect(find.text('Avg Speed'), findsOneWidget);
+      
+      // Check for average speed label in the details section
       expect(find.text('Average Speed'), findsOneWidget);
       
-      // Calculate expected speed value as shown in the widget
+      // Calculate expected speed value exactly as shown in the widget
       final speed = testActivity.distanceKm / (testActivity.duration.inSeconds / 3600);
-      expect(find.text('${speed.toStringAsFixed(1)} km/h'), findsOneWidget);
+      final expectedSpeed = '${speed.toStringAsFixed(1)} km/h';
+      
+      // We expect to find the speed value in at least one place (actually appears in both the metrics card and details section)
+      expect(find.text(expectedSpeed), findsAtLeastNWidgets(1));
     });
   });
-}
-
-// Helper method to match the formatting in the widget
-String _formatDuration(Duration duration) {
-  String twoDigits(int n) => n.toString().padLeft(2, '0');
-  final hours = twoDigits(duration.inHours);
-  final minutes = twoDigits(duration.inMinutes.remainder(60));
-  final seconds = twoDigits(duration.inSeconds.remainder(60));
-  return hours == '00' ? '$minutes:$seconds' : '$hours:$minutes:$seconds';
 }

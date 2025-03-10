@@ -108,4 +108,30 @@ class ExerciseDetailServiceImpl implements ExerciseDetailService {
     // Default jika tipe dasar tidak dikenali
     return 'unknown';
   }
+
+  @override
+  Future<bool> deleteExerciseLog(String id, String activityType) async {
+    try {
+      // Menggunakan pattern yang sesuai dengan desain komposisi
+      if (activityType == ExerciseLogHistoryItem.typeSmartExercise) {
+        // Gunakan repository SmartExerciseLog untuk menghapus
+        return await _smartExerciseRepository.deleteById(id);
+      } 
+      else if (activityType == ExerciseLogHistoryItem.typeCardio) {
+        // Gunakan repository Cardio untuk menghapus
+        final cardioResult = await _cardioRepository.deleteCardioActivity(id);
+        return cardioResult;
+      } 
+      else if (activityType == ExerciseLogHistoryItem.typeWeightlifting) {
+        // Gunakan repository WeightLifting untuk menghapus
+        final weightLiftingResult = await _weightLiftingRepository.deleteExercise(id);
+        return weightLiftingResult;
+      }
+      
+      // Jika tipe tidak dikenali, return false
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
 }

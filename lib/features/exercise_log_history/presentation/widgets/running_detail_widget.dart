@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 
 /// Widget to display running activity details
 class RunningDetailWidget extends StatelessWidget {
   final RunningActivity activity;
-  final Color primaryPink = const Color(0xFFFF6B6B); // Cardio color
+  final Color primaryColor = const Color(0xFFFF6B6B); // Cardio color
   
   const RunningDetailWidget({
     super.key,
@@ -16,23 +17,44 @@ class RunningDetailWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
+      physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoCard(context),
+          _buildHeaderCard(context),
+          const SizedBox(height: 16),
+          _buildMetricsCard(context),
           const SizedBox(height: 16),
           _buildDetailsList(context),
+          const SizedBox(height: 24), // Extra padding at the bottom
         ],
       ),
     );
   }
   
-  Widget _buildInfoCard(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  Widget _buildHeaderCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            primaryColor.withOpacity(0.8),
+            primaryColor.withOpacity(0.6),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -41,16 +63,16 @@ class RunningDetailWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: primaryPink.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.directions_run,
                     size: 28,
-                    color: primaryPink,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,50 +80,135 @@ class RunningDetailWidget extends StatelessWidget {
                       const Text(
                         'Running Session',
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                              color: Color.fromRGBO(0, 0, 0, 0.3),
+                            ),
+                          ],
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
+                      const SizedBox(height: 4),
                       Text(
                         DateFormat('EEEE, dd MMMM yyyy').format(activity.date),
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 13,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF9F9F9),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildMetricColumn(
-                    'Distance',
-                    '${activity.distanceKm.toStringAsFixed(1)} km',
-                  ),
-                  _buildMetricColumn(
-                    'Duration',
-                    _formatDuration(activity.duration),
-                  ),
-                  _buildMetricColumn(
-                    'Calories',
-                    '${activity.caloriesBurned.round()} kcal',
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
+      ),
+    );
+  }
+  
+  Widget _buildMetricsCard(BuildContext context) {
+    return Card(
+      elevation: 3,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              _buildMetricItem(
+                icon: Icons.straighten,
+                value: '${activity.distanceKm.toStringAsFixed(1)} km',
+                label: 'Distance',
+                color: Colors.blue,
+                flex: 1,
+              ),
+              _buildVerticalDivider(),
+              _buildMetricItem(
+                icon: Icons.timer,
+                value: _formatDurationShort(activity.duration),
+                label: 'Duration',
+                color: Colors.purple,
+                flex: 1,
+              ),
+              _buildVerticalDivider(),
+              _buildMetricItem(
+                icon: Icons.local_fire_department,
+                value: '${activity.caloriesBurned.round()}',
+                label: 'Calories',
+                color: Colors.red,
+                flex: 1,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildVerticalDivider() {
+    return Container(
+      width: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      color: Colors.grey.withOpacity(0.2),
+    );
+  }
+  
+  Widget _buildMetricItem({
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color color,
+    required int flex,
+  }) {
+    return Expanded(
+      flex: flex,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey.shade600,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -110,32 +217,43 @@ class RunningDetailWidget extends StatelessWidget {
     final pace = _calculatePace(activity.duration, activity.distanceKm);
     
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 3,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Activity Details',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: primaryPink,
-              ),
+            Row(
+              children: [
+                Icon(
+                  Icons.analytics,
+                  color: primaryColor,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Activity Details',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             _buildDetailRow('Date', DateFormat('dd MMM yyyy').format(activity.date)),
-            const SizedBox(height: 8),
+            _buildDetailDivider(),
             _buildDetailRow('Time', DateFormat('HH:mm').format(activity.startTime)),
-            const SizedBox(height: 8),
+            _buildDetailDivider(),
             _buildDetailRow('Distance', '${activity.distanceKm.toStringAsFixed(1)} km'),
-            const SizedBox(height: 8),
+            _buildDetailDivider(),
             _buildDetailRow('Duration', _formatDuration(activity.duration)),
-            const SizedBox(height: 8),
+            _buildDetailDivider(),
             _buildDetailRow('Pace', pace),
-            const SizedBox(height: 8),
+            _buildDetailDivider(),
             _buildDetailRow('Calories Burned', '${activity.caloriesBurned.round()} kcal'),
           ],
         ),
@@ -143,26 +261,13 @@ class RunningDetailWidget extends StatelessWidget {
     );
   }
   
-  Widget _buildMetricColumn(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 13,
-          ),
-        ),
-      ],
+  Widget _buildDetailDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Divider(
+        color: Colors.grey.withOpacity(0.2),
+        height: 1,
+      ),
     );
   }
   
@@ -170,19 +275,28 @@ class RunningDetailWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.black54,
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black54,
+            ),
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.end,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
           ),
         ),
       ],
@@ -194,15 +308,28 @@ class RunningDetailWidget extends StatelessWidget {
     final hours = twoDigits(duration.inHours);
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return hours == '00' ? '$minutes:$seconds' : '$hours:$minutes:$seconds';
+    return hours == '00' ? '$minutes:$seconds min' : '$hours:$minutes:$seconds';
+  }
+  
+  String _formatDurationShort(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+    
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    } else {
+      return '${minutes}:${twoDigits(seconds)}';
+    }
   }
   
   String _calculatePace(Duration duration, double distanceKm) {
     if (distanceKm <= 0) return '0:00 /km';
     
-    final totalMinutes = duration.inMinutes + (duration.inSeconds % 60) / 60;
-    final paceMinutes = (totalMinutes / distanceKm).floor();
-    final paceSeconds = (((totalMinutes / distanceKm) - paceMinutes) * 60).round();
+    final paceInSeconds = duration.inSeconds / distanceKm;
+    final paceMinutes = (paceInSeconds / 60).floor();
+    final paceSeconds = (paceInSeconds % 60).round();
     
     return '$paceMinutes:${paceSeconds.toString().padLeft(2, '0')} /km';
   }
