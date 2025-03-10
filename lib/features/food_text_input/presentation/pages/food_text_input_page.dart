@@ -3,7 +3,6 @@ import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
 import 'package:pockeat/features/food_text_input/presentation/widgets/food_entry_form_page.dart';
 
 class FoodTextInputPage extends StatelessWidget {
-  // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
@@ -67,7 +66,6 @@ class FoodTextInputPage extends StatelessWidget {
                     weightRequired: true,
                     onSaved: (FoodEntry foodEntry) {
                       print('Food Entry Saved: ${foodEntry.toString()}');
-                      Navigator.pop(context);
                     },
                   ),
                 ),
