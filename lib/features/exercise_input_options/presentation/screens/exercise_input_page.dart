@@ -59,10 +59,10 @@ class ExerciseInputPage extends StatelessWidget {
               // Running Option
               ExerciseOptionCard(
                 icon: Icons.directions_run,
-                title: 'Running',
-                subtitle: 'Track your running session',
+                title: 'Cardio',
+                subtitle: 'Track your cardio session',
                 color: pinkColor,
-                route: '/running-input',
+                route: '/cardio',
               ),
               
               const SizedBox(height: 16),
