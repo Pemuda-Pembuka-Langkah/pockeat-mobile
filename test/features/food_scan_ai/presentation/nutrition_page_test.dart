@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/nutrition_page.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/pages/nutrition_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
