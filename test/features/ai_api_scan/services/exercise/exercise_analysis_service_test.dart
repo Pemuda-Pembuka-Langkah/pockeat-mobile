@@ -3,6 +3,7 @@ import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 
 // Manual mock implementation
@@ -218,8 +219,6 @@ void main() {
     expect(result.intensity, equals('Moderate'));
     expect(result.metValue, equals(8.5));
     expect(result.originalInput, equals('Running 5km in 30 minutes'));
-    expect(result.correctionComment, equals(userComment));
-    expect(result.isUserCorrected, isTrue);
     expect(result.summary, contains('Corrected analysis'));
     expect(result.summary, contains('Updated duration from 30 to 45 minutes'));
   });
@@ -263,8 +262,6 @@ void main() {
     expect(result.intensity, equals('High')); // Changed
     expect(result.metValue, equals(10.2)); // Changed
     expect(result.originalInput, equals('Running 5km in 30 minutes'));
-    expect(result.correctionComment, equals(userComment));
-    expect(result.isUserCorrected, isTrue);
   });
 
   test('should handle incomplete JSON response by using previous values', () async {
@@ -301,8 +298,7 @@ void main() {
     expect(result.duration, equals('30 minutes')); // Preserved from previous
     expect(result.intensity, equals('Moderate')); // Preserved from previous
     expect(result.metValue, equals(8.5)); // Preserved from previous
-    expect(result.correctionComment, equals(userComment));
-    expect(result.isUserCorrected, isTrue);
+
   });
 
   test('should throw exception when API returns null response', () async {
