@@ -107,7 +107,7 @@ class ExerciseHistoryCard extends StatelessWidget {
         final key = keyValue[0].trim();
         final value = keyValue.length > 1 ? keyValue[1].trim() : '';
         
-        spans.add(TextSpan(text: key + ': '));
+        spans.add(TextSpan(text: '$key: '));
         spans.add(TextSpan(
           text: value,
           style: TextStyle(
