@@ -73,6 +73,27 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   void clearWorkout() => setState(() => exercises.clear());
 
+  void deleteExercise(WeightLifting exercise) {
+    setState(() {
+      exercises.remove(exercise);
+    });
+    
+    // Show a snackbar to confirm deletion
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${exercise.name} deleted from your workout'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
+      )
+    );
+  }
+
+  void deleteSet(WeightLifting exercise, int setIndex) {
+    setState(() {
+      exercise.sets.removeAt(setIndex);
+    });
+  }
+
   // New method to save workout to repository
   Future<void> saveWorkout() async {
     if (exercises.isEmpty) {
@@ -276,6 +297,8 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                 primaryGreen: primaryGreen,
                 volume: calculateExerciseVolume(exercise),
                 onAddSet: () => _showAddSetDialog(exercise),
+                onDeleteExercise: () => deleteExercise(exercise),
+                onDeleteSet: (index) => deleteSet(exercise, index),
               )),
         ],
       ),
