@@ -10,10 +10,7 @@ void main() {
       await tester.pumpAndSettle();
   
       expect(find.byType(FoodTextInputPage), findsOneWidget);
-      print('Found FoodTextInputPage');
-      
       expect(find.byType(Scaffold), findsWidgets);
-      print('Found Scaffold');
     });
 
     testWidgets('AppBar has correct title and back button', (WidgetTester tester) async {

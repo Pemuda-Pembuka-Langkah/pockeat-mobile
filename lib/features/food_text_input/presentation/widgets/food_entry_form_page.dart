@@ -28,12 +28,15 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
   final _descriptionController = TextEditingController();
   final _ingredientsController = TextEditingController();
   final _weightController = TextEditingController();
+  final _correctionController = TextEditingController();
 
   String? _foodNameError;
   String? _descriptionError;
   String? _ingredientsError;
   String? _weightError;
   String? _successMessage;
+  bool _showCorrectionInterface = false;
+  bool _isAnalyzing = false;
 
   void _saveForm() {
     setState(() {
@@ -81,12 +84,29 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
     }
   }
 
+  void _correctAnalysis() {
+    setState(() {
+      _isAnalyzing = true;
+    });
+    // Add your analysis logic here
+    setState(() {
+      _isAnalyzing = false;
+    });
+  }
+
+  void _toggleCorrectionInterface() {
+    setState(() {
+      _showCorrectionInterface = !_showCorrectionInterface;
+    });
+  }
+
   @override
   void dispose() {
     _foodNameController.dispose();
     _descriptionController.dispose();
     _ingredientsController.dispose();
     _weightController.dispose();
+    _correctionController.dispose();
     super.dispose();
   }
 
@@ -207,10 +227,55 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                   ),
                 ),
               ),
+              if (_showCorrectionInterface) 
+                _CorrectionInterface(
+                  correctionController: _correctionController,
+                  onSubmit: _correctAnalysis,
+                ),
+              if (!_showCorrectionInterface && _successMessage != null) 
+                OutlinedButton.icon(
+                  onPressed: _toggleCorrectionInterface,
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Request Correction'),
+                ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CorrectionInterface extends StatelessWidget {
+  final TextEditingController correctionController;
+  final VoidCallback onSubmit;
+
+  const _CorrectionInterface({
+    required this.correctionController,
+    required this.onSubmit,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: correctionController,
+          decoration: const InputDecoration(
+            labelText: 'What needs correction?',
+            hintText: 'e.g., The calorie count is wrong, it should be higher',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 3,
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: onSubmit,
+          child: const Text('Submit Correction'),
+        ),
+      ],
     );
   }
 }
