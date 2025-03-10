@@ -7,17 +7,16 @@ class FoodEntryForm extends StatefulWidget {
   final int maxDescriptionWords;
   final int maxIngredientWords;
   final bool weightRequired;
-  final Function(FoodEntry)? onSaved; 
+  final Function(FoodEntry)? onSaved;
 
   const FoodEntryForm({
-  this.maxFoodNameWords = 20,
-  this.maxDescriptionWords = 50,
-  this.maxIngredientWords = 50,
-  this.weightRequired = true,
-  this.onSaved,
-  super.key,
+    this.maxFoodNameWords = 20,
+    this.maxDescriptionWords = 50,
+    this.maxIngredientWords = 50,
+    this.weightRequired = true,
+    this.onSaved,
+    super.key,
   });
-
 
   @override
   _FoodEntryFormState createState() => _FoodEntryFormState();
@@ -46,27 +45,25 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
     });
 
     _foodNameError = FormValidator.validateFoodName(_foodNameController.text, widget.maxFoodNameWords);
-    
     _descriptionError = FormValidator.validateDescription(_descriptionController.text, widget.maxDescriptionWords);
-    
     _ingredientsError = FormValidator.validateIngredients(_ingredientsController.text, widget.maxIngredientWords);
     
     if (widget.weightRequired) {
       _weightError = FormValidator.validateWeight(_weightController.text);
     }
 
-    setState(() {});  
+    setState(() {});
 
-    bool isValid = _foodNameError == null && 
-                  _descriptionError == null && 
-                  _ingredientsError == null &&
-                  (!widget.weightRequired || _weightError == null);
+    bool isValid = _foodNameError == null &&
+        _descriptionError == null &&
+        _ingredientsError == null &&
+        (!widget.weightRequired || _weightError == null);
 
     if (isValid) {
-      final weight = widget.weightRequired && _weightController.text.trim().isNotEmpty 
-          ? double.tryParse(_weightController.text)?.toInt() 
+      final weight = widget.weightRequired && _weightController.text.trim().isNotEmpty
+          ? double.tryParse(_weightController.text)?.toInt()
           : null;
-      
+
       FoodEntry foodEntry = FoodEntry(
         foodName: _foodNameController.text,
         description: _descriptionController.text,
@@ -93,69 +90,122 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
     super.dispose();
   }
 
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    String? errorText,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+    Key? key,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextField(
+        key: key,
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: label,
+          errorText: errorText,
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 2),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFFF6B6B), width: 2),
+          ),
+          labelStyle: const TextStyle(color: Colors.black54),
+          errorStyle: const TextStyle(color: Color(0xFFFF6B6B)),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Food Entry Form')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
+              _buildTextField(
                 key: const ValueKey('foodNameField'),
                 controller: _foodNameController,
-                decoration: InputDecoration(
-                  labelText: 'Food Name',
-                  errorText: _foodNameError,
-                ),
+                label: 'Food Name',
+                errorText: _foodNameError,
               ),
-              const SizedBox(height: 10),
-              TextField(
+              _buildTextField(
                 key: const ValueKey('descriptionField'),
                 controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  errorText: _descriptionError,
-                ),
+                label: 'Description',
+                errorText: _descriptionError,
                 maxLines: 3,
               ),
-              const SizedBox(height: 10),
-              TextField(
+              _buildTextField(
                 key: const ValueKey('ingredientsField'),
                 controller: _ingredientsController,
-                decoration: InputDecoration(
-                  labelText: 'Ingredients',
-                  errorText: _ingredientsError,
-                ),
+                label: 'Ingredients',
+                errorText: _ingredientsError,
                 maxLines: 3,
               ),
-              const SizedBox(height: 10),
-              TextField(
+              _buildTextField(
                 key: const ValueKey('weightField'),
                 controller: _weightController,
-                decoration: InputDecoration(
-                  labelText: 'Weight (grams)',
-                  errorText: _weightError,
-                ),
+                label: 'Weight (grams)',
+                errorText: _weightError,
                 keyboardType: TextInputType.number,
               ),
-              const SizedBox(height: 10),
               if (_successMessage != null)
                 Padding(
-                  padding: const EdgeInsets.only(top: 10),
+                  padding: const EdgeInsets.only(bottom: 16),
                   child: Text(
                     _successMessage!,
-                    style: const TextStyle(color: Colors.green),
+                    style: const TextStyle(
+                      color: Color(0xFF4ECDC4),
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                key: const ValueKey('saveButton'),
-                onPressed: _saveForm,
-                child: const Text('Save'),
+              SizedBox(
+                height: 50,
+                child: ElevatedButton(
+                  key: const ValueKey('saveButton'),
+                  onPressed: _saveForm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4ECDC4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Save',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
