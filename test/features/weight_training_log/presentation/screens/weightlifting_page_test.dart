@@ -431,6 +431,95 @@ void main() {
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     });
 
+    testWidgets('should delete a set from an exercise', (WidgetTester tester) async {
+      // Set a fixed screen size
+      tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      
+      // Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: WeightliftingPage(repository: mockRepository),
+      ));
+
+      // Add exercise
+      final exerciseItem = find.text('Bench Press');
+      await tester.tap(exerciseItem.first);
+      await tester.pumpAndSettle();
+      
+      // Add a set to the exercise
+      final addSetButton = find.descendant(
+        of: find.byType(ExerciseCard),
+        matching: find.text('Add Set')
+      );
+      await tester.tap(addSetButton);
+      await tester.pumpAndSettle();
+      
+      // Enter values for the set
+      final textFields = find.byType(TextField);
+      await tester.enterText(textFields.at(0), '50');  // Weight field
+      await tester.enterText(textFields.at(1), '10');  // Reps field
+      await tester.enterText(textFields.at(2), '1.5'); // Duration field
+      
+      // Add the set
+      await tester.tap(find.text('Add').last);
+      await tester.pumpAndSettle();
+      
+      // Verify set was added (we should see weight and reps displayed)
+      expect(find.text('50.0 kg'), findsOneWidget);
+      expect(find.text('10 reps'), findsOneWidget);
+      
+      // Now find the delete set button (X) and tap it
+      final deleteSetButton = find.byIcon(Icons.close);
+      expect(deleteSetButton, findsOneWidget);
+      await tester.tap(deleteSetButton);
+      await tester.pumpAndSettle();
+      
+      // Verify the set was deleted
+      expect(find.text('50.0 kg'), findsNothing);
+      expect(find.text('10 reps'), findsNothing);
+      
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    });
+
+    testWidgets('should delete an exercise and show snackbar', (WidgetTester tester) async {
+      // Set a fixed screen size
+      tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      
+      // Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: WeightliftingPage(repository: mockRepository),
+      ));
+
+      // Add exercise
+      final exerciseName = 'Bench Press';
+      final exerciseItem = find.text(exerciseName);
+      await tester.tap(exerciseItem.first);
+      await tester.pumpAndSettle();
+      
+      // Verify it was added
+      expect(find.byType(ExerciseCard), findsOneWidget);
+      
+      // Find and tap the delete exercise button
+      final deleteExerciseButton = find.text('Delete Exercise');
+      expect(deleteExerciseButton, findsOneWidget);
+      await tester.tap(deleteExerciseButton);
+      await tester.pumpAndSettle();
+      
+      // Verify the exercise was deleted
+      expect(find.byType(ExerciseCard), findsNothing);
+      
+      // Verify snackbar appears with the correct message
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('$exerciseName deleted from your workout'), findsOneWidget);
+      
+      // Find the SnackBar widget to check its background color
+      final SnackBar snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+      expect(snackBar.backgroundColor, Colors.red);
+      
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    });
+
     testWidgets('should initialize repository with FirebaseFirestore.instance when no repository provided', 
         (WidgetTester tester) async {
       // Mock the behavior instead of actually initializing Firebase
