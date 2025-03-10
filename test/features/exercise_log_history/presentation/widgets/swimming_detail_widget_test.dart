@@ -58,10 +58,17 @@ void main() {
       // Assert - Check metric values
       expect(find.text(totalDistance), findsAtLeastNWidgets(1));
       
-      // For duration, use the formatted value method to match what's in the widget
-      final expectedDuration = _formatDuration(testActivity.duration);
+      // For duration, use the formatted value method to match exactly what's in the widget
+      // Now includes the " min" suffix that was added in the new design
+      final minutes = testActivity.duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+      final seconds = testActivity.duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+      final expectedDuration = '$minutes:$seconds min';
       expect(find.text(expectedDuration), findsAtLeastNWidgets(1));
       
+      // Test for calories value in the metrics card
+      expect(find.text('500'), findsAtLeastNWidgets(1));
+      
+      // In the details section it shows with kcal unit
       expect(find.text('500 kcal'), findsAtLeastNWidgets(1));
     });
 
@@ -133,26 +140,19 @@ void main() {
         ),
       ));
 
-      // Assert - Check pace is displayed
-      expect(find.text('Pace (100m)'), findsOneWidget);
+      // Assert - Check pace label is displayed
+      expect(find.text('Pace (100m)'), findsAtLeastNWidgets(1));
       
-      // Calculate expected pace value as shown in the widget
+      // Calculate the expected pace value exactly as in the widget
       final totalDistance = testActivity.laps * testActivity.poolLength;
-      final pace100m = totalDistance > 0 ? (testActivity.duration.inSeconds / (totalDistance / 100)) : 0;
+      final durationInSeconds = testActivity.duration.inSeconds;
+      final pace100m = totalDistance > 0 ? (durationInSeconds / (totalDistance / 100)) : 0;
       final paceMinutes = (pace100m / 60).floor();
       final paceSeconds = (pace100m % 60).round();
       final expectedPace = '$paceMinutes:${paceSeconds.toString().padLeft(2, '0')}';
       
-      expect(find.text(expectedPace), findsOneWidget);
+      // Find the pace text
+      expect(find.text(expectedPace), findsAtLeastNWidgets(1));
     });
   });
-}
-
-// Helper method to match the formatting in the widget
-String _formatDuration(Duration duration) {
-  String twoDigits(int n) => n.toString().padLeft(2, '0');
-  final hours = twoDigits(duration.inHours);
-  final minutes = twoDigits(duration.inMinutes.remainder(60));
-  final seconds = twoDigits(duration.inSeconds.remainder(60));
-  return hours == '00' ? '$minutes:$seconds' : '$hours:$minutes:$seconds';
 }

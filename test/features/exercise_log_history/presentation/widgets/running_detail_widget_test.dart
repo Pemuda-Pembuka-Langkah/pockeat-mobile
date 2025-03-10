@@ -54,7 +54,10 @@ void main() {
       expect(find.text('5.0 km'), findsAtLeastNWidgets(1));
       
       // For duration, use the formatted value method to match what's in the widget
-      final expectedDuration = _formatDuration(testActivity.duration);
+      // Updated to include the "min" suffix that was added in the new design
+      final minutes = testActivity.duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+      final seconds = testActivity.duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+      final expectedDuration = '$minutes:$seconds min';
       expect(find.text(expectedDuration), findsAtLeastNWidgets(1));
       
       expect(find.text('350 kcal'), findsAtLeastNWidgets(1));
@@ -102,15 +105,13 @@ void main() {
 
       // Assert - Check pace is displayed
       expect(find.text('Pace'), findsOneWidget);
+      
+      // Check calculated pace value is displayed
+      final paceInSeconds = testActivity.duration.inSeconds / testActivity.distanceKm;
+      final paceMinutes = (paceInSeconds / 60).floor();
+      final paceSeconds = (paceInSeconds % 60).round();
+      final expectedPace = '$paceMinutes:${paceSeconds.toString().padLeft(2, '0')} /km';
+      expect(find.text(expectedPace), findsAtLeastNWidgets(1));
     });
   });
-}
-
-// Helper method to match the formatting in the widget
-String _formatDuration(Duration duration) {
-  String twoDigits(int n) => n.toString().padLeft(2, '0');
-  final hours = twoDigits(duration.inHours);
-  final minutes = twoDigits(duration.inMinutes.remainder(60));
-  final seconds = twoDigits(duration.inSeconds.remainder(60));
-  return hours == '00' ? '$minutes:$seconds' : '$hours:$minutes:$seconds';
 }

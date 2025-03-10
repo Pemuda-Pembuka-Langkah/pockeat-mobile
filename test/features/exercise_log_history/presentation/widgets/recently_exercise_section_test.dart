@@ -105,10 +105,17 @@ void main() {
 
     testWidgets('displays error state when repository throws',
         (WidgetTester tester) async {
+      // Create a specific test exception
       final testException = Exception('Test error');
+      
+      // Setup the mock to throw an exception - using a straightforward approach
       when(mockRepository.getAllExerciseLogs(limit: 5))
-          .thenAnswer((_) async => throw testException);
+          .thenAnswer((_) async {
+            await Future.delayed(const Duration(milliseconds: 10));
+            throw testException;
+          });
 
+      // Build the widget
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -119,8 +126,11 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      // Wait for all pending timers and animation frames to complete
+      await tester.pump(); // Initial loading state
+      await tester.pump(const Duration(milliseconds: 20)); // Wait for Future to complete with error
 
+      // Verify the error message is displayed
       expect(find.textContaining('Error loading exercises'), findsOneWidget);
     });
 

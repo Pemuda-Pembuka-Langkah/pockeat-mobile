@@ -23,13 +23,49 @@ class RecentlyExerciseSection extends StatefulWidget {
       _RecentlyExerciseSectionState();
 }
 
-class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> {
+class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with WidgetsBindingObserver {
   late Future<List<ExerciseLogHistoryItem>> _exercisesFuture;
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _loadExercises();
+    
+    // Register as an observer to detect app lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
+    
+    // Listen to focus changes to detect when we return to this widget
+    _focusNode.addListener(_onFocusChange);
+    
+    // Request focus to ensure we get focus events
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clean up resources
+    WidgetsBinding.instance.removeObserver(this);
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh data when app is resumed
+    if (state == AppLifecycleState.resumed) {
+      _loadExercises();
+    }
+  }
+
+  void _onFocusChange() {
+    // Refresh data when this widget gains focus
+    if (_focusNode.hasFocus) {
+      _loadExercises();
+    }
   }
 
   @override
@@ -42,12 +78,17 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> {
   }
 
   void _loadExercises() {
-    _exercisesFuture =
-        widget.repository.getAllExerciseLogs(limit: widget.limit);
+    setState(() {
+      _exercisesFuture =
+          widget.repository.getAllExerciseLogs(limit: widget.limit);
+    });
   }
 
   void _navigateToAllExercises() {
-    Navigator.of(context).pushNamed('/exercise-history');
+    Navigator.of(context).pushNamed('/exercise-history').then((_) {
+      // Refresh data when returning from exercise history page
+      _loadExercises();
+    });
   }
 
   void _navigateToExerciseDetail(ExerciseLogHistoryItem exercise) {
@@ -57,53 +98,58 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> {
         'exerciseId': exercise.sourceId ?? exercise.id, // Gunakan sourceId jika ada, atau fallback ke id
         'activityType': exercise.activityType,
       },
-    );
+    ).then((_) {
+      // Refresh data when returning from detail page
+      _loadExercises();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final Color primaryPink = const Color(0xFFFF6B6B);
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Recent Exercises',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: _navigateToAllExercises,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: primaryPink.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
+    return Focus(
+      focusNode: _focusNode,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Recent Exercises',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
                     ),
-                    child: Text(
-                      'Show All',
-                      style: TextStyle(
-                        color: primaryPink,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                  ),
+                  GestureDetector(
+                    onTap: _navigateToAllExercises,
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: primaryPink.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Show All',
+                        style: TextStyle(
+                          color: primaryPink,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          FutureBuilder<List<ExerciseLogHistoryItem>>(
+            FutureBuilder<List<ExerciseLogHistoryItem>>(
             future: _exercisesFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -153,7 +199,8 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> {
               }
             },
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -49,6 +49,81 @@ class ExerciseHistoryCard extends StatelessWidget {
     }
   }
 
+  /// Generate a subtitle with highlighting for important information
+  Widget _buildEnhancedSubtitle() {
+    // Break down subtitle into parts that might need highlighting
+    final parts = exercise.subtitle.split('•');
+    
+    if (parts.length <= 1) {
+      // If there are no bullet points, just return the plain subtitle
+      return Text(
+        exercise.subtitle,
+        style: const TextStyle(
+          fontSize: 14,
+          color: Colors.black54,
+          height: 1.3,
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+    
+    // Build a rich subtitle with highlighted metrics
+    return RichText(
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        style: const TextStyle(
+          fontSize: 14,
+          color: Colors.black54,
+          height: 1.3,
+        ),
+        children: _buildRichTextSpans(parts),
+      ),
+    );
+  }
+  
+  /// Build rich text spans for subtitle highlighting
+  List<TextSpan> _buildRichTextSpans(List<String> parts) {
+    final List<TextSpan> spans = [];
+    
+    // Add the first part without a bullet
+    if (parts[0].isNotEmpty) {
+      spans.add(TextSpan(text: parts[0].trim()));
+    }
+    
+    // Add the remaining parts with bullet points and highlighted values
+    for (int i = 1; i < parts.length; i++) {
+      if (parts[i].isEmpty) continue;
+      
+      // Add bullet point
+      spans.add(const TextSpan(text: ' • '));
+      
+      final String part = parts[i].trim();
+      
+      // Check if this part contains a colon (key-value pair)
+      if (part.contains(':')) {
+        final keyValue = part.split(':');
+        final key = keyValue[0].trim();
+        final value = keyValue.length > 1 ? keyValue[1].trim() : '';
+        
+        spans.add(TextSpan(text: key + ': '));
+        spans.add(TextSpan(
+          text: value,
+          style: TextStyle(
+            color: _getColorForActivityType(exercise.activityType),
+            fontWeight: FontWeight.w600,
+          ),
+        ));
+      } else {
+        // No colon, just add the part as is
+        spans.add(TextSpan(text: part));
+      }
+    }
+    
+    return spans;
+  }
+
   @override
   Widget build(BuildContext context) {
     final activityColor = _getColorForActivityType(exercise.activityType);
@@ -97,31 +172,32 @@ class ExerciseHistoryCard extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          exercise.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                        Expanded(
+                          child: Text(
+                            exercise.title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        Text(
-                          exercise.timeAgo,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black54,
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(
+                            exercise.timeAgo,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      exercise.subtitle,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black54,
-                      ),
-                    ),
+                    _buildEnhancedSubtitle(),
                   ],
                 ),
               ),
