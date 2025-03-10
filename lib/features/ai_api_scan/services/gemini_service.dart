@@ -6,16 +6,19 @@ import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analy
 abstract class GeminiService {
   Future<FoodAnalysisResult> analyzeFoodByText(String description);
   Future<FoodAnalysisResult> analyzeFoodByImage(File imageFile);
-  Future<FoodAnalysisResult> analyzeNutritionLabel(File imageFile, double servings);
-  Future<ExerciseAnalysisResult> analyzeExercise(String description, {double? userWeightKg});
+  Future<FoodAnalysisResult> analyzeNutritionLabel(
+      File imageFile, double servings);
+  Future<ExerciseAnalysisResult> analyzeExercise(String description,
+      {double? userWeightKg});
+  Future<ExerciseAnalysisResult> correctExerciseAnalysis(
+      ExerciseAnalysisResult previousResult, String userComment);
 }
 
 class GeminiServiceException implements Exception {
   final String message;
-  
+
   GeminiServiceException(this.message);
-  
+
   @override
   String toString() => 'GeminiServiceException: $message';
 }
-

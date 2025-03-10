@@ -327,6 +327,174 @@ void main() {
       // Assert
       expect(didPop, isTrue, reason: 'Navigator should have popped');
     });
+
+    testWidgets('shows correction dialog when correction button is tapped', (WidgetTester tester) async {
+      // Arrange
+      when(mockGeminiService.analyzeExercise(any))
+          .thenAnswer((_) async => mockAnalysisResult);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SmartExerciseLogPage(
+            geminiService: mockGeminiService,
+            repository: mockRepository,
+          ),
+        ),
+      );
+
+      // Act - Complete analysis first
+      await tester.enterText(find.byType(TextField), 'Running 30 minutes high intensity');
+      await tester.tap(find.text('Analyze Workout'));
+      await tester.pumpAndSettle();
+
+      // Then tap correction button
+      await tester.tap(find.text('Correct Analysis'));
+      await tester.pumpAndSettle();
+
+      // Assert - Verify correction dialog appears
+      expect(find.text('Correct Analysis'), findsNWidgets(2)); // One in button, one in dialog title
+      expect(find.text('Please provide details on what needs to be corrected:'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('Submit Correction'), findsOneWidget);
+    });
+
+    testWidgets('applies correction when submitted in dialog', (WidgetTester tester) async {
+      // Arrange
+      when(mockGeminiService.analyzeExercise(any))
+          .thenAnswer((_) async => mockAnalysisResult);
+          
+      // Create a corrected result
+      final correctedResult = ExerciseAnalysisResult(
+        exerciseType: 'Running',
+        duration: '45 minutes', // Changed duration
+        intensity: 'High',
+        estimatedCalories: 450, // Updated calories
+        metValue: 8.0,
+        summary: 'You performed Running for 45 minutes at High intensity, burning approximately 450 calories.',
+        timestamp: DateTime.now(),
+        originalInput: 'Running 30 minutes high intensity',
+      );
+      
+      // Setup mock for correction through GeminiService
+      when(mockGeminiService.correctExerciseAnalysis(any, any))
+          .thenAnswer((_) async => correctedResult);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SmartExerciseLogPage(
+            geminiService: mockGeminiService,
+            repository: mockRepository,
+          ),
+        ),
+      );
+
+      // Act - Complete analysis first
+      await tester.enterText(find.byType(TextField), 'Running 30 minutes high intensity');
+      await tester.tap(find.text('Analyze Workout'));
+      await tester.pumpAndSettle();
+
+      // Then tap correction button
+      await tester.tap(find.text('Correct Analysis'));
+      await tester.pumpAndSettle();
+      
+      // Enter correction comment
+      await tester.enterText(find.byType(TextField).last, 'I actually ran for 45 minutes');
+      
+      // Submit correction
+      await tester.tap(find.text('Submit Correction'));
+      await tester.pumpAndSettle();
+
+      // Assert - Verify UI gets updated with corrected values
+      expect(find.text('45 minutes'), findsOneWidget); // New duration
+      expect(find.text('450 kcal'), findsOneWidget); // New calories
+      
+      // Also verify the success message appears in a snackbar
+      expect(find.text('Analysis corrected successfully!'), findsOneWidget);
+    });
+
+    testWidgets('shows loading indicator during correction', (WidgetTester tester) async {
+      // Arrange
+      when(mockGeminiService.analyzeExercise(any))
+          .thenAnswer((_) async => mockAnalysisResult);
+          
+      // Setup mock with delay to simulate network request
+      when(mockGeminiService.correctExerciseAnalysis(any, any))
+          .thenAnswer((_) async {
+        await Future.delayed(const Duration(milliseconds: 100));
+        return mockAnalysisResult;
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SmartExerciseLogPage(
+            geminiService: mockGeminiService,
+            repository: mockRepository,
+          ),
+        ),
+      );
+
+      // Act - Complete analysis first
+      await tester.enterText(find.byType(TextField), 'Running 30 minutes high intensity');
+      await tester.tap(find.text('Analyze Workout'));
+      await tester.pumpAndSettle();
+
+      // Then tap correction button
+      await tester.tap(find.text('Correct Analysis'));
+      await tester.pumpAndSettle();
+      
+      // Enter correction comment
+      await tester.enterText(find.byType(TextField).last, 'I actually ran for 45 minutes');
+      
+      // Submit correction
+      await tester.tap(find.text('Submit Correction'));
+      await tester.pump(); // Just pump once to catch loading state
+      
+      // Assert - Verify loading indicator appears
+      expect(find.text('Correcting analysis...'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      
+      // Wait until process completes
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('shows error message when correction fails', (WidgetTester tester) async {
+      // Arrange
+      when(mockGeminiService.analyzeExercise(any))
+          .thenAnswer((_) async => mockAnalysisResult);
+          
+      // Setup mock to throw error
+      when(mockGeminiService.correctExerciseAnalysis(any, any))
+          .thenThrow(Exception('Correction failed'));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SmartExerciseLogPage(
+            geminiService: mockGeminiService,
+            repository: mockRepository,
+          ),
+        ),
+      );
+
+      // Act - Complete analysis first
+      await tester.enterText(find.byType(TextField), 'Running 30 minutes high intensity');
+      await tester.tap(find.text('Analyze Workout'));
+      await tester.pumpAndSettle();
+
+      // Then tap correction button
+      await tester.tap(find.text('Correct Analysis'));
+      await tester.pumpAndSettle();
+      
+      // Enter correction comment
+      await tester.enterText(find.byType(TextField).last, 'I actually ran for 45 minutes');
+      
+      // Submit correction
+      await tester.tap(find.text('Submit Correction'));
+      await tester.pumpAndSettle();
+      
+      // Assert - Verify error message appears
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.textContaining('Failed to correct analysis'), findsOneWidget);
+    });
   });
 }
 
