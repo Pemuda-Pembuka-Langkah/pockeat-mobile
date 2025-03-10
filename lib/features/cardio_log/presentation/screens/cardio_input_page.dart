@@ -166,8 +166,10 @@ class CardioInputPageState extends State<CardioInputPage> {
                   break;
               }
 
-              // Create and save activity object
+              // Create and save activity object without popping immediately
               _saveActivity(calories);
+              // Remove this line to prevent immediate navigation
+              // Navigator.pop(context); 
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryPink,
@@ -370,23 +372,34 @@ class CardioInputPageState extends State<CardioInputPage> {
       // Save using repository
       await _repository.saveCardioActivity(activity);
 
-      // Show success message to user
+      // Show success message to user with navigation after SnackBar is dismissed
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Activity successfully saved! Calories burned: ${calories.toStringAsFixed(0)} kcal',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+        // Use a longer duration and a callback for when the SnackBar is dismissed
+        final snackBar = SnackBar(
+          content: Text(
+            'Activity successfully saved! Calories burned: ${calories.toStringAsFixed(0)} kcal',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
-            backgroundColor: primaryPink,
-            duration: const Duration(seconds: 2),
           ),
+          backgroundColor: primaryPink,
+          duration: const Duration(seconds: 1), // Short duration
+          // Set behavior to fixed to ensure it's visible
+          behavior: SnackBarBehavior.fixed,
         );
+        
+        // Show the SnackBar and navigate after it's dismissed
+        ScaffoldMessenger.of(context)
+          .showSnackBar(snackBar)
+          .closed
+          .then((_) {
+            // Navigate back after SnackBar is dismissed
+            if (mounted) {
+              Navigator.pop(context);
+            }
+          });
       }
-      _navigateAfterSave();
     } catch (e) {
       // Show error message to user
       if (mounted) {
@@ -405,12 +418,6 @@ class CardioInputPageState extends State<CardioInputPage> {
         );
       }
     }
-  }
-
-  // Separate method for navigation to make testing easier
-  void _navigateAfterSave() {
-    // Simply show a success message without navigation for better testability
-    // Navigation can be handled by the parent widget if needed
   }
 
   // Helper method to convert string to CyclingType
