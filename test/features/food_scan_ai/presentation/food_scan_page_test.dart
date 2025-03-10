@@ -6,6 +6,8 @@ import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/nutrition_page.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 
 class MockCameraController extends Mock implements CameraController {}
 
@@ -15,16 +17,27 @@ class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
 class MockRoute extends Mock implements Route<dynamic> {}
 
+class MockFoodScanPhotoService extends Mock implements FoodScanPhotoService {}
+
 void main() {
   late Widget scanFoodPage;
   late MockCameraController mockCameraController;
   late MockNavigatorObserver mockNavigatorObserver;
+  late MockFoodScanPhotoService mockFoodScanPhotoService;
 
   setUpAll(() {
     mockCameraController = MockCameraController();
     mockNavigatorObserver = MockNavigatorObserver();
+    mockFoodScanPhotoService = MockFoodScanPhotoService();
     registerFallbackValue(MockCameraController());
     registerFallbackValue(MockRoute());
+
+    // Daftarkan mock service ke GetIt
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<FoodScanPhotoService>()) {
+      getIt.unregister<FoodScanPhotoService>();
+    }
+    getIt.registerSingleton<FoodScanPhotoService>(mockFoodScanPhotoService);
 
     // Berikan mock controller ke ScanFoodPage
     scanFoodPage = MaterialApp(
@@ -33,6 +46,14 @@ void main() {
       ),
       navigatorObservers: [mockNavigatorObserver],
     );
+  });
+
+  tearDownAll(() {
+    // Bersihkan GetIt setelah semua test selesai
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<FoodScanPhotoService>()) {
+      getIt.unregister<FoodScanPhotoService>();
+    }
   });
 
   testWidgets('Initial state variables are set correctly',
@@ -117,19 +138,23 @@ void main() {
     when(() => mockImage.path).thenReturn('test/path/image.jpg');
     when(() => mockCameraController.takePicture())
         .thenAnswer((_) async => mockImage);
+    
 
     await tester.pumpWidget(scanFoodPage);
+
+    clearInteractions(mockNavigatorObserver);
 
     // Act - Tap the capture button
     await tester.tap(find.byKey(const Key('camera_button')));
     await tester.pumpAndSettle();
 
+    
     // Assert
     // Verify that takePicture was called
     verify(() => mockCameraController.takePicture()).called(1);
 
     // Verify navigation to NutritionPage
-    verify(() => mockNavigatorObserver.didPush(any(), any())).called(5);
+    verify(() => mockNavigatorObserver.didPush(any(), any())).called(1);
 
     // Verify we're on NutritionPage with correct image path
     final nutritionPageFinder = find.byType(NutritionPage);

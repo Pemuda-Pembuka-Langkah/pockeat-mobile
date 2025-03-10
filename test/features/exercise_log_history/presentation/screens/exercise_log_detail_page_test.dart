@@ -12,6 +12,7 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/cycli
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/running_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/smart_exercise_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/swimming_detail_widget.dart';
+import 'package:pockeat/features/exercise_log_history/presentation/widgets/weight_lifting_detail_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
@@ -21,6 +22,9 @@ import 'package:pockeat/features/weight_training_log/domain/models/weight_liftin
 @GenerateMocks(
     [CardioRepository, SmartExerciseLogRepository, WeightLiftingRepository])
 import 'exercise_log_detail_page_test.mocks.dart';
+
+// Mock NavigatorObserver for testing navigation
+class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
 void main() {
   // Sample data for testing
@@ -141,7 +145,7 @@ void main() {
       expect(find.text('Error loading data'), findsOneWidget);
     });
 
-    testWidgets('should display RunningDetailWidget for running activity',
+    testWidgets('should display RunningDetailWidget with modern UI components',
         (WidgetTester tester) async {
       // Arrange
       when(mockCardioRepository.getCardioActivityById(any))
@@ -162,9 +166,20 @@ void main() {
 
       // Assert - should render RunningDetailWidget
       expect(find.byType(RunningDetailWidget), findsOneWidget);
+      
+      // Verify modern UI components
+      expect(find.text('Running Session'), findsOneWidget);
+      
+      // Test for metrics and icons
+      expect(find.byIcon(Icons.straighten), findsAtLeastNWidgets(1)); // Distance icon
+      expect(find.byIcon(Icons.timer), findsAtLeastNWidgets(1)); // Pace icon
+      expect(find.byIcon(Icons.local_fire_department), findsAtLeastNWidgets(1)); // Calories icon
+      
+      // Verify the container with gradient is present (looking for BoxDecoration)
+      expect(find.byType(Container), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('should display CyclingDetailWidget for cycling activity',
+    testWidgets('should display CyclingDetailWidget with modern UI components',
         (WidgetTester tester) async {
       // Arrange
       when(mockCardioRepository.getCardioActivityById(any))
@@ -185,9 +200,20 @@ void main() {
 
       // Assert - should render CyclingDetailWidget
       expect(find.byType(CyclingDetailWidget), findsOneWidget);
+      
+      // Verify modern UI components
+      expect(find.text('Cycling Session'), findsOneWidget);
+      
+      // Test for metrics and icons
+      expect(find.byIcon(Icons.straighten), findsAtLeastNWidgets(1)); // Distance icon
+      expect(find.byIcon(Icons.speed), findsAtLeastNWidgets(1)); // Speed icon
+      expect(find.byIcon(Icons.local_fire_department), findsAtLeastNWidgets(1)); // Calories icon
+      
+      // Verify activity details
+      expect(find.text('Activity Details'), findsOneWidget);
     });
 
-    testWidgets('should display SwimmingDetailWidget for swimming activity',
+    testWidgets('should display SwimmingDetailWidget with modern UI components',
         (WidgetTester tester) async {
       // Arrange
       when(mockCardioRepository.getCardioActivityById(any))
@@ -208,6 +234,16 @@ void main() {
 
       // Assert - should render SwimmingDetailWidget
       expect(find.byType(SwimmingDetailWidget), findsOneWidget);
+      
+      // Verify modern UI components
+      expect(find.text('Swimming Session'), findsOneWidget);
+      
+      // Test for metrics display
+      expect(find.text('Activity Details'), findsOneWidget);
+      expect(find.text('Stroke Style'), findsOneWidget);
+      
+      // Test for calculating pace per 100m is displayed
+      expect(find.text('Pace (100m)'), findsAtLeastNWidgets(1));
     });
 
     testWidgets('should display SmartExerciseDetailWidget for smart exercise',
@@ -258,7 +294,7 @@ void main() {
     });
 
     testWidgets(
-        'should display weight lifting details when exercise type is weightlifting',
+        'should display weight lifting details with modern UI components',
         (WidgetTester tester) async {
       // Arrange
       when(mockWeightLiftingRepository.getExerciseById('weight-1'))
@@ -286,6 +322,104 @@ void main() {
 
       // Check that at least one weight value is displayed
       expect(find.textContaining('60'), findsAtLeastNWidgets(1));
+      
+      // Verify modern UI components
+      // Look for headers that indicate the new design
+      expect(find.text('Workout Details'), findsOneWidget);
+      
+      // Verify gradient container is present
+      expect(find.byType(Container), findsAtLeastNWidgets(1));
+    });
+
+    group('Delete functionality tests', () {
+      testWidgets('should show delete button in AppBar', (WidgetTester tester) async {
+        // Arrange
+        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
+            .thenAnswer((_) async => smartExercise);
+
+        // Act
+        await tester.pumpWidget(MaterialApp(
+          home: ExerciseLogDetailPage(
+            exerciseId: 'smart-1',
+            activityType: ExerciseLogHistoryItem.typeSmartExercise,
+            cardioRepository: mockCardioRepository,
+            smartExerciseRepository: mockSmartExerciseRepository,
+            weightLiftingRepository: mockWeightLiftingRepository,
+          ),
+        ));
+
+        await tester.pumpAndSettle();
+
+        // Assert - verify delete button is visible in AppBar
+        expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+        expect(find.byTooltip('Delete'), findsOneWidget);
+      });
+
+      testWidgets('should show confirmation dialog when delete button is pressed',
+          (WidgetTester tester) async {
+        // Arrange
+        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
+            .thenAnswer((_) async => smartExercise);
+
+        // Act
+        await tester.pumpWidget(MaterialApp(
+          home: ExerciseLogDetailPage(
+            exerciseId: 'smart-1',
+            activityType: ExerciseLogHistoryItem.typeSmartExercise,
+            cardioRepository: mockCardioRepository,
+            smartExerciseRepository: mockSmartExerciseRepository,
+            weightLiftingRepository: mockWeightLiftingRepository,
+          ),
+        ));
+
+        await tester.pumpAndSettle();
+
+        // Tap the delete button
+        await tester.tap(find.byIcon(Icons.delete_outline));
+        await tester.pumpAndSettle();
+
+        // Assert - verify confirmation dialog appears
+        expect(find.text('Delete Exercise'), findsOneWidget);
+        expect(
+            find.text(
+                'Are you sure you want to delete this exercise log? This action cannot be undone.'),
+            findsOneWidget);
+        expect(find.text('Cancel'), findsOneWidget);
+        expect(find.text('Delete'), findsAtLeastNWidgets(1));
+      });
+
+      testWidgets('should close dialog when Cancel is pressed',
+          (WidgetTester tester) async {
+        // Arrange
+        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
+            .thenAnswer((_) async => smartExercise);
+
+        // Act
+        await tester.pumpWidget(MaterialApp(
+          home: ExerciseLogDetailPage(
+            exerciseId: 'smart-1',
+            activityType: ExerciseLogHistoryItem.typeSmartExercise,
+            cardioRepository: mockCardioRepository,
+            smartExerciseRepository: mockSmartExerciseRepository,
+            weightLiftingRepository: mockWeightLiftingRepository,
+          ),
+        ));
+
+        await tester.pumpAndSettle();
+
+        // Tap the delete button to show dialog
+        await tester.tap(find.byIcon(Icons.delete_outline));
+        await tester.pumpAndSettle();
+
+        // Tap the cancel button
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+
+        // Assert - dialog should be closed
+        expect(find.text('Delete Exercise'), findsNothing);
+      });
+
+      // Delete confirmation test would be added here (requires mock navigators)
     });
   });
 }

@@ -55,6 +55,7 @@ class FoodAnalysisResult {
       'food_name': foodName,
       'ingredients': ingredients.map((i) => i.toJson()).toList(),
       'nutrition_info': nutritionInfo.toJson(),
+      'warnings': warnings,
     };
   }
 }
@@ -78,6 +79,7 @@ class Ingredient {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'servings': servings,
     };
   }
   

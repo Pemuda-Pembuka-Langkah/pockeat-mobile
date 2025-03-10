@@ -69,7 +69,7 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
       },
     );
     
-    // Refresh list if exercise was deleted (result == true)
+    // Refresh data jika detail page mengembalikan true (exercise telah dihapus)
     if (result == true) {
       _loadExercises();
     }

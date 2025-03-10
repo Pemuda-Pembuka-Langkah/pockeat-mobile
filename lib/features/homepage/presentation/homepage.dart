@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage>
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   String? dbInfo;
+  bool _shouldRefreshExerciseSection = false;
 
   Future<void> _checkDatabase() async {
     try {
@@ -53,6 +54,17 @@ class _HomePageState extends State<HomePage>
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
+        
+        // If switching to the exercises tab (index 2), trigger a rebuild
+        if (_tabController.index == 2) {
+          setState(() {
+            _shouldRefreshExerciseSection = true;
+          });
+        } else {
+          setState(() {
+            _shouldRefreshExerciseSection = false;
+          });
+        }
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -321,9 +333,14 @@ class _HomePageState extends State<HomePage>
             children: [
               const OverviewSection(),
               const RecentlyFoodsSection(),
-              RecentlyExerciseSection(
-                repository: exerciseLogHistoryRepository,
-              ),
+              _shouldRefreshExerciseSection
+                  ? RecentlyExerciseSection(
+                      repository: exerciseLogHistoryRepository,
+                      key: UniqueKey(),
+                    )
+                  : RecentlyExerciseSection(
+                      repository: exerciseLogHistoryRepository,
+                    ),
             ],
           ),
         ),

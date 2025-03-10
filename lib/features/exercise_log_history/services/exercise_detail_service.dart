@@ -40,4 +40,11 @@ abstract class ExerciseDetailService {
   /// [basicType] adalah tipe dasar (smart_exercise, cardio, atau weightlifting)
   /// Return `Future<String>` yang merepresentasikan tipe sebenarnya ('running', 'cycling', 'swimming', 'smart_exercise', 'weightlifting')
   Future<String> getActualActivityType(String id, String basicType);
+  
+  /// Menghapus log exercise berdasarkan ID dan tipe aktivitas
+  ///
+  /// [id] adalah ID dari exercise log yang ingin dihapus
+  /// [activityType] adalah tipe aktivitas (smart_exercise, cardio, weightlifting)
+  /// Return `Future<bool>` yang bernilai true jika berhasil dihapus, false jika gagal atau tidak ditemukan
+  Future<bool> deleteExerciseLog(String id, String activityType);
 }
