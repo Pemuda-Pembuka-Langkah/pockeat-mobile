@@ -13,7 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class WeightliftingPage extends StatefulWidget {
   final WeightLiftingRepository? repository;
   
-  const WeightliftingPage({super.key, this.repository});
+  const WeightliftingPage({Key? key, this.repository}) : super(key: key);
 
   @override
   _WeightliftingPageState createState() => _WeightliftingPageState();
@@ -42,13 +42,27 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   }
 
   void addExercise(String name) {
-    setState(() {
-      exercises.add(WeightLifting(
-        name: name,
-        bodyPart: selectedBodyPart,
-        metValue: exercisesByCategory[selectedBodyPart]?[name] ?? 3.15,
-      ));
-    });
+    // Check if exercise with this name already exists
+    bool isDuplicate = exercises.any((exercise) => exercise.name == name);
+    
+    if (isDuplicate) {
+      // Show a snackbar instead of adding duplicate
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$name is already in your workout'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        )
+      );
+    } else {
+      setState(() {
+        exercises.add(WeightLifting(
+          name: name,
+          bodyPart: selectedBodyPart,
+          metValue: exercisesByCategory[selectedBodyPart]?[name] ?? 3.15,
+        ));
+      });
+    }
   }
 
   void addSet(WeightLifting exercise, double weight, int reps, double duration) {
@@ -72,6 +86,8 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     
     try {
       // Add current date to each exercise before saving
+      final now = DateTime.now();
+      final dateString = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
       
       // Save each exercise
       List<Future<String>> saveFutures = [];
@@ -189,6 +205,20 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     );
   }
 
+  List<Widget> _buildDialogActions(WeightLifting exercise, double weight, int reps, double duration) {
+    return [
+      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+      ElevatedButton(
+        onPressed: () {
+          if (weight > 0 && reps > 0 && duration > 0) {
+            addSet(exercise, weight, reps, duration);
+            Navigator.pop(context);
+          }
+        },
+        child: const Text('Add'),
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
