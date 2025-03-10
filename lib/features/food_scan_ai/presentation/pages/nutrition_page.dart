@@ -31,7 +31,7 @@ class _NutritionPageState extends State<NutritionPage> {
   double _calories = 0;
   Map<String, dynamic> _nutritionData = {};
   List<String> _warnings = [];
-  late FoodAnalysisResult food;
+  late FoodAnalysisResult? food;
 
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);

@@ -8,6 +8,9 @@ import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
+import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'dart:io';
+
 
 class MockCameraController extends Mock implements CameraController {}
 
@@ -18,6 +21,8 @@ class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 class MockRoute extends Mock implements Route<dynamic> {}
 
 class MockFoodScanPhotoService extends Mock implements FoodScanPhotoService {}
+
+class MockFile extends Mock implements File {}
 
 void main() {
   late Widget scanFoodPage;
@@ -31,6 +36,9 @@ void main() {
     mockFoodScanPhotoService = MockFoodScanPhotoService();
     registerFallbackValue(MockCameraController());
     registerFallbackValue(MockRoute());
+    registerFallbackValue(MockXFile());
+    registerFallbackValue(MockFile());
+    registerFallbackValue(File(''));
 
     // Daftarkan mock service ke GetIt
     final getIt = GetIt.instance;
@@ -139,6 +147,23 @@ void main() {
     when(() => mockCameraController.takePicture())
         .thenAnswer((_) async => mockImage);
     
+    // Mock FoodScanPhotoService response
+    when(() => mockFoodScanPhotoService.analyzeFoodPhoto(any())).thenAnswer(
+      (_) async => FoodAnalysisResult(
+        foodName: 'Test Food',
+        nutritionInfo: NutritionInfo(
+          calories: 100,
+          protein: 10,
+          carbs: 20,
+          fat: 5,
+          fiber: 3,
+          sugar: 2,
+          sodium: 100,
+        ),
+        warnings: [],
+        ingredients: [],
+      ),
+    );
 
     await tester.pumpWidget(scanFoodPage);
 
@@ -148,13 +173,15 @@ void main() {
     await tester.tap(find.byKey(const Key('camera_button')));
     await tester.pumpAndSettle();
 
-    
     // Assert
     // Verify that takePicture was called
     verify(() => mockCameraController.takePicture()).called(1);
 
-    // Verify navigation to NutritionPage
-    verify(() => mockNavigatorObserver.didPush(any(), any())).called(1);
+    // Verifikasi navigasi
+    verify(() => mockNavigatorObserver.didReplace(
+          oldRoute: any(named: 'oldRoute'),
+          newRoute: any(named: 'newRoute'),
+        )).called(1);
 
     // Verify we're on NutritionPage with correct image path
     final nutritionPageFinder = find.byType(NutritionPage);
