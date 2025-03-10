@@ -39,6 +39,7 @@ void main() {
               analysisResult: mockAnalysisComplete,
               onRetry: () {},
               onSave: () {},
+              onCorrect: (_) {},
             ),
           ),
         ),
@@ -66,6 +67,7 @@ void main() {
               analysisResult: mockAnalysisIncomplete,
               onRetry: () {},
               onSave: () {},
+              onCorrect: (_) {},
             ),
           ),
         ),
@@ -103,6 +105,7 @@ void main() {
               analysisResult: completeAnalysisNoSummary,
               onRetry: () {},
               onSave: () {},
+              onCorrect: (_) {},
             ),
           ),
         ),
@@ -135,6 +138,7 @@ void main() {
                 onRetryCalled = true;
               },
               onSave: () {},
+              onCorrect: (_) {},
             ),
           ),
         ),
@@ -162,6 +166,7 @@ void main() {
               onSave: () {
                 onSaveCalled = true;
               },
+              onCorrect: (_) {},
             ),
           ),
         ),
@@ -199,6 +204,7 @@ void main() {
               analysisResult: mockAnalysisWithMissingInfo,
               onRetry: () {},
               onSave: () {},
+              onCorrect: (_) {},
             ),
           ),
         ),
@@ -239,6 +245,7 @@ void main() {
               analysisResult: mockNumericDuration,
               onRetry: () {},
               onSave: () {},
+              onCorrect: (_) {},
             ),
           ),
         ),
@@ -264,6 +271,7 @@ void main() {
               analysisResult: mockDescriptiveDuration,
               onRetry: () {},
               onSave: () {},
+              onCorrect: (_) {},
             ),
           ),
         ),
@@ -289,6 +297,7 @@ void main() {
               analysisResult: mockRangeDuration,
               onRetry: () {},
               onSave: () {},
+              onCorrect: (_) {},
             ),
           ),
         ),
@@ -317,6 +326,7 @@ void main() {
               analysisResult: mockZeroMetValue,
               onRetry: () {},
               onSave: () {},
+              onCorrect: (_) {},
             ),
           ),
         ),
@@ -326,6 +336,160 @@ void main() {
       expect(find.text('Light Activity'), findsOneWidget);
       expect(find.text('15 minutes'), findsOneWidget);
       expect(find.text('0.0'), findsNothing); // MET value 0 should not be displayed
+    });
+
+    // Tests for Correction Functionality
+    group('Correction Functionality', () {
+      testWidgets('displays correction button for complete analysis results',
+          (WidgetTester tester) async {
+        // Arrange
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AnalysisResultWidget(
+                analysisResult: mockAnalysisComplete,
+                onRetry: () {},
+                onSave: () {},
+                onCorrect: (_) {},
+              ),
+            ),
+          ),
+        );
+
+        // Assert
+        expect(find.text('Correct Analysis'), findsOneWidget);
+        expect(find.byIcon(Icons.edit_note), findsOneWidget);
+      });
+
+      testWidgets('opens correction dialog when correction button is tapped',
+          (WidgetTester tester) async {
+        // Arrange
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AnalysisResultWidget(
+                analysisResult: mockAnalysisComplete,
+                onRetry: () {},
+                onSave: () {},
+                onCorrect: (_) {},
+              ),
+            ),
+          ),
+        );
+
+        // Act - Tap the correction button
+        await tester.tap(find.text('Correct Analysis'));
+        await tester.pumpAndSettle();
+
+        // Assert - Dialog should be visible
+        expect(find.text('Correct Analysis'), findsNWidgets(2)); // One in button, one in dialog title
+        expect(find.text('Please provide details on what needs to be corrected:'), findsOneWidget);
+        expect(find.byType(TextField), findsOneWidget);
+        expect(find.text('Submit Correction'), findsOneWidget);
+        expect(find.text('Cancel'), findsOneWidget);
+      });
+
+      testWidgets('calls onCorrect callback with user comment when submitted',
+          (WidgetTester tester) async {
+        // Arrange
+        String? capturedComment;
+        
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AnalysisResultWidget(
+                analysisResult: mockAnalysisComplete,
+                onRetry: () {},
+                onSave: () {},
+                onCorrect: (comment) {
+                  capturedComment = comment;
+                },
+              ),
+            ),
+          ),
+        );
+
+        // Act - Open dialog
+        await tester.tap(find.text('Correct Analysis'));
+        await tester.pumpAndSettle();
+        
+        // Enter correction text
+        await tester.enterText(find.byType(TextField), 'The workout was actually 45 minutes');
+        
+        // Submit correction
+        await tester.tap(find.text('Submit Correction'));
+        await tester.pumpAndSettle();
+
+        // Assert
+        expect(capturedComment, 'The workout was actually 45 minutes');
+      });
+
+      testWidgets('does nothing when correction dialog is canceled',
+          (WidgetTester tester) async {
+        // Arrange
+        bool onCorrectCalled = false;
+        
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AnalysisResultWidget(
+                analysisResult: mockAnalysisComplete,
+                onRetry: () {},
+                onSave: () {},
+                onCorrect: (_) {
+                  onCorrectCalled = true;
+                },
+              ),
+            ),
+          ),
+        );
+
+        // Act - Open dialog
+        await tester.tap(find.text('Correct Analysis'));
+        await tester.pumpAndSettle();
+        
+        // Enter text but then cancel
+        await tester.enterText(find.byType(TextField), 'Cancel this correction');
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+
+        // Assert
+        expect(onCorrectCalled, false);
+        expect(find.byType(AlertDialog), findsNothing); // Dialog should be closed
+      });
+
+      testWidgets('does not call onCorrect when empty comment is submitted',
+          (WidgetTester tester) async {
+        // Arrange
+        bool onCorrectCalled = false;
+        
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AnalysisResultWidget(
+                analysisResult: mockAnalysisComplete,
+                onRetry: () {},
+                onSave: () {},
+                onCorrect: (_) {
+                  onCorrectCalled = true;
+                },
+              ),
+            ),
+          ),
+        );
+
+        // Act - Open dialog
+        await tester.tap(find.text('Correct Analysis'));
+        await tester.pumpAndSettle();
+        
+        // Leave text field empty and try to submit
+        await tester.tap(find.text('Submit Correction'));
+        await tester.pumpAndSettle();
+
+        // Assert
+        expect(onCorrectCalled, false);
+        expect(find.byType(AlertDialog), findsOneWidget); // Dialog should still be open
+      });
     });
   });
 }
