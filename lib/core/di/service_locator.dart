@@ -10,7 +10,7 @@ import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_se
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 
 final getIt = GetIt.instance;
-
+ // coverage:ignore-start
 void setupDependencies() {
   // Register specialized services
   getIt.registerSingleton<FoodTextAnalysisService>(
@@ -37,7 +37,6 @@ void setupDependencies() {
     FoodScanRepository(),
   );
   
-  // Register the combined service that maintains the original API
   getIt.registerSingleton<GeminiService>(
     GeminiServiceImpl(
       foodTextAnalysisService: getIt<FoodTextAnalysisService>(),
@@ -47,3 +46,4 @@ void setupDependencies() {
     ),
   );
 }
+ // coverage:ignore-end

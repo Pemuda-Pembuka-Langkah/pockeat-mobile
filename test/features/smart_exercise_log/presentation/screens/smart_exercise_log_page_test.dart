@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
@@ -17,6 +18,7 @@ void main() {
   group('SmartExerciseLogPage Widget Tests', () {
     late MockGeminiService mockGeminiService;
     late MockSmartExerciseLogRepository mockRepository;
+    final getIt = GetIt.instance;
 
     // Sample exercise analysis result for testing
     final mockAnalysisResult = ExerciseAnalysisResult(
@@ -46,6 +48,21 @@ void main() {
     setUp(() {
       mockGeminiService = MockGeminiService();
       mockRepository = MockSmartExerciseLogRepository();
+      
+      // Reset GetIt before each test
+      if (GetIt.I.isRegistered<GeminiService>()) {
+        GetIt.I.unregister<GeminiService>();
+      }
+      
+      // Register mock services in GetIt
+      getIt.registerSingleton<GeminiService>(mockGeminiService);
+    });
+
+    tearDown(() {
+      // Clean up GetIt after each test
+      if (GetIt.I.isRegistered<GeminiService>()) {
+        GetIt.I.unregister<GeminiService>();
+      }
     });
 
     testWidgets('renders initial UI with workout form', (WidgetTester tester) async {
@@ -240,5 +257,90 @@ void main() {
       expect(find.byType(WorkoutFormWidget), findsOneWidget);
       expect(find.byType(AnalysisResultWidget), findsNothing);
     });
+
+    testWidgets('shows error message when saving fails', (WidgetTester tester) async {
+      // Arrange
+      when(mockGeminiService.analyzeExercise(any))
+          .thenAnswer((_) async => mockAnalysisResult);
+      when(mockRepository.saveAnalysisResult(any))
+          .thenThrow(Exception('Database error'));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SmartExerciseLogPage(
+            geminiService: mockGeminiService,
+            repository: mockRepository,
+          ),
+        ),
+      );
+
+      // Act - Complete analysis first
+      await tester.enterText(find.byType(TextField), 'Running 30 minutes high intensity');
+      await tester.tap(find.text('Analyze Workout'));
+      await tester.pumpAndSettle();
+
+      // Then click save button
+      await tester.tap(find.text('Save Log'));
+      await tester.pump(); // Show SnackBar
+
+      // Assert - Verify error message appears
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.textContaining('Failed to save log'), findsOneWidget);
+    });
+
+    testWidgets('back button navigates away from the page', (WidgetTester tester) async {
+      // Setup navigation test with a navigator
+      bool didPop = false;
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<dynamic>(
+                builder: (BuildContext context) {
+                  if (settings.name == '/') {
+                    return SmartExerciseLogPage(
+                      geminiService: mockGeminiService,
+                      repository: mockRepository,
+                    );
+                  }
+                  return Container();
+                },
+                settings: settings,
+              );
+            },
+            observers: [
+              MockNavigatorObserver(
+                didPopCallback: () {
+                  didPop = true;
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Act - Tap back button in app bar
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(didPop, isTrue, reason: 'Navigator should have popped');
+    });
   });
+}
+
+// Helper class for monitoring navigation
+class MockNavigatorObserver extends NavigatorObserver {
+  final Function? didPopCallback;
+
+  MockNavigatorObserver({this.didPopCallback});
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (didPopCallback != null) {
+      didPopCallback!();
+    }
+    super.didPop(route, previousRoute);
+  }
 }

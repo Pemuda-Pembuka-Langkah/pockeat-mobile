@@ -1,8 +1,8 @@
-// test/features/ai_api_scan/services/food/food_text_analysis_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
+import 'package:pockeat/features/ai_api_scan/services/food/utils/food_analysis_parser.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 
 class MockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
@@ -89,7 +89,11 @@ void main() {
       // Act & Assert
       expect(
         () => service.analyze(foodDescription),
-        throwsA(isA<GeminiServiceException>()),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message, 
+          'error message', 
+          contains('No response text generated')
+        )),
       );
     });
 
@@ -114,7 +118,43 @@ void main() {
       // Act & Assert
       expect(
         () => service.analyze(foodDescription),
-        throwsA(isA<GeminiServiceException>()),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          contains('Network error')
+        )),
+      );
+    });
+  });
+
+  group('FoodAnalysisParser', () {
+    test('parse should handle error as Map correctly', () {
+      // Arrange
+      final jsonText = '{"error": {"message": "Custom error message"}}';
+      
+      // Act & Assert
+      expect(
+        () => FoodAnalysisParser.parse(jsonText),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message, 
+          'message', 
+          contains('Custom error message')
+        )),
+      );
+    });
+
+    test('parse should handle error as Map without message correctly', () {
+      // Arrange
+      final jsonText = '{"error": {}}'; // Empty error Map
+      
+      // Act & Assert
+      expect(
+        () => FoodAnalysisParser.parse(jsonText),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message, 
+          'message', 
+          contains('Unknown error')
+        )),
       );
     });
   });

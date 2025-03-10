@@ -9,6 +9,7 @@ import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analy
 import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Define mock classes with mocktail
 class MockFoodTextAnalysisService extends Mock
@@ -24,6 +25,9 @@ class MockExerciseAnalysisService extends Mock
     implements ExerciseAnalysisService {}
 
 class MockFile extends Mock implements File {}
+
+// Mock for flutter_dotenv
+class MockDotEnv extends Mock implements DotEnv {}
 
 void main() {
   late MockFoodTextAnalysisService mockTextService;
@@ -183,5 +187,6 @@ void main() {
               mockExerciseService.analyze(description, userWeightKg: weight))
           .called(1);
     });
+
   });
 }

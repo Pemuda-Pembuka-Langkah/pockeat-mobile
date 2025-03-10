@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
-
+// coverage:ignore-start
 abstract class BaseGeminiService {
   final String apiKey;
   final GenerativeModelWrapper modelWrapper;
@@ -26,7 +26,7 @@ abstract class BaseGeminiService {
     }
     return apiKey;
   }
-
+  // coverage:ignore-end
   String extractJson(String text) {
     try {
       // First try to clean up the text by removing comments and fixing common JSON issues

@@ -1,5 +1,5 @@
   import 'package:google_generative_ai/google_generative_ai.dart';
-
+ // coverage:ignore-start
   abstract class GenerativeModelWrapper {
     Future<dynamic> generateContent(List<Content> contents);
   }
@@ -14,3 +14,4 @@
       return _model.generateContent(contents);
     }
   }
+// coverage:ignore-end

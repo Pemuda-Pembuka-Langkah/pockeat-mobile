@@ -6,12 +6,12 @@ class FoodAnalysisResult {
   final List<String> warnings;
   
   // Constants for warning messages to ensure consistency
-  static const String HIGH_SODIUM_WARNING = "High sodium content";
-  static const String HIGH_SUGAR_WARNING = "High sugar content";
+  static const String highSodiumWarning = "High sodium content";
+  static const String highSugarWarning = "High sugar content";
   
   // Thresholds for warnings
-  static const double HIGH_SODIUM_THRESHOLD = 500.0; // mg
-  static const double HIGH_SUGAR_THRESHOLD = 20.0; // g
+  static const double highSodiumThreshold = 500.0; // mg
+  static const double highSugarThreshold = 20.0; // g
   
   FoodAnalysisResult({
     required this.foodName,
@@ -32,11 +32,11 @@ class FoodAnalysisResult {
     } 
     // Otherwise generate warnings based on nutrition values
     else {
-      if (nutritionInfo.sodium > HIGH_SODIUM_THRESHOLD) {
-        warnings.add(HIGH_SODIUM_WARNING);
+      if (nutritionInfo.sodium > highSodiumThreshold) {
+        warnings.add(highSodiumWarning);
       }
-      if (nutritionInfo.sugar > HIGH_SUGAR_THRESHOLD) {
-        warnings.add(HIGH_SUGAR_WARNING);
+      if (nutritionInfo.sugar > highSugarThreshold) {
+        warnings.add(highSugarWarning);
       }
     }
     

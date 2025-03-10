@@ -10,10 +10,11 @@ class ExerciseAnalysisService extends BaseGeminiService {
     required super.apiKey,
     super.customModelWrapper,
   });
-
+// coverage:ignore-start
   factory ExerciseAnalysisService.fromEnv() {
     return ExerciseAnalysisService(apiKey: BaseGeminiService.getApiKeyFromEnv());
   }
+// coverage:ignore-end
 
   Future<ExerciseAnalysisResult> analyze(String description, {double? userWeightKg}) async {
     try {

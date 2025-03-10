@@ -1,4 +1,3 @@
-// test/features/ai_api_scan/services/exercise/exercise_analysis_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
@@ -105,7 +104,11 @@ void main() {
       // Act & Assert
       expect(
         () => service.analyze(exerciseDescription),
-        throwsA(isA<GeminiServiceException>()),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          contains('No response text generated')
+        )),
       );
     });
 
@@ -117,8 +120,60 @@ void main() {
       // Act & Assert
       expect(
         () => service.analyze(exerciseDescription),
-        throwsA(isA<GeminiServiceException>()),
+        throwsA(isA<GeminiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          contains('API call failed')
+        )),
       );
+    });
+  });
+
+  group('ExerciseAnalysisService error handling', () {
+    test('parseExerciseResponse should throw GeminiServiceException when extractJson fails', () {
+      // Arrange - String without clear JSON format
+      final invalidText = 'Ini bukan JSON sama sekali';
+      
+      // Act & Assert
+      expect(
+        () => service.parseExerciseResponse(invalidText, 'jogging'),
+        throwsA(
+          isA<GeminiServiceException>()
+            .having((e) => e.message, 'message', contains('Failed to parse exercise analysis response'))
+        ),
+      );
+    });
+    
+    test('parseExerciseResponse should throw GeminiServiceException when jsonDecode fails', () {
+      // Arrange - String with malformed JSON format
+      // JSON-like format but invalid (unbalanced curly braces)
+      final malformedJson = '{"exercise_type": "Running", "calories_burned": 300,';
+      
+      // Act & Assert
+      expect(
+        () => service.parseExerciseResponse(malformedJson, 'running'),
+        throwsA(
+          isA<GeminiServiceException>()
+            .having((e) => e.message, 'message', contains('Failed to parse exercise analysis response'))
+        ),
+      );
+    });
+    
+    test('parseExerciseResponse should propagate exception message from parsing failure', () {
+      final brokenJson = '{ "this": "is", broken": "json" }';
+      
+      // Act
+      try {
+        service.parseExerciseResponse(brokenJson, 'exercise');
+        fail('Expected exception was not thrown');
+      } catch (e) {
+        // Assert
+        expect(e, isA<GeminiServiceException>());
+        expect((e as GeminiServiceException).message, startsWith('Failed to parse exercise analysis response:'));
+
+        // Check for FormatException instead of SyntaxException
+        expect(e.message, contains('FormatException'));
+      }
     });
   });
 }
