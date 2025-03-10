@@ -16,11 +16,9 @@ class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 void main() {
   late MockExerciseLogHistoryService mockRepository;
   late List<ExerciseLogHistoryItem> mockExercises;
-  late MockNavigatorObserver mockObserver;
 
   setUp(() {
     mockRepository = MockExerciseLogHistoryService();
-    mockObserver = MockNavigatorObserver();
 
     mockExercises = [
       ExerciseLogHistoryItem(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 
 /// A reusable widget that displays an exercise history item in a card format.
@@ -107,7 +106,7 @@ class ExerciseHistoryCard extends StatelessWidget {
         final key = keyValue[0].trim();
         final value = keyValue.length > 1 ? keyValue[1].trim() : '';
         
-        spans.add(TextSpan(text: key + ': '));
+        spans.add(TextSpan(text: '$key: '));
         spans.add(TextSpan(
           text: value,
           style: TextStyle(
