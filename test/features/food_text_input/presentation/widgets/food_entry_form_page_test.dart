@@ -5,18 +5,83 @@ import 'package:pockeat/features/food_text_input/presentation/widgets/food_entry
 
 void main() {
   group('FoodEntryForm Basic Widget Tests', () {
-    testWidgets('Form has all required input fields', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: FoodEntryForm()));
+    testWidgets('Form has all required input fields with correct styling', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm())));
       
+      // Verify fields exist
       expect(find.byKey(const ValueKey('foodNameField')), findsOneWidget);
       expect(find.byKey(const ValueKey('descriptionField')), findsOneWidget);
       expect(find.byKey(const ValueKey('ingredientsField')), findsOneWidget);
       expect(find.byKey(const ValueKey('weightField')), findsOneWidget);
       expect(find.byKey(const ValueKey('saveButton')), findsOneWidget);
+
+      // Verify text field styling
+      final TextField foodNameField = tester.widget<TextField>(
+        find.byKey(const ValueKey('foodNameField'))
+      );
+      final InputDecoration decoration = foodNameField.decoration!;
+      
+      expect(decoration.filled, true);
+      expect(decoration.fillColor, Colors.white);
+      expect((decoration.border as OutlineInputBorder).borderRadius, 
+        BorderRadius.circular(12));
+      expect(decoration.labelStyle?.color, Colors.black54);
     });
-    
+
+    testWidgets('Save button has correct styling', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm())));
+
+      final ElevatedButton saveButton = tester.widget<ElevatedButton>(
+        find.byKey(const ValueKey('saveButton'))
+      );
+      
+      final ButtonStyle? style = saveButton.style;
+      final backgroundColor = style?.backgroundColor?.resolve({});
+      expect(backgroundColor, const Color(0xFF4ECDC4));
+
+      final Text buttonText = tester.widget<Text>(find.text('Save'));
+      expect(buttonText.style?.fontSize, 16);
+      expect(buttonText.style?.fontWeight, FontWeight.w600);
+    });
+
+    testWidgets('Success message has correct styling', (WidgetTester tester) async {
+      bool onSavedCalled = false;
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: FoodEntryForm(
+              onSaved: (FoodEntry entry) {
+                onSavedCalled = true;
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Fill in valid data
+      await tester.enterText(find.byKey(const ValueKey('foodNameField')), 'Test Food');
+      await tester.enterText(find.byKey(const ValueKey('descriptionField')), 'Test Description');
+      await tester.enterText(find.byKey(const ValueKey('ingredientsField')), 'Test Ingredients');
+      await tester.enterText(find.byKey(const ValueKey('weightField')), '100');
+
+      await tester.tap(find.byKey(const ValueKey('saveButton')));
+      await tester.pump();
+
+      expect(find.text('Food entry is saved successfully!'), findsOneWidget);
+      
+      final Text successText = tester.widget<Text>(
+        find.text('Food entry is saved successfully!')
+      );
+      expect(successText.style?.color, const Color(0xFF4ECDC4));
+      expect(successText.style?.fontWeight, FontWeight.w600);
+      expect(successText.textAlign, TextAlign.center);
+      
+      expect(onSavedCalled, true);
+    });
+
     testWidgets('Can input short text in all fields', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: FoodEntryForm()));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm())));
       
       await tester.enterText(find.byKey(const ValueKey('foodNameField')), 'Nasi Goreng');
       expect(find.text('Nasi Goreng'), findsOneWidget);
@@ -32,7 +97,7 @@ void main() {
     });
     
     testWidgets('Can input long text descriptions', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: FoodEntryForm()));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm())));
       
       final longDescription = 'I had nasi goreng for lunch today, it consisted of fried rice with various vegetables including carrots, peas, and corn. The rice was flavored with sweet soy sauce and a bit of chili. It also contained small pieces of chicken and some scrambled eggs mixed throughout. The portion was quite large and I couldn\'t finish it all in one sitting.';
       
@@ -43,7 +108,7 @@ void main() {
     });
     
     testWidgets('Form scrolls to accommodate long inputs', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: FoodEntryForm()));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm())));
       
       await tester.enterText(find.byKey(const ValueKey('foodNameField')), 'Nasi Goreng Special');
       
@@ -96,8 +161,25 @@ void main() {
   });
 
   group('FoodEntryForm Validation Tests', () {
+    testWidgets('Shows error message with correct styling', (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm())));
+      
+      await tester.tap(find.byKey(const ValueKey('saveButton')));
+      await tester.pump();
+
+      final TextField foodNameField = tester.widget<TextField>(
+        find.byKey(const ValueKey('foodNameField'))
+      );
+      final InputDecoration decoration = foodNameField.decoration!;
+      
+      expect(decoration.errorStyle?.color, const Color(0xFFFF6B6B));
+      expect((decoration.errorBorder as OutlineInputBorder).borderSide.color, 
+        const Color(0xFFFF6B6B));
+      expect((decoration.errorBorder as OutlineInputBorder).borderSide.width, 2.0);
+    });
+
     testWidgets('Shows error message when required fields are empty', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: FoodEntryForm()));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm())));
       
       await tester.tap(find.byKey(const ValueKey('saveButton')));
       await tester.pump(); 
@@ -112,7 +194,7 @@ void main() {
     });
 
     testWidgets('Shows error when food name text exceeds maximum word count', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: FoodEntryForm(maxFoodNameWords: 20)));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm(maxFoodNameWords: 20))));
 
       final longFoodName = 'Grilled herb-marinated chicken breast with roasted garlic mashed potatoes, sautéed buttered asparagus, honey-glazed baby carrots, creamy mushroom sauce, and a side of freshly baked whole wheat bread with homemade basil pesto spread, served alongside a refreshing mixed berry yogurt parfait with granola and a drizzle of organic wildflower honey.';
 
@@ -129,7 +211,7 @@ void main() {
     });
 
     testWidgets('Shows error when description text exceeds maximum word count', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: FoodEntryForm(maxDescriptionWords: 50)));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm(maxDescriptionWords: 50))));
 
       final longDescription = 'For breakfast, I had a bowl of oatmeal with sliced bananas, honey, and a sprinkle of cinnamon. Alongside, I drank a cup of black coffee. Later, for lunch, I ate grilled salmon with steamed broccoli, brown rice, and a side of fresh avocado salad. In the evening, I had a hearty vegetable soup with carrots, potatoes, and lentils, accompanied by whole wheat toast. I also snacked on almonds, yogurt, and an apple throughout the day. Staying hydrated, I drank plenty of water and a cup of green tea before bedtime to help with digestion and relaxation.';
       
@@ -146,7 +228,7 @@ void main() {
     });
 
     testWidgets('Shows error when ingredients text exceeds maximum word count', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: FoodEntryForm(maxIngredientWords: 50)));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm(maxIngredientWords: 50))));
 
       final longIngredients = 'For breakfast, I had a bowl of oatmeal with sliced bananas, honey, and a sprinkle of cinnamon. Alongside, I drank a cup of black coffee. Later, for lunch, I ate grilled salmon with steamed broccoli, brown rice, and a side of fresh avocado salad. In the evening, I had a hearty vegetable soup with carrots, potatoes, and lentils, accompanied by whole wheat toast. I also snacked on almonds, yogurt, and an apple throughout the day. Staying hydrated, I drank plenty of water and a cup of green tea before bedtime to help with digestion and relaxation.';
       
@@ -163,7 +245,7 @@ void main() {
     });
     
     testWidgets('Shows error when weight is not a valid number', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: FoodEntryForm()));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm())));
       
       await tester.enterText(find.byKey(const ValueKey('foodNameField')), 'Test Food');      
       await tester.enterText(find.byKey(const ValueKey('descriptionField')), 'Test Description');
@@ -178,7 +260,7 @@ void main() {
     });
     
     testWidgets('Shows error when weight is less than or equal to 0', (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: FoodEntryForm()));
+      await tester.pumpWidget(const MaterialApp(home: Scaffold(body: FoodEntryForm())));
       
       await tester.enterText(find.byKey(const ValueKey('foodNameField')), 'Test Food');      
       await tester.enterText(find.byKey(const ValueKey('descriptionField')), 'Test Description');
@@ -204,10 +286,12 @@ void main() {
       FoodEntry? savedFoodEntry;
       
       await tester.pumpWidget(MaterialApp(
-        home: FoodEntryForm(
-          onSaved: (entry) {
-            savedFoodEntry = entry;
-          },
+        home: Scaffold(
+          body: FoodEntryForm(
+            onSaved: (entry) {
+              savedFoodEntry = entry;
+            },
+          ),
         ),
       ));
       
@@ -232,11 +316,13 @@ void main() {
       FoodEntry? savedFoodEntry;
       
       await tester.pumpWidget(MaterialApp(
-        home: FoodEntryForm(
-          weightRequired: false,
-          onSaved: (entry) {
-            savedFoodEntry = entry;
-          },
+        home: Scaffold(
+          body: FoodEntryForm(
+            weightRequired: false,
+            onSaved: (entry) {
+              savedFoodEntry = entry;
+            },
+          ),
         ),
       ));
       
