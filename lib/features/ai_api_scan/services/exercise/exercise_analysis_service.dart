@@ -117,4 +117,97 @@ class ExerciseAnalysisService extends BaseGeminiService {
           "Failed to parse exercise analysis response: $e");
     }
   }
+  Future<ExerciseAnalysisResult> correctAnalysis(
+      ExerciseAnalysisResult previousResult, String userComment) async {
+    try {
+      final prompt = '''
+      Original exercise analysis:
+      - Exercise type: ${previousResult.exerciseType}
+      - Duration: ${previousResult.duration}
+      - Intensity: ${previousResult.intensity}
+      - Calories burned: ${previousResult.estimatedCalories}
+      - MET value: ${previousResult.metValue}
+      
+      User correction comment: "$userComment"
+      
+      Please correct the exercise analysis based on the user's comment. 
+      Only modify values that need to be changed according to the user's feedback.
+      
+      Return your response as a strict JSON object with this exact format:
+      {
+        "exercise_type": "string",
+        "calories_burned": number,
+        "duration_minutes": number,
+        "intensity_level": "string",
+        "met_value": number,
+        "correction_applied": "string explaining what was corrected"
+      }
+      ''';
+
+      final response =
+          await modelWrapper.generateContent([Content.text(prompt)]);
+      if (response.text == null) {
+        throw GeminiServiceException('No response text generated');
+      }
+
+      return parseCorrectionResponse(
+          response.text!, previousResult, userComment);
+    } catch (e) {
+      throw GeminiServiceException("Error correcting exercise analysis: $e");
+    }
+  }
+
+  ExerciseAnalysisResult parseCorrectionResponse(
+      String responseText, ExerciseAnalysisResult previousResult, String userComment) {
+    try {
+      // Extract JSON from response text
+      final jsonString = extractJson(responseText);
+      final jsonData = jsonDecode(jsonString);
+
+      // Extract values from JSON, defaulting to previous values if not provided
+      final exerciseType = jsonData['exercise_type'] ?? previousResult.exerciseType;
+      final caloriesBurned = jsonData['calories_burned'] ?? previousResult.estimatedCalories;
+      
+      // Handle duration which might be in string format in previousResult
+      int durationMinutes;
+      if (jsonData['duration_minutes'] != null) {
+        durationMinutes = jsonData['duration_minutes'];
+      } else {
+        // Try to extract numbers from the previous duration string
+        final durationString = previousResult.duration;
+        final numbers = RegExp(r'\d+').allMatches(durationString);
+        durationMinutes = numbers.isNotEmpty ? int.parse(numbers.first.group(0)!) : 0;
+      }
+      
+      final intensityLevel = jsonData['intensity_level'] ?? previousResult.intensity;
+      final metValue = (jsonData['met_value'] ?? previousResult.metValue).toDouble();
+      final correctionApplied = jsonData['correction_applied'] ?? 'Adjustments applied based on user feedback';
+
+      // Create a summary incorporating the correction information
+      final summary =
+          'Corrected analysis: You performed $exerciseType for $durationMinutes minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories. ($correctionApplied)';
+
+      // Determine duration string format
+      final duration = '$durationMinutes minutes';
+
+      // Create the corrected exercise analysis result
+      return ExerciseAnalysisResult(
+        exerciseType: exerciseType,
+        duration: duration,
+        intensity: intensityLevel,
+        estimatedCalories:
+            caloriesBurned is int ? caloriesBurned : caloriesBurned.toInt(),
+        metValue: metValue,
+        summary: summary,
+        timestamp: DateTime.now(),
+        originalInput: previousResult.originalInput,
+      );
+    } catch (e) {
+      throw GeminiServiceException(
+          "Failed to parse exercise correction response: $e");
+    }
+  }
+
+  
+  
 }
