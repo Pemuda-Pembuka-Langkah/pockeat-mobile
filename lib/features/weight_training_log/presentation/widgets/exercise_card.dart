@@ -7,14 +7,18 @@ class ExerciseCard extends StatelessWidget {
   final Color primaryGreen;
   final double volume;
   final VoidCallback onAddSet;
+  final VoidCallback onDeleteExercise;
+  final Function(int) onDeleteSet;
 
   const ExerciseCard({
-    super.key,
+    Key? key,
     required this.exercise,
     required this.primaryGreen,
     required this.volume,
     required this.onAddSet,
-  });
+    required this.onDeleteExercise,
+    required this.onDeleteSet,
+  }) : super(key: key);
 
   Widget _buildSetRow(int setNumber, WeightLiftingSet set) {
     return Container(
@@ -74,6 +78,14 @@ class ExerciseCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
               color: Colors.black87,
             ),
+          ),
+          const Spacer(),
+          // Delete set button
+          IconButton(
+            icon: const Icon(Icons.close, size: 16, color: Colors.red),
+            onPressed: () => onDeleteSet(setNumber - 1),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
           ),
         ],
       ),
@@ -158,23 +170,47 @@ class ExerciseCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: OutlinedButton(
-              onPressed: onAddSet,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: primaryGreen,
-                side: BorderSide(color: primaryGreen),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            child: Column(
+              children: [
+                OutlinedButton(
+                  onPressed: onAddSet,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: primaryGreen,
+                    side: BorderSide(color: primaryGreen),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add),
+                      SizedBox(width: 8),
+                      Text('Add Set'),
+                    ],
+                  ),
                 ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add),
-                  SizedBox(width: 8),
-                  Text('Add Set'),
-                ],
-              ),
+                const SizedBox(height: 8),
+                // Add Delete Exercise button
+                OutlinedButton(
+                  onPressed: onDeleteExercise,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.delete),
+                      SizedBox(width: 8),
+                      Text('Delete Exercise'),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],

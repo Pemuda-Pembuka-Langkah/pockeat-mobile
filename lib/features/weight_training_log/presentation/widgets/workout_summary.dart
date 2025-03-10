@@ -21,37 +21,51 @@ class WorkoutSummary extends StatelessWidget {
   });
 
   Widget _buildSummaryItem(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: primaryGreen.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Fixed size container for icon
+          Container(
+            width: 40,
+            height: 40,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: primaryGreen.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: primaryGreen,
+              size: 20,
+            ),
           ),
-          child: Icon(
-            icon,
-            color: primaryGreen,
-            size: 20,
+          const SizedBox(height: 8),
+          // Value text with flexible height
+          Flexible(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+              softWrap: true,
+              overflow: TextOverflow.visible,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
+          // Label text
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.black54,
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.black54,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -84,13 +98,13 @@ class WorkoutSummary extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSummaryItem('Exercises', exerciseCount.toString(), Icons.fitness_center),
               _buildSummaryItem('Sets', totalSets.toString(), Icons.repeat),
-              _buildSummaryItem('Volume', '${totalVolume.toStringAsFixed(1)} kg', Icons.bar_chart),
-              _buildSummaryItem('Duration', '${totalDuration.toString()} minutes', Icons.access_time_rounded),
-              _buildSummaryItem('Calories', 'Est. ${estimatedCalories.toStringAsFixed(2)} kcal', Icons.local_fire_department),
+              _buildSummaryItem('Volume', '${totalVolume.toStringAsFixed(1)}\nkg', Icons.bar_chart),
+              _buildSummaryItem('Duration', '${totalDuration.toStringAsFixed(1)}\nminutes', Icons.access_time_rounded),
+              _buildSummaryItem('Estimated\nCalories', '${estimatedCalories.toStringAsFixed(2)}\nkcal', Icons.local_fire_department),
             ],
           ),
         ],
