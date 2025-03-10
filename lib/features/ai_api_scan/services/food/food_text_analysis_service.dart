@@ -83,10 +83,7 @@ class FoodTextAnalysisService extends BaseGeminiService {
       final jsonString = extractJson(response.text!);
       return FoodAnalysisParser.parse(jsonString);
     } catch (e) {
-      if (e is GeminiServiceException) {
-        rethrow;
-      }
-      throw GeminiServiceException("Error analyzing food from text: $e");
+    throw GeminiServiceException("Failed to analyze food description '$description': $e");
     }
   }
 }

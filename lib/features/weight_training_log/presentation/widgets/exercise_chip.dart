@@ -6,11 +6,11 @@ class ExerciseChipWidget extends StatelessWidget {
   final Color primaryGreen;
 
   const ExerciseChipWidget({
-    Key? key,
+    super.key,
     required this.exerciseName,
     required this.onTap,
     required this.primaryGreen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
