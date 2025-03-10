@@ -12,11 +12,14 @@ class FoodTextInputPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const ValueKey('foodTextInputScaffold'),
       backgroundColor: primaryYellow,
       appBar: AppBar(
+        key: const ValueKey('foodTextInputAppBar'),
         backgroundColor: primaryYellow,
         elevation: 0,
         leading: IconButton(
+          key: const ValueKey('backButton'),
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
@@ -30,6 +33,7 @@ class FoodTextInputPage extends StatelessWidget {
         ),
       ),
       body: Padding(
+        key: const ValueKey('bodyPadding'),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,6 +50,7 @@ class FoodTextInputPage extends StatelessWidget {
             const SizedBox(height: 24),
             Expanded(
               child: Container(
+                key: const ValueKey('formContainer'),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -59,14 +64,13 @@ class FoodTextInputPage extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: FoodEntryForm(
+                  child: const FoodEntryForm(
+                    key: ValueKey('foodEntryForm'),
                     maxFoodNameWords: 20,
                     maxDescriptionWords: 100,
                     maxIngredientWords: 200,
                     weightRequired: true,
-                    onSaved: (FoodEntry foodEntry) {
-                      print('Food Entry Saved: ${foodEntry.toString()}');
-                    },
+                    onSaved: null,
                   ),
                 ),
               ),
