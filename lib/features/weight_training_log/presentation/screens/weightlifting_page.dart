@@ -132,14 +132,22 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       
       // Show success message
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Workout saved successfully! Total volume: ${calculateTotalVolume(exercises).toStringAsFixed(1)} kg'),
-            backgroundColor: Colors.green,
-          )
+        final snackBar = SnackBar(
+          content: Text('Workout saved successfully! Total volume: ${calculateTotalVolume(exercises).toStringAsFixed(1)} kg'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
         );
+        
         // Clear workout after successful save
         clearWorkout();
+        
+        // Show snackbar and navigate when it closes
+        ScaffoldMessenger.of(context)
+            .showSnackBar(snackBar)
+            .closed
+            .then((_) {
+          Navigator.pop(context); // Changed from pushReplacementNamed to pop
+        });
       }
     } catch (e) {
       if (mounted) {
