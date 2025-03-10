@@ -491,6 +491,44 @@ void main() {
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     });
 
+    testWidgets('should show red snackbar when trying to add duplicate exercise', 
+        (WidgetTester tester) async {
+      // Set a fixed screen size
+      tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      
+      // Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: WeightliftingPage(repository: mockRepository),
+      ));
+
+      // Add exercise first time
+      final exerciseName = 'Bench Press';
+      final exerciseItem = find.text(exerciseName);
+      await tester.tap(exerciseItem.first);
+      await tester.pumpAndSettle();
+      
+      // Verify it was added (should find one exercise card)
+      expect(find.byType(ExerciseCard), findsOneWidget);
+      
+      // Try to add the same exercise again
+      await tester.tap(exerciseItem.first);
+      await tester.pumpAndSettle();
+      
+      // Verify snackbar appears with the correct message and color
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('$exerciseName is already in your workout'), findsOneWidget);
+      
+      // Find the SnackBar widget to check its background color
+      final SnackBar snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+      expect(snackBar.backgroundColor, Colors.red);
+      
+      // Verify the exercise was only added once (still only one card)
+      expect(find.byType(ExerciseCard), findsOneWidget);
+      
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    });
+
     testWidgets('should dismiss dialog when cancel button is tapped',
         (WidgetTester tester) async {
       // Set a fixed screen size
