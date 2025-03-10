@@ -1,4 +1,3 @@
-// lib/features/ai_api_scan/presentation/screens/ai_analysis_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,12 +21,14 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
   final _textDescriptionController = TextEditingController();
   final _exerciseDescriptionController = TextEditingController();
   final _servingsController = TextEditingController(text: '1.0');
+  final _correctionController = TextEditingController();
   
   // States
   bool _isLoading = false;
   FoodAnalysisResult? _foodAnalysisResult;
   ExerciseAnalysisResult? _exerciseResult;
   String? _errorMessage;
+  bool _showCorrectionInterface = false;
   
   // Services
   final _foodTextAnalysisService = getIt<FoodTextAnalysisService>();
@@ -46,6 +47,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
           _foodAnalysisResult = null;
           _exerciseResult = null;
           _errorMessage = null;
+          _showCorrectionInterface = false;
         });
       }
     });
@@ -56,6 +58,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
     _textDescriptionController.dispose();
     _exerciseDescriptionController.dispose();
     _servingsController.dispose();
+    _correctionController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -72,6 +75,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       _isLoading = true;
       _foodAnalysisResult = null;
       _errorMessage = null;
+      _showCorrectionInterface = false;
     });
     
     try {
@@ -82,6 +86,41 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       });
     } catch (e) {
       _showError('Error analyzing food: ${e.toString()}');
+    }
+  }
+
+  // Food text correction
+  Future<void> _correctFoodTextAnalysis() async {
+    if (_foodAnalysisResult == null) return;
+    
+    final correction = _correctionController.text.trim();
+    if (correction.isEmpty) {
+      _showError('Please enter correction details');
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    
+    try {
+      final result = await _foodTextAnalysisService.correctAnalysis(_foodAnalysisResult!, correction);
+      setState(() {
+        _foodAnalysisResult = result;
+        _isLoading = false;
+        _showCorrectionInterface = false;
+        _correctionController.clear();
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Analysis corrected successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      _showError('Error correcting analysis: ${e.toString()}');
     }
   }
   
@@ -96,6 +135,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       _isLoading = true;
       _foodAnalysisResult = null;
       _errorMessage = null;
+      _showCorrectionInterface = false;
     });
     
     try {
@@ -106,6 +146,41 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       });
     } catch (e) {
       _showError('Error analyzing food image: ${e.toString()}');
+    }
+  }
+
+  // Food image correction
+  Future<void> _correctFoodImageAnalysis() async {
+    if (_foodAnalysisResult == null) return;
+    
+    final correction = _correctionController.text.trim();
+    if (correction.isEmpty) {
+      _showError('Please enter correction details');
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    
+    try {
+      final result = await _foodImageAnalysisService.correctAnalysis(_foodAnalysisResult!, correction);
+      setState(() {
+        _foodAnalysisResult = result;
+        _isLoading = false;
+        _showCorrectionInterface = false;
+        _correctionController.clear();
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Analysis corrected successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      _showError('Error correcting analysis: ${e.toString()}');
     }
   }
   
@@ -129,6 +204,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       _isLoading = true;
       _foodAnalysisResult = null;
       _errorMessage = null;
+      _showCorrectionInterface = false;
     });
     
     try {
@@ -139,6 +215,54 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       });
     } catch (e) {
       _showError('Error analyzing nutrition label: ${e.toString()}');
+    }
+  }
+
+  // Nutrition label correction
+  Future<void> _correctNutritionLabelAnalysis() async {
+    if (_foodAnalysisResult == null) return;
+    
+    final correction = _correctionController.text.trim();
+    if (correction.isEmpty) {
+      _showError('Please enter correction details');
+      return;
+    }
+    
+    final servingsText = _servingsController.text.trim();
+    double servings;
+    try {
+      servings = double.parse(servingsText);
+    } catch (e) {
+      _showError('Please enter a valid number for servings');
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    
+    try {
+      final result = await _nutritionLabelService.correctAnalysis(
+        _foodAnalysisResult!, 
+        correction, 
+        servings
+      );
+      setState(() {
+        _foodAnalysisResult = result;
+        _isLoading = false;
+        _showCorrectionInterface = false;
+        _correctionController.clear();
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Analysis corrected successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      _showError('Error correcting analysis: ${e.toString()}');
     }
   }
   
@@ -154,6 +278,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       _isLoading = true;
       _exerciseResult = null;
       _errorMessage = null;
+      _showCorrectionInterface = false;
     });
     
     try {
@@ -164,6 +289,41 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       });
     } catch (e) {
       _showError('Error analyzing exercise: ${e.toString()}');
+    }
+  }
+
+  // Exercise correction
+  Future<void> _correctExerciseAnalysis() async {
+    if (_exerciseResult == null) return;
+    
+    final correction = _correctionController.text.trim();
+    if (correction.isEmpty) {
+      _showError('Please enter correction details');
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    
+    try {
+      final result = await _exerciseAnalysisService.correctAnalysis(_exerciseResult!, correction);
+      setState(() {
+        _exerciseResult = result;
+        _isLoading = false;
+        _showCorrectionInterface = false;
+        _correctionController.clear();
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Analysis corrected successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      _showError('Error correcting analysis: ${e.toString()}');
     }
   }
   
@@ -179,6 +339,15 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
         backgroundColor: Colors.red,
       ),
     );
+  }
+
+  void _toggleCorrectionInterface() {
+    setState(() {
+      _showCorrectionInterface = !_showCorrectionInterface;
+      if (!_showCorrectionInterface) {
+        _correctionController.clear();
+      }
+    });
   }
   
   @override
@@ -243,8 +412,18 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
               _errorMessage!,
               style: const TextStyle(color: Colors.red),
             ),
-          if (_foodAnalysisResult != null)
+          if (_foodAnalysisResult != null) ...[
             _buildFoodAnalysisResult(_foodAnalysisResult!),
+            const SizedBox(height: 16),
+            if (!_showCorrectionInterface)
+              OutlinedButton.icon(
+                onPressed: _toggleCorrectionInterface,
+                icon: const Icon(Icons.edit),
+                label: const Text('Request Correction'),
+              )
+            else
+              _buildCorrectionInterface(_correctFoodTextAnalysis),
+          ],
         ],
       ),
     );
@@ -274,8 +453,18 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
               _errorMessage!,
               style: const TextStyle(color: Colors.red),
             ),
-          if (_foodAnalysisResult != null)
+          if (_foodAnalysisResult != null) ...[
             _buildFoodAnalysisResult(_foodAnalysisResult!),
+            const SizedBox(height: 16),
+            if (!_showCorrectionInterface)
+              OutlinedButton.icon(
+                onPressed: _toggleCorrectionInterface,
+                icon: const Icon(Icons.edit),
+                label: const Text('Request Correction'),
+              )
+            else
+              _buildCorrectionInterface(_correctFoodImageAnalysis),
+          ],
         ],
       ),
     );
@@ -314,8 +503,18 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
               _errorMessage!,
               style: const TextStyle(color: Colors.red),
             ),
-          if (_foodAnalysisResult != null)
+          if (_foodAnalysisResult != null) ...[
             _buildFoodAnalysisResult(_foodAnalysisResult!),
+            const SizedBox(height: 16),
+            if (!_showCorrectionInterface)
+              OutlinedButton.icon(
+                onPressed: _toggleCorrectionInterface,
+                icon: const Icon(Icons.edit),
+                label: const Text('Request Correction'),
+              )
+            else
+              _buildCorrectionInterface(_correctNutritionLabelAnalysis),
+          ],
         ],
       ),
     );
@@ -349,10 +548,65 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
               _errorMessage!,
               style: const TextStyle(color: Colors.red),
             ),
-          if (_exerciseResult != null)
+          if (_exerciseResult != null) ...[
             _buildExerciseAnalysisResult(_exerciseResult!),
+            const SizedBox(height: 16),
+            if (!_showCorrectionInterface)
+              OutlinedButton.icon(
+                onPressed: _toggleCorrectionInterface,
+                icon: const Icon(Icons.edit),
+                label: const Text('Request Correction'),
+              )
+            else
+              _buildCorrectionInterface(_correctExerciseAnalysis),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildCorrectionInterface(Function() onSubmit) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: _correctionController,
+          decoration: const InputDecoration(
+            labelText: 'What needs correction?',
+            hintText: 'e.g., The calorie count is wrong, it should be higher',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 3,
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : onSubmit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Submit Correction'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton(
+              onPressed: _isLoading ? null : _toggleCorrectionInterface,
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      ],
     );
   }
   
