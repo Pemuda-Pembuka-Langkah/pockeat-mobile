@@ -14,17 +14,16 @@ class GeminiServiceImpl implements GeminiService {
   final FoodImageAnalysisService _foodImageAnalysisService;
   final NutritionLabelAnalysisService _nutritionLabelService;
   final ExerciseAnalysisService _exerciseAnalysisService;
-  
+
   GeminiServiceImpl({
     required FoodTextAnalysisService foodTextAnalysisService,
     required FoodImageAnalysisService foodImageAnalysisService,
     required NutritionLabelAnalysisService nutritionLabelService,
     required ExerciseAnalysisService exerciseAnalysisService,
-  }) : 
-    _foodTextAnalysisService = foodTextAnalysisService,
-    _foodImageAnalysisService = foodImageAnalysisService,
-    _nutritionLabelService = nutritionLabelService,
-    _exerciseAnalysisService = exerciseAnalysisService;
+  })  : _foodTextAnalysisService = foodTextAnalysisService,
+        _foodImageAnalysisService = foodImageAnalysisService,
+        _nutritionLabelService = nutritionLabelService,
+        _exerciseAnalysisService = exerciseAnalysisService;
 
 // coverage:ignore-start
   factory GeminiServiceImpl.fromEnv({
@@ -35,9 +34,12 @@ class GeminiServiceImpl implements GeminiService {
   }) {
     return GeminiServiceImpl(
       foodTextAnalysisService: textService ?? FoodTextAnalysisService.fromEnv(),
-      foodImageAnalysisService: imageService ?? FoodImageAnalysisService.fromEnv(),
-      nutritionLabelService: nutritionService ?? NutritionLabelAnalysisService.fromEnv(),
-      exerciseAnalysisService: exerciseService ?? ExerciseAnalysisService.fromEnv(),
+      foodImageAnalysisService:
+          imageService ?? FoodImageAnalysisService.fromEnv(),
+      nutritionLabelService:
+          nutritionService ?? NutritionLabelAnalysisService.fromEnv(),
+      exerciseAnalysisService:
+          exerciseService ?? ExerciseAnalysisService.fromEnv(),
     );
   }
   // coverage:ignore-end
@@ -64,6 +66,15 @@ class GeminiServiceImpl implements GeminiService {
     return _exerciseAnalysisService.analyze(
       description,
       userWeightKg: userWeightKg,
+    );
+  }
+  
+  @override
+  Future<ExerciseAnalysisResult> correctExerciseAnalysis(
+      ExerciseAnalysisResult previousResult, String userComment) {
+    return _exerciseAnalysisService.correctAnalysis(
+      previousResult,
+      userComment,
     );
   }
 }

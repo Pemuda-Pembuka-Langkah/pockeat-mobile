@@ -185,7 +185,7 @@ class ExerciseAnalysisService extends BaseGeminiService {
 
       // Create a summary incorporating the correction information
       final summary =
-          'Corrected analysis: You performed $exerciseType for $durationMinutes minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories. ($correctionApplied)';
+          'You performed $exerciseType for $durationMinutes minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories. ($correctionApplied)';
 
       // Determine duration string format
       final duration = '$durationMinutes minutes';
