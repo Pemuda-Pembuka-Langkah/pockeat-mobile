@@ -30,6 +30,13 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   int _selectedMonth = DateTime.now().month;
   int _selectedYear = DateTime.now().year;
   
+  // Search state
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  List<ExerciseLogHistoryItem>? _allExercises;
+  List<ExerciseLogHistoryItem>? _filteredExercises;
+  bool _isSearching = false;
+  
   // Colors
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
@@ -39,6 +46,12 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   void initState() {
     super.initState();
     _loadExercises();
+  }
+  
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _loadExercises() {
@@ -57,6 +70,12 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
           _exercisesFuture = widget.service.getAllExerciseLogs();
           break;
       }
+      
+      // Reset search when loading new exercises
+      _searchQuery = '';
+      _searchController.clear();
+      _allExercises = null;
+      _filteredExercises = null;
     });
   }
 
@@ -73,6 +92,91 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
     if (result == true) {
       _loadExercises();
     }
+  }
+  
+  void _filterExercises(String query) {
+    setState(() {
+      _searchQuery = query.trim().toLowerCase();
+      
+      if (_allExercises == null || _searchQuery.isEmpty) {
+        _filteredExercises = _allExercises;
+        return;
+      }
+      
+      _filteredExercises = _allExercises!.where((exercise) {
+        return exercise.title.toLowerCase().contains(_searchQuery) || 
+               exercise.subtitle.toLowerCase().contains(_searchQuery);
+      }).toList();
+    });
+  }
+  
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            Icon(
+              Icons.search,
+              color: _isSearching ? primaryPink : Colors.grey,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Search exercises...',
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 15),
+                ),
+                onChanged: _filterExercises,
+                onTap: () {
+                  setState(() {
+                    _isSearching = true;
+                  });
+                },
+                onSubmitted: (_) {
+                  setState(() {
+                    _isSearching = false;
+                  });
+                  FocusScope.of(context).unfocus();
+                },
+              ),
+            ),
+            if (_searchQuery.isNotEmpty)
+              GestureDetector(
+                onTap: () {
+                  _searchController.clear();
+                  _filterExercises('');
+                  FocusScope.of(context).unfocus();
+                  setState(() {
+                    _isSearching = false;
+                  });
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Icon(Icons.close, color: Colors.grey),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -337,6 +441,8 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
       body: Column(
         children: [
           const SizedBox(height: 16),
+          _buildSearchBar(),
+          const SizedBox(height: 12),
           _buildFilterChips(),
           const SizedBox(height: 16),
           Expanded(
@@ -380,7 +486,38 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
                     ),
                   );
                 } else {
-                  final exercises = snapshot.data!;
+                  // Store all exercises for filtering
+                  _allExercises ??= snapshot.data!;
+                  
+                  // Get exercises to display (filtered or all)
+                  final exercises = _searchQuery.isNotEmpty 
+                      ? _filteredExercises ?? [] 
+                      : _allExercises!;
+                  
+                  if (_searchQuery.isNotEmpty && exercises.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 72,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No exercises found for "$_searchQuery"',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey.shade600,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  
                   return ListView.builder(
                     padding: const EdgeInsets.only(top: 8, bottom: 20),
                     itemCount: exercises.length,
