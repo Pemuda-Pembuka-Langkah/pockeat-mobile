@@ -29,12 +29,12 @@ void setupDependencies() {
     ExerciseAnalysisService.fromEnv(),
   );
 
-  getIt.registerSingleton<FoodScanPhotoService>(
-    FoodScanPhotoService(),
-  );
-
   getIt.registerSingleton<FoodScanRepository>(
     FoodScanRepository(),
+  );
+
+  getIt.registerSingleton<FoodScanPhotoService>(
+    FoodScanPhotoService(),
   );
   
   getIt.registerSingleton<GeminiService>(

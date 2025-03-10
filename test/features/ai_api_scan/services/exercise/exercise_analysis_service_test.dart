@@ -3,6 +3,7 @@ import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 
 // Manual mock implementation
@@ -176,4 +177,245 @@ void main() {
       }
     });
   });
+
+
+  group('ExerciseAnalysisService correction functionality', () {
+  test('should successfully correct exercise analysis based on user comment', () async {
+    // Arrange
+    final previousResult = ExerciseAnalysisResult(
+      exerciseType: 'Running',
+      duration: '30 minutes',
+      intensity: 'Moderate',
+      estimatedCalories: 350,
+      metValue: 8.5,
+      summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
+      timestamp: DateTime.now(),
+      originalInput: 'Running 5km in 30 minutes',
+    );
+    
+    const userComment = 'I actually ran for 45 minutes, not 30';
+    
+    const correctionJsonResponse = '''
+    {
+      "exercise_type": "Running",
+      "calories_burned": 525,
+      "duration_minutes": 45,
+      "intensity_level": "Moderate",
+      "met_value": 8.5,
+      "correction_applied": "Updated duration from 30 to 45 minutes and recalculated calories"
+    }
+    ''';
+
+    // Mock
+    mockModelWrapper.responseText = correctionJsonResponse;
+
+    // Act
+    final result = await service.correctAnalysis(previousResult, userComment);
+
+    // Assert
+    expect(result.exerciseType, equals('Running'));
+    expect(result.estimatedCalories, equals(525));
+    expect(result.duration, equals('45 minutes'));
+    expect(result.intensity, equals('Moderate'));
+    expect(result.metValue, equals(8.5));
+    expect(result.originalInput, equals('Running 5km in 30 minutes'));
+    expect(result.summary, contains('Corrected analysis'));
+    expect(result.summary, contains('Updated duration from 30 to 45 minutes'));
+  });
+
+  test('should preserve unchanged values when only some fields are corrected', () async {
+    // Arrange
+    final previousResult = ExerciseAnalysisResult(
+      exerciseType: 'Running',
+      duration: '30 minutes',
+      intensity: 'Moderate',
+      estimatedCalories: 350,
+      metValue: 8.5,
+      summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
+      timestamp: DateTime.now(),
+      originalInput: 'Running 5km in 30 minutes',
+    );
+    
+    const userComment = 'It was actually high intensity';
+    
+    const correctionJsonResponse = '''
+    {
+      "exercise_type": "Running",
+      "calories_burned": 420,
+      "duration_minutes": 30,
+      "intensity_level": "High",
+      "met_value": 10.2,
+      "correction_applied": "Updated intensity from Moderate to High and adjusted calories and MET value"
+    }
+    ''';
+
+    // Mock
+    mockModelWrapper.responseText = correctionJsonResponse;
+
+    // Act
+    final result = await service.correctAnalysis(previousResult, userComment);
+
+    // Assert
+    expect(result.exerciseType, equals('Running'));
+    expect(result.estimatedCalories, equals(420));
+    expect(result.duration, equals('30 minutes')); // Unchanged
+    expect(result.intensity, equals('High')); // Changed
+    expect(result.metValue, equals(10.2)); // Changed
+    expect(result.originalInput, equals('Running 5km in 30 minutes'));
+  });
+
+  test('should handle incomplete JSON response by using previous values', () async {
+    // Arrange
+    final previousResult = ExerciseAnalysisResult(
+      exerciseType: 'Running',
+      duration: '30 minutes',
+      intensity: 'Moderate',
+      estimatedCalories: 350,
+      metValue: 8.5,
+      summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
+      timestamp: DateTime.now(),
+      originalInput: 'Running 5km in 30 minutes',
+    );
+    
+    const userComment = 'It was actually swimming';
+    
+    const partialJsonResponse = '''
+    {
+      "exercise_type": "Swimming",
+      "correction_applied": "Changed exercise type from Running to Swimming"
+    }
+    ''';
+
+    // Mock
+    mockModelWrapper.responseText = partialJsonResponse;
+
+    // Act
+    final result = await service.correctAnalysis(previousResult, userComment);
+
+    // Assert
+    expect(result.exerciseType, equals('Swimming')); // Changed
+    expect(result.estimatedCalories, equals(350)); // Preserved from previous
+    expect(result.duration, equals('30 minutes')); // Preserved from previous
+    expect(result.intensity, equals('Moderate')); // Preserved from previous
+    expect(result.metValue, equals(8.5)); // Preserved from previous
+
+  });
+
+  test('should throw exception when API returns null response', () async {
+    // Arrange
+    final previousResult = ExerciseAnalysisResult(
+      exerciseType: 'Running',
+      duration: '30 minutes',
+      intensity: 'Moderate',
+      estimatedCalories: 350,
+      metValue: 8.5,
+      summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
+      timestamp: DateTime.now(),
+      originalInput: 'Running 5km in 30 minutes',
+    );
+    
+    const userComment = 'I actually ran for 45 minutes';
+    mockModelWrapper.responseText = null;
+
+    // Act & Assert
+    expect(
+      () => service.correctAnalysis(previousResult, userComment),
+      throwsA(isA<GeminiServiceException>().having(
+        (e) => e.message,
+        'error message',
+        contains('No response text generated')
+      )),
+    );
+  });
+
+  test('should throw exception when API call fails', () async {
+    // Arrange
+    final previousResult = ExerciseAnalysisResult(
+      exerciseType: 'Running',
+      duration: '30 minutes',
+      intensity: 'Moderate',
+      estimatedCalories: 350,
+      metValue: 8.5,
+      summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
+      timestamp: DateTime.now(),
+      originalInput: 'Running 5km in 30 minutes',
+    );
+    
+    const userComment = 'I actually ran for 45 minutes';
+    mockModelWrapper.exceptionToThrow = Exception('API call failed');
+
+    // Act & Assert
+    expect(
+      () => service.correctAnalysis(previousResult, userComment),
+      throwsA(isA<GeminiServiceException>().having(
+        (e) => e.message,
+        'error message',
+        contains('Error correcting exercise analysis')
+      )),
+    );
+  });
+
+  test('parseCorrectionResponse should handle invalid JSON format', () {
+    // Arrange
+    final previousResult = ExerciseAnalysisResult(
+      exerciseType: 'Running',
+      duration: '30 minutes',
+      intensity: 'Moderate',
+      estimatedCalories: 350,
+      metValue: 8.5,
+      summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
+      timestamp: DateTime.now(),
+      originalInput: 'Running 5km in 30 minutes',
+    );
+    
+    const userComment = 'I actually ran for 45 minutes';
+    final malformedJson = '{"exercise_type": "Swimming", "calories_burned": 400,';
+    
+    // Act & Assert
+    expect(
+      () => service.parseCorrectionResponse(malformedJson, previousResult, userComment),
+      throwsA(
+        isA<GeminiServiceException>()
+          .having((e) => e.message, 'message', contains('Failed to parse exercise correction response'))
+      ),
+    );
+  });
+
+  test('should correctly extract duration minutes from string format', () async {
+    // Arrange
+    final previousResult = ExerciseAnalysisResult(
+      exerciseType: 'Running',
+      duration: '30 minutes and 15 seconds', // More complex duration string
+      intensity: 'Moderate',
+      estimatedCalories: 350,
+      metValue: 8.5,
+      summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
+      timestamp: DateTime.now(),
+      originalInput: 'Running 5km in 30 minutes',
+    );
+    
+    const userComment = 'I ran longer';
+    
+    const correctionJsonResponse = '''
+    {
+      "exercise_type": "Running",
+      "calories_burned": 525,
+      "duration_minutes": 45,
+      "intensity_level": "Moderate",
+      "met_value": 8.5,
+      "correction_applied": "Updated duration from 30 to 45 minutes and recalculated calories"
+    }
+    ''';
+
+    // Mock
+    mockModelWrapper.responseText = correctionJsonResponse;
+
+    // Act
+    final result = await service.correctAnalysis(previousResult, userComment);
+
+    // Assert
+    expect(result.duration, equals('45 minutes'));
+    expect(result.estimatedCalories, equals(525));
+  });
+});
 }
