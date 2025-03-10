@@ -10,9 +10,6 @@ import 'package:pockeat/features/cardio_log/presentation/widgets/swimming_form.d
 
 import 'cardio_input_page_test.mocks.dart';
 
-@GenerateMocks([NavigatorObserver])
-class MockNavigatorObserver extends Mock implements NavigatorObserver {}
-
 @GenerateMocks([CardioRepository])
 void main() {
   late MockCardioRepository mockRepository;
