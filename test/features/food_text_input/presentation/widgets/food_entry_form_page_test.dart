@@ -130,33 +130,26 @@ void main() {
     });
     
     testWidgets('Widget disposes controllers when removed', (WidgetTester tester) async {
-      bool showForm = true;
-      late StateSetter builderSetState;
-      
       await tester.pumpWidget(
-        MaterialApp(
-          home: StatefulBuilder(
-            builder: (context, setState) {
-              builderSetState = setState;
-              return showForm 
-                ? const FoodEntryForm() 
-                : const Text('Form removed');
-            },
+        const MaterialApp(
+          home: Scaffold(
+            body: FoodEntryForm(),
           ),
         ),
       );
       
       expect(find.byType(FoodEntryForm), findsOneWidget);
       
-      builderSetState(() {
-        showForm = false;
-      });
-
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Text('Form removed'),
+          ),
+        ),
+      );
       
       expect(find.byType(FoodEntryForm), findsNothing);
       expect(find.text('Form removed'), findsOneWidget);
-      
     });
   });
 
