@@ -117,7 +117,6 @@ class ExerciseAnalysisService extends BaseGeminiService {
           "Failed to parse exercise analysis response: $e");
     }
   }
-  
   Future<ExerciseAnalysisResult> correctAnalysis(
       ExerciseAnalysisResult previousResult, String userComment) async {
     try {
