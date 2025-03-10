@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:pockeat/features/food_text_input/presentation/pages/food_text_input_page.dart';
 
 class FoodInputPage extends StatelessWidget {
-  // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
@@ -83,12 +83,18 @@ class FoodInputPage extends StatelessWidget {
               title: 'Input Manually',
               subtitle: 'Search or prompt food details',
               color: primaryPink,
-              route: '/add-food-manual'
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FoodTextInputPage(),
+                  ),
+                );
+              },
             ),
 
             const Spacer(),
 
-            // Recent Foods Preview
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -174,7 +180,6 @@ class FoodInputPage extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  // Icon Container
                   Container(
                     width: 48,
                     height: 48,
@@ -189,7 +194,6 @@ class FoodInputPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Text Content
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
