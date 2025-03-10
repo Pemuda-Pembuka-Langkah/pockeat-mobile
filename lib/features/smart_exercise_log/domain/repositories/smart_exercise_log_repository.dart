@@ -1,22 +1,47 @@
-// Exception untuk error saat penyimpanan atau pengambilan data
+// Exception for errors during saving or retrieving data
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 abstract class SmartExerciseLogRepository {
-  /// Menyimpan hasil analisis olahraga ke database
+  /// Saves exercise analysis results to the database
   ///
-  /// Mengembalikan [String] berupa id dari hasil yang disimpan
-  /// Throws [Exception] jika terjadi error saat penyimpanan
+  /// Returns a [String] ID of the saved result
+  /// Throws [Exception] if an error occurs during saving
   Future<String> saveAnalysisResult(ExerciseAnalysisResult result);
 
-  /// Mengambil hasil analisis berdasarkan ID
+  /// Retrieves analysis results by ID
   ///
-  /// Mengembalikan [ExerciseAnalysisResult] jika ditemukan, null jika tidak ada
-  /// Throws [Exception] jika terjadi error saat pengambilan data
+  /// Returns [ExerciseAnalysisResult] if found, null if not exists
+  /// Throws [Exception] if an error occurs during data retrieval
   Future<ExerciseAnalysisResult?> getAnalysisResultFromId(String id);
 
-  /// Mengambil semua hasil analisis
+  /// Retrieves all analysis results
   ///
-  /// Mengembalikan [List<AnalysisResult>] berisi semua hasil analisis
-  /// Throws [StorageException] jika terjadi error saat pengambilan data
-  Future<List<ExerciseAnalysisResult>> getAllAnalysisResults();
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing all analysis results
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAllAnalysisResults({int? limit});
+  
+  /// Retrieves analysis results by date
+  /// 
+  /// Parameter [date] to filter results by a specific date
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing analysis results on the specified date
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByDate(DateTime date, {int? limit});
+  
+  /// Retrieves analysis results by month and year
+  /// 
+  /// Parameters [month] (1-12) and [year] to filter results
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing analysis results on the specified month and year
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByMonth(int month, int year, {int? limit});
+  
+  /// Retrieves analysis results by year
+  /// 
+  /// Parameter [year] to filter results
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing analysis results on the specified year
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByYear(int year, {int? limit});
 }
