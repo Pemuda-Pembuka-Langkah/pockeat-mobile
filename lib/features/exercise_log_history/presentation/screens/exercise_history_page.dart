@@ -54,6 +54,10 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
     super.dispose();
   }
 
+  //
+  // Data loading and filtering methods
+  //
+  
   void _loadExercises() {
     setState(() {
       switch (_activeFilterType) {
@@ -71,12 +75,16 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
           break;
       }
       
-      // Reset search when loading new exercises
-      _searchQuery = '';
-      _searchController.clear();
-      _allExercises = null;
-      _filteredExercises = null;
+      _resetSearch();
     });
+  }
+  
+  void _resetSearch() {
+    _searchQuery = '';
+    _searchController.clear();
+    _allExercises = null;
+    _filteredExercises = null;
+    _isSearching = false;
   }
 
   void _navigateToExerciseDetail(ExerciseLogHistoryItem exercise) async {
@@ -94,6 +102,14 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
     }
   }
   
+  //
+  // Search-related methods
+  //
+  
+  /// Filters exercises based on the given search query
+  /// 
+  /// This method filters the exercises by title and subtitle and
+  /// updates the filtered list state.
   void _filterExercises(String query) {
     setState(() {
       _searchQuery = query.trim().toLowerCase();
@@ -110,75 +126,72 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
     });
   }
   
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: const Offset(0, 1),
+  /// Clears the current search
+  void _clearSearch() {
+    _searchController.clear();
+    _filterExercises('');
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _isSearching = false;
+    });
+  }
+  
+  /// Handles focus change when user taps on search field
+  void _handleSearchFocus(bool isFocused) {
+    setState(() {
+      _isSearching = isFocused;
+    });
+  }
+  
+  /// Returns appropriate widget based on search results
+  Widget _buildSearchResults(List<ExerciseLogHistoryItem> exercises) {
+    // Show empty search results state
+    if (_searchQuery.isNotEmpty && exercises.isEmpty) {
+      return _buildEmptySearchState();
+    }
+  
+    // Show exercise list
+    return ListView.builder(
+      padding: const EdgeInsets.only(top: 8, bottom: 20),
+      itemCount: exercises.length,
+      itemBuilder: (context, index) {
+        return ExerciseHistoryCard(
+          exercise: exercises[index],
+          onTap: () => _navigateToExerciseDetail(exercises[index]),
+        );
+      },
+    );
+  }
+  
+  /// Builds empty state for search with no results
+  Widget _buildEmptySearchState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_off,
+            size: 72,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No exercises found for "$_searchQuery"',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey.shade600,
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            const SizedBox(width: 16),
-            Icon(
-              Icons.search,
-              color: _isSearching ? primaryPink : Colors.grey,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Search exercises...',
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 15),
-                ),
-                onChanged: _filterExercises,
-                onTap: () {
-                  setState(() {
-                    _isSearching = true;
-                  });
-                },
-                onSubmitted: (_) {
-                  setState(() {
-                    _isSearching = false;
-                  });
-                  FocusScope.of(context).unfocus();
-                },
-              ),
-            ),
-            if (_searchQuery.isNotEmpty)
-              GestureDetector(
-                onTap: () {
-                  _searchController.clear();
-                  _filterExercises('');
-                  FocusScope.of(context).unfocus();
-                  setState(() {
-                    _isSearching = false;
-                  });
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Icon(Icons.close, color: Colors.grey),
-                ),
-              ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
 
+  //
+  // UI filter-related methods
+  //
+  
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -422,6 +435,124 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
       ),
     );
   }
+  
+  //
+  // UI Building methods
+  //
+  
+  /// Builds the search bar widget
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        height: 50,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const SizedBox(width: 16),
+            Icon(
+              Icons.search,
+              color: _isSearching ? primaryPink : Colors.grey,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Search exercises...',
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 15),
+                ),
+                onChanged: _filterExercises,
+                onTap: () => _handleSearchFocus(true),
+                onSubmitted: (_) => _handleSearchFocus(false),
+              ),
+            ),
+            if (_searchQuery.isNotEmpty)
+              GestureDetector(
+                onTap: _clearSearch,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Icon(Icons.close, color: Colors.grey),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  /// Builds the exercise content area (list or empty states)
+  Widget _buildExerciseContent(AsyncSnapshot<List<ExerciseLogHistoryItem>> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    } 
+    
+    if (snapshot.hasError) {
+      return Center(
+        child: Text(
+          'Error: ${snapshot.error}',
+          style: const TextStyle(
+            color: Colors.red,
+            fontSize: 16,
+          ),
+        ),
+      );
+    } 
+    
+    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+      return _buildEmptyStateForFilter();
+    } 
+    
+    // Store all exercises for filtering
+    _allExercises ??= snapshot.data!;
+    
+    // Get exercises to display (filtered or all)
+    final exercises = _searchQuery.isNotEmpty 
+        ? _filteredExercises ?? [] 
+        : _allExercises!;
+    
+    return _buildSearchResults(exercises);
+  }
+  
+  /// Builds the empty state widget for when no exercises match the current filter
+  Widget _buildEmptyStateForFilter() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.fitness_center,
+            size: 72,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _getEmptyStateMessage(),
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -449,86 +580,7 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
             child: FutureBuilder<List<ExerciseLogHistoryItem>>(
               future: _exercisesFuture,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Error: ${snapshot.error}',
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 16,
-                      ),
-                    ),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.fitness_center,
-                          size: 72,
-                          color: Colors.grey.shade400,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _getEmptyStateMessage(),
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey.shade600,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  // Store all exercises for filtering
-                  _allExercises ??= snapshot.data!;
-                  
-                  // Get exercises to display (filtered or all)
-                  final exercises = _searchQuery.isNotEmpty 
-                      ? _filteredExercises ?? [] 
-                      : _allExercises!;
-                  
-                  if (_searchQuery.isNotEmpty && exercises.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.search_off,
-                            size: 72,
-                            color: Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No exercises found for "$_searchQuery"',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey.shade600,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  
-                  return ListView.builder(
-                    padding: const EdgeInsets.only(top: 8, bottom: 20),
-                    itemCount: exercises.length,
-                    itemBuilder: (context, index) {
-                      return ExerciseHistoryCard(
-                        exercise: exercises[index],
-                        onTap: () => _navigateToExerciseDetail(exercises[index]),
-                      );
-                    },
-                  );
-                }
+                return _buildExerciseContent(snapshot);
               },
             ),
           ),

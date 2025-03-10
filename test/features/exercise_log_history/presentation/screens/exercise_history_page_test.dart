@@ -631,125 +631,153 @@ void main() {
       expect(callCount, 2, reason: 'Service should be called a second time after delete');
     });
     
-    testWidgets('should display search bar UI elements',
-        (WidgetTester tester) async {
-      // Arrange
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+    group('Search functionality', () {
+      testWidgets('should display search bar UI elements with proper styling',
+          (WidgetTester tester) async {
+        // Arrange
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
+        
+        // Assert - verify search bar elements
+        expect(find.byIcon(Icons.search), findsOneWidget);
+        expect(find.text('Search exercises...'), findsOneWidget);
+        expect(find.byType(TextField), findsOneWidget);
+        
+        // Verify search bar styling
+        final container = tester.widget<AnimatedContainer>(
+          find.descendant(
+            of: find.byType(Padding).first, 
+            matching: find.byType(AnimatedContainer),
+          ),
+        );
+        expect(container.decoration, isA<BoxDecoration>());
+        final boxDecoration = container.decoration as BoxDecoration;
+        expect(boxDecoration.borderRadius, isA<BorderRadius>());
+      });
       
-      // Assert - verify search bar elements
-      expect(find.byIcon(Icons.search), findsOneWidget);
-      expect(find.text('Search exercises...'), findsOneWidget);
-      expect(find.byType(TextField), findsOneWidget);
-    });
-    
-    testWidgets('should filter exercises based on search query - title match',
-        (WidgetTester tester) async {
-      // Arrange
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+      testWidgets('should filter exercises by title when entering search text',
+          (WidgetTester tester) async {
+        // Arrange
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
+        
+        // Act - enter search text
+        await tester.enterText(find.byType(TextField), 'Push');
+        await tester.pumpAndSettle();
+        
+        // Assert - verify only matching exercises are shown
+        expect(find.text('Push-ups'), findsOneWidget);
+        expect(find.text('Running'), findsNothing);
+        expect(find.text('Bench Press'), findsNothing);
+        
+        // Verify close icon appears
+        expect(find.byIcon(Icons.close), findsOneWidget);
+      });
       
-      // Act - enter search text
-      await tester.enterText(find.byType(TextField), 'Push');
-      await tester.pumpAndSettle();
+      testWidgets('should filter exercises by subtitle when entering search text',
+          (WidgetTester tester) async {
+        // Arrange
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
+        
+        // Act - enter search text
+        await tester.enterText(find.byType(TextField), 'km');
+        await tester.pumpAndSettle();
+        
+        // Assert - verify only matching exercises are shown
+        expect(find.text('Push-ups'), findsNothing);
+        expect(find.text('Running'), findsOneWidget);
+        expect(find.text('Bench Press'), findsNothing);
+      });
       
-      // Assert - verify only matching exercises are shown
-      expect(find.text('Push-ups'), findsOneWidget);
-      expect(find.text('Running'), findsNothing);
-      expect(find.text('Bench Press'), findsNothing);
+      testWidgets('should display custom empty state when search has no matches',
+          (WidgetTester tester) async {
+        // Arrange
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
+        
+        // Act - enter search text that won't match any exercises
+        await tester.enterText(find.byType(TextField), 'abcxyz');
+        await tester.pumpAndSettle();
+        
+        // Assert - verify empty state is shown
+        expect(find.byIcon(Icons.search_off), findsOneWidget);
+        expect(find.text('No exercises found for "abcxyz"'), findsOneWidget);
+        
+        // No exercise items should be shown
+        expect(find.text('Push-ups'), findsNothing);
+        expect(find.text('Running'), findsNothing);
+        expect(find.text('Bench Press'), findsNothing);
+      });
       
-      // Verify close icon appears
-      expect(find.byIcon(Icons.close), findsOneWidget);
-    });
-    
-    testWidgets('should filter exercises based on search query - subtitle match',
-        (WidgetTester tester) async {
-      // Arrange
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
+      testWidgets('should clear search when tapping the clear button',
+          (WidgetTester tester) async {
+        // Arrange
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
+        
+        // First enter search text
+        await tester.enterText(find.byType(TextField), 'Push');
+        await tester.pumpAndSettle();
+        
+        // Verify only Push-ups is visible
+        expect(find.text('Push-ups'), findsOneWidget);
+        expect(find.text('Running'), findsNothing);
+        
+        // Act - tap the clear button
+        await tester.tap(find.byIcon(Icons.close));
+        await tester.pumpAndSettle();
+        
+        // Assert - verify all exercises are shown again
+        expect(find.text('Push-ups'), findsOneWidget);
+        expect(find.text('Running'), findsOneWidget);
+        expect(find.text('Bench Press'), findsOneWidget);
+        
+        // Search field should be empty
+        expect(find.byIcon(Icons.close), findsNothing);
+      });
       
-      // Act - enter search text
-      await tester.enterText(find.byType(TextField), 'km');
-      await tester.pumpAndSettle();
+      testWidgets('should automatically reset search when changing filter',
+          (WidgetTester tester) async {
+        // Arrange
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
+        
+        // Enter search text first
+        await tester.enterText(find.byType(TextField), 'Push');
+        await tester.pumpAndSettle();
+        
+        // Verify filtered results
+        expect(find.text('Push-ups'), findsOneWidget);
+        expect(find.text('Running'), findsNothing);
+        
+        // Act - change filter
+        await tester.tap(find.text('All')); // Tapping "All" will trigger _loadExercises
+        await tester.pumpAndSettle();
+        
+        // Assert - verify all exercises are shown again
+        expect(find.text('Push-ups'), findsOneWidget);
+        expect(find.text('Running'), findsOneWidget);
+        expect(find.text('Bench Press'), findsOneWidget);
+        
+        // Search field should be empty
+        expect(find.byIcon(Icons.close), findsNothing);
+      });
       
-      // Assert - verify only matching exercises are shown
-      expect(find.text('Push-ups'), findsNothing);
-      expect(find.text('Running'), findsOneWidget);
-      expect(find.text('Bench Press'), findsNothing);
-    });
-    
-    testWidgets('should show empty state when search has no matches',
-        (WidgetTester tester) async {
-      // Arrange
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
-      
-      // Act - enter search text that won't match any exercises
-      await tester.enterText(find.byType(TextField), 'abcxyz');
-      await tester.pumpAndSettle();
-      
-      // Assert - verify empty state is shown
-      expect(find.byIcon(Icons.search_off), findsOneWidget);
-      expect(find.text('No exercises found for "abcxyz"'), findsOneWidget);
-      
-      // No exercise items should be shown
-      expect(find.text('Push-ups'), findsNothing);
-      expect(find.text('Running'), findsNothing);
-      expect(find.text('Bench Press'), findsNothing);
-    });
-    
-    testWidgets('should clear search and show all exercises when pressing clear button',
-        (WidgetTester tester) async {
-      // Arrange
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
-      
-      // First enter search text
-      await tester.enterText(find.byType(TextField), 'Push');
-      await tester.pumpAndSettle();
-      
-      // Verify only Push-ups is visible
-      expect(find.text('Push-ups'), findsOneWidget);
-      expect(find.text('Running'), findsNothing);
-      
-      // Act - tap the clear button
-      await tester.tap(find.byIcon(Icons.close));
-      await tester.pumpAndSettle();
-      
-      // Assert - verify all exercises are shown again
-      expect(find.text('Push-ups'), findsOneWidget);
-      expect(find.text('Running'), findsOneWidget);
-      expect(find.text('Bench Press'), findsOneWidget);
-      
-      // Search field should be empty
-      expect(find.byIcon(Icons.close), findsNothing);
-    });
-    
-    testWidgets('should automatically reset search when filter changes',
-        (WidgetTester tester) async {
-      // Arrange
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
-      
-      // Enter search text first
-      await tester.enterText(find.byType(TextField), 'Push');
-      await tester.pumpAndSettle();
-      
-      // Verify only Push-ups is visible
-      expect(find.text('Push-ups'), findsOneWidget);
-      expect(find.text('Running'), findsNothing);
-      
-      // Act - change filter
-      await tester.tap(find.text('All')); // Tapping "All" will trigger loadExercises
-      await tester.pumpAndSettle();
-      
-      // Assert - verify all exercises are shown again
-      expect(find.text('Push-ups'), findsOneWidget);
-      expect(find.text('Running'), findsOneWidget);
-      expect(find.text('Bench Press'), findsOneWidget);
-      
-      // Search field should be empty
-      expect(find.byIcon(Icons.close), findsNothing);
+      testWidgets('should handle case-insensitive search',
+          (WidgetTester tester) async {
+        // Arrange
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
+        
+        // Act - enter search text with mixed case
+        await tester.enterText(find.byType(TextField), 'pUsH');
+        await tester.pumpAndSettle();
+        
+        // Assert - verify case-insensitive match works
+        expect(find.text('Push-ups'), findsOneWidget);
+        expect(find.text('Running'), findsNothing);
+      });
     });
   });
 }
