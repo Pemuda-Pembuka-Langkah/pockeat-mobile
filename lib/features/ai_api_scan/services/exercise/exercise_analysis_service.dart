@@ -117,4 +117,5 @@ class ExerciseAnalysisService extends BaseGeminiService {
           "Failed to parse exercise analysis response: $e");
     }
   }
+  
 }
