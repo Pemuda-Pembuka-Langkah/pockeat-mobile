@@ -93,4 +93,70 @@ class NutritionLabelAnalysisService extends BaseGeminiService {
       throw GeminiServiceException("Error analyzing nutrition label: $e");
     }
   }
+
+  Future<FoodAnalysisResult> correctAnalysis(
+      FoodAnalysisResult previousResult, String userComment, double servings) async {
+    try {
+      final prompt = '''
+      Original nutrition label analysis (for $servings servings):
+      - Food name: ${previousResult.foodName}
+      - Ingredients: ${previousResult.ingredients.map((i) => "${i.name}: ${i.servings}g").join(", ")}
+      - Calories: ${previousResult.nutritionInfo.calories}
+      - Protein: ${previousResult.nutritionInfo.protein}g
+      - Carbs: ${previousResult.nutritionInfo.carbs}g
+      - Fat: ${previousResult.nutritionInfo.fat}g
+      - Sodium: ${previousResult.nutritionInfo.sodium}mg
+      - Fiber: ${previousResult.nutritionInfo.fiber}g
+      - Sugar: ${previousResult.nutritionInfo.sugar}g
+      - Warnings: ${previousResult.warnings.join(", ")}
+      
+      User correction comment: "$userComment"
+      
+      Please correct the nutrition label analysis based on the user's comment.
+      Only modify values that need to be changed according to the user's feedback.
+      The corrected analysis should be for $servings servings.
+      
+      Return your response as a strict JSON object with this exact format:
+      {
+        "food_name": "string",
+        "ingredients": [
+          {
+            "name": "string",
+            "servings": number
+          }
+        ],
+        "nutrition_info": {
+          "calories": number,
+          "protein": number,
+          "carbs": number,
+          "fat": number,
+          "sodium": number,
+          "fiber": number,
+          "sugar": number
+        },
+        "warnings": ["string"]
+      }
+      
+      IMPORTANT: Do not include any comments, annotations or notes in the JSON. Do not use '#' or '//' characters. Only return valid JSON.
+      For the warnings array:
+      - Include "High sodium content" (exact text) if sodium exceeds 500mg
+      - Include "High sugar content" (exact text) if sugar exceeds 20g
+      If there are no warnings, you can include an empty array [] for warnings.
+      ''';
+
+      final response = await modelWrapper.generateContent([Content.text(prompt)]);
+      
+      if (response.text == null) {
+        throw GeminiServiceException('No response text generated');
+      }
+
+      final jsonString = extractJson(response.text!);
+      return FoodAnalysisParser.parse(jsonString);
+    } catch (e) {
+      if (e is GeminiServiceException) {
+        rethrow;
+      }
+      throw GeminiServiceException("Error correcting nutrition label analysis: $e");
+    }
+  }
 }
