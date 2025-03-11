@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 
@@ -320,7 +319,7 @@ class RunningDetailWidget extends StatelessWidget {
     if (hours > 0) {
       return '${hours}h ${minutes}m';
     } else {
-      return '${minutes}:${twoDigits(seconds)}';
+      return '$minutes:${twoDigits(seconds)}';
     }
   }
   

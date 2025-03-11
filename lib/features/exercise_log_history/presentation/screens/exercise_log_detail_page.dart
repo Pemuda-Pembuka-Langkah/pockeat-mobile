@@ -271,40 +271,42 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
 
   // Method untuk menghapus exercise log
   Future<void> _deleteExercise(BuildContext context) async {
-    // Menampilkan loading indicator
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
+    if (!mounted) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
 
     try {
-      // Panggil service untuk menghapus exercise log
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(child: CircularProgressIndicator());
+        },
+      );
+
+      // Attempt to delete
       final result = await _detailService.deleteExerciseLog(
         widget.exerciseId,
         widget.activityType,
       );
 
-      // Menghilangkan loading indicator
-      Navigator.of(context).pop();
+      if (!mounted) return;
 
-      // Cek hasil delete
+      // Remove loading indicator
+      navigator.pop();
+
       if (result) {
-        // Success case - kembali ke halaman sebelumnya
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           const SnackBar(
             content: Text('Exercise log deleted successfully'),
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.of(context).pop(true); // Return true sebagai indikator sukses
+        navigator.pop(true); // Return true as success indicator
       } else {
-        // Failure case - tetap di halaman dan tampilkan error
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           const SnackBar(
             content: Text('Failed to delete exercise log'),
             backgroundColor: Colors.red,
@@ -312,9 +314,12 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
         );
       }
     } catch (e) {
-      // Error case - tetap di halaman dan tampilkan error
-      Navigator.of(context).pop(); // Menghilangkan loading indicator
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+
+      // Remove loading indicator
+      navigator.pop();
+      
+      scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text('Error deleting exercise log: ${e.toString()}'),
           backgroundColor: Colors.red,
