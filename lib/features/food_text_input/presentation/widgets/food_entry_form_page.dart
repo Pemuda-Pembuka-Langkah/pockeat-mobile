@@ -39,6 +39,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
   bool _showForm = true;
   FoodEntry? _savedFoodEntry;
   FoodTextAnalysisService? _analysisService;
+  FoodAnalysisResult? _analysisResult;
 
   @override
   void initState() {
@@ -48,7 +49,6 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
 
   @override
   void dispose() {
-
     _foodNameError = null;
     _descriptionError = null;
     _ingredientsError = null;
@@ -91,15 +91,12 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
       final foodEntry = _savedFoodEntry;
       if (foodEntry == null) return;
 
-      // Create a combined text description for analysis
       final combinedText = "${foodEntry.foodName}: ${foodEntry.description}. Ingredients: ${foodEntry.ingredients}";
-      // Use the existing analyze method
       final result = await _analysisService!.analyze(combinedText);
       
-      // Handle the analysis result
       setState(() {
         _successMessage = 'Food analyzed successfully!';
-        // You can add more UI updates based on the result if needed
+        _analysisResult = result;
       });
     } catch (e) {
       setState(() {
@@ -241,6 +238,29 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
     );
   }
 
+  Widget _buildAnalysisRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -262,6 +282,39 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                   textAlign: TextAlign.center,
                 ),
               ),
+            if (_analysisResult != null) ...[
+              const Divider(height: 24),
+              const Text(
+                'Analysis Results',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _buildAnalysisRow('Calories', '${_analysisResult!.nutritionInfo.calories} kcal'),
+                      const Divider(height: 16),
+                      _buildAnalysisRow('Protein', '${_analysisResult!.nutritionInfo.protein}g'),
+                      _buildAnalysisRow('Carbs', '${_analysisResult!.nutritionInfo.carbs}g'),
+                      _buildAnalysisRow('Fat', '${_analysisResult!.nutritionInfo.fat}g'),
+                      _buildAnalysisRow('Fiber', '${_analysisResult!.nutritionInfo.fiber}g'),
+                      _buildAnalysisRow('Sugar', '${_analysisResult!.nutritionInfo.sugar}g'),
+                      _buildAnalysisRow('Sodium', '${_analysisResult!.nutritionInfo.sodium}mg'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             if (_showForm) ...[
               _buildTextField(
                 key: const ValueKey('foodNameField'),
