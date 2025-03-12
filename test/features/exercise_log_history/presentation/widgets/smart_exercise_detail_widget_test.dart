@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
@@ -43,7 +44,7 @@ void main() {
       // Assert - Check exercise type is displayed as the title
       // The exercise type appears multiple times in the widget
       expect(find.text('Push-ups'), findsAtLeastNWidgets(1));
-      expect(find.byIcon(Icons.fitness_center), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.text_badge_checkmark), findsOneWidget);
     });
 
     testWidgets('should display formatted date', (WidgetTester tester) async {

@@ -136,18 +136,6 @@ class _HomePageState extends State<HomePage>
               toolbarHeight: 60,
               title: Row(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Image.asset(
-                      'assets/images/icon.png',
-                      width: 30,
-                      height: 30,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   const Text(
                     'Pockeat',
                     style: TextStyle(
@@ -159,24 +147,32 @@ class _HomePageState extends State<HomePage>
                 ],
               ),
               actions: [
-                _buildStatBadge(
-                  icon: Icons.favorite,
-                  value: "95",
-                  color: primaryPink,
+                // Wrap badges in a Flexible widget with Row to prevent overflow
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildStatBadge(
+                        icon: Icons.favorite,
+                        value: "95",
+                        color: primaryPink,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildStatBadge(
+                        icon: Icons.star,
+                        value: "8",
+                        color: const Color(0xFFFFB946),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildStatBadge(
+                        icon: Icons.monetization_on,
+                        value: "2,350",
+                        color: const Color(0xFFFFD700),
+                      ),
+                      const SizedBox(width: 12),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 8),
-                _buildStatBadge(
-                  icon: Icons.star,
-                  value: "8",
-                  color: const Color(0xFFFFB946),
-                ),
-                const SizedBox(width: 8),
-                _buildStatBadge(
-                  icon: Icons.monetization_on,
-                  value: "2,350",
-                  color: const Color(0xFFFFD700),
-                ),
-                const SizedBox(width: 12),
                 const Padding(
                   padding: EdgeInsets.only(right: 16),
                   child: CircleAvatar(
@@ -270,11 +266,11 @@ class _HomePageState extends State<HomePage>
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.fromLTRB(16, 8, 16, 20),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Hello, Alex',
                             style: TextStyle(
                               fontSize: 24,
@@ -282,8 +278,8 @@ class _HomePageState extends State<HomePage>
                               color: Colors.black87,
                             ),
                           ),
-                          SizedBox(height: 6),
-                          Text(
+                          const SizedBox(height: 6),
+                          const Text(
                             'You\'re doing great today! Keep up with your healthy eating habits.',
                             style: TextStyle(
                               color: Colors.black54,
@@ -298,34 +294,31 @@ class _HomePageState extends State<HomePage>
                 ),
               ),
             ),
-            SliverAppBar(
-              pinned: true,
-              floating: false,
-              backgroundColor: Colors.white,
-              toolbarHeight: 0,
-              bottom: TabBar(
-                controller: _tabController,
-                labelColor: Colors.black87,
-                unselectedLabelColor: Colors.black38,
-                labelStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+            SliverPersistentHeader(
+              delegate: _SliverTabBarDelegate(
+                TabBar(
+                  controller: _tabController,
+                  labelColor: Colors.black87,
+                  unselectedLabelColor: Colors.black38,
+                  labelStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  indicatorColor: primaryPink,
+                  indicatorWeight: 2,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  tabs: const [
+                    Tab(text: 'Overview'),
+                    Tab(text: 'Foods'),
+                    Tab(text: 'Exercises'),
+                  ],
                 ),
-                unselectedLabelStyle: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                ),
-                indicatorColor: primaryPink,
-                indicatorWeight: 2,
-                indicatorSize: TabBarIndicatorSize.label,
-                labelPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                tabs: const [
-                  Text('Overview'),
-                  Text('Foods'),
-                  Text('Exercises'),
-                ],
               ),
+              pinned: true,
             ),
           ],
           body: TabBarView(
@@ -347,5 +340,31 @@ class _HomePageState extends State<HomePage>
       ),
       bottomNavigationBar: const CustomBottomNavBar(),
     );
+  }
+}
+
+// SliverPersistentHeaderDelegate for TabBar with dynamic height
+class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverTabBarDelegate(this._tabBar);
+
+  final TabBar _tabBar;
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+  
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Colors.white,
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverTabBarDelegate oldDelegate) {
+    return false;
   }
 }

@@ -111,11 +111,12 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
     return Focus(
       focusNode: _focusNode,
       child: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 16), // Add consistent bottom padding
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), // Added bottom padding
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -130,8 +131,7 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
                   GestureDetector(
                     onTap: _navigateToAllExercises,
                     child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Fixed padding
                       decoration: BoxDecoration(
                         color: primaryPink.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -150,55 +150,62 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
               ),
             ),
             FutureBuilder<List<ExerciseLogHistoryItem>>(
-            future: _exercisesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Center(
-                    child: Text(
-                      'Error loading exercises: ${snapshot.error}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.red,
+              future: _exercisesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16), // Consistent vertical padding
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Consistent with other paddings
+                    child: Center(
+                      child: Text(
+                        'Error loading exercises: ${snapshot.error}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.red,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(
-                    child: Text(
-                      'No exercise history yet',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black54,
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Consistent with other paddings
+                    child: Center(
+                      child: Text(
+                        'No exercise history yet',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              } else {
-                final exercises = snapshot.data!;
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: exercises.length,
-                  itemBuilder: (context, index) => ExerciseHistoryCard(
-                    exercise: exercises[index],
-                    onTap: () => _navigateToExerciseDetail(exercises[index]),
-                  ),
-                );
-              }
-            },
-          ),
+                  );
+                } else {
+                  final exercises = snapshot.data!;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16), // Consistent horizontal padding
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero, // No additional padding in ListView
+                      itemCount: exercises.length,
+                      itemBuilder: (context, index) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8), // Consistent spacing between cards
+                        child: ExerciseHistoryCard(
+                          exercise: exercises[index],
+                          onTap: () => _navigateToExerciseDetail(exercises[index]),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
           ],
         ),
       ),
