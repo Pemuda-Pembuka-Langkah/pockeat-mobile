@@ -34,35 +34,6 @@ class BottomActionBar extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Material(
-              color: primaryYellow.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(8),
-              child: InkWell(
-                key: const Key('fix_button'),
-                borderRadius: BorderRadius.circular(8),
-                onTap: () {},
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(CupertinoIcons.wand_stars, size: 20, color: primaryPink),
-                      const SizedBox(width: 6),
-                      const Text(
-                        'Fix',
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
             flex: 2,
             child: Material(
               color: primaryPink,
@@ -72,17 +43,40 @@ class BottomActionBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 onTap: () async {
                   if (!isLoading && food != null) {
+                    // Tampilkan indikator loading
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      },
+                    );
+                    
                     try {
                       final message = await foodScanPhotoService
                           .saveFoodAnalysis(food!);
 
                       if (!context.mounted) return;
+                      
+                      // Tutup dialog loading
+                      Navigator.of(context).pop();
 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(message)),
+                        SnackBar(
+                          content: Text(message),
+                          backgroundColor: const Color(0xFF4ECDC4), // Warna hijau
+                        ),
                       );
+
+                      Navigator.pop(context);
+
                     } catch (e) {
                       if (!context.mounted) return;
+                      
+                      // Tutup dialog loading
+                      Navigator.of(context).pop();
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Gagal menyimpan: ${e.toString()}')),

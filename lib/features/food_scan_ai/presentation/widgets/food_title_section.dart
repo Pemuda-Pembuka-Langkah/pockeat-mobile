@@ -39,45 +39,6 @@ class FoodTitleSection extends StatelessWidget {
                       maxLines: 2,
                       softWrap: true,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      isLoading ? '' : '1 plate • 300g',
-                      key: const Key('food_portion'),
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: primaryGreen,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Column(
-                  children: [
-                    Text(
-                      '92',
-                      key: Key('food_score'),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'Score',
-                      key: Key('food_score_text'),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ],
                 ),
               ),
