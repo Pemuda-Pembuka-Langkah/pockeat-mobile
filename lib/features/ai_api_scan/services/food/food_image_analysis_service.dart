@@ -119,7 +119,15 @@ class FoodImageAnalysisService extends BaseGeminiService {
       
       User correction comment: "$userComment"
       
-      Please correct the food analysis based on the user's comment.
+      Please correct and analyze the ingredients and nutritional content on the correction comment.
+      If not described, assume a standard serving size and ingredients for 1 person only.
+      
+      Provide a comprehensive analysis including:
+      - The name of the food
+      - A complete list of ingredients with servings composition (in grams) 
+      - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
+      - Add warnings if the food contains high sodium (>500mg) or high sugar (>20g)
+      
       Only modify values that need to be changed according to the user's feedback.
       
       Return your response as a strict JSON object with this exact format:
