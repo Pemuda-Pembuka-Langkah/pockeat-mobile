@@ -90,7 +90,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Analysis corrected successfully!'),
-            backgroundColor: primaryPurple,
+            backgroundColor: Colors.green,
           ),
         );
       }
@@ -126,7 +126,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Workout log saved successfully!'),
-            backgroundColor: primaryPurple,
+            backgroundColor: Colors.green,
           ),
         );
         
@@ -157,7 +157,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Smart Workout Log',
+          'Smart Exercise Log',
           style: TextStyle(
             color: Colors.black87,
             fontSize: 18,
