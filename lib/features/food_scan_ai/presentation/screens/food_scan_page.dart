@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/nutrition_page.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/screens/nutrition_page.dart';
 import 'package:camera/camera.dart';
 
 class ScanFoodPage extends StatefulWidget {
@@ -36,8 +36,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
   final String _statusMessage = 'Make sure your food is clearly visible';
   final Color _progressColor = const Color(0xFFFF4949); // Using primaryPink
   int _currentMode = 0;
-  // ignore: unused_field
-  final bool _isFoodPositioned = false;
+
 
   bool _isCameraReady = false;
 
@@ -45,7 +44,6 @@ class ScanFoodPageState extends State<ScanFoodPage>
   String get statusMessage => _statusMessage;
   int get currentMode => _currentMode;
   bool get isCameraReady => _isCameraReady;
-  bool get isFoodPositioned => _isFoodPositioned;
   Color get progressColor => _progressColor;
 
   @override
@@ -64,6 +62,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
       if (mounted) {
         setState(() {
           _isCameraReady = true;
+          widget.cameraController.setFlashMode(FlashMode.off);
         });
       }
     } catch (e) {
@@ -84,9 +83,21 @@ class ScanFoodPageState extends State<ScanFoodPage>
       body: Stack(
         children: [
           // Camera Preview
-          Center(
+          Positioned.fill(
             child: _isCameraReady 
-              ? CameraPreview(widget.cameraController)
+              ? FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: widget.cameraController.value.previewSize!.height,
+                    height: widget.cameraController.value.previewSize!.width,
+                    child: Center(
+                      child: AspectRatio(
+                        aspectRatio: 1 / widget.cameraController.value.aspectRatio,
+                        child: CameraPreview(widget.cameraController),
+                      ),
+                    ),
+                  ),
+                )
               : const Center(child: CircularProgressIndicator()),
           ),
 
@@ -210,16 +221,24 @@ class ScanFoodPageState extends State<ScanFoodPage>
                         CupertinoIcons.xmark,
                         onTap: () => Navigator.pop(context),
                       ),
-                      Row(
-                        children: [
-                          _buildModeButton('Scan', 0),
-                          const SizedBox(width: 16),
-                          _buildModeButton('Tag Food', 1),
-                          const SizedBox(width: 16),
-                          _buildModeButton('Help', 2),
-                        ],
+                      Container(
+                        alignment: Alignment.center,
+                        child: _buildModeButton('Scan', 0),
                       ),
-                      _buildCircularButton(Icons.flash_on),
+                      _buildCircularButton(
+                        widget.cameraController.value.flashMode == FlashMode.off 
+                          ? Icons.flash_off 
+                          : Icons.flash_on,
+                        onTap: () {
+                          setState(() {
+                            if (widget.cameraController.value.flashMode == FlashMode.off) {
+                              widget.cameraController.setFlashMode(FlashMode.torch);
+                            } else {
+                              widget.cameraController.setFlashMode(FlashMode.off);
+                            }
+                          });
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -233,53 +252,71 @@ class ScanFoodPageState extends State<ScanFoodPage>
             right: 0,
             bottom: 0,
             child: Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
               decoration: BoxDecoration(
-                color: primaryYellow,
+                color: Colors.black.withOpacity(0.7),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Progress Bar
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: 8,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: _scanProgress,
-                        backgroundColor: Colors.grey[200],
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(_progressColor),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
                   // Status Message
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: Text(
-                      _statusMessage,
-                      key: ValueKey<String>(_statusMessage),
-                      style: const TextStyle(
-                        color: Colors.black54,
-                        fontSize: 16,
-                      ),
-                      textAlign: TextAlign.center,
+                  Text(
+                    _statusMessage,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
-
-                  // Camera Controls
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildCircularButton(CupertinoIcons.photo),
-                      _buildCameraButton(),
-                      _buildCircularButton(CupertinoIcons.barcode),
-                    ],
+                  
+                  // Camera Button
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryGreen.withOpacity(0.3),
+                          blurRadius: 12,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: InkWell(
+                      key: const Key('camera_button'),
+                      onTap: () async {
+                        try {
+                          final image = await widget.cameraController.takePicture();
+                          if (mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NutritionPage(imagePath: image.path),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          // Handle picture taking error
+                        }
+                      },
+                      customBorder: const CircleBorder(),
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: primaryGreen,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 3),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 36,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -326,38 +363,6 @@ class ScanFoodPageState extends State<ScanFoodPage>
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: 20),
-      ),
-    );
-  }
-
-  Widget _buildCameraButton() {
-    return InkWell(
-      key: const Key('camera_button'),
-      onTap: () async {
-        try {
-          final image = await widget.cameraController.takePicture();
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => NutritionPage(imagePath: image.path),
-              ),
-            );
-          }
-        } catch (e) {
-          // Handle picture taking error
-        }
-      },
-      customBorder: const CircleBorder(),
-      child: Container(
-        width: 72,
-        height: 72,
-        decoration: BoxDecoration(
-          color: primaryGreen,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 4),
-        ),
-        child: const Icon(Icons.camera_alt, color: Colors.white, size: 32),
       ),
     );
   }

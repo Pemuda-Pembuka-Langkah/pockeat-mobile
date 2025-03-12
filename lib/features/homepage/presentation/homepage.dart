@@ -322,7 +322,7 @@ class _HomePageState extends State<HomePage>
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 tabs: const [
                   Text('Overview'),
-                  Text('Recently Foods'),
+                  Text('Foods'),
                   Text('Exercises'),
                 ],
               ),

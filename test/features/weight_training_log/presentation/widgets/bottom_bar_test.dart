@@ -23,4 +23,20 @@ void main() {
     await tester.tap(find.byType(BottomBar));
     expect(saved, true);
   });
+
+  testWidgets('BottomBar displays correct volume when volume is zero', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomBar(
+            totalVolume: 0.0,
+            primaryGreen: Colors.green,
+            onSaveWorkout: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Save Workout (0.0 kg)'), findsOneWidget);
+  });
 }

@@ -364,7 +364,77 @@ void main() {
         throwsArgumentError,
       );
     });
+
+  // Fix for the filterByYear test
+  test('should return exercises for specific year', () async {
+    // Setup
+    final testYear = 2025;
+    final startOfYear = DateTime(testYear, 1, 1);
+    // Match the exact implementation in repository
+    final endOfYear = DateTime(testYear + 1, 1, 1).subtract(Duration(milliseconds: 1));
+    
+    final mockDocSnap = MockQueryDocumentSnapshot<Map<String, dynamic>>();
+    when(mockDocSnap.data()).thenReturn({
+      ...testExercise.toJson(),
+      'dateCreated': '2025-03-08'
+    });
+    mockDocs = [mockDocSnap];
+    
+    // Recreate the mocks for filterByYear
+    when(mockFirestore.collection('weight_lifting_logs')).thenReturn(mockCollection);
+    
+    // Mock the query chain properly with separate mock objects
+    final mockQueryFirstWhere = MockQuery<Map<String, dynamic>>();
+    final mockQuerySecondWhere = MockQuery<Map<String, dynamic>>();
+    
+    when(mockCollection.where('timestamp', 
+        isGreaterThanOrEqualTo: anyNamed('isGreaterThanOrEqualTo')))
+        .thenReturn(mockQueryFirstWhere);
+    
+    when(mockQueryFirstWhere.where('timestamp', 
+        isLessThanOrEqualTo: anyNamed('isLessThanOrEqualTo')))
+        .thenReturn(mockQuerySecondWhere);
+    
+    when(mockQuerySecondWhere.get()).thenAnswer((_) async => mockQuerySnapshot);
+    when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+    
+    // Execute
+    final result = await repository.filterByYear(testYear);
+    
+    // Verify
+    verify(mockFirestore.collection('weight_lifting_logs')).called(1);
+    expect(result.length, 1);
   });
+
+  // Fix for getExercisesWithLimit test
+  test('should return limited number of exercises', () async {
+    // Setup
+    final mockDocSnap = MockQueryDocumentSnapshot<Map<String, dynamic>>();
+    when(mockDocSnap.data()).thenReturn(testExercise.toJson());
+    mockDocs = [mockDocSnap];
+    
+    // Explicit collection setup for this test
+    when(mockFirestore.collection('weight_lifting_logs')).thenReturn(mockCollection);
+    
+    // Mock chain
+    final mockQueryOrdered = MockQuery<Map<String, dynamic>>();
+    final mockQueryLimited = MockQuery<Map<String, dynamic>>();
+    
+    when(mockCollection.orderBy(any)).thenReturn(mockQueryOrdered);
+    when(mockQueryOrdered.limit(any)).thenReturn(mockQueryLimited);
+    when(mockQueryLimited.get()).thenAnswer((_) async => mockQuerySnapshot);
+    when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+    
+    // Execute
+    final result = await repository.getExercisesWithLimit(10);
+    
+    // Verify
+    verify(mockFirestore.collection('weight_lifting_logs')).called(1);
+    verify(mockCollection.orderBy('name')).called(1);
+    verify(mockQueryOrdered.limit(10)).called(1);
+    expect(result.length, 1);
+  });
+});
 
   group('filterByYear', () {
     test('should return exercises for specific year', () async {

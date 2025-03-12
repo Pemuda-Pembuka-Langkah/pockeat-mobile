@@ -219,7 +219,7 @@ void main() {
     expect(result.intensity, equals('Moderate'));
     expect(result.metValue, equals(8.5));
     expect(result.originalInput, equals('Running 5km in 30 minutes'));
-    expect(result.summary, contains('Corrected analysis'));
+    expect(result.summary, contains('You performed Running for 45 minutes'));
     expect(result.summary, contains('Updated duration from 30 to 45 minutes'));
   });
 
@@ -277,7 +277,7 @@ void main() {
       originalInput: 'Running 5km in 30 minutes',
     );
     
-    const userComment = 'It was actually swimming';
+    const userComment = 'I actually ran for 45 minutes';
     
     const partialJsonResponse = '''
     {

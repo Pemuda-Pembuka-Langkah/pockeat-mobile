@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:pockeat/features/food_text_input/presentation/pages/food_text_input_page.dart';
 
 class FoodInputPage extends StatelessWidget {
-  // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
@@ -46,21 +46,6 @@ class FoodInputPage extends StatelessWidget {
                     color: Colors.black87,
                   ),
                 ),
-                TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/food-analysis'),
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                  child: const Text(
-                    'Food Analysis',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 32),
@@ -70,7 +55,7 @@ class FoodInputPage extends StatelessWidget {
               context: context,
               icon: CupertinoIcons.camera_viewfinder,
               title: 'Scan Food',
-              subtitle: 'Scan barcode or take a photo',
+              subtitle: 'Take a photo of your food',
               color: primaryGreen,
               route: '/scan',
             ),
@@ -83,58 +68,14 @@ class FoodInputPage extends StatelessWidget {
               title: 'Input Manually',
               subtitle: 'Search or prompt food details',
               color: primaryPink,
-              route: '/add-food-manual'
-            ),
-
-            const Spacer(),
-
-            // Recent Foods Preview
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 5,
-                    offset: Offset(0, 2),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FoodTextInputPage(),
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Recent Foods',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _buildRecentFood(
-                        icon: CupertinoIcons.cube_box,
-                        label: 'Protein Bar',
-                        type: 'Snack',
-                        calories: '220',
-                        color: primaryGreen,
-                      ),
-                      const SizedBox(width: 12),
-                      _buildRecentFood(
-                        icon: CupertinoIcons.cart,
-                        label: 'Chicken Salad',
-                        type: 'Lunch',
-                        calories: '350',
-                        color: primaryPink,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                );
+              },
             ),
           ],
         ),
@@ -174,7 +115,6 @@ class FoodInputPage extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  // Icon Container
                   Container(
                     width: 48,
                     height: 48,
@@ -189,7 +129,6 @@ class FoodInputPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Text Content
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,81 +162,6 @@ class FoodInputPage extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentFood({
-    required IconData icon,
-    required String label,
-    required String type,
-    required String calories,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 16,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        type,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      const Text(
-                        ' • ',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.black38,
-                        ),
-                      ),
-                      Text(
-                        '$calories cal',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );

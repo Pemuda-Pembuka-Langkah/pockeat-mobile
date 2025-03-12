@@ -10,10 +10,10 @@ import 'package:pockeat/features/exercise_input_options/presentation/screens/exe
 import 'package:pockeat/features/homepage/presentation/homepage.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:camera/camera.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/food_scan_page.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pockeat/component/navigation.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/food_input_page.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/screens/food_input_page.dart';
 import 'package:pockeat/features/ai_api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
@@ -147,7 +147,7 @@ class MyApp extends StatelessWidget {
                 lensDirection: CameraLensDirection.back,
                 sensorOrientation: 0,
               ),
-              ResolutionPreset.medium,
+              ResolutionPreset.max,
             )),
         '/add-food': (context) => const FoodInputPage(),
         '/food-analysis': (context) => const AIAnalysisScreen(),

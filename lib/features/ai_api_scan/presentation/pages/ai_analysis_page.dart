@@ -106,12 +106,16 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
     
     try {
       final result = await _foodTextAnalysisService.correctAnalysis(_foodAnalysisResult!, correction);
+      if (!mounted) return;
+      
       setState(() {
         _foodAnalysisResult = result;
         _isLoading = false;
         _showCorrectionInterface = false;
         _correctionController.clear();
       });
+      
+      if (!mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -120,7 +124,19 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
         ),
       );
     } catch (e) {
-      _showError('Error correcting analysis: ${e.toString()}');
+      if (!mounted) return;
+      
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to correct analysis: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
   
@@ -166,12 +182,16 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
     
     try {
       final result = await _foodImageAnalysisService.correctAnalysis(_foodAnalysisResult!, correction);
+      if (!mounted) return;
+      
       setState(() {
         _foodAnalysisResult = result;
         _isLoading = false;
         _showCorrectionInterface = false;
         _correctionController.clear();
       });
+      
+      if (!mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -180,7 +200,19 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
         ),
       );
     } catch (e) {
-      _showError('Error correcting analysis: ${e.toString()}');
+      if (!mounted) return;
+      
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to correct analysis: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
   
@@ -248,12 +280,16 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
         correction, 
         servings
       );
+      if (!mounted) return;
+      
       setState(() {
         _foodAnalysisResult = result;
         _isLoading = false;
         _showCorrectionInterface = false;
         _correctionController.clear();
       });
+      
+      if (!mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -262,7 +298,19 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
         ),
       );
     } catch (e) {
-      _showError('Error correcting analysis: ${e.toString()}');
+      if (!mounted) return;
+      
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to correct analysis: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
   
@@ -309,12 +357,16 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
     
     try {
       final result = await _exerciseAnalysisService.correctAnalysis(_exerciseResult!, correction);
+      if (!mounted) return;
+      
       setState(() {
         _exerciseResult = result;
         _isLoading = false;
         _showCorrectionInterface = false;
         _correctionController.clear();
       });
+      
+      if (!mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -323,7 +375,19 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
         ),
       );
     } catch (e) {
-      _showError('Error correcting analysis: ${e.toString()}');
+      if (!mounted) return;
+      
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to correct analysis: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
   

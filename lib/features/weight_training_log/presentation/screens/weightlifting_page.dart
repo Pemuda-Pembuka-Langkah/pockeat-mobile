@@ -13,7 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class WeightliftingPage extends StatefulWidget {
   final WeightLiftingRepository? repository;
   
-  const WeightliftingPage({super.key, this.repository});
+  const WeightliftingPage({Key? key, this.repository}) : super(key: key);
 
   @override
   _WeightliftingPageState createState() => _WeightliftingPageState();
@@ -42,13 +42,27 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   }
 
   void addExercise(String name) {
-    setState(() {
-      exercises.add(WeightLifting(
-        name: name,
-        bodyPart: selectedBodyPart,
-        metValue: exercisesByCategory[selectedBodyPart]?[name] ?? 3.15,
-      ));
-    });
+    // Check if exercise with this name already exists
+    bool isDuplicate = exercises.any((exercise) => exercise.name == name);
+    
+    if (isDuplicate) {
+      // Show a snackbar instead of adding duplicate
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$name is already in your workout'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        )
+      );
+    } else {
+      setState(() {
+        exercises.add(WeightLifting(
+          name: name,
+          bodyPart: selectedBodyPart,
+          metValue: exercisesByCategory[selectedBodyPart]?[name] ?? 3.15,
+        ));
+      });
+    }
   }
 
   void addSet(WeightLifting exercise, double weight, int reps, double duration) {
@@ -59,6 +73,27 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   void clearWorkout() => setState(() => exercises.clear());
 
+  void deleteExercise(WeightLifting exercise) {
+    setState(() {
+      exercises.remove(exercise);
+    });
+    
+    // Show a snackbar to confirm deletion
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${exercise.name} deleted from your workout'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
+      )
+    );
+  }
+
+  void deleteSet(WeightLifting exercise, int setIndex) {
+    setState(() {
+      exercise.sets.removeAt(setIndex);
+    });
+  }
+
   // New method to save workout to repository
   Future<void> saveWorkout() async {
     if (exercises.isEmpty) {
@@ -68,10 +103,25 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       return;
     }
 
+    // Check if any exercise has no sets
+    for (final exercise in exercises) {
+      if (exercise.sets.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${exercise.name} has no sets. Add at least one set to each exercise.'),
+            backgroundColor: Colors.red,
+          )
+        );
+        return;
+      }
+    }
+
     setState(() => _isSaving = true);
     
     try {
       // Add current date to each exercise before saving
+      final now = DateTime.now();
+      final dateString = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
       
       // Save each exercise
       List<Future<String>> saveFutures = [];
@@ -95,14 +145,20 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       
       // Show success message
       if (mounted) {
+        // Show success SnackBar
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Workout saved successfully! Total volume: ${calculateTotalVolume(exercises).toStringAsFixed(1)} kg'),
             backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
           )
         );
+        
         // Clear workout after successful save
         clearWorkout();
+        
+        // Navigate back immediately without waiting for SnackBar to close
+        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
@@ -189,7 +245,6 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,7 +252,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       backgroundColor: primaryYellow,
       appBar: _buildAppBar(),
       body: _buildBody(),
-      bottomNavigationBar: exercises.isNotEmpty ? _buildBottomBar() : null,
+      bottomNavigationBar: exercises.isNotEmpty && calculateTotalVolume(exercises) > 0 ? _buildBottomBar() : null,
     );
   }
 
@@ -246,6 +301,8 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                 primaryGreen: primaryGreen,
                 volume: calculateExerciseVolume(exercise),
                 onAddSet: () => _showAddSetDialog(exercise),
+                onDeleteExercise: () => deleteExercise(exercise),
+                onDeleteSet: (index) => deleteSet(exercise, index),
               )),
         ],
       ),
