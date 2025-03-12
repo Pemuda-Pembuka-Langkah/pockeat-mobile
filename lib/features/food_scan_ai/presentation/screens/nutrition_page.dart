@@ -13,7 +13,7 @@ import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_sec
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/pages/food_scan_page.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
 import 'package:camera/camera.dart';
 
 class NutritionPage extends StatefulWidget {
