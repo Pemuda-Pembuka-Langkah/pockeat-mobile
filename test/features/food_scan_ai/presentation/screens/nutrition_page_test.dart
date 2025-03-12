@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
 import 'dart:io';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
 
 class MockFoodScanPhotoService extends Mock implements FoodScanPhotoService {}
 
@@ -152,6 +153,39 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const Key('add_to_log_button')), findsOneWidget);
+  });
+
+
+    testWidgets('NutritionPage should show error screen when analysis fails',
+      (WidgetTester tester) async {
+    // Setup mock to throw an error
+    when(() => mockFoodScanPhotoService.analyzeFoodPhoto(any()))
+        .thenThrow(Exception('Failed to analyze food'));
+
+    // Create a new instance with the error-throwing mock
+    final errorPage = MaterialApp(
+      home: NutritionPage(imagePath: testImagePath),
+    );
+
+    await tester.pumpWidget(errorPage);
+    await tester.pumpAndSettle();
+
+    // Verify error screen is displayed
+    expect(find.byType(FoodAnalysisError), findsOneWidget);
+    
+    // Verify error message components are displayed
+    expect(find.text('Makanan Tidak Terdeteksi'), findsOneWidget);
+    expect(
+      find.text('AI kami tidak dapat mengidentifikasi makanan dalam foto. Pastikan makanan terlihat jelas dan coba lagi.'),
+      findsOneWidget,
+    );
+    
+    // Verify tips section is displayed
+    expect(find.text('Tips untuk Foto yang Lebih Baik:'), findsOneWidget);
+    
+    // Verify buttons are present
+    expect(find.text('Foto Ulang'), findsOneWidget);
+    expect(find.text('Kembali'), findsOneWidget);
   });
 }
 
