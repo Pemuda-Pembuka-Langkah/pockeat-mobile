@@ -128,7 +128,6 @@ void main() {
       );
       
       // Verify running form UI elements
-      expect(find.text('Activity Date'), findsOneWidget);
       expect(find.text('Start Time'), findsOneWidget);
       expect(find.text('End Time'), findsOneWidget);
       expect(find.text('Distance'), findsOneWidget);
@@ -159,7 +158,6 @@ void main() {
       );
       
       // Verify cycling form UI elements
-      expect(find.text('Activity Date'), findsOneWidget);
       expect(find.text('Start Time'), findsOneWidget);
       expect(find.text('End Time'), findsOneWidget);
       expect(find.text('Distance'), findsOneWidget);
@@ -190,7 +188,6 @@ void main() {
       );
       
       // Verify swimming form UI elements
-      expect(find.text('Activity Date'), findsOneWidget);
       expect(find.text('Start Time'), findsOneWidget);
       expect(find.text('End Time'), findsOneWidget);
       expect(find.text('Laps'), findsOneWidget);

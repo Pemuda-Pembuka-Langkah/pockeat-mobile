@@ -5,7 +5,7 @@ class ExerciseAnalysisResult {
   final String exerciseType;
   final String duration;
   final String intensity;
-  final int estimatedCalories;
+  final num estimatedCalories;
   final double metValue; // Field MET baru
   final String? summary;
   final DateTime timestamp;
@@ -71,7 +71,7 @@ class ExerciseAnalysisResult {
     String? exerciseType,
     String? duration,
     String? intensity,
-    int? estimatedCalories,
+    num? estimatedCalories,
     double? metValue, // Support untuk update MET value
     String? summary,
     DateTime? timestamp,
