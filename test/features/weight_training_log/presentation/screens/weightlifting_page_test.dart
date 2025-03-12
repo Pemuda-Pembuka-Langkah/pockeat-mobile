@@ -7,6 +7,7 @@ import 'package:pockeat/features/weight_training_log/presentation/screens/weight
 import 'package:pockeat/features/weight_training_log/presentation/widgets/exercise_card.dart';
 import 'package:pockeat/features/weight_training_log/presentation/widgets/body_part_chip.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:pockeat/features/weight_training_log/presentation/widgets/bottom_bar.dart';
 
 // Import the generated mock file
 import 'weightlifting_page_test.mocks.dart';
@@ -864,6 +865,57 @@ void main() {
       expect(find.text('Testing Weight=50.0, Reps=10, Duration=0.0'), findsOneWidget);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
+      
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    });
+
+    testWidgets('should show warning when saving workout with exercise without sets', (WidgetTester tester) async {
+      // Set a fixed screen size
+      tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      
+      // Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: WeightliftingPage(repository: mockRepository),
+      ));
+
+      // Add exercise without sets
+      final exerciseItem = find.text('Bench Press');
+      expect(exerciseItem, findsWidgets);
+      await tester.tap(exerciseItem.first);
+      await tester.pumpAndSettle();
+      
+      // Verify exercise card exists but has no sets
+      expect(find.byType(ExerciseCard), findsOneWidget);
+      
+      // Try to save workout
+      await tester.tap(find.byIcon(Icons.save));
+      await tester.pumpAndSettle();
+      
+      // Should show warning about missing sets
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.textContaining('has no sets'), findsOneWidget);
+      
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+    });
+
+    testWidgets('should not show bottom bar when exercises have no sets', (WidgetTester tester) async {
+      // Set a fixed screen size
+      tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      
+      // Build the widget
+      await tester.pumpWidget(MaterialApp(
+        home: WeightliftingPage(repository: mockRepository),
+      ));
+
+      // Add exercise without sets (volume will be 0)
+      final exerciseItem = find.text('Bench Press');
+      await tester.tap(exerciseItem.first);
+      await tester.pumpAndSettle();
+      
+      // Bottom bar should not be visible when total volume is 0
+      expect(find.byType(BottomBar), findsNothing);
       
       addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     });
