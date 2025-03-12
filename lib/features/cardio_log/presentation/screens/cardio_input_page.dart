@@ -15,7 +15,7 @@ class CardioInputPage extends StatefulWidget {
   final CardioRepository? repository;
 
   const CardioInputPage({
-    super.key, 
+    super.key,
     this.repository,
   });
 
@@ -169,7 +169,7 @@ class CardioInputPageState extends State<CardioInputPage> {
               // Create and save activity object without popping immediately
               _saveActivity(calories);
               // Remove this line to prevent immediate navigation
-              // Navigator.pop(context); 
+              // Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryPink,
@@ -326,14 +326,16 @@ class CardioInputPageState extends State<CardioInputPage> {
   Future<void> _saveActivity(double calories) async {
     try {
       CardioActivity? activity;
+      final todayDate = DateTime.now();
 
       switch (selectedType) {
         case CardioType.running:
           // Access form state directly using the key
           final formState = _runningFormKey.currentState!;
+          
 
           activity = RunningActivity(
-            date: formState.selectedDate,
+            date: todayDate,
             startTime: formState.selectedStartTime,
             endTime: formState.selectedEndTime,
             distanceKm: runningDistance,
@@ -345,7 +347,7 @@ class CardioInputPageState extends State<CardioInputPage> {
           final formState = _cyclingFormKey.currentState!;
 
           activity = CyclingActivity(
-            date: formState.selectedDate,
+            date: todayDate,
             startTime: formState.selectedStartTime,
             endTime: formState.selectedEndTime,
             distanceKm: cyclingDistance,
@@ -358,7 +360,7 @@ class CardioInputPageState extends State<CardioInputPage> {
           final formState = _swimmingFormKey.currentState!;
 
           activity = SwimmingActivity(
-            date: formState.selectedDate,
+            date: todayDate,
             startTime: formState.selectedStartTime,
             endTime: formState.selectedEndTime,
             laps: swimmingLaps,
@@ -383,22 +385,19 @@ class CardioInputPageState extends State<CardioInputPage> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          backgroundColor: primaryPink,
+          backgroundColor: Colors.green,
           duration: const Duration(seconds: 1), // Short duration
           // Set behavior to fixed to ensure it's visible
           behavior: SnackBarBehavior.fixed,
         );
-        
+
         // Show the SnackBar and navigate after it's dismissed
-        ScaffoldMessenger.of(context)
-          .showSnackBar(snackBar)
-          .closed
-          .then((_) {
-            // Navigate back after SnackBar is dismissed
-            if (mounted) {
-              Navigator.pop(context);
-            }
-          });
+        ScaffoldMessenger.of(context).showSnackBar(snackBar).closed.then((_) {
+          // Navigate back after SnackBar is dismissed
+          if (mounted) {
+            Navigator.pop(context);
+          }
+        });
       }
     } catch (e) {
       // Show error message to user

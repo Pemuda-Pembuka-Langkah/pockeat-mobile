@@ -37,9 +37,8 @@ class CyclingForm extends StatefulWidget {
 
 class CyclingFormState extends State<CyclingForm> {
   CyclingActivityType selectedCyclingType = CyclingActivityType.mountain;
-  int selectedKm = 5;
+  int selectedKm = 0;
   int selectedMeter = 0;
-  DateTime selectedDate = DateTime.now();
   DateTime selectedStartTime = DateTime.now();
   DateTime selectedEndTime = DateTime.now().add(const Duration(minutes: 30));
 
@@ -72,56 +71,54 @@ class CyclingFormState extends State<CyclingForm> {
           const SizedBox(height: 12),
           _buildCyclingTypeSelector(),
           const SizedBox(height: 16),
-          DateSelectionWidget(
-            primaryColor: widget.primaryPink,
-            selectedDate: selectedDate,
-            onDateChanged: (newDate) {
-              setState(() {
-                selectedDate = newDate;
-                
-                // Keep the same time but update date
-                selectedStartTime = DateTime(
-                  newDate.year,
-                  newDate.month,
-                  newDate.day,
-                  selectedStartTime.hour,
-                  selectedStartTime.minute,
-                );
-                
-                selectedEndTime = DateTime(
-                  newDate.year,
-                  newDate.month,
-                  newDate.day,
-                  selectedEndTime.hour,
-                  selectedEndTime.minute,
-                );
-                
-                // If end time is before start time (e.g. cycling past midnight),
-                // add a day to end time
-                if (selectedEndTime.isBefore(selectedStartTime)) {
-                  selectedEndTime = selectedEndTime.add(const Duration(days: 1));
-                }
-              });
-            },
-          ),
-          const SizedBox(height: 16),
           TimeSelectionWidget(
             primaryColor: widget.primaryPink,
             selectedStartTime: selectedStartTime,
             selectedEndTime: selectedEndTime,
             onStartTimeChanged: (newStartTime) {
               setState(() {
-                selectedStartTime = newStartTime;
+                // Keep the same time but update to today's date
+                final now = DateTime.now();
+                selectedStartTime = DateTime(
+                  now.year,
+                  now.month,
+                  now.day,
+                  newStartTime.hour,
+                  newStartTime.minute,
+                );
                 
-                // If end time is now before start time, adjust it
+                // If end time is before start time (e.g. cycling past midnight),
+                // adjust end time to maintain duration but with today's date
                 if (selectedEndTime.isBefore(selectedStartTime)) {
                   selectedEndTime = selectedStartTime.add(const Duration(minutes: 30));
+                } else {
+                  // Keep existing end time but update to today's date
+                  selectedEndTime = DateTime(
+                    now.year,
+                    now.month,
+                    now.day,
+                    selectedEndTime.hour,
+                    selectedEndTime.minute,
+                  );
                 }
               });
             },
             onEndTimeChanged: (newEndTime) {
               setState(() {
-                selectedEndTime = newEndTime;
+                // Keep the same time but ensure it's today's date
+                final now = DateTime.now();
+                selectedEndTime = DateTime(
+                  now.year,
+                  now.month,
+                  now.day,
+                  newEndTime.hour,
+                  newEndTime.minute,
+                );
+                
+                // If end time is before start time, add a day to end time
+                if (selectedEndTime.isBefore(selectedStartTime)) {
+                  selectedEndTime = selectedEndTime.add(const Duration(days: 1));
+                }
               });
             },
           ),

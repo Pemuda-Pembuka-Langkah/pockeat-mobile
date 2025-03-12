@@ -482,7 +482,7 @@ Widget _buildQuickAddCard(Map<String, dynamic> food) {
       padding: const EdgeInsets.symmetric(vertical: 16),
       children: [
         // History Section with Show All
-        _buildSectionTitle('History', showAll: true),
+        _buildSectionTitle('Recent Foods', showAll: true),
         SizedBox(
           height: 220,
           child: ListView.builder(
