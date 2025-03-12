@@ -103,6 +103,19 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       return;
     }
 
+    // Check if any exercise has no sets
+    for (final exercise in exercises) {
+      if (exercise.sets.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${exercise.name} has no sets. Add at least one set to each exercise.'),
+            backgroundColor: Colors.red,
+          )
+        );
+        return;
+      }
+    }
+
     setState(() => _isSaving = true);
     
     try {
@@ -239,7 +252,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       backgroundColor: primaryYellow,
       appBar: _buildAppBar(),
       body: _buildBody(),
-      bottomNavigationBar: exercises.isNotEmpty ? _buildBottomBar() : null,
+      bottomNavigationBar: exercises.isNotEmpty && calculateTotalVolume(exercises) > 0 ? _buildBottomBar() : null,
     );
   }
 
