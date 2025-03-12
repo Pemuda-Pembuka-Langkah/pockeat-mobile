@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class CalorieSummaryCard extends StatelessWidget {
   final bool isLoading;
-  final double calories;
+  final int calories;
   final Color primaryYellow;
   final Color primaryPink;
 
@@ -51,34 +51,9 @@ class CalorieSummaryCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: primaryPink,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    '22% of daily goal',
-                    key: Key('food_calories_goal'),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
               ],
             ),
-            const SizedBox(height: 16),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: 0.22,
-                backgroundColor: Colors.white,
-                valueColor: AlwaysStoppedAnimation<Color>(primaryPink),
-                minHeight: 8,
-              ),
-            ),
+
           ],
         ),
       ),

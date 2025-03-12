@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AdditionalNutrientsSection extends StatelessWidget {
   final bool isLoading;
   final Map<String, dynamic> nutritionData;
-  final double calories;
+  final int calories;
   final Color primaryYellow;
 
   const AdditionalNutrientsSection({
@@ -17,7 +17,7 @@ class AdditionalNutrientsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: _buildNutrientsGrid(),
     );
   }
@@ -82,7 +82,6 @@ class AdditionalNutrientsSection extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 2),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -92,13 +91,6 @@ class AdditionalNutrientsSection extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
-                ),
-              ),
-              Text(
-                'of ${nutrient['goal']}',
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 12,
                 ),
               ),
             ],

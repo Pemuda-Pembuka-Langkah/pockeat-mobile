@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class MacroItem extends StatelessWidget {
   final String label;
-  final double value;
-  final double total;
+  final int value;
+  final int total;
   final Color color;
   final String? subtitle;
 
@@ -35,7 +35,7 @@ class MacroItem extends StatelessWidget {
                 ),
               ),
               Text(
-                '$value of ${total}g',
+                '${value}g',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -44,26 +44,6 @@ class MacroItem extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: value / total,
-              backgroundColor: color.withOpacity(0.15),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-              minHeight: 8,
-            ),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              subtitle!,
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 14,
-              ),
-            ),
-          ],
         ],
       ),
     );

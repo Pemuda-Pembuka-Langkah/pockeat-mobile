@@ -7,11 +7,14 @@ import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/bottom_action_bar.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/ai_analysis_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/additional_nutrients_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/recommendations_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/pages/food_scan_page.dart';
+import 'package:camera/camera.dart';
 
 class NutritionPage extends StatefulWidget {
   final String imagePath;
@@ -27,10 +30,13 @@ class NutritionPage extends StatefulWidget {
 class _NutritionPageState extends State<NutritionPage> {
   bool _isScrolledToTop = true;
   bool _isLoading = true;
+  bool _hasError = false;
+  String _errorMessage = '';
   String _foodName = 'Analyzing...';
-  double _calories = 0;
+  int _calories = 0;
   Map<String, dynamic> _nutritionData = {};
   List<String> _warnings = [];
+  List<Ingredient> _ingredients = [];
   late FoodAnalysisResult? food;
 
   // Theme colors
@@ -49,6 +55,7 @@ class _NutritionPageState extends State<NutritionPage> {
     try {
       setState(() {
         _isLoading = true;
+        _hasError = false;
       });
 
       final result = await widget.foodScanPhotoService
@@ -56,124 +63,151 @@ class _NutritionPageState extends State<NutritionPage> {
 
       setState(() {
         _foodName = result.foodName;
-        _calories = result.nutritionInfo.calories.toDouble();
+        _calories = result.nutritionInfo.calories.toInt();
         _nutritionData = {
-          'protein': result.nutritionInfo.protein,
-          'carbs': result.nutritionInfo.carbs,
-          'fat': result.nutritionInfo.fat,
-          'fiber': result.nutritionInfo.fiber,
-          'sugar': result.nutritionInfo.sugar,
-          'sodium': result.nutritionInfo.sodium,
+          'protein': result.nutritionInfo.protein.toInt(),
+          'carbs': result.nutritionInfo.carbs.toInt(),
+          'fat': result.nutritionInfo.fat.toInt(),
+          'fiber': result.nutritionInfo.fiber.toInt(),
+          'sugar': result.nutritionInfo.sugar.toInt(),
+          'sodium': result.nutritionInfo.sodium.toInt(),
         };
+        _ingredients = result.ingredients;
         _isLoading = false;
         _warnings = result.warnings;
         food = result;
       });
     } catch (e) {
       setState(() {
-        _foodName = 'Analysis Failed';
         _isLoading = false;
+        _hasError = true;
+        _errorMessage = e.toString();
       });
-      // Tampilkan error dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error'),
-          content: Text('Failed to analyze food: $e'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
     }
+  }
+
+  void _retryPhotoCapture() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ScanFoodPage(cameraController: CameraController(
+              CameraDescription(
+                name: '0',
+                lensDirection: CameraLensDirection.back,
+                sensorOrientation: 0,
+              ),
+              ResolutionPreset.max,
+            ),),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        body: FoodAnalysisLoading(
+          primaryYellow: primaryYellow,
+          primaryPink: primaryPink,
+        ),
+      );
+    }
+
+    if (_hasError) {
+      return Scaffold(
+        body: FoodAnalysisError(
+          errorMessage: _errorMessage,
+          primaryPink: primaryPink,
+          primaryYellow: primaryYellow,
+          onRetry: _retryPhotoCapture,
+          onBack: () => Navigator.pop(context),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (scrollNotification) {
-          if (scrollNotification is ScrollUpdateNotification) {
-            setState(() {
-              _isScrolledToTop = scrollNotification.metrics.pixels < 100;
-            });
-          }
-          return true;
-        },
-        child: CustomScrollView(
-          slivers: [
-            NutritionAppBar(
-              isScrolledToTop: _isScrolledToTop,
-              imagePath: widget.imagePath,
-              primaryYellow: primaryYellow,
-            ),
-            // Content
-            SliverToBoxAdapter(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-                child: Container(
-                  color: Colors.white,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FoodTitleSection(
-                        isLoading: _isLoading,
-                        foodName: _foodName,
-                        primaryGreen: primaryGreen,
-                      ),
-                      CalorieSummaryCard(
-                        isLoading: _isLoading,
-                        calories: _calories,
-                        primaryYellow: primaryYellow,
-                        primaryPink: primaryPink,
-                      ),
-                      AIAnalysisSection(
-                        primaryGreen: primaryGreen,
-                      ),
-                      NutritionalInfoSection(
-                        isLoading: _isLoading,
-                        nutritionData: _nutritionData,
-                        primaryPink: primaryPink,
-                        primaryGreen: primaryGreen,
-                        warningYellow: warningYellow,
-                      ),
-                      AdditionalNutrientsSection(
-                        isLoading: _isLoading,
-                        nutritionData: _nutritionData,
-                        calories: _calories,
-                        primaryYellow: primaryYellow,
-                      ),
-                      DietTagsSection(
-                        warnings: _warnings,
-                        primaryGreen: primaryGreen,
-                        warningYellow: warningYellow,
-                      ),
-                      RecommendationsSection(
-                        primaryYellow: primaryYellow,
-                        primaryPink: primaryPink,
-                      ),
-                      const SizedBox(height: 100),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: _buildAnalysisResultContent(),
       bottomSheet: BottomActionBar(
         isLoading: _isLoading,
-        food: _isLoading ? null : food,
+        food: food,
         foodScanPhotoService: widget.foodScanPhotoService,
         primaryYellow: primaryYellow,
         primaryPink: primaryPink,
+      ),
+    );
+  }
+
+  Widget _buildAnalysisResultContent() {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollNotification) {
+        if (scrollNotification is ScrollUpdateNotification) {
+          setState(() {
+            _isScrolledToTop = scrollNotification.metrics.pixels < 100;
+          });
+        }
+        return true;
+      },
+      child: CustomScrollView(
+        slivers: [
+          NutritionAppBar(
+            isScrolledToTop: _isScrolledToTop,
+            imagePath: widget.imagePath,
+            primaryYellow: primaryYellow,
+          ),
+          // Content
+          SliverToBoxAdapter(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
+              child: Container(
+                color: Colors.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FoodTitleSection(
+                      isLoading: _isLoading,
+                      foodName: _foodName,
+                      primaryGreen: primaryGreen,
+                    ),
+                    CalorieSummaryCard(
+                      isLoading: _isLoading,
+                      calories: _calories,
+                      primaryYellow: primaryYellow,
+                      primaryPink: primaryPink,
+                    ),
+                    NutritionalInfoSection(
+                      isLoading: _isLoading,
+                      nutritionData: _nutritionData,
+                      primaryPink: primaryPink,
+                      primaryGreen: primaryGreen,
+                      warningYellow: warningYellow,
+                    ),
+                    AdditionalNutrientsSection(
+                      isLoading: _isLoading,
+                      nutritionData: _nutritionData,
+                      calories: _calories,
+                      primaryYellow: primaryYellow,
+                    ),
+                    IngredientsSection(
+                      ingredients: _ingredients,
+                      primaryGreen: primaryGreen,
+                      isLoading: _isLoading,
+                    ),
+                    DietTagsSection(
+                      warnings: _warnings,
+                      primaryGreen: primaryGreen,
+                      warningYellow: warningYellow,
+                    ),
+                    const SizedBox(height: 100),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

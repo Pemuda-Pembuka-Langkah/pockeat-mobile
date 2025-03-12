@@ -148,7 +148,7 @@ class MyApp extends StatelessWidget {
                 lensDirection: CameraLensDirection.back,
                 sensorOrientation: 0,
               ),
-              ResolutionPreset.medium,
+              ResolutionPreset.max,
             )),
         '/add-food': (context) => const FoodInputPage(),
         '/food-analysis': (context) => const AIAnalysisScreen(),
