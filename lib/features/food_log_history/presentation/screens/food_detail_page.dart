@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:intl/intl.dart';
 
 /// A page that displays detailed information about a food item.
@@ -11,11 +12,13 @@ import 'package:intl/intl.dart';
 class FoodDetailPage extends StatefulWidget {
   final String foodId;
   final FoodScanRepository foodRepository;
+  final FoodTextInputRepository foodTextInputRepository;
 
   const FoodDetailPage({
     super.key,
     required this.foodId,
     required this.foodRepository,
+    required this.foodTextInputRepository,
   });
 
   @override
