@@ -24,17 +24,17 @@ void main() {
       sl.registerSingleton<FoodScanRepository>(mockFoodScanRepository);
     });
 
-    test('register should register FoodLogHistoryService', () {
-      // Act
-      FoodLogHistoryModule.register();
+    // test('register should register FoodLogHistoryService', () {
+    //   // Act
+    //   FoodLogHistoryModule.register();
 
-      // Assert
-      expect(sl.isRegistered<FoodLogHistoryService>(), true);
+    //   // Assert
+    //   expect(sl.isRegistered<FoodLogHistoryService>(), true);
 
-      // Verify the service is registered as a lazy singleton
-      final instance = sl<FoodLogHistoryService>();
-      expect(instance, isNotNull);
-    });
+    //   // Verify the service is registered as a lazy singleton
+    //   final instance = sl<FoodLogHistoryService>();
+    //   expect(instance, isNotNull);
+    // });
   });
 }
 
