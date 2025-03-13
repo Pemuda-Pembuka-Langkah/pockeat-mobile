@@ -17,10 +17,10 @@ void main() {
       );
 
       // Assert
-      expect(find.text('Ceritakan aktivitas olahragamu'), findsOneWidget);
-      expect(find.text('Berikan detail seperti jenis, durasi, dan intensitas olahraga'), findsOneWidget);
+      expect(find.text('Describe your workout activity'), findsOneWidget);
+      expect(find.text('Provide details such as type, duration, and intensity'), findsOneWidget);
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.text('Analisis Olahraga'), findsOneWidget);
+      expect(find.text('Analyze Workout'), findsOneWidget);
     });
 
     testWidgets('shows error message when submitting empty input', (WidgetTester tester) async {
@@ -36,11 +36,11 @@ void main() {
       );
 
       // Act - tap the button with empty input
-      await tester.tap(find.text('Analisis Olahraga'));
+      await tester.tap(find.text('Analyze Workout'));
       await tester.pump();
 
       // Assert
-      expect(find.text('Deskripsi olahraga tidak boleh kosong'), findsOneWidget);
+      expect(find.text('Workout description cannot be empty'), findsOneWidget);
     });
 
     testWidgets('clears error message when user starts typing', (WidgetTester tester) async {
@@ -56,16 +56,16 @@ void main() {
       );
 
       // Act - show error first
-      await tester.tap(find.text('Analisis Olahraga'));
+      await tester.tap(find.text('Analyze Workout'));
       await tester.pump();
-      expect(find.text('Deskripsi olahraga tidak boleh kosong'), findsOneWidget);
+      expect(find.text('Workout description cannot be empty'), findsOneWidget);
 
       // Act - type something
-      await tester.enterText(find.byType(TextField), 'Lari pagi 30 menit');
+      await tester.enterText(find.byType(TextField), 'Morning run 30 minutes');
       await tester.pump();
 
       // Assert
-      expect(find.text('Deskripsi olahraga tidak boleh kosong'), findsNothing);
+      expect(find.text('Workout description cannot be empty'), findsNothing);
     });
 
     testWidgets('calls onAnalyzePressed with input text when form is valid', (WidgetTester tester) async {
@@ -84,12 +84,12 @@ void main() {
       );
 
       // Act
-      await tester.enterText(find.byType(TextField), 'Lari pagi 30 menit');
-      await tester.tap(find.text('Analisis Olahraga'));
+      await tester.enterText(find.byType(TextField), 'Morning run 30 minutes');
+      await tester.tap(find.text('Analyze Workout'));
       await tester.pump();
 
       // Assert
-      expect(capturedInput, 'Lari pagi 30 menit');
+      expect(capturedInput, 'Morning run 30 minutes');
     });
 
     testWidgets('button is disabled when isLoading is true', (WidgetTester tester) async {
@@ -109,14 +109,14 @@ void main() {
       );
 
       // Act
-      await tester.enterText(find.byType(TextField), 'Lari pagi 30 menit');
+      await tester.enterText(find.byType(TextField), 'Morning run 30 minutes');
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump();
 
       // Assert
       expect(onAnalyzeWasCalled, false);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text('Analisis Olahraga'), findsNothing);
+      expect(find.text('Analyze Workout'), findsNothing);
     });
 
     testWidgets('accepts both Indonesian and English text input', (WidgetTester tester) async {
@@ -136,7 +136,7 @@ void main() {
 
       // Act - Indonesian
       await tester.enterText(find.byType(TextField), 'Lari pagi selama 30 menit');
-      await tester.tap(find.text('Analisis Olahraga'));
+      await tester.tap(find.text('Analyze Workout'));
       await tester.pump();
 
       // Clear input
@@ -145,7 +145,7 @@ void main() {
 
       // Act - English
       await tester.enterText(find.byType(TextField), 'Morning run for 30 minutes');
-      await tester.tap(find.text('Analisis Olahraga'));
+      await tester.tap(find.text('Analyze Workout'));
       await tester.pump();
 
       // Assert

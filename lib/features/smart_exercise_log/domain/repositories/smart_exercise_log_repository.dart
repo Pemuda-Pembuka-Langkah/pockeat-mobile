@@ -1,23 +1,54 @@
-// Exception untuk error saat penyimpanan atau pengambilan data
-import 'package:pockeat/features/smart_exercise_log/domain/models/analysis_result.dart';
-
+// Exception for errors during saving or retrieving data
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 abstract class SmartExerciseLogRepository {
-  /// Menyimpan hasil analisis olahraga ke database
-  /// 
-  /// Mengembalikan [String] berupa id dari hasil yang disimpan
-  /// Throws [Exception] jika terjadi error saat penyimpanan
-  Future<String> saveAnalysisResult(AnalysisResult result);
+  /// Saves exercise analysis results to the database
+  ///
+  /// Returns a [String] ID of the saved result
+  /// Throws [Exception] if an error occurs during saving
+  Future<String> saveAnalysisResult(ExerciseAnalysisResult result);
+
+  /// Retrieves analysis results by ID
+  ///
+  /// Returns [ExerciseAnalysisResult] if found, null if not exists
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<ExerciseAnalysisResult?> getAnalysisResultFromId(String id);
+
+  /// Retrieves all analysis results
+  ///
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing all analysis results
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAllAnalysisResults({int? limit});
   
-  /// Mengambil hasil analisis berdasarkan ID
+  /// Retrieves analysis results by date
   /// 
-  /// Mengembalikan [AnalysisResult] jika ditemukan, null jika tidak ada
-  /// Throws [Exception] jika terjadi error saat pengambilan data
-  Future<AnalysisResult?> getAnalysisResultFromId(String id);
+  /// Parameter [date] to filter results by a specific date
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing analysis results on the specified date
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByDate(DateTime date, {int? limit});
   
-  /// Mengambil semua hasil analisis
+  /// Retrieves analysis results by month and year
   /// 
-  /// Mengembalikan [List<AnalysisResult>] berisi semua hasil analisis
-  /// Throws [StorageException] jika terjadi error saat pengambilan data
-  Future<List<AnalysisResult>> getAllAnalysisResults();
+  /// Parameters [month] (1-12) and [year] to filter results
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing analysis results on the specified month and year
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByMonth(int month, int year, {int? limit});
+  
+  /// Retrieves analysis results by year
+  /// 
+  /// Parameter [year] to filter results
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing analysis results on the specified year
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByYear(int year, {int? limit});
+  
+  /// Deletes an analysis result by its ID
+  /// 
+  /// Parameter [id] the unique identifier of the analysis result to delete
+  /// Returns [bool] true if successfully deleted, false if the document doesn't exist
+  /// Throws [Exception] if an error occurs during deletion
+  Future<bool> deleteById(String id);
 }

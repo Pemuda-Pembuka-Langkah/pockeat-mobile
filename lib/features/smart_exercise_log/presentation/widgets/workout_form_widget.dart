@@ -29,7 +29,7 @@ class _WorkoutFormWidgetState extends State<WorkoutFormWidget> {
     
     if (input.isEmpty) {
       setState(() {
-        _errorMessage = 'Deskripsi olahraga tidak boleh kosong';
+        _errorMessage = 'Workout description cannot be empty';
       });
       return;
     }
@@ -60,7 +60,7 @@ class _WorkoutFormWidgetState extends State<WorkoutFormWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Ceritakan aktivitas olahragamu',
+            'Describe your workout activity',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -69,7 +69,7 @@ class _WorkoutFormWidgetState extends State<WorkoutFormWidget> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Berikan detail seperti jenis, durasi, dan intensitas olahraga',
+            'Provide details such as type, duration, and intensity',
             style: TextStyle(
               fontSize: 14,
               color: Colors.black54,
@@ -80,7 +80,7 @@ class _WorkoutFormWidgetState extends State<WorkoutFormWidget> {
             controller: _workoutController,
             maxLines: 4,
             decoration: InputDecoration(
-              hintText: 'Contoh: "Lari pagi selama 30 menit dengan intensitas sedang" atau "HIIT workout for 15 minutes"',
+              hintText: 'Example: "Morning run for 30 minutes with medium intensity" or "HIIT workout for 15 minutes"',
               hintStyle: const TextStyle(color: Colors.black38),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -119,7 +119,7 @@ class _WorkoutFormWidgetState extends State<WorkoutFormWidget> {
                       ),
                     )
                   : const Text(
-                      'Analisis Olahraga',
+                      'Analyze Workout',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
