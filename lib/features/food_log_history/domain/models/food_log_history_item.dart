@@ -52,8 +52,6 @@ class FoodLogHistoryItem {
     final calories = foodAnalysisResult.nutritionInfo.calories.toInt();
     final protein = foodAnalysisResult.nutritionInfo.protein.toInt();
     final carbs = foodAnalysisResult.nutritionInfo.carbs.toInt();
-    print(foodAnalysisResult.id);
-
     return FoodLogHistoryItem(
       id: foodAnalysisResult.id,
       title: foodAnalysisResult.foodName,
