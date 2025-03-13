@@ -34,4 +34,20 @@ class FoodScanPhotoService {
     await _foodScanRepository.save(analysisResult, _uuid.v4());
     return 'Successfully saved food analysis';
   }
+  
+  /// Mengoreksi hasil analisis makanan berdasarkan feedback pengguna
+  /// 
+  /// [previousResult] adalah hasil analisis sebelumnya
+  /// [userComment] adalah feedback atau koreksi dari pengguna
+  /// Mengembalikan [FoodAnalysisResult] yang telah dikoreksi
+  Future<FoodAnalysisResult> correctFoodAnalysis(
+      FoodAnalysisResult previousResult, String userComment) async {
+    try {
+      final correctedResult = await _foodImageAnalysisService.correctAnalysis(
+          previousResult, userComment);
+      return correctedResult;
+    } catch (e) {
+      throw Exception('Gagal mengoreksi analisis makanan: ${e.toString()}');
+    }
+  }
 }

@@ -38,6 +38,9 @@ class _NutritionPageState extends State<NutritionPage> {
   List<String> _warnings = [];
   List<Ingredient> _ingredients = [];
   late FoodAnalysisResult? food;
+  
+  // Track if analysis is being corrected
+  bool _isCorrectingAnalysis = false;
 
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
@@ -62,20 +65,8 @@ class _NutritionPageState extends State<NutritionPage> {
           .analyzeFoodPhoto(File(widget.imagePath));
 
       setState(() {
-        _foodName = result.foodName;
-        _calories = result.nutritionInfo.calories.toInt();
-        _nutritionData = {
-          'protein': result.nutritionInfo.protein.toInt(),
-          'carbs': result.nutritionInfo.carbs.toInt(),
-          'fat': result.nutritionInfo.fat.toInt(),
-          'fiber': result.nutritionInfo.fiber.toInt(),
-          'sugar': result.nutritionInfo.sugar.toInt(),
-          'sodium': result.nutritionInfo.sodium.toInt(),
-        };
-        _ingredients = result.ingredients;
+        _updateFoodData(result);
         _isLoading = false;
-        _warnings = result.warnings;
-        food = result;
       });
     } catch (e) {
       setState(() {
@@ -84,6 +75,40 @@ class _NutritionPageState extends State<NutritionPage> {
         _errorMessage = e.toString();
       });
     }
+  }
+  
+  // Update UI data with analysis result
+  void _updateFoodData(FoodAnalysisResult result) {
+    _foodName = result.foodName;
+    _calories = result.nutritionInfo.calories.toInt();
+    _nutritionData = {
+      'protein': result.nutritionInfo.protein.toInt(),
+      'carbs': result.nutritionInfo.carbs.toInt(),
+      'fat': result.nutritionInfo.fat.toInt(),
+      'fiber': result.nutritionInfo.fiber.toInt(),
+      'sugar': result.nutritionInfo.sugar.toInt(),
+      'sodium': result.nutritionInfo.sodium.toInt(),
+    };
+    _ingredients = result.ingredients;
+    _warnings = result.warnings;
+    food = result;
+  }
+  
+  // Handle analysis correction
+  void _handleAnalysisCorrected(FoodAnalysisResult correctedResult) {
+    setState(() {
+      _isCorrectingAnalysis = false;
+      _updateFoodData(correctedResult);
+    });
+    
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Analysis corrected successfully!'),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   void _retryPhotoCapture() {
@@ -104,11 +129,12 @@ class _NutritionPageState extends State<NutritionPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    if (_isLoading || _isCorrectingAnalysis) {
       return Scaffold(
         body: FoodAnalysisLoading(
           primaryYellow: primaryYellow,
           primaryPink: primaryPink,
+          message: _isCorrectingAnalysis ? 'Correcting Analysis' : 'Analyzing Food',
         ),
       );
     }
@@ -129,11 +155,22 @@ class _NutritionPageState extends State<NutritionPage> {
       backgroundColor: Colors.white,
       body: _buildAnalysisResultContent(),
       bottomSheet: BottomActionBar(
-        isLoading: _isLoading,
+        isLoading: _isLoading || _isCorrectingAnalysis,
         food: food,
         foodScanPhotoService: widget.foodScanPhotoService,
         primaryYellow: primaryYellow,
         primaryPink: primaryPink,
+        primaryGreen: primaryGreen,
+        onAnalysisCorrected: (correctedResult) {
+          setState(() {
+            _isCorrectingAnalysis = true;
+          });
+          
+          // Process the correction asynchronously and update UI when done
+          Future.delayed(Duration.zero, () {
+            _handleAnalysisCorrected(correctedResult);
+          });
+        },
       ),
     );
   }
