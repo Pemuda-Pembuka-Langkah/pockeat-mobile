@@ -281,6 +281,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle('Select Body Part'),
+          const SizedBox(height: 8),
           _buildBodyPartChips(),
           const SizedBox(height: 24),
           _buildExerciseQuickAdd(),
@@ -295,14 +296,17 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
             estimatedCalories: calculateEstimatedCalories(exercises),
             primaryGreen: primaryGreen,
           ),
-          ...exercises.map((exercise) => ExerciseCard(
-                key: Key('exerciseCard_${exercise.name}'),
-                exercise: exercise,
-                primaryGreen: primaryGreen,
-                volume: calculateExerciseVolume(exercise),
-                onAddSet: () => _showAddSetDialog(exercise),
-                onDeleteExercise: () => deleteExercise(exercise),
-                onDeleteSet: (index) => deleteSet(exercise, index),
+          ...exercises.map((exercise) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: ExerciseCard(
+                  key: Key('exerciseCard_${exercise.name}'),
+                  exercise: exercise,
+                  primaryGreen: primaryGreen,
+                  volume: calculateExerciseVolume(exercise),
+                  onAddSet: () => _showAddSetDialog(exercise),
+                  onDeleteExercise: () => deleteExercise(exercise),
+                  onDeleteSet: (index) => deleteSet(exercise, index),
+                ),
               )),
         ],
       ),
@@ -316,12 +320,15 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       key: const Key('bodyPartChips'),
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: exercisesByCategory.keys.map((category) => BodyPartChip(
-          key: Key('bodyPartChip_$category'),
-          category: category,
-          isSelected: selectedBodyPart == category,
-          onTap: () => setState(() => selectedBodyPart = category),
-          primaryGreen: primaryGreen
+        children: exercisesByCategory.keys.map((category) => Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: BodyPartChip(
+            key: Key('bodyPartChip_$category'),
+            category: category,
+            isSelected: selectedBodyPart == category,
+            onTap: () => setState(() => selectedBodyPart = category),
+            primaryGreen: primaryGreen
+          ),
         )).toList(),
       ),
     );
