@@ -33,15 +33,17 @@ class FoodImageAnalysisService extends BaseGeminiService {
       - Beverages
       - Fruits and vegetables
       - Packaged food products
+      - Amount of food items
       
       Even if the image quality is not perfect or the food is partially visible, please do your best to identify it and provide an analysis.
       
       For the identified food, provide a comprehensive analysis including:
       - The specific name of the food
-      - A detailed list of likely ingredients with estimated servings composition in grams
+      - A detailed list of likely ingredients with estimated servings composition in grams, estimate based on size and portion to the best of your ability.
       - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
       - Add warnings if the food contains high sodium (>500mg) or high sugar (>20g)
       
+      BE VERY THOROUGH. YOU WILL BE FIRED. THE CUSTOMER CAN GET POISONED. BE VERY THOROUGH.
       Return your response as a strict JSON object with this exact format with NO COMMENTS:
       {
         "food_name": "string",

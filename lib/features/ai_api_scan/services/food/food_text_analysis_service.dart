@@ -11,10 +11,11 @@ class FoodTextAnalysisService extends BaseGeminiService {
     required super.apiKey,
     super.customModelWrapper,
   });
-  
+
   // coverage:ignore-start
   factory FoodTextAnalysisService.fromEnv() {
-    return FoodTextAnalysisService(apiKey: BaseGeminiService.getApiKeyFromEnv());
+    return FoodTextAnalysisService(
+        apiKey: BaseGeminiService.getApiKeyFromEnv());
   }
   // coverage:ignore-end
 
@@ -28,10 +29,13 @@ class FoodTextAnalysisService extends BaseGeminiService {
       
       Provide a comprehensive analysis including:
       - The name of the food
-      - A complete list of ingredients with servings composition (in grams) 
+      - A complete list of ingredients with servings composition (in grams) from portion estimation or standard serving size.
       - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
-      - Add warnings if the food contains high sodium (>500mg) or high sugar (>20g)
+      - Add warnings if the food contains high sodium (>500mg) or high sugar (>20g).
       
+
+      BE VERY THOROUGH. YOU WILL BE FIRED. THE CUSTOMER CAN GET POISONED. BE VERY THOROUGH.
+
       Return your response as a strict JSON object with this exact format with NO COMMENTS:
       {
         "food_name": "string",
@@ -77,7 +81,8 @@ class FoodTextAnalysisService extends BaseGeminiService {
       }
       ''';
 
-      final response = await modelWrapper.generateContent([Content.text(prompt)]);
+      final response =
+          await modelWrapper.generateContent([Content.text(prompt)]);
       if (response.text == null) {
         throw GeminiServiceException('No response text generated');
       }
@@ -85,7 +90,8 @@ class FoodTextAnalysisService extends BaseGeminiService {
       final jsonString = extractJson(response.text!);
       return FoodAnalysisParser.parse(jsonString);
     } catch (e) {
-      throw GeminiServiceException("Failed to analyze food description '$description': $e");
+      throw GeminiServiceException(
+          "Failed to analyze food description '$description': $e");
     }
   }
 
@@ -143,8 +149,9 @@ class FoodTextAnalysisService extends BaseGeminiService {
       IMPORTANT: Return only the JSON object with no additional text, comments, or explanations.
       ''';
 
-      final response = await modelWrapper.generateContent([Content.text(prompt)]);
-      
+      final response =
+          await modelWrapper.generateContent([Content.text(prompt)]);
+
       if (response.text == null) {
         throw GeminiServiceException('No response text generated');
       }
