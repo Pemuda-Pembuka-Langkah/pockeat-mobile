@@ -5,7 +5,7 @@ class FoodAnalysisResult {
   final NutritionInfo nutritionInfo;
   final List<String> warnings;
 
-  final String foodImageUrl;
+  String? foodImageUrl;
 
   // Constants for warning messages to ensure consistency
   static const String highSodiumWarning = "High sodium content";
@@ -44,7 +44,7 @@ class FoodAnalysisResult {
     }
 
     return FoodAnalysisResult(
-      foodImageUrl:  '',
+      foodImageUrl: json['food_image_url'],
       foodName: json['food_name'] ?? '',
       ingredients: (json['ingredients'] as List<dynamic>?)
               ?.map((item) => Ingredient.fromJson(item))
@@ -61,6 +61,7 @@ class FoodAnalysisResult {
       'ingredients': ingredients.map((i) => i.toJson()).toList(),
       'nutrition_info': nutritionInfo.toJson(),
       'warnings': warnings,
+      'food_image_url': foodImageUrl,
     };
   }
 }

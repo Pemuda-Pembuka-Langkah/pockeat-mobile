@@ -1,4 +1,4 @@
-import 'package:pockeat/features/homepage/presentation/pet_section.dart';
+import 'package:pockeat/features/homepage/presentation/screens/pet_section.dart';
 import 'package:flutter/material.dart';
 
 class OverviewSection extends StatefulWidget {

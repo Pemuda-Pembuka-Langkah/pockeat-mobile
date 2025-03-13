@@ -11,7 +11,12 @@ import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_se
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'dart:io';
 
-class MockCameraController extends Mock implements CameraController {}
+class MockCameraController extends Mock implements CameraController {
+  @override
+  Future<void> dispose() async {
+    return Future<void>.value();
+  }
+}
 
 class MockXFile extends Mock implements XFile {}
 
@@ -96,7 +101,6 @@ void main() {
     // Get the state
     final state = tester.state<ScanFoodPageState>(find.byType(ScanFoodPage));
     
-
     // Test initial values
     expect(state.scanProgress, 0.0);
     expect(state.statusMessage, 'Make sure your food is clearly visible');

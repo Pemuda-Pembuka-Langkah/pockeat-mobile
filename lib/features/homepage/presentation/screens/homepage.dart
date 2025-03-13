@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pockeat/component/navigation.dart';
-import 'package:pockeat/features/homepage/presentation/overview_section.dart';
-import 'package:pockeat/features/homepage/presentation/recently_foods_section.dart';
+import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
+import 'package:pockeat/features/homepage/presentation/screens/recently_foods_section.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/recently_exercise_section.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:flutter/material.dart';
