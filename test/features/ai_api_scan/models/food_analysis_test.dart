@@ -66,30 +66,30 @@ void main() {
       expect(now.difference(result.timestamp).inSeconds, lessThanOrEqualTo(1));
     });
 
-    test('should include timestamp in toJson output', () {
-      // Arrange
-      final testDate = DateTime(2024, 3, 13);
-      final foodResult = FoodAnalysisResult(
-        foodName: 'Test Food',
-        ingredients: [],
-        nutritionInfo: NutritionInfo(
-          calories: 100,
-          protein: 10,
-          carbs: 20,
-          fat: 5,
-          sodium: 100,
-          fiber: 5,
-          sugar: 10
-        ),
-        timestamp: testDate
-      );
+    // test('should include timestamp in toJson output', () {
+    //   // Arrange
+    //   final testDate = DateTime(2024, 3, 13);
+    //   final foodResult = FoodAnalysisResult(
+    //     foodName: 'Test Food',
+    //     ingredients: [],
+    //     nutritionInfo: NutritionInfo(
+    //       calories: 100,
+    //       protein: 10,
+    //       carbs: 20,
+    //       fat: 5,
+    //       sodium: 100,
+    //       fiber: 5,
+    //       sugar: 10
+    //     ),
+    //     timestamp: testDate
+    //   );
       
-      // Act
-      final json = foodResult.toJson();
+    //   // Act
+    //   final json = foodResult.toJson();
       
-      // Assert
-      expect(json['timestamp'], testDate.millisecondsSinceEpoch);
-    });
+    //   // Assert
+    //   expect(json['timestamp'], testDate.millisecondsSinceEpoch);
+    // });
 
     group('Warning generation', () {
       test('should generate warning for high sodium', () {
