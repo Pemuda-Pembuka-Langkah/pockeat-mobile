@@ -4,8 +4,8 @@ class FoodAnalysisResult {
   final List<Ingredient> ingredients;
   final NutritionInfo nutritionInfo;
   final List<String> warnings;
-
   final String foodImageUrl;
+  final DateTime timestamp;
 
   // Constants for warning messages to ensure consistency
   static const String highSodiumWarning = "High sodium content";
@@ -21,7 +21,8 @@ class FoodAnalysisResult {
     required this.nutritionInfo,
     this.warnings = const [], 
     this.foodImageUrl = '',
-  });
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
 
   factory FoodAnalysisResult.fromJson(Map<String, dynamic> json) {
     final nutritionInfo = NutritionInfo.fromJson(json['nutrition_info'] ?? {});
@@ -52,6 +53,9 @@ class FoodAnalysisResult {
           [],
       nutritionInfo: nutritionInfo,
       warnings: warnings,
+      timestamp: json['timestamp'] != null 
+          ? DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int) 
+          : null,
     );
   }
 
@@ -61,6 +65,7 @@ class FoodAnalysisResult {
       'ingredients': ingredients.map((i) => i.toJson()).toList(),
       'nutrition_info': nutritionInfo.toJson(),
       'warnings': warnings,
+      'timestamp': timestamp.millisecondsSinceEpoch,
     };
   }
 }
