@@ -32,6 +32,8 @@ import 'package:pockeat/features/food_log_history/presentation/screens/food_hist
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_log_history/presentation/screens/food_detail_page.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -93,6 +95,9 @@ void main() async {
         ),
         Provider<FoodScanRepository>(
           create: (_) => getIt<FoodScanRepository>(),
+        ),
+        Provider<FoodTextInputRepository>(
+          create: (_) => getIt<FoodTextInputRepository>(),
         ),
         // Add other providers here if needed
       ],
@@ -191,6 +196,8 @@ class MyApp extends StatelessWidget {
             foodId: args['foodId'] as String,
             foodRepository:
                 Provider.of<FoodScanRepository>(context, listen: false),
+            foodTextInputRepository: 
+                Provider.of<FoodTextInputRepository>(context, listen: false),
           );
         },
       },

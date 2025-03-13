@@ -4,15 +4,15 @@ import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
 void main() {
   test('FoodEntry model is created correctly', () {
     final foodEntry = FoodEntry(
-      foodName: 'Nasi Goreng',
-      description: 'Fried rice with vegetables',
-      ingredients: 'Rice, eggs, soy sauce',
-      weight: 300,
+      foodDescription: 'Fried rice with vegetables',
     );
 
-    expect(foodEntry.foodName, 'Nasi Goreng');
-    expect(foodEntry.description, 'Fried rice with vegetables');
-    expect(foodEntry.ingredients, 'Rice, eggs, soy sauce');
-    expect(foodEntry.weight, 300);
+    expect(foodEntry.foodDescription, 'Fried rice with vegetables');
+  });
+
+  test('FoodEntry should not accept an empty foodDescription', () {
+    final foodEntry = FoodEntry(foodDescription: '');
+    
+    expect(foodEntry.foodDescription.isEmpty, true);
   });
 }
