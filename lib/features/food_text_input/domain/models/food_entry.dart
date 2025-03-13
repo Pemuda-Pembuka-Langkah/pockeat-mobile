@@ -1,18 +1,12 @@
 class FoodEntry {
-  final String foodName;
-  final String description;
-  final String ingredients;
-  final int? weight;
+  final String foodDescription;
 
   FoodEntry({
-    required this.foodName,
-    required this.description,
-    required this.ingredients,
-    this.weight,
+    required this.foodDescription,
   });
 
   @override
   String toString() {
-    return 'FoodEntry(foodName: $foodName, description: $description, ingredients: $ingredients, weight: $weight)';
+    return 'FoodEntry(description: $foodDescription)';
   }
 }
