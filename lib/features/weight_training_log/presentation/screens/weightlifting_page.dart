@@ -264,10 +264,13 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
       title: const Text('Weightlifting', style: TextStyle(fontWeight: FontWeight.w600)),
       actions: [
-        IconButton(
-          key: const Key('saveWorkoutButton'),
-          icon: const Icon(Icons.save),
-          onPressed: saveWorkout,
+        Opacity(
+          opacity: 0.0,
+          child: IconButton(
+            key: const Key('saveWorkoutButton'),
+            icon: const Icon(Icons.save),
+            onPressed: saveWorkout,
+          ),
         ),
       ],
     );
@@ -281,6 +284,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSectionTitle('Select Body Part'),
+          const SizedBox(height: 8),
           _buildBodyPartChips(),
           const SizedBox(height: 24),
           _buildExerciseQuickAdd(),
@@ -295,14 +299,17 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
             estimatedCalories: calculateEstimatedCalories(exercises),
             primaryGreen: primaryGreen,
           ),
-          ...exercises.map((exercise) => ExerciseCard(
-                key: Key('exerciseCard_${exercise.name}'),
-                exercise: exercise,
-                primaryGreen: primaryGreen,
-                volume: calculateExerciseVolume(exercise),
-                onAddSet: () => _showAddSetDialog(exercise),
-                onDeleteExercise: () => deleteExercise(exercise),
-                onDeleteSet: (index) => deleteSet(exercise, index),
+          ...exercises.map((exercise) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: ExerciseCard(
+                  key: Key('exerciseCard_${exercise.name}'),
+                  exercise: exercise,
+                  primaryGreen: primaryGreen,
+                  volume: calculateExerciseVolume(exercise),
+                  onAddSet: () => _showAddSetDialog(exercise),
+                  onDeleteExercise: () => deleteExercise(exercise),
+                  onDeleteSet: (index) => deleteSet(exercise, index),
+                ),
               )),
         ],
       ),
@@ -316,12 +323,15 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       key: const Key('bodyPartChips'),
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: exercisesByCategory.keys.map((category) => BodyPartChip(
-          key: Key('bodyPartChip_$category'),
-          category: category,
-          isSelected: selectedBodyPart == category,
-          onTap: () => setState(() => selectedBodyPart = category),
-          primaryGreen: primaryGreen
+        children: exercisesByCategory.keys.map((category) => Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: BodyPartChip(
+            key: Key('bodyPartChip_$category'),
+            category: category,
+            isSelected: selectedBodyPart == category,
+            onTap: () => setState(() => selectedBodyPart = category),
+            primaryGreen: primaryGreen
+          ),
         )).toList(),
       ),
     );
