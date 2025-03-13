@@ -18,7 +18,8 @@ void main() {
           'sodium': 2,
           'fiber': 4.4,
           'sugar': 19.0
-        }
+        },
+        'timestamp': 1710320000000 // March 13, 2024 timestamp
       };
       
       // Act
@@ -33,6 +34,61 @@ void main() {
       expect(result.nutritionInfo.fiber, 4.4);
       expect(result.nutritionInfo.sugar, 19.0);
       expect(result.warnings, isEmpty); // No warnings for normal sugar/sodium
+      expect(result.timestamp, isA<DateTime>());
+      expect(result.timestamp.millisecondsSinceEpoch, 1710320000000);
+    });
+
+    test('should set default timestamp when not provided in JSON', () {
+      // Arrange
+      final json = {
+        'food_name': 'Apple',
+        'ingredients': [
+          {'name': 'Apple', 'servings': 100}
+        ],
+        'nutrition_info': {
+          'calories': 95,
+          'protein': 0.5,
+          'carbs': 25.1,
+          'fat': 0.3,
+          'sodium': 2,
+          'fiber': 4.4,
+          'sugar': 19.0
+        }
+      };
+      
+      // Act
+      final result = FoodAnalysisResult.fromJson(json);
+      final now = DateTime.now();
+      
+      // Assert
+      expect(result.timestamp, isA<DateTime>());
+      // Timestamp should be recent (within the last second)
+      expect(now.difference(result.timestamp).inSeconds, lessThanOrEqualTo(1));
+    });
+
+    test('should include timestamp in toJson output', () {
+      // Arrange
+      final testDate = DateTime(2024, 3, 13);
+      final foodResult = FoodAnalysisResult(
+        foodName: 'Test Food',
+        ingredients: [],
+        nutritionInfo: NutritionInfo(
+          calories: 100,
+          protein: 10,
+          carbs: 20,
+          fat: 5,
+          sodium: 100,
+          fiber: 5,
+          sugar: 10
+        ),
+        timestamp: testDate
+      );
+      
+      // Act
+      final json = foodResult.toJson();
+      
+      // Assert
+      expect(json['timestamp'], testDate.millisecondsSinceEpoch);
     });
 
     group('Warning generation', () {

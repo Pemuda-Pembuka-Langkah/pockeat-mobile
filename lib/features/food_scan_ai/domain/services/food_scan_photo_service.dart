@@ -50,4 +50,9 @@ class FoodScanPhotoService {
       throw Exception('Failed to correct food analysis: ${e.toString()}');
     }
   }
+
+  // get all food analysis
+  Future<List<FoodAnalysisResult>> getAllFoodAnalysis() async {
+    return await _foodScanRepository.getAll();
+  }
 }

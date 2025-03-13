@@ -77,7 +77,7 @@ class ExerciseLogHistoryItem {
       return ExerciseLogHistoryItem(
         activityType: typeWeightlifting,
         title: weightLifting.name,
-        subtitle: '0 min • 0 cal',
+        subtitle: '0 minutes • 0 cal',
         timestamp: weightLifting.timestamp,
         caloriesBurned: 0,
         sourceId: weightLifting.id,
@@ -95,7 +95,7 @@ class ExerciseLogHistoryItem {
       activityType: typeWeightlifting,
       title: weightLifting.name,
       subtitle:
-          '${totalDurationInMinutes.toStringAsFixed(0)} min • $caloriesBurned cal',
+          '${totalDurationInMinutes.toStringAsFixed(0)} minutes • $caloriesBurned cal',
       timestamp: weightLifting.timestamp,
       caloriesBurned: caloriesBurned,
       sourceId: weightLifting.id,
@@ -121,7 +121,7 @@ class ExerciseLogHistoryItem {
     // Format durasi dalam format yang lebih user-friendly
     final minutes = cardioLog.duration.inMinutes;
     final durationText =
-        minutes > 0 ? '$minutes min' : '${cardioLog.duration.inSeconds} sec';
+        minutes > 0 ? '$minutes minutes' : '${cardioLog.duration.inSeconds} seconds';
 
     return ExerciseLogHistoryItem(
       activityType: typeCardio,
