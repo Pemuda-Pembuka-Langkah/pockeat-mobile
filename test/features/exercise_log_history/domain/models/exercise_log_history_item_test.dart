@@ -57,7 +57,7 @@ void main() {
       final exerciseAnalysisResult = ExerciseAnalysisResult(
         id: 'smart-123',
         exerciseType: 'Running',
-        duration: '30 min',
+        duration: '30 minutes',
         intensity: 'High',
         metValue: 8.0,
         estimatedCalories: 300,
@@ -73,7 +73,7 @@ void main() {
       expect(
           item.activityType, equals(ExerciseLogHistoryItem.typeSmartExercise));
       expect(item.title, equals('Running'));
-      expect(item.subtitle, equals('30 min • 300 cal'));
+      expect(item.subtitle, equals('30 minutes • 300 cal'));
       expect(item.timestamp, equals(testTimestamp));
       expect(item.caloriesBurned, equals(300));
       expect(item.sourceId, equals('smart-123'));
@@ -103,7 +103,7 @@ void main() {
 
       // The exact calorie value may vary based on our formula,
       // so we'll use a more flexible assertion that checks for the format pattern
-      expect(item.subtitle, matches(r'180 min • \d+ cal'));
+      expect(item.subtitle, matches(r'180 minutes • \d+ cal'));
       expect(item.sourceId, equals('weight-123'));
     });
 
@@ -130,7 +130,7 @@ void main() {
       expect(
           item.activityType, equals(ExerciseLogHistoryItem.typeWeightlifting));
       expect(item.title, equals('Bench Press'));
-      expect(item.subtitle, matches(r'180 min • \d+ cal'));
+      expect(item.subtitle, matches(r'180 minutes • \d+ cal'));
       expect(item.sourceId, equals('weight-123'));
     });
 
@@ -153,7 +153,7 @@ void main() {
       // Assert
       expect(item.activityType, equals(ExerciseLogHistoryItem.typeCardio));
       expect(item.title, equals('Running'));
-      expect(item.subtitle, equals('30 min • 320 cal'));
+      expect(item.subtitle, equals('30 minutes • 320 cal'));
       expect(item.timestamp, equals(testTimestamp));
       expect(item.caloriesBurned, equals(320));
       expect(item.sourceId, equals('cardio-123'));
@@ -179,7 +179,7 @@ void main() {
       // Assert
       expect(item.activityType, equals(ExerciseLogHistoryItem.typeCardio));
       expect(item.title, equals('Cycling'));
-      expect(item.subtitle, equals('45 min • 400 cal'));
+      expect(item.subtitle, equals('45 minutes • 400 cal'));
       expect(item.timestamp, equals(testTimestamp));
       expect(item.caloriesBurned, equals(400));
       expect(item.sourceId, equals('cardio-456'));
@@ -206,7 +206,7 @@ void main() {
       // Assert
       expect(item.activityType, equals(ExerciseLogHistoryItem.typeCardio));
       expect(item.title, equals('Swimming'));
-      expect(item.subtitle, equals('40 min • 350 cal'));
+      expect(item.subtitle, equals('40 minutes • 350 cal'));
       expect(item.timestamp, equals(testTimestamp));
       expect(item.caloriesBurned, equals(350));
       expect(item.sourceId, equals('cardio-789'));
@@ -237,7 +237,7 @@ void main() {
       expect(
           item.activityType, equals(ExerciseLogHistoryItem.typeWeightlifting));
       expect(item.title, equals('Bench Press'));
-      expect(item.subtitle, matches(r'75 min • \d+ cal'));
+      expect(item.subtitle, matches(r'75 minutes • \d+ cal'));
       expect(item.sourceId, equals('weight-123'));
 
       // Calculate calories using our new formula
@@ -272,7 +272,7 @@ void main() {
       expect(
           item.activityType, equals(ExerciseLogHistoryItem.typeWeightlifting));
       expect(item.title, equals('Deadlift'));
-      expect(item.subtitle, matches(r'20 min • \d+ cal'));
+      expect(item.subtitle, matches(r'20 minutes • \d+ cal'));
       expect(item.sourceId, equals('weight-456'));
 
       // Calculate calories using our new formula
@@ -303,7 +303,7 @@ void main() {
       // Assert
       expect(item.activityType, equals(ExerciseLogHistoryItem.typeWeightlifting));
       expect(item.title, equals('Bench Press'));
-      expect(item.subtitle, equals('0 min • 0 cal'));
+      expect(item.subtitle, equals('0 minutes • 0 cal'));
       expect(item.caloriesBurned, equals(0));
       expect(item.sourceId, equals('weight-empty'));
     });
@@ -328,7 +328,7 @@ void main() {
 
       // Total duration is 180 minutes (60+60+60)
       // Assert
-      expect(item.subtitle, contains('180 min'));
+      expect(item.subtitle, contains('180 minutes'));
       expect(item.subtitle, contains('cal'));
       expect(item.caloriesBurned, isNotNull);
     });
@@ -350,7 +350,7 @@ void main() {
       // Assert
       expect(item.activityType, equals(ExerciseLogHistoryItem.typeCardio));
       expect(item.title, equals('Running'));
-      expect(item.subtitle, equals('30 min • 320 cal'));
+      expect(item.subtitle, equals('30 minutes • 320 cal'));
       expect(item.timestamp, equals(testTimestamp));
       expect(item.caloriesBurned, equals(320));
     });
@@ -377,7 +377,7 @@ void main() {
       
       // Also verify that calories appear in the subtitle
       expect(item.subtitle, contains('cal'));
-      expect(item.subtitle, contains('300 min')); // The implementation treats the duration value as minutes directly
+      expect(item.subtitle, contains('300 minutes')); // The implementation treats the duration value as minutes directly
     });
 
     group('timeAgo formatting tests', () {

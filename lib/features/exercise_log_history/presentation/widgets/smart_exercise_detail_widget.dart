@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
@@ -70,7 +71,7 @@ class SmartExerciseDetailWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Icon(
-                    Icons.fitness_center,
+                    CupertinoIcons.text_badge_checkmark,
                     size: 28,
                     color: Colors.white,
                   ),
