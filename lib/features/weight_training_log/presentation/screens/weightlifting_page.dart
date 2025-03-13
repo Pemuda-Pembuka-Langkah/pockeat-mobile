@@ -264,10 +264,13 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
       title: const Text('Weightlifting', style: TextStyle(fontWeight: FontWeight.w600)),
       actions: [
-        IconButton(
-          key: const Key('saveWorkoutButton'),
-          icon: const Icon(Icons.save),
-          onPressed: saveWorkout,
+        Opacity(
+          opacity: 0.0,
+          child: IconButton(
+            key: const Key('saveWorkoutButton'),
+            icon: const Icon(Icons.save),
+            onPressed: saveWorkout,
+          ),
         ),
       ],
     );
