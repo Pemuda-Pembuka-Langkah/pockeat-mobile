@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pockeat/component/navigation.dart';
-import 'package:pockeat/features/homepage/presentation/overview_section.dart';
-import 'package:pockeat/features/homepage/presentation/recently_foods_section.dart';
+import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
+import 'package:pockeat/features/food_log_history/presentation/widgets/food_recent_section.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/recently_exercise_section.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
@@ -120,6 +121,8 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     final exerciseLogHistoryRepository =
         Provider.of<ExerciseLogHistoryService>(context);
+    final foodLogHistoryService =
+        Provider.of<FoodLogHistoryService>(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -325,7 +328,9 @@ class _HomePageState extends State<HomePage>
             controller: _tabController,
             children: [
               const OverviewSection(),
-              const RecentlyFoodsSection(),
+              FoodRecentSection(
+                service: foodLogHistoryService,
+              ),
               _shouldRefreshExerciseSection
                   ? RecentlyExerciseSection(
                       repository: exerciseLogHistoryRepository,

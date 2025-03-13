@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
-import 'package:pockeat/features/homepage/presentation/homepage.dart';
+import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:camera/camera.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
@@ -28,6 +28,10 @@ import 'package:pockeat/features/exercise_log_history/presentation/screens/exerc
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
+import 'package:pockeat/features/food_log_history/presentation/screens/food_history_page.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/food_log_history/presentation/screens/food_detail_page.dart';
+import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,6 +87,12 @@ void main() async {
         ),
         Provider<WeightLiftingRepository>(
           create: (_) => weightLiftingRepository,
+        ),
+        Provider<FoodLogHistoryService>(
+          create: (_) => getIt<FoodLogHistoryService>(),
+        ),
+        Provider<FoodScanRepository>(
+          create: (_) => getIt<FoodScanRepository>(),
         ),
         // Add other providers here if needed
       ],
@@ -157,6 +167,9 @@ class MyApp extends StatelessWidget {
         '/exercise-history': (context) => ExerciseHistoryPage(
               service: Provider.of<ExerciseLogHistoryService>(context),
             ),
+        '/food-history': (context) => FoodHistoryPage(
+              service: Provider.of<FoodLogHistoryService>(context),
+            ),
         '/exercise-detail': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>;
@@ -169,6 +182,15 @@ class MyApp extends StatelessWidget {
                 Provider.of<SmartExerciseLogRepository>(context, listen: false),
             weightLiftingRepository:
                 Provider.of<WeightLiftingRepository>(context, listen: false),
+          );
+        },
+        '/food-detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
+          return FoodDetailPage(
+            foodId: args['foodId'] as String,
+            foodRepository:
+                Provider.of<FoodScanRepository>(context, listen: false),
           );
         },
       },

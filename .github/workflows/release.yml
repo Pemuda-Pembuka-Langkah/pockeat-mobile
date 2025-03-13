@@ -22,6 +22,7 @@ jobs:
       - name: Create .env file
         run: |
           echo "FLAVOR=production" > .env
+          echo "GOOGLE_GEMINI_API_KEY=${{ secrets.PRODUCTION_GOOGLE_GEMINI_API_KEY }}" >> .env
           echo "PRODUCTION_FIREBASE_PROJECT_ID=${{ secrets.PRODUCTION_FIREBASE_PROJECT_ID }}" >> .env
           echo "PRODUCTION_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PRODUCTION_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
           echo "PRODUCTION_FIREBASE_STORAGE_BUCKET=${{ secrets.PRODUCTION_FIREBASE_STORAGE_BUCKET }}" >> .env
