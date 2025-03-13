@@ -1,3 +1,4 @@
+// test/features/ai_api_scan/services/food/food_text_analysis_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
@@ -37,7 +38,6 @@ void main() {
   });
 
   group('FoodTextAnalysisService', () {
-    // Tests remain the same
     test('should analyze food by text successfully', () async {
       // Arrange
       const foodDescription = 'Apple pie with cinnamon';
@@ -122,7 +122,7 @@ void main() {
         throwsA(isA<GeminiServiceException>().having(
           (e) => e.message,
           'error message',
-          contains('Network error')
+          contains('Failed to analyze food description')
         )),
       );
     });
@@ -232,6 +232,70 @@ void main() {
       expect(result.nutritionInfo.fat, equals(18));
       expect(result.warnings.length, equals(1));
       expect(result.warnings[0], equals('High sugar content'));
+    });
+
+    test('should handle food names and ingredients with special characters during correction', () async {
+      // Arrange
+      final previousResult = FoodAnalysisResult(
+        foodName: 'Apple "Pie"',
+        ingredients: [
+          Ingredient(name: 'Apples\nGranny Smith', servings: 50),
+          Ingredient(name: 'Flour', servings: 25),
+        ],
+        nutritionInfo: NutritionInfo(
+          calories: 250,
+          protein: 2,
+          carbs: 40,
+          fat: 12,
+          sodium: 150,
+          fiber: 3,
+          sugar: 25,
+        ),
+        warnings: ['High "sugar" content'],
+      );
+      
+      const userComment = 'Add cinnamon';
+      
+      const validJsonResponse = '''
+      {
+        "food_name": "Apple Pie with Cinnamon",
+        "ingredients": [
+          {
+            "name": "Apples",
+            "servings": 50
+          },
+          {
+            "name": "Flour",
+            "servings": 25
+          },
+          {
+            "name": "Cinnamon",
+            "servings": 2
+          }
+        ],
+        "nutrition_info": {
+          "calories": 255,
+          "protein": 2,
+          "carbs": 41,
+          "fat": 12,
+          "sodium": 150,
+          "fiber": 3,
+          "sugar": 25
+        },
+        "warnings": ["High sugar content"]
+      }
+      ''';
+
+      // Mock
+      mockModelWrapper.responseText = validJsonResponse;
+
+      // Act
+      final result = await service.correctAnalysis(previousResult, userComment);
+
+      // Assert
+      expect(result.foodName, equals('Apple Pie with Cinnamon'));
+      expect(result.ingredients.length, equals(3));
+      expect(result.ingredients[2].name, equals('Cinnamon'));
     });
 
     test('should correct nutrition values based on user comment', () async {

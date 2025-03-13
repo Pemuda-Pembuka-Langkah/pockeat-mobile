@@ -4,13 +4,15 @@ import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/base_gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/utils/food_analysis_parser.dart';
+import 'package:pockeat/features/ai_api_scan/services/food/utils/json_prompt_formatter.dart';
 
 class FoodTextAnalysisService extends BaseGeminiService {
   FoodTextAnalysisService({
     required super.apiKey,
     super.customModelWrapper,
   });
-// coverage:ignore-start
+  
+  // coverage:ignore-start
   factory FoodTextAnalysisService.fromEnv() {
     return FoodTextAnalysisService(apiKey: BaseGeminiService.getApiKeyFromEnv());
   }
@@ -83,7 +85,7 @@ class FoodTextAnalysisService extends BaseGeminiService {
       final jsonString = extractJson(response.text!);
       return FoodAnalysisParser.parse(jsonString);
     } catch (e) {
-    throw GeminiServiceException("Failed to analyze food description '$description': $e");
+      throw GeminiServiceException("Failed to analyze food description '$description': $e");
     }
   }
 
@@ -91,33 +93,28 @@ class FoodTextAnalysisService extends BaseGeminiService {
       FoodAnalysisResult previousResult, String userComment) async {
     try {
       final prompt = '''
-      Original food analysis:
-      - Food name: ${previousResult.foodName}
-      - Ingredients: ${previousResult.ingredients.map((i) => "${i.name}: ${i.servings}g").join(", ")}
-      - Calories: ${previousResult.nutritionInfo.calories}
-      - Protein: ${previousResult.nutritionInfo.protein}g
-      - Carbs: ${previousResult.nutritionInfo.carbs}g
-      - Fat: ${previousResult.nutritionInfo.fat}g
-      - Sodium: ${previousResult.nutritionInfo.sodium}mg
-      - Fiber: ${previousResult.nutritionInfo.fiber}g
-      - Sugar: ${previousResult.nutritionInfo.sugar}g
-      - Warnings: ${previousResult.warnings.join(", ")}
+      You are a food nutrition expert tasked with correcting a food analysis based on user feedback.
+
+      ORIGINAL ANALYSIS:
+      ${JsonPromptFormatter.formatFoodAnalysisResult(previousResult)}
       
-      User correction comment: "$userComment"
+      USER CORRECTION: "$userComment"
       
+      INSTRUCTIONS:
+      1. Carefully analyze the user's correction and determine what specific aspects need to be modified.
+      2. Consider these possible correction types:
+         - Food identity correction (e.g., "this is chicken, not beef")
+         - Ingredient additions/removals/adjustments (e.g., "there's no butter" or "add 15g of cheese")
+         - Portion size adjustments (e.g., "this is a half portion")
+         - Nutritional value corrections (e.g., "calories should be around 350")
+         - Special dietary information (e.g., "this is a vegan version")
+      3. Only modify elements that need correction based on the user's feedback.
+      4. Keep all other values from the original analysis intact.
+      5. Maintain reasonable nutritional consistency (e.g., if calories increase, check if macros need adjustment).
+      6. For standard serving size, use common restaurant or cookbook portions for a single adult.
       
-      Please correct and analyze the ingredients and nutritional content on the correction comment.
-      If not described, assume a standard serving size and ingredients for 1 person only.
-      
-      Provide a comprehensive analysis including:
-      - The name of the food
-      - A complete list of ingredients with servings composition (in grams) 
-      - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
-      - Add warnings if the food contains high sodium (>500mg) or high sugar (>20g)
-      
-      Only modify values that need to be changed according to the user's feedback.
-      
-      Return your response as a strict JSON object with this exact format with NO COMMENTS:
+      RESPONSE FORMAT:
+      Return a valid JSON object with exactly this structure:
       {
         "food_name": "string",
         "ingredients": [
@@ -138,11 +135,12 @@ class FoodTextAnalysisService extends BaseGeminiService {
         "warnings": ["string"]
       }
       
-      IMPORTANT: Do not include any comments, annotations or notes in the JSON. Do not use '#' or '//' characters. Only return valid JSON.
-      For the warnings array:
-      - Include "High sodium content" (exact text) if sodium exceeds 500mg
-      - Include "High sugar content" (exact text) if sugar exceeds 20g
-      If there are no warnings, you can include an empty array [] for warnings.
+      WARNING CRITERIA:
+      - Add "High sodium content" if sodium exceeds 500mg
+      - Add "High sugar content" if sugar exceeds 20g
+      - Use empty array [] if no warnings apply
+      
+      IMPORTANT: Return only the JSON object with no additional text, comments, or explanations.
       ''';
 
       final response = await modelWrapper.generateContent([Content.text(prompt)]);
