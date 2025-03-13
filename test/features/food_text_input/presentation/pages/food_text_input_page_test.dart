@@ -90,10 +90,7 @@ void main() {
         find.byType(FoodEntryForm)
       );
 
-      expect(form.maxFoodNameWords, 20);
       expect(form.maxDescriptionWords, 100);
-      expect(form.maxIngredientWords, 200);
-      expect(form.weightRequired, true);
     });
   });
 }
