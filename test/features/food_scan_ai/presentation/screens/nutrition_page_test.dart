@@ -6,6 +6,7 @@ import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_se
 import 'package:mocktail/mocktail.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
 import 'dart:io';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
 
@@ -17,34 +18,78 @@ void main() {
   const testImagePath = 'test/assets/test_image.jpg';
   late Widget nutritionPage;
   late MockFoodScanPhotoService mockFoodScanPhotoService;
+  late FoodAnalysisResult testFoodResult;
+  late FoodAnalysisResult correctedFoodResult;
 
   setUpAll(() {
-    // Daftarkan fallback value untuk File
+    // Register fallback value for File
     registerFallbackValue(MockFile());
+    // Register fallback values for correctFoodAnalysis parameters
+    registerFallbackValue(FoodAnalysisResult(
+      foodName: '',
+      ingredients: [],
+      nutritionInfo: NutritionInfo(
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        sodium: 0,
+        sugar: 0,
+        fiber: 0,
+      ),
+      warnings: [],
+    ));
+    registerFallbackValue('');
   });
 
   setUp(() {
-    // Inisialisasi mock service
+    // Initialize mock service
     mockFoodScanPhotoService = MockFoodScanPhotoService();
 
-    // Setup mock untuk mengembalikan data valid
-    when(() => mockFoodScanPhotoService.analyzeFoodPhoto(any()))
-        .thenAnswer((_) async => FoodAnalysisResult(
-              foodName: 'Test Food',
-              ingredients: [Ingredient(name: 'Test Ingredient', servings: 1)],
-              nutritionInfo: NutritionInfo(
-                calories: 250,
-                protein: 10,
-                carbs: 30,
-                fat: 12,
-                sodium: 100,
-                sugar: 10,
-                fiber: 5,
-              ),
-              warnings: [],
-            ));
+    // Set up test food analysis result
+    testFoodResult = FoodAnalysisResult(
+      foodName: 'Test Food',
+      ingredients: [Ingredient(name: 'Test Ingredient', servings: 1)],
+      nutritionInfo: NutritionInfo(
+        calories: 250,
+        protein: 10,
+        carbs: 30,
+        fat: 12,
+        sodium: 100,
+        sugar: 10,
+        fiber: 5,
+      ),
+      warnings: [],
+    );
+    
+    // Set up corrected food analysis result
+    correctedFoodResult = FoodAnalysisResult(
+      foodName: 'Corrected Food',
+      ingredients: [
+        Ingredient(name: 'Corrected Ingredient', servings: 2),
+        Ingredient(name: 'New Ingredient', servings: 1),
+      ],
+      nutritionInfo: NutritionInfo(
+        calories: 300,
+        protein: 15,
+        carbs: 25,
+        fat: 15,
+        sodium: 120,
+        sugar: 8,
+        fiber: 6,
+      ),
+      warnings: [],
+    );
 
-    // Daftarkan mock service ke GetIt
+    // Setup mock to return valid data
+    when(() => mockFoodScanPhotoService.analyzeFoodPhoto(any()))
+        .thenAnswer((_) async => testFoodResult);
+        
+    // Setup mock for correction
+    when(() => mockFoodScanPhotoService.correctFoodAnalysis(any(), any()))
+        .thenAnswer((_) async => correctedFoodResult);
+
+    // Register mock service to GetIt
     final getIt = GetIt.instance;
     if (getIt.isRegistered<FoodScanPhotoService>()) {
       getIt.unregister<FoodScanPhotoService>();
@@ -57,7 +102,7 @@ void main() {
   });
 
   tearDown(() {
-    // Bersihkan GetIt setelah setiap test
+    // Clean up GetIt after each test
     final getIt = GetIt.instance;
     if (getIt.isRegistered<FoodScanPhotoService>()) {
       getIt.unregister<FoodScanPhotoService>();
@@ -89,6 +134,9 @@ void main() {
 
     // Verify that bottom sheet buttons are present
     expect(find.text('Add to Log'), findsOneWidget);
+    
+    // Verify correction button is present
+    expect(find.text('Correct Analysis'), findsOneWidget);
   });
 
   testWidgets('NutritionPage should handle scroll events',
@@ -155,8 +203,7 @@ void main() {
     expect(find.byKey(const Key('add_to_log_button')), findsOneWidget);
   });
 
-
-    testWidgets('NutritionPage should show error screen when analysis fails',
+  testWidgets('NutritionPage should show error screen when analysis fails',
       (WidgetTester tester) async {
     // Setup mock to throw an error
     when(() => mockFoodScanPhotoService.analyzeFoodPhoto(any()))
@@ -186,6 +233,140 @@ void main() {
     // Verify buttons are present
     expect(find.text('Foto Ulang'), findsOneWidget);
     expect(find.text('Kembali'), findsOneWidget);
+  });
+  
+  // New tests for correction functionality
+  testWidgets('Correction button opens correction dialog',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(nutritionPage);
+    await tester.pumpAndSettle();
+
+    // Verify correction button is present
+    expect(find.text('Correct Analysis'), findsOneWidget);
+    
+    // Tap the correction button
+    await tester.tap(find.text('Correct Analysis'));
+    await tester.pumpAndSettle();
+    
+    // Verify dialog appears
+    expect(find.text('Current analysis:'), findsOneWidget);
+    expect(find.text('Food: Test Food'), findsOneWidget);
+    expect(find.text('Enter your correction:'), findsOneWidget);
+    expect(find.text('Submit Correction'), findsOneWidget);
+  });
+  
+  testWidgets('Correction dialog submits data and shows loading state',
+      (WidgetTester tester) async {
+    // Create a new instance to isolate this test
+    final testPage = MaterialApp(
+      home: NutritionPage(imagePath: testImagePath),
+    );
+    
+    await tester.pumpWidget(testPage);
+    await tester.pumpAndSettle();
+    
+    // Tap the correction button
+    await tester.tap(find.text('Correct Analysis'));
+    await tester.pumpAndSettle();
+    
+    // Enter correction text
+    await tester.enterText(find.byType(TextField), 'This is brown rice');
+    
+    // Submit the correction
+    await tester.tap(find.text('Submit Correction'));
+    await tester.pump(); // Start animation
+    
+    // Dialog should be closing now, verify service was called
+    verify(() => mockFoodScanPhotoService.correctFoodAnalysis(any(), 'This is brown rice')).called(1);
+    
+    // Now we should see loading state
+    await tester.pump(); // Continue animation
+    expect(find.byType(FoodAnalysisLoading), findsOneWidget);
+    
+    // Wait for the correction to complete
+    await tester.pump(const Duration(milliseconds: 100));
+    
+    // Loading should finish, updated data should be shown
+    await tester.pumpAndSettle();
+  });
+  
+  testWidgets('NutritionPage updates data after correction',
+      (WidgetTester tester) async {
+    // Need to use a key to find widget after state update
+    final pageKey = GlobalKey();
+    final testPage = MaterialApp(
+      home: Scaffold(
+        key: pageKey,
+        body: NutritionPage(imagePath: testImagePath),
+      ),
+    );
+    
+    await tester.pumpWidget(testPage);
+    await tester.pumpAndSettle();
+    
+    // Initially we should see the original food name
+    expect(find.text('Test Food'), findsOneWidget);
+    expect(find.text('250'), findsWidgets); // Calories value
+    
+    // Open correction dialog
+    await tester.tap(find.text('Correct Analysis'));
+    await tester.pumpAndSettle();
+    
+    // Submit a correction
+    await tester.enterText(find.byType(TextField), 'Correction text');
+    await tester.tap(find.text('Submit Correction'));
+    
+    // Now we need to wait for all async operations
+    await tester.pump(); // Start dialog closing
+    await tester.pump(); // Process first animation frame
+    await tester.pump(const Duration(milliseconds: 500)); // Wait for loading state
+    await tester.pumpAndSettle(); // Wait for everything to complete
+    
+    // Verify service was called
+    verify(() => mockFoodScanPhotoService.correctFoodAnalysis(any(), any())).called(1);
+    
+    // Need to re-render the page now to see the updated values
+    await tester.pumpAndSettle();
+    
+    // Test that correction worked by checking key data values
+    // Note: Since the widget rebuilds, these assertions might need adjustments
+    // based on how you expose these values in your UI
+    expect(find.text('Corrected Food'), findsOneWidget);
+    // The calories would be 300 from the corrected data
+    expect(find.text('300'), findsWidgets);
+  });
+  
+  testWidgets('NutritionPage handles correction errors',
+      (WidgetTester tester) async {
+    // Set up mock to throw error for correction
+    when(() => mockFoodScanPhotoService.correctFoodAnalysis(any(), any()))
+        .thenThrow(Exception('Correction failed'));
+        
+    await tester.pumpWidget(nutritionPage);
+    await tester.pumpAndSettle();
+    
+    // Tap correction button
+    await tester.tap(find.text('Correct Analysis'));
+    await tester.pumpAndSettle();
+    
+    // Enter correction
+    await tester.enterText(find.byType(TextField), 'This will fail');
+    
+    // Submit
+    await tester.tap(find.text('Submit Correction'));
+    await tester.pump();
+    
+    // Dialog should close
+    await tester.pumpAndSettle();
+    
+    // Verify we didn't go to loading state
+    expect(find.byType(FoodAnalysisLoading), findsNothing);
+    
+    // We should still see original data
+    expect(find.text('Test Food'), findsOneWidget);
+    
+    // Verify service was called (even though it failed)
+    verify(() => mockFoodScanPhotoService.correctFoodAnalysis(any(), any())).called(1);
   });
 }
 
