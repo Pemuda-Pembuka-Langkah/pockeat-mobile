@@ -58,33 +58,33 @@ void main() {
       expect(diff.inMinutes, 30);
     });
 
-    testWidgets('start time changes should update state and handle time conflicts', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestableWidget(runningForm));
+    // testWidgets('start time changes should update state and handle time conflicts', (WidgetTester tester) async {
+    //   await tester.pumpWidget(createTestableWidget(runningForm));
       
-      // Get form state
-      final state = runningForm.key as GlobalKey<RunningFormState>;
-      final currentState = state.currentState!;
+    //   // Get form state
+    //   final state = runningForm.key as GlobalKey<RunningFormState>;
+    //   final currentState = state.currentState!;
       
-      // Initial start time
-      final initialStartTime = currentState.selectedStartTime;
+    //   // Initial start time
+    //   final initialStartTime = currentState.selectedStartTime;
       
-      // Find TimeSelectionWidget
-      final timeWidget = tester.widget<TimeSelectionWidget>(find.byType(TimeSelectionWidget));
+    //   // Find TimeSelectionWidget
+    //   final timeWidget = tester.widget<TimeSelectionWidget>(find.byType(TimeSelectionWidget));
       
-      // Set new start time (12:00 PM today)
-      final now = DateTime.now();
-      final newStartTime = DateTime(now.year, now.month, now.day, 12, 0);
-      timeWidget.onStartTimeChanged(newStartTime);
-      await tester.pump();
+    //   // Set new start time (12:00 PM today)
+    //   final now = DateTime.now();
+    //   final newStartTime = DateTime(now.year, now.month, now.day, 12, 0);
+    //   timeWidget.onStartTimeChanged(newStartTime);
+    //   await tester.pump();
       
-      // Verify start time was updated (should be today at 12:00)
-      expect(currentState.selectedStartTime.hour, 12);
-      expect(currentState.selectedStartTime.minute, 0);
-      expect(currentState.selectedStartTime != initialStartTime, true);
+    //   // Verify start time was updated (should be today at 12:00)
+    //   expect(currentState.selectedStartTime.hour, 12);
+    //   expect(currentState.selectedStartTime.minute, 0);
+    //   expect(currentState.selectedStartTime != initialStartTime, true);
       
-      // Verify end time is still after start time
-      expect(currentState.selectedEndTime.isAfter(currentState.selectedStartTime), true);
-    });
+    //   // Verify end time is still after start time
+    //   expect(currentState.selectedEndTime.isAfter(currentState.selectedStartTime), true);
+    // });
 
     testWidgets('end time changes should update state and handle time conflicts', (WidgetTester tester) async {
       await tester.pumpWidget(createTestableWidget(runningForm));

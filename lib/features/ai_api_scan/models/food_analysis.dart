@@ -1,4 +1,7 @@
 // lib/pockeat/features/ai_api_scan/models/food_analysis.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
+
 class FoodAnalysisResult {
   final String foodName;
   final List<Ingredient> ingredients;
@@ -6,6 +9,7 @@ class FoodAnalysisResult {
   final List<String> warnings;
   String? foodImageUrl;
   final DateTime timestamp;
+  final String id; // Changed to non-nullable
 
   // Constants for warning messages to ensure consistency
   static const String highSodiumWarning = "High sodium content";
@@ -22,9 +26,12 @@ class FoodAnalysisResult {
     this.warnings = const [], 
     this.foodImageUrl,
     DateTime? timestamp,
-  }) : timestamp = timestamp ?? DateTime.now();
+    String? id, // Optional parameter
+  }) : 
+    timestamp = timestamp ?? DateTime.now(),
+    id = id ?? const Uuid().v4(); // Generate UUID if not provided
 
-  factory FoodAnalysisResult.fromJson(Map<String, dynamic> json) {
+  factory FoodAnalysisResult.fromJson(Map<String, dynamic> json, {String? id}) {
     final nutritionInfo = NutritionInfo.fromJson(json['nutrition_info'] ?? {});
 
     // Generate warnings for high sodium or sugar if not provided in the JSON
@@ -46,33 +53,51 @@ class FoodAnalysisResult {
 
     DateTime parsedTimestamp;
     if (json['timestamp'] != null) {
-      parsedTimestamp = DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int);
+      // Handle both Timestamp and int formats
+      if (json['timestamp'] is Timestamp) {
+        parsedTimestamp = (json['timestamp'] as Timestamp).toDate();
+      } else if (json['timestamp'] is int) {
+        parsedTimestamp = DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int);
+      } else {
+        parsedTimestamp = DateTime.now();
+      }
     } else {
       parsedTimestamp = DateTime.now();
     }
 
     return FoodAnalysisResult(
-      foodImageUrl: json['food_image_url'] ?? '',
       foodName: json['food_name'] ?? '',
-      ingredients: (json['ingredients'] as List<dynamic>?)
-              ?.map((item) => Ingredient.fromJson(item))
-              .toList() ??
-          [],
+      ingredients: _parseIngredients(json['ingredients']),
       nutritionInfo: nutritionInfo,
       warnings: warnings,
+      foodImageUrl: json['food_image_url'],
       timestamp: parsedTimestamp,
+      id: id ?? json['id'] ?? 'food_${DateTime.now().millisecondsSinceEpoch}', // Generate default ID using timestamp
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'food_name': foodName,
-      'food_image_url': foodImageUrl,
       'ingredients': ingredients.map((i) => i.toJson()).toList(),
       'nutrition_info': nutritionInfo.toJson(),
       'warnings': warnings,
-      'timestamp': timestamp.millisecondsSinceEpoch,
+      'food_image_url': foodImageUrl,
+      'timestamp': Timestamp.fromDate(timestamp), // Use Firestore Timestamp instead of milliseconds
+      'id': id,
     };
+  }
+
+  static List<Ingredient> _parseIngredients(dynamic ingredientsData) {
+    if (ingredientsData == null) return [];
+    
+    if (ingredientsData is List) {
+      return ingredientsData
+          .map((item) => Ingredient.fromJson(item))
+          .toList();
+    }
+    
+    return [];
   }
 }
 
