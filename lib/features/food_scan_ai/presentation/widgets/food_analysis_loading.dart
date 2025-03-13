@@ -4,11 +4,13 @@ import 'package:flutter/cupertino.dart';
 class FoodAnalysisLoading extends StatelessWidget {
   final Color primaryYellow;
   final Color primaryPink;
+  final String message;
 
   const FoodAnalysisLoading({
     Key? key,
     required this.primaryYellow,
     required this.primaryPink,
+    this.message = 'Analyzing Food',
   }) : super(key: key);
 
   @override
@@ -41,8 +43,8 @@ class FoodAnalysisLoading extends StatelessWidget {
 
           // Judul
           Text(
-            'Menganalisis Makanan',
-            style: TextStyle(
+            message,
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
@@ -54,9 +56,11 @@ class FoodAnalysisLoading extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              'AI kami sedang mengidentifikasi makanan dan menghitung nilai nutrisinya...',
+              message == 'Analyzing Food'
+                  ? 'Our AI is identifying the food and calculating its nutritional value...'
+                  : 'Our AI is updating the analysis based on your correction...',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 color: Colors.black54,
                 height: 1.5,
@@ -74,16 +78,18 @@ class FoodAnalysisLoading extends StatelessWidget {
   }
 
   Widget _buildAnalysisSteps() {
+    bool isCorrection = message != 'Analyzing Food';
+    
     return Column(
       children: [
         _buildAnalysisStep(
           icon: CupertinoIcons.camera,
-          text: 'Mengidentifikasi makanan',
+          text: 'Identifying food',
           isCompleted: true,
         ),
         _buildAnalysisStep(
-          icon: CupertinoIcons.chart_bar,
-          text: 'Menghitung nutrisi',
+          icon: isCorrection ? CupertinoIcons.pencil : CupertinoIcons.chart_bar,
+          text: isCorrection ? 'Correcting analysis' : 'Calculating nutrition',
           isActive: true,
         ),
       ],

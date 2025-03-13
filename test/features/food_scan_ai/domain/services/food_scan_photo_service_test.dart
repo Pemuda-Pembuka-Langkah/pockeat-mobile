@@ -25,6 +25,7 @@ void main() {
   late MockFile mockFile;
   late MockUuid mockUuid;
   late FoodAnalysisResult analysisResult;
+  late FoodAnalysisResult correctedResult;
 
   setUpAll(() {
     // Register fallback values
@@ -45,12 +46,32 @@ void main() {
       warnings: [],
     );
     registerFallbackValue(analysisResult);
+    registerFallbackValue('');
   });
 
   setUp(() {
     // Inisialisasi mocks
     mockFile = MockFile();
     mockUuid = MockUuid();
+
+    // Initialize the corrected result
+    correctedResult = FoodAnalysisResult(
+      foodName: 'Corrected Food',
+      ingredients: [
+        Ingredient(name: 'Corrected Ingredient', servings: 2),
+        Ingredient(name: 'New Ingredient', servings: 1),
+      ],
+      nutritionInfo: NutritionInfo(
+        calories: 300,
+        protein: 15,
+        carbs: 25,
+        fat: 15,
+        sodium: 120,
+        sugar: 8,
+        fiber: 6,
+      ),
+      warnings: [],
+    );
 
     // Daftarkan mock services ke GetIt dengan cara yang aman
     final getIt = GetIt.instance;
@@ -141,7 +162,7 @@ void main() {
         throwsA(isA<Exception>().having(
           (e) => e.toString(),
           'message',
-          contains('Gagal menganalisis foto makanan'),
+          contains('Failed to analyze food photo'),
         )),
       );
       verify(() => mockFoodImageAnalysisService.analyze(mockFile)).called(1);
@@ -163,6 +184,84 @@ void main() {
       // Assert
       expect(result, equals('Successfully saved food analysis'));
       verify(() => mockFoodScanRepository.save(any(), any())).called(1);
+    });
+  });
+
+  group('correctFoodAnalysis', () {
+    test('should return corrected FoodAnalysisResult when correction is successful',
+        () async {
+      // Arrange
+      const userComment = 'This is brown rice, not white rice';
+
+      when(() => mockFoodImageAnalysisService.correctAnalysis(any(), any()))
+          .thenAnswer((_) async => correctedResult);
+
+      // Act
+      final result = await foodScanPhotoService.correctFoodAnalysis(
+          analysisResult, userComment);
+
+      // Assert
+      expect(result, equals(correctedResult));
+      verify(() => mockFoodImageAnalysisService.correctAnalysis(
+          analysisResult, userComment)).called(1);
+    });
+
+    test('should throw Exception when correction fails', () async {
+      // Arrange
+      const userComment = 'This is brown rice, not white rice';
+
+      when(() => mockFoodImageAnalysisService.correctAnalysis(any(), any()))
+          .thenThrow(Exception('Service error'));
+
+      // Act & Assert
+      expect(
+        () => foodScanPhotoService.correctFoodAnalysis(
+            analysisResult, userComment),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to correct food analysis'),
+        )),
+      );
+      verify(() => mockFoodImageAnalysisService.correctAnalysis(
+          analysisResult, userComment)).called(1);
+    });
+
+    test('should handle empty user comment', () async {
+      // Arrange
+      const userComment = '';
+
+      when(() => mockFoodImageAnalysisService.correctAnalysis(any(), any()))
+          .thenAnswer((_) async => correctedResult);
+
+      // Act
+      final result = await foodScanPhotoService.correctFoodAnalysis(
+          analysisResult, userComment);
+
+      // Assert
+      expect(result, equals(correctedResult));
+      verify(() => mockFoodImageAnalysisService.correctAnalysis(
+          analysisResult, userComment)).called(1);
+    });
+
+    test('should forward specific error message from service', () async {
+      // Arrange
+      const userComment = 'This is brown rice';
+      const specificError = 'Cannot process image correction';
+
+      when(() => mockFoodImageAnalysisService.correctAnalysis(any(), any()))
+          .thenThrow(Exception(specificError));
+
+      // Act & Assert
+      expect(
+        () => foodScanPhotoService.correctFoodAnalysis(
+            analysisResult, userComment),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains(specificError),
+        )),
+      );
     });
   });
 }

@@ -35,7 +35,6 @@ void main() async {
   // Default ke dev untuk development yang aman
   // Load dotenv dulu
   await dotenv.load(fileName: '.env');
-  
 
   // Ambil flavor dari dotenv
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
@@ -61,13 +60,13 @@ void main() async {
   final smartExerciseLogRepository =
       SmartExerciseLogRepositoryImpl(firestore: firestore);
   final cardioRepository = CardioRepositoryImpl(firestore: firestore);
-  final weightLiftingRepository = WeightLiftingRepositoryImpl(firestore: firestore);
+  final weightLiftingRepository =
+      WeightLiftingRepositoryImpl(firestore: firestore);
   final exerciseLogHistoryRepository = ExerciseLogHistoryServiceImpl(
     smartExerciseLogRepository: smartExerciseLogRepository,
     cardioRepository: cardioRepository,
     weightLiftingRepository: weightLiftingRepository,
   );
-
 
   runApp(
     MultiProvider(
@@ -159,13 +158,17 @@ class MyApp extends StatelessWidget {
               service: Provider.of<ExerciseLogHistoryService>(context),
             ),
         '/exercise-detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
           return ExerciseLogDetailPage(
             exerciseId: args['exerciseId'] as String,
             activityType: args['activityType'] as String,
-            cardioRepository: Provider.of<CardioRepository>(context, listen: false),
-            smartExerciseRepository: Provider.of<SmartExerciseLogRepository>(context, listen: false),
-            weightLiftingRepository: Provider.of<WeightLiftingRepository>(context, listen: false),
+            cardioRepository:
+                Provider.of<CardioRepository>(context, listen: false),
+            smartExerciseRepository:
+                Provider.of<SmartExerciseLogRepository>(context, listen: false),
+            weightLiftingRepository:
+                Provider.of<WeightLiftingRepository>(context, listen: false),
           );
         },
       },
