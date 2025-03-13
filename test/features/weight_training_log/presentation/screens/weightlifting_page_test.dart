@@ -538,7 +538,7 @@ void main() {
                 const WeightliftingPage();
               } catch (e) {
                 // Expected exception in test environment
-                print('Expected error (for coverage): $e');
+                logger.e('Expected error (for coverage): $e');
               }
               
               // Return a dummy widget that doesn't throw exceptions
