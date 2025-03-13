@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
 import 'package:pockeat/features/food_text_input/presentation/widgets/food_entry_form_page.dart';
+import 'package:pockeat/features/food_text_input/presentation/pages/nutrition_page.dart';
+import 'package:pockeat/core/di/service_locator.dart';
+import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
 
 class FoodTextInputPage extends StatelessWidget {
   final Color primaryYellow = const Color(0xFFFFE893);
@@ -60,9 +63,19 @@ class FoodTextInputPage extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: FoodEntryForm(
-                    maxDescriptionWords: 100,
                     onSaved: (FoodEntry foodEntry) {
-                      print('Food Entry Saved: ${foodEntry.toString()}');
+                      final foodText = foodEntry.foodDescription; 
+                      final foodTextInputService = getIt<FoodTextInputService>(); 
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NutritionPage(
+                            foodText: foodText,
+                            foodTextInputService: foodTextInputService,
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ),
