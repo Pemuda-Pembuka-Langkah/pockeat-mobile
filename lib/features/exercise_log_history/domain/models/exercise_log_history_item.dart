@@ -2,6 +2,7 @@ import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analy
 import 'package:uuid/uuid.dart';
 import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:pockeat/features/weight_training_log/services/workout_service.dart';
 
 /// Model untuk item history log olahraga
 ///
@@ -14,9 +15,8 @@ class ExerciseLogHistoryItem {
   final String title;
   final String subtitle;
   final DateTime timestamp;
-  final int caloriesBurned;
-  final String?
-      sourceId; // ID dari data sumber (misalnya ID dari SmartExerciseLog)
+  final num caloriesBurned;
+  final String? sourceId; // ID dari data sumber (misalnya ID dari SmartExerciseLog)
   // Konstanta untuk tipe aktivitas umum
   static const String typeSmartExercise = 'smart_exercise';
   static const String typeWeightlifting = 'weightlifting';
@@ -77,7 +77,7 @@ class ExerciseLogHistoryItem {
       return ExerciseLogHistoryItem(
         activityType: typeWeightlifting,
         title: weightLifting.name,
-        subtitle: '0 min • 0 cal',
+        subtitle: '0 minutes • 0 cal',
         timestamp: weightLifting.timestamp,
         caloriesBurned: 0,
         sourceId: weightLifting.id,
@@ -88,18 +88,14 @@ class ExerciseLogHistoryItem {
     double totalDurationInMinutes =
         weightLifting.sets.fold(0.0, (sum, set) => sum + set.duration);
         
-    // Calculate calories burned using workout service formula
-    double totalDurationInHours = totalDurationInMinutes / 60;
-    double totalWeight = weightLifting.sets.fold(0.0, (sum, set) => sum + (set.weight * set.reps));
-    double totalReps = weightLifting.sets.fold(0.0, (sum, set) => sum + set.reps);
-    int caloriesBurned = (weightLifting.metValue * 75.0 * 
-        (totalDurationInHours + 0.0001 * totalWeight + 0.002 * totalReps)).round();
+    // Calculate calories burned using workout service
+    int caloriesBurned = calculateExerciseCalories(weightLifting).round();
 
     return ExerciseLogHistoryItem(
       activityType: typeWeightlifting,
       title: weightLifting.name,
       subtitle:
-          '${totalDurationInMinutes.toStringAsFixed(0)} min • $caloriesBurned cal',
+          '${totalDurationInMinutes.toStringAsFixed(0)} minutes • $caloriesBurned cal',
       timestamp: weightLifting.timestamp,
       caloriesBurned: caloriesBurned,
       sourceId: weightLifting.id,
@@ -125,7 +121,7 @@ class ExerciseLogHistoryItem {
     // Format durasi dalam format yang lebih user-friendly
     final minutes = cardioLog.duration.inMinutes;
     final durationText =
-        minutes > 0 ? '$minutes min' : '${cardioLog.duration.inSeconds} sec';
+        minutes > 0 ? '$minutes minutes' : '${cardioLog.duration.inSeconds} seconds';
 
     return ExerciseLogHistoryItem(
       activityType: typeCardio,
@@ -135,32 +131,5 @@ class ExerciseLogHistoryItem {
       caloriesBurned: cardioLog.caloriesBurned.toInt(),
       sourceId: cardioLog.id,
     );
-  }
-
-  /// Factory dari Map (untuk parsing response dari database)
-  factory ExerciseLogHistoryItem.fromMap(Map<String, dynamic> map, String id) {
-    return ExerciseLogHistoryItem(
-      id: id,
-      activityType: map['activityType'] ?? typeSmartExercise,
-      title: map['title'] ?? 'Unknown Exercise',
-      subtitle: map['subtitle'] ?? '',
-      timestamp: map['timestamp'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['timestamp'])
-          : DateTime.now(),
-      caloriesBurned: map['caloriesBurned'] ?? 0,
-      sourceId: map['sourceId'],
-    );
-  }
-
-  /// Konversi ke Map (untuk penyimpanan)
-  Map<String, dynamic> toMap() {
-    return {
-      'activityType': activityType,
-      'title': title,
-      'subtitle': subtitle,
-      'timestamp': timestamp.millisecondsSinceEpoch,
-      'caloriesBurned': caloriesBurned,
-      'sourceId': sourceId,
-    };
   }
 }

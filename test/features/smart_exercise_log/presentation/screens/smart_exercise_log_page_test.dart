@@ -77,7 +77,7 @@ void main() {
       );
 
       // Assert
-      expect(find.text('Smart Workout Log'), findsOneWidget);
+      expect(find.text('Smart Exercise Log'), findsOneWidget);
       expect(find.byType(WorkoutFormWidget), findsOneWidget);
       expect(find.byType(AnalysisResultWidget), findsNothing);
     });

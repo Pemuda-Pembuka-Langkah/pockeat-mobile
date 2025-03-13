@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'date_selection_widget.dart';
 import 'personal_data_reminder.dart';
 import 'time_selection_widget.dart';
 
@@ -37,7 +36,6 @@ class SwimmingFormState extends State<SwimmingForm> {
   String selectedStroke = 'Freestyle (Front Crawl)';
   double customPoolLength = 25.0;
   int selectedLaps = 20;
-  DateTime selectedDate = DateTime.now();
   DateTime selectedStartTime = DateTime.now();
   DateTime selectedEndTime = DateTime.now().add(const Duration(minutes: 30));
 
@@ -60,26 +58,25 @@ class SwimmingFormState extends State<SwimmingForm> {
         children: [
           PersonalDataReminder(),
           const SizedBox(height: 16),
-          DateSelectionWidget(
+          TimeSelectionWidget(
             primaryColor: widget.primaryPink,
-            selectedDate: selectedDate,
-            onDateChanged: (newDate) {
+            selectedStartTime: selectedStartTime,
+            selectedEndTime: selectedEndTime,
+            onStartTimeChanged: (newStartTime) {
               setState(() {
-                selectedDate = newDate;
-                
-                // Keep the same time but update date
+                final now = DateTime.now();
                 selectedStartTime = DateTime(
-                  newDate.year,
-                  newDate.month,
-                  newDate.day,
-                  selectedStartTime.hour,
-                  selectedStartTime.minute,
+                  now.year,
+                  now.month,
+                  now.day,
+                  newStartTime.hour,
+                  newStartTime.minute,
                 );
                 
                 selectedEndTime = DateTime(
-                  newDate.year,
-                  newDate.month,
-                  newDate.day,
+                  now.year,
+                  now.month,
+                  now.day,
                   selectedEndTime.hour,
                   selectedEndTime.minute,
                 );
@@ -91,25 +88,21 @@ class SwimmingFormState extends State<SwimmingForm> {
                 }
               });
             },
-          ),
-          const SizedBox(height: 16),
-          TimeSelectionWidget(
-            primaryColor: widget.primaryPink,
-            selectedStartTime: selectedStartTime,
-            selectedEndTime: selectedEndTime,
-            onStartTimeChanged: (newStartTime) {
-              setState(() {
-                selectedStartTime = newStartTime;
-                
-                // If end time is now before start time, adjust it
-                if (selectedEndTime.isBefore(selectedStartTime)) {
-                  selectedEndTime = selectedStartTime.add(const Duration(minutes: 30));
-                }
-              });
-            },
             onEndTimeChanged: (newEndTime) {
               setState(() {
-                selectedEndTime = newEndTime;
+                final now = DateTime.now();
+                selectedEndTime = DateTime(
+                  now.year,
+                  now.month,
+                  now.day,
+                  newEndTime.hour,
+                  newEndTime.minute,
+                );
+                
+                // If end time is before start time, add a day to end time
+                if (selectedEndTime.isBefore(selectedStartTime)) {
+                  selectedEndTime = selectedEndTime.add(const Duration(days: 1));
+                }
               });
             },
           ),

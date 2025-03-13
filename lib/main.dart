@@ -10,10 +10,10 @@ import 'package:pockeat/features/exercise_input_options/presentation/screens/exe
 import 'package:pockeat/features/homepage/presentation/homepage.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:camera/camera.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/pages/food_scan_page.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pockeat/component/navigation.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/pages/food_input_page.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/screens/food_input_page.dart';
 import 'package:pockeat/features/ai_api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
@@ -35,7 +35,6 @@ void main() async {
   // Default ke dev untuk development yang aman
   // Load dotenv dulu
   await dotenv.load(fileName: '.env');
-  
 
   // Ambil flavor dari dotenv
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
@@ -61,13 +60,13 @@ void main() async {
   final smartExerciseLogRepository =
       SmartExerciseLogRepositoryImpl(firestore: firestore);
   final cardioRepository = CardioRepositoryImpl(firestore: firestore);
-  final weightLiftingRepository = WeightLiftingRepositoryImpl(firestore: firestore);
+  final weightLiftingRepository =
+      WeightLiftingRepositoryImpl(firestore: firestore);
   final exerciseLogHistoryRepository = ExerciseLogHistoryServiceImpl(
     smartExerciseLogRepository: smartExerciseLogRepository,
     cardioRepository: cardioRepository,
     weightLiftingRepository: weightLiftingRepository,
   );
-
 
   runApp(
     MultiProvider(
@@ -148,7 +147,7 @@ class MyApp extends StatelessWidget {
                 lensDirection: CameraLensDirection.back,
                 sensorOrientation: 0,
               ),
-              ResolutionPreset.medium,
+              ResolutionPreset.max,
             )),
         '/add-food': (context) => const FoodInputPage(),
         '/food-analysis': (context) => const AIAnalysisScreen(),
@@ -159,13 +158,17 @@ class MyApp extends StatelessWidget {
               service: Provider.of<ExerciseLogHistoryService>(context),
             ),
         '/exercise-detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
           return ExerciseLogDetailPage(
             exerciseId: args['exerciseId'] as String,
             activityType: args['activityType'] as String,
-            cardioRepository: Provider.of<CardioRepository>(context, listen: false),
-            smartExerciseRepository: Provider.of<SmartExerciseLogRepository>(context, listen: false),
-            weightLiftingRepository: Provider.of<WeightLiftingRepository>(context, listen: false),
+            cardioRepository:
+                Provider.of<CardioRepository>(context, listen: false),
+            smartExerciseRepository:
+                Provider.of<SmartExerciseLogRepository>(context, listen: false),
+            weightLiftingRepository:
+                Provider.of<WeightLiftingRepository>(context, listen: false),
           );
         },
       },

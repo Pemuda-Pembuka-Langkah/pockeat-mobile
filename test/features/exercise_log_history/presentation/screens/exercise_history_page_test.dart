@@ -28,7 +28,7 @@ void main() {
       id: '2',
       activityType: ExerciseLogHistoryItem.typeCardio,
       title: 'Running',
-      subtitle: '30 min • 5 km',
+      subtitle: '30 minutes • 5 km',
       timestamp: DateTime.now().subtract(const Duration(days: 1)),
       caloriesBurned: 350,
     ),

@@ -60,22 +60,7 @@ class NutritionAppBar extends StatelessWidget {
           ],
         ),
       ),
-      actions: [
-        CupertinoButton(
-          child: Icon(
-            CupertinoIcons.share,
-            color: isScrolledToTop ? Colors.white : Colors.black87,
-          ),
-          onPressed: () {},
-        ),
-        CupertinoButton(
-          child: Icon(
-            CupertinoIcons.ellipsis,
-            color: isScrolledToTop ? Colors.white : Colors.black87,
-          ),
-          onPressed: () {},
-        ),
-      ],
+
     );
   }
 }

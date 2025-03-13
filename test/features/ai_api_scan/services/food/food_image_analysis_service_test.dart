@@ -55,7 +55,6 @@ void main() {
   });
 
   group('FoodImageAnalysisService', () {
-    // Tests remain the same
     test('should analyze food by image successfully', () async {
       // Arrange
       final mockBytes = Uint8List.fromList([1, 2, 3, 4]);
@@ -140,158 +139,218 @@ void main() {
   });
 
   group('FoodImageAnalysisService correction functionality', () {
-  test('should correct food analysis successfully based on user comment', () async {
-    // Arrange
-    final previousResult = FoodAnalysisResult(
-      foodName: 'Burger',
-      ingredients: [
-        Ingredient(name: 'Beef Patty', servings: 45),
-        Ingredient(name: 'Burger Bun', servings: 30),
-      ],
-      nutritionInfo: NutritionInfo(
-        calories: 450,
-        protein: 25,
-        carbs: 35,
-        fat: 22,
-        sodium: 800,
-        fiber: 2,
-        sugar: 8,
-      ),
-      warnings: ['High sodium content'],
-    );
-    
-    const userComment = 'This is actually a vegetarian burger with a plant-based patty';
-    
-    const validJsonResponse = '''
-    {
-      "food_name": "Vegetarian Burger",
-      "ingredients": [
-        {
-          "name": "Plant-based Patty",
-          "servings": 45
+    test('should correct food analysis successfully based on user comment', () async {
+      // Arrange
+      final previousResult = FoodAnalysisResult(
+        foodName: 'Burger',
+        ingredients: [
+          Ingredient(name: 'Beef Patty', servings: 45),
+          Ingredient(name: 'Burger Bun', servings: 30),
+        ],
+        nutritionInfo: NutritionInfo(
+          calories: 450,
+          protein: 25,
+          carbs: 35,
+          fat: 22,
+          sodium: 800,
+          fiber: 2,
+          sugar: 8,
+        ),
+        warnings: ['High sodium content'],
+      );
+      
+      const userComment = 'This is actually a vegetarian burger with a plant-based patty';
+      
+      const validJsonResponse = '''
+      {
+        "food_name": "Vegetarian Burger",
+        "ingredients": [
+          {
+            "name": "Plant-based Patty",
+            "servings": 45
+          },
+          {
+            "name": "Burger Bun",
+            "servings": 30
+          }
+        ],
+        "nutrition_info": {
+          "calories": 380,
+          "protein": 18,
+          "carbs": 40,
+          "fat": 18,
+          "sodium": 750,
+          "fiber": 4,
+          "sugar": 6
         },
-        {
-          "name": "Burger Bun",
-          "servings": 30
-        }
-      ],
-      "nutrition_info": {
-        "calories": 380,
-        "protein": 18,
-        "carbs": 40,
-        "fat": 18,
-        "sodium": 750,
-        "fiber": 4,
-        "sugar": 6
-      },
-      "warnings": ["High sodium content"]
-    }
-    ''';
+        "warnings": ["High sodium content"]
+      }
+      ''';
 
-    // Mock
-    mockModelWrapper.responseText = validJsonResponse;
+      // Mock
+      mockModelWrapper.responseText = validJsonResponse;
 
-    // Act
-    final result = await service.correctAnalysis(previousResult, userComment);
+      // Act
+      final result = await service.correctAnalysis(previousResult, userComment);
 
-    // Assert
-    expect(result.foodName, equals('Vegetarian Burger'));
-    expect(result.ingredients.length, equals(2));
-    expect(result.ingredients[0].name, equals('Plant-based Patty'));
-    expect(result.nutritionInfo.calories, equals(380));
-    expect(result.warnings.length, equals(1));
-    expect(result.warnings[0], equals('High sodium content'));
+      // Assert
+      expect(result.foodName, equals('Vegetarian Burger'));
+      expect(result.ingredients.length, equals(2));
+      expect(result.ingredients[0].name, equals('Plant-based Patty'));
+      expect(result.nutritionInfo.calories, equals(380));
+      expect(result.warnings.length, equals(1));
+      expect(result.warnings[0], equals('High sodium content'));
+    });
+
+    test('should correct food analysis with special characters in names', () async {
+      // Arrange
+      final previousResult = FoodAnalysisResult(
+        foodName: 'Burger',
+        ingredients: [
+          Ingredient(name: 'Beef "Angus" Patty', servings: 45),
+          Ingredient(name: 'Burger\nBun', servings: 30),
+        ],
+        nutritionInfo: NutritionInfo(
+          calories: 450,
+          protein: 25,
+          carbs: 35,
+          fat: 22,
+          sodium: 800,
+          fiber: 2,
+          sugar: 8,
+        ),
+        warnings: ['High "sodium" content'],
+      );
+      
+      const userComment = 'This is a vegan burger';
+      
+      const validJsonResponse = '''
+      {
+        "food_name": "Vegan Burger",
+        "ingredients": [
+          {
+            "name": "Plant Patty",
+            "servings": 45
+          },
+          {
+            "name": "Burger Bun",
+            "servings": 30
+          }
+        ],
+        "nutrition_info": {
+          "calories": 350,
+          "protein": 15,
+          "carbs": 40,
+          "fat": 16,
+          "sodium": 600,
+          "fiber": 5,
+          "sugar": 4
+        },
+        "warnings": ["High sodium content"]
+      }
+      ''';
+
+      // Mock
+      mockModelWrapper.responseText = validJsonResponse;
+
+      // Act
+      final result = await service.correctAnalysis(previousResult, userComment);
+
+      // Assert
+      expect(result.foodName, equals('Vegan Burger'));
+      expect(result.ingredients.length, equals(2));
+      expect(result.nutritionInfo.protein, equals(15));
+    });
+
+    test('should throw exception when API returns null response during correction', () async {
+      // Arrange
+      final previousResult = FoodAnalysisResult(
+        foodName: 'Burger',
+        ingredients: [
+          Ingredient(name: 'Beef Patty', servings: 45),
+          Ingredient(name: 'Burger Bun', servings: 30),
+        ],
+        nutritionInfo: NutritionInfo(
+          calories: 450,
+          protein: 25,
+          carbs: 35,
+          fat: 22,
+          sodium: 800,
+          fiber: 2,
+          sugar: 8,
+        ),
+        warnings: ['High sodium content'],
+      );
+      
+      const userComment = 'This is actually a vegetarian burger';
+      mockModelWrapper.responseText = null;
+
+      // Act & Assert
+      expect(
+        () => service.correctAnalysis(previousResult, userComment),
+        throwsA(isA<GeminiServiceException>()),
+      );
+    });
+
+    test('should throw exception when API call fails during correction', () async {
+      // Arrange
+      final previousResult = FoodAnalysisResult(
+        foodName: 'Burger',
+        ingredients: [
+          Ingredient(name: 'Beef Patty', servings: 45),
+          Ingredient(name: 'Burger Bun', servings: 30),
+        ],
+        nutritionInfo: NutritionInfo(
+          calories: 450,
+          protein: 25,
+          carbs: 35,
+          fat: 22,
+          sodium: 800,
+          fiber: 2,
+          sugar: 8,
+        ),
+        warnings: ['High sodium content'],
+      );
+      
+      const userComment = 'This is actually a vegetarian burger';
+      mockModelWrapper.exceptionToThrow = Exception('API call failed');
+
+      // Act & Assert
+      expect(
+        () => service.correctAnalysis(previousResult, userComment),
+        throwsA(isA<GeminiServiceException>()),
+      );
+    });
+
+    test('should throw exception when API returns error response during correction', () async {
+      // Arrange
+      final previousResult = FoodAnalysisResult(
+        foodName: 'Burger',
+        ingredients: [
+          Ingredient(name: 'Beef Patty', servings: 45),
+          Ingredient(name: 'Burger Bun', servings: 30),
+        ],
+        nutritionInfo: NutritionInfo(
+          calories: 450,
+          protein: 25,
+          carbs: 35,
+          fat: 22,
+          sodium: 800,
+          fiber: 2,
+          sugar: 8,
+        ),
+        warnings: ['High sodium content'],
+      );
+      
+      const userComment = 'This is actually a vegetarian burger';
+      const errorResponse = '{"error": "Could not process correction"}';
+      mockModelWrapper.responseText = errorResponse;
+
+      // Act & Assert
+      expect(
+        () => service.correctAnalysis(previousResult, userComment),
+        throwsA(isA<GeminiServiceException>()),
+      );
+    });
   });
-
-  test('should throw exception when API returns null response during correction', () async {
-    // Arrange
-    final previousResult = FoodAnalysisResult(
-      foodName: 'Burger',
-      ingredients: [
-        Ingredient(name: 'Beef Patty', servings: 45),
-        Ingredient(name: 'Burger Bun', servings: 30),
-      ],
-      nutritionInfo: NutritionInfo(
-        calories: 450,
-        protein: 25,
-        carbs: 35,
-        fat: 22,
-        sodium: 800,
-        fiber: 2,
-        sugar: 8,
-      ),
-      warnings: ['High sodium content'],
-    );
-    
-    const userComment = 'This is actually a vegetarian burger';
-    mockModelWrapper.responseText = null;
-
-    // Act & Assert
-    expect(
-      () => service.correctAnalysis(previousResult, userComment),
-      throwsA(isA<GeminiServiceException>()),
-    );
-  });
-
-  test('should throw exception when API call fails during correction', () async {
-    // Arrange
-    final previousResult = FoodAnalysisResult(
-      foodName: 'Burger',
-      ingredients: [
-        Ingredient(name: 'Beef Patty', servings: 45),
-        Ingredient(name: 'Burger Bun', servings: 30),
-      ],
-      nutritionInfo: NutritionInfo(
-        calories: 450,
-        protein: 25,
-        carbs: 35,
-        fat: 22,
-        sodium: 800,
-        fiber: 2,
-        sugar: 8,
-      ),
-      warnings: ['High sodium content'],
-    );
-    
-    const userComment = 'This is actually a vegetarian burger';
-    mockModelWrapper.exceptionToThrow = Exception('API call failed');
-
-    // Act & Assert
-    expect(
-      () => service.correctAnalysis(previousResult, userComment),
-      throwsA(isA<GeminiServiceException>()),
-    );
-  });
-
-  test('should throw exception when API returns error response during correction', () async {
-    // Arrange
-    final previousResult = FoodAnalysisResult(
-      foodName: 'Burger',
-      ingredients: [
-        Ingredient(name: 'Beef Patty', servings: 45),
-        Ingredient(name: 'Burger Bun', servings: 30),
-      ],
-      nutritionInfo: NutritionInfo(
-        calories: 450,
-        protein: 25,
-        carbs: 35,
-        fat: 22,
-        sodium: 800,
-        fiber: 2,
-        sugar: 8,
-      ),
-      warnings: ['High sodium content'],
-    );
-    
-    const userComment = 'This is actually a vegetarian burger';
-    const errorResponse = '{"error": "Could not process correction"}';
-    mockModelWrapper.responseText = errorResponse;
-
-    // Act & Assert
-    expect(
-      () => service.correctAnalysis(previousResult, userComment),
-      throwsA(isA<GeminiServiceException>()),
-    );
-  });
-});
 }

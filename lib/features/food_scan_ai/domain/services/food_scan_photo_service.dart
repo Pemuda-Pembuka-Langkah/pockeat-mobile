@@ -13,25 +13,41 @@ class FoodScanPhotoService {
 
   FoodScanPhotoService();
 
-  /// Menganalisis foto makanan dan mengembalikan hasil analisis
+  /// Analyzes a food photo and returns the analysis result
   /// 
-  /// [photo] adalah file gambar yang akan dianalisis
-  /// Mengembalikan [FoodAnalysisResult] yang berisi informasi makanan
+  /// [photo] is the image file to be analyzed
+  /// Returns [FoodAnalysisResult] containing the food information
   Future<FoodAnalysisResult> analyzeFoodPhoto(File photo) async {
     try {
       final result = await _foodImageAnalysisService.analyze(photo);
       return result;
     } catch (e) {
-      throw Exception('Gagal menganalisis foto makanan: ${e.toString()}');
+      throw Exception('Failed to analyze food photo: ${e.toString()}');
     }
   }
 
-  /// Menyimpan hasil analisis makanan ke dalam database
+  /// Saves the food analysis result to the database
   /// 
-  /// [analysisResult] adalah hasil analisis makanan yang akan disimpan
-  /// Mengembalikan pesan sukses jika berhasil menyimpan data
+  /// [analysisResult] is the food analysis result to be saved
+  /// Returns a success message if data is saved successfully
   Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult) async {
     await _foodScanRepository.save(analysisResult, _uuid.v4());
     return 'Successfully saved food analysis';
+  }
+  
+  /// Corrects a food analysis result based on user feedback
+  /// 
+  /// [previousResult] is the previous analysis result
+  /// [userComment] is the user's correction or feedback
+  /// Returns [FoodAnalysisResult] that has been corrected
+  Future<FoodAnalysisResult> correctFoodAnalysis(
+      FoodAnalysisResult previousResult, String userComment) async {
+    try {
+      final correctedResult = await _foodImageAnalysisService.correctAnalysis(
+          previousResult, userComment);
+      return correctedResult;
+    } catch (e) {
+      throw Exception('Failed to correct food analysis: ${e.toString()}');
+    }
   }
 }
