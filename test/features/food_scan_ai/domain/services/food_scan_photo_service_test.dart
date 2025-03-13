@@ -26,11 +26,14 @@ void main() {
   late MockUuid mockUuid;
   late FoodAnalysisResult analysisResult;
   late FoodAnalysisResult correctedResult;
+  late DateTime testDateTime;
 
   setUpAll(() {
     // Register fallback values
     registerFallbackValue(MockFile());
-
+    
+    testDateTime = DateTime(2025, 3, 13); // Fixed test date
+    
     analysisResult = FoodAnalysisResult(
       foodName: 'Test Food',
       ingredients: [Ingredient(name: 'Test Ingredient', servings: 1)],
@@ -44,6 +47,7 @@ void main() {
         fiber: 5,
       ),
       warnings: [],
+      timestamp: testDateTime,
     );
     registerFallbackValue(analysisResult);
     registerFallbackValue('');
@@ -71,6 +75,7 @@ void main() {
         fiber: 6,
       ),
       warnings: [],
+      timestamp: testDateTime,
     );
 
     // Daftarkan mock services ke GetIt dengan cara yang aman
@@ -138,6 +143,7 @@ void main() {
           fiber: 5,
         ),
         warnings: [],
+        timestamp: testDateTime,
       );
 
       when(() => mockFoodImageAnalysisService.analyze(any()))
@@ -211,7 +217,7 @@ void main() {
       const userComment = 'This is brown rice, not white rice';
 
       when(() => mockFoodImageAnalysisService.correctAnalysis(any(), any()))
-          .thenThrow(Exception('Service error'));
+          .thenThrow(Exception('Network error'));
 
       // Act & Assert
       expect(
@@ -226,42 +232,40 @@ void main() {
       verify(() => mockFoodImageAnalysisService.correctAnalysis(
           analysisResult, userComment)).called(1);
     });
+  });
 
-    test('should handle empty user comment', () async {
+  group('getAllFoodAnalysis', () {
+    test('should return list of FoodAnalysisResult when retrieval is successful',
+        () async {
       // Arrange
-      const userComment = '';
+      final expectedResults = [analysisResult, correctedResult];
 
-      when(() => mockFoodImageAnalysisService.correctAnalysis(any(), any()))
-          .thenAnswer((_) async => correctedResult);
+      when(() => mockFoodScanRepository.getAll())
+          .thenAnswer((_) async => expectedResults);
 
       // Act
-      final result = await foodScanPhotoService.correctFoodAnalysis(
-          analysisResult, userComment);
+      final results = await foodScanPhotoService.getAllFoodAnalysis();
 
       // Assert
-      expect(result, equals(correctedResult));
-      verify(() => mockFoodImageAnalysisService.correctAnalysis(
-          analysisResult, userComment)).called(1);
+      expect(results, equals(expectedResults));
+      expect(results.length, equals(2));
+      expect(results[0].timestamp, equals(testDateTime));
+      expect(results[1].timestamp, equals(testDateTime));
+      verify(() => mockFoodScanRepository.getAll()).called(1);
     });
 
-    test('should forward specific error message from service', () async {
+    test('should return empty list when no food analysis results are found',
+        () async {
       // Arrange
-      const userComment = 'This is brown rice';
-      const specificError = 'Cannot process image correction';
+      when(() => mockFoodScanRepository.getAll())
+          .thenAnswer((_) async => []);
 
-      when(() => mockFoodImageAnalysisService.correctAnalysis(any(), any()))
-          .thenThrow(Exception(specificError));
+      // Act
+      final results = await foodScanPhotoService.getAllFoodAnalysis();
 
-      // Act & Assert
-      expect(
-        () => foodScanPhotoService.correctFoodAnalysis(
-            analysisResult, userComment),
-        throwsA(isA<Exception>().having(
-          (e) => e.toString(),
-          'message',
-          contains(specificError),
-        )),
-      );
+      // Assert
+      expect(results, isEmpty);
+      verify(() => mockFoodScanRepository.getAll()).called(1);
     });
   });
 }

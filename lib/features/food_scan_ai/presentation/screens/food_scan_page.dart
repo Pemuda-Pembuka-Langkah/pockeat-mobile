@@ -73,6 +73,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
   @override
   void dispose() {
     _scanLineController.dispose();
+    widget.cameraController.dispose();
     super.dispose();
   }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class FoodAnalysisLoading extends StatelessWidget {
   final Color primaryYellow;
@@ -65,88 +64,6 @@ class FoodAnalysisLoading extends StatelessWidget {
                 color: Colors.black54,
                 height: 1.5,
               ),
-            ),
-          ),
-
-          const SizedBox(height: 32),
-
-          // Indikator tahapan analisis
-          _buildAnalysisSteps(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAnalysisSteps() {
-    bool isCorrection = message != 'Analyzing Food';
-    
-    return Column(
-      children: [
-        _buildAnalysisStep(
-          icon: CupertinoIcons.camera,
-          text: 'Identifying food',
-          isCompleted: true,
-        ),
-        _buildAnalysisStep(
-          icon: isCorrection ? CupertinoIcons.pencil : CupertinoIcons.chart_bar,
-          text: isCorrection ? 'Correcting analysis' : 'Calculating nutrition',
-          isActive: true,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAnalysisStep({
-    required IconData icon,
-    required String text,
-    bool isCompleted = false,
-    bool isActive = false,
-  }) {
-    Color iconColor;
-    Color textColor;
-
-    if (isCompleted) {
-      iconColor = Colors.green;
-      textColor = Colors.black87;
-    } else if (isActive) {
-      iconColor = primaryPink;
-      textColor = Colors.black87;
-    } else {
-      iconColor = Colors.grey.shade400;
-      textColor = Colors.grey.shade600;
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                    color: textColor,
-                  ),
-                ),
-              ],
             ),
           ),
         ],

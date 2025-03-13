@@ -4,7 +4,7 @@ class FoodAnalysisResult {
   final List<Ingredient> ingredients;
   final NutritionInfo nutritionInfo;
   final List<String> warnings;
-  final String foodImageUrl;
+  String? foodImageUrl;
   final DateTime timestamp;
 
   // Constants for warning messages to ensure consistency
@@ -20,7 +20,7 @@ class FoodAnalysisResult {
     required this.ingredients,
     required this.nutritionInfo,
     this.warnings = const [], 
-    this.foodImageUrl = '',
+    this.foodImageUrl,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
 
@@ -44,8 +44,15 @@ class FoodAnalysisResult {
       }
     }
 
+    DateTime parsedTimestamp;
+    if (json['timestamp'] != null) {
+      parsedTimestamp = DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int);
+    } else {
+      parsedTimestamp = DateTime.now();
+    }
+
     return FoodAnalysisResult(
-      foodImageUrl:  '',
+      foodImageUrl: json['food_image_url'] ?? '',
       foodName: json['food_name'] ?? '',
       ingredients: (json['ingredients'] as List<dynamic>?)
               ?.map((item) => Ingredient.fromJson(item))
@@ -53,15 +60,14 @@ class FoodAnalysisResult {
           [],
       nutritionInfo: nutritionInfo,
       warnings: warnings,
-      timestamp: json['timestamp'] != null 
-          ? DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int) 
-          : null,
+      timestamp: parsedTimestamp,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'food_name': foodName,
+      'food_image_url': foodImageUrl,
       'ingredients': ingredients.map((i) => i.toJson()).toList(),
       'nutrition_info': nutritionInfo.toJson(),
       'warnings': warnings,
