@@ -16,17 +16,6 @@ class FoodAnalysisParser {
             jsonData['error']['message'] ?? 'Unknown error');
       }
 
-      // Check if there's a low confidence flag in warnings
-      final hasLowConfidenceWarning = jsonData.containsKey('warnings') && 
-          jsonData['warnings'] is List &&
-          (jsonData['warnings'] as List).any((warning) => 
-              warning.toString().contains('confidence is low'));
-      
-      // Set the low confidence flag based on explicit property or warning content
-      if (!jsonData.containsKey('is_low_confidence') && hasLowConfidenceWarning) {
-        jsonData['is_low_confidence'] = true;
-      }
-
       return FoodAnalysisResult.fromJson(jsonData);
     } catch (e) {
       throw GeminiServiceException(
