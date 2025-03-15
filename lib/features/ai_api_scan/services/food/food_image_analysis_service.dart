@@ -11,7 +11,6 @@ import 'package:pockeat/features/ai_api_scan/services/food/utils/json_prompt_for
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
 
 class FoodImageAnalysisService extends BaseGeminiService {
   final FirebaseFirestore _firestore;
@@ -20,7 +19,7 @@ class FoodImageAnalysisService extends BaseGeminiService {
 
   FoodImageAnalysisService({
     required super.apiKey,
-    FirebaseFirestore? firestore,
+      FirebaseFirestore? firestore,
     super.customModelWrapper,
     GenerativeModelWrapper? accurateModelWrapper,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
@@ -29,10 +28,10 @@ class FoodImageAnalysisService extends BaseGeminiService {
               model: 'gemini-1.5-pro',
               apiKey: apiKey,
               generationConfig: GenerationConfig(
-                temperature: 0.2, // Much lower temperature for precise analysis
+                temperature: 0.4,// Much lower temperature for precise analysis
                 topK: 40,
                 topP: 0.95,
-                maxOutputTokens: 8192,
+                maxOutputTokens: 2048,
                 responseMimeType: 'text/plain',
               ),
             ));

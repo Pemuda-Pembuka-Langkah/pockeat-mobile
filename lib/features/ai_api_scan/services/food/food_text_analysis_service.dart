@@ -403,8 +403,6 @@ class FoodTextAnalysisService extends BaseGeminiService {
     }
   }
 
-  // Main analyze method with RAG implementation
-  @override
   Future<FoodAnalysisResult> analyze(String description) async {
     try {
       // Step 1: Initial food identification
@@ -438,8 +436,7 @@ class FoodTextAnalysisService extends BaseGeminiService {
     }
   }
 
-  // Correction method enhanced with reference images when available
-  @override
+
   Future<FoodAnalysisResult> correctAnalysis(
       FoodAnalysisResult previousResult, String userComment) async {
     try {
