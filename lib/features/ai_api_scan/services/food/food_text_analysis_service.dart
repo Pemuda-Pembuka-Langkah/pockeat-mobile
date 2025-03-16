@@ -239,23 +239,10 @@ class FoodTextAnalysisService extends BaseGeminiService {
         Similarity Score: ${(food['score'] * 100).toStringAsFixed(1)}%
         '''));
         
-        // Try to download and add the reference image if available
-        if (food['image_url'] != null && food['image_url'].toString().isNotEmpty) {
-          try {
-            final imageBytes = await _downloadImageBytes(food['image_url']);
-            if (imageBytes != null) {
-              contentParts.add(DataPart('image/jpeg', imageBytes));
-              contentParts.add(TextPart('Above is the reference image for ${food['title']}'));
-              
-              // Store the image URL of the top match (first iteration)
+        if (food['image_url'] != null && food['image_url'].toString().isNotEmpty) {           
               if (refIndex == 1) {
                 selectedImageUrl = food['image_url'];
               }
-            }
-          } catch (e) {
-            // If download fails, just continue without the image
-            print('Failed to download reference image: $e');
-          }
         }
         
         refIndex++;
@@ -481,7 +468,7 @@ class FoodTextAnalysisService extends BaseGeminiService {
           }
         } catch (e) {
           // If we can't get the image, just continue without it
-          print('Failed to load reference image for correction: $e');
+          // print('Failed to load reference image for correction: $e');
         }
       }
 
