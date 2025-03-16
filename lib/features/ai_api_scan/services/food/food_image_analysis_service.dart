@@ -19,7 +19,7 @@ class FoodImageAnalysisService extends BaseGeminiService {
 
   FoodImageAnalysisService({
     required super.apiKey,
-      FirebaseFirestore? firestore,
+    FirebaseFirestore? firestore,
     super.customModelWrapper,
     GenerativeModelWrapper? accurateModelWrapper,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
@@ -28,7 +28,7 @@ class FoodImageAnalysisService extends BaseGeminiService {
               model: 'gemini-1.5-pro',
               apiKey: apiKey,
               generationConfig: GenerationConfig(
-                temperature: 0.4,// Much lower temperature for precise analysis
+                temperature: 0.4, // Much lower temperature for precise analysis
                 topK: 40,
                 topP: 0.95,
                 maxOutputTokens: 2048,
@@ -177,6 +177,7 @@ class FoodImageAnalysisService extends BaseGeminiService {
     } catch (e) {
       // throw ('F
       //ailed to download image: $e');
+      return null; // Mengembalikan null ketika terjadi exception
     }
   }
 
@@ -511,7 +512,8 @@ class FoodImageAnalysisService extends BaseGeminiService {
             }
           }
         } catch (e) {
-          throw ('Failed to load original image for correction: $e');
+          throw GeminiServiceException(
+              'Failed to load original image for correction: $e');
         }
       }
 
