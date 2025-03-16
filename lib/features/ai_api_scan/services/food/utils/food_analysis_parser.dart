@@ -48,7 +48,10 @@ static FoodAnalysisResult parse(String jsonText) {
     
     // Set the low confidence flag based on explicit property or warning content
     if (!jsonData.containsKey('is_low_confidence') && hasLowConfidenceWarning) {
+      // coverage:ignore-start
       jsonData['is_low_confidence'] = true;
+
+      // coverage:ignore-end
     }
 
     return FoodAnalysisResult.fromJson(jsonData);

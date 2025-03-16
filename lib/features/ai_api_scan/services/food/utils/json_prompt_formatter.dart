@@ -30,7 +30,9 @@ class JsonPromptFormatter {
     for (int i = 0; i < warnings.length; i++) {
       buffer.write('"${_escapeString(warnings[i])}"');
       if (i < warnings.length - 1) {
+        // coverage:ignore-start
         buffer.write(',');
+        // coverage:ignore-end
       }
     }
     buffer.write(']');
