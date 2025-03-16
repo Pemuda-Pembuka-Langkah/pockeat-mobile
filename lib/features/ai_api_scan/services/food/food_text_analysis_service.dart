@@ -223,7 +223,7 @@ class FoodTextAnalysisService extends BaseGeminiService {
         // Add text description for this reference food
         contentParts.add(TextPart('''
         
-        REFERENCE FOOD ${refIndex}:
+        REFERENCE FOOD $refIndex:
         Name: ${food['title']}
         Ingredients: ${food['ingredients']}
         Similarity Score: ${(food['score'] * 100).toStringAsFixed(1)}%
