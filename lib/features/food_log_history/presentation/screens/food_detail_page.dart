@@ -714,7 +714,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                               ),
                               if (ingredient.servings > 0)
                                 Text(
-                                  '${ingredient.servings} servings',
+                                  '${ingredient.servings} grams',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.black54,

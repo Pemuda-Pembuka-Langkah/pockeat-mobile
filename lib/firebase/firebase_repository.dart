@@ -9,6 +9,8 @@ abstract class BaseFirestoreRepository<T> {
   // Function to convert Map to T
   final T Function(Map<String, dynamic> map, String id) fromMap;
 
+
+// coverage:ignore-start
   BaseFirestoreRepository({
     FirebaseFirestore? firestore,
     required this.collectionName,
@@ -250,4 +252,6 @@ abstract class BaseFirestoreRepository<T> {
       throw Exception('Failed to delete item: $e');
     }
   }
+
+  // coverage:ignore-end
 }

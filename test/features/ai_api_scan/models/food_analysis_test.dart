@@ -434,6 +434,107 @@ void main() {
       });
     });
   });
+  test('should handle low confidence flag', () {
+  // Arrange
+  final jsonWithLowConfidence = {
+    'food_name': 'Uncertain Food',
+    'ingredients': [
+      {'name': 'Unknown Ingredient', 'servings': 100}
+    ],
+    'nutrition_info': {
+      'calories': 100,
+      'protein': 5,
+      'carbs': 10,
+      'fat': 2,
+      'sodium': 50,
+      'fiber': 1,
+      'sugar': 5
+    },
+    'is_low_confidence': true
+  };
+
+  final jsonWithoutFlag = {
+    'food_name': 'Certain Food',
+    'ingredients': [
+      {'name': 'Known Ingredient', 'servings': 100}
+    ],
+    'nutrition_info': {
+      'calories': 100,
+      'protein': 5,
+      'carbs': 10,
+      'fat': 2,
+      'sodium': 50,
+      'fiber': 1,
+      'sugar': 5
+    }
+  };
+
+  // Act
+  final resultWithLowConfidence = FoodAnalysisResult.fromJson(jsonWithLowConfidence);
+  final resultWithoutFlag = FoodAnalysisResult.fromJson(jsonWithoutFlag);
+
+  // Assert
+  expect(resultWithLowConfidence.isLowConfidence, true);
+  expect(resultWithoutFlag.isLowConfidence, false); // Should default to false
+});
+test('should handle Firestore Timestamp object in JSON', () {
+  // Arrange
+  final testDate = DateTime(2024, 3, 13);
+  final timestampMock = Timestamp.fromDate(testDate); // Create actual Firestore Timestamp
+
+  final json = {
+    'food_name': 'Apple',
+    'ingredients': [
+      {'name': 'Apple', 'servings': 100}
+    ],
+    'nutrition_info': {
+      'calories': 95,
+      'protein': 0.5,
+      'carbs': 25.1,
+      'fat': 0.3,
+      'sodium': 2,
+      'fiber': 4.4,
+      'sugar': 19.0
+    },
+    'timestamp': timestampMock
+  };
+
+  // Act
+  final result = FoodAnalysisResult.fromJson(json);
+
+  // Assert
+  expect(result.timestamp, equals(testDate));
+});
+
+test('should handle non-standard timestamp format in JSON', () {
+  // Arrange
+  final json = {
+    'food_name': 'Apple',
+    'ingredients': [
+      {'name': 'Apple', 'servings': 100}
+    ],
+    'nutrition_info': {
+      'calories': 95,
+      'protein': 0.5,
+      'carbs': 25.1,
+      'fat': 0.3,
+      'sodium': 2,
+      'fiber': 4.4,
+      'sugar': 19.0
+    },
+    'timestamp': 'invalid-timestamp-format' // Non-standard format
+  };
+
+  // Act
+  final result = FoodAnalysisResult.fromJson(json);
+  final now = DateTime.now();
+
+  // Assert
+  expect(result.timestamp, isA<DateTime>());
+  // Timestamp should be recent (within the last second)
+  expect(now.difference(result.timestamp).inSeconds, lessThanOrEqualTo(1));
+});
+
 }
 
 // Mock class for Timestamp

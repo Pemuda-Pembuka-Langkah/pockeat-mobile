@@ -9,11 +9,13 @@ class FoodAnalysisResult {
   final List<String> warnings;
   String? foodImageUrl;
   final DateTime timestamp;
-  final String id; // Changed to non-nullable
+  final String id;
+  final bool isLowConfidence; // Added low confidence flag
 
   // Constants for warning messages to ensure consistency
   static const String highSodiumWarning = "High sodium content";
   static const String highSugarWarning = "High sugar content";
+  static const String lowConfidenceWarning = "Analysis confidence is low - nutrition values may be less accurate";
 
   // Thresholds for warnings
   static const double highSodiumThreshold = 500.0; // mg
@@ -26,10 +28,11 @@ class FoodAnalysisResult {
     this.warnings = const [], 
     this.foodImageUrl,
     DateTime? timestamp,
-    String? id, // Optional parameter
+    String? id,
+    this.isLowConfidence = false, // Default to high confidence
   }) : 
     timestamp = timestamp ?? DateTime.now(),
-    id = id ?? const Uuid().v4(); // Generate UUID if not provided
+    id = id ?? const Uuid().v4();
 
   factory FoodAnalysisResult.fromJson(Map<String, dynamic> json, {String? id}) {
     final nutritionInfo = NutritionInfo.fromJson(json['nutrition_info'] ?? {});
@@ -65,6 +68,9 @@ class FoodAnalysisResult {
       parsedTimestamp = DateTime.now();
     }
 
+    // Check for low confidence flag
+    bool isLowConfidence = json['is_low_confidence'] == true;
+    
     return FoodAnalysisResult(
       foodName: json['food_name'] ?? '',
       ingredients: _parseIngredients(json['ingredients']),
@@ -72,7 +78,8 @@ class FoodAnalysisResult {
       warnings: warnings,
       foodImageUrl: json['food_image_url'],
       timestamp: parsedTimestamp,
-      id: id ?? json['id'] ?? 'food_${DateTime.now().millisecondsSinceEpoch}', // Generate default ID using timestamp
+      id: id ?? json['id'] ?? 'food_${DateTime.now().millisecondsSinceEpoch}',
+      isLowConfidence: isLowConfidence,
     );
   }
 
@@ -83,9 +90,33 @@ class FoodAnalysisResult {
       'nutrition_info': nutritionInfo.toJson(),
       'warnings': warnings,
       'food_image_url': foodImageUrl,
-      'timestamp': Timestamp.fromDate(timestamp), // Use Firestore Timestamp instead of milliseconds
+      'timestamp': Timestamp.fromDate(timestamp),
       'id': id,
+      'is_low_confidence': isLowConfidence,
     };
+  }
+
+  // Create a copy with modified fields
+  FoodAnalysisResult copyWith({
+    String? foodName,
+    List<Ingredient>? ingredients,
+    NutritionInfo? nutritionInfo,
+    List<String>? warnings,
+    String? foodImageUrl,
+    DateTime? timestamp,
+    String? id,
+    bool? isLowConfidence,
+  }) {
+    return FoodAnalysisResult(
+      foodName: foodName ?? this.foodName,
+      ingredients: ingredients ?? this.ingredients,
+      nutritionInfo: nutritionInfo ?? this.nutritionInfo,
+      warnings: warnings ?? this.warnings,
+      foodImageUrl: foodImageUrl ?? this.foodImageUrl,
+      timestamp: timestamp ?? this.timestamp,
+      id: id ?? this.id,
+      isLowConfidence: isLowConfidence ?? this.isLowConfidence,
+    );
   }
 
   static List<Ingredient> _parseIngredients(dynamic ingredientsData) {
