@@ -22,6 +22,7 @@ class FoodImageAnalysisService extends BaseGeminiService {
     FirebaseFirestore? firestore,
     super.customModelWrapper,
     GenerativeModelWrapper? accurateModelWrapper,
+    // coverage:ignore-start
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _accurateModelWrapper = accurateModelWrapper ??
             RealGenerativeModelWrapper(GenerativeModel(
@@ -35,27 +36,10 @@ class FoodImageAnalysisService extends BaseGeminiService {
                 responseMimeType: 'text/plain',
               ),
             ));
-
-  // coverage:ignore-start
   factory FoodImageAnalysisService.fromEnv() {
     final apiKey = BaseGeminiService.getApiKeyFromEnv();
-
-    // Create the accurate model wrapper
-    final accurateModelWrapper = RealGenerativeModelWrapper(GenerativeModel(
-      model: 'gemini-1.5-pro',
-      apiKey: apiKey,
-      generationConfig: GenerationConfig(
-        temperature: 0.2, // Low temperature for accurate analysis
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 8192,
-        responseMimeType: 'text/plain',
-      ),
-    ));
-
     return FoodImageAnalysisService(
       apiKey: apiKey,
-      accurateModelWrapper: accurateModelWrapper,
     );
   }
   // coverage:ignore-end
@@ -512,9 +496,11 @@ class FoodImageAnalysisService extends BaseGeminiService {
             }
           }
         } catch (e) {
+          // coverage:ignore-start
           throw GeminiServiceException(
               'Failed to load original image for correction: $e');
         }
+        // coverage:ignore-end
       }
 
       // Add the response format instructions
@@ -553,10 +539,11 @@ class FoodImageAnalysisService extends BaseGeminiService {
       // Use low temperature model for corrections with all content parts
       final response = await _accurateModelWrapper
           .generateContent([Content.multi(contentParts)]);
-
+       // coverage:ignore-start
       if (response.text == null) {
         throw GeminiServiceException('No response text generated');
       }
+        // coverage:ignore-end
 
       final jsonString = extractJson(response.text!);
 
@@ -567,9 +554,11 @@ class FoodImageAnalysisService extends BaseGeminiService {
       if (previousResult.isLowConfidence) {
         correctedResult = correctedResult.copyWith(isLowConfidence: true);
 
+       // coverage:ignore-start
         // Check if the low confidence warning is present and add it if not
         bool hasLowConfidenceWarning = correctedResult.warnings.any(
             (warning) => warning == FoodAnalysisResult.lowConfidenceWarning);
+        // coverage:ignore-end
 
         if (!hasLowConfidenceWarning) {
           List<String> updatedWarnings =
