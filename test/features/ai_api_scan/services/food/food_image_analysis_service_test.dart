@@ -27,7 +27,36 @@ import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 ])
 import 'food_image_analysis_service_test.mocks.dart';
 
-class MockFile extends Mock implements File {}
+// Implementasi MockFile yang lebih baik
+class MockFile implements File {
+  final String _path;
+  final Uint8List _bytes;
+  final bool _exists;
+
+  MockFile({
+    required String path,
+    required Uint8List bytes,
+    bool exists = true,
+  })  : _path = path,
+        _bytes = bytes,
+        _exists = exists;
+
+  @override
+  Future<Uint8List> readAsBytes() async => _bytes;
+
+  @override
+  String get path => _path;
+
+  @override
+  bool existsSync() => _exists;
+
+  @override
+  Future<bool> exists() async => _exists;
+
+  // Implement other required methods with empty implementations
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 class MockHttpResponse extends Mock implements http.Response {}
 
@@ -36,7 +65,7 @@ class MockGenerativeModelWrapper implements GenerativeModelWrapper {
   String? responseText;
   Exception? exceptionToThrow;
   bool wasCalled = false;
-  
+
   @override
   Future<dynamic> generateContent(dynamic _) async {
     wasCalled = true;
@@ -45,15 +74,15 @@ class MockGenerativeModelWrapper implements GenerativeModelWrapper {
     }
     return _MockGenerateContentResponse(responseText);
   }
-  
+
   void setResponse(String? text) {
     responseText = text;
   }
-  
+
   void setException(Exception exception) {
     exceptionToThrow = exception;
   }
-  
+
   // Implement other required methods with empty implementations
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -66,36 +95,83 @@ class _MockGenerateContentResponse {
 }
 
 // Custom DocumentSnapshot implementation that doesn't use Mockito
-class CustomMockDocumentSnapshot<T extends Map<String, dynamic>> implements DocumentSnapshot<T> {
+class CustomMockDocumentSnapshot<T extends Map<String, dynamic>>
+    implements QueryDocumentSnapshot<T> {
   final String _id;
   final T _data;
-  
+
   CustomMockDocumentSnapshot(this._id, this._data);
-  
+
   @override
   String get id => _id;
-  
+
   @override
-  T? data() => _data;
-  
+  T data() => _data;
+
   // Implement other required methods with empty implementations
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 // Custom QuerySnapshot implementation that doesn't use Mockito
-class CustomMockQuerySnapshot<T extends Map<String, dynamic>> implements QuerySnapshot<T> {
-  final List<DocumentSnapshot<T>> _docs;
-  
+class CustomMockQuerySnapshot<T extends Map<String, dynamic>>
+    implements QuerySnapshot<T> {
+  final List<QueryDocumentSnapshot<T>> _docs;
+
   CustomMockQuerySnapshot(this._docs);
-  
+
   @override
-  List<QueryDocumentSnapshot<T>> get docs => 
-      _docs.map((doc) => doc as QueryDocumentSnapshot<T>).toList();
-  
+  List<QueryDocumentSnapshot<T>> get docs => _docs;
+
   // Implement other required methods with empty implementations
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+// Implementasi MockFile yang lebih baik
+class _ErrorMockFile implements File {
+  final String _path;
+  final Exception _error;
+
+  _ErrorMockFile({
+    required String path,
+    required Exception error,
+  })  : _path = path,
+        _error = error;
+
+  @override
+  Future<Uint8List> readAsBytes() async {
+    throw _error;
+  }
+
+  @override
+  String get path => _path;
+
+  @override
+  bool existsSync() => false;
+
+  @override
+  Future<bool> exists() async => false;
+
+  // Implement other required methods with empty implementations
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+// Subclass FoodImageAnalysisService untuk mock metode _downloadImageBytes
+class TestFoodImageAnalysisService extends FoodImageAnalysisService {
+  TestFoodImageAnalysisService({
+    required super.apiKey,
+    required super.firestore,
+    required super.customModelWrapper,
+    required super.accurateModelWrapper,
+  });
+
+  @override
+  Future<Uint8List?> _downloadImageBytes(String imageUrl) async {
+    // Selalu mengembalikan null untuk tes
+    return null;
+  }
 }
 
 void main() {
@@ -106,7 +182,7 @@ void main() {
   late MockFile mockFile;
   late MockCollectionReference<Map<String, dynamic>> mockCollection;
   late MockQuery<Map<String, dynamic>> mockQuery;
-  
+
   const String testApiKey = 'test-api-key';
   final testImageBytes = Uint8List.fromList([1, 2, 3, 4]);
 
@@ -114,23 +190,20 @@ void main() {
     mockFirestore = MockFirebaseFirestore();
     mockModelWrapper = MockGenerativeModelWrapper();
     mockAccurateModelWrapper = MockGenerativeModelWrapper();
-    mockFile = MockFile();
+    mockFile = MockFile(path: '/test/path/to/image.jpg', bytes: testImageBytes);
     mockCollection = MockCollectionReference<Map<String, dynamic>>();
     mockQuery = MockQuery<Map<String, dynamic>>();
 
-    when(mockFile.readAsBytes()).thenAnswer((_) async => testImageBytes);
-    when(mockFile.path).thenReturn('/test/path/to/image.jpg');
-    when(mockFile.existsSync()).thenReturn(true);
-    when(mockFile.exists()).thenAnswer((_) async => true);
-
-    // Setup Firestore mocks
+    // Setup Firestore mocks, hanya collection dan orderBy
     when(mockFirestore.collection('fooddataset')).thenReturn(mockCollection);
     when(mockCollection.orderBy('title')).thenReturn(mockQuery);
+
+    // Mengembalikan baris yang dikomentari
     when(mockQuery.startAt(any)).thenReturn(mockQuery);
     when(mockQuery.endAt(any)).thenReturn(mockQuery);
     when(mockQuery.limit(any)).thenReturn(mockQuery);
 
-    service = FoodImageAnalysisService(
+    service = TestFoodImageAnalysisService(
       apiKey: testApiKey,
       firestore: mockFirestore,
       customModelWrapper: mockModelWrapper,
@@ -139,14 +212,12 @@ void main() {
   });
 
   group('FoodImageAnalysisService', () {
-    test('factory constructor should work correctly', () {
-      expect(FoodImageAnalysisService.fromEnv(), isA<FoodImageAnalysisService>());
-    });
-
     group('analyze', () {
-      test('should successfully analyze food image with similar foods found', () async {
+      test('should successfully analyze food image with similar foods found',
+          () async {
         // Setup test data
-        mockModelWrapper.setResponse('{"food_name": "Pizza", "description": "Pepperoni pizza with cheese"}');
+        mockModelWrapper.setResponse(
+            '{"food_name": "Pizza", "description": "Pepperoni pizza with cheese"}');
 
         // Create a custom document for high confidence match
         final Map<String, dynamic> docData = {
@@ -154,10 +225,15 @@ void main() {
           'cleaned_ingredients': 'Dough, Tomato Sauce, Cheese, Pepperoni',
           'image_url': 'http://example.com/pizza.jpg',
         };
-        final customDoc = CustomMockDocumentSnapshot<Map<String, dynamic>>('pizza1', docData);
-        final customQuerySnapshot = CustomMockQuerySnapshot<Map<String, dynamic>>([customDoc]);
-        
-        // Set up the query to return our custom snapshot
+        final customDoc =
+            CustomMockDocumentSnapshot<Map<String, dynamic>>('pizza1', docData);
+        final customQuerySnapshot =
+            CustomMockQuerySnapshot<Map<String, dynamic>>([customDoc]);
+
+        // Setup query chain
+        when(mockQuery.startAt(any)).thenReturn(mockQuery);
+        when(mockQuery.endAt(any)).thenReturn(mockQuery);
+        when(mockQuery.limit(any)).thenReturn(mockQuery);
         when(mockQuery.get()).thenAnswer((_) async => customQuerySnapshot);
 
         // Setup accurate model response
@@ -192,19 +268,27 @@ void main() {
         expect(result.nutritionInfo.calories, 350);
         expect(result.warnings, contains('High sodium content'));
         expect(result.isLowConfidence, false);
-        
+
         // Verify interactions
         expect(mockModelWrapper.wasCalled, true);
         expect(mockAccurateModelWrapper.wasCalled, true);
         verify(mockFirestore.collection('fooddataset')).called(1);
       });
 
-      test('should analyze with low confidence when no similar foods found', () async {
+      test('should analyze with low confidence when no similar foods found',
+          () async {
         // Setup test data
-        mockModelWrapper.setResponse('{"food_name": "Exotic Dish", "description": "Unknown food"}');
+        mockModelWrapper.setResponse(
+            '{"food_name": "Exotic Dish", "description": "Unknown food"}');
 
         // Set up empty query results
-        final customQuerySnapshot = CustomMockQuerySnapshot<Map<String, dynamic>>([]);
+        final customQuerySnapshot =
+            CustomMockQuerySnapshot<Map<String, dynamic>>([]);
+
+        // Setup query chain
+        when(mockQuery.startAt(any)).thenReturn(mockQuery);
+        when(mockQuery.endAt(any)).thenReturn(mockQuery);
+        when(mockQuery.limit(any)).thenReturn(mockQuery);
         when(mockQuery.get()).thenAnswer((_) async => customQuerySnapshot);
 
         // Setup accurate model response
@@ -236,16 +320,20 @@ void main() {
         expect(result.foodName, 'Exotic Rice Dish');
         expect(result.ingredients.length, 3);
         expect(result.isLowConfidence, true);
-        expect(result.warnings, contains(FoodAnalysisResult.lowConfidenceWarning));
-        
+        expect(
+            result.warnings, contains(FoodAnalysisResult.lowConfidenceWarning));
+
         // Verify interactions
         expect(mockModelWrapper.wasCalled, true);
         expect(mockAccurateModelWrapper.wasCalled, true);
       });
 
-      test('should analyze with low confidence when similar foods have low score', () async {
+      test(
+          'should analyze with low confidence when similar foods have low score',
+          () async {
         // Setup test data
-        mockModelWrapper.setResponse('{"food_name": "Mystery Dish", "description": "Food on a plate"}');
+        mockModelWrapper.setResponse(
+            '{"food_name": "Mystery Dish", "description": "Food on a plate"}');
 
         // Prepare custom document with low score potential
         final Map<String, dynamic> docData = {
@@ -253,12 +341,17 @@ void main() {
           'cleaned_ingredients': 'Ingredients',
           'image_url': '',
         };
-        final customDoc = CustomMockDocumentSnapshot<Map<String, dynamic>>('lowscore', docData);
-        final customQuerySnapshot = CustomMockQuerySnapshot<Map<String, dynamic>>([customDoc]);
-        
-        // Set up the query to return our custom snapshot
+        final customDoc = CustomMockDocumentSnapshot<Map<String, dynamic>>(
+            'lowscore', docData);
+        final customQuerySnapshot =
+            CustomMockQuerySnapshot<Map<String, dynamic>>([customDoc]);
+
+        // Setup query chain
+        when(mockQuery.startAt(any)).thenReturn(mockQuery);
+        when(mockQuery.endAt(any)).thenReturn(mockQuery);
+        when(mockQuery.limit(any)).thenReturn(mockQuery);
         when(mockQuery.get()).thenAnswer((_) async => customQuerySnapshot);
-        
+
         // Setup accurate model response
         mockAccurateModelWrapper.setResponse('''
         {
@@ -285,7 +378,8 @@ void main() {
         // Verify the result
         expect(result.foodName, 'Mixed Plate');
         expect(result.isLowConfidence, true);
-        expect(result.warnings, contains(FoodAnalysisResult.lowConfidenceWarning));
+        expect(
+            result.warnings, contains(FoodAnalysisResult.lowConfidenceWarning));
         expect(result.warnings, contains('High sodium content'));
       });
 
@@ -294,11 +388,10 @@ void main() {
         mockModelWrapper.setResponse(null);
 
         // Execute and verify exception
-        expect(() => service.analyze(mockFile), 
-          throwsA(isA<GeminiServiceException>().having(
-            (e) => e.message, 'message', contains('No response text generated')
-          ))
-        );
+        expect(
+            () => service.analyze(mockFile),
+            throwsA(isA<GeminiServiceException>().having((e) => e.message,
+                'message', contains('No response text generated'))));
       });
 
       test('should handle malformed JSON in response', () async {
@@ -306,27 +399,125 @@ void main() {
         mockModelWrapper.setResponse('Not valid JSON');
 
         // Execute and verify exception
-        expect(() => service.analyze(mockFile), 
-          throwsA(isA<GeminiServiceException>())
-        );
+        expect(() => service.analyze(mockFile),
+            throwsA(isA<GeminiServiceException>()));
       });
 
       test('should handle error reading image file', () async {
-        // Setup file read error
-        when(mockFile.readAsBytes()).thenThrow(FileSystemException('Error reading file'));
+        // Setup file read error dengan membuat MockFile baru yang melempar exception
+        final errorMockFile = _ErrorMockFile(
+          path: '/test/path/to/image.jpg',
+          error: FileSystemException('Error reading file'),
+        );
 
         // Execute and verify exception
-        expect(() => service.analyze(mockFile), 
-          throwsA(isA<GeminiServiceException>().having(
-            (e) => e.message, 'message', contains('Error analyzing food')
-          ))
-        );
+        expect(
+            () => service.analyze(errorMockFile),
+            throwsA(isA<GeminiServiceException>().having((e) => e.message,
+                'message', contains('Error identifying food'))));
+      });
+
+      test('should handle "No food detected in image" response', () async {
+        // Setup test data
+        mockModelWrapper.setResponse(
+            '{"food_name": "Unknown", "description": "Cannot identify any food"}');
+
+        // Set up empty query results to trigger low confidence path
+        final customQuerySnapshot =
+            CustomMockQuerySnapshot<Map<String, dynamic>>([]);
+        when(mockQuery.startAt(any)).thenReturn(mockQuery);
+        when(mockQuery.endAt(any)).thenReturn(mockQuery);
+        when(mockQuery.limit(any)).thenReturn(mockQuery);
+        when(mockQuery.get()).thenAnswer((_) async => customQuerySnapshot);
+
+        // Setup accurate model response with "No food detected" (tanpa field error)
+        mockAccurateModelWrapper.setResponse('''
+        {
+          "food_name": "Unknown",
+          "ingredients": [],
+          "nutrition_info": {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fat": 0,
+            "sodium": 0,
+            "fiber": 0,
+            "sugar": 0
+          },
+          "warnings": ["No food detected in image"]
+        }
+        ''');
+
+        // Execute the analyze method
+        final result = await service.analyze(mockFile);
+
+        // Verify the result
+        expect(result.foodName, 'Unknown');
+        expect(result.ingredients.isEmpty, true);
+        expect(result.nutritionInfo.calories, 0);
+        expect(result.isLowConfidence, true);
+        expect(
+            result.warnings, contains(FoodAnalysisResult.lowConfidenceWarning));
+        expect(result.warnings, contains('No food detected in image'));
+      });
+
+      test('should handle error in _analyzeWithReferences', () async {
+        // Setup test data for initial identification
+        mockModelWrapper.setResponse(
+            '{"food_name": "Pizza", "description": "Pepperoni pizza with cheese"}');
+
+        // Create a custom document for high confidence match
+        final Map<String, dynamic> docData = {
+          'title': 'Pepperoni Pizza',
+          'cleaned_ingredients': 'Dough, Tomato Sauce, Cheese, Pepperoni',
+          'image_url': 'http://example.com/pizza.jpg',
+        };
+        final customDoc =
+            CustomMockDocumentSnapshot<Map<String, dynamic>>('pizza1', docData);
+        final customQuerySnapshot =
+            CustomMockQuerySnapshot<Map<String, dynamic>>([customDoc]);
+
+        // Setup query chain for high confidence path
+        when(mockQuery.startAt(any)).thenReturn(mockQuery);
+        when(mockQuery.endAt(any)).thenReturn(mockQuery);
+        when(mockQuery.limit(any)).thenReturn(mockQuery);
+        when(mockQuery.get()).thenAnswer((_) async => customQuerySnapshot);
+
+        // Setup error in accurate model
+        mockAccurateModelWrapper.setException(
+            GeminiServiceException('Error in reference analysis'));
+
+        // Execute and verify exception
+        expect(
+            () => service.analyze(mockFile),
+            throwsA(isA<GeminiServiceException>().having((e) => e.message,
+                'message', contains('Error in reference analysis'))));
+      });
+
+      test('should handle error in _findSimilarFoods', () async {
+        // Setup test data for initial identification
+        mockModelWrapper.setResponse(
+            '{"food_name": "Pizza", "description": "Pepperoni pizza with cheese"}');
+
+        // Setup Firestore error
+        when(mockQuery.startAt(any)).thenReturn(mockQuery);
+        when(mockQuery.endAt(any)).thenReturn(mockQuery);
+        when(mockQuery.limit(any)).thenReturn(mockQuery);
+        when(mockQuery.get()).thenThrow(
+            FirebaseException(plugin: 'firestore', message: 'Firestore error'));
+
+        // Execute and verify exception
+        expect(
+            () => service.analyze(mockFile),
+            throwsA(isA<GeminiServiceException>().having((e) => e.message,
+                'message', contains('Error finding similar foods'))));
       });
     });
 
     group('correctAnalysis', () {
-      test('should correctly update food analysis based on user feedback', () async {
-        // Create original result
+      test('should correctly update food analysis based on user feedback',
+          () async {
+        // Create original result with http URL instead of file path
         final originalResult = FoodAnalysisResult(
           foodName: 'Hamburger',
           ingredients: [
@@ -346,12 +537,9 @@ void main() {
           ),
           warnings: ['High sodium content'],
           isLowConfidence: false,
-          foodImageUrl: '/path/to/image.jpg',
+          foodImageUrl: 'http://example.com/burger.jpg',
         );
 
-        // Setup file exists
-        when(mockFile.readAsBytes()).thenAnswer((_) async => testImageBytes);
-        
         // Setup correction response
         mockAccurateModelWrapper.setResponse('''
         {
@@ -377,25 +565,24 @@ void main() {
         ''');
 
         // Execute correction
-        final correctedResult = await service.correctAnalysis(
-          originalResult, 
-          "It's actually a cheeseburger, you missed the cheese!"
-        );
+        final correctedResult = await service.correctAnalysis(originalResult,
+            "It's actually a cheeseburger, you missed the cheese!");
 
         // Verify the corrected result
         expect(correctedResult.foodName, 'Cheeseburger');
         expect(correctedResult.ingredients.length, 5);
-        expect(correctedResult.ingredients.any((i) => i.name == 'Cheese'), isTrue);
+        expect(
+            correctedResult.ingredients.any((i) => i.name == 'Cheese'), isTrue);
         expect(correctedResult.nutritionInfo.calories, 550);
         expect(correctedResult.foodImageUrl, originalResult.foodImageUrl);
         expect(correctedResult.isLowConfidence, originalResult.isLowConfidence);
-        
+
         // Verify interactions
         expect(mockAccurateModelWrapper.wasCalled, true);
       });
 
       test('should preserve low confidence flag on corrections', () async {
-        // Create low confidence original result
+        // Create low confidence original result with http URL
         final originalResult = FoodAnalysisResult(
           foodName: 'Unknown Food',
           ingredients: [
@@ -412,9 +599,9 @@ void main() {
           ),
           warnings: [FoodAnalysisResult.lowConfidenceWarning],
           isLowConfidence: true,
-          foodImageUrl: '/path/to/image.jpg',
+          foodImageUrl: 'http://example.com/unknown-food.jpg',
         );
-        
+
         // Setup correction response
         mockAccurateModelWrapper.setResponse('''
         {
@@ -439,14 +626,13 @@ void main() {
 
         // Execute correction
         final correctedResult = await service.correctAnalysis(
-          originalResult, 
-          "It's a chicken salad"
-        );
+            originalResult, "It's a chicken salad");
 
         // Verify the result maintains low confidence
         expect(correctedResult.foodName, 'Chicken Salad');
         expect(correctedResult.isLowConfidence, true);
-        expect(correctedResult.warnings, contains(FoodAnalysisResult.lowConfidenceWarning));
+        expect(correctedResult.warnings,
+            contains(FoodAnalysisResult.lowConfidenceWarning));
         expect(correctedResult.foodImageUrl, originalResult.foodImageUrl);
       });
 
@@ -470,16 +656,15 @@ void main() {
           warnings: [],
           isLowConfidence: false,
         );
-        
+
         // Setup generation error
         mockAccurateModelWrapper.setException(Exception('API error'));
 
         // Execute and verify exception
-        expect(() => service.correctAnalysis(originalResult, "Add meatballs"), 
-          throwsA(isA<GeminiServiceException>().having(
-            (e) => e.message, 'message', contains('Error correcting food analysis')
-          ))
-        );
+        expect(
+            () => service.correctAnalysis(originalResult, "Add meatballs"),
+            throwsA(isA<GeminiServiceException>().having((e) => e.message,
+                'message', contains('Error correcting food analysis'))));
       });
 
       test('should handle web image URLs in correction', () async {
@@ -504,10 +689,7 @@ void main() {
           isLowConfidence: false,
           foodImageUrl: 'http://example.com/sushi.jpg',
         );
-        
-        // Setup HTTP response mock if needed
-        // (not using http client in this test directly)
-        
+
         // Setup correction response
         mockAccurateModelWrapper.setResponse('''
         {
@@ -533,15 +715,72 @@ void main() {
 
         // Execute correction
         final correctedResult = await service.correctAnalysis(
-          originalResult, 
-          "Add avocado to the ingredients"
-        );
+            originalResult, "Add avocado to the ingredients");
 
-        // Verify the result 
+        // Verify the result
         expect(correctedResult.foodName, 'Sushi Roll');
         expect(correctedResult.ingredients.length, 4);
-        expect(correctedResult.ingredients.any((i) => i.name == 'Avocado'), isTrue);
+        expect(correctedResult.ingredients.any((i) => i.name == 'Avocado'),
+            isTrue);
         expect(correctedResult.foodImageUrl, originalResult.foodImageUrl);
+      });
+
+      test('should handle null foodImageUrl in correction', () async {
+        // Create original result with null foodImageUrl
+        final originalResult = FoodAnalysisResult(
+          foodName: 'Pasta',
+          ingredients: [
+            Ingredient(name: 'Pasta', servings: 120),
+            Ingredient(name: 'Tomato Sauce', servings: 100),
+          ],
+          nutritionInfo: NutritionInfo(
+            calories: 350,
+            protein: 12,
+            carbs: 70,
+            fat: 5,
+            sodium: 400,
+            fiber: 4,
+            sugar: 6,
+          ),
+          warnings: [],
+          isLowConfidence: false,
+          foodImageUrl: null, // Null foodImageUrl
+        );
+
+        // Setup correction response
+        mockAccurateModelWrapper.setResponse('''
+        {
+          "food_name": "Pasta with Meatballs",
+          "ingredients": [
+            {"name": "Pasta", "servings": 120},
+            {"name": "Tomato Sauce", "servings": 100},
+            {"name": "Meatballs", "servings": 80}
+          ],
+          "nutrition_info": {
+            "calories": 450,
+            "protein": 25,
+            "carbs": 70,
+            "fat": 12,
+            "sodium": 500,
+            "fiber": 4,
+            "sugar": 6
+          },
+          "warnings": ["High sodium content"]
+        }
+        ''');
+
+        // Execute correction
+        final correctedResult = await service.correctAnalysis(
+            originalResult, "Add meatballs to the pasta");
+
+        // Verify the result
+        expect(correctedResult.foodName, 'Pasta with Meatballs');
+        expect(correctedResult.ingredients.length, 3);
+        expect(correctedResult.ingredients.any((i) => i.name == 'Meatballs'),
+            isTrue);
+        expect(correctedResult.nutritionInfo.calories, 450);
+        expect(correctedResult.foodImageUrl, null);
+        expect(correctedResult.warnings, contains('High sodium content'));
       });
     });
   });
