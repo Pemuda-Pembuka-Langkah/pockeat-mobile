@@ -3,6 +3,10 @@ name: Release CI
 on:
   push:
     tags: ['v*']
+    
+# Ensure CHANGELOG.md is readable
+permissions:
+  contents: write
 
 jobs:
   test:
@@ -51,8 +55,6 @@ jobs:
     name: Build & Distribute
     needs: test
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     
     steps:
       - uses: actions/checkout@v4
@@ -97,7 +99,7 @@ jobs:
         
       - name: Build Release APK
         run: flutter build apk --release
-        
+      
       # Analisis tambahan untuk memastikan kualitas
       - name: Run Flutter Analyze for CI Failure
         run: flutter analyze --no-fatal-warnings --no-fatal-infos
@@ -106,19 +108,36 @@ jobs:
       - name: Get version from tag
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-        
+          
+      # Extract release notes from CHANGELOG.md
+      - name: Extract changelog for current version
+        id: extract_changelog
+        run: |
+          VERSION=$(echo ${GITHUB_REF#refs/tags/v} | sed 's/\.0*\./\./g')
+          echo "Looking for version $VERSION in CHANGELOG.md"
+          SECTION=$(sed -n "/## v$VERSION/,/## v[0-9]/p" CHANGELOG.md | sed '$d')
+          # If section is empty, use a fallback message
+          if [ -z "$SECTION" ]; then
+            SECTION="Release version ${{ steps.get_version.outputs.VERSION }}"
+          fi
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$SECTION" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
       # Upload to GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
           name: Release ${{ steps.get_version.outputs.VERSION }}
+          body: ${{ steps.extract_changelog.outputs.CHANGELOG }}
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      # Distribute to Firebase App Distribution
+      # Upload to Firebase App Distribution
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.PRODUCTION_FIREBASE_ANDROID_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           file: build/app/outputs/flutter-apk/app-release.apk
+          releaseNotes: ${{ steps.extract_changelog.outputs.CHANGELOG }}
