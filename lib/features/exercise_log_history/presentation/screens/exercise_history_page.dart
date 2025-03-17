@@ -194,7 +194,11 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   // UI filter-related methods
   //
 
+  /// Selects date filter and updates the filter state
   Future<void> _selectDate(BuildContext context) async {
+    // Clear search when changing filter
+    _clearSearch();
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -224,6 +228,9 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   }
 
   Future<void> _selectMonth(BuildContext context) async {
+    // Clear search when changing filter
+    _clearSearch();
+
     final currentMonth = DateTime(_selectedYear, _selectedMonth);
 
     // Show a month picker dialog
@@ -342,6 +349,9 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   }
 
   Future<void> _selectYear(BuildContext context) async {
+    // Clear search when changing filter
+    _clearSearch();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -378,7 +388,13 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
       String label, FilterType filterType, VoidCallback onSelected) {
     final bool isSelected = _activeFilterType == filterType;
     return GestureDetector(
-      onTap: onSelected,
+      onTap: () {
+        // Clear search when changing filter if it's a different filter
+        if (_activeFilterType != filterType) {
+          _clearSearch();
+        }
+        onSelected();
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
