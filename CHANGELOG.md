@@ -4,7 +4,7 @@
 Release Date: March 17, 2025
 ### Features
 - Label Mode in Camera Scan - Penambahan mode khusus untuk memindai label nutrisi pada kemasan makanan dengan opsi - pengaturan ukuran porsi
-- Dataset-Reinforced Analysis - Implementasi sistem analisis baru dengan penguatan dataset
+- Dataset-Reinforced Analysis - Implementasi sistem analisis baru dengan penguatan dataset makanan
 
 ### Technical
 - Reimplementasi service analisis gambar dan teks dengan alur:
