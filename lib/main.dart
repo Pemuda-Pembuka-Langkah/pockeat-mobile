@@ -16,24 +16,19 @@ import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_input_page.dart';
 import 'package:pockeat/features/ai_api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
-import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service_impl.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_history_page.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
-import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_log_detail_page.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
-import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
 import 'package:pockeat/features/food_log_history/presentation/screens/food_history_page.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_log_history/presentation/screens/food_detail_page.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,34 +56,21 @@ void main() async {
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
 
-  // Initialize repositories
-  final firestore = FirebaseFirestore.instance;
-  final smartExerciseLogRepository =
-      SmartExerciseLogRepositoryImpl(firestore: firestore);
-  final cardioRepository = CardioRepositoryImpl(firestore: firestore);
-  final weightLiftingRepository =
-      WeightLiftingRepositoryImpl(firestore: firestore);
-  final exerciseLogHistoryRepository = ExerciseLogHistoryServiceImpl(
-    smartExerciseLogRepository: smartExerciseLogRepository,
-    cardioRepository: cardioRepository,
-    weightLiftingRepository: weightLiftingRepository,
-  );
-
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         Provider<ExerciseLogHistoryService>(
-          create: (_) => exerciseLogHistoryRepository,
+          create: (_) => getIt<ExerciseLogHistoryService>(),
         ),
         Provider<SmartExerciseLogRepository>(
-          create: (_) => smartExerciseLogRepository,
+          create: (_) => getIt<SmartExerciseLogRepository>(),
         ),
         Provider<CardioRepository>(
-          create: (_) => cardioRepository,
+          create: (_) => getIt<CardioRepository>(),
         ),
         Provider<WeightLiftingRepository>(
-          create: (_) => weightLiftingRepository,
+          create: (_) => getIt<WeightLiftingRepository>(),
         ),
         Provider<FoodLogHistoryService>(
           create: (_) => getIt<FoodLogHistoryService>(),
@@ -169,9 +151,7 @@ class MyApp extends StatelessWidget {
         '/add-exercise': (context) => const ExerciseInputPage(),
         '/weightlifting-input': (context) => const WeightliftingPage(),
         '/cardio': (context) => const CardioInputPage(),
-        '/exercise-history': (context) => ExerciseHistoryPage(
-              service: Provider.of<ExerciseLogHistoryService>(context),
-            ),
+        '/exercise-history': (context) => const ExerciseHistoryPage(),
         '/food-history': (context) => FoodHistoryPage(
               service: Provider.of<FoodLogHistoryService>(context),
             ),
@@ -181,12 +161,6 @@ class MyApp extends StatelessWidget {
           return ExerciseLogDetailPage(
             exerciseId: args['exerciseId'] as String,
             activityType: args['activityType'] as String,
-            cardioRepository:
-                Provider.of<CardioRepository>(context, listen: false),
-            smartExerciseRepository:
-                Provider.of<SmartExerciseLogRepository>(context, listen: false),
-            weightLiftingRepository:
-                Provider.of<WeightLiftingRepository>(context, listen: false),
           );
         },
         '/food-detail': (context) {
@@ -196,7 +170,7 @@ class MyApp extends StatelessWidget {
             foodId: args['foodId'] as String,
             foodRepository:
                 Provider.of<FoodScanRepository>(context, listen: false),
-            foodTextInputRepository: 
+            foodTextInputRepository:
                 Provider.of<FoodTextInputRepository>(context, listen: false),
           );
         },
