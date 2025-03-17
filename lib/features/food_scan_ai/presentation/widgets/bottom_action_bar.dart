@@ -12,6 +12,8 @@ class BottomActionBar extends StatelessWidget {
   final Color primaryPink;
   final Color primaryGreen;
   final Function(FoodAnalysisResult)? onAnalysisCorrected;
+  final double servingSize;
+  final bool isLabelScan;
 
   const BottomActionBar({
     Key? key,
@@ -22,6 +24,8 @@ class BottomActionBar extends StatelessWidget {
     required this.primaryPink,
     this.primaryGreen = const Color(0xFF4ECDC4),
     this.onAnalysisCorrected,
+    this.servingSize = 1.0,
+    this.isLabelScan = false,
   }) : super(key: key);
 
   // Helper method to show SnackBar messages consistently
@@ -213,11 +217,16 @@ class BottomActionBar extends StatelessWidget {
                 );
               }
 
-              final correctedResult =
-                  await foodScanPhotoService.correctFoodAnalysis(
-                food!,
-                userComment,
-              );
+              final correctedResult = isLabelScan
+                  ? await foodScanPhotoService.correctNutritionLabelAnalysis(
+                      food!,
+                      userComment,
+                      servingSize,
+                    )
+                  : await foodScanPhotoService.correctFoodAnalysis(
+                      food!,
+                      userComment,
+                    );
 
               if (onAnalysisCorrected != null) {
                 onAnalysisCorrected!(correctedResult);
