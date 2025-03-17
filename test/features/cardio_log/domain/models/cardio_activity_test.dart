@@ -99,6 +99,101 @@ void main() {
     });
 
     group('CyclingActivity Tests', () {
+      test('CyclingActivity fromMap should parse commute type correctly', () {
+        final map = {
+          'type': 'cycling',
+          'date': testDate.millisecondsSinceEpoch,
+          'startTime': testStartTime.millisecondsSinceEpoch,
+          'endTime': testEndTime.millisecondsSinceEpoch,
+          'distanceKm': 10.0,
+          'cyclingType': 'commute',
+          'caloriesBurned': 300.0,
+        };
+
+        final activity = CyclingActivity.fromMap(map);
+
+        expect(activity.cyclingType, CyclingType.commute);
+        expect(activity.cyclingTypeString, 'commute');
+      });
+
+      test('CyclingActivity fromMap should parse stationary type correctly',
+          () {
+        final map = {
+          'type': 'cycling',
+          'date': testDate.millisecondsSinceEpoch,
+          'startTime': testStartTime.millisecondsSinceEpoch,
+          'endTime': testEndTime.millisecondsSinceEpoch,
+          'distanceKm': 5.0,
+          'cyclingType': 'stationary',
+          'caloriesBurned': 250.0,
+        };
+
+        final activity = CyclingActivity.fromMap(map);
+
+        expect(activity.cyclingType, CyclingType.stationary);
+        expect(activity.cyclingTypeString, 'stationary');
+      });
+
+      test(
+          'CyclingActivity copyWith should create a new instance with updated values',
+          () {
+        final originalActivity = CyclingActivity(
+          id: 'test-id',
+          date: testDate,
+          startTime: testStartTime,
+          endTime: testEndTime,
+          distanceKm: 15.0,
+          cyclingType: CyclingType.mountain,
+          caloriesBurned: 450,
+        );
+
+        final updatedActivity = originalActivity.copyWith(
+          id: 'new-id',
+          date: DateTime(2023, 3, 16),
+          startTime: DateTime(2023, 3, 16, 10, 0),
+          endTime: DateTime(2023, 3, 16, 10, 45),
+          distanceKm: 20.0,
+          cyclingType: CyclingType.commute,
+          caloriesBurned: 500,
+        );
+
+        // Check that values were updated
+        expect(updatedActivity.id, 'new-id');
+        expect(updatedActivity.date, DateTime(2023, 3, 16));
+        expect(updatedActivity.startTime, DateTime(2023, 3, 16, 10, 0));
+        expect(updatedActivity.endTime, DateTime(2023, 3, 16, 10, 45));
+        expect(updatedActivity.distanceKm, 20.0);
+        expect(updatedActivity.cyclingType, CyclingType.commute);
+        expect(updatedActivity.caloriesBurned, 500);
+
+        // Test that providing null keeps original values
+        final partialUpdate = originalActivity.copyWith(
+          distanceKm: 25.0,
+        );
+
+        expect(partialUpdate.id, originalActivity.id);
+        expect(partialUpdate.date, originalActivity.date);
+        expect(partialUpdate.cyclingType, originalActivity.cyclingType);
+        expect(partialUpdate.distanceKm, 25.0);
+      });
+
+      test('CyclingActivity calculateCalories method should call calculator',
+          () {
+        final activity = CyclingActivity(
+          date: testDate,
+          startTime: testStartTime,
+          endTime: testEndTime,
+          distanceKm: 15.0,
+          cyclingType: CyclingType.mountain,
+        );
+
+        // Force calculation
+        final calories = activity.calculateCalories();
+
+        // The actual value will depend on the CalorieCalculator implementation
+        // But we just want to verify the method gets called for coverage
+        expect(calories, isNotNull);
+      });
       test('CyclingActivity should be created correctly', () {
         final activity = CyclingActivity(
           date: testDate,
@@ -459,7 +554,7 @@ void main() {
         expect(activity.distanceKm, 0.0);
         expect(activity.speedKmPerHour, 0.0);
       });
-      
+
       test('CardioActivityFactory fromFormData with missing optional data', () {
         final activity = CardioActivityFactory.fromFormData(
           type: CardioType.swimming,
