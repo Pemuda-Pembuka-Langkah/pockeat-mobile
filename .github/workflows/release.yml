@@ -114,3 +114,11 @@ jobs:
           files: build/app/outputs/flutter-apk/app-release.apk
           name: Release ${{ steps.get_version.outputs.VERSION }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          
+      # Distribute to Firebase App Distribution
+      - name: Upload to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.PRODUCTION_FIREBASE_ANDROID_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          file: build/app/outputs/flutter-apk/app-release.apk
