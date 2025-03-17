@@ -731,6 +731,46 @@ void main() {
         expect(
             (activity as CyclingActivity).cyclingType, CyclingType.stationary);
       });
+      test(
+          'CardioActivityFactory should create CyclingActivity with commute type',
+          () {
+        final formData = {
+          'distanceKm': 10.0,
+          'cyclingType': 'commute',
+        };
+
+        final activity = CardioActivityFactory.fromFormData(
+          type: CardioType.cycling,
+          date: DateTime(2023, 1, 1),
+          startTime: DateTime(2023, 1, 1, 10, 0),
+          endTime: DateTime(2023, 1, 1, 10, 30),
+          formData: formData,
+        );
+
+        expect(activity, isA<CyclingActivity>());
+        expect((activity as CyclingActivity).cyclingType, CyclingType.commute);
+      });
+
+      test(
+          'CardioActivityFactory should create CyclingActivity with stationary type',
+          () {
+        final formData = {
+          'distanceKm': 5.0,
+          'cyclingType': 'stationary',
+        };
+
+        final activity = CardioActivityFactory.fromFormData(
+          type: CardioType.cycling,
+          date: DateTime(2023, 1, 1),
+          startTime: DateTime(2023, 1, 1, 10, 0),
+          endTime: DateTime(2023, 1, 1, 10, 30),
+          formData: formData,
+        );
+
+        expect(activity, isA<CyclingActivity>());
+        expect(
+            (activity as CyclingActivity).cyclingType, CyclingType.stationary);
+      });
     });
   });
 }
