@@ -48,35 +48,6 @@ class PersonalDataReminder extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    // coverage:ignore-start
-                    onPressed: () {
-                      // No functionality - to be implemented later
-                    },
-                    // coverage:ignore-end
-                    style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF6B6B),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                    ),
-                    child: const Text(
-                      'Update Data',
-                      style: TextStyle(
-                        fontSize: 14, 
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
