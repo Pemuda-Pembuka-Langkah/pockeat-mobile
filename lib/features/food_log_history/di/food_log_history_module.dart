@@ -5,13 +5,10 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 
-/// Registers all dependencies for the Food Log History feature
 class FoodLogHistoryModule {
-  /// Register all services for the Food Log History feature
   static void register() {
     final GetIt sl = getIt;
     
-    // Register the FoodLogHistoryService
     sl.registerLazySingleton<FoodLogHistoryService>(
       () => FoodLogHistoryServiceImpl(
         foodScanRepository: sl<FoodScanRepository>(),
