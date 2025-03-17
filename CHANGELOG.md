@@ -3,6 +3,7 @@
 ## v1.1.2 (Current) - Enhanced Food Analysis & Label
 Release Date: March 17, 2025
 ### Features
+- Add Header & Detailed Description for Food Text Input Form
 - Label Mode in Camera Scan - Penambahan mode khusus untuk memindai label nutrisi pada kemasan makanan dengan opsi - pengaturan ukuran porsi
 - Dataset-Reinforced Analysis - Implementasi sistem analisis baru dengan penguatan dataset makanan
 
