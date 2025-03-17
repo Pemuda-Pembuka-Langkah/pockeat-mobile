@@ -18,10 +18,16 @@ import 'package:camera/camera.dart';
 
 class NutritionPage extends StatefulWidget {
   final String imagePath;
+  final bool isLabelScan;
   final FoodScanPhotoService foodScanPhotoService;
+  final double servingSize;
 
-  NutritionPage({super.key, required this.imagePath})
-      : foodScanPhotoService = getIt<FoodScanPhotoService>();
+  NutritionPage({
+    super.key,
+    required this.imagePath,
+    this.isLabelScan = false,
+    this.servingSize = 1.0,
+  }) : foodScanPhotoService = getIt<FoodScanPhotoService>();
 
   @override
   _NutritionPageState createState() => _NutritionPageState();
@@ -61,8 +67,11 @@ class _NutritionPageState extends State<NutritionPage> {
         _hasError = false;
       });
 
-      final result = await widget.foodScanPhotoService
-          .analyzeFoodPhoto(File(widget.imagePath));
+      final result = widget.isLabelScan
+          ? await widget.foodScanPhotoService
+              .analyzeNutritionLabelPhoto(File(widget.imagePath), widget.servingSize)
+          : await widget.foodScanPhotoService
+              .analyzeFoodPhoto(File(widget.imagePath));
 
       setState(() {
         _updateFoodData(result);
@@ -161,6 +170,8 @@ class _NutritionPageState extends State<NutritionPage> {
         primaryYellow: primaryYellow,
         primaryPink: primaryPink,
         primaryGreen: primaryGreen,
+        isLabelScan: widget.isLabelScan,
+        servingSize: widget.servingSize,
         onAnalysisCorrected: (correctedResult) {
           setState(() {
             _isCorrectingAnalysis = true;
@@ -239,6 +250,10 @@ class _NutritionPageState extends State<NutritionPage> {
                       warningYellow: warningYellow,
                     ),
                     const SizedBox(height: 100),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 50),
+                      child: SizedBox(),
+                    ),
                   ],
                 ),
               ),
