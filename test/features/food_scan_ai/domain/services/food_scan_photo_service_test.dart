@@ -7,6 +7,7 @@ import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repo
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
 
 // Mock classes
 class MockFoodImageAnalysisService extends Mock
@@ -18,6 +19,8 @@ class MockFile extends Mock implements File {}
 
 class MockUuid extends Mock implements Uuid {}
 
+class MockNutritionLabelAnalysisService extends Mock implements NutritionLabelAnalysisService {}
+
 void main() {
   late FoodScanPhotoService foodScanPhotoService;
   late MockFoodImageAnalysisService mockFoodImageAnalysisService;
@@ -27,6 +30,7 @@ void main() {
   late FoodAnalysisResult analysisResult;
   late FoodAnalysisResult correctedResult;
   late DateTime testDateTime;
+  late MockNutritionLabelAnalysisService mockNutritionLabelAnalysisService;
 
   setUpAll(() {
     // Register fallback values
@@ -87,6 +91,14 @@ void main() {
       getIt.unregister<FoodScanRepository>();
     }
     getIt.registerSingleton<FoodScanRepository>(mockFoodScanRepository);
+
+    mockNutritionLabelAnalysisService = MockNutritionLabelAnalysisService();
+
+    if (getIt.isRegistered<NutritionLabelAnalysisService>()) {
+      getIt.unregister<NutritionLabelAnalysisService>();
+    }
+    getIt.registerSingleton<NutritionLabelAnalysisService>(
+        mockNutritionLabelAnalysisService);
 
     mockFoodImageAnalysisService = MockFoodImageAnalysisService();
 
@@ -266,6 +278,123 @@ void main() {
       // Assert
       expect(results, isEmpty);
       verify(() => mockFoodScanRepository.getAll()).called(1);
+    });
+  });
+
+  group('analyzeNutritionLabelPhoto', () {
+    test('should return FoodAnalysisResult when nutrition label analysis is successful',
+        () async {
+      // Arrange
+      const double servingSize = 2.0;
+      final expectedResult = FoodAnalysisResult(
+        foodName: 'Test Food Label',
+        ingredients: [Ingredient(name: 'Test Ingredient', servings: servingSize)],
+        nutritionInfo: NutritionInfo(
+          calories: 250 * servingSize,
+          protein: 10 * servingSize,
+          carbs: 30 * servingSize,
+          fat: 12 * servingSize,
+          sodium: 100 * servingSize,
+          sugar: 10 * servingSize,
+          fiber: 5 * servingSize,
+        ),
+        warnings: [],
+        timestamp: testDateTime,
+      );
+
+      when(() => mockNutritionLabelAnalysisService.analyze(any(), any()))
+          .thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await foodScanPhotoService.analyzeNutritionLabelPhoto(
+          mockFile, servingSize);
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(() => mockNutritionLabelAnalysisService.analyze(mockFile, servingSize))
+          .called(1);
+    });
+
+    test('should throw Exception when nutrition label analysis fails', () async {
+      // Arrange
+      const double servingSize = 1.5;
+      when(() => mockNutritionLabelAnalysisService.analyze(any(), any()))
+          .thenThrow(Exception('Failed to process nutrition label'));
+
+      // Act & Assert
+      expect(
+        () => foodScanPhotoService.analyzeNutritionLabelPhoto(mockFile, servingSize),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to analyze food photo'),
+        )),
+      );
+      verify(() => mockNutritionLabelAnalysisService.analyze(mockFile, servingSize))
+          .called(1);
+    });
+  });
+
+  group('correctNutritionLabelAnalysis', () {
+    test(
+        'should return corrected FoodAnalysisResult when nutrition label correction is successful',
+        () async {
+      // Arrange
+      const userComment = 'The serving size should be larger';
+      const servingSize = 2.5;
+      final expectedResult = FoodAnalysisResult(
+        foodName: 'Corrected Label Food',
+        ingredients: [
+          Ingredient(name: 'Corrected Ingredient', servings: servingSize),
+        ],
+        nutritionInfo: NutritionInfo(
+          calories: 300 * servingSize,
+          protein: 15 * servingSize,
+          carbs: 25 * servingSize,
+          fat: 15 * servingSize,
+          sodium: 120 * servingSize,
+          sugar: 8 * servingSize,
+          fiber: 6 * servingSize,
+        ),
+        warnings: [],
+        timestamp: testDateTime,
+      );
+
+      when(() => mockNutritionLabelAnalysisService.correctAnalysis(
+              any(), any(), any()))
+          .thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await foodScanPhotoService.correctNutritionLabelAnalysis(
+          analysisResult, userComment, servingSize);
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(() => mockNutritionLabelAnalysisService.correctAnalysis(
+          analysisResult, userComment, servingSize)).called(1);
+    });
+
+    test('should throw Exception when nutrition label correction fails', () async {
+      // Arrange
+      const userComment = 'The serving size should be larger';
+      const servingSize = 2.5;
+
+      when(() => mockNutritionLabelAnalysisService.correctAnalysis(
+              any(), any(), any()))
+          .thenThrow(Exception('Failed to process correction'));
+
+      // Act & Assert
+      expect(
+        () => foodScanPhotoService.correctNutritionLabelAnalysis(
+            analysisResult, userComment, servingSize),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to correct food analysis'),
+        )),
+      );
+      verify(() => mockNutritionLabelAnalysisService.correctAnalysis(
+          analysisResult, userComment, servingSize)).called(1);
     });
   });
 }
