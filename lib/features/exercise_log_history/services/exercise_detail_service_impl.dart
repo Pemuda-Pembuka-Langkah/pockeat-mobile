@@ -5,21 +5,21 @@ import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log
 import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
+import 'package:get_it/get_it.dart';
 
 /// Implementasi dari ExerciseDetailService menggunakan komposisi repository
 class ExerciseDetailServiceImpl implements ExerciseDetailService {
-  final CardioRepository _cardioRepository;
-  final SmartExerciseLogRepository _smartExerciseRepository;
-  final WeightLiftingRepository _weightLiftingRepository;
+  late final CardioRepository _cardioRepository;
+  late final SmartExerciseLogRepository _smartExerciseRepository;
+  late final WeightLiftingRepository _weightLiftingRepository;
+  final _getIt = GetIt.instance;
 
-  /// Konstruktor dengan dependency injection
-  ExerciseDetailServiceImpl({
-    required CardioRepository cardioRepository,
-    required SmartExerciseLogRepository smartExerciseRepository,
-    required WeightLiftingRepository weightLiftingRepository,
-  })  : _cardioRepository = cardioRepository,
-        _smartExerciseRepository = smartExerciseRepository,
-        _weightLiftingRepository = weightLiftingRepository;
+  /// Konstruktor dengan dependency injection dari GetIt
+  ExerciseDetailServiceImpl() {
+    _cardioRepository = _getIt<CardioRepository>();
+    _smartExerciseRepository = _getIt<SmartExerciseLogRepository>();
+    _weightLiftingRepository = _getIt<WeightLiftingRepository>();
+  }
 
   @override
   Future<dynamic> getSmartExerciseDetail(String id) async {
@@ -116,18 +116,17 @@ class ExerciseDetailServiceImpl implements ExerciseDetailService {
       if (activityType == ExerciseLogHistoryItem.typeSmartExercise) {
         // Gunakan repository SmartExerciseLog untuk menghapus
         return await _smartExerciseRepository.deleteById(id);
-      } 
-      else if (activityType == ExerciseLogHistoryItem.typeCardio) {
+      } else if (activityType == ExerciseLogHistoryItem.typeCardio) {
         // Gunakan repository Cardio untuk menghapus
         final cardioResult = await _cardioRepository.deleteCardioActivity(id);
         return cardioResult;
-      } 
-      else if (activityType == ExerciseLogHistoryItem.typeWeightlifting) {
+      } else if (activityType == ExerciseLogHistoryItem.typeWeightlifting) {
         // Gunakan repository WeightLifting untuk menghapus
-        final weightLiftingResult = await _weightLiftingRepository.deleteExercise(id);
+        final weightLiftingResult =
+            await _weightLiftingRepository.deleteExercise(id);
         return weightLiftingResult;
       }
-      
+
       // Jika tipe tidak dikenali, return false
       return false;
     } catch (e) {

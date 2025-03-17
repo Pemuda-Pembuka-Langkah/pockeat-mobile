@@ -55,7 +55,7 @@ class FoodLogHistoryItem {
     return FoodLogHistoryItem(
       id: foodAnalysisResult.id,
       title: foodAnalysisResult.foodName,
-      subtitle: '$calories cal • ${protein}g protein • ${carbs}g carbs',
+      subtitle: '${protein}g protein • ${carbs}g carbs',
       timestamp: foodAnalysisResult.timestamp,
       calories: calories,
       sourceId: foodAnalysisResult.id, // Use id if available, otherwise use URL

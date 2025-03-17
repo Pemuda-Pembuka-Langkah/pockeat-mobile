@@ -6,6 +6,7 @@ import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repositor
 import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:get_it/get_it.dart';
 
 /// Implementasi repository Exercise Log History
 ///
@@ -13,17 +14,16 @@ import 'package:pockeat/features/weight_training_log/domain/models/weight_liftin
 /// (SmartExerciseLogRepository, CardioLogRepository, dan di masa depan: WeightliftingLogRepository)
 /// untuk mengambil dan mengelola history log olahraga dari berbagai sumber
 class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
-  final SmartExerciseLogRepository _smartExerciseLogRepository;
-  final CardioRepository _cardioRepository;
-  final WeightLiftingRepository _weightLiftingRepository;
+  late final SmartExerciseLogRepository _smartExerciseLogRepository;
+  late final CardioRepository _cardioRepository;
+  late final WeightLiftingRepository _weightLiftingRepository;
+  final _getIt = GetIt.instance;
 
-  ExerciseLogHistoryServiceImpl({
-    required SmartExerciseLogRepository smartExerciseLogRepository,
-    required CardioRepository cardioRepository,
-    required WeightLiftingRepository weightLiftingRepository,
-  }) : _smartExerciseLogRepository = smartExerciseLogRepository,
-       _cardioRepository = cardioRepository,
-       _weightLiftingRepository = weightLiftingRepository;
+  ExerciseLogHistoryServiceImpl() {
+    _smartExerciseLogRepository = _getIt<SmartExerciseLogRepository>();
+    _cardioRepository = _getIt<CardioRepository>();
+    _weightLiftingRepository = _getIt<WeightLiftingRepository>();
+  }
 
   @override
   Future<List<ExerciseLogHistoryItem>> getAllExerciseLogs({int? limit}) async {
@@ -38,7 +38,8 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       final cardioItems = _convertCardioLogs(cardioLogs);
 
       // Ambil data dari WeightLiftingLogs
-      final weightLiftingLogs = await _weightLiftingRepository.getAllExercises();
+      final weightLiftingLogs =
+          await _weightLiftingRepository.getAllExercises();
       final weightLiftingItems = _convertWeightLiftingLogs(weightLiftingLogs);
 
       // Gabungkan semua item
@@ -63,7 +64,8 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   }
 
   @override
-  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByDate(DateTime date) async {
+  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByDate(
+      DateTime date) async {
     try {
       // Get smart exercise logs for this date
       final smartLogs =
@@ -96,11 +98,12 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   }
 
   @override
-  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByMonth(int month, int year) async {
+  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByMonth(
+      int month, int year) async {
     try {
       // Get smart exercise logs for this month
-      final smartLogs = await _smartExerciseLogRepository.getAnalysisResultsByMonth(
-          month, year);
+      final smartLogs = await _smartExerciseLogRepository
+          .getAnalysisResultsByMonth(month, year);
       final smartItems = _convertSmartExerciseLogs(smartLogs);
 
       // Get cardio activities for this month
@@ -177,7 +180,8 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   }
 
   // Helper method untuk mengkonversi WeightLiftingLogs menjadi ExerciseLogHistoryItems
-  List<ExerciseLogHistoryItem> _convertWeightLiftingLogs(List<WeightLifting> logs) {
+  List<ExerciseLogHistoryItem> _convertWeightLiftingLogs(
+      List<WeightLifting> logs) {
     return logs
         .map((log) => ExerciseLogHistoryItem.fromWeightliftingLog(log))
         .toList();
