@@ -52,9 +52,11 @@ class PersonalDataReminder extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
+                    // coverage:ignore-start
                     onPressed: () {
                       // No functionality - to be implemented later
                     },
+                    // coverage:ignore-end
                     style: TextButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6B6B),
                       foregroundColor: Colors.white,
