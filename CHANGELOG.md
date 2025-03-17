@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.1.2 (Current) - Enhanced Food Analysis & Label
+Release Date: March 17, 2025
+### Features
+- Label Mode in Camera Scan - Penambahan mode khusus untuk memindai label nutrisi pada kemasan makanan dengan opsi - pengaturan ukuran porsi
+- Dataset-Reinforced Analysis - Implementasi sistem analisis baru dengan penguatan dataset
+
+### Technical
+- Reimplementasi service analisis gambar dan teks dengan alur:
+ 1. Interaksi dengan model API high temperature untuk nama makanan dan deskripsi
+ 2. Pencarian kemiripan pada dataset untuk hasil API sebelumnya
+ 3. Analisis final dengan model low temperature untuk hasil yang lebih akurat dan berdasar
+
 ## v1.1.1 (Current) - Firebase Integration
 **Release Date: March 17, 2025**
 
