@@ -15,7 +15,6 @@ import 'cardio_input_page_test.mocks.dart';
 
 @GenerateMocks([CardioRepository])
 @GenerateMocks([FirebaseFirestore])
-class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
 
 void main() {
   late MockCardioRepository mockRepository;
