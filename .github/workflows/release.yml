@@ -107,7 +107,11 @@ jobs:
       # Extract tag version
       - name: Get version from tag
         id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          # Simpan full tag (ex: v1.1.2)
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          # Simpan versi tanpa 'v' (ex: 1.1.2) untuk Firebase
+          echo "VERSION_NO_V=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
           
       # Extract release notes from CHANGELOG.md
       - name: Extract changelog for current version
@@ -141,3 +145,4 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           file: build/app/outputs/flutter-apk/app-release.apk
           releaseNotes: ${{ steps.extract_changelog.outputs.CHANGELOG }}
+          releaseNumber: ${{ steps.get_version.outputs.VERSION_NO_V }}
