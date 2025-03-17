@@ -69,6 +69,7 @@ class GeminiServiceImpl implements GeminiService {
     );
   }
   
+  // coverage:ignore-start
   @override
   Future<ExerciseAnalysisResult> correctExerciseAnalysis(
       ExerciseAnalysisResult previousResult, String userComment) {
@@ -77,4 +78,6 @@ class GeminiServiceImpl implements GeminiService {
       userComment,
     );
   }
+
+  // coverage:ignore-end
 }

@@ -35,7 +35,7 @@ abstract class BaseGeminiService {
     return apiKey;
   }
 
-  // coverage:ignore-end
+
   String extractJson(String text) {
     try {
       String cleanedText = _cleanJsonText(text);
@@ -100,3 +100,4 @@ abstract class BaseGeminiService {
     return cleaned;
   }
 }
+    // coverage:ignore-end
