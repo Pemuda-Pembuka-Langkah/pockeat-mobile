@@ -21,21 +21,20 @@ class FoodTextAnalysisService extends BaseGeminiService {
     FirebaseFirestore? firestore,
     super.customModelWrapper,
     GenerativeModelWrapper? accurateModelWrapper,
-     // coverage:ignore-start
-  }) : _firestore = firestore ?? FirebaseFirestore.instance,
-       _accurateModelWrapper = accurateModelWrapper ?? RealGenerativeModelWrapper(
-         GenerativeModel(
-           model: 'gemini-1.5-pro',
-           apiKey: apiKey,
-           generationConfig: GenerationConfig(
-             temperature: 0.2, // Much lower temperature for precise analysis
-             topK: 40,
-             topP: 0.95,
-             maxOutputTokens: 8192,
-             responseMimeType: 'text/plain',
-           ),
-         )
-       );
+    // coverage:ignore-start
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _accurateModelWrapper = accurateModelWrapper ??
+            RealGenerativeModelWrapper(GenerativeModel(
+              model: 'gemini-1.5-pro',
+              apiKey: apiKey,
+              generationConfig: GenerationConfig(
+                temperature: 0.2, // Much lower temperature for precise analysis
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 8192,
+                responseMimeType: 'text/plain',
+              ),
+            ));
 
   factory FoodTextAnalysisService.fromEnv() {
     final apiKey = BaseGeminiService.getApiKeyFromEnv();
@@ -54,7 +53,10 @@ class FoodTextAnalysisService extends BaseGeminiService {
       
       DESCRIPTION: "$description"
       
-      Please provide your best identification of the specific name of this food.
+      Please provide your best identification of the specific name of this food. if the user input is just a combination of ingredients, try to identify the most likely dish or food item.
+      The name of the food would be that, assume standard servings and additional complementary ingredients for said food in the description,
+
+      Be VERY THOUROUGH. If not, the customer can get poisoned. Be VERY THOROUGH.
       
       Return your response as a strict JSON object with this exact format:
       {
@@ -64,21 +66,22 @@ class FoodTextAnalysisService extends BaseGeminiService {
       ''';
 
       // Use default model with higher temperature for creative identification
-      final response = await modelWrapper.generateContent([Content.text(prompt)]);
+      final response =
+          await modelWrapper.generateContent([Content.text(prompt)]);
       // coverage:ignore-start
       if (response.text == null) {
         throw GeminiServiceException('No response text generated');
       }
-       // coverage:ignore-end
+      // coverage:ignore-end
       final jsonString = extractJson(response.text!);
       return jsonDecode(jsonString) as Map<String, dynamic>;
     } catch (e) {
       if (e is GeminiServiceException) {
         rethrow;
       }
-       // coverage:ignore-start
+      // coverage:ignore-start
       throw GeminiServiceException("Error identifying food: $e");
-       // coverage:ignore-end
+      // coverage:ignore-end
     }
   }
 
@@ -93,36 +96,36 @@ class FoodTextAnalysisService extends BaseGeminiService {
           .toList();
 
       // If no valid search terms, return empty list
-       // coverage:ignore-start
+      // coverage:ignore-start
       if (searchTerms.isEmpty) {
         return [];
       }
-       // coverage:ignore-end
+      // coverage:ignore-end
 
       // Get a reference to the food collection
       final foodCollection = _firestore.collection('fooddataset');
-      
+
       // Initial query with the first term
       final initialTerm = searchTerms[0];
-      
+
       var query = foodCollection
           .orderBy('title')
-          .startAt([initialTerm])
-          .endAt(['$initialTerm\uf8ff'])
-          .limit(20); // Get more than we need for filtering
-      
+          .startAt([initialTerm]).endAt(['$initialTerm\uf8ff']).limit(
+              20); // Get more than we need for filtering
+
       // Execute query
       final snapshot = await query.get();
-      
+
       // Filter and score results based on title similarity
       final results = snapshot.docs.map((doc) {
         final data = doc.data();
         final title = (data['title'] as String).toLowerCase();
-        
+
         // Calculate a simple relevance score based on how many terms match
-        int matchCount = searchTerms.where((term) => title.contains(term)).length;
+        int matchCount =
+            searchTerms.where((term) => title.contains(term)).length;
         double similarity = matchCount / searchTerms.length;
-        
+
         return {
           'id': doc.id,
           'title': data['title'],
@@ -131,10 +134,11 @@ class FoodTextAnalysisService extends BaseGeminiService {
           'score': similarity,
         };
       }).toList();
-      
+
       // Sort by relevance
-      results.sort((a, b) => (b['score'] as double).compareTo(a['score'] as double));
-      
+      results.sort(
+          (a, b) => (b['score'] as double).compareTo(a['score'] as double));
+
       // Return top 5 results
       return results.take(5).toList();
     } catch (e) {
@@ -149,19 +153,19 @@ class FoodTextAnalysisService extends BaseGeminiService {
       if (imageUrl.isEmpty || !imageUrl.startsWith('http')) {
         return null;
       }
-      
+
       // Download the image
       final response = await http.get(Uri.parse(imageUrl));
       if (response.statusCode != 200) {
         return null;
       }
-      
-       // coverage:ignore-start
+
+      // coverage:ignore-start
       return response.bodyBytes;
     } catch (e) {
-      throw('Failed to download image: $e');
+      throw ('Failed to download image: $e');
     }
-     // coverage:ignore-end
+    // coverage:ignore-end
   }
 
   // Check if the search results have low confidence
@@ -170,15 +174,15 @@ class FoodTextAnalysisService extends BaseGeminiService {
     if (similarFoods.isEmpty) {
       return true;
     }
-    
+
     // Case 2: Top result has low similarity score (below 60%)
     if (similarFoods.isNotEmpty && similarFoods[0]['score'] < 0.60) {
       return true;
     }
-    
+
     return false;
   }
-  
+
   // Mark a result as low confidence
   FoodAnalysisResult _markLowConfidence(FoodAnalysisResult result) {
     // Add a note about low confidence to the warnings
@@ -186,7 +190,7 @@ class FoodTextAnalysisService extends BaseGeminiService {
     if (!updatedWarnings.contains(FoodAnalysisResult.lowConfidenceWarning)) {
       updatedWarnings.add(FoodAnalysisResult.lowConfidenceWarning);
     }
-    
+
     // Create a copy with the low confidence flag set
     return result.copyWith(
       isLowConfidence: true,
@@ -211,14 +215,14 @@ class FoodTextAnalysisService extends BaseGeminiService {
 
       // We'll create a list to hold all content parts
       List<Part> contentParts = [];
-      
+
       // Add the text prompt first
       contentParts.add(TextPart(textPrompt));
 
       // Add the reference foods information and try to download their images
       int refIndex = 1;
       String? selectedImageUrl; // To store the top reference image URL
-      
+
       for (final food in similarFoods) {
         // Add text description for this reference food
         contentParts.add(TextPart('''
@@ -228,16 +232,17 @@ class FoodTextAnalysisService extends BaseGeminiService {
         Ingredients: ${food['ingredients']}
         Similarity Score: ${(food['score'] * 100).toStringAsFixed(1)}%
         '''));
-        
-        if (food['image_url'] != null && food['image_url'].toString().isNotEmpty) {           
-              if (refIndex == 1) {
-                selectedImageUrl = food['image_url'];
-              }
+
+        if (food['image_url'] != null &&
+            food['image_url'].toString().isNotEmpty) {
+          if (refIndex == 1) {
+            selectedImageUrl = food['image_url'];
+          }
         }
-        
+
         refIndex++;
       }
-      
+
       // Add the task instructions
       contentParts.add(TextPart('''
       
@@ -276,24 +281,23 @@ class FoodTextAnalysisService extends BaseGeminiService {
       '''));
 
       // Use low temperature model for accurate analysis with all content parts
-      final response = await _accurateModelWrapper.generateContent([
-        Content.multi(contentParts)
-      ]);
+      final response = await _accurateModelWrapper
+          .generateContent([Content.multi(contentParts)]);
 
       // coverage:ignore-start
       if (response.text == null) {
         throw GeminiServiceException('No response text generated');
       }
-       // coverage:ignore-end
+      // coverage:ignore-end
 
       final jsonString = extractJson(response.text!);
       FoodAnalysisResult result = FoodAnalysisParser.parse(jsonString);
-      
+
       // Set the image URL from the top similar food
       if (selectedImageUrl != null) {
         result = result.copyWith(foodImageUrl: selectedImageUrl);
       }
-      
+
       return result;
     } catch (e) {
       // coverage:ignore-start
@@ -304,7 +308,7 @@ class FoodTextAnalysisService extends BaseGeminiService {
     }
     // coverage:ignore-end
   }
-  
+
   // Direct analysis without reference data
   Future<FoodAnalysisResult> _directAnalysis(String description) async {
     try {
@@ -368,13 +372,14 @@ class FoodTextAnalysisService extends BaseGeminiService {
       ''';
 
       // Use low temperature model for accurate analysis
-      final response = await _accurateModelWrapper.generateContent([Content.text(prompt)]);
-      
+      final response =
+          await _accurateModelWrapper.generateContent([Content.text(prompt)]);
+
       // coverage:ignore-start
       if (response.text == null) {
         throw GeminiServiceException('No response text generated');
       }
-       // coverage:ignore-end
+      // coverage:ignore-end
 
       final jsonString = extractJson(response.text!);
       return FoodAnalysisParser.parse(jsonString);
@@ -393,13 +398,13 @@ class FoodTextAnalysisService extends BaseGeminiService {
       // Step 1: Initial food identification
       final identification = await _identifyFood(description);
       final foodName = identification['food_name'] as String;
-      
+
       // Step 2: Find similar foods by name
       final similarFoods = await _findSimilarFoods(foodName);
-      
+
       // Check for low confidence results
       bool lowConfidence = _isLowConfidence(similarFoods);
-      
+
       // Step 3: Final analysis
       FoodAnalysisResult result;
       if (lowConfidence) {
@@ -411,7 +416,7 @@ class FoodTextAnalysisService extends BaseGeminiService {
         // Use reference-augmented analysis with images
         result = await _analyzeWithReferences(description, similarFoods);
       }
-      
+
       return result;
     } catch (e) {
       if (e is GeminiServiceException) {
@@ -422,7 +427,6 @@ class FoodTextAnalysisService extends BaseGeminiService {
       // coverage:ignore-end
     }
   }
-
 
   Future<FoodAnalysisResult> correctAnalysis(
       FoodAnalysisResult previousResult, String userComment) async {
@@ -454,10 +458,12 @@ class FoodTextAnalysisService extends BaseGeminiService {
       contentParts.add(TextPart(textPrompt));
 
       // Check if we have an image URL from the reference food, and if so, try to include it
-      if (previousResult.foodImageUrl != null && previousResult.foodImageUrl!.isNotEmpty && 
+      if (previousResult.foodImageUrl != null &&
+          previousResult.foodImageUrl!.isNotEmpty &&
           previousResult.foodImageUrl!.startsWith('http')) {
         try {
-          final imageBytes = await _downloadImageBytes(previousResult.foodImageUrl!);
+          final imageBytes =
+              await _downloadImageBytes(previousResult.foodImageUrl!);
           // coverage:ignore-start
           if (imageBytes != null) {
             contentParts.add(DataPart('image/jpeg', imageBytes));
@@ -508,41 +514,41 @@ class FoodTextAnalysisService extends BaseGeminiService {
       '''));
 
       // Use low temperature model for corrections with all content parts
-      final response = await _accurateModelWrapper.generateContent([
-        Content.multi(contentParts)
-      ]);
+      final response = await _accurateModelWrapper
+          .generateContent([Content.multi(contentParts)]);
       // coverage:ignore-start
       if (response.text == null) {
         throw GeminiServiceException('No response text generated');
       }
-       // coverage:ignore-end
+      // coverage:ignore-end
 
       final jsonString = extractJson(response.text!);
-      
+
       // Parse the corrected result
       FoodAnalysisResult correctedResult = FoodAnalysisParser.parse(jsonString);
-      
+
       // Preserve the original confidence flag when making corrections
       if (previousResult.isLowConfidence) {
         correctedResult = correctedResult.copyWith(isLowConfidence: true);
-        
+
         // Check if the low confidence warning is present and add it if not
         bool hasLowConfidenceWarning = correctedResult.warnings.any(
-          (warning) => warning == FoodAnalysisResult.lowConfidenceWarning
-        );
-        
+            (warning) => warning == FoodAnalysisResult.lowConfidenceWarning);
+
         if (!hasLowConfidenceWarning) {
-          List<String> updatedWarnings = List<String>.from(correctedResult.warnings);
+          List<String> updatedWarnings =
+              List<String>.from(correctedResult.warnings);
           updatedWarnings.add(FoodAnalysisResult.lowConfidenceWarning);
           correctedResult = correctedResult.copyWith(warnings: updatedWarnings);
         }
       }
-      
+
       // Preserve the original image URL when making corrections
       if (previousResult.foodImageUrl != null) {
-        correctedResult = correctedResult.copyWith(foodImageUrl: previousResult.foodImageUrl);
+        correctedResult =
+            correctedResult.copyWith(foodImageUrl: previousResult.foodImageUrl);
       }
-      
+
       return correctedResult;
     } catch (e) {
       if (e is GeminiServiceException) {
