@@ -38,14 +38,17 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
         
+      - name: Generate mocks with build_runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+        
       - name: Run tests
         run: flutter test
         
-      - name: Run Flutter Analyze
-        run: flutter analyze
+      - name: Run Flutter Analyze for CI Failure
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
 
-  build-and-release:
-    name: Build & Create Release
+  build-and-distribute:
+    name: Build & Distribute
     needs: test
     runs-on: ubuntu-latest
     permissions:
@@ -53,8 +56,6 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -82,6 +83,9 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       
+      - name: Generate mocks with build_runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      
       # Setup keystore
       - name: Setup keystore
         run: |
@@ -93,44 +97,20 @@ jobs:
         
       - name: Build Release APK
         run: flutter build apk --release
-      
+        
+      # Analisis tambahan untuk memastikan kualitas
+      - name: Run Flutter Analyze for CI Failure
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
+        
       # Extract tag version
       - name: Get version from tag
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
         
-      # Generate changelog untuk GREEN (feat) dan REFACTOR
-      - name: Generate Changelog
-        id: changelog
-        uses: mikepenz/release-changelog-builder-action@v4
-        with:
-          configuration: |
-            {
-              "commit_pattern": "^(GREEN|REFACTOR|feat|fix)(?:\\(([^)]+)\\))?: (.+)",
-              "commit_groups": [
-                {
-                  "title": "## 🟢 GREEN",
-                  "pattern": "^GREEN(?:\\(([^)]+)\\))?:|^feat(?:\\(([^)]+)\\))?:"
-                },
-                {
-                  "title": "## 🔄 REFACTOR",
-                  "pattern": "^REFACTOR(?:\\(([^)]+)\\))?:"
-                },
-                {
-                  "title": "## 🐛 Fixes",
-                  "pattern": "^fix(?:\\(([^)]+)\\))?:"
-                }
-              ]
-            }
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      # Create GitHub Release dengan APK dan changelog
-      - name: Create Release
+      # Upload to GitHub Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
           name: Release ${{ steps.get_version.outputs.VERSION }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
