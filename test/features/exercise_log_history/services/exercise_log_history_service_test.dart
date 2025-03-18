@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service_impl.dart';
@@ -21,16 +22,45 @@ void main() {
   late MockCardioRepository mockCardioRepository;
   late MockWeightLiftingRepository mockWeightLiftingRepository;
   late ExerciseLogHistoryService service;
+  final getIt = GetIt.instance;
 
   setUp(() {
     mockSmartExerciseLogRepository = MockSmartExerciseLogRepository();
     mockCardioRepository = MockCardioRepository();
     mockWeightLiftingRepository = MockWeightLiftingRepository();
-    service = ExerciseLogHistoryServiceImpl(
-      smartExerciseLogRepository: mockSmartExerciseLogRepository,
-      cardioRepository: mockCardioRepository,
-      weightLiftingRepository: mockWeightLiftingRepository,
+
+    // Register mocks in GetIt
+    if (getIt.isRegistered<SmartExerciseLogRepository>()) {
+      getIt.unregister<SmartExerciseLogRepository>();
+    }
+    getIt.registerSingleton<SmartExerciseLogRepository>(
+        mockSmartExerciseLogRepository);
+
+    if (getIt.isRegistered<CardioRepository>()) {
+      getIt.unregister<CardioRepository>();
+    }
+    getIt.registerSingleton<CardioRepository>(mockCardioRepository);
+
+    if (getIt.isRegistered<WeightLiftingRepository>()) {
+      getIt.unregister<WeightLiftingRepository>();
+    }
+    getIt.registerSingleton<WeightLiftingRepository>(
+        mockWeightLiftingRepository);
+
+    // Register service
+    if (getIt.isRegistered<ExerciseLogHistoryService>()) {
+      getIt.unregister<ExerciseLogHistoryService>();
+    }
+    getIt.registerSingleton<ExerciseLogHistoryService>(
+      ExerciseLogHistoryServiceImpl(),
     );
+
+    service = getIt<ExerciseLogHistoryService>();
+  });
+
+  tearDown(() {
+    // Reset GetIt
+    getIt.reset();
   });
 
   group('ExerciseLogHistoryRepository', () {
@@ -368,11 +398,13 @@ void main() {
       expect(result[2].activityType, ExerciseLogHistoryItem.typeCardio);
     });
 
-    test('should apply limit parameter when getting all exercise logs', () async {
+    test('should apply limit parameter when getting all exercise logs',
+        () async {
       // Arrange - setup more data than limit
       when(mockSmartExerciseLogRepository.getAllAnalysisResults(
               limit: anyNamed('limit')))
-          .thenAnswer((_) async => [smartExerciseLog1, smartExerciseLog2, smartExerciseLog3]);
+          .thenAnswer((_) async =>
+              [smartExerciseLog1, smartExerciseLog2, smartExerciseLog3]);
 
       when(mockCardioRepository.getAllCardioActivities())
           .thenAnswer((_) async => [cardioLog1, cardioLog2, cardioLog3]);
@@ -384,8 +416,9 @@ void main() {
       final result = await service.getAllExerciseLogs(limit: 4);
 
       // Assert
-      expect(result.length, 4); // Should be limited to 4 even though we have 8 items
-      
+      expect(result.length,
+          4); // Should be limited to 4 even though we have 8 items
+
       // Verify the items are sorted by timestamp (newest first)
       for (int i = 0; i < result.length - 1; i++) {
         expect(
@@ -417,11 +450,13 @@ void main() {
 
     test('should throw exception when getExerciseLogsByMonth fails', () async {
       // Arrange - setup repository to throw
-      when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(testMonth, testYear))
+      when(mockSmartExerciseLogRepository.getAnalysisResultsByMonth(
+              testMonth, testYear))
           .thenThrow(Exception('Repository failure'));
 
       // Act and Assert
-      expect(() => service.getExerciseLogsByMonth(testMonth, testYear), throwsException);
+      expect(() => service.getExerciseLogsByMonth(testMonth, testYear),
+          throwsException);
     });
 
     test('should throw exception when getExerciseLogsByYear fails', () async {

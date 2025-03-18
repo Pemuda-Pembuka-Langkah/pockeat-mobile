@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'distance_selection_widget.dart';
 import 'time_selection_widget.dart';
-import 'date_selection_widget.dart';
 import 'personal_data_reminder.dart';
 
 enum CyclingActivityType { mountain, commute, stationary }

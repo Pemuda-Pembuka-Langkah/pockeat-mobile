@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
@@ -10,7 +11,6 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/smart
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/swimming_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/weight_lifting_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service.dart';
-import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
@@ -19,17 +19,11 @@ import 'package:pockeat/features/weight_training_log/domain/models/weight_liftin
 class ExerciseLogDetailPage extends StatefulWidget {
   final String exerciseId;
   final String activityType;
-  final CardioRepository cardioRepository;
-  final SmartExerciseLogRepository smartExerciseRepository;
-  final WeightLiftingRepository weightLiftingRepository;
 
   const ExerciseLogDetailPage({
     super.key,
     required this.exerciseId,
     required this.activityType,
-    required this.cardioRepository,
-    required this.smartExerciseRepository,
-    required this.weightLiftingRepository,
   });
 
   @override
@@ -44,11 +38,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
   @override
   void initState() {
     super.initState();
-    _detailService = ExerciseDetailServiceImpl(
-      cardioRepository: widget.cardioRepository,
-      smartExerciseRepository: widget.smartExerciseRepository,
-      weightLiftingRepository: widget.weightLiftingRepository,
-    );
+    _detailService = getIt<ExerciseDetailService>();
     // Initialize with a Future that includes all loading processes
     _exerciseFuture = _loadExerciseData();
   }
@@ -318,7 +308,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
 
       // Remove loading indicator
       navigator.pop();
-      
+
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text('Error deleting exercise log: ${e.toString()}'),
