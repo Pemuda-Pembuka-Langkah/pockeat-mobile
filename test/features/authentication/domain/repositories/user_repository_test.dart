@@ -5,9 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_auth_repository.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_firestore_repository.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_stream_repository.dart';
 
 // Import file mock yang akan digenerate
 import 'user_repository_test.mocks.dart';
@@ -20,25 +22,26 @@ import 'user_repository_test.mocks.dart';
   DocumentReference,
   DocumentSnapshot,
   User,
+  UserAuthRepository,
+  UserFirestoreRepository,
+  UserStreamRepository
 ])
 // File user_repository_test.mocks.dart akan digenerate dengan perintah: flutter pub run build_runner build
 
 void main() {
-  late UserRepository userRepository;
-  late MockFirebaseAuth mockAuth;
-  late MockFirebaseFirestore mockFirestore;
+  late UserRepositoryImpl userRepository;
+  late MockUserAuthRepository mockAuthRepo;
+  late MockUserFirestoreRepository mockFirestoreRepo;
+  late MockUserStreamRepository mockStreamRepo;
   late MockUser mockUser;
-  late MockDocumentReference<Map<String, dynamic>> mockUserDoc;
-  late MockCollectionReference<Map<String, dynamic>> mockUsersCollection;
-  late MockDocumentSnapshot<Map<String, dynamic>> mockUserSnapshot;
+  final StreamController<UserModel?> mockStreamController =
+      StreamController<UserModel?>.broadcast();
 
   setUp(() {
-    mockAuth = MockFirebaseAuth();
-    mockFirestore = MockFirebaseFirestore();
+    mockAuthRepo = MockUserAuthRepository();
+    mockFirestoreRepo = MockUserFirestoreRepository();
+    mockStreamRepo = MockUserStreamRepository();
     mockUser = MockUser();
-    mockUsersCollection = MockCollectionReference<Map<String, dynamic>>();
-    mockUserDoc = MockDocumentReference<Map<String, dynamic>>();
-    mockUserSnapshot = MockDocumentSnapshot<Map<String, dynamic>>();
 
     // Setup basic user data
     when(mockUser.uid).thenReturn('test-user-id');
@@ -47,40 +50,49 @@ void main() {
     when(mockUser.photoURL).thenReturn('https://example.com/photo.jpg');
     when(mockUser.emailVerified).thenReturn(false);
 
-    // Setup auth dengan mock user
-    when(mockAuth.currentUser).thenReturn(mockUser);
+    // Setup auth repo dengan mock user
+    when(mockAuthRepo.currentUser).thenReturn(mockUser);
+    when(mockAuthRepo.authStateChanges)
+        .thenAnswer((_) => Stream.value(mockUser));
 
-    // Setup Firestore dengan mock collection dan document
-    when(mockFirestore.collection('users')).thenReturn(mockUsersCollection);
-    when(mockUsersCollection.doc('test-user-id')).thenReturn(mockUserDoc);
-    when(mockUsersCollection.doc('another-user-id')).thenReturn(mockUserDoc);
+    // Setup mock data untuk firestore repo
+    final userData = UserModel(
+      uid: 'test-user-id',
+      email: 'test@example.com',
+      displayName: 'Test User',
+      photoURL: 'https://example.com/photo.jpg',
+      emailVerified: false,
+      createdAt: DateTime.now(),
+    );
 
-    // Setup document data
-    final userData = {
-      'uid': 'test-user-id',
-      'email': 'test@example.com',
-      'displayName': 'Test User',
-      'photoURL': 'https://example.com/photo.jpg',
-      'emailVerified': false,
-      'createdAt': Timestamp.now(),
-    };
-    when(mockUserDoc.get()).thenAnswer((_) async => mockUserSnapshot);
-    when(mockUserSnapshot.id).thenReturn('test-user-id');
-    when(mockUserSnapshot.exists).thenReturn(true);
-    when(mockUserSnapshot.data()).thenReturn(userData);
+    when(mockFirestoreRepo.getUserById('test-user-id'))
+        .thenAnswer((_) async => userData);
+    when(mockFirestoreRepo.saveUser(any)).thenAnswer((_) async {});
+    when(mockFirestoreRepo.updateUser(any, any)).thenAnswer((_) async {});
 
-    // Stubs for update and set
-    when(mockUserDoc.update(any)).thenAnswer((_) async {});
-    when(mockUserDoc.set(any, any)).thenAnswer((_) async {});
+    // Setup mock stream repo
+    when(mockStreamRepo.userChanges)
+        .thenAnswer((_) => mockStreamController.stream);
+    when(mockStreamRepo.currentUserStream)
+        .thenAnswer((_) => Stream.value(userData));
+    when(mockStreamRepo.getUserStream('test-user-id'))
+        .thenAnswer((_) => Stream.value(userData));
 
-    // Buat repository dengan mock
+    // Buat repository dengan mock langsung menggunakan constructor baru
     userRepository = UserRepositoryImpl(
-      auth: mockAuth,
-      firestore: mockFirestore,
+      authRepo: mockAuthRepo,
+      firestoreRepo: mockFirestoreRepo,
+      streamRepo: mockStreamRepo,
     );
   });
 
-  group('UserRepository', () {
+  tearDown(() {
+    // Pastikan resource dibersihkan
+    userRepository.dispose();
+    mockStreamController.close();
+  });
+
+  group('UserRepository Core Functions', () {
     test('getCurrentUser should return current user', () async {
       // Act
       final result = await userRepository.getCurrentUser();
@@ -88,18 +100,21 @@ void main() {
       // Assert
       expect(result, isNotNull);
       expect(result?.uid, equals('test-user-id'));
-      expect(result?.email, equals('test@example.com'));
+      verify(mockAuthRepo.currentUser).called(1);
+      verify(mockFirestoreRepo.getUserById('test-user-id')).called(1);
     });
 
     test('getCurrentUser should return null when not logged in', () async {
       // Arrange
-      when(mockAuth.currentUser).thenReturn(null);
+      when(mockAuthRepo.currentUser).thenReturn(null);
 
       // Act
       final result = await userRepository.getCurrentUser();
 
       // Assert
       expect(result, isNull);
+      verify(mockAuthRepo.currentUser).called(1);
+      verifyNever(mockFirestoreRepo.getUserById(any));
     });
 
     test('getUserById should return user when ID matches current user',
@@ -110,27 +125,44 @@ void main() {
       // Assert
       expect(result, isNotNull);
       expect(result?.uid, equals('test-user-id'));
+      verify(mockAuthRepo.validateUserAccess('test-user-id')).called(1);
+      verify(mockFirestoreRepo.getUserById('test-user-id')).called(1);
     });
 
     test(
         'getUserById should throw exception when ID does not match current user',
         () async {
+      // Arrange
+      final exception = UserRepositoryException(
+        'Access to another user\'s data is not allowed',
+        code: 'permission-denied',
+      );
+      when(mockAuthRepo.validateUserAccess('another-user-id'))
+          .thenThrow(exception);
+
       // Act & Assert
       expect(
           () => userRepository.getUserById('another-user-id'),
-          throwsA(isA<UserRepositoryException>()
-              .having((e) => e.code, 'code', 'permission-denied')));
+          throwsA(predicate((e) =>
+              e is UserRepositoryException && e.code == 'permission-denied')));
+      verify(mockAuthRepo.validateUserAccess('another-user-id')).called(1);
     });
 
     test('getUserById should throw exception when not logged in', () async {
       // Arrange
-      when(mockAuth.currentUser).thenReturn(null);
+      final exception = UserRepositoryException(
+        'No authenticated user found',
+        code: 'unauthenticated',
+      );
+      when(mockAuthRepo.validateUserAccess('test-user-id'))
+          .thenThrow(exception);
 
       // Act & Assert
       expect(
           () => userRepository.getUserById('test-user-id'),
-          throwsA(isA<UserRepositoryException>()
-              .having((e) => e.code, 'code', 'unauthenticated')));
+          throwsA(predicate((e) =>
+              e is UserRepositoryException && e.code == 'unauthenticated')));
+      verify(mockAuthRepo.validateUserAccess('test-user-id')).called(1);
     });
 
     test('saveUser should update Firestore document', () async {
@@ -144,15 +176,28 @@ void main() {
         createdAt: DateTime.now(),
       );
 
-      // Capture data yang dikirim ke Firestore
+      // Act
       await userRepository.saveUser(newUser);
 
       // Assert
-      verify(mockUserDoc.set(argThat(isA<Map<String, dynamic>>()), any))
-          .called(1);
+      verify(mockFirestoreRepo.saveUser(newUser)).called(1);
     });
 
     test('updateUserProfile should update user profile data', () async {
+      // Arrange
+      final updatedUser = UserModel(
+        uid: 'test-user-id',
+        email: 'test@example.com',
+        displayName: 'Updated Name',
+        photoURL: 'https://example.com/photo.jpg',
+        emailVerified: false,
+        gender: 'Male',
+        createdAt: DateTime.now(),
+      );
+
+      when(mockFirestoreRepo.getUserById('test-user-id'))
+          .thenAnswer((_) async => updatedUser);
+
       // Act
       final result = await userRepository.updateUserProfile(
         userId: 'test-user-id',
@@ -162,126 +207,160 @@ void main() {
 
       // Assert
       expect(result, isTrue);
-      verify(mockUserDoc.update(argThat(predicate<Map<Object, Object?>>((map) =>
-          map['displayName'] == 'Updated Name' &&
-          map['gender'] == 'Male')))).called(1);
+
+      // Verifikasi update auth profile
+      verify(mockAuthRepo.updateUserProfile(
+        displayName: 'Updated Name',
+        photoURL: null,
+      )).called(1);
+
+      // Verifikasi update firestore
+      verify(mockFirestoreRepo.updateUser(
+          'test-user-id',
+          argThat(predicate<Map<String, dynamic>>((map) =>
+              map['displayName'] == 'Updated Name' &&
+              map['gender'] == 'Male')))).called(1);
+
+      // Verifikasi notifikasi perubahan
+      verify(mockStreamRepo.notifyUserChanged(any)).called(1);
     });
 
     test('updateUserProfile should throw exception when updating another user',
         () async {
-      // Arrange - simulasi user yang berbeda
-      when(mockUser.uid).thenReturn('different-user-id');
+      // Arrange
+      final exception = UserRepositoryException(
+        'Access to another user\'s data is not allowed',
+        code: 'permission-denied',
+      );
+      when(mockAuthRepo.validateUserAccess('another-user-id'))
+          .thenThrow(exception);
 
       // Act & Assert
       expect(
           () => userRepository.updateUserProfile(
-                userId: 'test-user-id',
+                userId: 'another-user-id',
                 displayName: 'Some Name',
               ),
-          throwsA(isA<UserRepositoryException>()
-              .having((e) => e.code, 'code', 'permission-denied')));
+          throwsA(predicate((e) =>
+              e is UserRepositoryException && e.code == 'permission-denied')));
     });
 
     test('updateEmailVerificationStatus should update emailVerified status',
         () async {
+      // Arrange
+      final updatedUser = UserModel(
+        uid: 'test-user-id',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        photoURL: 'https://example.com/photo.jpg',
+        emailVerified: true,
+        createdAt: DateTime.now(),
+      );
+
+      when(mockFirestoreRepo.getUserById('test-user-id'))
+          .thenAnswer((_) async => updatedUser);
+
       // Act
       await userRepository.updateEmailVerificationStatus('test-user-id', true);
 
+      // Verify validasi akses
+      verify(mockAuthRepo.validateUserAccess('test-user-id')).called(1);
+
       // Verify update called with correct params
-      verify(mockUserDoc.update({'emailVerified': true})).called(1);
+      verify(mockFirestoreRepo
+          .updateUser('test-user-id', {'emailVerified': true})).called(1);
+
+      // Verify notifikasi perubahan
+      verify(mockStreamRepo.notifyUserChanged(any)).called(1);
     });
 
     test('updateEmailVerificationStatus should throw for another user',
         () async {
-      // Arrange - simulasi user yang berbeda
-      when(mockUser.uid).thenReturn('different-user-id');
+      // Arrange
+      final exception = UserRepositoryException(
+        'Access to another user\'s data is not allowed',
+        code: 'permission-denied',
+      );
+      when(mockAuthRepo.validateUserAccess('another-user-id'))
+          .thenThrow(exception);
 
       // Act & Assert
       expect(
           () => userRepository.updateEmailVerificationStatus(
-              'test-user-id', true),
-          throwsA(isA<UserRepositoryException>()
-              .having((e) => e.code, 'code', 'permission-denied')));
+              'another-user-id', true),
+          throwsA(predicate((e) =>
+              e is UserRepositoryException && e.code == 'permission-denied')));
     });
 
-    // Untuk menguji isEmailAlreadyRegistered
-    test('isEmailAlreadyRegistered should return true for registered email',
-        () async {
+    test('isEmailAlreadyRegistered should validate and check email', () async {
       // Arrange
-      when(mockAuth.fetchSignInMethodsForEmail('test@example.com'))
-          .thenAnswer((_) async => ['password']);
+      when(mockAuthRepo.isEmailAlreadyRegistered('test@example.com'))
+          .thenAnswer((_) async => true);
+      when(mockAuthRepo.isEmailAlreadyRegistered('new@example.com'))
+          .thenAnswer((_) async => false);
 
-      // Act
-      final result =
+      final exception = UserRepositoryException(
+        'Invalid email format',
+        code: 'invalid-email',
+      );
+      when(mockAuthRepo.isEmailAlreadyRegistered('invalid-email'))
+          .thenThrow(exception);
+
+      // Act & Assert - already registered email
+      final registeredResult =
           await userRepository.isEmailAlreadyRegistered('test@example.com');
+      expect(registeredResult, isTrue);
 
-      // Assert
-      expect(result, isTrue);
+      // Act & Assert - new email
+      final newResult =
+          await userRepository.isEmailAlreadyRegistered('new@example.com');
+      expect(newResult, isFalse);
+
+      // Act & Assert - invalid email
+      expect(
+        () => userRepository.isEmailAlreadyRegistered('invalid-email'),
+        throwsA(predicate(
+            (e) => e is UserRepositoryException && e.code == 'invalid-email')),
+      );
+    });
+  });
+
+  // Test untuk reactive programming
+  group('UserRepository Reactive Programming', () {
+    test('userStream should delegate to streamRepo', () {
+      // Act
+      final stream = userRepository.userStream('test-user-id');
+
+      // Assert - verify delegation
+      verify(mockStreamRepo.getUserStream('test-user-id')).called(1);
     });
 
-    test('isEmailAlreadyRegistered should return false for new email',
-        () async {
+    test('userStream should return error stream on exception', () {
       // Arrange
-      when(mockAuth.fetchSignInMethodsForEmail('new@example.com'))
-          .thenAnswer((_) async => []);
+      final exception = UserRepositoryException(
+        'Access to another user\'s data is not allowed',
+        code: 'permission-denied',
+      );
+      when(mockStreamRepo.getUserStream('another-user-id'))
+          .thenThrow(exception);
 
       // Act
-      final result =
-          await userRepository.isEmailAlreadyRegistered('new@example.com');
+      final stream = userRepository.userStream('another-user-id');
 
-      // Assert
-      expect(result, isFalse);
+      // Assert - verify it's an error stream
+      expectLater(
+        stream,
+        emitsError(predicate((e) =>
+            e is UserRepositoryException && e.code == 'permission-denied')),
+      );
     });
 
-    // Stream Tests - Pendekatan lebih sederhana
-    group('Stream Tests - Basic', () {
-      test('userStream should return error stream when accessing another user',
-          () async {
-        // Arrange - simulasi user yang berbeda
-        when(mockAuth.currentUser).thenReturn(mockUser);
-        when(mockUser.uid).thenReturn('different-user-id');
+    test('currentUserStream should delegate to streamRepo', () {
+      // Act
+      final stream = userRepository.currentUserStream();
 
-        // Act - ambil stream
-        final stream = userRepository.userStream('test-user-id');
-
-        // Assert - verifikasi bahwa stream adalah error stream
-        expect(stream, isA<Stream<UserModel?>>());
-
-        // Pastikan stream ini mengembalikan error saat digunakan
-        await expectLater(
-            stream.first,
-            throwsA(isA<UserRepositoryException>()
-                .having((e) => e.code, 'code', 'permission-denied')));
-      });
-
-      test('userStream should return a valid stream for current user', () {
-        // Arrange
-        when(mockAuth.currentUser).thenReturn(mockUser);
-        when(mockUser.uid).thenReturn('test-user-id');
-        when(mockUserDoc.snapshots())
-            .thenAnswer((_) => Stream.value(mockUserSnapshot));
-
-        // Act
-        final stream = userRepository.userStream('test-user-id');
-
-        // Assert
-        expect(stream, isA<Stream<UserModel?>>());
-      });
-
-      test('currentUserStream should return a valid stream', () {
-        // Arrange
-        when(mockAuth.authStateChanges())
-            .thenAnswer((_) => Stream.value(mockUser));
-
-        // Act
-        final stream = userRepository.currentUserStream();
-
-        // Assert
-        expect(stream, isA<Stream<UserModel?>>());
-      });
+      // Assert - verify delegation
+      verify(mockStreamRepo.currentUserStream).called(1);
     });
-
-    // Catatan: Ini contoh dasar pengujian stream dengan StreamController
-    // Pengujian stream yang lebih kompleks bisa ditambahkan sesuai kebutuhan
   });
 }

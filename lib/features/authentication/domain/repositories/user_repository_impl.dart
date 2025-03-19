@@ -1,7 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_repository_base.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_auth_repository.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_firestore_repository.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_stream_repository.dart';
 
 /// Exception khusus untuk repository user
 class UserRepositoryException implements Exception {
@@ -16,70 +21,84 @@ class UserRepositoryException implements Exception {
       'UserRepositoryException: $message${code != null ? ' (code: $code)' : ''}';
 }
 
+/// Implementasi UserRepository dengan aplikasi Repository Pattern
 class UserRepositoryImpl implements UserRepository {
-  final FirebaseAuth _auth;
-  final FirebaseFirestore _firestore;
+  // Dependencies
+  final UserAuthRepository _authRepo;
+  final UserFirestoreRepository _firestoreRepo;
+  final UserStreamRepository _streamRepo;
 
-  // Collection reference untuk users
-  late final CollectionReference<Map<String, dynamic>> _usersCollection;
-
-  UserRepositoryImpl({
+  // Factory constructor untuk penggunaan default
+  factory UserRepositoryImpl({
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
-  })  : _auth = auth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance {
-    _usersCollection = _firestore.collection('users');
+    // Parameter tambahan untuk testing
+    UserAuthRepository? authRepo,
+    UserFirestoreRepository? firestoreRepo,
+    UserStreamRepository? streamRepo,
+  }) {
+    // Jika repository sudah diinjeksi, gunakan langsung
+    if (authRepo != null && firestoreRepo != null && streamRepo != null) {
+      return UserRepositoryImpl._(
+        authRepo: authRepo,
+        firestoreRepo: firestoreRepo,
+        streamRepo: streamRepo,
+      );
+    }
+
+    // Jika tidak, buat repository baru
+    final _authRepo = UserAuthRepository(auth: auth, firestore: firestore);
+    final _firestoreRepo =
+        UserFirestoreRepository(auth: auth, firestore: firestore);
+    final _streamRepo = UserStreamRepository(
+      firestoreRepo: _firestoreRepo,
+      authRepo: _authRepo,
+      auth: auth,
+      firestore: firestore,
+    );
+
+    return UserRepositoryImpl._(
+      authRepo: _authRepo,
+      firestoreRepo: _firestoreRepo,
+      streamRepo: _streamRepo,
+    );
   }
+
+  // Constructor untuk injection langsung dan testing
+  UserRepositoryImpl._({
+    required UserAuthRepository authRepo,
+    required UserFirestoreRepository firestoreRepo,
+    required UserStreamRepository streamRepo,
+  })  : _authRepo = authRepo,
+        _firestoreRepo = firestoreRepo,
+        _streamRepo = streamRepo;
+
+  /// Stream perubahan data user untuk reactive UI
+  Stream<UserModel?> get userChanges => _streamRepo.userChanges;
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    final currentUser = _auth.currentUser;
+    final currentUser = _authRepo.currentUser;
     if (currentUser == null) {
       return null;
     }
 
-    // Ambil data dari Firestore untuk mendapatkan data lengkap
-    return getUserById(currentUser.uid);
+    return await _firestoreRepo.getUserById(currentUser.uid);
   }
 
   @override
   Future<UserModel?> getUserById(String userId) async {
     try {
-      // Validasi apakah user yang login mencoba akses data miliknya
-      final currentUser = _auth.currentUser;
-      if (currentUser == null) {
-        throw UserRepositoryException(
-          'No authenticated user found',
-          code: 'unauthenticated',
-        );
-      }
+      // Validasi akses
+      _authRepo.validateUserAccess(userId);
 
-      if (currentUser.uid != userId) {
-        throw UserRepositoryException(
-          'Access to another user\'s data is not allowed',
-          code: 'permission-denied',
-        );
-      }
-
-      final docSnapshot = await _usersCollection.doc(userId).get();
-
-      if (!docSnapshot.exists) {
-        return null;
-      }
-
-      return UserModel.fromFirestore(docSnapshot);
+      // Ambil data dari Firestore
+      return await _firestoreRepo.getUserById(userId);
     } on UserRepositoryException {
-      // Re-throw UserRepositoryException agar error yang spesifik dapat ditangkap
       rethrow;
-    } on FirebaseException catch (e) {
-      throw UserRepositoryException(
-        'Firebase error while getting user data',
-        code: e.code,
-        originalError: e,
-      );
     } catch (e) {
       throw UserRepositoryException(
-        'Unexpected error while getting user data',
+        'Error getting user data',
         originalError: e,
       );
     }
@@ -88,21 +107,13 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<void> saveUser(UserModel user) async {
     try {
-      // Security Rules akan mengecek apakah user berhak menulis ke dokumen ini
-      await _usersCollection.doc(user.uid).set(
-            user.toMap(),
-            SetOptions(
-                merge: true), // Update partial, tidak override seluruh dokumen
-          );
-    } on FirebaseException catch (e) {
-      throw UserRepositoryException(
-        'Failed to save user data',
-        code: e.code,
-        originalError: e,
-      );
+      // Simpan user ke Firestore
+      await _firestoreRepo.saveUser(user);
+    } on UserRepositoryException {
+      rethrow;
     } catch (e) {
       throw UserRepositoryException(
-        'Unexpected error while saving user data',
+        'Error saving user data',
         originalError: e,
       );
     }
@@ -117,29 +128,26 @@ class UserRepositoryImpl implements UserRepository {
     DateTime? birthDate,
   }) async {
     try {
-      // Validasi akses ke data
-      final currentUser = _auth.currentUser;
-      if (currentUser == null || currentUser.uid != userId) {
-        throw UserRepositoryException(
-          'Cannot update profile of another user',
-          code: 'permission-denied',
+      // Validasi akses
+      _authRepo.validateUserAccess(userId);
+
+      // Update Firebase Auth profile jika perlu
+      if (displayName != null || photoURL != null) {
+        await _authRepo.updateUserProfile(
+          displayName: displayName,
+          photoURL: photoURL,
         );
       }
 
+      // Persiapkan data update untuk Firestore
       final updateData = <String, dynamic>{};
 
       if (displayName != null) {
         updateData['displayName'] = displayName;
-
-        // Update juga di Firebase Auth
-        await _auth.currentUser?.updateDisplayName(displayName);
       }
 
       if (photoURL != null) {
         updateData['photoURL'] = photoURL;
-
-        // Update juga di Firebase Auth
-        await _auth.currentUser?.updatePhotoURL(photoURL);
       }
 
       if (gender != null) {
@@ -150,30 +158,23 @@ class UserRepositoryImpl implements UserRepository {
         updateData['birthDate'] = Timestamp.fromDate(birthDate);
       }
 
+      // Update data di Firestore jika ada perubahan
       if (updateData.isNotEmpty) {
-        // Security Rules akan mengecek apakah user berhak update dokumen ini
-        await _usersCollection.doc(userId).update(updateData);
+        await _firestoreRepo.updateUser(userId, updateData);
+
+        // Ambil data terbaru untuk notifikasi
+        final updatedUser = await _firestoreRepo.getUserById(userId);
+        if (updatedUser != null) {
+          _streamRepo.notifyUserChanged(updatedUser);
+        }
       }
 
       return true;
     } on UserRepositoryException {
       rethrow;
-    } on FirebaseException catch (e) {
-      if (e.code == 'permission-denied') {
-        throw UserRepositoryException(
-          'You do not have permission to update this profile',
-          code: e.code,
-          originalError: e,
-        );
-      }
-      throw UserRepositoryException(
-        'Failed to update user profile',
-        code: e.code,
-        originalError: e,
-      );
     } catch (e) {
       throw UserRepositoryException(
-        'Unexpected error while updating profile',
+        'Error updating user profile',
         originalError: e,
       );
     }
@@ -182,26 +183,12 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<bool> isEmailAlreadyRegistered(String email) async {
     try {
-      // Cara 1: Cek melalui Firebase Auth (lebih aman, tidak perlu atur security rules khusus)
-      final methods = await _auth.fetchSignInMethodsForEmail(email);
-      return methods.isNotEmpty;
-    } on FirebaseAuthException catch (e) {
-      // Ini bisa jadi normal jika email invalid format
-      if (e.code == 'invalid-email') {
-        throw UserRepositoryException(
-          'Invalid email format',
-          code: e.code,
-          originalError: e,
-        );
-      }
-      throw UserRepositoryException(
-        'Error checking email registration status',
-        code: e.code,
-        originalError: e,
-      );
+      return await _authRepo.isEmailAlreadyRegistered(email);
+    } on UserRepositoryException {
+      rethrow;
     } catch (e) {
       throw UserRepositoryException(
-        'Unexpected error checking email registration',
+        'Error checking email registration',
         originalError: e,
       );
     }
@@ -211,30 +198,22 @@ class UserRepositoryImpl implements UserRepository {
   Future<void> updateEmailVerificationStatus(
       String userId, bool isVerified) async {
     try {
-      // Validasi akses ke data
-      final currentUser = _auth.currentUser;
-      if (currentUser == null || currentUser.uid != userId) {
-        throw UserRepositoryException(
-          'Cannot update verification status of another user',
-          code: 'permission-denied',
-        );
-      }
+      // Validasi akses
+      _authRepo.validateUserAccess(userId);
 
-      // Security Rules akan mengecek apakah user berhak update dokumen ini
-      await _usersCollection.doc(userId).update({
-        'emailVerified': isVerified,
-      });
+      // Update status verifikasi
+      await _firestoreRepo.updateUser(userId, {'emailVerified': isVerified});
+
+      // Ambil data terbaru untuk notifikasi
+      final updatedUser = await _firestoreRepo.getUserById(userId);
+      if (updatedUser != null) {
+        _streamRepo.notifyUserChanged(updatedUser);
+      }
     } on UserRepositoryException {
       rethrow;
-    } on FirebaseException catch (e) {
-      throw UserRepositoryException(
-        'Failed to update email verification status',
-        code: e.code,
-        originalError: e,
-      );
     } catch (e) {
       throw UserRepositoryException(
-        'Unexpected error updating email verification status',
+        'Error updating email verification status',
         originalError: e,
       );
     }
@@ -243,98 +222,26 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Stream<UserModel?> userStream(String userId) {
     try {
-      // Validasi akses ke data
-      final currentUser = _auth.currentUser;
-      if (currentUser == null || currentUser.uid != userId) {
-        throw UserRepositoryException(
-          'Cannot stream data of another user',
-          code: 'permission-denied',
-        );
-      }
-
-      // Security Rules akan mengecek apakah user berhak mengakses dokumen ini secara real-time
-      return _usersCollection.doc(userId).snapshots().map((snapshot) {
-        if (!snapshot.exists) {
-          return null;
-        }
-        return UserModel.fromFirestore(snapshot);
-      }).handleError((error) {
-        if (error is FirebaseException) {
-          throw UserRepositoryException(
-            'Error streaming user data',
-            code: error.code,
-            originalError: error,
-          );
-        }
-        throw UserRepositoryException(
-          'Unexpected error in user stream',
-          originalError: error,
-        );
-      });
+      return _streamRepo.getUserStream(userId);
+    } on UserRepositoryException catch (e) {
+      return Stream.error(e);
     } catch (e) {
-      // Untuk error yang terjadi sebelum stream dibuat
-      // Konversi ke error stream
-      return Stream.error(
-        e is UserRepositoryException
-            ? e
-            : UserRepositoryException(
-                'Failed to create user stream',
-                originalError: e,
-              ),
-      );
+      return Stream.error(UserRepositoryException(
+        'Error creating user stream',
+        originalError: e,
+      ));
     }
   }
 
   @override
   Stream<UserModel?> currentUserStream() {
-    return _auth.authStateChanges().asyncMap((firebaseUser) async {
-      if (firebaseUser == null) {
-        return null;
-      }
+    return _streamRepo.currentUserStream;
+  }
 
-      try {
-        // Ambil data dari Firestore
-        final userDoc = await _usersCollection.doc(firebaseUser.uid).get();
-
-        if (!userDoc.exists) {
-          // User ada di Auth tapi belum ada di Firestore
-          // Mungkin perlu buat dokumen baru
-          final newUser = UserModel.fromFirebaseUser(firebaseUser);
-          await saveUser(newUser);
-          return newUser;
-        }
-
-        return UserModel.fromFirestore(userDoc);
-      } on FirebaseException catch (e) {
-        throw UserRepositoryException(
-          'Error retrieving current user data',
-          code: e.code,
-          originalError: e,
-        );
-      } catch (e) {
-        // Jika gagal dapat data Firestore, gunakan data minimal dari Auth
-        if (e is! UserRepositoryException) {
-          // Log error tapi jangan throw karena ini stream
-          // Kita masih mau return user dari auth
-        }
-        return UserModel.fromFirebaseUser(firebaseUser);
-      }
-    }).handleError((error) {
-      // Handle error dari asyncMap
-      if (error is FirebaseAuthException) {
-        throw UserRepositoryException(
-          'Auth state error',
-          code: error.code,
-          originalError: error,
-        );
-      }
-      if (error is! UserRepositoryException) {
-        throw UserRepositoryException(
-          'Unexpected error in current user stream',
-          originalError: error,
-        );
-      }
-      throw error; // Jika sudah UserRepositoryException, rethrow saja
-    });
+  /// Cleanup resources saat repository tidak digunakan lagi
+  void dispose() {
+    _authRepo.dispose();
+    _firestoreRepo.dispose();
+    _streamRepo.dispose();
   }
 }
