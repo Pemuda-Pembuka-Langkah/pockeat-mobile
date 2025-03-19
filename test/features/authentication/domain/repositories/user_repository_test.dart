@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -231,7 +233,153 @@ void main() {
       expect(result, isFalse);
     });
 
-    // Catatan: Untuk stream tests perlu implementasi yang lebih kompleks
-    // dengan StreamController dan akan diimplementasikan terpisah
+    // Stream Tests dengan StreamController
+    group('Stream Tests', () {
+      late StreamController<DocumentSnapshot<Map<String, dynamic>>>
+          documentStreamController;
+      late StreamController<User?> authStateController;
+
+      setUp(() {
+        // Setup controller untuk document stream
+        documentStreamController =
+            StreamController<DocumentSnapshot<Map<String, dynamic>>>();
+
+        // Setup controller untuk auth state changes
+        authStateController = StreamController<User?>();
+
+        // Setup mocks untuk stream
+        when(mockUserDoc.snapshots())
+            .thenAnswer((_) => documentStreamController.stream);
+        when(mockAuth.authStateChanges())
+            .thenAnswer((_) => authStateController.stream);
+      });
+
+      tearDown(() async {
+        // Cleanup controllers after each test
+        await documentStreamController.close();
+        await authStateController.close();
+      });
+
+      test('userStream should emit UserModel when document changes', () async {
+        // Act
+        final stream = userRepository.userStream('test-user-id');
+
+        // Prepare untuk menangkap hasil dari stream
+        final completer = Completer<UserModel?>();
+        final subscription = stream.listen((user) {
+          if (!completer.isCompleted) {
+            completer.complete(user);
+          }
+        }, onError: (e) {
+          if (!completer.isCompleted) {
+            completer.completeError(e);
+          }
+        });
+
+        // Simulasi dokumen berubah dengan mengirim snapshot baru
+        final updatedData = {
+          'uid': 'test-user-id',
+          'email': 'test@example.com',
+          'displayName': 'Updated Name',
+          'photoURL': 'https://example.com/new.jpg',
+          'emailVerified': true,
+          'createdAt': Timestamp.now(),
+        };
+
+        // Update data di snapshot
+        when(mockUserSnapshot.data()).thenReturn(updatedData);
+
+        // Kirim snapshot ke stream
+        documentStreamController.add(mockUserSnapshot);
+
+        // Tunggu hasil
+        final result = await completer.future;
+
+        // Cleanup
+        await subscription.cancel();
+
+        // Assert
+        expect(result, isNotNull);
+        expect(result!.displayName, equals('Updated Name'));
+        expect(result.emailVerified, isTrue);
+      });
+
+      test('userStream should throw when accessing another user stream',
+          () async {
+        // Arrange - simulasi user yang berbeda
+        when(mockUser.uid).thenReturn('different-user-id');
+
+        // Act & Assert
+        expect(
+            () => userRepository.userStream('test-user-id'),
+            throwsA(isA<UserRepositoryException>()
+                .having((e) => e.code, 'code', 'permission-denied')));
+      });
+
+      test('currentUserStream should emit null when user logs out', () async {
+        // Prepare untuk menangkap hasil dari stream
+        final stream = userRepository.currentUserStream();
+        final completer = Completer<UserModel?>();
+        final subscription = stream.listen((user) {
+          if (!completer.isCompleted) {
+            completer.complete(user);
+          }
+        }, onError: (e) {
+          if (!completer.isCompleted) {
+            completer.completeError(e);
+          }
+        });
+
+        // Simulasi logout dengan mengirim null ke stream
+        authStateController.add(null);
+
+        // Tunggu hasil
+        final result = await completer.future;
+
+        // Cleanup
+        await subscription.cancel();
+
+        // Assert
+        expect(result, isNull);
+      });
+
+      test('currentUserStream should create user document if not exists',
+          () async {
+        // Arrange - document tidak ada di Firestore
+        when(mockUserSnapshot.exists).thenReturn(false);
+
+        // Siapkan untuk menangkap hasil dari stream
+        final stream = userRepository.currentUserStream();
+        final completer = Completer<UserModel?>();
+        final subscription = stream.listen((user) {
+          if (!completer.isCompleted) {
+            completer.complete(user);
+          }
+        }, onError: (e) {
+          if (!completer.isCompleted) {
+            completer.completeError(e);
+          }
+        });
+
+        // Simulasi login dengan mengirim user ke stream
+        authStateController.add(mockUser);
+
+        // Tunggu hasil
+        final result = await completer.future;
+
+        // Cleanup
+        await subscription.cancel();
+
+        // Verify dokumen baru dibuat
+        verify(mockUserDoc.set(any, any)).called(1);
+
+        // Assert user dikembalikan
+        expect(result, isNotNull);
+        expect(result!.uid, equals('test-user-id'));
+      });
+    });
+
+    // Catatan: Ini contoh dasar pengujian stream dengan StreamController
+    // Pengujian stream yang lebih kompleks bisa ditambahkan sesuai kebutuhan
   });
 }
