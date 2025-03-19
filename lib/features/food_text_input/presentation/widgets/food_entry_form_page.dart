@@ -5,9 +5,11 @@ import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 
 class FoodEntryForm extends StatefulWidget {
   final Function(FoodEntry)? onSaved;
+  final bool isAnalyzing;
 
   const FoodEntryForm({
     this.onSaved,
+    this.isAnalyzing = false,
     super.key,
   });
 
@@ -16,20 +18,9 @@ class FoodEntryForm extends StatefulWidget {
 }
 
 class _FoodEntryFormState extends State<FoodEntryForm> {
-  final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
-  final _correctionController = TextEditingController();
-
   String? _descriptionError;
-  String? _successMessage;
-  bool _showCorrectionInterface = false;
-  bool _isAnalyzing = false;
-  bool _showForm = true;
-  bool _showAnalysisResults = false;
-  FoodEntry? _savedFoodEntry;
-  FoodAnalysisResult? _analysisResult;
-  String? _analysisError;
-
+  
   late FoodTextAnalysisService _analysisService;
 
   @override
@@ -37,120 +28,122 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
     super.initState();
     _analysisService = FoodTextAnalysisService.fromEnv();
   }
-
-  Future<void> _performAnalysis() async {
-    if (_savedFoodEntry == null) return;
-
-    setState(() {
-      _isAnalyzing = true;
-      _analysisError = null;
-    });
-
-    try {
-      final textToAnalyze = _savedFoodEntry!.foodDescription;
-      final result = await _analysisService.analyze(textToAnalyze);
+  
+  void _validateAndSubmit() {
+    final input = _descriptionController.text.trim();
+    
+    if (input.isEmpty) {
       setState(() {
-        _analysisResult = result;
-        _showAnalysisResults = true;
-        _isAnalyzing = false;
-      });
-    } catch (e) {
-      setState(() {
-        _analysisError = e.toString();
-        _isAnalyzing = false;
-      });
-    }
-  }
-
-  void _saveForm() {
-    setState(() {
-      _descriptionError = null;
-      _successMessage = null;
-      _analysisError = null;
-    });
-
-    if (_descriptionController.text.trim().isEmpty) {
-      setState(() {
-        _descriptionError = 'Please insert food description';
+        _descriptionError = 'Food description cannot be empty';
       });
       return;
     }
-
+    
+    setState(() {
+      _descriptionError = null;
+    });
+    
     FoodEntry foodEntry = FoodEntry(
-      foodDescription: _descriptionController.text,
+      foodDescription: input,
     );
 
     widget.onSaved?.call(foodEntry);
-
-    setState(() {
-      _successMessage = 'Food entry saved successfully!';
-      _showForm = false;
-      _savedFoodEntry = foodEntry;
-    });
-
-    _performAnalysis();
   }
 
   @override
   void dispose() {
     _descriptionController.dispose();
-    _correctionController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: _showForm
-            ? Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextField(
-                      key: const ValueKey('descriptionField'),
-                      controller: _descriptionController,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        errorText: _descriptionError,
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Color(0xFF4ECDC4), width: 2),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _saveForm,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4ECDC4),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'Save & Analyze Food',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Describe your food',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Provide details about what you ate, including ingredients and portion sizes',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _descriptionController,
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: 'Example: "Grilled chicken salad with lettuce, tomatoes, and olive oil dressing" or "Bowl of oatmeal with blueberries"',
+              hintStyle: const TextStyle(color: Colors.black38),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.black26),
+              ),
+              errorText: _descriptionError,
+            ),
+            onChanged: (_) {
+              if (_descriptionError != null) {
+                setState(() {
+                  _descriptionError = null;
+                });
+              }
+            },
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: widget.isAnalyzing ? null : _validateAndSubmit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4ECDC4), // Keeping your app's original color
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              )
-            : Container(),
+                disabledBackgroundColor: Colors.grey,
+              ),
+              child: widget.isAnalyzing
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text(
+                      'Save & Analyze Food',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }

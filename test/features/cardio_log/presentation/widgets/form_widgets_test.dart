@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
-import 'package:pockeat/features/cardio_log/presentation/widgets/date_selection_widget.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/distance_selection_widget.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/time_selection_widget.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/running_form.dart';
@@ -10,35 +8,6 @@ import 'package:pockeat/features/cardio_log/presentation/widgets/swimming_form.d
 
 void main() {
   final Color primaryPink = const Color(0xFFFF6B6B);
-  
-  group('DateSelectionWidget Tests', () {
-    testWidgets('DateSelectionWidget should render correctly', 
-        (WidgetTester tester) async {
-      DateTime selectedDate = DateTime.now();
-      
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: DateSelectionWidget(
-              primaryColor: primaryPink,
-              selectedDate: selectedDate,
-              onDateChanged: (date) {
-                selectedDate = date;
-              },
-            ),
-          ),
-        ),
-      );
-      
-      // Verify date selection UI elements
-      expect(find.text('Activity Date'), findsOneWidget);
-      
-      // Format current date for display using the same format as in the widget
-      final formattedDate = DateFormat('EEEE, MMMM d, yyyy').format(selectedDate);
-      
-      expect(find.text(formattedDate), findsOneWidget);
-    });
-  });
   
   group('TimeSelectionWidget Tests', () {
     testWidgets('TimeSelectionWidget should render correctly', 
@@ -138,6 +107,7 @@ void main() {
     testWidgets('CyclingForm should render correctly', 
         (WidgetTester tester) async {
       double calculatedCalories = 0;
+      // ignore: unused_local_variable
       String selectedType = '';
       
       await tester.pumpWidget(

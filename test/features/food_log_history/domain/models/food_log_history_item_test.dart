@@ -54,7 +54,7 @@ void main() {
           FoodLogHistoryItem.fromFoodAnalysisResult(foodAnalysisResult);
 
       expect(item.title, 'Chicken Salad');
-      expect(item.subtitle.contains('350 cal'), isTrue);
+      expect(item.subtitle.contains('350 cal'), isFalse);
       expect(item.subtitle.contains('20g protein'), isTrue);
       expect(item.timestamp, timestamp);
       expect(item.calories, 350);

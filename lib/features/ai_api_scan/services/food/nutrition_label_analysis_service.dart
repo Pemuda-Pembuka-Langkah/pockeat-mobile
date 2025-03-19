@@ -13,10 +13,10 @@ class NutritionLabelAnalysisService extends BaseGeminiService {
   });
 // coverage:ignore-start
   factory NutritionLabelAnalysisService.fromEnv() {
-    return NutritionLabelAnalysisService(apiKey: BaseGeminiService.getApiKeyFromEnv());
+    return NutritionLabelAnalysisService(
+        apiKey: BaseGeminiService.getApiKeyFromEnv());
   }
   // coverage:ignore-end
-  
 
   Future<FoodAnalysisResult> analyze(File imageFile, double servings) async {
     try {
@@ -94,8 +94,8 @@ class NutritionLabelAnalysisService extends BaseGeminiService {
     }
   }
 
-  Future<FoodAnalysisResult> correctAnalysis(
-      FoodAnalysisResult previousResult, String userComment, double servings) async {
+  Future<FoodAnalysisResult> correctAnalysis(FoodAnalysisResult previousResult,
+      String userComment, double servings) async {
     try {
       final prompt = '''
       Original nutrition label analysis (for $servings servings):
@@ -114,7 +114,7 @@ class NutritionLabelAnalysisService extends BaseGeminiService {
       
       
       Please correct and analyze the ingredients and nutritional content on the correction comment.
-      If not described, assume a standard serving size and ingredients for 1 person only.
+      If it is about an ingredient or the food and not described, assume a standard serving size and ingredients for 1 person only.
       
       Provide a comprehensive analysis including:
       - The name of the food
@@ -122,7 +122,8 @@ class NutritionLabelAnalysisService extends BaseGeminiService {
       - Detailed macronutrition information ONLY of calories, protein, carbs, fat, sodium, fiber, and sugar. No need to display other macro information.
       - Add warnings if the food contains high sodium (>500mg) or high sugar (>20g)
       
-      Only modify values that need to be changed according to the user's feedback.
+      Only modify values that need to be changed according to the user's feedback, but remember that the user CAN give more than one feedback.
+      Please correct the analysis based on the user's comment accordingly.
       
       The corrected analysis should be for $servings servings.
       
@@ -154,8 +155,9 @@ class NutritionLabelAnalysisService extends BaseGeminiService {
       If there are no warnings, you can include an empty array [] for warnings.
       ''';
 
-      final response = await modelWrapper.generateContent([Content.text(prompt)]);
-      
+      final response =
+          await modelWrapper.generateContent([Content.text(prompt)]);
+
       if (response.text == null) {
         throw GeminiServiceException('No response text generated');
       }
@@ -166,7 +168,8 @@ class NutritionLabelAnalysisService extends BaseGeminiService {
       if (e is GeminiServiceException) {
         rethrow;
       }
-      throw GeminiServiceException("Error correcting nutrition label analysis: $e");
+      throw GeminiServiceException(
+          "Error correcting nutrition label analysis: $e");
     }
   }
 }

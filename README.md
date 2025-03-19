@@ -1,5 +1,8 @@
 # PockEat
 
+## Distribution
+Firebase App Distribution: https://appdistribution.firebase.dev/i/c358efb3007cc0cd
+
 ## Build Status
 Staging: [![Staging Workflow](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/staging.yml/badge.svg)](https://github.com/Pemuda-Pembuka-Langkah/pockeat-mobile/actions/workflows/staging.yml)
 
