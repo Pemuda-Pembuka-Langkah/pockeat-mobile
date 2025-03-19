@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/authentication/domain/user_model.dart';
+import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
 // Mock untuk Firebase User
 class MockFirebaseUser extends Mock implements auth.User {
