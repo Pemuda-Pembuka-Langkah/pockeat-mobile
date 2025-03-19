@@ -12,6 +12,8 @@ import 'package:pockeat/features/food_text_input/domain/services/food_text_input
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_log_history/di/food_log_history_module.dart';
 import 'package:pockeat/features/exercise_log_history/di/exercise_log_history_module.dart';
+import 'package:pockeat/features/authentication/services/register_service.dart';
+import 'package:pockeat/features/authentication/services/register_service_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -60,6 +62,11 @@ void setupDependencies() {
       nutritionLabelService: getIt<NutritionLabelAnalysisService>(),
       exerciseAnalysisService: getIt<ExerciseAnalysisService>(),
     ),
+  );
+
+  // Register RegisterService
+  getIt.registerSingleton<RegisterService>(
+    RegisterServiceImpl(),
   );
 
   // Register Food Log History module
