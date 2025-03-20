@@ -4,7 +4,8 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
-import 'package:uni_links/uni_links.dart';
+import 'package:app_links/app_links.dart';
+import 'package:meta/meta.dart';
 
 /// Exception khusus untuk DeepLinkService
 class DeepLinkException implements Exception {
@@ -22,8 +23,10 @@ class DeepLinkException implements Exception {
 class DeepLinkServiceImpl implements DeepLinkService {
   final FirebaseAuth _auth;
   final FirebaseDynamicLinks _dynamicLinks;
+  final AppLinks _appLinks = AppLinks();
 
   StreamSubscription? _deepLinkSub;
+  StreamSubscription? _appLinksSub;
   final StreamController<Uri?> _deepLinkStreamController =
       StreamController<Uri?>.broadcast();
 
@@ -33,19 +36,21 @@ class DeepLinkServiceImpl implements DeepLinkService {
   })  : _auth = auth ?? FirebaseAuth.instance,
         _dynamicLinks = dynamicLinks ?? FirebaseDynamicLinks.instance;
 
+  // Getter dan metode untuk mempermudah unit testing
+  @visibleForTesting
+  Future<Uri?> getInitialAppLink() => _appLinks.getInitialAppLink();
+
+  @visibleForTesting
+  Stream<Uri> getUriLinkStream() => _appLinks.uriLinkStream;
+
   @override
   Future<void> initialize() async {
     // 1. Handle initial link (app opened from a link)
     try {
-      final initialLink = getInitialLink();
-      initialLink.listen((Uri? link) {
-        if (link != null) {
-          _handleIncomingLink(link);
-        }
-      }, onError: (error) {
-        // Log error silently but continue execution
-        // In production, this could be logged to an analytics service
-      });
+      final initialLink = await getInitialAppLink();
+      if (initialLink != null) {
+        _handleIncomingLink(initialLink);
+      }
     } catch (e) {
       throw DeepLinkException('Failed to initialize initial link handler',
           originalError: e);
@@ -53,6 +58,13 @@ class DeepLinkServiceImpl implements DeepLinkService {
 
     // 2. Handle links while app is running
     try {
+      _appLinksSub = getUriLinkStream().listen((Uri uri) {
+        _handleIncomingLink(uri);
+      }, onError: (error) {
+        throw DeepLinkException('Error in app link stream',
+            originalError: error);
+      });
+
       _deepLinkSub = onLinkReceived().listen((Uri? link) {
         if (link != null) {
           _handleIncomingLink(link);
@@ -106,7 +118,7 @@ class DeepLinkServiceImpl implements DeepLinkService {
   @override
   Stream<Uri?> getInitialLink() async* {
     try {
-      final initialLink = await getInitialUri();
+      final initialLink = await getInitialAppLink();
       if (initialLink != null) {
         yield initialLink;
       }
@@ -117,20 +129,6 @@ class DeepLinkServiceImpl implements DeepLinkService {
 
   @override
   Stream<Uri?> onLinkReceived() {
-    try {
-      uriLinkStream.listen((Uri? link) {
-        if (link != null) {
-          _deepLinkStreamController.add(link);
-        }
-      }, onError: (error) {
-        throw DeepLinkException('Error in URI link stream',
-            originalError: error);
-      });
-    } catch (e) {
-      throw DeepLinkException('Error initializing URI link stream',
-          originalError: e);
-    }
-
     return _deepLinkStreamController.stream;
   }
 
@@ -194,6 +192,7 @@ class DeepLinkServiceImpl implements DeepLinkService {
   void dispose() {
     try {
       _deepLinkSub?.cancel();
+      _appLinksSub?.cancel();
       _deepLinkStreamController.close();
     } catch (e) {
       throw DeepLinkException('Error disposing deep link service',
