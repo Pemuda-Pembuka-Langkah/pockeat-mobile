@@ -174,8 +174,9 @@ class _RegisterPageState extends State<RegisterPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  Text('Registration successful! Please verify your email.'),
+              content: Text(
+                'Registration successful! Please verify your email.',
+              ),
               backgroundColor: primaryGreen,
             ),
           );
@@ -217,8 +218,9 @@ class _RegisterPageState extends State<RegisterPage> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ??
-          DateTime.now()
-              .subtract(const Duration(days: 365 * 18)), // Default 18 years
+          DateTime.now().subtract(
+            const Duration(days: 365 * 18),
+          ), // Default 18 years
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -265,8 +267,9 @@ class _RegisterPageState extends State<RegisterPage> {
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text('Failed to send verification email. Please try again.'),
+            content: Text(
+              'Failed to send verification email. Please try again.',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -328,10 +331,7 @@ class _RegisterPageState extends State<RegisterPage> {
           // Subtitle
           Text(
             'Sign up to start your health journey',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
 
@@ -458,9 +458,10 @@ class _RegisterPageState extends State<RegisterPage> {
               }
               // Updated password validation to support special characters
               final passwordRegExp = RegExp(
-                  r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d|.*[!@#$%^&*(),.?":{}|<>])');
+                r'^(?=.*[a-z])(?=.*[A-Z])(?=.*[\d!@#$%^&*(),.?":{}|<>])',
+              );
               if (!passwordRegExp.hasMatch(value)) {
-                return 'Password must contain uppercase, lowercase, and number or special character';
+                return 'Password harus mengandung huruf besar, huruf kecil, DAN angka atau karakter khusus';
               }
               return null;
             },
@@ -565,10 +566,10 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             value: _selectedGender,
             items: _genderOptions
-                .map((gender) => DropdownMenuItem(
-                      value: gender,
-                      child: Text(gender),
-                    ))
+                .map(
+                  (gender) =>
+                      DropdownMenuItem(value: gender, child: Text(gender)),
+                )
                 .toList(),
             onChanged: (value) {
               setState(() {
@@ -694,11 +695,7 @@ class _RegisterPageState extends State<RegisterPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Icon
-        Icon(
-          Icons.mark_email_read,
-          size: 100,
-          color: primaryGreen,
-        ),
+        Icon(Icons.mark_email_read, size: 100, color: primaryGreen),
 
         const SizedBox(height: 30),
 
@@ -718,10 +715,7 @@ class _RegisterPageState extends State<RegisterPage> {
         // Description
         Text(
           'We have sent a verification email to ${_emailController.text}. Please check your inbox or spam folder to verify.',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey[700],
-          ),
+          style: TextStyle(fontSize: 16, color: Colors.grey[700]),
           textAlign: TextAlign.center,
         ),
 
@@ -759,10 +753,7 @@ class _RegisterPageState extends State<RegisterPage> {
           },
           child: Text(
             'Back to Sign In',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[700],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[700]),
           ),
         ),
 
@@ -775,10 +766,7 @@ class _RegisterPageState extends State<RegisterPage> {
           },
           child: Text(
             'Continue to Home',
-            style: TextStyle(
-              fontSize: 16,
-              color: primaryGreen,
-            ),
+            style: TextStyle(fontSize: 16, color: primaryGreen),
           ),
         ),
       ],

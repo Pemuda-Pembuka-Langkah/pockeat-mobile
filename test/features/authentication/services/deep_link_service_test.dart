@@ -79,11 +79,11 @@ void main() {
 
   group('DeepLinkService', () {
     test(
-        'isEmailVerificationLink should return true for valid Firebase email verification URLs',
+        'isEmailVerificationLink should return true for valid pockeat scheme URLs',
         () {
       // Arrange
-      final Uri validLink = Uri.parse(
-          'https://example.firebaseapp.com/__/auth/action?mode=verifyEmail&oobCode=abc123');
+      final Uri validLink =
+          Uri.parse('pockeat://verify?mode=verifyEmail&oobCode=abc123');
 
       // Act
       final result = deepLinkService.isEmailVerificationLink(validLink);
@@ -95,15 +95,17 @@ void main() {
     test('isEmailVerificationLink should return false for invalid URLs', () {
       // Arrange
       final Uri invalidLink1 = Uri.parse('https://example.com/verify?code=123');
-      final Uri invalidLink2 = Uri.parse(
-          'https://example.firebaseapp.com/__/auth/action?mode=resetPassword&oobCode=abc123');
-      final Uri invalidLink3 = Uri.parse(
-          'https://example.firebaseapp.com/__/auth/action?mode=verifyEmail');
+      final Uri invalidLink2 =
+          Uri.parse('pockeat://verify?mode=resetPassword&oobCode=abc123');
+      final Uri invalidLink3 = Uri.parse('pockeat://verify?mode=verifyEmail');
+      final Uri invalidLink4 = Uri.parse(
+          'https://example.firebaseapp.com/__/auth/action?mode=verifyEmail&oobCode=abc123');
 
       // Act & Assert
       expect(deepLinkService.isEmailVerificationLink(invalidLink1), isFalse);
       expect(deepLinkService.isEmailVerificationLink(invalidLink2), isFalse);
       expect(deepLinkService.isEmailVerificationLink(invalidLink3), isFalse);
+      expect(deepLinkService.isEmailVerificationLink(invalidLink4), isFalse);
     });
 
     test(
@@ -137,8 +139,8 @@ void main() {
         'handleEmailVerificationLink should return true when verification succeeds',
         () async {
       // Arrange
-      final Uri validLink = Uri.parse(
-          'https://example.firebaseapp.com/__/auth/action?mode=verifyEmail&oobCode=abc123');
+      final Uri validLink =
+          Uri.parse('pockeat://verify?mode=verifyEmail&oobCode=abc123');
 
       when(mockFirebaseAuth.checkActionCode('abc123'))
           .thenAnswer((_) async => MockActionCodeInfo());
@@ -176,8 +178,7 @@ void main() {
         'handleEmailVerificationLink should return false when oobCode is missing',
         () async {
       // Arrange
-      final Uri invalidLink = Uri.parse(
-          'https://example.firebaseapp.com/__/auth/action?mode=verifyEmail');
+      final Uri invalidLink = Uri.parse('pockeat://verify?mode=verifyEmail');
 
       // Act
       final result =
@@ -193,8 +194,8 @@ void main() {
         'handleEmailVerificationLink should return false when Firebase throws an exception',
         () async {
       // Arrange
-      final Uri validLink = Uri.parse(
-          'https://example.firebaseapp.com/__/auth/action?mode=verifyEmail&oobCode=invalid');
+      final Uri validLink =
+          Uri.parse('pockeat://verify?mode=verifyEmail&oobCode=invalid');
 
       when(mockFirebaseAuth.checkActionCode('invalid'))
           .thenThrow(FirebaseAuthException(code: 'invalid-action-code'));
@@ -212,8 +213,8 @@ void main() {
     test('handleEmailVerificationLink should return false when user is null',
         () async {
       // Arrange
-      final Uri validLink = Uri.parse(
-          'https://example.firebaseapp.com/__/auth/action?mode=verifyEmail&oobCode=abc123');
+      final Uri validLink =
+          Uri.parse('pockeat://verify?mode=verifyEmail&oobCode=abc123');
 
       when(mockFirebaseAuth.currentUser).thenReturn(null);
       when(mockFirebaseAuth.checkActionCode('abc123'))

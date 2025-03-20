@@ -300,4 +300,77 @@ void main() {
       gender: null,
     )).called(1);
   });
+
+  testWidgets('Password validation should reject weak passwords',
+      (WidgetTester tester) async {
+    // Atur ukuran layar
+    setScreenSize(tester);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Isi form dengan password yang lemah
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Full Name'), 'Test User');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email'), 'test@example.com');
+
+    // 1. Password tanpa huruf besar
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Password'), 'password123');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Confirm Password'), 'password123');
+
+    // Scroll ke tombol register
+    final registerButton = find.widgetWithText(ElevatedButton, 'SIGN UP');
+    await tester.ensureVisible(registerButton);
+    await tester.pumpAndSettle();
+
+    // Tap tombol register
+    await tester.tap(registerButton);
+    await tester.pumpAndSettle();
+
+    // Verifikasi error message muncul
+    expect(
+        find.text(
+            'Password harus mengandung huruf besar, huruf kecil, DAN angka atau karakter khusus'),
+        findsOneWidget);
+
+    // 2. Password tanpa huruf kecil
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Password'), 'PASSWORD123');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Confirm Password'), 'PASSWORD123');
+
+    // Tap tombol register lagi
+    await tester.tap(registerButton);
+    await tester.pumpAndSettle();
+
+    // Verifikasi error message muncul
+    expect(
+        find.text(
+            'Password harus mengandung huruf besar, huruf kecil, DAN angka atau karakter khusus'),
+        findsOneWidget);
+
+    // 3. Password tanpa angka atau karakter khusus
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Password'), 'PasswordTest');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Confirm Password'), 'PasswordTest');
+
+    // Tap tombol register lagi
+    await tester.tap(registerButton);
+    await tester.pumpAndSettle();
+
+    // Verifikasi error message muncul
+    expect(
+        find.text(
+            'Password harus mengandung huruf besar, huruf kecil, DAN angka atau karakter khusus'),
+        findsOneWidget);
+  });
 }
