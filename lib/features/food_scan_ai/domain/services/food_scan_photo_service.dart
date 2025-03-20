@@ -30,7 +30,6 @@ class FoodScanPhotoService {
   /// [analysisResult] is the food analysis result to be saved
   /// Returns a success message if data is saved successfully
   Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult) async {
-
     await _foodScanRepository.save(analysisResult, analysisResult.id);
     return 'Successfully saved food analysis';
   }

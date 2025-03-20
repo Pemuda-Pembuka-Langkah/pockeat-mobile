@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/nutrition_page.dart';
 import 'package:camera/camera.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_photo_help_widget.dart';
 
 class ScanFoodPage extends StatefulWidget {
   final CameraController cameraController;
@@ -68,6 +69,15 @@ class ScanFoodPageState extends State<ScanFoodPage>
     } catch (e) {
       // Handle camera initialization error
     }
+  }
+
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return FoodPhotoHelpWidget(primaryColor: primaryGreen);
+      },
+    );
   }
 
   @override
@@ -226,19 +236,31 @@ class ScanFoodPageState extends State<ScanFoodPage>
                         alignment: Alignment.center,
                         child: _buildModeButton('Scan', 0),
                       ),
-                      _buildCircularButton(
-                        widget.cameraController.value.flashMode == FlashMode.off 
-                          ? Icons.flash_off 
-                          : Icons.flash_on,
-                        onTap: () {
-                          setState(() {
-                            if (widget.cameraController.value.flashMode == FlashMode.off) {
-                              widget.cameraController.setFlashMode(FlashMode.torch);
-                            } else {
-                              widget.cameraController.setFlashMode(FlashMode.off);
-                            }
-                          });
-                        },
+                      Row(
+                        children: [
+                          // Help Button
+                          _buildCircularButton(
+                            Icons.help_outline,
+                            key: 'help_button',
+                            onTap: _showHelpDialog,
+                          ),
+                          const SizedBox(width: 8),
+                          // Flash Button
+                          _buildCircularButton(
+                            widget.cameraController.value.flashMode == FlashMode.off 
+                              ? Icons.flash_off 
+                              : Icons.flash_on,
+                            onTap: () {
+                              setState(() {
+                                if (widget.cameraController.value.flashMode == FlashMode.off) {
+                                  widget.cameraController.setFlashMode(FlashMode.torch);
+                                } else {
+                                  widget.cameraController.setFlashMode(FlashMode.off);
+                                }
+                              });
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -352,9 +374,9 @@ class ScanFoodPageState extends State<ScanFoodPage>
     );
   }
 
-  Widget _buildCircularButton(IconData icon, {VoidCallback? onTap}) {
+  Widget _buildCircularButton(IconData icon, {VoidCallback? onTap, String? key}) {
     return GestureDetector(
-      key: Key('circular_button_$icon'),
+      key: key != null ? Key(key) : Key('circular_button_$icon'),
       onTap: onTap,
       child: Container(
         width: 40,
