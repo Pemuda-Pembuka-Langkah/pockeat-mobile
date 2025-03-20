@@ -6,6 +6,19 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:uni_links/uni_links.dart';
 
+/// Exception khusus untuk DeepLinkService
+class DeepLinkException implements Exception {
+  final String message;
+  final String? code;
+  final dynamic originalError;
+
+  DeepLinkException(this.message, {this.code, this.originalError});
+
+  @override
+  String toString() =>
+      'DeepLinkException: $message${code != null ? ' (code: $code)' : ''}';
+}
+
 class DeepLinkServiceImpl implements DeepLinkService {
   final FirebaseAuth _auth;
   final FirebaseDynamicLinks _dynamicLinks;
@@ -29,38 +42,55 @@ class DeepLinkServiceImpl implements DeepLinkService {
         if (link != null) {
           _handleIncomingLink(link);
         }
+      }, onError: (error) {
+        // Log error silently but continue execution
+        // In production, this could be logged to an analytics service
       });
-    } catch (_) {
-      
+    } catch (e) {
+      throw DeepLinkException('Failed to initialize initial link handler',
+          originalError: e);
     }
 
     // 2. Handle links while app is running
-    _deepLinkSub = onLinkReceived().listen((Uri? link) {
-      if (link != null) {
-        _handleIncomingLink(link);
-      }
-    }, onError: (err) {
-      print('Error listening to deep links: $err');
-    });
+    try {
+      _deepLinkSub = onLinkReceived().listen((Uri? link) {
+        if (link != null) {
+          _handleIncomingLink(link);
+        }
+      }, onError: (error) {
+        throw DeepLinkException('Error in deep link stream',
+            originalError: error);
+      });
+    } catch (e) {
+      throw DeepLinkException('Failed to setup deep link listener',
+          originalError: e);
+    }
 
     // 3. Handle Firebase Dynamic Links
-    _dynamicLinks.onLink.listen((PendingDynamicLinkData dynamicLinkData) {
-      final Uri deepLink = dynamicLinkData.link;
-      _handleIncomingLink(deepLink);
-    }).onError((error) {
-      print('Error handling firebase dynamic link: $error');
-    });
+    try {
+      _dynamicLinks.onLink.listen((PendingDynamicLinkData dynamicLinkData) {
+        final Uri deepLink = dynamicLinkData.link;
+        _handleIncomingLink(deepLink);
+      }).onError((error) {
+        throw DeepLinkException('Error handling Firebase dynamic link',
+            originalError: error);
+      });
+    } catch (e) {
+      throw DeepLinkException('Failed to setup Firebase dynamic link listener',
+          originalError: e);
+    }
   }
 
   void _handleIncomingLink(Uri link) {
-    print('Received deep link: $link');
+    try {
+      _deepLinkStreamController.add(link);
 
-    // Push the link to the stream
-    _deepLinkStreamController.add(link);
-
-    // Handle email verification link automatically
-    if (isEmailVerificationLink(link)) {
-      handleEmailVerificationLink(link);
+      // Handle email verification link automatically
+      if (isEmailVerificationLink(link)) {
+        handleEmailVerificationLink(link);
+      }
+    } catch (e) {
+      throw DeepLinkException('Error handling incoming link', originalError: e);
     }
   }
 
@@ -72,19 +102,25 @@ class DeepLinkServiceImpl implements DeepLinkService {
         yield initialLink;
       }
     } catch (e) {
-      print('Error retrieving initial uri: $e');
+      throw DeepLinkException('Error retrieving initial URI', originalError: e);
     }
   }
 
   @override
   Stream<Uri?> onLinkReceived() {
-    uriLinkStream.listen((Uri? link) {
-      if (link != null) {
-        _deepLinkStreamController.add(link);
-      }
-    }, onError: (err) {
-      print('Error in URI link stream: $err');
-    });
+    try {
+      uriLinkStream.listen((Uri? link) {
+        if (link != null) {
+          _deepLinkStreamController.add(link);
+        }
+      }, onError: (error) {
+        throw DeepLinkException('Error in URI link stream',
+            originalError: error);
+      });
+    } catch (e) {
+      throw DeepLinkException('Error initializing URI link stream',
+          originalError: e);
+    }
 
     return _deepLinkStreamController.stream;
   }
@@ -99,7 +135,7 @@ class DeepLinkServiceImpl implements DeepLinkService {
       // Extract oobCode or other params from link
       final oobCode = link.queryParameters['oobCode'];
       if (oobCode == null) {
-        return false;
+        throw DeepLinkException('Missing oobCode in verification link');
       }
 
       // Check if it's a valid action code
@@ -113,33 +149,46 @@ class DeepLinkServiceImpl implements DeepLinkService {
         await _auth.currentUser?.reload();
 
         return _auth.currentUser?.emailVerified ?? false;
+      } on FirebaseAuthException catch (e) {
+        throw DeepLinkException('Firebase auth error when verifying email',
+            code: e.code, originalError: e);
       } catch (e) {
-        print('Error applying action code: $e');
-        return false;
+        throw DeepLinkException('Error applying action code', originalError: e);
       }
     } catch (e) {
-      print('Error handling email verification link: $e');
-      return false;
+      if (e is DeepLinkException) {
+        // Untuk backward compatibility dengan code yang ada,
+        // kita tidak melempar exception tapi mengembalikan false
+        // saat ini, tapi logging bisa ditambahkan di sini
+        return false;
+      }
+      throw DeepLinkException('Error handling email verification link',
+          originalError: e);
     }
   }
 
   @override
   bool isEmailVerificationLink(Uri link) {
     // Check for Firebase Auth email verification link pattern
-    // Common patterns:
-    // - Contains "mode=verifyEmail" parameter
-    // - Contains "apiKey" parameter
-    // - Contains "oobCode" parameter
-
-    final params = link.queryParameters;
-    return link.host.contains('firebaseapp.com') &&
-        (params.containsKey('mode') && params['mode'] == 'verifyEmail') &&
-        params.containsKey('oobCode');
+    try {
+      final params = link.queryParameters;
+      return link.host.contains('firebaseapp.com') &&
+          (params.containsKey('mode') && params['mode'] == 'verifyEmail') &&
+          params.containsKey('oobCode');
+    } catch (e) {
+      throw DeepLinkException('Error validating email verification link',
+          originalError: e);
+    }
   }
 
   @override
   void dispose() {
-    _deepLinkSub?.cancel();
-    _deepLinkStreamController.close();
+    try {
+      _deepLinkSub?.cancel();
+      _deepLinkStreamController.close();
+    } catch (e) {
+      throw DeepLinkException('Error disposing deep link service',
+          originalError: e);
+    }
   }
 }

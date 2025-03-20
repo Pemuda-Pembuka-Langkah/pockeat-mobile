@@ -66,8 +66,7 @@ void main() {
 
       when(mockFirebaseAuth.checkActionCode('abc123'))
           .thenAnswer((_) async => MockActionCodeInfo());
-      when(mockFirebaseAuth.applyActionCode('abc123'))
-          .thenAnswer((_) async {});
+      when(mockFirebaseAuth.applyActionCode('abc123')).thenAnswer((_) async {});
       when(mockUser.reload()).thenAnswer((_) async {});
       when(mockUser.emailVerified).thenReturn(true);
 
@@ -88,8 +87,7 @@ void main() {
       final Uri invalidLink = Uri.parse('https://example.com/verify');
 
       // Act
-      final result =
-          await deepLinkService.handleEmailVerificationLink(invalidLink);
+      final result = await deepLinkService.handleEmailVerificationLink(invalidLink);
 
       // Assert
       expect(result, isFalse);
@@ -97,16 +95,14 @@ void main() {
       verifyNever(mockFirebaseAuth.applyActionCode(any));
     });
 
-    test(
-        'handleEmailVerificationLink should return false when oobCode is missing',
+    test('handleEmailVerificationLink should return false when oobCode is missing',
         () async {
       // Arrange
       final Uri invalidLink = Uri.parse(
           'https://example.firebaseapp.com/__/auth/action?mode=verifyEmail');
 
       // Act
-      final result =
-          await deepLinkService.handleEmailVerificationLink(invalidLink);
+      final result = await deepLinkService.handleEmailVerificationLink(invalidLink);
 
       // Assert
       expect(result, isFalse);
@@ -125,8 +121,7 @@ void main() {
           .thenThrow(FirebaseAuthException(code: 'invalid-action-code'));
 
       // Act
-      final result =
-          await deepLinkService.handleEmailVerificationLink(validLink);
+      final result = await deepLinkService.handleEmailVerificationLink(validLink);
 
       // Assert
       expect(result, isFalse);
@@ -147,13 +142,26 @@ void main() {
           .thenAnswer((_) async {});
 
       // Act
-      final result =
-          await deepLinkService.handleEmailVerificationLink(validLink);
+      final result = await deepLinkService.handleEmailVerificationLink(validLink);
 
       // Assert
       expect(result, isFalse);
       verify(mockFirebaseAuth.checkActionCode('abc123')).called(1);
       verify(mockFirebaseAuth.applyActionCode('abc123')).called(1);
+    });
+
+    test('DeepLinkException should format message correctly', () {
+      // Arrange & Act
+      final exception1 = DeepLinkException('Test message');
+      final exception2 = DeepLinkException('Test message', code: 'test-code');
+      final exception3 = DeepLinkException('Test message',
+          code: 'test-code', originalError: 'Original');
+
+      // Assert
+      expect(exception1.toString(), 'DeepLinkException: Test message');
+      expect(exception2.toString(),
+          'DeepLinkException: Test message (code: test-code)');
+      expect(exception3.originalError, 'Original');
     });
   });
 }
