@@ -30,6 +30,7 @@ import 'package:pockeat/features/food_log_history/presentation/screens/food_deta
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,11 +52,15 @@ void main() async {
       );
 
   setupDependencies();
+
   // Setup emulator kalau di dev mode
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
+
+  // Initialize the DeepLinkService
+  await getIt<DeepLinkService>().initialize();
 
   runApp(
     MultiProvider(
@@ -81,6 +86,10 @@ void main() async {
         ),
         Provider<FoodTextInputRepository>(
           create: (_) => getIt<FoodTextInputRepository>(),
+        ),
+        // Add the DeepLinkService provider
+        Provider<DeepLinkService>(
+          create: (_) => getIt<DeepLinkService>(),
         ),
         // Add other providers here if needed
       ],

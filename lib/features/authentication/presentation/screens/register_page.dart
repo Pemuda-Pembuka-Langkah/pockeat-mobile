@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:intl/intl.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 
 /// Registration page for new users
 ///
@@ -40,6 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final Color bgColor = const Color(0xFFF9F9F9);
 
   late RegisterService _registerService;
+  late DeepLinkService _deepLinkService;
 
   // Gender options list
   final List<String> _genderOptions = ['Male', 'Female', 'Other'];
@@ -48,6 +50,57 @@ class _RegisterPageState extends State<RegisterPage> {
   void initState() {
     super.initState();
     _registerService = GetIt.instance<RegisterService>();
+    _deepLinkService = GetIt.instance<DeepLinkService>();
+
+    // Listen for deep links for email verification
+    _listenForDeepLinks();
+  }
+
+  void _listenForDeepLinks() {
+    _deepLinkService.onLinkReceived().listen((Uri? link) {
+      if (link != null && _deepLinkService.isEmailVerificationLink(link)) {
+        _handleEmailVerification(link);
+      }
+    });
+  }
+
+  Future<void> _handleEmailVerification(Uri link) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final success = await _deepLinkService.handleEmailVerificationLink(link);
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Email verified successfully!'),
+            backgroundColor: primaryGreen,
+          ),
+        );
+
+        // Navigate to home page after successful verification
+        Navigator.of(context).pushReplacementNamed('/');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error verifying email. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override

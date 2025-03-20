@@ -5,9 +5,10 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 
 // Generate mock menggunakan mockito
-@GenerateMocks([RegisterService])
+@GenerateMocks([RegisterService, DeepLinkService])
 import 'register_page_test.mocks.dart';
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {
@@ -17,6 +18,7 @@ class MockNavigatorObserver extends Mock implements NavigatorObserver {
 
 void main() {
   late MockRegisterService mockRegisterService;
+  late MockDeepLinkService mockDeepLinkService;
 
   // Fungsi helper untuk menyetel ukuran layar test yang konsisten
   void setScreenSize(WidgetTester tester) {
@@ -31,11 +33,22 @@ void main() {
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     mockRegisterService = MockRegisterService();
+    mockDeepLinkService = MockDeepLinkService();
+
     // Setup GetIt untuk testing
     if (GetIt.I.isRegistered<RegisterService>()) {
       GetIt.I.unregister<RegisterService>();
     }
+    if (GetIt.I.isRegistered<DeepLinkService>()) {
+      GetIt.I.unregister<DeepLinkService>();
+    }
+
     GetIt.I.registerSingleton<RegisterService>(mockRegisterService);
+    GetIt.I.registerSingleton<DeepLinkService>(mockDeepLinkService);
+
+    // Setup behavior dasar untuk mockDeepLinkService
+    when(mockDeepLinkService.onLinkReceived())
+        .thenAnswer((_) => Stream.empty());
   });
 
   tearDown(() {
