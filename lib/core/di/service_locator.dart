@@ -16,6 +16,8 @@ import 'package:pockeat/features/authentication/services/register_service.dart';
 import 'package:pockeat/features/authentication/services/register_service_impl.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -66,14 +68,19 @@ void setupDependencies() {
     ),
   );
 
+  // Register UserRepository
+  getIt.registerSingleton<UserRepository>(
+    UserRepositoryImpl(),
+  );
+
   // Register RegisterService
   getIt.registerSingleton<RegisterService>(
-    RegisterServiceImpl(),
+    RegisterServiceImpl(userRepository: getIt<UserRepository>()),
   );
 
   // Register DeepLinkService
   getIt.registerSingleton<DeepLinkService>(
-    DeepLinkServiceImpl(),
+    DeepLinkServiceImpl(userRepository: getIt<UserRepository>()),
   );
 
   // Register Food Log History module

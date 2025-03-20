@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 
-class AccountActivatedPage extends StatelessWidget {
-  final String email;
-  final VoidCallback? onHomeTap;
+class EmailVerificationFailedPage extends StatelessWidget {
+  final String error;
 
-  const AccountActivatedPage({
+  const EmailVerificationFailedPage({
     Key? key,
-    required this.email,
-    this.onHomeTap,
+    required this.error,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Warna yang sama dengan RegisterPage untuk konsistensi
-    final Color primaryGreen = const Color(0xFF4ECDC4);
+    // Warna yang sama dengan halaman lain untuk konsistensi
+    final Color primaryPink = const Color(0xFFFF6B6B);
     final Color bgColor = const Color(0xFFF9F9F9);
 
     return Scaffold(
@@ -26,31 +24,31 @@ class AccountActivatedPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Icon sukses
+                // Icon error
                 Icon(
-                  Icons.check_circle_outline,
+                  Icons.error_outline,
                   size: 100,
-                  color: primaryGreen,
+                  color: Colors.red[400],
                 ),
 
                 const SizedBox(height: 30),
 
                 // Title
                 Text(
-                  'Account Successfully Activated!',
+                  'Email Verification Failed',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: primaryGreen,
+                    color: Colors.red[400],
                   ),
                   textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 20),
 
-                // Description
+                // Error message
                 Text(
-                  'Email $email has been successfully verified. You can now use all features of PockEat.',
+                  error,
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[700],
@@ -60,31 +58,52 @@ class AccountActivatedPage extends StatelessWidget {
 
                 const SizedBox(height: 40),
 
-                // Continue button
+                // Login button
                 SizedBox(
                   height: 55,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Panggil callback jika ada
-                      if (onHomeTap != null) {
-                        onHomeTap!();
-                      } else {
-                        // Navigasi default ke home page
-                        Navigator.of(context).pushReplacementNamed('/');
-                      }
+                      Navigator.of(context).pushReplacementNamed('/login');
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryGreen,
+                      backgroundColor: primaryPink,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                     child: const Text(
-                      'CONTINUE',
+                      'SIGN IN',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Register button
+                SizedBox(
+                  height: 55,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacementNamed('/register');
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: primaryPink),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      'CREATE NEW ACCOUNT',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                        color: primaryPink,
                       ),
                     ),
                   ),

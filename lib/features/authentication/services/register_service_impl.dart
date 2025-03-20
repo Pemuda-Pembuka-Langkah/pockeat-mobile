@@ -25,10 +25,17 @@ class RegisterServiceImpl implements RegisterService {
 
   /// Validasi password
   bool _isValidPassword(String password) {
-    // Password minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka
-    final passwordRegExp =
-        RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$');
-    return passwordRegExp.hasMatch(password);
+    // Password minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka atau simbol
+    final hasUppercase = RegExp(r'[A-Z]').hasMatch(password);
+    final hasLowercase = RegExp(r'[a-z]').hasMatch(password);
+    final hasDigit = RegExp(r'\d').hasMatch(password);
+    final hasSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password);
+    final hasMinLength = password.length >= 8;
+
+    return hasUppercase &&
+        hasLowercase &&
+        (hasDigit || hasSpecialChar) &&
+        hasMinLength;
   }
 
   @override
@@ -64,7 +71,6 @@ class RegisterServiceImpl implements RegisterService {
       if (isRegistered) {
         return RegisterResult.emailAlreadyInUse;
       }
-
 
       // Mendaftarkan user baru
       final credential = await _auth.createUserWithEmailAndPassword(

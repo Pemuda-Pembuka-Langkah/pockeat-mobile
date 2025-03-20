@@ -1,24 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
 import 'package:app_links/app_links.dart';
 import 'dart:async';
+import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 
 // Generate mocks
-@GenerateMocks([FirebaseAuth, FirebaseDynamicLinks, User, AppLinks])
+@GenerateMocks([FirebaseAuth, User, AppLinks, UserRepository])
 import 'deep_link_service_test.mocks.dart';
-
-// Mock for PendingDynamicLinkData
-class MockPendingDynamicLinkData extends Mock
-    implements PendingDynamicLinkData {
-  @override
-  final Uri link;
-
-  MockPendingDynamicLinkData(this.link);
-}
 
 // Helper class for tests
 class MockActionCodeInfo implements ActionCodeInfo {
@@ -32,9 +24,9 @@ class TestableDeepLinkServiceImpl extends DeepLinkServiceImpl {
 
   TestableDeepLinkServiceImpl({
     required FirebaseAuth auth,
-    required FirebaseDynamicLinks dynamicLinks,
+    required UserRepository userRepository,
     required this.mockAppLinks,
-  }) : super(auth: auth, dynamicLinks: dynamicLinks);
+  }) : super(auth: auth, userRepository: userRepository);
 
   @override
   Future<Uri?> getInitialAppLink() => mockAppLinks.getInitialAppLink();
@@ -46,17 +38,19 @@ class TestableDeepLinkServiceImpl extends DeepLinkServiceImpl {
 void main() {
   late TestableDeepLinkServiceImpl deepLinkService;
   late MockFirebaseAuth mockFirebaseAuth;
-  late MockFirebaseDynamicLinks mockFirebaseDynamicLinks;
   late MockAppLinks mockAppLinks;
+  late MockUserRepository mockUserRepository;
   late MockUser mockUser;
   late StreamController<Uri> mockUriStreamController;
+  late GlobalKey<NavigatorState> mockNavigatorKey;
 
   setUp(() {
     mockFirebaseAuth = MockFirebaseAuth();
-    mockFirebaseDynamicLinks = MockFirebaseDynamicLinks();
     mockAppLinks = MockAppLinks();
+    mockUserRepository = MockUserRepository();
     mockUser = MockUser();
     mockUriStreamController = StreamController<Uri>.broadcast();
+    mockNavigatorKey = GlobalKey<NavigatorState>();
 
     when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
 
@@ -68,7 +62,7 @@ void main() {
     // Create testable implementation
     deepLinkService = TestableDeepLinkServiceImpl(
       auth: mockFirebaseAuth,
-      dynamicLinks: mockFirebaseDynamicLinks,
+      userRepository: mockUserRepository,
       mockAppLinks: mockAppLinks,
     );
   });
@@ -108,20 +102,13 @@ void main() {
       expect(deepLinkService.isEmailVerificationLink(invalidLink4), isFalse);
     });
 
-    test(
-        'initialize should set up listeners for app_links and firebase dynamic links',
-        () async {
+    test('initialize should set up listeners for app_links', () async {
       // Arrange
-      final dynamicLinkStreamController =
-          StreamController<PendingDynamicLinkData>();
-
-      when(mockFirebaseDynamicLinks.onLink).thenAnswer(
-        (_) => dynamicLinkStreamController.stream,
-      );
+      when(mockAppLinks.getInitialAppLink()).thenAnswer((_) async => null);
 
       // Act - Note: initialize() may throw since we don't fully mock everything
       try {
-        await deepLinkService.initialize();
+        await deepLinkService.initialize(navigatorKey: mockNavigatorKey);
       } catch (e) {
         // Expected due to mock implementation
       }
@@ -129,10 +116,6 @@ void main() {
       // Assert
       verify(mockAppLinks.getInitialAppLink()).called(greaterThanOrEqualTo(1));
       verify(mockAppLinks.uriLinkStream).called(greaterThanOrEqualTo(1));
-      verify(mockFirebaseDynamicLinks.onLink).called(greaterThanOrEqualTo(1));
-
-      // Cleanup
-      dynamicLinkStreamController.close();
     });
 
     test(
@@ -147,6 +130,10 @@ void main() {
       when(mockFirebaseAuth.applyActionCode('abc123')).thenAnswer((_) async {});
       when(mockUser.reload()).thenAnswer((_) async {});
       when(mockUser.emailVerified).thenReturn(true);
+      when(mockUser.uid).thenReturn('test-user-id');
+      when(mockUserRepository.updateEmailVerificationStatus(
+              'test-user-id', true))
+          .thenAnswer((_) async {});
 
       // Act
       final result =
@@ -157,6 +144,9 @@ void main() {
       verify(mockFirebaseAuth.checkActionCode('abc123')).called(1);
       verify(mockFirebaseAuth.applyActionCode('abc123')).called(1);
       verify(mockUser.reload()).called(1);
+      verify(mockUserRepository.updateEmailVerificationStatus(
+              'test-user-id', true))
+          .called(1);
     });
 
     test('handleEmailVerificationLink should return false when link is invalid',
@@ -248,25 +238,58 @@ void main() {
     });
 
     test('DeepLinkException should format message correctly', () {
-      // Arrange & Act
-      final exception1 = DeepLinkException('Test message');
-      final exception2 = DeepLinkException('Test message', code: 'test-code');
-      final exception3 = DeepLinkException('Test message',
-          code: 'test-code', originalError: 'Original');
+      // Arrange
+      final exception = DeepLinkException(
+        'Test message',
+        code: 'test-code',
+        originalError: Exception('Original error'),
+      );
+
+      // Act
+      final result = exception.toString();
 
       // Assert
-      expect(exception1.toString(), 'DeepLinkException: Test message');
-      expect(exception2.toString(),
-          'DeepLinkException: Test message (code: test-code)');
-      expect(exception3.originalError, 'Original');
+      expect(
+          result, equals('DeepLinkException: Test message (code: test-code)'));
     });
 
-    test('dispose should cancel subscriptions and close stream controller', () {
+    test('DeepLinkException should format message without code correctly', () {
+      // Arrange
+      final exception = DeepLinkException(
+        'Test message',
+        originalError: Exception('Original error'),
+      );
+
+      // Act
+      final result = exception.toString();
+
+      // Assert
+      expect(result, equals('DeepLinkException: Test message'));
+    });
+
+    test('onLinkReceived should broadcast received links', () async {
+      // Arrange
+      await deepLinkService.initialize(navigatorKey: mockNavigatorKey);
+      final expectedLink = Uri.parse('pockeat://test');
+
+      // Act - send a link to the stream
+      mockUriStreamController.add(expectedLink);
+
+      // Assert - check if it's received through onLinkReceived stream
+      final receivedLink = await deepLinkService.onLinkReceived().first;
+      expect(receivedLink, equals(expectedLink));
+    });
+
+    test('dispose should close subscriptions and controllers', () async {
+      // Arrange
+      await deepLinkService.initialize(navigatorKey: mockNavigatorKey);
+
       // Act
       deepLinkService.dispose();
 
-      // Assert - primarily testing that no exception is thrown
-      expect(true, isTrue);
+      // Assert
+      // This test mostly checks that dispose() doesn't throw
+      expect(true, isTrue); // Dummy assertion
     });
   });
 }

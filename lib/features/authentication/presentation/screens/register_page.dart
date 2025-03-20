@@ -52,22 +52,6 @@ class _RegisterPageState extends State<RegisterPage> {
     super.initState();
     _registerService = GetIt.instance<RegisterService>();
     _deepLinkService = GetIt.instance<DeepLinkService>();
-
-    // Listen for deep links for email verification
-    _listenForDeepLinks();
-  }
-
-  void _listenForDeepLinks() {
-    _deepLinkService.onLinkReceived().listen((Uri? link) {
-      if (link != null) {
-        if (_deepLinkService.isEmailVerificationLink(link)) {
-          _handleEmailVerification(link);
-        } else if (link.toString() == 'pockeat://email-verified') {
-          // Handle internal navigation setelah email terverifikasi
-          _navigateToActivatedPage();
-        }
-      }
-    });
   }
 
   void _navigateToActivatedPage() {
@@ -76,45 +60,6 @@ class _RegisterPageState extends State<RegisterPage> {
         '/account-activated',
         arguments: {'email': _emailController.text.trim()},
       );
-    }
-  }
-
-  Future<void> _handleEmailVerification(Uri link) async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final success = await _deepLinkService.handleEmailVerificationLink(link);
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Email berhasil diverifikasi!'),
-            backgroundColor: primaryGreen,
-          ),
-        );
-
-        // Navigasi ke halaman akun telah diaktifkan
-        _navigateToActivatedPage();
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saat verifikasi email. Silakan coba lagi.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
   }
 
@@ -423,6 +368,10 @@ class _RegisterPageState extends State<RegisterPage> {
           TextFormField(
             controller: _passwordController,
             obscureText: !_isPasswordVisible,
+            keyboardType: TextInputType.visiblePassword,
+            autocorrect: false,
+            enableSuggestions: false,
+            obscuringCharacter: '•',
             decoration: InputDecoration(
               labelText: 'Password',
               hintText: 'Minimum 8 characters',
@@ -456,12 +405,21 @@ class _RegisterPageState extends State<RegisterPage> {
               if (value.length < 8) {
                 return 'Password must be at least 8 characters';
               }
-              // Updated password validation to support special characters
-              final passwordRegExp = RegExp(
-                r'^(?=.*[a-z])(?=.*[A-Z])(?=.*[\d!@#$%^&*(),.?":{}|<>])',
-              );
-              if (!passwordRegExp.hasMatch(value)) {
-                return 'Password harus mengandung huruf besar, huruf kecil, DAN angka atau karakter khusus';
+              // Perbaiki validasi password agar lebih jelas dan mengikuti standar
+              final hasUppercase = RegExp(r'[A-Z]').hasMatch(value);
+              final hasLowercase = RegExp(r'[a-z]').hasMatch(value);
+              final hasDigit = RegExp(r'\d').hasMatch(value);
+              final hasSpecialChar =
+                  RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value);
+
+              if (!hasUppercase) {
+                return 'Password must contain at least 1 uppercase letter';
+              }
+              if (!hasLowercase) {
+                return 'Password must contain at least 1 lowercase letter';
+              }
+              if (!hasDigit && !hasSpecialChar) {
+                return 'Password must contain at least 1 number or symbol';
               }
               return null;
             },
@@ -473,6 +431,10 @@ class _RegisterPageState extends State<RegisterPage> {
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: !_isConfirmPasswordVisible,
+            keyboardType: TextInputType.visiblePassword,
+            autocorrect: false,
+            enableSuggestions: false,
+            obscuringCharacter: '•',
             decoration: InputDecoration(
               labelText: 'Confirm Password',
               hintText: 'Enter the same password',
@@ -754,19 +716,6 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Text(
             'Back to Sign In',
             style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Continue to home button
-        TextButton(
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, '/');
-          },
-          child: Text(
-            'Continue to Home',
-            style: TextStyle(fontSize: 16, color: primaryGreen),
           ),
         ),
       ],

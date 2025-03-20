@@ -1,7 +1,12 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+
 /// Service untuk menangani deep link ke aplikasi
 abstract class DeepLinkService {
-  /// Inisialisasi service dan konfigurasi listener
-  Future<void> initialize();
+  /// Initialize the deep link service
+  ///
+  /// NavigatorKey dibutuhkan untuk melakukan navigasi dari service
+  Future<void> initialize({required GlobalKey<NavigatorState> navigatorKey});
 
   /// Mendengarkan deep link saat aplikasi dibuka melalui link (cold start)
   Stream<Uri?> getInitialLink();

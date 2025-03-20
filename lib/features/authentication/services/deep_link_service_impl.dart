@@ -2,10 +2,14 @@
 
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+// Hapus import Firebase Dynamic Links
+// import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:app_links/app_links.dart';
 import 'package:meta/meta.dart';
+import 'package:flutter/material.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 
 /// Exception khusus untuk DeepLinkService
 class DeepLinkException implements Exception {
@@ -22,17 +26,19 @@ class DeepLinkException implements Exception {
 
 class DeepLinkServiceImpl implements DeepLinkService {
   final FirebaseAuth _auth;
-  final FirebaseDynamicLinks _dynamicLinks;
   final AppLinks _appLinks = AppLinks();
+  late final GlobalKey<NavigatorState> _navigatorKey;
+  final UserRepository _userRepository;
 
-  StreamSubscription? _deepLinkSub;
   StreamSubscription? _appLinksSub;
   final StreamController<Uri?> _deepLinkStreamController =
       StreamController<Uri?>.broadcast();
 
-  DeepLinkServiceImpl({FirebaseAuth? auth, FirebaseDynamicLinks? dynamicLinks})
-      : _auth = auth ?? FirebaseAuth.instance,
-        _dynamicLinks = dynamicLinks ?? FirebaseDynamicLinks.instance;
+  DeepLinkServiceImpl({
+    FirebaseAuth? auth,
+    UserRepository? userRepository,
+  })  : _auth = auth ?? FirebaseAuth.instance,
+        _userRepository = userRepository ?? UserRepositoryImpl(auth: auth);
 
   // Getter dan metode untuk mempermudah unit testing
   @visibleForTesting
@@ -42,7 +48,10 @@ class DeepLinkServiceImpl implements DeepLinkService {
   Stream<Uri> getUriLinkStream() => _appLinks.uriLinkStream;
 
   @override
-  Future<void> initialize() async {
+  Future<void> initialize(
+      {required GlobalKey<NavigatorState> navigatorKey}) async {
+    _navigatorKey = navigatorKey;
+
     // 1. Handle initial link (app opened from a link)
     try {
       final initialLink = await getInitialAppLink();
@@ -69,41 +78,9 @@ class DeepLinkServiceImpl implements DeepLinkService {
           );
         },
       );
-
-      _deepLinkSub = onLinkReceived().listen(
-        (Uri? link) {
-          if (link != null) {
-            _handleIncomingLink(link);
-          }
-        },
-        onError: (error) {
-          throw DeepLinkException(
-            'Error in deep link stream',
-            originalError: error,
-          );
-        },
-      );
     } catch (e) {
       throw DeepLinkException(
         'Failed to setup deep link listener',
-        originalError: e,
-      );
-    }
-
-    // 3. Handle Firebase Dynamic Links
-    try {
-      _dynamicLinks.onLink.listen((PendingDynamicLinkData dynamicLinkData) {
-        final Uri deepLink = dynamicLinkData.link;
-        _handleIncomingLink(deepLink);
-      }).onError((error) {
-        throw DeepLinkException(
-          'Error handling Firebase dynamic link',
-          originalError: error,
-        );
-      });
-    } catch (e) {
-      throw DeepLinkException(
-        'Failed to setup Firebase dynamic link listener',
         originalError: e,
       );
     }
@@ -111,22 +88,44 @@ class DeepLinkServiceImpl implements DeepLinkService {
 
   void _handleIncomingLink(Uri link) {
     try {
-      _deepLinkStreamController.add(link);
-
-      // Handle email verification link automatically
+      // Handle email verification links
       if (isEmailVerificationLink(link)) {
         handleEmailVerificationLink(link).then((bool success) {
           if (success) {
-            // Navigasi ke halaman akun telah diaktifkan ditangani oleh RegisterPage
-            // Notifikasi stream untuk menginformasikan bahwa email telah diverifikasi
-            _deepLinkStreamController.add(
-              Uri.parse('pockeat://email-verified'),
+            final email = _auth.currentUser?.email ?? '';
+            _navigatorKey.currentState?.pushReplacementNamed(
+              '/account-activated',
+              arguments: {'email': email},
+            );
+
+            // Show success message
+            ScaffoldMessenger.of(_navigatorKey.currentState!.context)
+                .showSnackBar(
+              SnackBar(
+                content: Text('Email successfully verified!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else {
+            // Navigasi ke halaman failed verification
+            _navigatorKey.currentState?.pushReplacementNamed(
+              '/email-verification-failed',
+              arguments: {
+                'error': 'Email verification failed. Please try again.'
+              },
             );
           }
         }).catchError((error) {
-          // Error handling saat memproses verifikasi
+          // Navigasi ke halaman failed verification dengan error message
+          _navigatorKey.currentState?.pushReplacementNamed(
+            '/email-verification-failed',
+            arguments: {'error': 'Error: $error'},
+          );
         });
       }
+
+      // Broadcast link to stream for other listeners
+      _deepLinkStreamController.add(link);
     } catch (e) {
       throw DeepLinkException('Error handling incoming link', originalError: e);
     }
@@ -172,7 +171,20 @@ class DeepLinkServiceImpl implements DeepLinkService {
         // Reload the user to update emailVerified status
         await _auth.currentUser?.reload();
 
-        return _auth.currentUser?.emailVerified ?? false;
+        final isVerified = _auth.currentUser?.emailVerified ?? false;
+
+        // Update user data in Firestore if email was verified successfully
+        if (isVerified && _auth.currentUser != null) {
+          try {
+            // Update emailVerified status in Firestore
+            await _userRepository.updateEmailVerificationStatus(
+                _auth.currentUser!.uid, true);
+          } catch (e) {
+            // Continue even if Firestore update fails, because Firebase Auth verification was successful
+          }
+        }
+
+        return isVerified;
       } on FirebaseAuthException catch (e) {
         throw DeepLinkException(
           'Firebase auth error when verifying email',
@@ -186,7 +198,6 @@ class DeepLinkServiceImpl implements DeepLinkService {
       if (e is DeepLinkException) {
         // Untuk backward compatibility dengan code yang ada,
         // kita tidak melempar exception tapi mengembalikan false
-        // saat ini, tapi logging bisa ditambahkan di sini
         return false;
       }
       throw DeepLinkException(
@@ -215,7 +226,6 @@ class DeepLinkServiceImpl implements DeepLinkService {
   @override
   void dispose() {
     try {
-      _deepLinkSub?.cancel();
       _appLinksSub?.cancel();
       _deepLinkStreamController.close();
     } catch (e) {

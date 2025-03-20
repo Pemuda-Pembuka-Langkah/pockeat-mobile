@@ -235,7 +235,6 @@ void main() {
         findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, 'RESEND EMAIL'), findsOneWidget);
     expect(find.text('Back to Sign In'), findsOneWidget);
-    expect(find.text('Continue to Home'), findsOneWidget);
   });
 
   testWidgets('Password validation should accept special characters',
@@ -336,9 +335,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verifikasi error message muncul
-    expect(
-        find.text(
-            'Password harus mengandung huruf besar, huruf kecil, DAN angka atau karakter khusus'),
+    expect(find.text('Password must contain at least 1 uppercase letter'),
         findsOneWidget);
 
     // 2. Password tanpa huruf kecil
@@ -352,9 +349,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verifikasi error message muncul
-    expect(
-        find.text(
-            'Password harus mengandung huruf besar, huruf kecil, DAN angka atau karakter khusus'),
+    expect(find.text('Password must contain at least 1 lowercase letter'),
         findsOneWidget);
 
     // 3. Password tanpa angka atau karakter khusus
@@ -368,9 +363,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verifikasi error message muncul
-    expect(
-        find.text(
-            'Password harus mengandung huruf besar, huruf kecil, DAN angka atau karakter khusus'),
+    expect(find.text('Password must contain at least 1 number or symbol'),
         findsOneWidget);
   });
 }

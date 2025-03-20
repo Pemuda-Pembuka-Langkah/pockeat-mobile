@@ -29,13 +29,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verifikasi elemen UI
-      expect(find.text('Akun Berhasil Diaktifkan!'), findsOneWidget);
+      expect(find.text('Account Successfully Activated!'), findsOneWidget);
       expect(
           find.text(
-              'Email $testEmail telah berhasil diverifikasi. Sekarang kamu dapat menggunakan semua fitur PockEat.'),
+              'Email $testEmail has been successfully verified. You can now use all features of PockEat.'),
           findsOneWidget);
-      expect(find.text('LANJUTKAN KE HOME'), findsOneWidget);
-      expect(find.text('Masuk ke Akun'), findsOneWidget);
+      expect(find.text('CONTINUE'), findsOneWidget);
       expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
     });
 
@@ -56,7 +55,7 @@ void main() {
       // Verifikasi email ditampilkan dengan benar
       expect(
           find.text(
-              'Email $testEmail telah berhasil diverifikasi. Sekarang kamu dapat menggunakan semua fitur PockEat.'),
+              'Email $testEmail has been successfully verified. You can now use all features of PockEat.'),
           findsOneWidget);
     });
 
@@ -84,44 +83,12 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Tap tombol "LANJUTKAN KE HOME"
-      await tester.tap(find.text('LANJUTKAN KE HOME'));
+      // Tap tombol "CONTINUE"
+      await tester.tap(find.text('CONTINUE'));
       await tester.pumpAndSettle();
 
       // Verifikasi callback dipanggil
       expect(navigatedToHome, true);
-    });
-
-    testWidgets('Tombol navigasi ke Masuk berfungsi dengan benar',
-        (WidgetTester tester) async {
-      // Setup
-      const testEmail = 'test@example.com';
-      bool navigatedToLogin = false;
-      setScreenSize(tester);
-
-      // Build halaman dengan mocking Navigator
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) {
-              return AccountActivatedPage(
-                email: testEmail,
-                onLoginTap: () {
-                  navigatedToLogin = true;
-                },
-              );
-            },
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Tap tombol "Masuk ke Akun"
-      await tester.tap(find.text('Masuk ke Akun'));
-      await tester.pumpAndSettle();
-
-      // Verifikasi callback dipanggil
-      expect(navigatedToLogin, true);
     });
 
     testWidgets('Menampilkan warna yang konsisten dengan desain',
@@ -139,7 +106,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Temukan widget dengan warna yang ingin diperiksa
-      final titleFinder = find.text('Akun Berhasil Diaktifkan!');
+      final titleFinder = find.text('Account Successfully Activated!');
       final iconFinder = find.byIcon(Icons.check_circle_outline);
       final buttonFinder = find.byType(ElevatedButton);
 
@@ -181,7 +148,7 @@ void main() {
       // Verifikasi teks masih ditampilkan meskipun email kosong
       expect(
           find.text(
-              'Email  telah berhasil diverifikasi. Sekarang kamu dapat menggunakan semua fitur PockEat.'),
+              'Email  has been successfully verified. You can now use all features of PockEat.'),
           findsOneWidget);
     });
   });
