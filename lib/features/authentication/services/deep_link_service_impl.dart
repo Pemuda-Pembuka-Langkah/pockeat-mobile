@@ -87,7 +87,16 @@ class DeepLinkServiceImpl implements DeepLinkService {
 
       // Handle email verification link automatically
       if (isEmailVerificationLink(link)) {
-        handleEmailVerificationLink(link);
+        handleEmailVerificationLink(link).then((bool success) {
+          if (success) {
+            // Navigasi ke halaman akun telah diaktifkan ditangani oleh RegisterPage
+            // Notifikasi stream untuk menginformasikan bahwa email telah diverifikasi
+            _deepLinkStreamController
+                .add(Uri.parse('pockeat://email-verified'));
+          }
+        }).catchError((error) {
+          // Error handling saat memproses verifikasi
+        });
       }
     } catch (e) {
       throw DeepLinkException('Error handling incoming link', originalError: e);

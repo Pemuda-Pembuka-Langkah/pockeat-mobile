@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
 
 /// Registration page for new users
 ///
@@ -58,10 +59,24 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _listenForDeepLinks() {
     _deepLinkService.onLinkReceived().listen((Uri? link) {
-      if (link != null && _deepLinkService.isEmailVerificationLink(link)) {
-        _handleEmailVerification(link);
+      if (link != null) {
+        if (_deepLinkService.isEmailVerificationLink(link)) {
+          _handleEmailVerification(link);
+        } else if (link.toString() == 'pockeat://email-verified') {
+          // Handle internal navigation setelah email terverifikasi
+          _navigateToActivatedPage();
+        }
       }
     });
+  }
+
+  void _navigateToActivatedPage() {
+    if (mounted) {
+      Navigator.of(context).pushReplacementNamed(
+        '/account-activated',
+        arguments: {'email': _emailController.text.trim()},
+      );
+    }
   }
 
   Future<void> _handleEmailVerification(Uri link) async {
@@ -79,13 +94,13 @@ class _RegisterPageState extends State<RegisterPage> {
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Email verified successfully!'),
+            content: Text('Email berhasil diverifikasi!'),
             backgroundColor: primaryGreen,
           ),
         );
 
-        // Navigate to home page after successful verification
-        Navigator.of(context).pushReplacementNamed('/');
+        // Navigasi ke halaman akun telah diaktifkan
+        _navigateToActivatedPage();
       }
     } catch (e) {
       setState(() {
@@ -95,7 +110,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error verifying email. Please try again.'),
+            content: Text('Error saat verifikasi email. Silakan coba lagi.'),
             backgroundColor: Colors.red,
           ),
         );

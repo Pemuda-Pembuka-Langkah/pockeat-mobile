@@ -31,6 +31,7 @@ import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repo
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -143,6 +144,13 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomePage(),
         '/register': (context) => const RegisterPage(),
+        '/account-activated': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return AccountActivatedPage(
+            email: args?['email'] as String? ?? '',
+          );
+        },
         '/smart-exercise-log': (context) => SmartExerciseLogPage(
               // Langsung berikan dependensi yang dibutuhkan
               geminiService: getIt<GeminiService>(),
