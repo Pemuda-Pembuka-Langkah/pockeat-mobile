@@ -11,7 +11,7 @@ import 'package:pockeat/features/authentication/services/deep_link_service.dart'
 /// email, password, name, birth date, and gender.
 /// Users must also agree to the terms and conditions.
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();

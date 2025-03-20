@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_auth_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_base.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

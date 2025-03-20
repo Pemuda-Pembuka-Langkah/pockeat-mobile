@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
-import 'package:pockeat/features/authentication/domain/repositories/user_repository_base.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_auth_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_firestore_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_stream_repository.dart';
@@ -33,34 +32,36 @@ class UserRepositoryImpl implements UserRepository {
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
     // Parameter tambahan untuk testing
-    UserAuthRepository? authRepo,
-    UserFirestoreRepository? firestoreRepo,
-    UserStreamRepository? streamRepo,
+    UserAuthRepository? providedAuthRepo,
+    UserFirestoreRepository? providedFirestoreRepo,
+    UserStreamRepository? providedStreamRepo,
   }) {
     // Jika repository sudah diinjeksi, gunakan langsung
-    if (authRepo != null && firestoreRepo != null && streamRepo != null) {
+    if (providedAuthRepo != null &&
+        providedFirestoreRepo != null &&
+        providedStreamRepo != null) {
       return UserRepositoryImpl._(
-        authRepo: authRepo,
-        firestoreRepo: firestoreRepo,
-        streamRepo: streamRepo,
+        authRepo: providedAuthRepo,
+        firestoreRepo: providedFirestoreRepo,
+        streamRepo: providedStreamRepo,
       );
     }
 
     // Jika tidak, buat repository baru
-    final _authRepo = UserAuthRepository(auth: auth, firestore: firestore);
-    final _firestoreRepo =
+    final authRepo = UserAuthRepository(auth: auth, firestore: firestore);
+    final firestoreRepo =
         UserFirestoreRepository(auth: auth, firestore: firestore);
-    final _streamRepo = UserStreamRepository(
-      firestoreRepo: _firestoreRepo,
-      authRepo: _authRepo,
+    final streamRepo = UserStreamRepository(
+      firestoreRepo: firestoreRepo,
+      authRepo: authRepo,
       auth: auth,
       firestore: firestore,
     );
 
     return UserRepositoryImpl._(
-      authRepo: _authRepo,
-      firestoreRepo: _firestoreRepo,
-      streamRepo: _streamRepo,
+      authRepo: authRepo,
+      firestoreRepo: firestoreRepo,
+      streamRepo: streamRepo,
     );
   }
 

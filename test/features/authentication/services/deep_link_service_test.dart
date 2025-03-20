@@ -3,7 +3,6 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
 
 // Generate mocks
@@ -68,8 +67,8 @@ void main() {
       when(mockFirebaseAuth.checkActionCode('abc123'))
           .thenAnswer((_) async => MockActionCodeInfo());
       when(mockFirebaseAuth.applyActionCode('abc123'))
-          .thenAnswer((_) async => null);
-      when(mockUser.reload()).thenAnswer((_) async => null);
+          .thenAnswer((_) async {});
+      when(mockUser.reload()).thenAnswer((_) async {});
       when(mockUser.emailVerified).thenReturn(true);
 
       // Act
@@ -145,7 +144,7 @@ void main() {
       when(mockFirebaseAuth.checkActionCode('abc123'))
           .thenAnswer((_) async => MockActionCodeInfo());
       when(mockFirebaseAuth.applyActionCode('abc123'))
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async {});
 
       // Act
       final result =

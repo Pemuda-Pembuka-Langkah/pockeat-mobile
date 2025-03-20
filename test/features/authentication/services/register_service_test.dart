@@ -116,14 +116,12 @@ class FakeFirebaseAuth implements FirebaseAuth {
       throw FirebaseAuthException(code: exceptionCode ?? 'unknown');
     }
 
-    if (_currentUser == null) {
-      _currentUser = FakeUser(
+    _currentUser ??= FakeUser(
         uid: 'test-user-id',
         email: email,
         displayName: null,
         emailVerified: false,
       );
-    }
 
     return FakeUserCredential(user: _currentUser!);
   }

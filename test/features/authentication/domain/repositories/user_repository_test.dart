@@ -80,9 +80,9 @@ void main() {
 
     // Buat repository dengan mock langsung menggunakan constructor baru
     userRepository = UserRepositoryImpl(
-      authRepo: mockAuthRepo,
-      firestoreRepo: mockFirestoreRepo,
-      streamRepo: mockStreamRepo,
+      providedAuthRepo: mockAuthRepo,
+      providedFirestoreRepo: mockFirestoreRepo,
+      providedStreamRepo: mockStreamRepo,
     );
   });
 

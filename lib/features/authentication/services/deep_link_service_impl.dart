@@ -1,7 +1,8 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -10,7 +11,7 @@ class DeepLinkServiceImpl implements DeepLinkService {
   final FirebaseDynamicLinks _dynamicLinks;
 
   StreamSubscription? _deepLinkSub;
-  StreamController<Uri?> _deepLinkStreamController =
+  final StreamController<Uri?> _deepLinkStreamController =
       StreamController<Uri?>.broadcast();
 
   DeepLinkServiceImpl({
@@ -23,14 +24,14 @@ class DeepLinkServiceImpl implements DeepLinkService {
   Future<void> initialize() async {
     // 1. Handle initial link (app opened from a link)
     try {
-      final initialLink = await getInitialLink();
+      final initialLink = getInitialLink();
       initialLink.listen((Uri? link) {
         if (link != null) {
           _handleIncomingLink(link);
         }
       });
-    } catch (e) {
-      print('Error retrieving initial deep link: $e');
+    } catch (_) {
+      
     }
 
     // 2. Handle links while app is running

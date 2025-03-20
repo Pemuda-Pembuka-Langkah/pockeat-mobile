@@ -14,7 +14,7 @@ class BottomActionBar extends StatelessWidget {
   final Function(FoodAnalysisResult)? onAnalysisCorrected;
 
   const BottomActionBar({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.food,
     required this.foodScanPhotoService,
@@ -22,7 +22,7 @@ class BottomActionBar extends StatelessWidget {
     required this.primaryPink,
     this.primaryGreen = const Color(0xFF4ECDC4),
     this.onAnalysisCorrected,
-  }) : super(key: key);
+  });
 
   // Helper method to show SnackBar messages consistently
   void showSnackBarMessage(BuildContext context, String message,

@@ -11,9 +11,9 @@ import 'user_repository_base_test.mocks.dart';
 // Implementasi konkrit untuk testing
 class ConcreteUserRepository extends UserRepositoryBase {
   ConcreteUserRepository({
-    FirebaseAuth? auth,
-    FirebaseFirestore? firestore,
-  }) : super(auth: auth, firestore: firestore);
+    super.auth,
+    super.firestore,
+  });
 }
 
 // Custom mock untuk Firebase User

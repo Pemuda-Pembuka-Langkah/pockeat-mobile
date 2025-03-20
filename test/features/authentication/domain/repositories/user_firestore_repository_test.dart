@@ -5,7 +5,6 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_firestore_repository.dart';
-import 'package:pockeat/features/authentication/domain/repositories/user_repository_base.dart';
 
 import 'user_firestore_repository_test.mocks.dart';
 

@@ -11,14 +11,14 @@ class ExerciseCard extends StatelessWidget {
   final Function(int) onDeleteSet;
 
   const ExerciseCard({
-    Key? key,
+    super.key,
     required this.exercise,
     required this.primaryGreen,
     required this.volume,
     required this.onAddSet,
     required this.onDeleteExercise,
     required this.onDeleteSet,
-  }) : super(key: key);
+  });
 
   Widget _buildSetRow(int setNumber, WeightLiftingSet set) {
     return Container(

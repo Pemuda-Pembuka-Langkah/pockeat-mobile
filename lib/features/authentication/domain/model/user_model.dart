@@ -115,14 +115,14 @@ class UserModel {
     DateTime? lastLoginAt,
   }) {
     return UserModel(
-      uid: this.uid,
-      email: this.email,
+      uid: uid,
+      email: email,
       displayName: displayName ?? this.displayName,
       photoURL: photoURL ?? this.photoURL,
       emailVerified: emailVerified ?? this.emailVerified,
       gender: gender ?? this.gender,
       birthDate: birthDate ?? this.birthDate,
-      createdAt: this.createdAt,
+      createdAt: createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
     );
   }

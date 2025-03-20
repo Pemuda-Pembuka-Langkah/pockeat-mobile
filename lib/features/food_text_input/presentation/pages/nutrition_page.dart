@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
-import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/food_text_input/presentation/pages/food_text_input_page.dart';
-import 'package:pockeat/features/food_text_input/presentation/widgets/text_input_nutrition_app_bar.dart';
 import 'package:pockeat/features/food_text_input/presentation/widgets/bottom_action_bar.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
@@ -18,7 +15,7 @@ class NutritionPage extends StatefulWidget {
   final String foodText;
   final FoodTextInputService foodTextInputService;
 
-  NutritionPage({super.key, required this.foodText, required this.foodTextInputService});
+  const NutritionPage({super.key, required this.foodText, required this.foodTextInputService});
 
   @override
   _NutritionPageState createState() => _NutritionPageState();

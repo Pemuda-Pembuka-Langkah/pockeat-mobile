@@ -10,13 +10,13 @@ class CorrectionDialog extends StatefulWidget {
   final FoodAnalysisResult foodAnalysisResult;
 
   const CorrectionDialog({
-    Key? key,
+    super.key,
     required this.primaryYellow,
     required this.primaryPink,
     required this.primaryGreen,
     required this.onSubmit,
     required this.foodAnalysisResult,
-  }) : super(key: key);
+  });
 
   @override
   State<CorrectionDialog> createState() => _CorrectionDialogState();

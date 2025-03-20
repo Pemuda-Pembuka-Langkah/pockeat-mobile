@@ -1,14 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_base.dart';
 
 /// Repository untuk operasi Firestore dengan data user
 class UserFirestoreRepository extends UserRepositoryBase {
   UserFirestoreRepository({
-    FirebaseAuth? auth,
-    FirebaseFirestore? firestore,
-  }) : super(auth: auth, firestore: firestore);
+    super.auth,
+    super.firestore,
+  });
 
   /// Mendapatkan data user dari Firestore berdasarkan ID
   Future<UserModel?> getUserById(String userId) async {
