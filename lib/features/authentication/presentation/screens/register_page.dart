@@ -4,11 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
 
-/// Halaman untuk registrasi pengguna baru
+/// Registration page for new users
 ///
-/// Halaman ini berisi form untuk mengisi data registrasi seperti
-/// email, password, nama, tanggal lahir, dan jenis kelamin.
-/// Pengguna juga harus menyetujui syarat dan ketentuan.
+/// This page contains a form to fill registration data such as
+/// email, password, name, birth date, and gender.
+/// Users must also agree to the terms and conditions.
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
 
@@ -31,19 +31,18 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isConfirmPasswordVisible = false;
   String? _errorMessage;
 
-  // State untuk alur registrasi
+  // State for registration flow
   bool _isRegistrationSuccess = false;
-  bool _isRegistrationPending = false;
 
-  // Colors dari ExerciseHistoryPage
+  // Colors
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color bgColor = const Color(0xFFF9F9F9);
 
   late RegisterService _registerService;
 
-  // List gender options
-  final List<String> _genderOptions = ['Pria', 'Wanita', 'Lainnya'];
+  // Gender options list
+  final List<String> _genderOptions = ['Male', 'Female', 'Other'];
 
   @override
   void initState() {
@@ -60,20 +59,20 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  // Fungsi untuk menangani register
+  // Function to handle registration
   Future<void> _register() async {
-    // Tutup keyboard
+    // Close keyboard
     FocusScope.of(context).unfocus();
 
-    // Validasi form
+    // Validate form
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Validasi terms and conditions
+    // Validate terms and conditions
     if (!_termsAccepted) {
       setState(() {
-        _errorMessage = 'Anda harus menyetujui syarat dan ketentuan';
+        _errorMessage = 'You must agree to the terms and conditions';
       });
       return;
     }
@@ -101,36 +100,20 @@ class _RegisterPageState extends State<RegisterPage> {
       if (result == RegisterResult.success) {
         setState(() {
           _isRegistrationSuccess = true;
-          _isRegistrationPending = true;
         });
 
-        // Cek apakah sudah terverifikasi
-        final isVerified = await _registerService.isEmailVerified();
-
+        // Show success message
         if (mounted) {
-          if (isVerified) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    'Registrasi berhasil! Email Anda telah terverifikasi.'),
-                backgroundColor: primaryGreen,
-              ),
-            );
-
-            // Navigasi ke homepage
-            Navigator.pushReplacementNamed(context, '/');
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content:
-                    Text('Registrasi berhasil! Silakan verifikasi email Anda.'),
-                backgroundColor: primaryGreen,
-              ),
-            );
-          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text('Registration successful! Please verify your email.'),
+              backgroundColor: primaryGreen,
+            ),
+          );
         }
       } else {
-        // Tampilkan pesan error
+        // Show error message
         setState(() {
           _errorMessage = _getErrorMessage(result);
         });
@@ -138,36 +121,36 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Terjadi kesalahan. Silakan coba lagi.';
+        _errorMessage = 'An error occurred. Please try again.';
       });
     }
   }
 
-  // Mendapatkan pesan error berdasarkan hasil register
+  // Get error message based on registration result
   String _getErrorMessage(RegisterResult result) {
     switch (result) {
       case RegisterResult.emailAlreadyInUse:
-        return 'Email sudah digunakan. Silakan gunakan email lain.';
+        return 'Email is already in use. Please use a different email.';
       case RegisterResult.invalidEmail:
-        return 'Format email tidak valid.';
+        return 'Invalid email format.';
       case RegisterResult.weakPassword:
-        return 'Password terlalu lemah. Gunakan minimal 8 karakter dengan huruf besar, huruf kecil, dan angka.';
+        return 'Password is too weak. Use at least 8 characters with uppercase, lowercase, and numbers.';
       case RegisterResult.operationNotAllowed:
-        return 'Operasi tidak diizinkan.';
+        return 'Operation not allowed.';
       case RegisterResult.unknown:
-        return 'Terjadi kesalahan. Silakan coba lagi.';
+        return 'An error occurred. Please try again.';
       default:
-        return 'Terjadi kesalahan. Silakan coba lagi.';
+        return 'An error occurred. Please try again.';
     }
   }
 
-  // Fungsi untuk memilih tanggal lahir
+  // Function to select birth date
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ??
           DateTime.now()
-              .subtract(const Duration(days: 365 * 18)), // Default 18 tahun
+              .subtract(const Duration(days: 365 * 18)), // Default 18 years
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -191,7 +174,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  // Mengirim ulang email verifikasi
+  // Resend verification email
   Future<void> _resendVerificationEmail() async {
     setState(() {
       _isLoading = true;
@@ -207,7 +190,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (result && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Email verifikasi telah dikirim ulang.'),
+            content: Text('Verification email has been resent.'),
             backgroundColor: primaryGreen,
           ),
         );
@@ -215,7 +198,7 @@ class _RegisterPageState extends State<RegisterPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content:
-                Text('Gagal mengirim email verifikasi. Silakan coba lagi.'),
+                Text('Failed to send verification email. Please try again.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -228,54 +211,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Terjadi kesalahan. Silakan coba lagi.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  // Cek status verifikasi email
-  Future<void> _checkVerificationStatus() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final isVerified = await _registerService.isEmailVerified();
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (isVerified && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Email telah terverifikasi!'),
-            backgroundColor: primaryGreen,
-          ),
-        );
-
-        // Navigasi ke homepage
-        Navigator.pushReplacementNamed(context, '/');
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Email belum terverifikasi. Silakan cek inbox Anda.'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Terjadi kesalahan. Silakan coba lagi.'),
+            content: Text('An error occurred. Please try again.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -300,7 +236,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Form registrasi
+  // Registration form
   Widget _buildRegistrationForm() {
     return Form(
       key: _formKey,
@@ -308,18 +244,9 @@ class _RegisterPageState extends State<RegisterPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Logo atau Icon
-          Icon(
-            Icons.fitness_center,
-            size: 80,
-            color: primaryPink,
-          ),
-
-          const SizedBox(height: 20),
-
-          // Judul
+          // Title
           Text(
-            'Buat Akun Baru',
+            'Create New Account',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
@@ -332,7 +259,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
           // Subtitle
           Text(
-            'Daftar untuk mulai perjalanan kesehatan Anda',
+            'Sign up to start your health journey',
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[600],
@@ -360,12 +287,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
           if (_errorMessage != null) const SizedBox(height: 20),
 
-          // Nama lengkap
+          // Full name
           TextFormField(
             controller: _nameController,
             decoration: InputDecoration(
-              labelText: 'Nama Lengkap',
-              hintText: 'Masukkan nama lengkap Anda',
+              labelText: 'Full Name',
+              hintText: 'Enter your full name',
               prefixIcon: const Icon(Icons.person),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -381,7 +308,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Nama tidak boleh kosong';
+                return 'Name cannot be empty';
               }
               return null;
             },
@@ -395,7 +322,7 @@ class _RegisterPageState extends State<RegisterPage> {
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               labelText: 'Email',
-              hintText: 'Masukkan email Anda',
+              hintText: 'Enter your email',
               prefixIcon: const Icon(Icons.email),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -411,12 +338,12 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Email tidak boleh kosong';
+                return 'Email cannot be empty';
               }
-              // Validasi format email
+              // Email format validation
               final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
               if (!emailRegExp.hasMatch(value)) {
-                return 'Format email tidak valid';
+                return 'Invalid email format';
               }
               return null;
             },
@@ -430,7 +357,7 @@ class _RegisterPageState extends State<RegisterPage> {
             obscureText: !_isPasswordVisible,
             decoration: InputDecoration(
               labelText: 'Password',
-              hintText: 'Minimal 8 karakter',
+              hintText: 'Minimum 8 characters',
               prefixIcon: const Icon(Icons.lock),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -456,16 +383,16 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Password tidak boleh kosong';
+                return 'Password cannot be empty';
               }
               if (value.length < 8) {
-                return 'Password minimal 8 karakter';
+                return 'Password must be at least 8 characters';
               }
-              // Validasi password kuat
-              final passwordRegExp =
-                  RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$');
+              // Updated password validation to support special characters
+              final passwordRegExp = RegExp(
+                  r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d|.*[!@#$%^&*(),.?":{}|<>])');
               if (!passwordRegExp.hasMatch(value)) {
-                return 'Password harus mengandung huruf besar, huruf kecil, dan angka';
+                return 'Password must contain uppercase, lowercase, and number or special character';
               }
               return null;
             },
@@ -473,13 +400,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
           const SizedBox(height: 16),
 
-          // Konfirmasi Password
+          // Confirm Password
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: !_isConfirmPasswordVisible,
             decoration: InputDecoration(
-              labelText: 'Konfirmasi Password',
-              hintText: 'Masukkan password yang sama',
+              labelText: 'Confirm Password',
+              hintText: 'Enter the same password',
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -507,10 +434,10 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Konfirmasi password tidak boleh kosong';
+                return 'Confirm password cannot be empty';
               }
               if (value != _passwordController.text) {
-                return 'Password tidak cocok';
+                return 'Passwords do not match';
               }
               return null;
             },
@@ -518,14 +445,14 @@ class _RegisterPageState extends State<RegisterPage> {
 
           const SizedBox(height: 16),
 
-          // Tanggal Lahir
+          // Birth date
           GestureDetector(
             onTap: () => _selectDate(context),
             child: AbsorbPointer(
               child: TextFormField(
                 decoration: InputDecoration(
-                  labelText: 'Tanggal Lahir (Opsional)',
-                  hintText: 'Pilih tanggal lahir',
+                  labelText: 'Birth Date (Optional)',
+                  hintText: 'Select your birth date',
                   prefixIcon: const Icon(Icons.calendar_today),
                   suffixIcon: Icon(Icons.arrow_drop_down, color: primaryPink),
                   border: OutlineInputBorder(
@@ -551,10 +478,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
           const SizedBox(height: 16),
 
-          // Jenis Kelamin
+          // Gender
           DropdownButtonFormField<String>(
             decoration: InputDecoration(
-              labelText: 'Jenis Kelamin (Opsional)',
+              labelText: 'Gender (Optional)',
               prefixIcon: const Icon(Icons.person_outline),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -580,12 +507,12 @@ class _RegisterPageState extends State<RegisterPage> {
                 _selectedGender = value;
               });
             },
-            hint: const Text('Pilih jenis kelamin'),
+            hint: const Text('Select your gender'),
           ),
 
           const SizedBox(height: 20),
 
-          // Checkbox Syarat dan Ketentuan
+          // Terms and Conditions Checkbox
           Row(
             children: [
               SizedBox(
@@ -608,23 +535,22 @@ class _RegisterPageState extends State<RegisterPage> {
               Expanded(
                 child: RichText(
                   text: TextSpan(
-                    text: 'Saya menyetujui ',
+                    text: 'I agree to the ',
                     style: TextStyle(color: Colors.grey[700]),
                     children: [
                       TextSpan(
-                        text: 'Syarat dan Ketentuan',
+                        text: 'Terms and Conditions',
                         style: TextStyle(
                           color: primaryPink,
                           fontWeight: FontWeight.bold,
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            // Navigasi ke halaman Terms and Conditions
-                            print('Buka Terms and Conditions');
+                            // Navigate to Terms and Conditions page
                           },
                       ),
                       TextSpan(
-                        text: ' PockEat',
+                        text: ' of PockEat',
                         style: TextStyle(color: Colors.grey[700]),
                       ),
                     ],
@@ -636,7 +562,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
           const SizedBox(height: 30),
 
-          // Tombol Register
+          // Register Button
           SizedBox(
             height: 55,
             child: ElevatedButton(
@@ -653,7 +579,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
                   : const Text(
-                      'DAFTAR',
+                      'SIGN UP',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -665,22 +591,22 @@ class _RegisterPageState extends State<RegisterPage> {
 
           const SizedBox(height: 20),
 
-          // Link ke halaman login
+          // Link to login page
           Center(
             child: RichText(
               text: TextSpan(
-                text: 'Sudah punya akun? ',
+                text: 'Already have an account? ',
                 style: TextStyle(color: Colors.grey[700]),
                 children: [
                   TextSpan(
-                    text: 'Masuk',
+                    text: 'Sign In',
                     style: TextStyle(
                       color: primaryPink,
                       fontWeight: FontWeight.bold,
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
-                        // Navigasi ke halaman login
+                        // Navigate to login page
                         Navigator.pushReplacementNamed(context, '/login');
                       },
                   ),
@@ -693,7 +619,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // UI verifikasi email
+  // Email verification UI
   Widget _buildVerificationUI() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -708,9 +634,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
         const SizedBox(height: 30),
 
-        // Judul
+        // Title
         Text(
-          'Verifikasi Email Anda',
+          'Verify Your Email',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -721,9 +647,9 @@ class _RegisterPageState extends State<RegisterPage> {
 
         const SizedBox(height: 20),
 
-        // Deskripsi
+        // Description
         Text(
-          'Kami telah mengirimkan email verifikasi ke ${_emailController.text}. Silakan cek inbox atau folder spam Anda untuk verifikasi.',
+          'We have sent a verification email to ${_emailController.text}. Please check your inbox or spam folder to verify.',
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey[700],
@@ -733,36 +659,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
         const SizedBox(height: 40),
 
-        // Tombol cek status verifikasi
-        SizedBox(
-          height: 55,
-          child: ElevatedButton(
-            onPressed: _isLoading ? null : _checkVerificationStatus,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryGreen,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              disabledBackgroundColor: primaryGreen.withOpacity(0.5),
-            ),
-            child: _isLoading
-                ? CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  )
-                : const Text(
-                    'SUDAH VERIFIKASI',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
-                  ),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Tombol kirim ulang email verifikasi
+        // Resend email verification button
         SizedBox(
           height: 55,
           child: OutlinedButton(
@@ -774,7 +671,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             child: Text(
-              'KIRIM ULANG EMAIL',
+              'RESEND EMAIL',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -787,13 +684,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
         const SizedBox(height: 16),
 
-        // Tombol kembali ke halaman login
+        // Back to login button
         TextButton(
           onPressed: () {
             Navigator.pushReplacementNamed(context, '/login');
           },
           child: Text(
-            'Kembali ke Login',
+            'Back to Sign In',
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[700],
@@ -803,13 +700,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
         const SizedBox(height: 16),
 
-        // Tombol lanjut ke beranda
+        // Continue to home button
         TextButton(
           onPressed: () {
             Navigator.pushReplacementNamed(context, '/');
           },
           child: Text(
-            'Lanjut ke Beranda',
+            'Continue to Home',
             style: TextStyle(
               fontSize: 16,
               color: primaryGreen,

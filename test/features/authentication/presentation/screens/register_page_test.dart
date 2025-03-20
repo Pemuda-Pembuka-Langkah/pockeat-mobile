@@ -43,7 +43,7 @@ void main() {
     GetIt.I.reset();
   });
 
-  testWidgets('Register page harus memuat semua komponen form dengan benar',
+  testWidgets('Register page should load all form components correctly',
       (WidgetTester tester) async {
     // Atur ukuran layar
     setScreenSize(tester);
@@ -57,21 +57,20 @@ void main() {
     await tester.pumpAndSettle();
 
     // Pastikan semua elemen UI ada
-    expect(find.text('Buat Akun Baru'), findsOneWidget);
-    expect(find.text('Daftar untuk mulai perjalanan kesehatan Anda'),
-        findsOneWidget);
+    expect(find.text('Create New Account'), findsOneWidget);
+    expect(find.text('Sign up to start your health journey'), findsOneWidget);
 
     // Form fields
-    expect(find.widgetWithText(TextFormField, 'Nama Lengkap'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'Full Name'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Email'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Password'), findsOneWidget);
-    expect(find.widgetWithText(TextFormField, 'Konfirmasi Password'),
-        findsOneWidget);
-    expect(find.widgetWithText(TextFormField, 'Tanggal Lahir (Opsional)'),
+    expect(
+        find.widgetWithText(TextFormField, 'Confirm Password'), findsOneWidget);
+    expect(find.widgetWithText(TextFormField, 'Birth Date (Optional)'),
         findsOneWidget);
     expect(
         find.widgetWithText(
-            DropdownButtonFormField<String>, 'Jenis Kelamin (Opsional)'),
+            DropdownButtonFormField<String>, 'Gender (Optional)'),
         findsOneWidget);
 
     // Checkbox untuk terms and conditions
@@ -81,10 +80,10 @@ void main() {
     expect(find.byType(RichText), findsWidgets);
 
     // Register Button
-    expect(find.widgetWithText(ElevatedButton, 'DAFTAR'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, 'SIGN UP'), findsOneWidget);
   });
 
-  testWidgets('Form validation harus bekerja dengan benar',
+  testWidgets('Form validation should work correctly',
       (WidgetTester tester) async {
     // Atur ukuran layar
     setScreenSize(tester);
@@ -98,7 +97,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Ambil lokasi tombol register
-    final registerButton = find.widgetWithText(ElevatedButton, 'DAFTAR');
+    final registerButton = find.widgetWithText(ElevatedButton, 'SIGN UP');
 
     // Scroll ke tombol register untuk memastikan tombol terlihat
     await tester.ensureVisible(registerButton);
@@ -109,11 +108,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verifikasi error text fields
-    expect(find.text('Email tidak boleh kosong'), findsOneWidget);
-    expect(find.text('Password tidak boleh kosong'), findsOneWidget);
+    expect(find.text('Email cannot be empty'), findsOneWidget);
+    expect(find.text('Password cannot be empty'), findsOneWidget);
   });
 
-  testWidgets('Validasi syarat dan ketentuan harus berfungsi',
+  testWidgets('Terms and conditions validation should work',
       (WidgetTester tester) async {
     // Atur ukuran layar
     setScreenSize(tester);
@@ -128,17 +127,16 @@ void main() {
 
     // Isi form dengan data valid
     await tester.enterText(
-        find.widgetWithText(TextFormField, 'Nama Lengkap'), 'Test User');
+        find.widgetWithText(TextFormField, 'Full Name'), 'Test User');
     await tester.enterText(
         find.widgetWithText(TextFormField, 'Email'), 'test@example.com');
     await tester.enterText(
         find.widgetWithText(TextFormField, 'Password'), 'Password123');
     await tester.enterText(
-        find.widgetWithText(TextFormField, 'Konfirmasi Password'),
-        'Password123');
+        find.widgetWithText(TextFormField, 'Confirm Password'), 'Password123');
 
     // Scroll ke tombol register
-    final registerButton = find.widgetWithText(ElevatedButton, 'DAFTAR');
+    final registerButton = find.widgetWithText(ElevatedButton, 'SIGN UP');
     await tester.ensureVisible(registerButton);
     await tester.pumpAndSettle();
 
@@ -147,11 +145,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verifikasi pesan error syarat dan ketentuan
-    expect(find.text('Anda harus menyetujui syarat dan ketentuan'),
+    expect(find.text('You must agree to the terms and conditions'),
         findsOneWidget);
   });
 
-  testWidgets('Register berhasil menampilkan verifikasi email',
+  testWidgets('Successful registration should show email verification UI',
       (WidgetTester tester) async {
     // Setup mock untuk sukses
     when(mockRegisterService.register(
@@ -164,8 +162,6 @@ void main() {
       gender: anyNamed('gender'),
     )).thenAnswer((_) async => RegisterResult.success);
 
-    when(mockRegisterService.isEmailVerified()).thenAnswer((_) async => false);
-
     // Atur ukuran layar
     setScreenSize(tester);
 
@@ -179,14 +175,13 @@ void main() {
 
     // Isi form dengan data valid
     await tester.enterText(
-        find.widgetWithText(TextFormField, 'Nama Lengkap'), 'Test User');
+        find.widgetWithText(TextFormField, 'Full Name'), 'Test User');
     await tester.enterText(
         find.widgetWithText(TextFormField, 'Email'), 'test@example.com');
     await tester.enterText(
         find.widgetWithText(TextFormField, 'Password'), 'Password123');
     await tester.enterText(
-        find.widgetWithText(TextFormField, 'Konfirmasi Password'),
-        'Password123');
+        find.widgetWithText(TextFormField, 'Confirm Password'), 'Password123');
 
     // Setuju terms dengan mengetuk checkbox
     final checkbox = find.byType(Checkbox);
@@ -195,7 +190,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Scroll ke tombol register
-    final registerButton = find.widgetWithText(ElevatedButton, 'DAFTAR');
+    final registerButton = find.widgetWithText(ElevatedButton, 'SIGN UP');
     await tester.ensureVisible(registerButton);
     await tester.pumpAndSettle();
 
@@ -214,12 +209,82 @@ void main() {
       gender: null,
     )).called(1);
 
-    // Verify isEmailVerified dipanggil
-    verify(mockRegisterService.isEmailVerified()).called(1);
-
     // Verifikasi SnackBar muncul
     expect(find.byType(SnackBar), findsOneWidget);
-    expect(find.text('Registrasi berhasil! Silakan verifikasi email Anda.'),
+    expect(find.text('Registration successful! Please verify your email.'),
         findsOneWidget);
+
+    // Verify verification screen is shown
+    expect(find.text('Verify Your Email'), findsOneWidget);
+    expect(
+        find.text(
+            'We have sent a verification email to test@example.com. Please check your inbox or spam folder to verify.'),
+        findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, 'RESEND EMAIL'), findsOneWidget);
+    expect(find.text('Back to Sign In'), findsOneWidget);
+    expect(find.text('Continue to Home'), findsOneWidget);
+  });
+
+  testWidgets('Password validation should accept special characters',
+      (WidgetTester tester) async {
+    // Atur ukuran layar
+    setScreenSize(tester);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Isi form dengan password yang memiliki karakter khusus
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Full Name'), 'Test User');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email'), 'test@example.com');
+
+    // Password dengan karakter khusus
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Password'), 'Pass@word123');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Confirm Password'), 'Pass@word123');
+
+    // Setuju terms dengan mengetuk checkbox
+    final checkbox = find.byType(Checkbox);
+    await tester.ensureVisible(checkbox);
+    await tester.tap(checkbox);
+    await tester.pumpAndSettle();
+
+    // Setup mock untuk sukses
+    when(mockRegisterService.register(
+      email: anyNamed('email'),
+      password: anyNamed('password'),
+      confirmPassword: anyNamed('confirmPassword'),
+      termsAccepted: anyNamed('termsAccepted'),
+      displayName: anyNamed('displayName'),
+      birthDate: anyNamed('birthDate'),
+      gender: anyNamed('gender'),
+    )).thenAnswer((_) async => RegisterResult.success);
+
+    // Scroll ke tombol register
+    final registerButton = find.widgetWithText(ElevatedButton, 'SIGN UP');
+    await tester.ensureVisible(registerButton);
+    await tester.pumpAndSettle();
+
+    // Tap tombol register
+    await tester.tap(registerButton);
+    await tester.pumpAndSettle();
+
+    // Verify register dipanggil dengan parameter yang benar termasuk password dengan karakter khusus
+    verify(mockRegisterService.register(
+      email: 'test@example.com',
+      password: 'Pass@word123',
+      confirmPassword: 'Pass@word123',
+      termsAccepted: true,
+      displayName: 'Test User',
+      birthDate: null,
+      gender: null,
+    )).called(1);
   });
 }

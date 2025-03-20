@@ -65,12 +65,12 @@ class RegisterServiceImpl implements RegisterService {
         return RegisterResult.emailAlreadyInUse;
       }
 
+
       // Mendaftarkan user baru
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-
       // Memperbarui displayName jika tersedia
       if (displayName != null && credential.user != null) {
         await credential.user!.updateDisplayName(displayName);
@@ -104,7 +104,7 @@ class RegisterServiceImpl implements RegisterService {
         'operation-not-allowed' => RegisterResult.operationNotAllowed,
         _ => RegisterResult.unknown,
       };
-    } catch (_) {
+    } catch (e) {
       return RegisterResult.unknown;
     }
   }
@@ -121,7 +121,7 @@ class RegisterServiceImpl implements RegisterService {
       await user.sendEmailVerification();
 
       return true;
-    } catch (_) {
+    } catch (e) {
       return false;
     }
   }
