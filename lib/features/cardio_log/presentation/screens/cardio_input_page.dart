@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/calorie_calculator.dart';
 import '../widgets/cycling_form.dart';
 import '../widgets/running_form.dart';
@@ -325,6 +326,21 @@ class CardioInputPageState extends State<CardioInputPage> {
   // Function to save activity
   Future<void> _saveActivity(double calories) async {
     try {
+      final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+      // Validate user is logged in
+      if (userId.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('You must be logged in to save activities'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
       CardioActivity? activity;
       final todayDate = DateTime.now();
 
@@ -332,9 +348,9 @@ class CardioInputPageState extends State<CardioInputPage> {
         case CardioType.running:
           // Access form state directly using the key
           final formState = _runningFormKey.currentState!;
-          
 
           activity = RunningActivity(
+            userId: userId,
             date: todayDate,
             startTime: formState.selectedStartTime,
             endTime: formState.selectedEndTime,
@@ -347,6 +363,7 @@ class CardioInputPageState extends State<CardioInputPage> {
           final formState = _cyclingFormKey.currentState!;
 
           activity = CyclingActivity(
+            userId: userId,
             date: todayDate,
             startTime: formState.selectedStartTime,
             endTime: formState.selectedEndTime,
@@ -360,6 +377,7 @@ class CardioInputPageState extends State<CardioInputPage> {
           final formState = _swimmingFormKey.currentState!;
 
           activity = SwimmingActivity(
+            userId: userId,
             date: todayDate,
             startTime: formState.selectedStartTime,
             endTime: formState.selectedEndTime,
