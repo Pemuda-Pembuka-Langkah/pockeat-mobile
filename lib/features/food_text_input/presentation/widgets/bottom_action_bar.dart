@@ -12,6 +12,7 @@ class TextBottomActionBar extends StatelessWidget {
   final Color primaryPink;
   final Color primaryGreen;
   final Function(FoodAnalysisResult)? onAnalysisCorrected;
+  final Function(bool)? onSavingStateChange;
 
   const TextBottomActionBar({
     Key? key,
@@ -22,6 +23,7 @@ class TextBottomActionBar extends StatelessWidget {
     required this.primaryPink,
     this.primaryGreen = const Color(0xFF4ECDC4),
     this.onAnalysisCorrected,
+    this.onSavingStateChange,
   }) : super(key: key);
 
   void showSnackBarMessage(BuildContext context, String message, {Color? backgroundColor}) {
@@ -86,6 +88,8 @@ class TextBottomActionBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     onTap: () async {
                       if (!isLoading && food != null) {
+                        onSavingStateChange?.call(true); // Indicate saving started
+
                         showDialog(
                           context: context,
                           barrierDismissible: false,
@@ -97,13 +101,18 @@ class TextBottomActionBar extends StatelessWidget {
                           final message = await foodTextInputService.saveFoodAnalysis(food!);
                           if (!context.mounted) return;
                           Navigator.of(context).pop();
+
                           showSnackBarMessage(context, message, backgroundColor: primaryGreen);
-                          Navigator.pop(context);
-                          Navigator.pop(context);
+
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context); // Only pop once
+                          }
                         } catch (e) {
                           if (!context.mounted) return;
                           Navigator.of(context).pop();
                           showSnackBarMessage(context, 'Failed to save: ${e.toString()}');
+                        } finally {
+                          onSavingStateChange?.call(false); // Indicate saving finished
                         }
                       }
                     },

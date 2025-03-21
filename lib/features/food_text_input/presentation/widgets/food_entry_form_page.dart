@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
 
 class FoodEntryForm extends StatefulWidget {
   final Function(FoodEntry)? onSaved;
   final bool isAnalyzing;
+  final FoodEntry? existingEntry; 
 
   const FoodEntryForm({
     this.onSaved,
     this.isAnalyzing = false,
+    this.existingEntry, 
     super.key,
   });
 
@@ -27,22 +30,39 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
   void initState() {
     super.initState();
     _analysisService = FoodTextAnalysisService.fromEnv();
+    
+    if (widget.existingEntry != null) {
+      _descriptionController.text = widget.existingEntry!.foodDescription;
+    }
   }
   
-  void _validateAndSubmit() {
+  void _validateAndSubmit({bool isCorrection = false}) {
     final input = _descriptionController.text.trim();
-    
+
     if (input.isEmpty) {
       setState(() {
         _descriptionError = 'Food description cannot be empty';
       });
       return;
     }
-    
+
     setState(() {
       _descriptionError = null;
     });
-    
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FoodAnalysisLoading(
+          primaryYellow: const Color(0xFFFFE893),
+          primaryPink: const Color(0xFFFF6B6B),
+          message: isCorrection
+              ? 'Updating Analysis' 
+              : 'Analyzing Food',   
+        ),
+      ),
+    );
+
     FoodEntry foodEntry = FoodEntry(
       foodDescription: input,
     );
@@ -115,9 +135,13 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: widget.isAnalyzing ? null : _validateAndSubmit,
+              onPressed: widget.isAnalyzing
+                  ? null
+                  : () => _validateAndSubmit(
+                      isCorrection: widget.existingEntry != null, 
+                    ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4ECDC4), // Keeping your app's original color
+                backgroundColor: const Color(0xFF4ECDC4), 
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -133,9 +157,11 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Text(
-                      'Save & Analyze Food',
-                      style: TextStyle(
+                  : Text(
+                      widget.existingEntry != null
+                          ? 'Update & Analyze Food' 
+                          : 'Save & Analyze Food',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: Colors.white,

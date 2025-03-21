@@ -27,6 +27,7 @@ class NutritionPage extends StatefulWidget {
 class _NutritionPageState extends State<NutritionPage> {
   bool _isLoading = true;
   bool _hasError = false;
+  bool _isSaving = false;
   String _errorMessage = '';
   String _foodName = 'Analyzing...';
   int _calories = 0;
@@ -63,7 +64,7 @@ class _NutritionPageState extends State<NutritionPage> {
     }
   }
 
-  void _updateFoodData(FoodAnalysisResult result) {
+  void _updateFoodData(FoodAnalysisResult result, {bool isCorrection = false}) {
     _foodName = result.foodName;
     _calories = result.nutritionInfo.calories.toInt();
     _nutritionData = {
@@ -77,6 +78,10 @@ class _NutritionPageState extends State<NutritionPage> {
     _ingredients = result.ingredients;
     _warnings = result.warnings;
     food = result;
+
+    if (!isCorrection) {
+      _isLoading = false;
+    }
   }
 
   @override
@@ -107,12 +112,22 @@ class _NutritionPageState extends State<NutritionPage> {
       backgroundColor: Colors.white,
       body: _buildAnalysisResultContent(),
       bottomSheet: TextBottomActionBar(
-        isLoading: _isLoading,
+        isLoading: _isLoading || _isSaving,
         food: food,
         foodTextInputService: widget.foodTextInputService,
         primaryYellow: const Color(0xFFFFE893),
         primaryPink: const Color(0xFFFF6B6B),
         primaryGreen: const Color(0xFF4ECDC4),
+        onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
+          setState(() {
+            _updateFoodData(correctedResult, isCorrection: true);  
+          });
+        },
+        onSavingStateChange: (bool saving){
+          setState(() {
+            _isSaving = saving;
+          });
+        }
       ),
     );
   }
@@ -120,7 +135,6 @@ class _NutritionPageState extends State<NutritionPage> {
   Widget _buildAnalysisResultContent() {
     return CustomScrollView(
       slivers: [
-        // Simple SliverAppBar with no background image
         SliverAppBar(
           backgroundColor: const Color(0xFFFFE893),
           title: const Text(
