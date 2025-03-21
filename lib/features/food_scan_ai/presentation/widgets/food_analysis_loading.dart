@@ -6,11 +6,11 @@ class FoodAnalysisLoading extends StatelessWidget {
   final String message;
 
   const FoodAnalysisLoading({
-    Key? key,
+    super.key,
     required this.primaryYellow,
     required this.primaryPink,
     this.message = 'Analyzing Food',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

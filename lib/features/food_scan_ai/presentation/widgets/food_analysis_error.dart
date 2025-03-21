@@ -9,13 +9,13 @@ class FoodAnalysisError extends StatelessWidget {
   final VoidCallback onBack;
 
   const FoodAnalysisError({
-    Key? key,
+    super.key,
     required this.errorMessage,
     required this.primaryPink,
     required this.primaryYellow,
     required this.onRetry,
     required this.onBack,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

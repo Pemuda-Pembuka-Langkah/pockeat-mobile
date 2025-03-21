@@ -7,17 +7,12 @@ import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_history_page.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
-import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_history_card.dart';
 
 // Generate mock classes
 @GenerateMocks([ExerciseLogHistoryService])
 import 'exercise_history_page_test.mocks.dart';
 
 // Tambahkan import untuk akses ke FilterType
-import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_history_page.dart'
-    as exercise_page;
 
 void main() {
   late MockExerciseLogHistoryService mockService;

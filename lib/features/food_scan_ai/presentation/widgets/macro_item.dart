@@ -8,13 +8,13 @@ class MacroItem extends StatelessWidget {
   final String? subtitle;
 
   const MacroItem({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     required this.total,
     required this.color,
     this.subtitle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

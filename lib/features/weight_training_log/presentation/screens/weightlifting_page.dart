@@ -13,7 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class WeightliftingPage extends StatefulWidget {
   final WeightLiftingRepository? repository;
   
-  const WeightliftingPage({Key? key, this.repository}) : super(key: key);
+  const WeightliftingPage({super.key, this.repository});
 
   @override
   _WeightliftingPageState createState() => _WeightliftingPageState();

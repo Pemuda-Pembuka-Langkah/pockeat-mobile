@@ -29,6 +29,27 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/food_log_history/presentation/screens/food_detail_page.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
+import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
+
+// Global navigator key untuk akses Navigator dari anywhere
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+// Class untuk menangani deep link secara global
+class DeepLinkHandler {
+  static void setupDeepLinks(DeepLinkService service) {
+    // Tidak perlu lagi setup listener kompleks, karena deep link service sudah memiliki navigatorKey
+    // dan bisa menangani navigasi langsung
+
+    // Tambahkan listener sederhana untuk debugging saja
+    service.onLinkReceived().listen((Uri? link) {
+      if (link == null) return;
+      print('🌐 Deep link received in global handler: ${link.toString()}');
+    });
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,11 +71,18 @@ void main() async {
       );
 
   setupDependencies();
+
   // Setup emulator kalau di dev mode
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
+
+  // Initialize the DeepLinkService dengan navigatorKey
+  await getIt<DeepLinkService>().initialize(navigatorKey: navigatorKey);
+
+  // Setup deep link handler untuk debugging
+  DeepLinkHandler.setupDeepLinks(getIt<DeepLinkService>());
 
   runApp(
     MultiProvider(
@@ -98,6 +126,7 @@ class MyApp extends StatelessWidget {
         Provider.of<SmartExerciseLogRepository>(context);
 
     return MaterialApp(
+      navigatorKey: navigatorKey, // Tambahkan navigator key untuk akses global
       title: 'Pockeat',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -129,9 +158,25 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/',
+      initialRoute: '/register',
       routes: {
         '/': (context) => const HomePage(),
+        '/register': (context) => const RegisterPage(),
+        '/account-activated': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return AccountActivatedPage(
+            email: args?['email'] as String? ?? '',
+          );
+        },
+        '/email-verification-failed': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return EmailVerificationFailedPage(
+            error: args?['error'] as String? ??
+                'Verification failed. Please try again.',
+          );
+        },
         '/smart-exercise-log': (context) => SmartExerciseLogPage(
               // Langsung berikan dependensi yang dibutuhkan
               geminiService: getIt<GeminiService>(),
