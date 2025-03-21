@@ -18,10 +18,16 @@ import 'package:camera/camera.dart';
 
 class NutritionPage extends StatefulWidget {
   final String imagePath;
+  final bool isLabelScan;
   final FoodScanPhotoService foodScanPhotoService;
+  final double servingSize;
 
-  NutritionPage({super.key, required this.imagePath})
-      : foodScanPhotoService = getIt<FoodScanPhotoService>();
+  NutritionPage({
+    super.key,
+    required this.imagePath,
+    this.isLabelScan = false,
+    this.servingSize = 1.0,
+  }) : foodScanPhotoService = getIt<FoodScanPhotoService>();
 
   @override
   _NutritionPageState createState() => _NutritionPageState();
@@ -38,6 +44,9 @@ class _NutritionPageState extends State<NutritionPage> {
   List<String> _warnings = [];
   List<Ingredient> _ingredients = [];
   late FoodAnalysisResult? food;
+  
+  // Track if analysis is being corrected
+  bool _isCorrectingAnalysis = false;
 
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
@@ -58,24 +67,15 @@ class _NutritionPageState extends State<NutritionPage> {
         _hasError = false;
       });
 
-      final result = await widget.foodScanPhotoService
-          .analyzeFoodPhoto(File(widget.imagePath));
+      final result = widget.isLabelScan
+          ? await widget.foodScanPhotoService
+              .analyzeNutritionLabelPhoto(File(widget.imagePath), widget.servingSize)
+          : await widget.foodScanPhotoService
+              .analyzeFoodPhoto(File(widget.imagePath));
 
       setState(() {
-        _foodName = result.foodName;
-        _calories = result.nutritionInfo.calories.toInt();
-        _nutritionData = {
-          'protein': result.nutritionInfo.protein.toInt(),
-          'carbs': result.nutritionInfo.carbs.toInt(),
-          'fat': result.nutritionInfo.fat.toInt(),
-          'fiber': result.nutritionInfo.fiber.toInt(),
-          'sugar': result.nutritionInfo.sugar.toInt(),
-          'sodium': result.nutritionInfo.sodium.toInt(),
-        };
-        _ingredients = result.ingredients;
+        _updateFoodData(result);
         _isLoading = false;
-        _warnings = result.warnings;
-        food = result;
       });
     } catch (e) {
       setState(() {
@@ -84,6 +84,40 @@ class _NutritionPageState extends State<NutritionPage> {
         _errorMessage = e.toString();
       });
     }
+  }
+  
+  // Update UI data with analysis result
+  void _updateFoodData(FoodAnalysisResult result) {
+    _foodName = result.foodName;
+    _calories = result.nutritionInfo.calories.toInt();
+    _nutritionData = {
+      'protein': result.nutritionInfo.protein.toInt(),
+      'carbs': result.nutritionInfo.carbs.toInt(),
+      'fat': result.nutritionInfo.fat.toInt(),
+      'fiber': result.nutritionInfo.fiber.toInt(),
+      'sugar': result.nutritionInfo.sugar.toInt(),
+      'sodium': result.nutritionInfo.sodium.toInt(),
+    };
+    _ingredients = result.ingredients;
+    _warnings = result.warnings;
+    food = result;
+  }
+  
+  // Handle analysis correction
+  void _handleAnalysisCorrected(FoodAnalysisResult correctedResult) {
+    setState(() {
+      _isCorrectingAnalysis = false;
+      _updateFoodData(correctedResult);
+    });
+    
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Analysis corrected successfully!'),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   void _retryPhotoCapture() {
@@ -104,11 +138,12 @@ class _NutritionPageState extends State<NutritionPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    if (_isLoading || _isCorrectingAnalysis) {
       return Scaffold(
         body: FoodAnalysisLoading(
           primaryYellow: primaryYellow,
           primaryPink: primaryPink,
+          message: _isCorrectingAnalysis ? 'Correcting Analysis' : 'Analyzing Food',
         ),
       );
     }
@@ -129,11 +164,24 @@ class _NutritionPageState extends State<NutritionPage> {
       backgroundColor: Colors.white,
       body: _buildAnalysisResultContent(),
       bottomSheet: BottomActionBar(
-        isLoading: _isLoading,
+        isLoading: _isLoading || _isCorrectingAnalysis,
         food: food,
         foodScanPhotoService: widget.foodScanPhotoService,
         primaryYellow: primaryYellow,
         primaryPink: primaryPink,
+        primaryGreen: primaryGreen,
+        isLabelScan: widget.isLabelScan,
+        servingSize: widget.servingSize,
+        onAnalysisCorrected: (correctedResult) {
+          setState(() {
+            _isCorrectingAnalysis = true;
+          });
+          
+          // Process the correction asynchronously and update UI when done
+          Future.delayed(Duration.zero, () {
+            _handleAnalysisCorrected(correctedResult);
+          });
+        },
       ),
     );
   }
@@ -202,6 +250,10 @@ class _NutritionPageState extends State<NutritionPage> {
                       warningYellow: warningYellow,
                     ),
                     const SizedBox(height: 100),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 50),
+                      child: SizedBox(),
+                    ),
                   ],
                 ),
               ),

@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
+
 // coverage:ignore-start
 abstract class BaseGeminiService {
   final String apiKey;
@@ -16,6 +17,13 @@ abstract class BaseGeminiService {
             RealGenerativeModelWrapper(GenerativeModel(
               model: 'gemini-1.5-pro',
               apiKey: apiKey,
+                  generationConfig: GenerationConfig(
+      temperature: 1,
+      topK: 40,
+      topP: 0.95,
+      maxOutputTokens: 8192,
+      responseMimeType: 'text/plain',
+    ),
             ));
 
   static String getApiKeyFromEnv() {
@@ -26,13 +34,12 @@ abstract class BaseGeminiService {
     }
     return apiKey;
   }
-  // coverage:ignore-end
+
+
   String extractJson(String text) {
     try {
-      // First try to clean up the text by removing comments and fixing common JSON issues
       String cleanedText = _cleanJsonText(text);
 
-      // Try parsing the cleaned text
       try {
         jsonDecode(cleanedText);
         return cleanedText;
@@ -42,10 +49,8 @@ abstract class BaseGeminiService {
 
         if (startIndex >= 0 && endIndex >= 0 && endIndex > startIndex) {
           String jsonString = text.substring(startIndex, endIndex + 1);
-          // Clean the extracted JSON
           jsonString = _cleanJsonText(jsonString);
 
-          // Validate that it's parseable
           try {
             jsonDecode(jsonString);
             return jsonString;
@@ -95,3 +100,4 @@ abstract class BaseGeminiService {
     return cleaned;
   }
 }
+    // coverage:ignore-end

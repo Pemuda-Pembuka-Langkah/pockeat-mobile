@@ -1,35 +1,49 @@
 // lib/pockeat/features/ai_api_scan/models/food_analysis.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:uuid/uuid.dart';
+
 class FoodAnalysisResult {
   final String foodName;
   final List<Ingredient> ingredients;
   final NutritionInfo nutritionInfo;
   final List<String> warnings;
-  
+  String? foodImageUrl;
+  final DateTime timestamp;
+  final String id;
+  final bool isLowConfidence; // Added low confidence flag
+
   // Constants for warning messages to ensure consistency
   static const String highSodiumWarning = "High sodium content";
   static const String highSugarWarning = "High sugar content";
-  
+  static const String lowConfidenceWarning = "Analysis confidence is low - nutrition values may be less accurate";
+
   // Thresholds for warnings
   static const double highSodiumThreshold = 500.0; // mg
   static const double highSugarThreshold = 20.0; // g
-  
+
   FoodAnalysisResult({
     required this.foodName,
     required this.ingredients,
     required this.nutritionInfo,
-    this.warnings = const [],
-  });
-  
-  factory FoodAnalysisResult.fromJson(Map<String, dynamic> json) {
+    this.warnings = const [], 
+    this.foodImageUrl,
+    DateTime? timestamp,
+    String? id,
+    this.isLowConfidence = false, // Default to high confidence
+  }) : 
+    timestamp = timestamp ?? DateTime.now(),
+    id = id ?? const Uuid().v4();
+
+  factory FoodAnalysisResult.fromJson(Map<String, dynamic> json, {String? id}) {
     final nutritionInfo = NutritionInfo.fromJson(json['nutrition_info'] ?? {});
-    
+
     // Generate warnings for high sodium or sugar if not provided in the JSON
     List<String> warnings = [];
-    
+
     // If warnings are provided in the JSON, use those
     if (json['warnings'] != null) {
       warnings = List<String>.from(json['warnings']);
-    } 
+    }
     // Otherwise generate warnings based on nutrition values
     else {
       if (nutritionInfo.sodium > highSodiumThreshold) {
@@ -39,14 +53,33 @@ class FoodAnalysisResult {
         warnings.add(highSugarWarning);
       }
     }
+
+    DateTime parsedTimestamp;
+    if (json['timestamp'] != null) {
+      // Handle both Timestamp and int formats
+      if (json['timestamp'] is Timestamp) {
+        parsedTimestamp = (json['timestamp'] as Timestamp).toDate();
+      } else if (json['timestamp'] is int) {
+        parsedTimestamp = DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int);
+      } else {
+        parsedTimestamp = DateTime.now();
+      }
+    } else {
+      parsedTimestamp = DateTime.now();
+    }
+
+    // Check for low confidence flag
+    bool isLowConfidence = json['is_low_confidence'] == true;
     
     return FoodAnalysisResult(
       foodName: json['food_name'] ?? '',
-      ingredients: (json['ingredients'] as List<dynamic>?)
-          ?.map((item) => Ingredient.fromJson(item))
-          .toList() ?? [],
+      ingredients: _parseIngredients(json['ingredients']),
       nutritionInfo: nutritionInfo,
       warnings: warnings,
+      foodImageUrl: json['food_image_url'],
+      timestamp: parsedTimestamp,
+      id: id ?? json['id'] ?? 'food_${DateTime.now().millisecondsSinceEpoch}',
+      isLowConfidence: isLowConfidence,
     );
   }
 
@@ -56,7 +89,46 @@ class FoodAnalysisResult {
       'ingredients': ingredients.map((i) => i.toJson()).toList(),
       'nutrition_info': nutritionInfo.toJson(),
       'warnings': warnings,
+      'food_image_url': foodImageUrl,
+      'timestamp': Timestamp.fromDate(timestamp),
+      'id': id,
+      'is_low_confidence': isLowConfidence,
     };
+  }
+
+  // Create a copy with modified fields
+  FoodAnalysisResult copyWith({
+    String? foodName,
+    List<Ingredient>? ingredients,
+    NutritionInfo? nutritionInfo,
+    List<String>? warnings,
+    String? foodImageUrl,
+    DateTime? timestamp,
+    String? id,
+    bool? isLowConfidence,
+  }) {
+    return FoodAnalysisResult(
+      foodName: foodName ?? this.foodName,
+      ingredients: ingredients ?? this.ingredients,
+      nutritionInfo: nutritionInfo ?? this.nutritionInfo,
+      warnings: warnings ?? this.warnings,
+      foodImageUrl: foodImageUrl ?? this.foodImageUrl,
+      timestamp: timestamp ?? this.timestamp,
+      id: id ?? this.id,
+      isLowConfidence: isLowConfidence ?? this.isLowConfidence,
+    );
+  }
+
+  static List<Ingredient> _parseIngredients(dynamic ingredientsData) {
+    if (ingredientsData == null) return [];
+    
+    if (ingredientsData is List) {
+      return ingredientsData
+          .map((item) => Ingredient.fromJson(item))
+          .toList();
+    }
+    
+    return [];
   }
 }
 
@@ -68,12 +140,10 @@ class Ingredient {
     required this.name,
     required this.servings,
   });
-  
+
   factory Ingredient.fromJson(Map<String, dynamic> json) {
     return Ingredient(
-      name: json['name'] ?? '',
-      servings: _parseDouble(json['servings'])
-    );
+        name: json['name'] ?? '', servings: _parseDouble(json['servings']));
   }
 
   Map<String, dynamic> toJson() {
@@ -82,7 +152,7 @@ class Ingredient {
       'servings': servings,
     };
   }
-  
+
   static double _parseDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is int) return value.toDouble();
@@ -100,7 +170,7 @@ class NutritionInfo {
   final double sodium;
   final double fiber;
   final double sugar;
-  
+
   NutritionInfo({
     required this.calories,
     required this.protein,
@@ -110,7 +180,7 @@ class NutritionInfo {
     required this.fiber,
     required this.sugar,
   });
-  
+
   factory NutritionInfo.fromJson(Map<String, dynamic> json) {
     return NutritionInfo(
       calories: _parseDouble(json['calories']),
@@ -134,6 +204,7 @@ class NutritionInfo {
       'sugar': sugar,
     };
   }
+
   static double _parseDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is int) return value.toDouble();

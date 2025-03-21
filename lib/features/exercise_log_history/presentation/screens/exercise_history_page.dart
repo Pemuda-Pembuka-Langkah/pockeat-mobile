@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_history_card.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 
 /// A page that displays the user's exercise history with filtering options.
-/// 
+///
 /// This page allows users to view their exercise history and filter it by
 /// date, month, or year. It uses the ExerciseHistoryCard widget to display
 /// individual exercise items.
 class ExerciseHistoryPage extends StatefulWidget {
-  final ExerciseLogHistoryService service;
-
   const ExerciseHistoryPage({
     super.key,
-    required this.service,
   });
 
   @override
@@ -22,21 +20,22 @@ class ExerciseHistoryPage extends StatefulWidget {
 }
 
 class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
+  late ExerciseLogHistoryService _service;
   late Future<List<ExerciseLogHistoryItem>> _exercisesFuture;
-  
+
   // Filter state
   FilterType _activeFilterType = FilterType.all;
   DateTime _selectedDate = DateTime.now();
   int _selectedMonth = DateTime.now().month;
   int _selectedYear = DateTime.now().year;
-  
+
   // Search state
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   List<ExerciseLogHistoryItem>? _allExercises;
   List<ExerciseLogHistoryItem>? _filteredExercises;
   bool _isSearching = false;
-  
+
   // Colors
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
@@ -45,9 +44,10 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   @override
   void initState() {
     super.initState();
+    _service = GetIt.instance<ExerciseLogHistoryService>();
     _loadExercises();
   }
-  
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -57,28 +57,29 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   //
   // Data loading and filtering methods
   //
-  
+
   void _loadExercises() {
     setState(() {
       switch (_activeFilterType) {
         case FilterType.date:
-          _exercisesFuture = widget.service.getExerciseLogsByDate(_selectedDate);
+          _exercisesFuture = _service.getExerciseLogsByDate(_selectedDate);
           break;
         case FilterType.month:
-          _exercisesFuture = widget.service.getExerciseLogsByMonth(_selectedMonth, _selectedYear);
+          _exercisesFuture =
+              _service.getExerciseLogsByMonth(_selectedMonth, _selectedYear);
           break;
         case FilterType.year:
-          _exercisesFuture = widget.service.getExerciseLogsByYear(_selectedYear);
+          _exercisesFuture = _service.getExerciseLogsByYear(_selectedYear);
           break;
         case FilterType.all:
-          _exercisesFuture = widget.service.getAllExerciseLogs();
+          _exercisesFuture = _service.getAllExerciseLogs();
           break;
       }
-      
+
       _resetSearch();
     });
   }
-  
+
   void _resetSearch() {
     _searchQuery = '';
     _searchController.clear();
@@ -91,41 +92,42 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
     final result = await Navigator.of(context).pushNamed(
       '/exercise-detail',
       arguments: {
-        'exerciseId': exercise.sourceId ?? exercise.id, // Gunakan sourceId jika ada, atau fallback ke id
+        'exerciseId': exercise.sourceId ??
+            exercise.id, // Gunakan sourceId jika ada, atau fallback ke id
         'activityType': exercise.activityType,
       },
     );
-    
+
     // Refresh data jika detail page mengembalikan true (exercise telah dihapus)
     if (result == true) {
       _loadExercises();
     }
   }
-  
+
   //
   // Search-related methods
   //
-  
+
   /// Filters exercises based on the given search query
-  /// 
+  ///
   /// This method filters the exercises by title and subtitle and
   /// updates the filtered list state.
   void _filterExercises(String query) {
     setState(() {
       _searchQuery = query.trim().toLowerCase();
-      
+
       if (_allExercises == null || _searchQuery.isEmpty) {
         _filteredExercises = _allExercises;
         return;
       }
-      
+
       _filteredExercises = _allExercises!.where((exercise) {
-        return exercise.title.toLowerCase().contains(_searchQuery) || 
-               exercise.subtitle.toLowerCase().contains(_searchQuery);
+        return exercise.title.toLowerCase().contains(_searchQuery) ||
+            exercise.subtitle.toLowerCase().contains(_searchQuery);
       }).toList();
     });
   }
-  
+
   /// Clears the current search
   void _clearSearch() {
     _searchController.clear();
@@ -135,21 +137,21 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
       _isSearching = false;
     });
   }
-  
+
   /// Handles focus change when user taps on search field
   void _handleSearchFocus(bool isFocused) {
     setState(() {
       _isSearching = isFocused;
     });
   }
-  
+
   /// Returns appropriate widget based on search results
   Widget _buildSearchResults(List<ExerciseLogHistoryItem> exercises) {
     // Show empty search results state
     if (_searchQuery.isNotEmpty && exercises.isEmpty) {
       return _buildEmptySearchState();
     }
-  
+
     // Show exercise list
     return ListView.builder(
       padding: const EdgeInsets.only(top: 8, bottom: 20),
@@ -162,7 +164,7 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
       },
     );
   }
-  
+
   /// Builds empty state for search with no results
   Widget _buildEmptySearchState() {
     return Center(
@@ -191,8 +193,12 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   //
   // UI filter-related methods
   //
-  
+
+  /// Selects date filter and updates the filter state
   Future<void> _selectDate(BuildContext context) async {
+    // Clear search when changing filter
+    _clearSearch();
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -211,7 +217,7 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
         );
       },
     );
-    
+
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
@@ -222,8 +228,11 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   }
 
   Future<void> _selectMonth(BuildContext context) async {
+    // Clear search when changing filter
+    _clearSearch();
+
     final currentMonth = DateTime(_selectedYear, _selectedMonth);
-    
+
     // Show a month picker dialog
     showDialog(
       context: context,
@@ -277,7 +286,8 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
                 Expanded(
                   child: GridView.builder(
                     shrinkWrap: true,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
                       childAspectRatio: 1.5,
                     ),
@@ -285,9 +295,11 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
                     itemBuilder: (context, index) {
                       // Month index is 1-based
                       final monthIndex = index + 1;
-                      final monthName = DateFormat('MMM').format(DateTime(_selectedYear, monthIndex));
-                      final isCurrentMonth = monthIndex == _selectedMonth && _selectedYear == currentMonth.year;
-                      
+                      final monthName = DateFormat('MMM')
+                          .format(DateTime(_selectedYear, monthIndex));
+                      final isCurrentMonth = monthIndex == _selectedMonth &&
+                          _selectedYear == currentMonth.year;
+
                       return InkWell(
                         onTap: () {
                           setState(() {
@@ -300,18 +312,26 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
                         child: Container(
                           margin: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: isCurrentMonth ? primaryPink : Colors.transparent,
+                            color: isCurrentMonth
+                                ? primaryPink
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isCurrentMonth ? primaryPink : Colors.grey.shade300,
+                              color: isCurrentMonth
+                                  ? primaryPink
+                                  : Colors.grey.shade300,
                             ),
                           ),
                           child: Center(
                             child: Text(
                               monthName,
                               style: TextStyle(
-                                color: isCurrentMonth ? Colors.white : Colors.black87,
-                                fontWeight: isCurrentMonth ? FontWeight.bold : FontWeight.normal,
+                                color: isCurrentMonth
+                                    ? Colors.white
+                                    : Colors.black87,
+                                fontWeight: isCurrentMonth
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                               ),
                             ),
                           ),
@@ -329,6 +349,9 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   }
 
   Future<void> _selectYear(BuildContext context) async {
+    // Clear search when changing filter
+    _clearSearch();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -362,13 +385,16 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   }
 
   Widget _buildFilterChip(
-    String label, 
-    FilterType filterType, 
-    VoidCallback onSelected
-  ) {
+      String label, FilterType filterType, VoidCallback onSelected) {
     final bool isSelected = _activeFilterType == filterType;
     return GestureDetector(
-      onTap: onSelected,
+      onTap: () {
+        // Clear search when changing filter if it's a different filter
+        if (_activeFilterType != filterType) {
+          _clearSearch();
+        }
+        onSelected();
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
@@ -396,50 +422,44 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _buildFilterChip(
-              'All', 
-              FilterType.all, 
-              () {
-                setState(() {
-                  _activeFilterType = FilterType.all;
-                  _loadExercises();
-                });
-              }
-            ),
+            _buildFilterChip('All', FilterType.all, () {
+              setState(() {
+                _activeFilterType = FilterType.all;
+                _loadExercises();
+              });
+            }),
             const SizedBox(width: 8),
             _buildFilterChip(
-              _activeFilterType == FilterType.date 
-                ? DateFormat('dd MMM yyyy').format(_selectedDate)
-                : 'By Date', 
-              FilterType.date, 
-              () => _selectDate(context)
-            ),
+                _activeFilterType == FilterType.date
+                    ? DateFormat('dd MMM yyyy').format(_selectedDate)
+                    : 'By Date',
+                FilterType.date,
+                () => _selectDate(context)),
             const SizedBox(width: 8),
             _buildFilterChip(
-              _activeFilterType == FilterType.month 
-                ? DateFormat('MMMM yyyy').format(DateTime(_selectedYear, _selectedMonth))
-                : 'By Month', 
-              FilterType.month, 
-              () => _selectMonth(context)
-            ),
+                _activeFilterType == FilterType.month
+                    ? DateFormat('MMMM yyyy')
+                        .format(DateTime(_selectedYear, _selectedMonth))
+                    : 'By Month',
+                FilterType.month,
+                () => _selectMonth(context)),
             const SizedBox(width: 8),
             _buildFilterChip(
-              _activeFilterType == FilterType.year 
-                ? _selectedYear.toString()
-                : 'By Year', 
-              FilterType.year, 
-              () => _selectYear(context)
-            ),
+                _activeFilterType == FilterType.year
+                    ? _selectedYear.toString()
+                    : 'By Year',
+                FilterType.year,
+                () => _selectYear(context)),
           ],
         ),
       ),
     );
   }
-  
+
   //
   // UI Building methods
   //
-  
+
   /// Builds the search bar widget
   Widget _buildSearchBar() {
     return Padding(
@@ -493,15 +513,16 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
       ),
     );
   }
-  
+
   /// Builds the exercise content area (list or empty states)
-  Widget _buildExerciseContent(AsyncSnapshot<List<ExerciseLogHistoryItem>> snapshot) {
+  Widget _buildExerciseContent(
+      AsyncSnapshot<List<ExerciseLogHistoryItem>> snapshot) {
     if (snapshot.connectionState == ConnectionState.waiting) {
       return const Center(
         child: CircularProgressIndicator(),
       );
-    } 
-    
+    }
+
     if (snapshot.hasError) {
       return Center(
         child: Text(
@@ -512,23 +533,22 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
           ),
         ),
       );
-    } 
-    
+    }
+
     if (!snapshot.hasData || snapshot.data!.isEmpty) {
       return _buildEmptyStateForFilter();
-    } 
-    
+    }
+
     // Store all exercises for filtering
     _allExercises ??= snapshot.data!;
-    
+
     // Get exercises to display (filtered or all)
-    final exercises = _searchQuery.isNotEmpty 
-        ? _filteredExercises ?? [] 
-        : _allExercises!;
-    
+    final exercises =
+        _searchQuery.isNotEmpty ? _filteredExercises ?? [] : _allExercises!;
+
     return _buildSearchResults(exercises);
   }
-  
+
   /// Builds the empty state widget for when no exercises match the current filter
   Widget _buildEmptyStateForFilter() {
     return Center(

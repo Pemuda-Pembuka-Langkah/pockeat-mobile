@@ -8,35 +8,48 @@ import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
+import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
+import 'package:pockeat/features/food_log_history/di/food_log_history_module.dart';
+import 'package:pockeat/features/exercise_log_history/di/exercise_log_history_module.dart';
 
 final getIt = GetIt.instance;
- // coverage:ignore-start
+// coverage:ignore-start
 void setupDependencies() {
   // Register specialized services
   getIt.registerSingleton<FoodTextAnalysisService>(
     FoodTextAnalysisService.fromEnv(),
   );
-  
+
   getIt.registerSingleton<FoodImageAnalysisService>(
     FoodImageAnalysisService.fromEnv(),
   );
-  
+
   getIt.registerSingleton<NutritionLabelAnalysisService>(
     NutritionLabelAnalysisService.fromEnv(),
   );
-  
+
   getIt.registerSingleton<ExerciseAnalysisService>(
     ExerciseAnalysisService.fromEnv(),
+  );
+
+  getIt.registerSingleton<FoodTextInputRepository>(
+    FoodTextInputRepository(),
+  );
+
+  getIt.registerSingleton<FoodTextInputService>(
+    FoodTextInputService(),
   );
 
   getIt.registerSingleton<FoodScanRepository>(
     FoodScanRepository(),
   );
 
+
   getIt.registerSingleton<FoodScanPhotoService>(
     FoodScanPhotoService(),
   );
-  
+
   getIt.registerSingleton<GeminiService>(
     GeminiServiceImpl(
       foodTextAnalysisService: getIt<FoodTextAnalysisService>(),
@@ -45,5 +58,11 @@ void setupDependencies() {
       exerciseAnalysisService: getIt<ExerciseAnalysisService>(),
     ),
   );
+
+  // Register Food Log History module
+  FoodLogHistoryModule.register();
+
+  // Register Exercise Log History module
+  ExerciseLogHistoryModule.register();
 }
  // coverage:ignore-end

@@ -1,383 +1,149 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
-import 'package:pockeat/features/food_text_input/presentation/utils/food_entry_form_validator.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 
 class FoodEntryForm extends StatefulWidget {
   final Function(FoodEntry)? onSaved;
-  final bool weightRequired;
-  final int maxFoodNameWords;
-  final int maxDescriptionWords;
-  final int maxIngredientWords;
+  final bool isAnalyzing;
 
   const FoodEntryForm({
-    Key? key,
     this.onSaved,
-    this.weightRequired = true,
-    this.maxFoodNameWords = 20,
-    this.maxDescriptionWords = 50,
-    this.maxIngredientWords = 50,
-  }) : super(key: key);
+    this.isAnalyzing = false,
+    super.key,
+  });
 
   @override
   _FoodEntryFormState createState() => _FoodEntryFormState();
 }
 
 class _FoodEntryFormState extends State<FoodEntryForm> {
-  final TextEditingController _foodNameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _ingredientsController = TextEditingController();
-  final TextEditingController _weightController = TextEditingController();
-
-  String? _foodNameError;
+  final _descriptionController = TextEditingController();
   String? _descriptionError;
-  String? _ingredientsError;
-  String? _weightError;
-  String? _successMessage;
-  String? _analysisError;
-  bool _showForm = true;
-  FoodEntry? _savedFoodEntry;
-  FoodTextAnalysisService? _analysisService;
-  FoodAnalysisResult? _analysisResult;
+  
+  late FoodTextAnalysisService _analysisService;
 
   @override
   void initState() {
     super.initState();
-    _initializeAnalysisService();
+    _analysisService = FoodTextAnalysisService.fromEnv();
+  }
+  
+  void _validateAndSubmit() {
+    final input = _descriptionController.text.trim();
+    
+    if (input.isEmpty) {
+      setState(() {
+        _descriptionError = 'Food description cannot be empty';
+      });
+      return;
+    }
+    
+    setState(() {
+      _descriptionError = null;
+    });
+    
+    FoodEntry foodEntry = FoodEntry(
+      foodDescription: input,
+    );
+
+    widget.onSaved?.call(foodEntry);
   }
 
   @override
   void dispose() {
-    _foodNameError = null;
-    _descriptionError = null;
-    _ingredientsError = null;
-    _weightError = null;
-    _successMessage = null;
-    _analysisError = null;
-    _showForm = true;
-    _savedFoodEntry = null;
-
-    _foodNameController.dispose();
     _descriptionController.dispose();
-    _ingredientsController.dispose();
-    _weightController.dispose();
-    _analysisService = null;
-    
     super.dispose();
-  }
-
-  Future<void> _initializeAnalysisService() async {
-    try {
-      // Use the existing factory method instead of initialize()
-      _analysisService = FoodTextAnalysisService.fromEnv();
-    } catch (e) {
-      // Handle initialization error gracefully
-      setState(() {
-        _analysisError = 'Failed to initialize analysis service: ${e.toString()}';
-      });
-    }
-  }
-
-  Future<void> _performAnalysis() async {
-    if (_analysisService == null) {
-      setState(() {
-        _analysisError = 'Analysis service is not initialized';
-      });
-      return;
-    }
-
-    try {
-      final foodEntry = _savedFoodEntry;
-      if (foodEntry == null) return;
-
-      final combinedText = "${foodEntry.foodName}: ${foodEntry.description}. Ingredients: ${foodEntry.ingredients}";
-      final result = await _analysisService!.analyze(combinedText);
-      
-      setState(() {
-        _successMessage = 'Food analyzed successfully!';
-        _analysisResult = result;
-      });
-    } catch (e) {
-      setState(() {
-        _analysisError = 'Failed to analyze food entry: ${e.toString()}';
-      });
-    }
-  }
-
-  void _saveForm() {
-    setState(() {
-      _foodNameError = null;
-      _descriptionError = null;
-      _ingredientsError = null;
-      _weightError = null;
-      _successMessage = null;
-      _analysisError = null;
-    });
-
-    // Validate all required fields
-    _foodNameError = FormValidator.validateFoodName(_foodNameController.text.trim(), widget.maxFoodNameWords);
-    _descriptionError = FormValidator.validateDescription(_descriptionController.text.trim(), widget.maxDescriptionWords);
-    _ingredientsError = FormValidator.validateIngredients(_ingredientsController.text.trim(), widget.maxIngredientWords);
-    
-    // Always validate weight if required
-    if (widget.weightRequired) {
-      _weightError = FormValidator.validateWeight(_weightController.text.trim());
-    }
-
-    setState(() {});
-
-    bool isValid = _foodNameError == null &&
-        _descriptionError == null &&
-        _ingredientsError == null &&
-        (!widget.weightRequired || _weightError == null);
-
-    if (isValid) {
-      int? weight;
-      if (_weightController.text.trim().isNotEmpty) {
-        weight = double.tryParse(_weightController.text)?.toInt();
-        if (widget.weightRequired && (weight == null || weight <= 0)) {
-          setState(() {
-            _weightError = 'Please enter a valid number greater than 0';
-          });
-          return;
-        }
-      } else if (widget.weightRequired) {
-        setState(() {
-          _weightError = 'Please enter a valid number';
-        });
-        return;
-      }
-
-      FoodEntry foodEntry = FoodEntry(
-        foodName: _foodNameController.text.trim(),
-        description: _descriptionController.text.trim(),
-        ingredients: _ingredientsController.text.trim(),
-        weight: widget.weightRequired ? weight : null,
-      );
-
-      setState(() {
-        _successMessage = 'Food entry is saved successfully!';
-        _showForm = false;
-        _savedFoodEntry = foodEntry;
-      });
-
-      if (widget.onSaved != null) {
-        widget.onSaved!(foodEntry);
-      }
-
-      // Only perform analysis if weight is provided
-      if (weight != null) {
-        _performAnalysis();
-      }
-    }
-  }
-
-  Widget _buildTextField({
-    required Key key,
-    required TextEditingController controller,
-    required String label,
-    String? errorText,
-    int maxLines = 1,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextField(
-        key: key,
-        controller: controller,
-        maxLines: maxLines,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: Colors.black54),
-          errorText: errorText,
-          errorStyle: const TextStyle(
-            color: Color(0xFFFF6B6B),
-            fontSize: 12,
-          ),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(
-              color: Colors.black12,
-              width: 1,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(
-              color: Colors.black12,
-              width: 1,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(
-              color: Color(0xFF4ECDC4),
-              width: 2,
-            ),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(
-              color: Color(0xFFFF6B6B),
-              width: 2,
-            ),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(
-              color: Color(0xFFFF6B6B),
-              width: 2,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAnalysisRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_successMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Text(
-                  _successMessage!,
-                  style: const TextStyle(
-                    color: Color(0xFF4ECDC4),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Describe your food',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Provide details about what you ate, including ingredients and portion sizes',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _descriptionController,
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: 'Example: "Grilled chicken salad with lettuce, tomatoes, and olive oil dressing" or "Bowl of oatmeal with blueberries"',
+              hintStyle: const TextStyle(color: Colors.black38),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.black26),
               ),
-            if (_analysisResult != null) ...[
-              const Divider(height: 24),
-              const Text(
-                'Analysis Results',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              Card(
-                elevation: 2,
+              errorText: _descriptionError,
+            ),
+            onChanged: (_) {
+              if (_descriptionError != null) {
+                setState(() {
+                  _descriptionError = null;
+                });
+              }
+            },
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: widget.isAnalyzing ? null : _validateAndSubmit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4ECDC4), // Keeping your app's original color
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      _buildAnalysisRow('Calories', '${_analysisResult!.nutritionInfo.calories} kcal'),
-                      const Divider(height: 16),
-                      _buildAnalysisRow('Protein', '${_analysisResult!.nutritionInfo.protein}g'),
-                      _buildAnalysisRow('Carbs', '${_analysisResult!.nutritionInfo.carbs}g'),
-                      _buildAnalysisRow('Fat', '${_analysisResult!.nutritionInfo.fat}g'),
-                      _buildAnalysisRow('Fiber', '${_analysisResult!.nutritionInfo.fiber}g'),
-                      _buildAnalysisRow('Sugar', '${_analysisResult!.nutritionInfo.sugar}g'),
-                      _buildAnalysisRow('Sodium', '${_analysisResult!.nutritionInfo.sodium}mg'),
-                    ],
-                  ),
-                ),
+                disabledBackgroundColor: Colors.grey,
               ),
-            ],
-            if (_showForm) ...[
-              _buildTextField(
-                key: const ValueKey('foodNameField'),
-                controller: _foodNameController,
-                label: 'Food Name',
-                errorText: _foodNameError,
-              ),
-              _buildTextField(
-                key: const ValueKey('descriptionField'),
-                controller: _descriptionController,
-                label: 'Description',
-                errorText: _descriptionError,
-                maxLines: 3,
-              ),
-              _buildTextField(
-                key: const ValueKey('ingredientsField'),
-                controller: _ingredientsController,
-                label: 'Ingredients',
-                errorText: _ingredientsError,
-                maxLines: 3,
-              ),
-              if (widget.weightRequired)
-                _buildTextField(
-                  key: const ValueKey('weightField'),
-                  controller: _weightController,
-                  label: 'Weight (grams)',
-                  errorText: _weightError,
-                  keyboardType: TextInputType.number,
-                ),
-              ElevatedButton(
-                key: const ValueKey('saveButton'),
-                onPressed: _saveForm,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4ECDC4),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Save',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-            if (_analysisError != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  _analysisError!,
-                  style: const TextStyle(
-                    color: Color(0xFFFF6B6B),
-                    fontSize: 14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-          ],
-        ),
+              child: widget.isAnalyzing
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text(
+                      'Save & Analyze Food',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }

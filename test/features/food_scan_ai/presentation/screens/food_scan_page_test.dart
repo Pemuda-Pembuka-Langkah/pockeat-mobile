@@ -11,7 +11,33 @@ import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_se
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'dart:io';
 
-class MockCameraController extends Mock implements CameraController {}
+class MockCameraController extends Mock implements CameraController {
+  final _cameraValue = CameraValue(
+    isInitialized: true,
+    previewSize: const Size(1280, 720),
+    exposureMode: ExposureMode.auto,
+    focusMode: FocusMode.auto,
+    flashMode: FlashMode.off,
+    exposurePointSupported: false,
+    focusPointSupported: false,
+    deviceOrientation: DeviceOrientation.portraitUp,
+    isRecordingVideo: false,
+    isTakingPicture: false,
+    isStreamingImages: false,
+    isRecordingPaused: false,
+    description: const CameraDescription(
+      name: 'test',
+      lensDirection: CameraLensDirection.back,
+      sensorOrientation: 0,
+    ),
+  );
+
+  @override
+  Widget buildPreview() => const SizedBox(width: 1280, height: 720);
+
+  @override
+  CameraValue get value => _cameraValue;
+}
 
 class MockXFile extends Mock implements XFile {}
 
@@ -30,45 +56,42 @@ void main() {
   late MockFoodScanPhotoService mockFoodScanPhotoService;
 
   setUpAll(() {
+    final getIt = GetIt.instance;
+
     mockCameraController = MockCameraController();
     mockNavigatorObserver = MockNavigatorObserver();
     mockFoodScanPhotoService = MockFoodScanPhotoService();
 
-    when(() => mockCameraController.initialize()).thenAnswer((_) async => {});
-    when(() => mockCameraController.value).thenReturn(CameraValue(
-      isInitialized: true,
-      previewSize: const Size(1280, 720),
-      exposureMode: ExposureMode.auto,
-      focusMode: FocusMode.auto,
-      flashMode: FlashMode.off,
-      exposurePointSupported: false,
-      focusPointSupported: false,
-      deviceOrientation: DeviceOrientation.portraitUp,
-      isRecordingVideo: false,
-      isTakingPicture: false,
-      isStreamingImages: false,
-      isRecordingPaused: false,
-      description: const CameraDescription(
-        name: 'test',
-        lensDirection: CameraLensDirection.back,
-        sensorOrientation: 0,
-      ),
-    ));
-
-    registerFallbackValue(MockCameraController());
-    registerFallbackValue(MockRoute());
-    registerFallbackValue(MockXFile());
-    registerFallbackValue(MockFile());
-    registerFallbackValue(File(''));
-
-    // Daftarkan mock service ke GetIt
-    final getIt = GetIt.instance;
-    if (getIt.isRegistered<FoodScanPhotoService>()) {
-      getIt.unregister<FoodScanPhotoService>();
-    }
+    // mockFoodScanPhotoService to getIt
     getIt.registerSingleton<FoodScanPhotoService>(mockFoodScanPhotoService);
 
-    // Berikan mock controller ke ScanFoodPage
+    // Register fallback values
+    registerFallbackValue(const CameraDescription(
+      name: 'test',
+      lensDirection: CameraLensDirection.back,
+      sensorOrientation: 0,
+    ));
+    registerFallbackValue(FlashMode.off);
+    registerFallbackValue(MockXFile());
+    registerFallbackValue(File(''));
+    registerFallbackValue(MockRoute());
+  });
+
+  setUp(() {
+    // Reset mocks before each test
+    reset(mockCameraController);
+    reset(mockNavigatorObserver);
+    reset(mockFoodScanPhotoService);
+
+    // Setup basic mock behaviors
+    when(() => mockCameraController.initialize()).thenAnswer((_) async => {});
+    when(() => mockCameraController.setFlashMode(any()))
+        .thenAnswer((_) async => {});
+    when(() => mockCameraController.takePicture())
+        .thenAnswer((_) async => MockXFile());
+    when(() => mockCameraController.dispose()).thenAnswer((_) async => {});
+
+    // Create test widget
     scanFoodPage = MaterialApp(
       home: ScanFoodPage(
         cameraController: mockCameraController,
@@ -77,25 +100,12 @@ void main() {
     );
   });
 
-  setUp(() {
-    clearInteractions(mockCameraController);
-  });
-
-  tearDownAll(() {
-    // Bersihkan GetIt setelah semua test selesai
-    final getIt = GetIt.instance;
-    if (getIt.isRegistered<FoodScanPhotoService>()) {
-      getIt.unregister<FoodScanPhotoService>();
-    }
-  });
-
   testWidgets('Initial state variables are set correctly',
       (WidgetTester tester) async {
     await tester.pumpWidget(scanFoodPage);
 
     // Get the state
     final state = tester.state<ScanFoodPageState>(find.byType(ScanFoodPage));
-    
 
     // Test initial values
     expect(state.scanProgress, 0.0);
@@ -124,7 +134,8 @@ void main() {
       (WidgetTester tester) async {
     await tester.pumpWidget(scanFoodPage);
 
-    expect(find.text('Scan'), findsOneWidget);
+    expect(find.text('Food'), findsOneWidget);
+    expect(find.text('Label'), findsOneWidget);
   });
 
   testWidgets('Camera initialization works correctly',
@@ -212,7 +223,7 @@ void main() {
     final scanDecoration = scanContainer.decoration as BoxDecoration;
     expect(scanDecoration.color, const Color(0xFF4ECDC4)); // primaryGreen
     // Verify text styles
-    final scanText = tester.widget<Text>(find.text('Scan'));
+    final scanText = tester.widget<Text>(find.text('Food'));
 
     expect(scanText.style?.color, Colors.white);
     expect(scanText.style?.fontWeight, FontWeight.w600);
@@ -240,7 +251,7 @@ void main() {
     expect(decoration.borderRadius, BorderRadius.circular(20));
 
     // Test text style consistency for Scan button
-    final text = tester.widget<Text>(find.text('Scan'));
+    final text = tester.widget<Text>(find.text('Food'));
     expect(text.style?.color, Colors.white);
     expect(text.style?.fontWeight, FontWeight.w600);
   });
@@ -255,5 +266,97 @@ void main() {
 
     // Verify navigation pop was called
     verify(() => mockNavigatorObserver.didPop(any(), any())).called(1);
+  });
+
+  testWidgets('Dialog should appear when taking picture in label scan mode',
+      (WidgetTester tester) async {
+    // Arrange
+    final mockImage = MockXFile();
+    when(() => mockImage.path).thenReturn('test/path/image.jpg');
+    when(() => mockCameraController.takePicture())
+        .thenAnswer((_) async => mockImage);
+
+    await tester.pumpWidget(scanFoodPage);
+    // Tunggu inisialisasi kamera
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Ubah ke mode label scan
+    await tester.tap(find.byKey(const Key('mode_button_1')));
+    // Tunggu state update
+    await tester.pump();
+
+    // Ambil gambar
+    await tester.tap(find.byKey(const Key('camera_button')));
+    // Tunggu dialog muncul
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Assert
+    expect(find.text('Serving Size'), findsOneWidget);
+    expect(find.text('Berapa serving size yang Anda makan?'), findsOneWidget);
+  });
+
+  // Tambahkan test untuk interaksi dengan dialog
+  testWidgets('Dialog should handle serving size input correctly',
+      (WidgetTester tester) async {
+    // Arrange
+    final mockImage = MockXFile();
+    when(() => mockImage.path).thenReturn('test/path/image.jpg');
+    when(() => mockCameraController.takePicture())
+        .thenAnswer((_) async => mockImage);
+
+    await tester.pumpWidget(scanFoodPage);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Ubah ke mode label scan
+    await tester.tap(find.byKey(const Key('mode_button_1')));
+    await tester.pump();
+
+    // Buka dialog
+    await tester.tap(find.byKey(const Key('camera_button')));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Input serving size
+    await tester.enterText(find.byType(TextField), '2.5');
+    await tester.pump();
+
+    // Tekan tombol konfirmasi
+    await tester.tap(find.text('Konfirmasi'));
+    await tester.pumpAndSettle();
+
+    // Verify navigation to NutritionPage
+    final nutritionPageFinder = find.byType(NutritionPage);
+    expect(nutritionPageFinder, findsOneWidget);
+
+    final NutritionPage nutritionPage = tester.widget(nutritionPageFinder);
+    expect(nutritionPage.imagePath, 'test/path/image.jpg');
+    expect(nutritionPage.isLabelScan, isTrue);
+    expect(nutritionPage.servingSize, 2.5);
+  });
+
+  testWidgets('Dialog should handle invalid serving size input',
+      (WidgetTester tester) async {
+    // Arrange
+    final mockImage = MockXFile();
+    when(() => mockImage.path).thenReturn('test/path/image.jpg');
+    when(() => mockCameraController.takePicture())
+        .thenAnswer((_) async => mockImage);
+
+    await tester.pumpWidget(scanFoodPage);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Ubah ke mode label scan
+    await tester.tap(find.byKey(const Key('mode_button_1')));
+    await tester.pump();
+
+    // Buka dialog
+    await tester.tap(find.byKey(const Key('camera_button')));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Input invalid serving size
+    await tester.enterText(find.byType(TextField), '-1');
+    await tester.pump();
+
+    // Verify error message
+    expect(find.text('Mohon masukkan angka positif'), findsOneWidget);
   });
 }
