@@ -68,14 +68,7 @@ class FoodInputPage extends StatelessWidget {
               title: 'Input Manually',
               subtitle: 'Search or prompt food details',
               color: primaryPink,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FoodTextInputPage(),
-                  ),
-                );
-              },
+              route: '/food-text-input',
             ),
           ],
         ),
