@@ -29,6 +29,7 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/food_log_history/presentation/screens/food_detail_page.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
+import 'package:pockeat/features/food_text_input/presentation/pages/food_text_input_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -146,6 +147,7 @@ class MyApp extends StatelessWidget {
               ),
               ResolutionPreset.max,
             )),
+        '/food-text-input': (context) => const  FoodTextInputPage(),
         '/add-food': (context) => const FoodInputPage(),
         '/food-analysis': (context) => const AIAnalysisScreen(),
         '/add-exercise': (context) => const ExerciseInputPage(),
