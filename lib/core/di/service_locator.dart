@@ -45,9 +45,6 @@ void setupDependencies() {
     FoodScanRepository(),
   );
 
-  // getIt.registerLazySingleton<FoodTextInputRepository>(
-  // () => FoodTextInputRepository(),
-  // );
 
   getIt.registerSingleton<FoodScanPhotoService>(
     FoodScanPhotoService(),

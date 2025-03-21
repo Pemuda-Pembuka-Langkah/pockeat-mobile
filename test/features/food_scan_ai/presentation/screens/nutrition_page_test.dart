@@ -290,6 +290,28 @@ void main() {
     await tester.pumpAndSettle();
   });
   
+   testWidgets('Should call analyzeNutritionLabelPhoto when isLabelScan is true',
+        (WidgetTester tester) async {
+      // Arrange
+      when(() => mockFoodScanPhotoService.analyzeNutritionLabelPhoto(any(), any()))
+          .thenAnswer((_) async => testFoodResult);
+
+      final page = MaterialApp(
+        home: NutritionPage(
+          imagePath: testImagePath,
+          isLabelScan: true,
+          servingSize: 2.0,
+        ),
+      );
+
+      // Act
+      await tester.pumpWidget(page);
+      await tester.pumpAndSettle();
+
+      // Assert
+      verify(() => mockFoodScanPhotoService.analyzeNutritionLabelPhoto(any(), 2.0)).called(1);
+      verifyNever(() => mockFoodScanPhotoService.analyzeFoodPhoto(any()));
+    });
   
 }
 
