@@ -1,8 +1,10 @@
 # Changelog
-## V 1.2.0
+## v1.2.0
 Release Date: TBD
 ### Features
 - Fitur registrasi dengan email dan password
+### Technical
+- Implementasi fitur registrasi, verifikasi email, dan deeplink untuk in-app verification.
 ## v1.1.2 - Enhanced Food Analysis & Label
 Release Date: March 17, 2025
 ### Features
