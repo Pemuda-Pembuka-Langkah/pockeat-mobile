@@ -9,6 +9,7 @@ class SwimmingActivity extends CardioActivity {
 
   SwimmingActivity({
     super.id,
+    required super.userId,
     required super.date,
     required super.startTime,
     required super.endTime,
@@ -55,6 +56,7 @@ class SwimmingActivity extends CardioActivity {
   factory SwimmingActivity.fromMap(Map<String, dynamic> map) {
     return SwimmingActivity(
       id: map['id'],
+      userId: map['userId'],
       date: DateTime.fromMillisecondsSinceEpoch(map['date']),
       startTime: DateTime.fromMillisecondsSinceEpoch(map['startTime']),
       endTime: DateTime.fromMillisecondsSinceEpoch(map['endTime']),
@@ -78,6 +80,7 @@ class SwimmingActivity extends CardioActivity {
   }) {
     return SwimmingActivity(
       id: id ?? this.id,
+      userId: userId,
       date: date ?? this.date,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,

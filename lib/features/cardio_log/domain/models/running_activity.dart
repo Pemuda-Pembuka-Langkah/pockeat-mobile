@@ -7,6 +7,7 @@ class RunningActivity extends CardioActivity {
 
   RunningActivity({
     super.id,
+    required super.userId,
     required super.date,
     required super.startTime,
     required super.endTime,
@@ -43,6 +44,7 @@ class RunningActivity extends CardioActivity {
   factory RunningActivity.fromMap(Map<String, dynamic> map) {
     return RunningActivity(
       id: map['id'],
+      userId: map['userId'],
       date: DateTime.fromMillisecondsSinceEpoch(map['date']),
       startTime: DateTime.fromMillisecondsSinceEpoch(map['startTime']),
       endTime: DateTime.fromMillisecondsSinceEpoch(map['endTime']),
@@ -62,6 +64,7 @@ class RunningActivity extends CardioActivity {
   }) {
     return RunningActivity(
       id: id ?? this.id,
+      userId: userId,
       date: date ?? this.date,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,

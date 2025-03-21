@@ -15,6 +15,7 @@ class CyclingActivity extends CardioActivity {
 
   CyclingActivity({
     super.id,
+    required super.userId,
     required super.date,
     required super.startTime,
     required super.endTime,
@@ -42,6 +43,7 @@ class CyclingActivity extends CardioActivity {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'userId': userId,
       'date': date.millisecondsSinceEpoch,
       'startTime': startTime.millisecondsSinceEpoch,
       'endTime': endTime.millisecondsSinceEpoch,
@@ -73,6 +75,7 @@ class CyclingActivity extends CardioActivity {
 
     return CyclingActivity(
       id: map['id'],
+      userId: map['userId'],
       date: DateTime.fromMillisecondsSinceEpoch(map['date']),
       startTime: DateTime.fromMillisecondsSinceEpoch(map['startTime']),
       endTime: DateTime.fromMillisecondsSinceEpoch(map['endTime']),
@@ -94,6 +97,7 @@ class CyclingActivity extends CardioActivity {
   }) {
     return CyclingActivity(
       id: id ?? this.id,
+      userId: userId,
       date: date ?? this.date,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
