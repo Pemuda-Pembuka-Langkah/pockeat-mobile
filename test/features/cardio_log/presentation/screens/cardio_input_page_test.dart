@@ -15,12 +15,19 @@ import 'cardio_input_page_test.mocks.dart';
 
 @GenerateMocks([CardioRepository])
 @GenerateMocks([FirebaseFirestore])
-
 void main() {
   late MockCardioRepository mockRepository;
+  late MockFirebaseAuth mockAuth;
+  late User mockUser;
 
   setUp(() {
     mockRepository = MockCardioRepository();
+    mockAuth = MockFirebaseAuth();
+    mockUser = MockUser();
+
+    // Configure mock auth
+    when(mockUser.uid).thenReturn('test-user-id');
+    when(mockAuth.currentUser).thenReturn(mockUser);
   });
 
   // Helper to set up test widget
@@ -28,6 +35,7 @@ void main() {
     return MaterialApp(
       home: CardioInputPage(
         repository: mockRepository,
+        auth: mockAuth,
       ),
     );
   }
@@ -349,6 +357,8 @@ void main() {
         capturedActivity = invocation.positionalArguments[0];
         return Future.value('activity-id-123');
       });
+
+      expect(capturedActivity!.userId, 'test-user-id');
 
       await tester.pumpWidget(createCardioInputPage());
 
