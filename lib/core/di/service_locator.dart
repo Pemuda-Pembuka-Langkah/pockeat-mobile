@@ -1,5 +1,6 @@
 // lib/core/di/service_locator.dart
 import 'package:get_it/get_it.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_image_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
@@ -18,6 +19,7 @@ import 'package:pockeat/features/authentication/services/deep_link_service.dart'
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -51,9 +53,6 @@ void setupDependencies() {
     FoodScanRepository(),
   );
 
-  // getIt.registerLazySingleton<FoodTextInputRepository>(
-  // () => FoodTextInputRepository(),
-  // );
 
   getIt.registerSingleton<FoodScanPhotoService>(
     FoodScanPhotoService(),
@@ -88,5 +87,13 @@ void setupDependencies() {
 
   // Register Exercise Log History module
   ExerciseLogHistoryModule.register();
+
+  getIt.registerSingleton<FirebaseMessaging>(
+    FirebaseMessaging.instance,
+  );
+  
+  getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
+    FlutterLocalNotificationsPlugin(),
+  );
 }
  // coverage:ignore-end
