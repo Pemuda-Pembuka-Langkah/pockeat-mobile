@@ -5,9 +5,9 @@ class AIAnalysisSection extends StatelessWidget {
   final Color primaryGreen;
 
   const AIAnalysisSection({
-    Key? key,
+    super.key,
     required this.primaryGreen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

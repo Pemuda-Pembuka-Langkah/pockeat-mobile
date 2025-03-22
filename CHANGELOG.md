@@ -1,6 +1,11 @@
 # Changelog
-
-## v1.1.2 (Current) - Enhanced Food Analysis & Label
+## v1.2.0
+Release Date: TBD
+### Features
+- Fitur registrasi dengan email dan password
+### Technical
+- Implementasi fitur registrasi, verifikasi email, dan deeplink untuk in-app verification.
+## v1.1.2 - Enhanced Food Analysis & Label
 Release Date: March 17, 2025
 ### Features
 - Add Header & Detailed Description for Food Text Input Form
@@ -9,11 +14,11 @@ Release Date: March 17, 2025
 
 ### Technical
 - Reimplementasi service analisis gambar dan teks dengan alur:
- 1. Interaksi dengan model API high temperature untuk nama makanan dan deskripsi
- 2. Pencarian kemiripan pada dataset untuk hasil API sebelumnya
- 3. Analisis final dengan model low temperature untuk hasil yang lebih akurat dan berdasar
+- Interaksi dengan model API high temperature untuk nama makanan dan deskripsi
+- Pencarian kemiripan pada dataset untuk hasil API sebelumnya
+- Analisis final dengan model low temperature untuk hasil yang lebih akurat dan berdasar
 
-## v1.1.1 (Current) - Firebase Integration
+## v1.1.1 - Firebase Integration
 **Release Date: March 17, 2025**
 
 ### Features
