@@ -172,6 +172,24 @@ void main() {
       expect(repository.userChangesController.isClosed, isTrue);
     });
 
+    test('notifyUserChanged should handle closed controller', () {
+      // Arrange
+      final userModel = UserModel(
+        uid: 'test-user-id',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        photoURL: 'https://example.com/photo.jpg',
+        emailVerified: false,
+        createdAt: DateTime.now(),
+      );
+
+      // Close controller
+      repository.dispose();
+
+      // Act & Assert - should not throw
+      repository.notifyUserChanged(userModel);
+    });
+
     test('UserRepositoryException should format message with code', () {
       // Arrange
       final exception = UserRepositoryException(

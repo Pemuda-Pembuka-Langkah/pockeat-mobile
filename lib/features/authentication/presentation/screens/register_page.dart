@@ -3,8 +3,6 @@ import 'package:flutter/gestures.dart';
 import 'package:intl/intl.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
-import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
 
 /// Registration page for new users
 ///
@@ -42,8 +40,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final Color bgColor = const Color(0xFFF9F9F9);
 
   late RegisterService _registerService;
-  late DeepLinkService _deepLinkService;
-
   // Gender options list
   final List<String> _genderOptions = ['Male', 'Female', 'Other'];
 
@@ -51,17 +47,9 @@ class _RegisterPageState extends State<RegisterPage> {
   void initState() {
     super.initState();
     _registerService = GetIt.instance<RegisterService>();
-    _deepLinkService = GetIt.instance<DeepLinkService>();
   }
 
-  void _navigateToActivatedPage() {
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed(
-        '/account-activated',
-        arguments: {'email': _emailController.text.trim()},
-      );
-    }
-  }
+
 
   @override
   void dispose() {

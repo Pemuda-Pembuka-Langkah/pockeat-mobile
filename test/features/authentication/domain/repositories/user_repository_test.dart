@@ -225,6 +225,41 @@ void main() {
       verify(mockStreamRepo.notifyUserChanged(any)).called(1);
     });
 
+    test('updateUserProfile should throw when userId is empty', () async {
+      // Act & Assert - menerima UserRepositoryException yang dilempar implementasi
+      expect(
+        userRepository.updateUserProfile(
+          userId: '',
+          displayName: 'Test Name',
+        ),
+        throwsA(isA<UserRepositoryException>()),
+      );
+    });
+
+    test('updateUserProfile should handle errors in auth update', () async {
+      // Setup mock untuk validateUserAccess berhasil
+      when(mockAuthRepo.validateUserAccess('test-user-id')).thenReturn(null);
+
+      // Setup mock untuk updateUserProfile yang akan melempar exception
+      final exception = UserRepositoryException(
+        'Failed to update auth profile',
+        code: 'auth-failed',
+      );
+
+      when(mockAuthRepo.updateUserProfile(
+        displayName: 'Updated Name',
+        photoURL: null,
+      )).thenThrow(exception);
+
+      // Act & Assert
+      expect(
+          () => userRepository.updateUserProfile(
+                userId: 'test-user-id',
+                displayName: 'Updated Name',
+              ),
+          throwsA(isA<UserRepositoryException>()));
+    });
+
     test('updateUserProfile should throw exception when updating another user',
         () async {
       // Arrange
@@ -321,6 +356,40 @@ void main() {
         () => userRepository.isEmailAlreadyRegistered('invalid-email'),
         throwsA(predicate(
             (e) => e is UserRepositoryException && e.code == 'invalid-email')),
+      );
+    });
+
+    test('isEmailAlreadyRegistered should delegate to auth repository',
+        () async {
+      // Arrange
+      when(mockAuthRepo.isEmailAlreadyRegistered('test@example.com'))
+          .thenAnswer((_) async => true);
+
+      // Act
+      final result =
+          await userRepository.isEmailAlreadyRegistered('test@example.com');
+
+      // Assert
+      expect(result, isTrue);
+      verify(mockAuthRepo.isEmailAlreadyRegistered('test@example.com'))
+          .called(1);
+    });
+
+    test('isEmailAlreadyRegistered should handle exceptions', () async {
+      // Arrange
+      final exception = UserRepositoryException(
+        'Invalid email format',
+        code: 'invalid-email',
+      );
+      when(mockAuthRepo.isEmailAlreadyRegistered('invalid-email'))
+          .thenThrow(exception);
+
+      // Act & Assert
+      expect(
+        () => userRepository.isEmailAlreadyRegistered('invalid-email'),
+        throwsA(predicate(
+          (e) => e is UserRepositoryException && e.code == 'invalid-email',
+        )),
       );
     });
   });
