@@ -305,6 +305,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  dbus:
+    dependency: transitive
+    description:
+      name: dbus
+      sha256: "79e0c23480ff85dc68de79e2cd6334add97e48f7f4865d17686dd6ea81a47e8c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.11"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -321,14 +329,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.2"
-  dbus:
-    dependency: transitive
-    description:
-      name: dbus
-      sha256: "79e0c23480ff85dc68de79e2cd6334add97e48f7f4865d17686dd6ea81a47e8c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.11"
   equatable:
     dependency: transitive
     description:
@@ -640,14 +640,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
-  health:
-    dependency: "direct main"
-    description:
-      name: health
-      sha256: fce29d93359e09b42e9231339be83dabd20baf5dc50c7ff2723bdf79ba6cfc9d
-      url: "https://pub.dev"
-    source: hosted
-    version: "12.1.0"
   gtk:
     dependency: transitive
     description:
@@ -656,7 +648,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-
+  health:
+    dependency: "direct main"
+    description:
+      name: health
+      sha256: fce29d93359e09b42e9231339be83dabd20baf5dc50c7ff2723bdf79ba6cfc9d
+      url: "https://pub.dev"
+    source: hosted
+    version: "12.1.0"
   http:
     dependency: "direct main"
     description:
@@ -961,14 +960,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
-  platform:
-    dependency: transitive
-    description:
-      name: platform
-      sha256: "5d6b1b0036a5f331ebc77c850ebc8506cbc1e9416c27e59b439f917a902a4984"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.6"
   petitparser:
     dependency: transitive
     description:
@@ -977,6 +968,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
+  platform:
+    dependency: transitive
+    description:
+      name: platform
+      sha256: "5d6b1b0036a5f331ebc77c850ebc8506cbc1e9416c27e59b439f917a902a4984"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.6"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -1261,10 +1260,7 @@ packages:
       sha256: "21ec76dfc731550fd3e2ce7a33a9ea90b828fdf19a5c3bcf556fa992cfa99852"
       url: "https://pub.dev"
     source: hosted
-<<<<<<< HEAD
     version: "1.1.5"
-=======
-    version: "2.1.0"
   xdg_directories:
     dependency: transitive
     description:
@@ -1281,7 +1277,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
->>>>>>> refs/remotes/origin/PBI-dev-pesol
   yaml:
     dependency: transitive
     description:
