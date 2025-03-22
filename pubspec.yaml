@@ -61,13 +61,9 @@ dependencies:
   permission_handler: ^11.4.0  
   fl_chart: ^0.70.2
   android_intent_plus: ^5.3.0
-<<<<<<< HEAD
   device_info_plus: ^10.1.2
-=======
-  device_info_plus: ^11.3.3
   app_links: ^3.4.3
   meta: ^1.16.0
->>>>>>> refs/remotes/origin/PBI-dev-pesol
 
 dev_dependencies:
   flutter_test:
