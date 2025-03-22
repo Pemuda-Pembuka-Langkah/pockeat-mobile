@@ -173,7 +173,8 @@ void main() {
     await tester.pump(const Duration(seconds: 2)); // Finish loading
 
     // Verify error message is shown
-    expect(find.text('Incorrect password. Please try again.'), findsOneWidget);
+    expect(find.text('Incorrect password. Please check your password.'),
+        findsOneWidget);
   });
 
   testWidgets('Should toggle password visibility', (WidgetTester tester) async {
@@ -223,7 +224,7 @@ void main() {
         home: const LoginPage(),
         navigatorObservers: [mockObserver],
         routes: {
-          '': (context) => const Scaffold(body: Text('Register Page')),
+          '/register': (context) => const Scaffold(body: Text('Register Page')),
         },
       ),
     );
@@ -236,6 +237,145 @@ void main() {
     // Tap on the RichText containing "Sign Up"
     await tester.tap(signUpFinder);
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('Should verify forgot password link exists',
+      (WidgetTester tester) async {
+    // Setup screen size
+    tester.binding.window.physicalSizeTestValue = const Size(600, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+
+    // Build app
+    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+
+    // Find and verify "Forgot Password?" link
+    final forgotPasswordFinder = find.text('Forgot Password?');
+    expect(forgotPasswordFinder, findsOneWidget);
+
+    // Tap on forgot password link
+    await tester.tap(forgotPasswordFinder);
+    await tester.pumpAndSettle();
+
+    // Currently this does nothing since navigation is commented out in the actual code
+    // We're just ensuring the link exists and is tappable
+  });
+
+  testWidgets('Should show loading indicator during login',
+      (WidgetTester tester) async {
+    // Setup screen size
+    tester.binding.window.physicalSizeTestValue = const Size(600, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+
+    // Setup delayed response to show loading state
+    when(mockLoginService.loginByEmail(
+      email: 'test@example.com',
+      password: 'Password123',
+    )).thenAnswer((_) async {
+      // Delay to show loading indicator
+      await Future.delayed(const Duration(seconds: 1));
+      return mockUserCredential;
+    });
+
+    // Build app
+    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+
+    // Fill form with valid data
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email'), 'test@example.com');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Password'), 'Password123');
+
+    // Submit form
+    await tester.tap(find.text('SIGN IN'));
+    await tester.pump(); // Start loading
+
+    // Verify loading indicator is shown
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('SIGN IN'),
+        findsNothing); // Button text is replaced with indicator
+
+    // Finish loading
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  testWidgets('Should handle error messages for various Firebase exceptions',
+      (WidgetTester tester) async {
+    // Setup screen size
+    tester.binding.window.physicalSizeTestValue = const Size(600, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+
+    // Build app
+    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+
+    // Test various error cases
+    final testCases = [
+      {
+        'error': FirebaseAuthException(code: 'user-not-found'),
+        'message':
+            'Email not registered. Please check your email or register first.'
+      },
+      {
+        'error': FirebaseAuthException(code: 'invalid-credential'),
+        'message': 'Invalid email or password. Please check your credentials.'
+      },
+      {
+        'error': FirebaseAuthException(code: 'user-disabled'),
+        'message': 'This account has been disabled. Please contact admin.'
+      },
+      {
+        'error': FirebaseAuthException(code: 'too-many-requests'),
+        'message': 'Too many login attempts. Please try again later.'
+      },
+      {
+        'error': FirebaseAuthException(code: 'invalid-email'),
+        'message': 'Invalid email format. Please check your email.'
+      },
+      {
+        'error': FirebaseAuthException(code: 'operation-not-allowed'),
+        'message':
+            'Login with email and password is not allowed. Please use another login method.'
+      },
+      {
+        'error': FirebaseAuthException(code: 'network-request-failed'),
+        'message':
+            'Network problem occurred. Please check your internet connection.'
+      },
+      {
+        'error':
+            FirebaseAuthException(code: 'unknown-code', message: 'Some error'),
+        'message': 'Login failed: Some error'
+      },
+      {
+        'error': Exception('Random error'),
+        'message':
+            'An unexpected error occurred during login. Please try again later.'
+      },
+    ];
+
+    for (final testCase in testCases) {
+      // Reset state
+      await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+
+      // Setup mock to throw specific exception
+      when(mockLoginService.loginByEmail(
+        email: 'test@example.com',
+        password: 'Password123',
+      )).thenThrow(testCase['error']!);
+
+      // Fill form
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Email'), 'test@example.com');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Password'), 'Password123');
+
+      // Submit form
+      await tester.tap(find.text('SIGN IN'));
+      await tester.pump(); // Start loading
+      await tester.pump(const Duration(seconds: 1)); // Allow error to process
+
+      // Verify error message
+      expect(find.text(testCase['message'] as String), findsOneWidget);
+    }
   });
 }
 
