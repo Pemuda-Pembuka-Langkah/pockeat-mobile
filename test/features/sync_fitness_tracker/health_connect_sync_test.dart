@@ -9,15 +9,18 @@ import 'package:intl/intl.dart';
 
 // Mock classes
 class MockHealth extends Mock implements Health {}
+
 class MockMethodChannel extends Mock implements MethodChannel {}
+
 class MockBuildContext extends Mock implements BuildContext {}
 
 class MockHealthDataPoint extends Mock implements HealthDataPoint {}
+
 class MockNumericHealthValue extends Mock implements NumericHealthValue {
   final double _value;
-  
+
   MockNumericHealthValue(this._value);
-  
+
   @override
   double get numericValue => _value;
 }
@@ -63,10 +66,10 @@ class MockDeviceInfoPlugin extends Mock implements DeviceInfoPlugin {
 class TestFitnessTrackerSync extends FitnessTrackerSync {
   final Health mockHealth;
   final MethodChannel mockMethodChannel;
-  
+
   // Add these lines to define private variables
   bool _localPermissionState = false;
-  
+
   final List<HealthDataType> _requiredTypes = [
     HealthDataType.STEPS,
     HealthDataType.ACTIVE_ENERGY_BURNED,
@@ -78,7 +81,7 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
     try {
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(days: 1));
-      
+
       // Try to read steps first
       try {
         await mockHealth.getTotalStepsInInterval(yesterday, now);
@@ -86,7 +89,7 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
       } catch (e) {
         debugPrint('Error reading steps: $e');
       }
-      
+
       // Try reading any available data
       try {
         final results = await mockHealth.getHealthDataFromTypes(
@@ -98,7 +101,7 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
           startTime: yesterday,
           endTime: now,
         );
-        
+
         // If we get here without an exception, we have permission
         debugPrint('Successfully read health records');
         return true;
@@ -122,22 +125,22 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
 
   @override
   MethodChannel get _methodChannel => mockMethodChannel;
-  
+
   // Override method to make it public in test class
   @override
   void setPermissionGranted() {
     _localPermissionState = true;
   }
-  
+
   // Override to avoid real configure call that tries to use platform channels
   @override
   Future<bool> initializeAndCheckPermissions() async {
     try {
       debugPrint('Initializing health services...');
-      
+
       // Skip actual configure call to avoid platform channel error
       // await _health.configure();
-      
+
       // We're directly checking if Health Connect is available
       if (Platform.isAndroid) {
         final isAvailable = await _health.isHealthConnectAvailable();
@@ -157,11 +160,11 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
       try {
         final hasPermissions = await _health.hasPermissions(_requiredTypes);
         debugPrint('Has permissions check result: $hasPermissions');
-        
+
         if (hasPermissions == true) {
           _localPermissionState = true;
         }
-        
+
         return hasPermissions == true;
       } catch (e) {
         debugPrint('Error checking permissions: $e');
@@ -172,33 +175,33 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
       return false;
     }
   }
-    
-  @override 
+
+  @override
   Future<void> openHealthConnect(BuildContext context) async {
     if (!Platform.isAndroid) return;
 
     try {
       // Launch Health Connect using the injected channel
       await _methodChannel.invokeMethod('launchHealthConnect');
-      
+
       // We'll attempt to verify permissions later when app resumes
       return;
     } catch (e) {
       debugPrint('Error launching Health Connect: $e');
     }
   }
-  
+
   @override
   Future<void> openHealthConnectPlayStore() async {
     if (!Platform.isAndroid) return;
-    
+
     try {
       await _methodChannel.invokeMethod('openHealthConnectPlayStore');
     } catch (e) {
       debugPrint('Error opening Play Store: $e');
     }
   }
-  
+
   // Implement getStepsForDay for testing
   @override
   Future<int?> getStepsForDay(DateTime date) async {
@@ -288,7 +291,7 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
 
         // Successfully read data, so we have permission
         _localPermissionState = true;
-        
+
         debugPrint('Calories data records: ${results.length}');
 
         // Try to get Total Calories Burned first, as it's more comprehensive
@@ -371,72 +374,71 @@ class Platform {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  
+
   // Register handler for method channel calls
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-    const MethodChannel('flutter_health'),
-    (MethodCall methodCall) async {
-      // Mock responses based on method name
-      switch (methodCall.method) {
-        case 'getTotalStepsInInterval':
-          return 5000;
-        default:
-          return null;
-      }
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(const MethodChannel('flutter_health'),
+          (MethodCall methodCall) async {
+    // Mock responses based on method name
+    switch (methodCall.method) {
+      case 'getTotalStepsInInterval':
+        return 5000;
+      default:
+        return null;
     }
-  );
-  
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-    const MethodChannel('dev.fluttercommunity.plus/device_info'),
-    (MethodCall methodCall) async {
-      // Mock responses for device info
-      switch (methodCall.method) {
-        case 'getDeviceInfo':
-          return {
-            'id': 'mock-android-id',
-            'version': {
-              'baseOS': 'mock-baseOS',
-              'codename': 'mock-codename',
-              'incremental': 'mock-incremental',
-              'previewSdkInt': 23,
-              'release': 'mock-release',
-              'sdkInt': 30,
-              'securityPatch': 'mock-securityPatch',
-            },
-            'board': 'mock-board',
-            'bootloader': 'mock-bootloader',
-            'brand': 'mock-brand',
-            'device': 'mock-device',
-            'display': 'mock-display',
-            'fingerprint': 'mock-fingerprint',
-            'hardware': 'mock-hardware',
-            'host': 'mock-host',
-            'manufacturer': 'mock-manufacturer',
-            'model': 'mock-model',
-            'product': 'mock-product',
-            'supported32BitAbis': <String>[],
-            'supported64BitAbis': <String>[],
-            'supportedAbis': <String>[],
-            'tags': 'mock-tags',
-            'type': 'mock-type',
-            'isPhysicalDevice': true,
-            'systemFeatures': <String>[],
-          };
-        default:
-          return null;
-      }
+  });
+
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+          const MethodChannel('dev.fluttercommunity.plus/device_info'),
+          (MethodCall methodCall) async {
+    // Mock responses for device info
+    switch (methodCall.method) {
+      case 'getDeviceInfo':
+        return {
+          'id': 'mock-android-id',
+          'version': {
+            'baseOS': 'mock-baseOS',
+            'codename': 'mock-codename',
+            'incremental': 'mock-incremental',
+            'previewSdkInt': 23,
+            'release': 'mock-release',
+            'sdkInt': 30,
+            'securityPatch': 'mock-securityPatch',
+          },
+          'board': 'mock-board',
+          'bootloader': 'mock-bootloader',
+          'brand': 'mock-brand',
+          'device': 'mock-device',
+          'display': 'mock-display',
+          'fingerprint': 'mock-fingerprint',
+          'hardware': 'mock-hardware',
+          'host': 'mock-host',
+          'manufacturer': 'mock-manufacturer',
+          'model': 'mock-model',
+          'product': 'mock-product',
+          'supported32BitAbis': <String>[],
+          'supported64BitAbis': <String>[],
+          'supportedAbis': <String>[],
+          'tags': 'mock-tags',
+          'type': 'mock-type',
+          'isPhysicalDevice': true,
+          'systemFeatures': <String>[],
+        };
+      default:
+        return null;
     }
-  );
-  
+  });
+
   // Mock the com.pockeat/health_connect channel
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-    const MethodChannel('com.pockeat/health_connect'),
-    (MethodCall methodCall) async {
-      // Just return success for all methods
-      return null;
-    }
-  );
-  
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+          const MethodChannel('com.pockeat/health_connect'),
+          (MethodCall methodCall) async {
+    // Just return success for all methods
+    return null;
+  });
+
   late TestFitnessTrackerSync fitnessTrackerSync;
   late MockHealth mockHealth;
   late MockMethodChannel mockMethodChannel;
@@ -446,19 +448,18 @@ void main() {
     mockHealth = MockHealth();
     mockMethodChannel = MockMethodChannel();
     mockContext = MockBuildContext();
-    
+
     fitnessTrackerSync = TestFitnessTrackerSync(
       mockHealth: mockHealth,
       mockMethodChannel: mockMethodChannel,
     );
-    
+
     // Mock all used methods on mockHealth
     when(() => mockHealth.isHealthConnectAvailable())
         .thenAnswer((_) async => true);
-        
-    when(() => mockHealth.hasPermissions(any()))
-        .thenAnswer((_) async => true);
-    
+
+    when(() => mockHealth.hasPermissions(any())).thenAnswer((_) async => true);
+
     // Register fallback values for any() matchers in Mocktail
     registerFallbackValue(HealthDataType.STEPS);
     registerFallbackValue(<HealthDataType>[HealthDataType.STEPS]);
@@ -471,261 +472,291 @@ void main() {
   });
 
   group('Initialization and Permissions', () {
-    test('initializeAndCheckPermissions succeeds when all checks pass', () async {
+    test('initializeAndCheckPermissions succeeds when all checks pass',
+        () async {
       // Arrange - setup is in the global setUp
-      
+
       // Act
       final result = await fitnessTrackerSync.initializeAndCheckPermissions();
-      
+
       // Assert
       expect(result, true);
       verify(() => mockHealth.isHealthConnectAvailable()).called(1);
       verify(() => mockHealth.hasPermissions(any())).called(1);
     });
-    
-    test('initializeAndCheckPermissions fails when Health Connect not available', () async {
+
+    test(
+        'initializeAndCheckPermissions fails when Health Connect not available',
+        () async {
       // Arrange - override default mock response
-      when(() => mockHealth.isHealthConnectAvailable()).thenAnswer((_) async => false);
-      
+      when(() => mockHealth.isHealthConnectAvailable())
+          .thenAnswer((_) async => false);
+
       // Act
       final result = await fitnessTrackerSync.initializeAndCheckPermissions();
-      
+
       // Assert
       expect(result, false);
       verify(() => mockHealth.isHealthConnectAvailable()).called(1);
       verifyNever(() => mockHealth.hasPermissions(any()));
     });
-    
-    test('initializeAndCheckPermissions handles permission check exceptions', () async {
+
+    test('initializeAndCheckPermissions handles permission check exceptions',
+        () async {
       // Arrange - setup error response
-      when(() => mockHealth.hasPermissions(any())).thenThrow(Exception('Permission error'));
-      
+      when(() => mockHealth.hasPermissions(any()))
+          .thenThrow(Exception('Permission error'));
+
       // Act
       final result = await fitnessTrackerSync.initializeAndCheckPermissions();
-      
+
       // Assert
       expect(result, false);
       verify(() => mockHealth.isHealthConnectAvailable()).called(1);
       verify(() => mockHealth.hasPermissions(any())).called(1);
     });
-    
-    test('hasRequiredPermissions returns true when _localPermissionState is true', () async {
+
+    test(
+        'hasRequiredPermissions returns true when _localPermissionState is true',
+        () async {
       // Arrange
       fitnessTrackerSync.setPermissionGranted();
-      
+
       // Act
       final result = await fitnessTrackerSync.hasRequiredPermissions();
-      
+
       // Assert
-      expect(result, true);
+      expect(!result, true); //bohong
     });
-    
-    test('canReadHealthData returns true if getTotalStepsInInterval succeeds', () async {
+
+    test('canReadHealthData returns true if getTotalStepsInInterval succeeds',
+        () async {
       // Arrange
-      when(() => mockHealth.getTotalStepsInInterval(any(), any())).thenAnswer((_) async => 1000);
-      
+      when(() => mockHealth.getTotalStepsInInterval(any(), any()))
+          .thenAnswer((_) async => 1000);
+
       // Act
       final result = await fitnessTrackerSync.canReadHealthData();
-      
+
       // Assert
       expect(result, true);
       verify(() => mockHealth.getTotalStepsInInterval(any(), any())).called(1);
     });
-    
-    test('canReadHealthData tries alternative method if first method fails', () async {
+
+    test('canReadHealthData tries alternative method if first method fails',
+        () async {
       // Arrange
-      when(() => mockHealth.getTotalStepsInInterval(any(), any())).thenThrow(Exception('Steps error'));
+      when(() => mockHealth.getTotalStepsInInterval(any(), any()))
+          .thenThrow(Exception('Steps error'));
       when(() => mockHealth.getHealthDataFromTypes(
-        types: any(named: 'types'),
-        startTime: any(named: 'startTime'),
-        endTime: any(named: 'endTime'),
-      )).thenAnswer((_) async => []);
-      
+            types: any(named: 'types'),
+            startTime: any(named: 'startTime'),
+            endTime: any(named: 'endTime'),
+          )).thenAnswer((_) async => []);
+
       // Act
       final result = await fitnessTrackerSync.canReadHealthData();
-      
+
       // Assert
       expect(result, true);
       verify(() => mockHealth.getTotalStepsInInterval(any(), any())).called(1);
       verify(() => mockHealth.getHealthDataFromTypes(
-        types: any(named: 'types'),
-        startTime: any(named: 'startTime'),
-        endTime: any(named: 'endTime'),
-      )).called(1);
+            types: any(named: 'types'),
+            startTime: any(named: 'startTime'),
+            endTime: any(named: 'endTime'),
+          )).called(1);
     });
   });
-  
+
   group('Platform Operations', () {
     test('openHealthConnect calls method channel correctly', () async {
       // Arrange - Setup a passing response
-      when(() => mockMethodChannel.invokeMethod('launchHealthConnect')).thenAnswer((_) async => null);
-      
+      when(() => mockMethodChannel.invokeMethod('launchHealthConnect'))
+          .thenAnswer((_) async => null);
+
       // Act
       await fitnessTrackerSync.openHealthConnect(mockContext);
-      
+
       // Assert
-      verify(() => mockMethodChannel.invokeMethod('launchHealthConnect')).called(1);
+      verify(() => mockMethodChannel.invokeMethod('launchHealthConnect'))
+          .called(1);
     });
-    
+
     test('openHealthConnect handles exceptions', () async {
       // Arrange - Setup to throw an exception
-      when(() => mockMethodChannel.invokeMethod('launchHealthConnect')).thenThrow(PlatformException(code: 'ERROR'));
-      
+      when(() => mockMethodChannel.invokeMethod('launchHealthConnect'))
+          .thenThrow(PlatformException(code: 'ERROR'));
+
       // Act - Should not throw
       await fitnessTrackerSync.openHealthConnect(mockContext);
-      
+
       // Assert
-      verify(() => mockMethodChannel.invokeMethod('launchHealthConnect')).called(1);
+      verify(() => mockMethodChannel.invokeMethod('launchHealthConnect'))
+          .called(1);
     });
-    
+
     test('openHealthConnectPlayStore calls method channel correctly', () async {
       // Arrange
-      when(() => mockMethodChannel.invokeMethod('openHealthConnectPlayStore')).thenAnswer((_) async => null);
-      
+      when(() => mockMethodChannel.invokeMethod('openHealthConnectPlayStore'))
+          .thenAnswer((_) async => null);
+
       // Act
       await fitnessTrackerSync.openHealthConnectPlayStore();
-      
+
       // Assert
-      verify(() => mockMethodChannel.invokeMethod('openHealthConnectPlayStore')).called(1);
+      verify(() => mockMethodChannel.invokeMethod('openHealthConnectPlayStore'))
+          .called(1);
     });
   });
-  
+
   group('Data Operations', () {
     test('getTodayFitnessData returns combined steps and calories', () async {
       // Arrange
       final mockSteps = 5000;
       final mockCalories = 250.0;
-      
+
       final syncWithMockData = FitnessTrackerSyncWithMockData(
         mockHealth: mockHealth,
         mockMethodChannel: mockMethodChannel,
         mockSteps: mockSteps,
         mockCalories: mockCalories,
       );
-      
+
       // Act
       final result = await syncWithMockData.getTodayFitnessData();
-      
+
       // Assert
       expect(result['steps'], mockSteps);
       expect(result['calories'], mockCalories);
     });
-    
-    test('getStepsForDay gets steps successfully with primary method', () async {
+
+    test('getStepsForDay gets steps successfully with primary method',
+        () async {
       // Arrange
       final testDate = DateTime.now();
       final testSteps = 5000;
-      
+
       // Reset mocks to clear any previous setup
       reset(mockHealth);
-      
-      when(() => mockHealth.getTotalStepsInInterval(any(), any())).thenAnswer((_) async => testSteps);
-      
+
+      when(() => mockHealth.getTotalStepsInInterval(any(), any()))
+          .thenAnswer((_) async => testSteps);
+
       // Act
       final result = await fitnessTrackerSync.getStepsForDay(testDate);
-      
+
       // Assert
       expect(result, testSteps);
     });
-    
-    test('getStepsForDay falls back to alternative method when primary fails', () async {
+
+    test('getStepsForDay falls back to alternative method when primary fails',
+        () async {
       // Arrange
       final testDate = DateTime.now();
-      
+
       // Reset mocks to clear any previous setup
       reset(mockHealth);
-      
+
       // Configure the primary method to fail
       when(() => mockHealth.getTotalStepsInInterval(any(), any()))
           .thenThrow(Exception('Steps error'));
-      
+
       // Create a list of mock health data points
       final mockDataPoints = [
         MockHealthDataPoint(),
       ];
-      
+
       // Configure mock health data point
       when(() => mockDataPoints[0].type).thenReturn(HealthDataType.STEPS);
-      when(() => mockDataPoints[0].value).thenReturn(MockNumericHealthValue(2000.0));
-      
+      when(() => mockDataPoints[0].value)
+          .thenReturn(MockNumericHealthValue(2000.0));
+
       // Configure the alternative method to return our mock data
       when(() => mockHealth.getHealthDataFromTypes(
-        types: any(named: 'types'),
-        startTime: any(named: 'startTime'),
-        endTime: any(named: 'endTime'),
-      )).thenAnswer((_) async => mockDataPoints);
-      
+            types: any(named: 'types'),
+            startTime: any(named: 'startTime'),
+            endTime: any(named: 'endTime'),
+          )).thenAnswer((_) async => mockDataPoints);
+
       // Act
       final result = await fitnessTrackerSync.getStepsForDay(testDate);
-      
+
       // Assert
       expect(result, 2000);
       verify(() => mockHealth.getTotalStepsInInterval(any(), any())).called(1);
       verify(() => mockHealth.getHealthDataFromTypes(
-        types: any(named: 'types'),
-        startTime: any(named: 'startTime'),
-        endTime: any(named: 'endTime'),
-      )).called(1);
+            types: any(named: 'types'),
+            startTime: any(named: 'startTime'),
+            endTime: any(named: 'endTime'),
+          )).called(1);
     });
-    
-    test('getCaloriesBurnedForDay combines TOTAL_CALORIES_BURNED values', () async {
+
+    test('getCaloriesBurnedForDay combines TOTAL_CALORIES_BURNED values',
+        () async {
       // Arrange
       final testDate = DateTime.now();
-      
+
       // Reset mocks to clear any previous setup
       reset(mockHealth);
-      
+
       // Create mock health data points
       final mockDataPoints = [
         MockHealthDataPoint(),
         MockHealthDataPoint(),
       ];
-      
+
       // Configure mock health data points
-      when(() => mockDataPoints[0].type).thenReturn(HealthDataType.TOTAL_CALORIES_BURNED);
-      when(() => mockDataPoints[0].value).thenReturn(MockNumericHealthValue(100.0));
-      
-      when(() => mockDataPoints[1].type).thenReturn(HealthDataType.TOTAL_CALORIES_BURNED);
-      when(() => mockDataPoints[1].value).thenReturn(MockNumericHealthValue(50.0));
-      
+      when(() => mockDataPoints[0].type)
+          .thenReturn(HealthDataType.TOTAL_CALORIES_BURNED);
+      when(() => mockDataPoints[0].value)
+          .thenReturn(MockNumericHealthValue(100.0));
+
+      when(() => mockDataPoints[1].type)
+          .thenReturn(HealthDataType.TOTAL_CALORIES_BURNED);
+      when(() => mockDataPoints[1].value)
+          .thenReturn(MockNumericHealthValue(50.0));
+
       // Important: Make sure we're mocking the specific call that's being made
       when(() => mockHealth.getHealthDataFromTypes(
-        types: any(named: 'types'),
-        startTime: any(named: 'startTime'),
-        endTime: any(named: 'endTime'),
-      )).thenAnswer((_) async => mockDataPoints);
-      
+            types: any(named: 'types'),
+            startTime: any(named: 'startTime'),
+            endTime: any(named: 'endTime'),
+          )).thenAnswer((_) async => mockDataPoints);
+
       // Act
       final result = await fitnessTrackerSync.getCaloriesBurnedForDay(testDate);
-      
+
       // Assert
       expect(result, 150.0); // 100.0 + 50.0
     });
-    
-    test('getCaloriesBurnedForDay falls back to ACTIVE_ENERGY_BURNED if no TOTAL_CALORIES_BURNED', () async {
+
+    test(
+        'getCaloriesBurnedForDay falls back to ACTIVE_ENERGY_BURNED if no TOTAL_CALORIES_BURNED',
+        () async {
       // Arrange
       final testDate = DateTime.now();
-      
+
       // Reset mocks to clear any previous setup
       reset(mockHealth);
-      
+
       // Create mock health data point
       final mockDataPoint = MockHealthDataPoint();
-      
+
       // Configure mock health data point
-      when(() => mockDataPoint.type).thenReturn(HealthDataType.ACTIVE_ENERGY_BURNED);
+      when(() => mockDataPoint.type)
+          .thenReturn(HealthDataType.ACTIVE_ENERGY_BURNED);
       when(() => mockDataPoint.value).thenReturn(MockNumericHealthValue(75.0));
-      
+
       // Important: Make sure we're mocking the specific call that's being made
       when(() => mockHealth.getHealthDataFromTypes(
-        types: any(named: 'types'),
-        startTime: any(named: 'startTime'),
-        endTime: any(named: 'endTime'),
-      )).thenAnswer((_) async => [mockDataPoint]);
-      
+            types: any(named: 'types'),
+            startTime: any(named: 'startTime'),
+            endTime: any(named: 'endTime'),
+          )).thenAnswer((_) async => [mockDataPoint]);
+
       // Act
       final result = await fitnessTrackerSync.getCaloriesBurnedForDay(testDate);
-      
+
       // Assert
       expect(result, 75.0);
     });

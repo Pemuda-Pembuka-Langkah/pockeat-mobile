@@ -51,19 +51,8 @@ void setupDependencies() {
     FoodScanRepository(),
   );
 
-
   getIt.registerSingleton<FoodScanPhotoService>(
     FoodScanPhotoService(),
-  );
-
-
-  getIt.registerSingleton<GeminiService>(
-    GeminiServiceImpl(
-      foodTextAnalysisService: getIt<FoodTextAnalysisService>(),
-      foodImageAnalysisService: getIt<FoodImageAnalysisService>(),
-      nutritionLabelService: getIt<NutritionLabelAnalysisService>(),
-      exerciseAnalysisService: getIt<ExerciseAnalysisService>(),
-    ),
   );
 
   // Register UserRepository
@@ -90,7 +79,7 @@ void setupDependencies() {
   getIt.registerSingleton<FirebaseMessaging>(
     FirebaseMessaging.instance,
   );
-  
+
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
   );

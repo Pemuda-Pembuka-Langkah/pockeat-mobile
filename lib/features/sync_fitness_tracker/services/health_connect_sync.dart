@@ -35,12 +35,24 @@ class FitnessTrackerSync {
     _localPermissionState = false;
   }
 
+  /// Access to Health instance (protected for testing)
+  @protected
+  Health get health => _health;
+
+  /// Access to MethodChannel (protected for testing)
+  @protected
+  MethodChannel get methodChannel => _methodChannel;
+
+  /// Access to required types (protected for testing)
+  @protected
+  List<HealthDataType> get requiredTypes => _requiredTypes;
+
   /// Initialize and check permissions in one step
   Future<bool> initializeAndCheckPermissions() async {
     try {
       debugPrint('Initializing health services...');
-      // Configure health plugin
-      await _health.configure();
+      // Configure health plugin - make this overridable in test subclass
+      await configureHealth();
 
       // Check if Health Connect is available (Android only)
       if (Platform.isAndroid) {
@@ -70,36 +82,27 @@ class FitnessTrackerSync {
     }
   }
 
+  /// Configure the health plugin (can be overridden in tests)
+  @protected
+  Future<void> configureHealth() async {
+    await _health.configure();
+  }
+
   /// Check if we have required permissions by actually trying to read data
   Future<bool> hasRequiredPermissions() async {
+    // If we already know we have permissions, return early
+    if (_localPermissionState) {
+      debugPrint('Using cached permission state: $_localPermissionState');
+      return _localPermissionState;
+    }
+
     try {
       debugPrint('Checking permissions by direct data access...');
 
-      // Directly try to read data instead of checking permissions
-      final now = DateTime.now();
-      final yesterday = now.subtract(const Duration(days: 1));
-
-      // Try calories data
-      try {
-        final caloriesData = await _health.getHealthDataFromTypes(
-          types: [HealthDataType.TOTAL_CALORIES_BURNED],
-          startTime: yesterday,
-          endTime: now,
-        );
-        debugPrint('Calories data records: ${caloriesData.length}');
-        // If we get here without exception, we have read permission
-        debugPrint('Successfully read calories data, we have permission');
+      // First try the canReadHealthData method which attempts to read data
+      if (await canReadHealthData()) {
         _localPermissionState = true;
         return true;
-      } catch (e) {
-        // Check if this is a security exception
-        if (e.toString().contains("SecurityException") ||
-            e.toString().contains("lacks the following permissions")) {
-          debugPrint('Permission denied for calories: $e');
-          _localPermissionState = false;
-          return false;
-        }
-        debugPrint('Error reading calories, but not a permission issue: $e');
       }
 
       // If we get here without getting any data or clear permission denial
@@ -116,7 +119,8 @@ class FitnessTrackerSync {
   }
 
   /// Attempt to read some data to check if we actually have permissions
-  Future<bool> _canReadHealthData() async {
+  @protected
+  Future<bool> canReadHealthData() async {
     try {
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(days: 1));
@@ -155,7 +159,7 @@ class FitnessTrackerSync {
         return false;
       }
     } catch (e) {
-      debugPrint('Error in _canReadHealthData: $e');
+      debugPrint('Error in canReadHealthData: $e');
       return false;
     }
   }
@@ -165,7 +169,7 @@ class FitnessTrackerSync {
 
     try {
       // Launch Health Connect using the injected channel
-      _methodChannel.invokeMethod('launchHealthConnect');
+      await _methodChannel.invokeMethod('launchHealthConnect');
 
       // We'll attempt to verify permissions later when app resumes
       return;
@@ -201,7 +205,7 @@ class FitnessTrackerSync {
   Future<bool> performForcedDataRead() async {
     debugPrint('Performing forced data read...');
     try {
-      final result = await _canReadHealthData();
+      final result = await canReadHealthData();
       if (result) {
         _localPermissionState = true;
       } else {
@@ -263,13 +267,12 @@ class FitnessTrackerSync {
 
   /// Get step count for a specific day
   Future<int?> getStepsForDay(DateTime date) async {
-    debugPrint('Getting steps for ${DateFormat('yyyy-MM-dd').format(date)}...');
+    debugPrint('Getting steps for ${formatDate(date)}...');
 
     // Create date range for the entire day
-    final startTime = DateTime(date.year, date.month, date.day);
-    final endTime = startTime
-        .add(const Duration(days: 1))
-        .subtract(const Duration(milliseconds: 1));
+    final DateTimeRange dateRange = getDateRange(date);
+    final startTime = dateRange.start;
+    final endTime = dateRange.end;
 
     try {
       // Try to get the step count using the specialized method first
@@ -284,8 +287,10 @@ class FitnessTrackerSync {
         }
       } catch (e) {
         debugPrint('Error with getTotalStepsInInterval: $e');
-        _localPermissionState = false;
-        throw e; // Rethrow to handle at higher level
+        if (e.toString().contains("SecurityException")) {
+          _localPermissionState = false;
+          throw e; // Rethrow to handle at higher level
+        }
       }
 
       // Try the more general method
@@ -334,14 +339,12 @@ class FitnessTrackerSync {
 
   /// Get calories burned for a specific day
   Future<double?> getCaloriesBurnedForDay(DateTime date) async {
-    debugPrint(
-        'Getting calories for ${DateFormat('yyyy-MM-dd').format(date)}...');
+    debugPrint('Getting calories for ${formatDate(date)}...');
 
     // Create date range for the entire day
-    final startTime = DateTime(date.year, date.month, date.day);
-    final endTime = startTime
-        .add(const Duration(days: 1))
-        .subtract(const Duration(milliseconds: 1));
+    final DateTimeRange dateRange = getDateRange(date);
+    final startTime = dateRange.start;
+    final endTime = dateRange.end;
 
     try {
       // Request calories data from both active energy and total calories
@@ -407,6 +410,16 @@ class FitnessTrackerSync {
     }
   }
 
+  /// Helper method to get date range for a day (testable)
+  @protected
+  DateTimeRange getDateRange(DateTime date) {
+    final startTime = DateTime(date.year, date.month, date.day);
+    final endTime = startTime
+        .add(const Duration(days: 1))
+        .subtract(const Duration(milliseconds: 1));
+    return DateTimeRange(start: startTime, end: endTime);
+  }
+
   /// Check if Health Connect is available
   Future<bool> isHealthConnectAvailable() async {
     try {
@@ -428,7 +441,7 @@ class FitnessTrackerSync {
   Future<void> openHealthConnectPlayStore() async {
     if (Platform.isAndroid) {
       try {
-        _methodChannel.invokeMethod('openHealthConnectPlayStore');
+        await _methodChannel.invokeMethod('openHealthConnectPlayStore');
       } catch (e) {
         debugPrint('Error opening Play Store: $e');
       }
@@ -436,12 +449,13 @@ class FitnessTrackerSync {
   }
 
   /// Manually set the permission state (for fixing permission detection issues)
+  @protected
   void setPermissionGranted() {
     _localPermissionState = true;
   }
 
   /// Format readable date
   String formatDate(DateTime date) {
-    return DateFormat('MMM d, yyyy').format(date);
+    return DateFormat('yyyy-MM-dd').format(date);
   }
 }

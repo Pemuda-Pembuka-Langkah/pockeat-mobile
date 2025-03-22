@@ -7,11 +7,10 @@ import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysi
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';
 
 class SmartExerciseLogPage extends StatefulWidget {
-
   final SmartExerciseLogRepository repository;
 
   const SmartExerciseLogPage({
-    super.key, 
+    super.key,
     required this.repository,
   });
 
@@ -23,29 +22,28 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
   // Consistent theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPurple = const Color(0xFF9B6BFF);
-  
+
   // State variables
   bool isAnalyzing = false;
   bool isCorrectingAnalysis = false;
   ExerciseAnalysisResult? analysisResult;
-  
-  final ExerciseAnalysisService _exerciseAnalysisService=
+
+  final ExerciseAnalysisService _exerciseAnalysisService =
       getIt<ExerciseAnalysisService>();
   late final SmartExerciseLogRepository _repository;
-  
+
   @override
   void initState() {
     super.initState();
     _repository = widget.repository;
   }
-  
+
   Future<void> analyzeWorkout(String workoutDescription) async {
     setState(() => isAnalyzing = true);
-    
+
     try {
-      // Use Gemini service for AI analysis
       final result = await _exerciseAnalysisService.analyze(workoutDescription);
-      
+
       setState(() {
         analysisResult = result;
         isAnalyzing = false;
@@ -54,7 +52,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
       setState(() {
         isAnalyzing = false;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -68,21 +66,21 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
 
   Future<void> correctAnalysis(String userComment) async {
     if (analysisResult == null) return;
-    
+
     setState(() => isCorrectingAnalysis = true);
-    
+
     try {
       // Use GeminiService for correcting analysis
       final correctedResult = await _exerciseAnalysisService.correctAnalysis(
         analysisResult!,
         userComment,
       );
-      
+
       setState(() {
         analysisResult = correctedResult;
         isCorrectingAnalysis = false;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -95,7 +93,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
       setState(() {
         isCorrectingAnalysis = false;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -106,19 +104,19 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
       }
     }
   }
-  
+
   void resetAnalysis() {
     setState(() {
       analysisResult = null;
     });
   }
-  
+
   Future<void> saveExerciseLog() async {
     if (analysisResult == null || !analysisResult!.isComplete) return;
-    
+
     try {
       await _repository.saveAnalysisResult(analysisResult!);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -126,7 +124,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
             backgroundColor: Colors.green,
           ),
         );
-        
+
         // Navigate back
         Navigator.pop(context);
       }
@@ -168,18 +166,17 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            
+
             // Workout Form - using your WorkoutFormWidget component
             if (analysisResult == null)
               WorkoutFormWidget(
                 onAnalyzePressed: analyzeWorkout,
                 isLoading: isAnalyzing,
               ),
-            
+
             // Analysis Result - using your AnalysisResultWidget component
             if (analysisResult != null && !isAnalyzing) ...[
               const SizedBox(height: 24),
-              
               if (isCorrectingAnalysis)
                 const Center(
                   child: Column(
