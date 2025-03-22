@@ -183,8 +183,6 @@ class MyApp extends StatelessWidget {
           );
         },
         '/smart-exercise-log': (context) => SmartExerciseLogPage(
-              // Langsung berikan dependensi yang dibutuhkan
-              geminiService: getIt<GeminiService>(),
               repository: smartExerciseLogRepository,
             ),
         '/scan': (context) => ScanFoodPage(

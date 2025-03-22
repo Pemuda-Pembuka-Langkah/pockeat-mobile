@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:pockeat/core/di/service_locator.dart';
+import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';
 
 class SmartExerciseLogPage extends StatefulWidget {
-  // Required dependencies for full DI
-  final GeminiService geminiService;
+
   final SmartExerciseLogRepository repository;
 
   const SmartExerciseLogPage({
     super.key, 
-    required this.geminiService,
     required this.repository,
   });
 
@@ -30,15 +29,13 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
   bool isCorrectingAnalysis = false;
   ExerciseAnalysisResult? analysisResult;
   
-  // Dependencies
-  late final GeminiService _geminiService;
+  final ExerciseAnalysisService _exerciseAnalysisService=
+      getIt<ExerciseAnalysisService>();
   late final SmartExerciseLogRepository _repository;
   
   @override
   void initState() {
     super.initState();
-    // Use injected dependencies
-    _geminiService = widget.geminiService;
     _repository = widget.repository;
   }
   
@@ -47,7 +44,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
     
     try {
       // Use Gemini service for AI analysis
-      final result = await _geminiService.analyzeExercise(workoutDescription);
+      final result = await _exerciseAnalysisService.analyze(workoutDescription);
       
       setState(() {
         analysisResult = result;
@@ -76,7 +73,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
     
     try {
       // Use GeminiService for correcting analysis
-      final correctedResult = await _geminiService.correctExerciseAnalysis(
+      final correctedResult = await _exerciseAnalysisService.correctAnalysis(
         analysisResult!,
         userComment,
       );
