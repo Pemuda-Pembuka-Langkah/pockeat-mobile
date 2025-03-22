@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/homepage/presentation/screens/pet_section.dart';
-import 'package:pockeat/features/sync_fitness_tracker/widgets/health_counter_widget.dart';
+import 'package:pockeat/features/sync_fitness_tracker/widgets/health_connect_widget.dart';
 
 class OverviewSection extends StatefulWidget {
   const OverviewSection({super.key});
@@ -144,7 +144,7 @@ class _OverviewSectionState extends State<OverviewSection> {
   }
 
   Widget _buildFitnessTrackerSection() {
-    return const HealthCounterWidget();
+    return const HealthConnectWidget();
   }
 
   Widget _buildNutrientCard({

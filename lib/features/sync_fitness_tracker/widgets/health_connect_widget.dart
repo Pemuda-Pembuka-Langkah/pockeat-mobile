@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
 
-class HealthCounterWidget extends StatefulWidget {
+class HealthConnectWidget extends StatefulWidget {
   final Color primaryColor;
 
-  const HealthCounterWidget({
+  const HealthConnectWidget({
     super.key,
     this.primaryColor = const Color(0xFFFF6B6B),
   });
 
   @override
-  State<HealthCounterWidget> createState() => _HealthCounterWidgetState();
+  State<HealthConnectWidget> createState() => _HealthConnectWidgetState();
 }
 
-class _HealthCounterWidgetState extends State<HealthCounterWidget>
+class _HealthConnectWidgetState extends State<HealthConnectWidget>
     with WidgetsBindingObserver {
   final FitnessTrackerSync _fitnessSync = FitnessTrackerSync();
   int _steps = 0;
@@ -301,7 +301,7 @@ class _HealthCounterWidgetState extends State<HealthCounterWidget>
             Icon(
               Icons.health_and_safety,
               size: 48,
-              color: Colors.blue,
+              color: Color.fromARGB(255, 123, 162, 194),
             ),
             SizedBox(height: 16),
             Text(
@@ -492,7 +492,7 @@ class _HealthCounterWidgetState extends State<HealthCounterWidget>
           : const Icon(Icons.refresh, size: 18),
       label: const Text('Refresh Health Data'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green,
+        backgroundColor: Color(0xFFFF6B6B),
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         shape: RoundedRectangleBorder(
