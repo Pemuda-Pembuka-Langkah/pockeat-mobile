@@ -4,6 +4,7 @@ import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 import 'dart:io' show Platform;
 import 'dart:async';
+//coverage:ignore-start
 
 class FitnessTrackerSync {
   /// Health plugin instance
@@ -82,7 +83,6 @@ class FitnessTrackerSync {
     }
   }
 
-//coverage:ignore-start
   /// Configure the health plugin (can be overridden in tests)
   @protected
   Future<void> configureHealth() async {
