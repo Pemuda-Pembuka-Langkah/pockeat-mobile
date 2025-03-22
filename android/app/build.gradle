@@ -38,7 +38,7 @@ android {
 
     defaultConfig {
         applicationId = "com.pockeat"
-        minSdkVersion = 23
+        minSdkVersion = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
