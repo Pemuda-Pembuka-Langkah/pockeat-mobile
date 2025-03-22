@@ -39,10 +39,9 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // App has resumed from background, check permissions again
-      if (_hasAttemptedConnection) {
-        _checkPermissionsAfterResume();
-      }
+      // Always check permissions when app resumes
+      _fitnessSync.resetPermissionState();
+      _checkPermissionsAfterResume();
     }
   }
 
@@ -56,8 +55,11 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
       final isAvailable = await _fitnessSync.isHealthConnectAvailable();
 
       if (isAvailable) {
-        final hasPermissions =
-            await _fitnessSync.initializeAndCheckPermissions();
+        // Reset permission state for fresh check
+        _fitnessSync.resetPermissionState();
+
+        final hasPermissions = await _fitnessSync.hasRequiredPermissions();
+
         setState(() {
           _isHealthConnectAvailable = true;
           _isConnected = hasPermissions;
@@ -65,7 +67,7 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
         });
 
         if (hasPermissions) {
-          // Try to load data even if we're not sure about permissions
+          // Try to load data if we have permissions
           _loadFitnessData();
         }
       } else {
@@ -79,6 +81,7 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
       debugPrint('Error checking Health Connect: $e');
       setState(() {
         _isLoading = false;
+        _isConnected = false;
       });
     }
   }
@@ -91,67 +94,23 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
     });
 
     try {
-      // Try more aggressive permission check
-      bool hasPermissions = false;
+      // Always do a direct permission check
+      final hasPermissions = await _fitnessSync.hasRequiredPermissions();
 
-      // First try direct data read
-      try {
-        await _fitnessSync.performForcedDataRead();
-        hasPermissions = true;
-      } catch (e) {
-        debugPrint('Error with forced data read: $e');
-        // Fall back to permission check
-        hasPermissions = await _fitnessSync.hasRequiredPermissions();
-      }
+      setState(() {
+        _isConnected = hasPermissions;
+        _isLoading = false;
+      });
 
-      // If we think we now have permissions, try to load data
       if (hasPermissions) {
-        _fitnessSync.setPermissionGranted(); // Manually set permission state
-        setState(() {
-          _isConnected = true;
-        });
+        // Load data if we have permissions
         _loadFitnessData();
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
       }
     } catch (e) {
       debugPrint('Error checking permissions after resume: $e');
       setState(() {
         _isLoading = false;
-      });
-
-      // Try loading data anyway as a fallback
-      _loadFitnessDataWithFailSafe();
-    }
-  }
-
-  // Try to load fitness data even if permission checks are failing
-  Future<void> _loadFitnessDataWithFailSafe() async {
-    try {
-      final data = await _fitnessSync.getTodayFitnessData();
-
-      // If we get data, update the UI and consider ourselves connected
-      if (data['steps'] > 0 || data['calories'] > 0) {
-        setState(() {
-          _steps = data['steps'] ?? 0;
-          _calories = (data['calories'] ?? 0);
-          _isConnected = true;
-          _isLoading = false;
-        });
-
-        // Update the permission state in the service
-        _fitnessSync.setPermissionGranted();
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error in failsafe fitness data load: $e');
-      setState(() {
-        _isLoading = false;
+        _isConnected = false;
       });
     }
   }
@@ -164,9 +123,16 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
     try {
       final data = await _fitnessSync.getTodayFitnessData();
 
-      // If we successfully got data, consider permissions granted
-      if (data['steps'] > 0 || data['calories'] > 0) {
-        _fitnessSync.setPermissionGranted();
+      // Check if we still have permissions
+      final hasPermissions = data['hasPermissions'] != false;
+
+      if (!hasPermissions) {
+        // Permission error detected, update UI to show connect card
+        setState(() {
+          _isConnected = false;
+          _isLoading = false;
+        });
+        return;
       }
 
       setState(() {
@@ -177,15 +143,43 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
       });
     } catch (e) {
       debugPrint('Error loading fitness data: $e');
+
+      // On error, check if we still have permissions
+      final hasPermissions = await _fitnessSync.hasRequiredPermissions();
+
       setState(() {
         _isLoading = false;
+        _isConnected = hasPermissions;
       });
 
-      // Try direct permission request as fallback
-      final granted = await _fitnessSync.requestAuthorization();
-      if (granted) {
-        _loadFitnessDataWithFailSafe();
+      if (!hasPermissions) {
+        // Try requesting authorization
+        await _requestAuthorization();
       }
+    }
+  }
+
+  Future<void> _requestAuthorization() async {
+    try {
+      final granted = await _fitnessSync.requestAuthorization();
+
+      if (granted) {
+        setState(() {
+          _isConnected = true;
+        });
+
+        // Try loading data again
+        _loadFitnessData();
+      } else {
+        setState(() {
+          _isConnected = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error requesting authorization: $e');
+      setState(() {
+        _isConnected = false;
+      });
     }
   }
 
@@ -352,8 +346,9 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
         return;
       }
 
-      // Try direct authorization first
+      // Try direct authorization first (shows system permission dialog)
       final granted = await _fitnessSync.requestAuthorization();
+
       if (granted) {
         setState(() {
           _isConnected = true;
@@ -362,11 +357,11 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
         return;
       }
 
-      // If direct authorization failed, open Health Connect
+      // If direct authorization failed, open Health Connect app
       // ignore: use_build_context_synchronously
       await _fitnessSync.openHealthConnect(context);
 
-      // We'll check permissions when the app resumes via didChangeAppLifecycleState
+      // We'll check permissions when the app resumes
       setState(() {
         _isLoading = false;
       });
@@ -374,6 +369,7 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
       debugPrint('Error connecting to health services: $e');
       setState(() {
         _isLoading = false;
+        _isConnected = false;
       });
     }
   }

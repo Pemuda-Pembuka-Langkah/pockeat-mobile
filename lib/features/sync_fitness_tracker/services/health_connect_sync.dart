@@ -8,7 +8,7 @@ import 'dart:async';
 class FitnessTrackerSync {
   /// Health plugin instance
   final Health _health;
-  
+
   /// Method channel for platform interactions
   final MethodChannel _methodChannel;
 
@@ -16,9 +16,9 @@ class FitnessTrackerSync {
   FitnessTrackerSync({
     Health? health,
     MethodChannel? methodChannel,
-  }) : 
-    _health = health ?? Health(),
-    _methodChannel = methodChannel ?? const MethodChannel('com.pockeat/health_connect');
+  })  : _health = health ?? Health(),
+        _methodChannel =
+            methodChannel ?? const MethodChannel('com.pockeat/health_connect');
 
   /// The required data types
   final List<HealthDataType> _requiredTypes = [
@@ -29,6 +29,11 @@ class FitnessTrackerSync {
 
   /// Local permission state to handle Health Connect inconsistencies
   bool _localPermissionState = false;
+
+  /// Reset the cached permission state to force a fresh check
+  void resetPermissionState() {
+    _localPermissionState = false;
+  }
 
   /// Initialize and check permissions in one step
   Future<bool> initializeAndCheckPermissions() async {
@@ -46,41 +51,66 @@ class FitnessTrackerSync {
         }
       }
 
-      // Check if we have local permission state first
-      if (_localPermissionState) {
-        debugPrint('Using cached permission state: $_localPermissionState');
+      // Always do a fresh permission check at initialization
+      _localPermissionState = false;
+
+      // Try a direct permission check
+      final hasPermissions = await hasRequiredPermissions();
+      debugPrint('Has permissions check result: $hasPermissions');
+
+      if (hasPermissions == true) {
+        _localPermissionState = true;
         return true;
       }
 
-      // Try a simple permission check
-      try {
-        final hasPermissions = await _health.hasPermissions(_requiredTypes);
-        debugPrint('Has permissions check result: $hasPermissions');
-        
-        // Also try a data read to double-check permissions
-        final canReadData = await _canReadHealthData();
-        debugPrint('Can read health data: $canReadData');
-        
-        if (canReadData) {
-          _localPermissionState = true;
-          return true;
-        }
-        
-        return hasPermissions == true;
-      } catch (e) {
-        debugPrint('Error checking permissions: $e');
-        
-        // Try a data read anyway to check permissions
-        final canReadData = await _canReadHealthData();
-        if (canReadData) {
-          _localPermissionState = true;
-          return true;
-        }
-        
-        return false;
-      }
+      return false;
     } catch (e) {
       debugPrint('Error in initializeAndCheckPermissions: $e');
+      return false;
+    }
+  }
+
+  /// Check if we have required permissions by actually trying to read data
+  Future<bool> hasRequiredPermissions() async {
+    try {
+      debugPrint('Checking permissions by direct data access...');
+
+      // Directly try to read data instead of checking permissions
+      final now = DateTime.now();
+      final yesterday = now.subtract(const Duration(days: 1));
+
+      // Try calories data
+      try {
+        final caloriesData = await _health.getHealthDataFromTypes(
+          types: [HealthDataType.TOTAL_CALORIES_BURNED],
+          startTime: yesterday,
+          endTime: now,
+        );
+        debugPrint('Calories data records: ${caloriesData.length}');
+        // If we get here without exception, we have read permission
+        debugPrint('Successfully read calories data, we have permission');
+        _localPermissionState = true;
+        return true;
+      } catch (e) {
+        // Check if this is a security exception
+        if (e.toString().contains("SecurityException") ||
+            e.toString().contains("lacks the following permissions")) {
+          debugPrint('Permission denied for calories: $e');
+          _localPermissionState = false;
+          return false;
+        }
+        debugPrint('Error reading calories, but not a permission issue: $e');
+      }
+
+      // If we get here without getting any data or clear permission denial
+      // Fall back to the hasPermissions check
+      final hasPermissions = await _health.hasPermissions(_requiredTypes);
+      debugPrint('Falling back to hasPermissions check: $hasPermissions');
+      _localPermissionState = hasPermissions == true;
+      return hasPermissions == true;
+    } catch (e) {
+      debugPrint('Error in hasRequiredPermissions: $e');
+      _localPermissionState = false;
       return false;
     }
   }
@@ -90,15 +120,20 @@ class FitnessTrackerSync {
     try {
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(days: 1));
-      
+
       // Try to read steps first
       try {
         await _health.getTotalStepsInInterval(yesterday, now);
         return true;
       } catch (e) {
+        if (e.toString().contains("SecurityException")) {
+          debugPrint('Permission denied: $e');
+          _localPermissionState = false;
+          return false;
+        }
         debugPrint('Error reading steps: $e');
       }
-      
+
       // Try reading any available data
       try {
         final results = await _health.getHealthDataFromTypes(
@@ -106,11 +141,16 @@ class FitnessTrackerSync {
           startTime: yesterday,
           endTime: now,
         );
-        
+
         // If we get here without an exception, we have permission
         debugPrint('Successfully read ${results.length} health records');
         return true;
       } catch (e) {
+        if (e.toString().contains("SecurityException")) {
+          debugPrint('Permission denied: $e');
+          _localPermissionState = false;
+          return false;
+        }
         debugPrint('Error reading health data: $e');
         return false;
       }
@@ -142,50 +182,18 @@ class FitnessTrackerSync {
       // Request permissions
       final granted = await _health.requestAuthorization(_requiredTypes);
       debugPrint('Authorization request result: $granted');
-      
+
       if (granted) {
         _localPermissionState = true;
+      } else {
+        _localPermissionState = false;
       }
-      
+
       return granted;
     } catch (e) {
       debugPrint('Error in requestAuthorization: $e');
+      _localPermissionState = false;
       return false;
-    }
-  }
-
-  /// Check if we have required permissions
-  Future<bool> hasRequiredPermissions() async {
-    try {
-      debugPrint('Checking if we have required permissions...');
-
-      // Check local state first
-      if (_localPermissionState) {
-        debugPrint('Using cached permission state: true');
-        return true;
-      }
-
-      // First try actual data read
-      final canReadData = await _canReadHealthData();
-      if (canReadData) {
-        _localPermissionState = true;
-        return true;
-      }
-      
-      // If data read fails, check permissions formally
-      final hasPermissions = await _health.hasPermissions(_requiredTypes);
-      debugPrint('Has permissions check result: $hasPermissions');
-      
-      if (hasPermissions == true) {
-        _localPermissionState = true;
-      }
-      
-      return hasPermissions == true;
-    } catch (e) {
-      debugPrint('Error in hasRequiredPermissions: $e');
-      
-      // Try data read as a fallback
-      return _canReadHealthData();
     }
   }
 
@@ -196,10 +204,13 @@ class FitnessTrackerSync {
       final result = await _canReadHealthData();
       if (result) {
         _localPermissionState = true;
+      } else {
+        _localPermissionState = false;
       }
       return result;
     } catch (e) {
       debugPrint('Error in forced data read: $e');
+      _localPermissionState = false;
       return false;
     }
   }
@@ -207,29 +218,46 @@ class FitnessTrackerSync {
   /// Get today's fitness data (steps and calories)
   Future<Map<String, dynamic>> getTodayFitnessData() async {
     debugPrint('Getting today\'s fitness data...');
-    
-    // Set local permission state to true if we can fetch data
-    _localPermissionState = true;
-    
+
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    
+
     // Initialize with default values
     final Map<String, dynamic> todayData = {
       'steps': 0,
       'calories': 0,
+      'hasPermissions': true,
     };
-    
-    // Get steps
-    final steps = await getStepsForDay(today);
-    todayData['steps'] = steps ?? 0;
-    
-    // Get calories
-    final calories = await getCaloriesBurnedForDay(today);
-    todayData['calories'] = calories ?? 0;
-    
-    debugPrint('Today\'s data: Steps=${todayData['steps']}, Calories=${todayData['calories']}');
-    
+
+    try {
+      // Get steps
+      final steps = await getStepsForDay(today);
+      todayData['steps'] = steps ?? 0;
+
+      // Get calories
+      final calories = await getCaloriesBurnedForDay(today);
+      todayData['calories'] = calories ?? 0;
+
+      debugPrint(
+          'Today\'s data: Steps=${todayData['steps']}, Calories=${todayData['calories']}');
+
+      // If we got zero data, check if we still have permissions
+      if (todayData['steps'] == 0 && todayData['calories'] == 0) {
+        // Verify permissions
+        final directPermissionCheck = await hasRequiredPermissions();
+        if (!directPermissionCheck) {
+          todayData['hasPermissions'] = false;
+          _localPermissionState = false;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error getting fitness data: $e');
+      if (e.toString().contains("SecurityException")) {
+        todayData['hasPermissions'] = false;
+        _localPermissionState = false;
+      }
+    }
+
     return todayData;
   }
 
@@ -256,6 +284,8 @@ class FitnessTrackerSync {
         }
       } catch (e) {
         debugPrint('Error with getTotalStepsInInterval: $e');
+        _localPermissionState = false;
+        throw e; // Rethrow to handle at higher level
       }
 
       // Try the more general method
@@ -265,9 +295,6 @@ class FitnessTrackerSync {
           startTime: startTime,
           endTime: endTime,
         );
-
-        // We successfully read data, so we have permission
-        _localPermissionState = true;
 
         // Sum up all step counts from the results
         int totalSteps = 0;
@@ -281,9 +308,15 @@ class FitnessTrackerSync {
         debugPrint(
             'Steps from getHealthDataFromTypes: $totalSteps (${results.length} records)');
         if (totalSteps > 0) {
+          _localPermissionState = true;
           return totalSteps;
         }
       } catch (e) {
+        if (e.toString().contains("SecurityException")) {
+          debugPrint('Permission denied for steps data: $e');
+          _localPermissionState = false;
+          throw e; // Rethrow to handle at higher level
+        }
         debugPrint('Error with getHealthDataFromTypes: $e');
       }
 
@@ -291,6 +324,10 @@ class FitnessTrackerSync {
       return 0;
     } catch (e) {
       debugPrint('Error getting steps: $e');
+      if (e.toString().contains("SecurityException")) {
+        _localPermissionState = false;
+        throw e; // Rethrow to handle at higher level
+      }
       return 0;
     }
   }
@@ -318,9 +355,6 @@ class FitnessTrackerSync {
           endTime: endTime,
         );
 
-        // Successfully read data, so we have permission
-        _localPermissionState = true;
-        
         debugPrint('Calories data records: ${results.length}');
 
         // Try to get Total Calories Burned first, as it's more comprehensive
@@ -349,9 +383,15 @@ class FitnessTrackerSync {
         debugPrint(
             'Total calories: $totalCalories, from total calories: $hasTotalCalories');
         if (totalCalories > 0) {
+          _localPermissionState = true;
           return totalCalories;
         }
       } catch (e) {
+        if (e.toString().contains("SecurityException")) {
+          debugPrint('Permission denied for calories: $e');
+          _localPermissionState = false;
+          throw e; // Rethrow to handle at higher level
+        }
         debugPrint('Error getting calories data: $e');
       }
 
@@ -359,6 +399,10 @@ class FitnessTrackerSync {
       return 0;
     } catch (e) {
       debugPrint('Error getting calories burned: $e');
+      if (e.toString().contains("SecurityException")) {
+        _localPermissionState = false;
+        throw e; // Rethrow to handle at higher level
+      }
       return 0;
     }
   }
@@ -384,7 +428,6 @@ class FitnessTrackerSync {
   Future<void> openHealthConnectPlayStore() async {
     if (Platform.isAndroid) {
       try {
-        // FIXED: Use the injected method channel instead of creating a new one
         _methodChannel.invokeMethod('openHealthConnectPlayStore');
       } catch (e) {
         debugPrint('Error opening Play Store: $e');
