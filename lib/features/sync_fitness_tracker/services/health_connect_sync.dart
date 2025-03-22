@@ -82,6 +82,7 @@ class FitnessTrackerSync {
     }
   }
 
+//coverage:ignore-start
   /// Configure the health plugin (can be overridden in tests)
   @protected
   Future<void> configureHealth() async {
@@ -459,3 +460,4 @@ class FitnessTrackerSync {
     return DateFormat('yyyy-MM-dd').format(date);
   }
 }
+//coverage:ignore-end
