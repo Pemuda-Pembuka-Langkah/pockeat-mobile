@@ -1200,4 +1200,25 @@ void main() {
     // Verify error message for empty confirm password
     expect(find.text('Confirm password cannot be empty'), findsOneWidget);
   });
+
+  testWidgets('Should handle back button press on register page',
+      (WidgetTester tester) async {
+    // Setup screen size
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build register page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verifikasi PopScope ada
+    expect(find.byType(PopScope), findsOneWidget);
+
+    // Verifikasi canPop adalah false
+    final popScope = tester.widget<PopScope>(find.byType(PopScope));
+    expect(popScope.canPop, isFalse);
+  });
 }

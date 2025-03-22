@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -376,6 +377,24 @@ void main() {
       // Verify error message
       expect(find.text(testCase['message'] as String), findsOneWidget);
     }
+  });
+
+  testWidgets('Should handle back button press on login page',
+      (WidgetTester tester) async {
+    // Setup screen size
+    tester.binding.window.physicalSizeTestValue = const Size(600, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+
+    // Build login page
+    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+    await tester.pumpAndSettle();
+
+    // Verifikasi PopScope ada
+    expect(find.byType(PopScope), findsOneWidget);
+
+    // Verifikasi canPop adalah false
+    final popScope = tester.widget<PopScope>(find.byType(PopScope));
+    expect(popScope.canPop, isFalse);
   });
 }
 
