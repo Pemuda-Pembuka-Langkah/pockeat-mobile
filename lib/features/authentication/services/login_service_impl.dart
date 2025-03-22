@@ -24,10 +24,8 @@ class LoginServiceImpl implements LoginService {
     // Membatalkan subscription sebelumnya jika ada
     _subscription?.cancel();
 
-    // Ambil stream dari repository
-    final stream = _userRepository.currentUserStream();
-
-    return stream;
+    // Ambil stream langsung dari repository
+    return _userRepository.currentUserStream();
   }
 
   @override

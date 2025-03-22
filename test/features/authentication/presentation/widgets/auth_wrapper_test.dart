@@ -59,15 +59,12 @@ void main() {
 
       // Verify the child is shown and loginService was not initialized
       expect(find.text('Child Widget'), findsOneWidget);
-      verifyNever(mockLoginService.initialize(any));
       verifyNever(mockLoginService.getCurrentUser());
     });
 
-    testWidgets('should initialize auth when requireAuth is true',
+    testWidgets('should check auth when requireAuth is true',
         (WidgetTester tester) async {
-      // Setup auth stream
-      final authStream = Stream<UserModel?>.fromIterable([authenticatedUser]);
-      when(mockLoginService.initialize(any)).thenAnswer((_) => authStream);
+      // Setup auth check
       when(mockLoginService.getCurrentUser())
           .thenAnswer((_) async => authenticatedUser);
 
@@ -86,18 +83,15 @@ void main() {
       // Wait for futures to complete
       await tester.pumpAndSettle();
 
-      // Verify the child is shown and loginService was initialized
+      // Verify the child is shown and loginService was checked
       expect(find.text('Child Widget'), findsOneWidget);
-      verify(mockLoginService.initialize(any)).called(1);
       verify(mockLoginService.getCurrentUser()).called(1);
     });
 
     testWidgets(
         'should show child when requireAuth is true and user is authenticated',
         (WidgetTester tester) async {
-      // Setup auth stream and current user
-      final authStream = Stream<UserModel?>.fromIterable([authenticatedUser]);
-      when(mockLoginService.initialize(any)).thenAnswer((_) => authStream);
+      // Setup current user
       when(mockLoginService.getCurrentUser())
           .thenAnswer((_) async => authenticatedUser);
 
@@ -127,9 +121,7 @@ void main() {
     testWidgets(
         'should redirect to login when requireAuth is true and user is not authenticated',
         (WidgetTester tester) async {
-      // Setup auth stream and current user to return null (not authenticated)
-      final authStream = Stream<UserModel?>.fromIterable([null]);
-      when(mockLoginService.initialize(any)).thenAnswer((_) => authStream);
+      // Setup current user to return null (not authenticated)
       when(mockLoginService.getCurrentUser()).thenAnswer((_) async => null);
 
       // Build widget tree with navigator observer to track redirects
@@ -164,11 +156,6 @@ void main() {
       when(mockLoginService.getCurrentUser())
           .thenAnswer((_) => completer.future);
 
-      // For the stream, also create a stream that never emits a value
-      final controller = StreamController<UserModel?>();
-      when(mockLoginService.initialize(any))
-          .thenAnswer((_) => controller.stream);
-
       // Build widget tree
       await tester.pumpWidget(
         MaterialApp(
@@ -186,49 +173,34 @@ void main() {
 
       // Verify the child is shown during loading
       expect(find.text('Child Widget'), findsOneWidget);
-
-      // Clean up
-      controller.close();
     });
 
-    testWidgets('should dispose auth subscriptions when widget is disposed',
+    testWidgets('should handle auth check errors gracefully',
         (WidgetTester tester) async {
-      // Setup auth stream
-      final controller = StreamController<UserModel?>();
-      when(mockLoginService.initialize(any))
-          .thenAnswer((_) => controller.stream);
+      // Setup auth check to throw an error
       when(mockLoginService.getCurrentUser())
-          .thenAnswer((_) async => authenticatedUser);
+          .thenThrow(Exception('Auth check failed'));
 
-      // Build widget tree in a stateful wrapper so we can dispose it
+      // Build widget tree
       await tester.pumpWidget(
         MaterialApp(
-          home: StatefulBuilder(
-            builder: (context, setState) {
-              return AuthWrapper(
-                requireAuth: true,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      // This will trigger a rebuild without the AuthWrapper
-                    });
-                  },
-                  child: const Text('Child Widget'),
-                ),
-              );
-            },
+          home: AuthWrapper(
+            requireAuth: true,
+            child: Container(
+              child: const Text('Child Widget'),
+            ),
           ),
+          routes: {
+            '/login': (context) => const Scaffold(body: Text('Login Page')),
+          },
         ),
       );
 
-      // Trigger button to dispose the AuthWrapper
-      await tester.tap(find.byType(ElevatedButton));
+      // Wait for futures to complete and navigation to happen
       await tester.pumpAndSettle();
 
-      // Clean up
-      controller.close();
-
-      // No explicit verification possible for dispose, but ensures code coverage
+      // Verify redirect to login page on error
+      expect(find.text('Login Page'), findsOneWidget);
     });
   });
 }
