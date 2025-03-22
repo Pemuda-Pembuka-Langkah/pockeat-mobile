@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 
 /// Login page for existing users
 ///
@@ -112,13 +113,22 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: _buildLoginForm(),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        // Jika user menekan tombol back, keluar dari aplikasi
+        // daripada kembali ke halaman utama yang memerlukan auth
+        SystemNavigator.pop();
+      },
+      child: Scaffold(
+        backgroundColor: bgColor,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: _buildLoginForm(),
+            ),
           ),
         ),
       ),
