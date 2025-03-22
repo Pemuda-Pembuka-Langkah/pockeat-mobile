@@ -49,8 +49,6 @@ class _RegisterPageState extends State<RegisterPage> {
     _registerService = GetIt.instance<RegisterService>();
   }
 
-
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -225,15 +223,24 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: _isRegistrationSuccess
-                ? _buildVerificationUI()
-                : _buildRegistrationForm(),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        // Jika user menekan tombol back, arahkan ke halaman login
+        // daripada ke halaman utama yang memerlukan auth
+        Navigator.pushReplacementNamed(context, '/login');
+      },
+      child: Scaffold(
+        backgroundColor: bgColor,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: _isRegistrationSuccess
+                  ? _buildVerificationUI()
+                  : _buildRegistrationForm(),
+            ),
           ),
         ),
       ),

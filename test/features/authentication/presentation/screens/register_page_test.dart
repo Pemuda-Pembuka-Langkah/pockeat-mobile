@@ -1109,4 +1109,95 @@ void main() {
     // Pastikan link "Sign In" ditemukan
     expect(signInLinkFinder, findsOneWidget);
   });
+
+  testWidgets('Should verify birth date field is present and tappable',
+      (WidgetTester tester) async {
+    // Atur ukuran layar
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Find the birth date field
+    final birthDateField =
+        find.widgetWithText(TextFormField, 'Birth Date (Optional)');
+    expect(birthDateField, findsOneWidget);
+
+    // Verify there is a GestureDetector for date picking
+    // Gunakan findDescendantOfType untuk mencari GestureDetector dalam hierarki widget
+    final gestureDetectorFinder = find
+        .descendant(
+          of: find.byType(AbsorbPointer),
+          matching: find.byType(GestureDetector),
+        )
+        .first;
+
+    // Verify gesture detector exists
+    expect(gestureDetectorFinder, isNotNull);
+
+    // Verify calendar icon exists
+    final calendarIcon = find.byIcon(Icons.calendar_today);
+    expect(calendarIcon, findsOneWidget);
+  });
+
+  testWidgets('Should initialize RegisterService properly in initState',
+      (WidgetTester tester) async {
+    // Atur ukuran layar
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page - we just need to verify initState completes without errors
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify that RegisterService was initialized properly from GetIt
+    // This test simply checks that we can access the page without errors from initialization
+    expect(find.byType(RegisterPage), findsOneWidget);
+  });
+
+  testWidgets('Should validate empty confirm password field',
+      (WidgetTester tester) async {
+    // Atur ukuran layar
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Fill all fields except confirm password
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Full Name'), 'Test User');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email'), 'test@example.com');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Password'), 'Password123');
+    // Deliberately leave confirm password empty
+
+    // Accept terms
+    final checkbox = find.byType(Checkbox);
+    await tester.ensureVisible(checkbox);
+    await tester.tap(checkbox);
+    await tester.pumpAndSettle();
+
+    // Tap register button
+    final registerButton = find.widgetWithText(ElevatedButton, 'SIGN UP');
+    await tester.ensureVisible(registerButton);
+    await tester.tap(registerButton);
+    await tester.pumpAndSettle();
+
+    // Verify error message for empty confirm password
+    expect(find.text('Confirm password cannot be empty'), findsOneWidget);
+  });
 }

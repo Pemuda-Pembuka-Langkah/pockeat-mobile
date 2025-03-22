@@ -39,9 +39,9 @@ class UserStreamRepository extends UserRepositoryBase {
 
   /// Inisialisasi current user stream
   Stream<UserModel?> _initCurrentUserStream() {
-    return _authRepo.authStateChanges
-        .asyncMap(_authStateToUserModel)
-        .distinct();
+    return _authRepo.authStateChanges.asyncMap((user) {
+      return _authStateToUserModel(user);
+    }).distinct();
   }
 
   /// Konversi user auth menjadi UserModel lengkap
