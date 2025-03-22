@@ -1,5 +1,6 @@
-import 'package:pockeat/features/homepage/presentation/screens/pet_section.dart';
 import 'package:flutter/material.dart';
+import 'package:pockeat/features/homepage/presentation/screens/pet_section.dart';
+import 'package:pockeat/features/sync_fitness_tracker/widgets/health_counter_widget.dart';
 
 class OverviewSection extends StatefulWidget {
   const OverviewSection({super.key});
@@ -72,9 +73,9 @@ class _OverviewSectionState extends State<OverviewSection> {
       ),
       child: Column(
         children: [
-          Row(
+          const Row(
             children: [
-              const Text(
+              Text(
                 '1,247',
                 style: TextStyle(
                   color: Colors.white,
@@ -83,8 +84,8 @@ class _OverviewSectionState extends State<OverviewSection> {
                   letterSpacing: -1,
                 ),
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'Remaining Calories',
                 style: TextStyle(
                   color: Colors.white70,
@@ -113,7 +114,7 @@ class _OverviewSectionState extends State<OverviewSection> {
                       strokeWidth: 12,
                     ),
                   ),
-                  Column(
+                  const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
@@ -142,207 +143,9 @@ class _OverviewSectionState extends State<OverviewSection> {
     );
   }
 
-  Widget _buildConnectToFitnesTracker() {
-  return Padding(
-    padding: const EdgeInsets.all(16), // Added padding around the entire widget
-    child: Column(
-      children: [
-        // Apple Health connection card with red background
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFF6B6B), // Red background
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  color: Colors.white, // White circle
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.favorite,
-                  color: Color(0xFFFF6B6B), // Red icon
-                  size: 16,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Connect Apple Health',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white, // White text for contrast
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    'to track your steps',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white70, // Slightly transparent white
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        
-        const SizedBox(height: 12),
-        
-        // Steps section (unchanged)
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  Icon(
-                    Icons.directions_walk_outlined,
-                    size: 16,
-                    color: Colors.black54,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Steps',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    '0',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      '+0',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        
-        const SizedBox(height: 12),
-        
-        // Calories section (unchanged)
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  Icon(
-                    Icons.local_fire_department,
-                    size: 16,
-                    color: Colors.black54,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Calories burned',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    '0',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      '+0',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
+  Widget _buildFitnessTrackerSection() {
+    return const HealthCounterWidget();
+  }
 
   Widget _buildNutrientCard({
     required String title,
@@ -429,7 +232,7 @@ class _OverviewSectionState extends State<OverviewSection> {
                 controller: _pageController,
                 children: [
                   _buildCaloriesToday(),
-                  _buildConnectToFitnesTracker(),
+                  _buildFitnessTrackerSection(),
                 ],
               ),
             ),
