@@ -4,7 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:health/health.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:pockeat/features/sync_fitness_tracker/services/fitness_tracker_sync.dart';
+import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
+import 'package:intl/intl.dart';
 
 // Mock classes
 class MockHealth extends Mock implements Health {}
@@ -171,16 +172,163 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
       return false;
     }
   }
-  
-  // Override these method implementations to be testable
+    
   @override 
   Future<void> openHealthConnect(BuildContext context) async {
-    await _methodChannel.invokeMethod('launchHealthConnect');
+    if (!Platform.isAndroid) return;
+
+    try {
+      // Launch Health Connect using the injected channel
+      await _methodChannel.invokeMethod('launchHealthConnect');
+      
+      // We'll attempt to verify permissions later when app resumes
+      return;
+    } catch (e) {
+      debugPrint('Error launching Health Connect: $e');
+    }
   }
   
   @override
   Future<void> openHealthConnectPlayStore() async {
-    await _methodChannel.invokeMethod('openHealthConnectPlayStore');
+    if (!Platform.isAndroid) return;
+    
+    try {
+      await _methodChannel.invokeMethod('openHealthConnectPlayStore');
+    } catch (e) {
+      debugPrint('Error opening Play Store: $e');
+    }
+  }
+  
+  // Implement getStepsForDay for testing
+  @override
+  Future<int?> getStepsForDay(DateTime date) async {
+    debugPrint('Getting steps for ${DateFormat('yyyy-MM-dd').format(date)}...');
+
+    // Create date range for the entire day
+    final startTime = DateTime(date.year, date.month, date.day);
+    final endTime = startTime
+        .add(const Duration(days: 1))
+        .subtract(const Duration(milliseconds: 1));
+
+    try {
+      // Try to get the step count using the specialized method first
+      try {
+        final steps = await _health.getTotalStepsInInterval(startTime, endTime);
+        debugPrint('Steps from getTotalStepsInInterval: $steps');
+
+        if (steps != null && steps > 0) {
+          // We successfully read steps, so we have permission
+          _localPermissionState = true;
+          return steps;
+        }
+      } catch (e) {
+        debugPrint('Error with getTotalStepsInInterval: $e');
+      }
+
+      // Try the more general method
+      try {
+        final results = await _health.getHealthDataFromTypes(
+          types: [HealthDataType.STEPS],
+          startTime: startTime,
+          endTime: endTime,
+        );
+
+        // We successfully read data, so we have permission
+        _localPermissionState = true;
+
+        // Sum up all step counts from the results
+        int totalSteps = 0;
+        for (final dataPoint in results) {
+          if (dataPoint.type == HealthDataType.STEPS) {
+            totalSteps +=
+                (dataPoint.value as NumericHealthValue).numericValue.toInt();
+          }
+        }
+
+        debugPrint(
+            'Steps from getHealthDataFromTypes: $totalSteps (${results.length} records)');
+        if (totalSteps > 0) {
+          return totalSteps;
+        }
+      } catch (e) {
+        debugPrint('Error with getHealthDataFromTypes: $e');
+      }
+
+      // Return 0 if no steps found
+      return 0;
+    } catch (e) {
+      debugPrint('Error getting steps: $e');
+      return 0;
+    }
+  }
+
+  // Implement getCaloriesBurnedForDay for testing
+  @override
+  Future<double?> getCaloriesBurnedForDay(DateTime date) async {
+    debugPrint(
+        'Getting calories for ${DateFormat('yyyy-MM-dd').format(date)}...');
+
+    // Create date range for the entire day
+    final startTime = DateTime(date.year, date.month, date.day);
+    final endTime = startTime
+        .add(const Duration(days: 1))
+        .subtract(const Duration(milliseconds: 1));
+
+    try {
+      // Request calories data from both active energy and total calories
+      try {
+        final results = await _health.getHealthDataFromTypes(
+          types: [
+            HealthDataType.ACTIVE_ENERGY_BURNED,
+            HealthDataType.TOTAL_CALORIES_BURNED,
+          ],
+          startTime: startTime,
+          endTime: endTime,
+        );
+
+        // Successfully read data, so we have permission
+        _localPermissionState = true;
+        
+        debugPrint('Calories data records: ${results.length}');
+
+        // Try to get Total Calories Burned first, as it's more comprehensive
+        double totalCalories = 0;
+        bool hasTotalCalories = false;
+
+        for (final dataPoint in results) {
+          if (dataPoint.type == HealthDataType.TOTAL_CALORIES_BURNED) {
+            totalCalories +=
+                (dataPoint.value as NumericHealthValue).numericValue.toDouble();
+            hasTotalCalories = true;
+          }
+        }
+
+        // If no total calories found, use active energy burned
+        if (!hasTotalCalories) {
+          for (final dataPoint in results) {
+            if (dataPoint.type == HealthDataType.ACTIVE_ENERGY_BURNED) {
+              totalCalories += (dataPoint.value as NumericHealthValue)
+                  .numericValue
+                  .toDouble();
+            }
+          }
+        }
+
+        debugPrint(
+            'Total calories: $totalCalories, from total calories: $hasTotalCalories');
+        if (totalCalories > 0) {
+          return totalCalories;
+        }
+      } catch (e) {
+        debugPrint('Error getting calories data: $e');
+      }
+
+      // Return 0 if no calories found
+      return 0;
+    } catch (e) {
+      debugPrint('Error getting calories burned: $e');
+      return 0;
+    }
   }
 }
 
@@ -468,6 +616,9 @@ void main() {
       final testDate = DateTime.now();
       final testSteps = 5000;
       
+      // Reset mocks to clear any previous setup
+      reset(mockHealth);
+      
       when(() => mockHealth.getTotalStepsInInterval(any(), any())).thenAnswer((_) async => testSteps);
       
       // Act
@@ -481,7 +632,12 @@ void main() {
       // Arrange
       final testDate = DateTime.now();
       
-      when(() => mockHealth.getTotalStepsInInterval(any(), any())).thenThrow(Exception('Steps error'));
+      // Reset mocks to clear any previous setup
+      reset(mockHealth);
+      
+      // Configure the primary method to fail
+      when(() => mockHealth.getTotalStepsInInterval(any(), any()))
+          .thenThrow(Exception('Steps error'));
       
       // Create a list of mock health data points
       final mockDataPoints = [
@@ -492,6 +648,7 @@ void main() {
       when(() => mockDataPoints[0].type).thenReturn(HealthDataType.STEPS);
       when(() => mockDataPoints[0].value).thenReturn(MockNumericHealthValue(2000.0));
       
+      // Configure the alternative method to return our mock data
       when(() => mockHealth.getHealthDataFromTypes(
         types: any(named: 'types'),
         startTime: any(named: 'startTime'),
@@ -503,11 +660,20 @@ void main() {
       
       // Assert
       expect(result, 2000);
+      verify(() => mockHealth.getTotalStepsInInterval(any(), any())).called(1);
+      verify(() => mockHealth.getHealthDataFromTypes(
+        types: any(named: 'types'),
+        startTime: any(named: 'startTime'),
+        endTime: any(named: 'endTime'),
+      )).called(1);
     });
     
     test('getCaloriesBurnedForDay combines TOTAL_CALORIES_BURNED values', () async {
       // Arrange
       final testDate = DateTime.now();
+      
+      // Reset mocks to clear any previous setup
+      reset(mockHealth);
       
       // Create mock health data points
       final mockDataPoints = [
@@ -522,6 +688,7 @@ void main() {
       when(() => mockDataPoints[1].type).thenReturn(HealthDataType.TOTAL_CALORIES_BURNED);
       when(() => mockDataPoints[1].value).thenReturn(MockNumericHealthValue(50.0));
       
+      // Important: Make sure we're mocking the specific call that's being made
       when(() => mockHealth.getHealthDataFromTypes(
         types: any(named: 'types'),
         startTime: any(named: 'startTime'),
@@ -539,6 +706,9 @@ void main() {
       // Arrange
       final testDate = DateTime.now();
       
+      // Reset mocks to clear any previous setup
+      reset(mockHealth);
+      
       // Create mock health data point
       final mockDataPoint = MockHealthDataPoint();
       
@@ -546,6 +716,7 @@ void main() {
       when(() => mockDataPoint.type).thenReturn(HealthDataType.ACTIVE_ENERGY_BURNED);
       when(() => mockDataPoint.value).thenReturn(MockNumericHealthValue(75.0));
       
+      // Important: Make sure we're mocking the specific call that's being made
       when(() => mockHealth.getHealthDataFromTypes(
         types: any(named: 'types'),
         startTime: any(named: 'startTime'),

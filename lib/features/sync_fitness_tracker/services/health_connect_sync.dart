@@ -7,10 +7,18 @@ import 'dart:async';
 
 class FitnessTrackerSync {
   /// Health plugin instance
-  final Health _health = Health();
+  final Health _health;
+  
+  /// Method channel for platform interactions
+  final MethodChannel _methodChannel;
 
-  /// Health Connect package name
-  static const String healthConnectPackage = 'com.google.android.apps.healthdata';
+  // Constructor with dependency injection
+  FitnessTrackerSync({
+    Health? health,
+    MethodChannel? methodChannel,
+  }) : 
+    _health = health ?? Health(),
+    _methodChannel = methodChannel ?? const MethodChannel('com.pockeat/health_connect');
 
   /// The required data types
   final List<HealthDataType> _requiredTypes = [
@@ -116,9 +124,8 @@ class FitnessTrackerSync {
     if (!Platform.isAndroid) return;
 
     try {
-      // Launch Health Connect
-      const MethodChannel('com.pockeat/health_connect')
-          .invokeMethod('launchHealthConnect');
+      // Launch Health Connect using the injected channel
+      _methodChannel.invokeMethod('launchHealthConnect');
 
       // We'll attempt to verify permissions later when app resumes
       return;
@@ -377,8 +384,8 @@ class FitnessTrackerSync {
   Future<void> openHealthConnectPlayStore() async {
     if (Platform.isAndroid) {
       try {
-        const MethodChannel('com.pockeat/health_connect')
-            .invokeMethod('openHealthConnectPlayStore');
+        // FIXED: Use the injected method channel instead of creating a new one
+        _methodChannel.invokeMethod('openHealthConnectPlayStore');
       } catch (e) {
         debugPrint('Error opening Play Store: $e');
       }

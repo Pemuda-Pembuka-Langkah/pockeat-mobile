@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/sync_fitness_tracker/services/fitness_tracker_sync.dart';
+import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
 
 class HealthCounterWidget extends StatefulWidget {
   final Color primaryColor;
