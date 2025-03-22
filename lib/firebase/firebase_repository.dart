@@ -113,10 +113,8 @@ abstract class BaseFirestoreRepository<T> {
       return querySnapshot.docs
           .map((doc) {
             final data = doc.data();
-            if (data is Map<String, dynamic>) {
-              return fromMap(data, doc.id);
-            }
-            throw Exception('Document data is not in the expected format');
+            return fromMap(data, doc.id);
+                      throw Exception('Document data is not in the expected format');
           })
           .toList();
     } catch (e) {
@@ -170,10 +168,8 @@ abstract class BaseFirestoreRepository<T> {
       return querySnapshot.docs
           .map((doc) {
             final data = doc.data();
-            if (data is Map<String, dynamic>) {
-              return fromMap(data, doc.id);
-            }
-            throw Exception('Document data is not in the expected format');
+            return fromMap(data, doc.id);
+                      throw Exception('Document data is not in the expected format');
           })
           .toList();
     } catch (e) {
@@ -219,10 +215,8 @@ abstract class BaseFirestoreRepository<T> {
       return querySnapshot.docs
           .map((doc) {
             final data = doc.data();
-            if (data is Map<String, dynamic>) {
-              return fromMap(data, doc.id);
-            }
-            throw Exception('Document data is not in the expected format');
+            return fromMap(data, doc.id);
+                      throw Exception('Document data is not in the expected format');
           })
           .toList();
     } catch (e) {

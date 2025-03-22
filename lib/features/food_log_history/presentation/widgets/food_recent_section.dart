@@ -17,10 +17,10 @@ class FoodRecentSection extends StatefulWidget {
 
   /// Creates a new [FoodRecentSection] widget
   const FoodRecentSection({
-    Key? key,
+    super.key,
     required this.service,
     this.limit = 5,
-  }) : super(key: key);
+  });
 
   @override
   State<FoodRecentSection> createState() => _FoodRecentSectionState();
