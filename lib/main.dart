@@ -39,20 +39,6 @@ import 'package:pockeat/features/authentication/presentation/screens/email_verif
 // Global navigator key untuk akses Navigator dari anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-// Class untuk menangani deep link secara global
-class DeepLinkHandler {
-  static void setupDeepLinks(DeepLinkService service) {
-    // Tidak perlu lagi setup listener kompleks, karena deep link service sudah memiliki navigatorKey
-    // dan bisa menangani navigasi langsung
-
-    // Tambahkan listener sederhana untuk debugging saja
-    service.onLinkReceived().listen((Uri? link) {
-      if (link == null) return;
-      print('🌐 Deep link received in global handler: ${link.toString()}');
-    });
-  }
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -85,9 +71,6 @@ void main() async {
 
   // Initialize the DeepLinkService dengan navigatorKey
   await getIt<DeepLinkService>().initialize(navigatorKey: navigatorKey);
-
-  // Setup deep link handler untuk debugging
-  DeepLinkHandler.setupDeepLinks(getIt<DeepLinkService>());
 
   runApp(
     MultiProvider(
