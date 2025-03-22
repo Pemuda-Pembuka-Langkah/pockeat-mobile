@@ -1,10 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Add these inside the manifest tag -->
+    <!-- Queries section (consolidated) -->
     <queries>
+        <!-- Health Connect query -->
         <package android:name="com.google.android.apps.healthdata" />
+        <intent>
+            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+        </intent>
+        <!-- Required to query activities that can process text -->
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
     </queries>
-
     
     <!-- Required Health Connect permissions -->
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
@@ -78,13 +86,14 @@
             <!-- Intent filter for Health Connect -->
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
+            
             <!-- Custom Deep Link Scheme for the app -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="pockeat" />
-
             </intent-filter>
         </activity>
         
@@ -106,18 +115,4 @@
                 </intent-filter>
         </activity-alias>
     </application>
-    
-    <!-- Required to query activities that can process text -->
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
-        </intent>
-        
-        <!-- Health Connect query -->
-        <package android:name="com.google.android.apps.healthdata" />
-        <intent>
-            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-        </intent>
-    </queries>
 </manifest>
