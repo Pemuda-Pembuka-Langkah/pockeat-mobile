@@ -6,10 +6,10 @@ class RecommendationsSection extends StatelessWidget {
   final Color primaryPink;
 
   const RecommendationsSection({
-    Key? key,
+    super.key,
     required this.primaryYellow,
     required this.primaryPink,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

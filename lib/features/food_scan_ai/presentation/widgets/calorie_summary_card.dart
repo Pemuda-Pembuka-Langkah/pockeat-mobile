@@ -7,12 +7,12 @@ class CalorieSummaryCard extends StatelessWidget {
   final Color primaryPink;
 
   const CalorieSummaryCard({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.calories,
     required this.primaryYellow,
     required this.primaryPink,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

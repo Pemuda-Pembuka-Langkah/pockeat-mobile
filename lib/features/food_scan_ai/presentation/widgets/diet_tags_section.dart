@@ -6,11 +6,11 @@ class DietTagsSection extends StatelessWidget {
   final Color warningYellow;
 
   const DietTagsSection({
-    Key? key,
+    super.key,
     required this.warnings,
     required this.primaryGreen,
     required this.warningYellow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

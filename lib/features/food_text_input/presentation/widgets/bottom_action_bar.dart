@@ -14,7 +14,7 @@ class TextBottomActionBar extends StatelessWidget {
   final Function(FoodAnalysisResult)? onAnalysisCorrected;
 
   const TextBottomActionBar({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.food,
     required this.foodTextInputService,
@@ -22,7 +22,7 @@ class TextBottomActionBar extends StatelessWidget {
     required this.primaryPink,
     this.primaryGreen = const Color(0xFF4ECDC4),
     this.onAnalysisCorrected,
-  }) : super(key: key);
+  });
 
   void showSnackBarMessage(BuildContext context, String message, {Color? backgroundColor}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -77,6 +77,7 @@ class FoodScanRepository extends BaseFirestoreRepository<FoodAnalysisResult> {
   ///
   /// Parameter [id] the ID of the food analysis result to delete
   /// Returns true if deletion was successful, false if the item wasn't found
+  @override
   Future<bool> deleteById(String id) async {
     return super.deleteById(id);
   }
