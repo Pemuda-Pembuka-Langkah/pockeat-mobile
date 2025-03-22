@@ -223,7 +223,7 @@ void main() {
         home: const LoginPage(),
         navigatorObservers: [mockObserver],
         routes: {
-          '/register': (context) => const Scaffold(body: Text('Register Page')),
+          '': (context) => const Scaffold(body: Text('Register Page')),
         },
       ),
     );
