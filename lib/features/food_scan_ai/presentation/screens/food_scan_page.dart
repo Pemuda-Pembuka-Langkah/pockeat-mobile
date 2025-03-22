@@ -34,9 +34,9 @@ class ScanFoodPageState extends State<ScanFoodPage>
 
   final double _scanProgress = 0.0;
   late AnimationController _scanLineController;
-  final String _statusMessage = 'Make sure your food is clearly visible';
+  String _statusMessage = 'Make sure your food is clearly visible';
   final Color _progressColor = const Color(0xFFFF4949); // Using primaryPink
-  int _currentMode = 0;
+  int _currentMode = 0; // 0 for food scan, 1 for label scan
 
 
   bool _isCameraReady = false;
@@ -232,9 +232,12 @@ class ScanFoodPageState extends State<ScanFoodPage>
                         CupertinoIcons.xmark,
                         onTap: () => Navigator.pop(context),
                       ),
-                      Container(
-                        alignment: Alignment.center,
-                        child: _buildModeButton('Scan', 0),
+                      Row(
+                        children: [
+                          _buildModeButton('Food', 0),
+                          const SizedBox(width: 8),
+                          _buildModeButton('Label', 1),
+                        ],
                       ),
                       Row(
                         children: [
@@ -285,7 +288,9 @@ class ScanFoodPageState extends State<ScanFoodPage>
                 children: [
                   // Status Message
                   Text(
-                    _statusMessage,
+                    _currentMode == 0 
+                        ? 'Make sure your food is clearly visible'
+                        : 'Position the nutrition label in the frame',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -313,12 +318,13 @@ class ScanFoodPageState extends State<ScanFoodPage>
                         try {
                           final image = await widget.cameraController.takePicture();
                           if (mounted) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => NutritionPage(imagePath: image.path),
-                              ),
-                            );
+                            if (_currentMode == 1) {
+                              // Jika mode label scan, tampilkan popup untuk serving size
+                              _showServingSizeDialog(context, image.path);
+                            } else {
+                              // Jika mode food scan, langsung navigasi ke NutritionPage
+                              _navigateToNutritionPage(context, image.path);
+                            }
                           }
                         } catch (e) {
                           // Handle picture taking error
@@ -333,8 +339,8 @@ class ScanFoodPageState extends State<ScanFoodPage>
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 3),
                         ),
-                        child: const Icon(
-                          Icons.camera_alt,
+                        child: Icon(
+                          _currentMode == 0 ? Icons.camera_alt : Icons.document_scanner,
                           color: Colors.white,
                           size: 36,
                         ),
@@ -355,7 +361,13 @@ class ScanFoodPageState extends State<ScanFoodPage>
     return GestureDetector(
       key: Key('mode_button_$mode'),
       onTap: () {
-        setState(() => _currentMode = mode);
+        setState(() {
+          _currentMode = mode;
+          // Update status message based on mode
+          _statusMessage = mode == 0 
+              ? 'Make sure your food is clearly visible'
+              : 'Position the nutrition label in the frame';
+        });
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -367,7 +379,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
           text,
           style: TextStyle(
             color: isSelected ? Colors.white : Colors.white,
-            fontWeight: FontWeight.w600,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
       ),
@@ -386,6 +398,147 @@ class ScanFoodPageState extends State<ScanFoodPage>
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: 20),
+      ),
+    );
+  }
+
+  // Fungsi untuk menampilkan dialog serving size yang sederhana
+  void _showServingSizeDialog(BuildContext context, String imagePath) {
+    double servingSize = 1.0;
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Serving Size',
+            style: TextStyle(
+              color: primaryGreen,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Berapa serving size yang Anda makan?',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  // Form input number sederhana
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: primaryGreen),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TextField(
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: '1.0',
+                        hintStyle: TextStyle(color: Colors.grey[400]),
+                      ),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: primaryGreen,
+                      ),
+                      onChanged: (value) {
+                        if (value.isNotEmpty) {
+                          try {
+                            final parsedValue = double.parse(value);
+                            if (parsedValue > 0) {
+                              servingSize = parsedValue;
+                            } else {
+                              // Tampilkan pesan jika angka tidak positif
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Mohon masukkan angka positif'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                              servingSize = 1.0;
+                            }
+                          } catch (e) {
+                            // Tampilkan pesan jika input bukan angka
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Mohon masukkan angka yang valid'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                            servingSize = 1.0;
+                          }
+                        }
+                      },
+                      controller: TextEditingController(text: servingSize.toString()),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  Text(
+                    'Pastikan Anda memasukkan angka yang benar',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              child: Text(
+                'Batal',
+                style: TextStyle(color: primaryPink),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryGreen,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              ),
+              child: const Text('Konfirmasi'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _navigateToNutritionPage(
+                  context, 
+                  imagePath, 
+                  servingSize: servingSize,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Fungsi untuk navigasi ke NutritionPage
+  void _navigateToNutritionPage(
+    BuildContext context, 
+    String imagePath, 
+    {double servingSize = 1.0}
+  ) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NutritionPage(
+          imagePath: imagePath,
+          isLabelScan: _currentMode == 1,
+          servingSize: servingSize,
+        ),
       ),
     );
   }

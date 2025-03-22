@@ -6,11 +6,11 @@ class FoodTitleSection extends StatelessWidget {
   final Color primaryGreen;
 
   const FoodTitleSection({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.foodName,
     required this.primaryGreen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

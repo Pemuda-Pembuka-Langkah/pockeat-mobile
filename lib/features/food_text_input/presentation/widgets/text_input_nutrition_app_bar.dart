@@ -6,10 +6,10 @@ class TextInputNutritionAppBar extends StatelessWidget {
   final Color primaryYellow;
 
   const TextInputNutritionAppBar({
-    Key? key,
+    super.key,
     required this.isScrolledToTop,
     required this.primaryYellow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

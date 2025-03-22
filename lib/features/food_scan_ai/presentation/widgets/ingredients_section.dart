@@ -8,11 +8,11 @@ class IngredientsSection extends StatelessWidget {
   final bool isLoading;
 
   const IngredientsSection({
-    Key? key,
+    super.key,
     required this.ingredients,
     required this.primaryGreen,
     required this.isLoading,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
