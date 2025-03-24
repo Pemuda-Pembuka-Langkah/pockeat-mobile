@@ -10,6 +10,10 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/p
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/nutrient_progress_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/meal_patterns_widget.dart';
 
+import 'package:logger/logger.dart';
+
+final logger = Logger();
+
 class NutritionProgressPage extends StatefulWidget {
   final NutritionService service;
   
@@ -71,10 +75,7 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
       setState(() {
         isLoading = false;
       });
-      assert(() {
-        print('Error loading nutrition data: $e');
-        return true;
-      }());
+      logger.e('Error loading nutrition data: $e');
     }
   }
 
@@ -99,10 +100,7 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
       setState(() {
         isChartLoading = false;
       });
-      assert(() {
-        print('Error toggling view: $e');
-        return true;
-      }());
+      logger.e('Error toggling view: $e');
     }
   }
 

@@ -11,6 +11,10 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/pr
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/performance_metric_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/workout_history_widget.dart';
 
+import 'package:logger/logger.dart';
+
+final logger = Logger();
+
 class ExerciseProgressPage extends StatefulWidget {
   final ExerciseProgressService service;
   
@@ -79,10 +83,7 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
       setState(() {
         isLoading = false;
       });
-      assert(() {
-        print('Error loading exercise progress data: $e');
-        return true;
-      }());
+      logger.e('Error loading exercise progress data: $e');
     }
   }
 
@@ -104,10 +105,7 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
         _exerciseData = newExerciseData;
       });
     } catch (e) {
-      assert(() {
-        print('Error toggling view: $e');
-        return true;
-      }());
+      logger.e('Error toggling view: $e');
     }
   }
 
