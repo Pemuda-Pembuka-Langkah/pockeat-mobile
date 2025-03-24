@@ -170,14 +170,10 @@ class MyApp extends StatelessWidget {
                 'Verification failed. Please try again.',
           );
         },
-
         '/smart-exercise-log': (context) => AuthWrapper(
               child: SmartExerciseLogPage(
-                // Langsung berikan dependensi yang dibutuhkan
-                geminiService: getIt<GeminiService>(),
                 repository: smartExerciseLogRepository,
               ),
-
             ),
         '/scan': (context) => AuthWrapper(
               child: ScanFoodPage(
