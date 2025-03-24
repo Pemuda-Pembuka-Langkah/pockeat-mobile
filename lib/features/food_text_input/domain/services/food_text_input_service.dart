@@ -22,7 +22,7 @@ class FoodTextInputService {
   }
 
   /// Saves the food analysis result to the database
-  Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult) async {
+  Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult, {bool isCorrected = false}) async {
     try {
       await _foodTextInputRepository.save(analysisResult, analysisResult.id ?? _uuid.v4());
       return 'Successfully saved food analysis';
