@@ -441,7 +441,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       color: primaryGreen.withOpacity(0.1),
       child: Center(
         child: Icon(
-          CupertinoIcons.cart_fill,
+          Icons.restaurant,
           size: 64,
           color: primaryGreen.withOpacity(0.5),
         ),
