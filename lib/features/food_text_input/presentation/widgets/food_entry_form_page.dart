@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
 
 class FoodEntryForm extends StatefulWidget {
   final Function(FoodEntry)? onSaved;
   final bool isAnalyzing;
   final FoodEntry? existingEntry; 
+  final bool isCorrection;
 
   const FoodEntryForm({
     this.onSaved,
     this.isAnalyzing = false,
     this.existingEntry, 
+    this.isCorrection = false,
     super.key,
   });
 
@@ -138,7 +139,7 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
               onPressed: widget.isAnalyzing
                   ? null
                   : () => _validateAndSubmit(
-                      isCorrection: widget.existingEntry != null, 
+                      isCorrection: widget.isCorrection, 
                     ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4ECDC4), 
