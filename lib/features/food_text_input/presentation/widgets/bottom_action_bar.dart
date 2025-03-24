@@ -88,34 +88,31 @@ class TextBottomActionBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     onTap: () async {
                       if (!isLoading && food != null) {
-                        onSavingStateChange?.call(true); // Indicate saving started
-
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (BuildContext context) {
-                            return const Center(child: CircularProgressIndicator());
-                          },
-                        );
+                        onSavingStateChange?.call(true); 
+                        
                         try {
+                          showSnackBarMessage(context, 'Saving food to log...', backgroundColor: Colors.blue);
+                          
                           final message = await foodTextInputService.saveFoodAnalysis(food!);
+                          
                           if (!context.mounted) return;
-                          Navigator.of(context).pop();
-
+                          
                           showSnackBarMessage(context, message, backgroundColor: primaryGreen);
-
-                          if (Navigator.canPop(context)) {
-                            Navigator.pop(context); // Only pop once
-                          }
+                          
+                          Future.delayed(const Duration(milliseconds: 500), () {
+                            if (context.mounted) {
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                            }
+                          });
+                          
                         } catch (e) {
                           if (!context.mounted) return;
-                          Navigator.of(context).pop();
-                          showSnackBarMessage(context, 'Failed to save: ${e.toString()}');
+                          showSnackBarMessage(context, 'Failed to save: ${e.toString()}', backgroundColor: Colors.red);
                         } finally {
-                          onSavingStateChange?.call(false); // Indicate saving finished
+                          onSavingStateChange?.call(false); 
                         }
                       }
-                    },
+                    },                    
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: const Row(
