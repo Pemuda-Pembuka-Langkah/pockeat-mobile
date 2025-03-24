@@ -12,7 +12,9 @@ import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/do
 import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/domain/repositories/analytics_repository.dart';
 
 // Generate mock class
-@GenerateMocks([], customMocks: [MockSpec<AnalyticsRepository>(as: #GeneratedMockAnalyticsRepository)])
+@GenerateMocks([AnalyticsRepository])
+import 'analytics_repository_test.mocks.dart';
+
 void main() {
   late MockAnalyticsRepository mockRepository;
 
@@ -246,64 +248,4 @@ void main() {
       });
     });
   });
-}
-
-// Mock class
-class MockAnalyticsRepository extends Mock implements AnalyticsRepository {
-  @override
-  Future<List<FocusItem>> getFocusItems() => super.noSuchMethod(
-        Invocation.method(#getFocusItems, []),
-        returnValue: Future.value(<FocusItem>[]),
-      ) as Future<List<FocusItem>>;
-
-  @override
-  Future<List<MetricItem>> getPerformanceMetrics() => super.noSuchMethod(
-        Invocation.method(#getPerformanceMetrics, []),
-        returnValue: Future.value(<MetricItem>[]),
-      ) as Future<List<MetricItem>>;
-
-  @override
-  Future<InsightCategory> getNutritionInsights() => super.noSuchMethod(
-        Invocation.method(#getNutritionInsights, []),
-        returnValue: Future.value(InsightCategory(
-          title: '',
-          icon: CupertinoIcons.circle,
-          color: Colors.black,
-          insights: [],
-        )),
-      ) as Future<InsightCategory>;
-
-  @override
-  Future<InsightCategory> getExerciseInsights() => super.noSuchMethod(
-        Invocation.method(#getExerciseInsights, []),
-        returnValue: Future.value(InsightCategory(
-          title: '',
-          icon: CupertinoIcons.circle,
-          color: Colors.black,
-          insights: [],
-        )),
-      ) as Future<InsightCategory>;
-
-  @override
-  Future<List<AnalysisItem>> getDetailedAnalysis() => super.noSuchMethod(
-        Invocation.method(#getDetailedAnalysis, []),
-        returnValue: Future.value(<AnalysisItem>[]),
-      ) as Future<List<AnalysisItem>>;
-
-  @override
-  Future<InsightCategory> getWeeklyPatterns() => super.noSuchMethod(
-        Invocation.method(#getWeeklyPatterns, []),
-        returnValue: Future.value(InsightCategory(
-          title: '',
-          icon: CupertinoIcons.circle,
-          color: Colors.black,
-          insights: [],
-        )),
-      ) as Future<InsightCategory>;
-
-  @override
-  Future<List<RecommendationItem>> getSmartRecommendations() => super.noSuchMethod(
-        Invocation.method(#getSmartRecommendations, []),
-        returnValue: Future.value(<RecommendationItem>[]),
-      ) as Future<List<RecommendationItem>>;
 }
