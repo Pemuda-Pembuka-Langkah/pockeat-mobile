@@ -24,7 +24,7 @@ class TextBottomActionBar extends StatelessWidget {
     this.primaryGreen = const Color(0xFF4ECDC4),
     this.onAnalysisCorrected,
     this.onSavingStateChange,
-  }) : super(key: key);
+  });
 
   void showSnackBarMessage(BuildContext context, String message, {Color? backgroundColor}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
