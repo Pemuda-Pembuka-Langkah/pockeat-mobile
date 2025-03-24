@@ -30,6 +30,7 @@ class RunningActivity extends CardioActivity {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'userId': userId,
       'date': date.millisecondsSinceEpoch,
       'startTime': startTime.millisecondsSinceEpoch,
       'endTime': endTime.millisecondsSinceEpoch,
