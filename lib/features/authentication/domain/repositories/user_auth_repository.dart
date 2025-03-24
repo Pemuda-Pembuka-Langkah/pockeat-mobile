@@ -10,10 +10,17 @@ class UserAuthRepository extends UserRepositoryBase {
   });
 
   /// Mendapatkan user saat ini
-  User? get currentUser => auth.currentUser;
+  User? get currentUser {
+    final user = auth.currentUser;
+    return user;
+  }
 
   /// Stream perubahan status auth
-  Stream<User?> get authStateChanges => auth.authStateChanges();
+  Stream<User?> get authStateChanges {
+    return auth.authStateChanges().map((user) {
+      return user;
+    });
+  }
 
   /// Update profil user di Firebase Auth
   Future<void> updateUserProfile({
