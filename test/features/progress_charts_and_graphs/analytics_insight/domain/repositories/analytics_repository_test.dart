@@ -12,7 +12,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/do
 import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/domain/repositories/analytics_repository.dart';
 
 // Generate mock class
-@GenerateMocks([AnalyticsRepository])
+@GenerateMocks([], customMocks: [MockSpec<AnalyticsRepository>(as: #GeneratedMockAnalyticsRepository)])
 void main() {
   late MockAnalyticsRepository mockRepository;
 
