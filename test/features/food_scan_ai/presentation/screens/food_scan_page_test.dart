@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_photo_help_widget.dart';
 import 'dart:io';
 
 class MockCameraController extends Mock implements CameraController {
@@ -358,5 +359,156 @@ void main() {
 
     // Verify error message
     expect(find.text('Mohon masukkan angka positif'), findsOneWidget);
+  });
+
+  testWidgets('FoodPhotoHelpWidget renders correctly',
+      (WidgetTester tester) async {
+    // Arrange
+    final widget = MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => FoodPhotoHelpWidget(
+                  primaryColor: const Color(0xFF4ECDC4),
+                ),
+              );
+            },
+            child: const Text('Show Help'),
+          ),
+        ),
+      ),
+    );
+
+    // Act
+    await tester.pumpWidget(widget);
+    await tester.tap(find.text('Show Help'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    // Check dialog title
+    expect(find.text('How to Take a Good Food Photo'), findsOneWidget);
+
+    // Check all tip items are present
+    expect(find.text('Good Lighting'), findsOneWidget);
+    expect(find.text('Center Your Food'), findsOneWidget);
+    expect(find.text('Appropriate Distance'), findsOneWidget);
+    expect(find.text('Steady Hand'), findsOneWidget);
+    expect(find.text('Avoid Reflections'), findsOneWidget);
+
+    // Check descriptions
+    expect(
+        find.text('Try to take photos in natural light. Avoid harsh shadows.'),
+        findsOneWidget);
+    expect(
+        find.text('Keep the food inside the scanning frame.'), findsOneWidget);
+    expect(find.text('Not too close, not too far. 8-12 inches is ideal.'),
+        findsOneWidget);
+    expect(find.text('Hold your phone steady to avoid blur.'), findsOneWidget);
+    expect(find.text('Avoid glare from shiny surfaces or packaging.'),
+        findsOneWidget);
+
+    // Check button exists
+    expect(find.text('Got it!'), findsOneWidget);
+  });
+
+  testWidgets('FoodPhotoHelpWidget dismisses when button is tapped',
+      (WidgetTester tester) async {
+    // Arrange
+    when(() => mockNavigatorObserver.didPop(any(), any())).thenReturn(null);
+
+    final widget = MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => FoodPhotoHelpWidget(
+                  primaryColor: const Color(0xFF4ECDC4),
+                ),
+              );
+            },
+            child: const Text('Show Help'),
+          ),
+        ),
+      ),
+      navigatorObservers: [mockNavigatorObserver],
+    );
+
+    // Act
+    await tester.pumpWidget(widget);
+    await tester.tap(find.text('Show Help'));
+    await tester.pumpAndSettle();
+
+    // Reset observer to clear previous calls
+    clearInteractions(mockNavigatorObserver);
+
+    // Tap the "Got it!" button
+    await tester.tap(find.text('Got it!'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    // Verify dialog is closed
+    expect(find.text('How to Take a Good Food Photo'), findsNothing);
+    verify(() => mockNavigatorObserver.didPop(any(), any())).called(1);
+  });
+
+  testWidgets('FoodPhotoHelpWidget displays with correct styling',
+      (WidgetTester tester) async {
+    // Arrange
+    const primaryColor = Color(0xFF4ECDC4);
+
+    final widget = MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => const FoodPhotoHelpWidget(
+                  primaryColor: primaryColor,
+                ),
+              );
+            },
+            child: const Text('Show Help'),
+          ),
+        ),
+      ),
+    );
+
+    // Act
+    await tester.pumpWidget(widget);
+    await tester.tap(find.text('Show Help'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    // Check title has correct style
+    final titleText =
+        tester.widget<Text>(find.text('How to Take a Good Food Photo'));
+    expect(titleText.style?.color, primaryColor);
+    expect(titleText.style?.fontWeight, FontWeight.bold);
+    expect(titleText.style?.fontSize, 18.0);
+
+    // Check icons have correct color
+    final icons = tester.widgetList<Icon>(find.byType(Icon));
+    for (final icon in icons) {
+      expect(icon.color, primaryColor);
+    }
+
+    // Check button styling
+    final button = tester.widget<TextButton>(find.byType(TextButton).last);
+    final buttonStyle = button.style as ButtonStyle;
+
+    // Extract background color
+    final backgroundColor = buttonStyle.backgroundColor?.resolve({});
+    expect(backgroundColor, primaryColor);
+
+    // Check button text style
+    final buttonText = tester.widget<Text>(find.text('Got it!'));
+    expect(buttonText.style?.color, Colors.white);
+    expect(buttonText.style?.fontWeight, FontWeight.bold);
   });
 }
