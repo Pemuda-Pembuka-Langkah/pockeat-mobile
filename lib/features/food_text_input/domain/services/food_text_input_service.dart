@@ -5,44 +5,47 @@ import 'package:pockeat/features/food_text_input/domain/repositories/food_text_i
 import 'package:uuid/uuid.dart';
 
 class FoodTextInputService {
-  final FoodTextAnalysisService _foodTextAnalysisService = getIt<FoodTextAnalysisService>();
-  final FoodTextInputRepository _foodTextInputRepository = getIt<FoodTextInputRepository>();
+  final FoodTextAnalysisService _foodTextAnalysisService;
+  final FoodTextInputRepository _foodTextInputRepository;
   final Uuid _uuid = Uuid();
 
-  FoodTextInputService();
+  FoodTextInputService(this._foodTextAnalysisService, this._foodTextInputRepository);
 
   /// Analyzes food description and returns the analysis result
   Future<FoodAnalysisResult> analyzeFoodText(String description) async {
     try {
-      final result = await _foodTextAnalysisService.analyze(description);
-      return result;
+      return await _foodTextAnalysisService.analyze(description);
     } catch (e) {
-      throw Exception('Failed to analyze food text: ${e.toString()}');
+      throw Exception('Food text analysis failed: ${e.toString()}');
     }
   }
 
   /// Saves the food analysis result to the database
   Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult, {bool isCorrected = false}) async {
     try {
-      await _foodTextInputRepository.save(analysisResult, analysisResult.id ?? _uuid.v4());
-      return 'Successfully saved food analysis';
+      final String analysisId = analysisResult.id ?? _uuid.v4();
+      await _foodTextInputRepository.save(analysisResult, analysisId);
+      return 'Food analysis saved successfully';
     } catch (e) {
-      throw Exception('Failed to save food analysis: ${e.toString()}');
+      throw Exception('Saving food analysis failed: ${e.toString()}');
     }
   }
 
   /// Corrects a food analysis result based on user feedback
   Future<FoodAnalysisResult> correctFoodAnalysis(FoodAnalysisResult previousResult, String userComment) async {
     try {
-      final correctedResult = await _foodTextAnalysisService.correctAnalysis(previousResult, userComment);
-      return correctedResult;
+      return await _foodTextAnalysisService.correctAnalysis(previousResult, userComment);
     } catch (e) {
-      throw Exception('Failed to correct food analysis: ${e.toString()}');
+      throw Exception('Food analysis correction failed: ${e.toString()}');
     }
   }
 
   /// Retrieves all food analysis results
   Future<List<FoodAnalysisResult>> getAllFoodAnalysis() async {
-    return await _foodTextInputRepository.getAll();
+    try {
+      return await _foodTextInputRepository.getAll();
+    } catch (e) {
+      throw Exception('Fetching food analysis results failed: ${e.toString()}');
+    }
   }
 }
