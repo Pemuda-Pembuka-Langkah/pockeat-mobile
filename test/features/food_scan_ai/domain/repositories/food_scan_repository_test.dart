@@ -183,4 +183,202 @@ void main() {
       );
     });
   });
+
+  group('FoodScanRepository - Date Filtering', () {
+    late DateTime testDate;
+    late FoodAnalysisResult todayAnalysis;
+    late FoodAnalysisResult yesterdayAnalysis;
+    late FoodAnalysisResult lastMonthAnalysis;
+    late FoodAnalysisResult lastYearAnalysis;
+
+    setUp(() async {
+      testDate = DateTime(2024, 3, 15, 12, 0);
+      
+      todayAnalysis = FoodAnalysisResult(
+        foodName: 'Today Food',
+        ingredients: [],
+        nutritionInfo: NutritionInfo(
+          calories: 300,
+          protein: 10,
+          carbs: 45,
+          fat: 8,
+          sodium: 400,
+          fiber: 2,
+          sugar: 1,
+        ),
+        timestamp: testDate,
+      );
+
+      yesterdayAnalysis = FoodAnalysisResult(
+        foodName: 'Yesterday Food',
+        ingredients: [],
+        nutritionInfo: NutritionInfo(
+          calories: 250,
+          protein: 8,
+          carbs: 35,
+          fat: 6,
+          sodium: 300,
+          fiber: 1,
+          sugar: 1,
+        ),
+        timestamp: testDate.subtract(const Duration(days: 1)),
+      );
+
+      lastMonthAnalysis = FoodAnalysisResult(
+        foodName: 'Last Month Food',
+        ingredients: [],
+        nutritionInfo: NutritionInfo(
+          calories: 400,
+          protein: 15,
+          carbs: 50,
+          fat: 12,
+          sodium: 500,
+          fiber: 3,
+          sugar: 2,
+        ),
+        timestamp: DateTime(2024, 2, 15),
+      );
+
+      lastYearAnalysis = FoodAnalysisResult(
+        foodName: 'Last Year Food',
+        ingredients: [],
+        nutritionInfo: NutritionInfo(
+          calories: 350,
+          protein: 12,
+          carbs: 40,
+          fat: 10,
+          sodium: 450,
+          fiber: 2,
+          sugar: 2,
+        ),
+        timestamp: DateTime(2023, 3, 15),
+      );
+
+      // Save test data
+      await repository.save(todayAnalysis, '1');
+      await repository.save(yesterdayAnalysis, '2');
+      await repository.save(lastMonthAnalysis, '3');
+      await repository.save(lastYearAnalysis, '4');
+    });
+
+    test('getAnalysisResultsByDate should return results for specific date', () async {
+      // Act
+      final results = await repository.getAnalysisResultsByDate(testDate);
+
+      // Assert
+      expect(results.length, 1);
+      expect(results.first.foodName, 'Today Food');
+      expect(results.first.timestamp.day, testDate.day);
+      expect(results.first.timestamp.month, testDate.month);
+      expect(results.first.timestamp.year, testDate.year);
+    });
+
+    test('getAnalysisResultsByMonth should return results for specific month', () async {
+      // Act
+      final results = await repository.getAnalysisResultsByMonth(3, 2024);
+
+      // Assert
+      expect(results.length, 2); // Today and yesterday's food
+      expect(
+        results.any((result) => result.foodName == 'Today Food'),
+        true,
+      );
+      expect(
+        results.any((result) => result.foodName == 'Yesterday Food'),
+        true,
+      );
+    });
+
+    test('getAnalysisResultsByYear should return results for specific year', () async {
+      // Act
+      final results = await repository.getAnalysisResultsByYear(2024);
+
+      // Assert
+      expect(results.length, 3); // Today, yesterday, and last month's food
+      expect(
+        results.any((result) => result.foodName == 'Today Food'),
+        true,
+      );
+      expect(
+        results.any((result) => result.foodName == 'Yesterday Food'),
+        true,
+      );
+      expect(
+        results.any((result) => result.foodName == 'Last Month Food'),
+        true,
+      );
+    });
+
+    test('getAnalysisResultsByDate with limit should respect the limit', () async {
+      // Save another food for the same date
+      final anotherTodayAnalysis = FoodAnalysisResult(
+        foodName: 'Another Today Food',
+        ingredients: [],
+        nutritionInfo: NutritionInfo(
+          calories: 200,
+          protein: 5,
+          carbs: 30,
+          fat: 4,
+          sodium: 200,
+          fiber: 1,
+          sugar: 1,
+        ),
+        timestamp: testDate,
+      );
+      await repository.save(anotherTodayAnalysis, '5');
+
+      // Act
+      final results = await repository.getAnalysisResultsByDate(testDate, limit: 1);
+
+      // Assert
+      expect(results.length, 1);
+    });
+  });
+
+  group('FoodScanRepository - Delete Operations', () {
+    test('deleteById should successfully delete existing document', () async {
+      // Arrange
+      const id = 'test-id';
+      await repository.save(testFoodAnalysis, id);
+
+      // Act
+      final result = await repository.deleteById(id);
+      final deletedDoc = await repository.getById(id);
+
+      // Assert
+      expect(result, true);
+      expect(deletedDoc, isNull);
+    });
+
+    test('deleteById should return false for non-existent document', () async {
+      // Act
+      final result = await repository.deleteById('non-existent-id');
+
+      // Assert
+      expect(result, false);
+    });
+
+    test('deleteById should handle errors gracefully', () async {
+      // Arrange
+      final mockFirestore = MockFirebaseFirestore();
+      final mockCollection = MockCollectionReference<Map<String, dynamic>>();
+      final mockDocument = MockDocumentReference<Map<String, dynamic>>();
+      
+      when(mockFirestore.collection(any)).thenReturn(mockCollection);
+      when(mockCollection.doc(any)).thenReturn(mockDocument);
+      when(mockDocument.delete()).thenThrow(Exception('Network error'));
+      
+      repository = FoodScanRepository(firestore: mockFirestore);
+
+      // Act & Assert
+      expect(
+        () => repository.deleteById('1'),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to delete item')
+        ))
+      );
+    });
+  });
 }

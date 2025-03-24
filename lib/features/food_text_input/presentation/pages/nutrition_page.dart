@@ -15,7 +15,7 @@ class NutritionPage extends StatefulWidget {
   final String foodText;
   final FoodTextInputService foodTextInputService;
 
-  NutritionPage({super.key, required this.foodText, required this.foodTextInputService});
+  const NutritionPage({super.key, required this.foodText, required this.foodTextInputService});
 
   @override
   _NutritionPageState createState() => _NutritionPageState();

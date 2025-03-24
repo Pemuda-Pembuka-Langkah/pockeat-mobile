@@ -15,7 +15,7 @@ class TextBottomActionBar extends StatelessWidget {
   final Function(bool)? onSavingStateChange;
 
   const TextBottomActionBar({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.food,
     required this.foodTextInputService,
