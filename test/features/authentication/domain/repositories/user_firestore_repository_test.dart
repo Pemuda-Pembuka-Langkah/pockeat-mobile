@@ -5,6 +5,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_firestore_repository.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_repository_base.dart';
 
 import 'user_firestore_repository_test.mocks.dart';
 
@@ -106,6 +107,40 @@ void main() {
       expect(result, isNull);
     });
 
+    test('getUserById should handle FirebaseException', () async {
+      // Arrange
+      final exception =
+          FirebaseException(plugin: 'firestore', code: 'not-found');
+      when(mockUserDoc.get()).thenThrow(exception);
+
+      // Act & Assert
+      expect(
+        () => firestoreRepository.getUserById('test-user-id'),
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.code == 'not-found' &&
+              e.message == 'Firebase error while getting user data',
+        )),
+      );
+    });
+
+    test('getUserById should handle general exceptions', () async {
+      // Arrange
+      final exception = Exception('General error');
+      when(mockUserDoc.get()).thenThrow(exception);
+
+      // Act & Assert
+      expect(
+        () => firestoreRepository.getUserById('test-user-id'),
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.message == 'Unexpected error while getting user data',
+        )),
+      );
+    });
+
     test('saveUser should set document with merge', () async {
       // Arrange
       when(mockUserDoc.set(any, any)).thenAnswer((_) async {});
@@ -145,6 +180,92 @@ void main() {
       verify(mockUserDoc.update(updateData)).called(1);
     });
 
+    test('saveUser should handle FirebaseException', () async {
+      // Arrange
+      final exception =
+          FirebaseException(plugin: 'firestore', code: 'permission-denied');
+      when(mockUserDoc.set(any, any)).thenThrow(exception);
+
+      final userModel = UserModel(
+        uid: 'test-user-id',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        photoURL: 'https://example.com/photo.jpg',
+        emailVerified: false,
+        createdAt: DateTime.now(),
+      );
+
+      // Act & Assert
+      expect(
+        () => firestoreRepository.saveUser(userModel),
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.code == 'permission-denied' &&
+              e.message == 'Failed to save user data',
+        )),
+      );
+    });
+
+    test('saveUser should handle general exceptions', () async {
+      // Arrange
+      final exception = Exception('General error');
+      when(mockUserDoc.set(any, any)).thenThrow(exception);
+
+      final userModel = UserModel(
+        uid: 'test-user-id',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        photoURL: 'https://example.com/photo.jpg',
+        emailVerified: false,
+        createdAt: DateTime.now(),
+      );
+
+      // Act & Assert
+      expect(
+        () => firestoreRepository.saveUser(userModel),
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.message == 'Unexpected error while saving user data',
+        )),
+      );
+    });
+
+    test('updateUser should handle FirebaseException', () async {
+      // Arrange
+      final exception =
+          FirebaseException(plugin: 'firestore', code: 'not-found');
+      when(mockUserDoc.update(any)).thenThrow(exception);
+
+      // Act & Assert
+      expect(
+        () => firestoreRepository.updateUser('test-user-id', {'name': 'Test'}),
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.code == 'not-found' &&
+              e.message == 'Failed to update user data',
+        )),
+      );
+    });
+
+    test('updateUser should handle general exceptions', () async {
+      // Arrange
+      final exception = Exception('General error');
+      when(mockUserDoc.update(any)).thenThrow(exception);
+
+      // Act & Assert
+      expect(
+        () => firestoreRepository.updateUser('test-user-id', {'name': 'Test'}),
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.message == 'Unexpected error while updating user data',
+        )),
+      );
+    });
+
     test('userChangesStream should map document snapshots to user models', () {
       // Act
       final stream = firestoreRepository.userChangesStream('test-user-id');
@@ -157,6 +278,50 @@ void main() {
       verify(mockUsersCollection.doc('test-user-id'))
           .called(greaterThanOrEqualTo(1));
       verify(mockUserDoc.snapshots()).called(1);
+    });
+
+    test('userChangesStream should handle FirebaseException during stream',
+        () async {
+      // Arrange
+      final exception =
+          FirebaseException(plugin: 'firestore', code: 'permission-denied');
+
+      when(mockUserDoc.snapshots()).thenAnswer((_) => Stream.error(exception));
+
+      // Act
+      final stream = firestoreRepository.userChangesStream('test-user-id');
+
+      // Assert - Verify stream emits error
+      expect(
+        () => stream.first,
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.code == 'permission-denied' &&
+              e.message == 'Firebase error in stream',
+        )),
+      );
+    });
+
+    test('userChangesStream should handle general exceptions during stream',
+        () async {
+      // Arrange
+      final exception = Exception('General error');
+
+      when(mockUserDoc.snapshots()).thenAnswer((_) => Stream.error(exception));
+
+      // Act
+      final stream = firestoreRepository.userChangesStream('test-user-id');
+
+      // Assert - Verify stream emits error
+      expect(
+        () => stream.first,
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.message == 'Unexpected error in stream',
+        )),
+      );
     });
   });
 }

@@ -5,7 +5,9 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
@@ -29,27 +31,17 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/food_log_history/presentation/screens/food_detail_page.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_initializer.dart';
+import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
+import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
 
 // Global navigator key untuk akses Navigator dari anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-// Class untuk menangani deep link secara global
-class DeepLinkHandler {
-  static void setupDeepLinks(DeepLinkService service) {
-    // Tidak perlu lagi setup listener kompleks, karena deep link service sudah memiliki navigatorKey
-    // dan bisa menangani navigasi langsung
-
-    // Tambahkan listener sederhana untuk debugging saja
-    service.onLinkReceived().listen((Uri? link) {
-      if (link == null) return;
-      print('🌐 Deep link received in global handler: ${link.toString()}');
-    });
-  }
-}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,6 +64,8 @@ void main() async {
 
   setupDependencies();
 
+  // Initialize notifications
+  await NotificationInitializer().initialize();
   // Setup emulator kalau di dev mode
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
@@ -80,9 +74,6 @@ void main() async {
 
   // Initialize the DeepLinkService dengan navigatorKey
   await getIt<DeepLinkService>().initialize(navigatorKey: navigatorKey);
-
-  // Setup deep link handler untuk debugging
-  DeepLinkHandler.setupDeepLinks(getIt<DeepLinkService>());
 
   runApp(
     MultiProvider(
@@ -158,10 +149,12 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/register',
+      initialRoute: '/splash',
       routes: {
-        '/': (context) => const HomePage(),
+        '/splash': (context) => const SplashScreenPage(),
+        '/': (context) => const AuthWrapper(child: HomePage()),
         '/register': (context) => const RegisterPage(),
+        '/login': (context) => const LoginPage(),
         '/account-activated': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>?;
@@ -177,48 +170,65 @@ class MyApp extends StatelessWidget {
                 'Verification failed. Please try again.',
           );
         },
-        '/smart-exercise-log': (context) => SmartExerciseLogPage(
-              // Langsung berikan dependensi yang dibutuhkan
-              geminiService: getIt<GeminiService>(),
-              repository: smartExerciseLogRepository,
-            ),
-        '/scan': (context) => ScanFoodPage(
-                cameraController: CameraController(
-              CameraDescription(
-                name: '0',
-                lensDirection: CameraLensDirection.back,
-                sensorOrientation: 0,
+        '/smart-exercise-log': (context) => AuthWrapper(
+              child: SmartExerciseLogPage(
+                // Langsung berikan dependensi yang dibutuhkan
+                geminiService: getIt<GeminiService>(),
+                repository: smartExerciseLogRepository,
               ),
-              ResolutionPreset.max,
-            )),
-        '/add-food': (context) => const FoodInputPage(),
-        '/food-analysis': (context) => const AIAnalysisScreen(),
-        '/add-exercise': (context) => const ExerciseInputPage(),
-        '/weightlifting-input': (context) => const WeightliftingPage(),
-        '/cardio': (context) => const CardioInputPage(),
-        '/exercise-history': (context) => const ExerciseHistoryPage(),
-        '/food-history': (context) => FoodHistoryPage(
-              service: Provider.of<FoodLogHistoryService>(context),
+            ),
+        '/scan': (context) => AuthWrapper(
+              child: ScanFoodPage(
+                cameraController: CameraController(
+                  CameraDescription(
+                    name: '0',
+                    lensDirection: CameraLensDirection.back,
+                    sensorOrientation: 0,
+                  ),
+                  ResolutionPreset.max,
+                ),
+              ),
+            ),
+        '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
+        '/food-analysis': (context) =>
+            const AuthWrapper(child: AIAnalysisScreen()),
+        '/add-exercise': (context) =>
+            const AuthWrapper(child: ExerciseInputPage()),
+        '/weightlifting-input': (context) =>
+            const AuthWrapper(child: WeightliftingPage()),
+        '/cardio': (context) => const AuthWrapper(child: CardioInputPage()),
+        '/exercise-history': (context) =>
+            const AuthWrapper(child: ExerciseHistoryPage()),
+        '/food-history': (context) => AuthWrapper(
+              child: FoodHistoryPage(
+                service: Provider.of<FoodLogHistoryService>(context),
+              ),
             ),
         '/exercise-detail': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>;
-          return ExerciseLogDetailPage(
-            exerciseId: args['exerciseId'] as String,
-            activityType: args['activityType'] as String,
+          return AuthWrapper(
+            child: ExerciseLogDetailPage(
+              exerciseId: args['exerciseId'] as String,
+              activityType: args['activityType'] as String,
+            ),
           );
         },
         '/food-detail': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>;
-          return FoodDetailPage(
-            foodId: args['foodId'] as String,
-            foodRepository:
-                Provider.of<FoodScanRepository>(context, listen: false),
-            foodTextInputRepository:
-                Provider.of<FoodTextInputRepository>(context, listen: false),
+          return AuthWrapper(
+            child: FoodDetailPage(
+              foodId: args['foodId'] as String,
+              foodRepository:
+                  Provider.of<FoodScanRepository>(context, listen: false),
+              foodTextInputRepository:
+                  Provider.of<FoodTextInputRepository>(context, listen: false),
+            ),
           );
         },
+        '/notification-settings': (context) =>
+            const AuthWrapper(child: NotificationSettingsScreen()),
       },
       onGenerateRoute: (settings) {
         // Default jika tidak ada rute yang cocok

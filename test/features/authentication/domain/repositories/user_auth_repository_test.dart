@@ -98,6 +98,39 @@ void main() {
       verify(mockUser.updatePhotoURL('https://example.com/new.jpg')).called(1);
     });
 
+    test('updateUserProfile should handle FirebaseAuthException', () async {
+      // Arrange
+      final exception = FirebaseAuthException(code: 'user-not-found');
+      when(mockUser.updateDisplayName(any)).thenThrow(exception);
+
+      // Act & Assert
+      expect(
+        () => authRepository.updateUserProfile(displayName: 'New Name'),
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.code == 'user-not-found' &&
+              e.message == 'Failed to update auth profile',
+        )),
+      );
+    });
+
+    test('updateUserProfile should handle general exceptions', () async {
+      // Arrange
+      final exception = Exception('General error');
+      when(mockUser.updateDisplayName(any)).thenThrow(exception);
+
+      // Act & Assert
+      expect(
+        () => authRepository.updateUserProfile(displayName: 'New Name'),
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.message == 'Unexpected error while updating auth profile',
+        )),
+      );
+    });
+
     test('updateUserProfile should throw when user is not logged in', () async {
       // Arrange
       when(mockAuth.currentUser).thenReturn(null);
@@ -153,6 +186,42 @@ void main() {
       );
 
       verifyNever(mockAuth.fetchSignInMethodsForEmail(any));
+    });
+
+    test('isEmailAlreadyRegistered should handle FirebaseAuthException',
+        () async {
+      // Arrange
+      final exception = FirebaseAuthException(code: 'network-request-failed');
+      when(mockAuth.fetchSignInMethodsForEmail('test@example.com'))
+          .thenThrow(exception);
+
+      // Act & Assert
+      expect(
+        () => authRepository.isEmailAlreadyRegistered('test@example.com'),
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.code == 'network-request-failed' &&
+              e.message == 'Error checking email registration status',
+        )),
+      );
+    });
+
+    test('isEmailAlreadyRegistered should handle general exceptions', () async {
+      // Arrange
+      final exception = Exception('Unexpected error');
+      when(mockAuth.fetchSignInMethodsForEmail('test@example.com'))
+          .thenThrow(exception);
+
+      // Act & Assert
+      expect(
+        () => authRepository.isEmailAlreadyRegistered('test@example.com'),
+        throwsA(predicate(
+          (e) =>
+              e is UserRepositoryException &&
+              e.message == 'Unexpected error checking email registration',
+        )),
+      );
     });
 
     test('createUserModelFromAuth should create UserModel from Firebase user',

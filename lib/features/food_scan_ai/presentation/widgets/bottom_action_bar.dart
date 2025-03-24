@@ -24,6 +24,8 @@ class BottomActionBar extends StatelessWidget {
     required this.primaryPink,
     this.primaryGreen = const Color(0xFF4ECDC4),
     this.onAnalysisCorrected,
+    this.servingSize = 1.0,
+    this.isLabelScan = false,
   });
 
   // Helper method to show SnackBar messages consistently

@@ -151,5 +151,86 @@ void main() {
       // Assert - verifikasi firestoreRepo.userChangesStream dipanggil
       verify(mockFirestoreRepo.userChangesStream('test-user-id')).called(1);
     });
+
+    test(
+        'getUserStream harus return stream dengan error jika akses tidak valid',
+        () async {
+      // Arrange
+      final exception = Exception('Unauthorized');
+
+      // Perlu setup ulang validateUserAccess - panggilan delegasi
+      when(mockAuthRepo.validateUserAccess('another-user-id'))
+          .thenThrow(exception);
+
+      // Act - kita tangkap error yang dihasilkan
+      bool errorCaught = false;
+      try {
+        await streamRepository.getUserStream('another-user-id').first;
+      } catch (e) {
+        errorCaught = true;
+        expect(e, isA<Exception>());
+      }
+
+      // Assert
+      expect(errorCaught, isTrue);
+      // Tidak perlu verifikasi dari direct call karena metode parent
+    });
+
+    test('_authStateToUserModel harus menangani error dengan benar', () async {
+      // Arrange - setup stream yang akan error saat fetch user
+      when(mockFirestoreRepo.getUserById('test-user-id'))
+          .thenThrow(Exception('Error fetching user'));
+
+      // Setup completer dan listener untuk menangkap nilai
+      final completer = Completer<UserModel?>();
+      final subscription = streamRepository.currentUserStream.listen((user) {
+        if (!completer.isCompleted) {
+          completer.complete(user);
+        }
+      }, onError: (e) {
+        if (!completer.isCompleted) {
+          completer.completeError(e);
+        }
+      });
+
+      // Trigger auth state change dengan user yang valid
+      authStateController.add(mockUser);
+
+      // Tunggu hasil dengan timeout yang lebih singkat
+      final user = await completer.future.timeout(Duration(seconds: 2));
+
+      // Cleanup
+      await subscription.cancel();
+
+      // Assert: stream tidak error dan menggunakan fallback data dari auth
+      expect(user, isNotNull);
+      expect(user?.uid, equals('test-user-id'));
+    });
+
+    test('currentUserStream harus return null saat user tidak login', () async {
+      // Setup completer untuk tangkap nilai
+      final completer = Completer<UserModel?>();
+      final subscription = streamRepository.currentUserStream.listen((user) {
+        if (!completer.isCompleted) {
+          completer.complete(user);
+        }
+      }, onError: (e) {
+        if (!completer.isCompleted) {
+          completer.completeError(e);
+        }
+      });
+
+      // Reset state stream
+      authStateController.add(null);
+
+      // Tunggu hasil dengan timeout yang lebih singkat
+      final user = await completer.future.timeout(Duration(seconds: 2));
+
+      // Cleanup
+      await subscription.cancel();
+
+      // Verify
+      expect(user, isNull);
+    });
   });
 }
