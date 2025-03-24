@@ -18,6 +18,8 @@ import 'package:pockeat/features/authentication/services/deep_link_service_impl.
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/authentication/services/login_service_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -63,6 +65,11 @@ void setupDependencies() {
   // Register RegisterService
   getIt.registerSingleton<RegisterService>(
     RegisterServiceImpl(userRepository: getIt<UserRepository>()),
+  );
+
+  // Register LoginService
+  getIt.registerSingleton<LoginService>(
+    LoginServiceImpl(userRepository: getIt<UserRepository>()),
   );
 
   // Register DeepLinkService
