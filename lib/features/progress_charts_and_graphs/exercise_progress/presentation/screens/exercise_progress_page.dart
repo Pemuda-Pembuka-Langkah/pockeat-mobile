@@ -79,7 +79,10 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
       setState(() {
         isLoading = false;
       });
-      print('Error loading exercise progress data: $e');
+      assert(() {
+        print('Error loading exercise progress data: $e');
+        return true;
+      }());
     }
   }
 
@@ -101,7 +104,10 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
         _exerciseData = newExerciseData;
       });
     } catch (e) {
-      print('Error toggling view: $e');
+      assert(() {
+        print('Error toggling view: $e');
+        return true;
+      }());
     }
   }
 

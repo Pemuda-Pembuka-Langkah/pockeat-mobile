@@ -71,7 +71,10 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
       setState(() {
         isLoading = false;
       });
-      print('Error loading nutrition data: $e');
+      assert(() {
+        print('Error loading nutrition data: $e');
+        return true;
+      }());
     }
   }
 
@@ -96,7 +99,10 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
       setState(() {
         isChartLoading = false;
       });
-      print('Error toggling view: $e');
+      assert(() {
+        print('Error toggling view: $e');
+        return true;
+      }());
     }
   }
 
