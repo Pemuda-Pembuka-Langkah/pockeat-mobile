@@ -12,6 +12,7 @@ class WeightLiftingFactory {
     required String name,
     required String bodyPart,
     required double metValue,
+    required String userId,
     List<Map<String, dynamic>>? setsData,
   }) {
     List<WeightLiftingSet> sets = [];
@@ -43,6 +44,7 @@ class WeightLiftingFactory {
       name: name,
       bodyPart: bodyPart,
       metValue: metValue,
+      userId: userId,
       sets: sets,
     );
   }
