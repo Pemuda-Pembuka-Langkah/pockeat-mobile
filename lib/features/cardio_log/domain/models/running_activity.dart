@@ -45,7 +45,7 @@ class RunningActivity extends CardioActivity {
   factory RunningActivity.fromMap(Map<String, dynamic> map) {
     return RunningActivity(
       id: map['id'],
-      userId: map['userId'],
+      userId: map['userId'] ?? 'unknown-user-id',
       date: DateTime.fromMillisecondsSinceEpoch(map['date']),
       startTime: DateTime.fromMillisecondsSinceEpoch(map['startTime']),
       endTime: DateTime.fromMillisecondsSinceEpoch(map['endTime']),

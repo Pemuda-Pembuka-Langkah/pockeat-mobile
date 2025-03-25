@@ -75,7 +75,7 @@ class CyclingActivity extends CardioActivity {
 
     return CyclingActivity(
       id: map['id'],
-      userId: map['userId'],
+      userId: map['userId'] ?? 'unknown-user-id',
       date: DateTime.fromMillisecondsSinceEpoch(map['date']),
       startTime: DateTime.fromMillisecondsSinceEpoch(map['startTime']),
       endTime: DateTime.fromMillisecondsSinceEpoch(map['endTime']),
