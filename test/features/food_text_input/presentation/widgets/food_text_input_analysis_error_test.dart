@@ -23,7 +23,7 @@ void main() {
       ),
     );
     
-    expect(find.text('Food Is Not Recognized by Our AI'), findsOneWidget);
+    expect(find.text("Oops! We Couldn't Detect Your Food"), findsOneWidget);
         
     expect(find.text('Tips for Better Input:'), findsOneWidget);
     expect(find.textContaining('Use common food names'), findsOneWidget);
