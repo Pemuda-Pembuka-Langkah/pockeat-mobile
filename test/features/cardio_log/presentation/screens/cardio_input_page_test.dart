@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -11,7 +12,16 @@ import 'package:pockeat/features/cardio_log/presentation/widgets/cycling_form.da
 import 'package:pockeat/features/cardio_log/presentation/widgets/running_form.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/swimming_form.dart';
 
+@GenerateMocks([CardioRepository, FirebaseAuth, FirebaseFirestore])
 import 'cardio_input_page_test.mocks.dart';
+
+class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
+// Create a mock User class
+class MockUser extends Mock implements User {
+  @override
+  String get uid => 'test-user-id';
+}
 
 @GenerateMocks([CardioRepository])
 @GenerateMocks([FirebaseFirestore])
@@ -26,7 +36,7 @@ void main() {
     mockUser = MockUser();
 
     // Configure mock auth
-    when(mockUser.uid).thenReturn('test-user-id');
+    // when(mockUser.uid).thenReturn('test-user-id');
     when(mockAuth.currentUser).thenReturn(mockUser);
   });
 
@@ -358,8 +368,6 @@ void main() {
         return Future.value('activity-id-123');
       });
 
-      expect(capturedActivity!.userId, 'test-user-id');
-
       await tester.pumpWidget(createCardioInputPage());
 
       // Switch to Cycling tab
@@ -373,6 +381,9 @@ void main() {
       // Tap Save button
       await tester.tap(find.text('Save Ride'));
       await tester.pump();
+
+      // Move this assertion AFTER we've called the method that sets capturedActivity
+      expect(capturedActivity!.userId, 'test-user-id');
 
       // Verify repository method was called and the activity has the right type
       verify(mockRepository.saveCardioActivity(any)).called(1);
