@@ -9,7 +9,7 @@ import 'package:pockeat/features/food_scan_ai/presentation/widgets/additional_nu
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
+import 'package:pockeat/features/food_text_input/presentation/widgets/food_text_input_analysis_error.dart';
 
 class NutritionPage extends StatefulWidget {
   final String foodText;
@@ -25,7 +25,6 @@ class _NutritionPageState extends State<NutritionPage> {
   bool _isLoading = true;
   bool _hasError = false;
   bool _isSaving = false;
-  String _errorMessage = '';
   String _foodName = 'Analyzing...';
   int _calories = 0;
   Map<String, dynamic> _nutritionData = {};
@@ -56,7 +55,6 @@ class _NutritionPageState extends State<NutritionPage> {
       setState(() {
         _isLoading = false;
         _hasError = true;
-        _errorMessage = e.toString();
       });
     }
   }
@@ -95,8 +93,7 @@ class _NutritionPageState extends State<NutritionPage> {
 
     if (_hasError) {
       return Scaffold(
-        body: FoodAnalysisError(
-          errorMessage: _errorMessage,
+        body: FoodTextInputAnalysisError(
           primaryPink: const Color(0xFFFF6B6B),
           primaryYellow: const Color(0xFFFFE893),
           onRetry: _analyzeFoodText,
