@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:pockeat/core/di/service_locator.dart';
+import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';
 
 class SmartExerciseLogPage extends StatefulWidget {
-  // Required dependencies for full DI
-  final GeminiService geminiService;
   final SmartExerciseLogRepository repository;
 
   const SmartExerciseLogPage({
-    super.key, 
-    required this.geminiService,
+    super.key,
     required this.repository,
   });
 
@@ -24,31 +22,28 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
   // Consistent theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPurple = const Color(0xFF9B6BFF);
-  
+
   // State variables
   bool isAnalyzing = false;
   bool isCorrectingAnalysis = false;
   ExerciseAnalysisResult? analysisResult;
-  
-  // Dependencies
-  late final GeminiService _geminiService;
+
+  final ExerciseAnalysisService _exerciseAnalysisService =
+      getIt<ExerciseAnalysisService>();
   late final SmartExerciseLogRepository _repository;
-  
+
   @override
   void initState() {
     super.initState();
-    // Use injected dependencies
-    _geminiService = widget.geminiService;
     _repository = widget.repository;
   }
-  
+
   Future<void> analyzeWorkout(String workoutDescription) async {
     setState(() => isAnalyzing = true);
-    
+
     try {
-      // Use Gemini service for AI analysis
-      final result = await _geminiService.analyzeExercise(workoutDescription);
-      
+      final result = await _exerciseAnalysisService.analyze(workoutDescription);
+
       setState(() {
         analysisResult = result;
         isAnalyzing = false;
@@ -57,7 +52,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
       setState(() {
         isAnalyzing = false;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -71,21 +66,21 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
 
   Future<void> correctAnalysis(String userComment) async {
     if (analysisResult == null) return;
-    
+
     setState(() => isCorrectingAnalysis = true);
-    
+
     try {
       // Use GeminiService for correcting analysis
-      final correctedResult = await _geminiService.correctExerciseAnalysis(
+      final correctedResult = await _exerciseAnalysisService.correctAnalysis(
         analysisResult!,
         userComment,
       );
-      
+
       setState(() {
         analysisResult = correctedResult;
         isCorrectingAnalysis = false;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -98,7 +93,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
       setState(() {
         isCorrectingAnalysis = false;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -109,19 +104,19 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
       }
     }
   }
-  
+
   void resetAnalysis() {
     setState(() {
       analysisResult = null;
     });
   }
-  
+
   Future<void> saveExerciseLog() async {
     if (analysisResult == null || !analysisResult!.isComplete) return;
-    
+
     try {
       await _repository.saveAnalysisResult(analysisResult!);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -129,7 +124,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
             backgroundColor: Colors.green,
           ),
         );
-        
+
         // Navigate back
         Navigator.pop(context);
       }
@@ -171,18 +166,17 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            
+
             // Workout Form - using your WorkoutFormWidget component
             if (analysisResult == null)
               WorkoutFormWidget(
                 onAnalyzePressed: analyzeWorkout,
                 isLoading: isAnalyzing,
               ),
-            
+
             // Analysis Result - using your AnalysisResultWidget component
             if (analysisResult != null && !isAnalyzing) ...[
               const SizedBox(height: 24),
-              
               if (isCorrectingAnalysis)
                 const Center(
                   child: Column(

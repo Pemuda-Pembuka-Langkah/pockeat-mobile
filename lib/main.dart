@@ -176,8 +176,6 @@ class MyApp extends StatelessWidget {
         },
         '/smart-exercise-log': (context) => AuthWrapper(
               child: SmartExerciseLogPage(
-                // Langsung berikan dependensi yang dibutuhkan
-                geminiService: getIt<GeminiService>(),
                 repository: smartExerciseLogRepository,
               ),
             ),
