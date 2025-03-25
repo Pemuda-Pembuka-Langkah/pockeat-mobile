@@ -82,6 +82,7 @@ void main() {
 
   final weightLiftingExercise = WeightLifting(
     id: 'weight-1',
+    userId: 'test-user-id',
     name: 'Bench Press',
     bodyPart: 'Chest',
     metValue: 6.0,

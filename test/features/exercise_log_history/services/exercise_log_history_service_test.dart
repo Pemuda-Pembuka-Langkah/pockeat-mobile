@@ -139,6 +139,7 @@ void main() {
       name: 'Bench Press',
       bodyPart: 'Chest',
       metValue: 4.0,
+      userId: 'test-user-id',
       sets: [
         WeightLiftingSet(weight: 80.0, reps: 10, duration: 60.0),
         WeightLiftingSet(weight: 85.0, reps: 8, duration: 60.0),
@@ -152,6 +153,7 @@ void main() {
       name: 'Squats',
       bodyPart: 'Legs',
       metValue: 6.0,
+      userId: 'test-user-id',
       sets: [
         WeightLiftingSet(weight: 100.0, reps: 8, duration: 60.0),
         WeightLiftingSet(weight: 110.0, reps: 6, duration: 60.0),
@@ -362,6 +364,7 @@ void main() {
         name: 'Deadlift',
         bodyPart: 'Back',
         metValue: 4.0,
+        userId: 'test-user-id',
         sets: [
           WeightLiftingSet(weight: 150.0, reps: 10, duration: 60.0),
           WeightLiftingSet(weight: 155.0, reps: 8, duration: 60.0),

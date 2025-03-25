@@ -83,6 +83,7 @@ void main() {
       // Arrange - create a real WeightLifting instance
       final weightLifting = WeightLifting(
         id: 'weight-123',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 4.0,
@@ -113,6 +114,7 @@ void main() {
       // Arrange - create a real WeightLifting instance
       final weightLifting = WeightLifting(
         id: 'weight-123',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 4.0,
@@ -227,6 +229,7 @@ void main() {
 
       final weightLifting = WeightLifting(
         id: 'weight-123',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 6.0,
@@ -262,6 +265,7 @@ void main() {
 
       final weightLifting = WeightLifting(
         id: 'weight-456',
+        userId: 'test-user-123',
         name: 'Deadlift',
         bodyPart: 'Back',
         metValue: 8.0,
@@ -293,6 +297,7 @@ void main() {
       // Arrange
       final weightLifting = WeightLifting(
         id: 'weight-empty',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         timestamp: testTimestamp,
@@ -315,6 +320,7 @@ void main() {
       // Arrange - create a WeightLifting instance with different weights
       final weightLifting = WeightLifting(
         id: 'weight-123',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         timestamp: testTimestamp,
@@ -363,6 +369,7 @@ void main() {
       // Arrange - create a WeightLifting instance with specific duration
       final weightLifting = WeightLifting(
         id: 'weight-123',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         timestamp: testTimestamp,

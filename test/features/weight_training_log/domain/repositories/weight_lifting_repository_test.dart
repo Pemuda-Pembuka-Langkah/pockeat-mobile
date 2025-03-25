@@ -20,6 +20,7 @@ void main() {
       name: 'Bench Press',
       bodyPart: 'Chest',
       metValue: 3.5,
+      userId: 'test-user-id',
       sets: [
         WeightLiftingSet(weight: 20.0, reps: 12, duration: 60.0),
       ],

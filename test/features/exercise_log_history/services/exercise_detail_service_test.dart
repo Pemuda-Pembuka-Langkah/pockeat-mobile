@@ -84,6 +84,7 @@ void main() {
       name: 'Bench Press',
       bodyPart: 'Chest',
       metValue: 6.0,
+      userId: 'test-user-id',
       timestamp: DateTime(2025, 3, 5),
       sets: [weightLiftingSet],
     );
