@@ -5,18 +5,18 @@ import 'package:mockito/annotations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
+import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';
 
 // Generate mocks
-@GenerateMocks([GeminiService, SmartExerciseLogRepository])
+@GenerateMocks([ExerciseAnalysisService, SmartExerciseLogRepository])
 import 'smart_exercise_log_page_test.mocks.dart';
 
 void main() {
   group('SmartExerciseLogPage Widget Tests', () {
-    late MockGeminiService mockGeminiService;
+    late MockExerciseAnalysisService mockExerciseAnalysisService;
     late MockSmartExerciseLogRepository mockRepository;
     final getIt = GetIt.instance;
 
@@ -46,22 +46,22 @@ void main() {
     );
 
     setUp(() {
-      mockGeminiService = MockGeminiService();
+      mockExerciseAnalysisService = MockExerciseAnalysisService();
       mockRepository = MockSmartExerciseLogRepository();
       
       // Reset GetIt before each test
-      if (GetIt.I.isRegistered<GeminiService>()) {
-        GetIt.I.unregister<GeminiService>();
+      if (GetIt.I.isRegistered<ExerciseAnalysisService>()) {
+        GetIt.I.unregister<ExerciseAnalysisService>();
       }
       
       // Register mock services in GetIt
-      getIt.registerSingleton<GeminiService>(mockGeminiService);
+      getIt.registerSingleton<ExerciseAnalysisService>(mockExerciseAnalysisService);
     });
 
     tearDown(() {
       // Clean up GetIt after each test
-      if (GetIt.I.isRegistered<GeminiService>()) {
-        GetIt.I.unregister<GeminiService>();
+      if (GetIt.I.isRegistered<ExerciseAnalysisService>()) {
+        GetIt.I.unregister<ExerciseAnalysisService>();
       }
     });
 
@@ -70,7 +70,6 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -84,7 +83,7 @@ void main() {
 
     testWidgets('shows loading indicator when analyzing workout', (WidgetTester tester) async {
       // Arrange - Setup mock with delay to simulate network request
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenAnswer((_) async {
         await Future.delayed(const Duration(milliseconds: 100));
         return mockAnalysisResult;
@@ -93,7 +92,6 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -120,13 +118,12 @@ void main() {
 
     testWidgets('shows analysis result after successful analysis', (WidgetTester tester) async {
       // Arrange
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenAnswer((_) async => mockAnalysisResult);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -150,13 +147,12 @@ void main() {
 
     testWidgets('shows error message when analysis fails', (WidgetTester tester) async {
       // Arrange - Setup mock to throw error
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenThrow(Exception('Network error'));
 
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -175,7 +171,7 @@ void main() {
 
     testWidgets('saves analysis result and shows success message', (WidgetTester tester) async {
       // Arrange
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenAnswer((_) async => mockAnalysisResult);
       when(mockRepository.saveAnalysisResult(any))
           .thenAnswer((_) async => 'mock_id');
@@ -183,7 +179,6 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -206,13 +201,12 @@ void main() {
 
     testWidgets('shows incomplete data warning for incomplete analysis result', (WidgetTester tester) async {
       // Arrange
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenAnswer((_) async => mockAnalysisResultWithError);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -232,13 +226,12 @@ void main() {
 
     testWidgets('retry button resets analysis and shows form again', (WidgetTester tester) async {
       // Arrange
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenAnswer((_) async => mockAnalysisResult);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -260,7 +253,7 @@ void main() {
 
     testWidgets('shows error message when saving fails', (WidgetTester tester) async {
       // Arrange
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenAnswer((_) async => mockAnalysisResult);
       when(mockRepository.saveAnalysisResult(any))
           .thenThrow(Exception('Database error'));
@@ -268,7 +261,6 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -300,7 +292,6 @@ void main() {
                 builder: (BuildContext context) {
                   if (settings.name == '/') {
                     return SmartExerciseLogPage(
-                      geminiService: mockGeminiService,
                       repository: mockRepository,
                     );
                   }
@@ -330,13 +321,12 @@ void main() {
 
     testWidgets('shows correction dialog when correction button is tapped', (WidgetTester tester) async {
       // Arrange
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenAnswer((_) async => mockAnalysisResult);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -360,7 +350,7 @@ void main() {
 
     testWidgets('applies correction when submitted in dialog', (WidgetTester tester) async {
       // Arrange
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenAnswer((_) async => mockAnalysisResult);
           
       // Create a corrected result
@@ -375,14 +365,13 @@ void main() {
         originalInput: 'Running 30 minutes high intensity',
       );
       
-      // Setup mock for correction through GeminiService
-      when(mockGeminiService.correctExerciseAnalysis(any, any))
+      // Setup mock for correction through exercise analysis service
+      when(mockExerciseAnalysisService.correctAnalysis(any, any))
           .thenAnswer((_) async => correctedResult);
 
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -414,11 +403,11 @@ void main() {
 
     testWidgets('shows loading indicator during correction', (WidgetTester tester) async {
       // Arrange
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenAnswer((_) async => mockAnalysisResult);
           
       // Setup mock with delay to simulate network request
-      when(mockGeminiService.correctExerciseAnalysis(any, any))
+      when(mockExerciseAnalysisService.correctAnalysis(any, any))
           .thenAnswer((_) async {
         await Future.delayed(const Duration(milliseconds: 100));
         return mockAnalysisResult;
@@ -427,7 +416,6 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
@@ -459,17 +447,16 @@ void main() {
 
     testWidgets('shows error message when correction fails', (WidgetTester tester) async {
       // Arrange
-      when(mockGeminiService.analyzeExercise(any))
+      when(mockExerciseAnalysisService.analyze(any))
           .thenAnswer((_) async => mockAnalysisResult);
           
       // Setup mock to throw error
-      when(mockGeminiService.correctExerciseAnalysis(any, any))
+      when(mockExerciseAnalysisService.correctAnalysis(any, any))
           .thenThrow(Exception('Correction failed'));
 
       await tester.pumpWidget(
         MaterialApp(
           home: SmartExerciseLogPage(
-            geminiService: mockGeminiService,
             repository: mockRepository,
           ),
         ),
