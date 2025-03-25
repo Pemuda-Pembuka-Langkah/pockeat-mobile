@@ -92,7 +92,7 @@ class TextBottomActionBar extends StatelessWidget {
                         onSavingStateChange?.call(true);
 
                         try {
-                          showSnackBarMessage(context, 'Saving food to log...', backgroundColor: Colors.blue);
+                          showSnackBarMessage(context, 'Saving food to log...', backgroundColor: Color(0xFF9B6BFF));
 
                           final message = await foodTextInputService.saveFoodAnalysis(food!);
 
@@ -147,7 +147,7 @@ class TextBottomActionBar extends StatelessWidget {
           onSubmit: (String userComment) async {
             try {
               Navigator.of(context).pop();
-              showSnackBarMessage(context, 'Processing correction...', backgroundColor: Colors.blue);
+              showSnackBarMessage(context, 'Processing correction...', backgroundColor: Color(0xFFFF6B6B));
               final correctedResult = await foodTextInputService.correctFoodAnalysis(food!, userComment);
               if (onAnalysisCorrected != null) {
                 onAnalysisCorrected!(correctedResult);
