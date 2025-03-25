@@ -14,10 +14,13 @@ import '../../domain/repositories/cardio_repository_impl.dart';
 
 class CardioInputPage extends StatefulWidget {
   final CardioRepository? repository;
+  final FirebaseAuth? auth; // Add this parameter
+
 
   const CardioInputPage({
     super.key,
     this.repository,
+    this.auth,
   });
 
   @override
@@ -31,6 +34,7 @@ class CardioInputPageState extends State<CardioInputPage> {
 
   // Repository to store data
   late CardioRepository _repository;
+  late FirebaseAuth _auth;
 
   // GlobalKeys for each form
   final GlobalKey<RunningFormState> _runningFormKey =
@@ -67,6 +71,7 @@ class CardioInputPageState extends State<CardioInputPage> {
     // Initialize repository, use injected repository or create a new one
     _repository = widget.repository ??
         CardioRepositoryImpl(firestore: FirebaseFirestore.instance);
+    _auth = widget.auth ?? FirebaseAuth.instance; // Use injected auth or default
   }
 
   @override
@@ -326,7 +331,7 @@ class CardioInputPageState extends State<CardioInputPage> {
   // Function to save activity
   Future<void> _saveActivity(double calories) async {
     try {
-      final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+      final String userId = _auth.currentUser?.uid ?? '';
 
       // Validate user is logged in
       if (userId.isEmpty) {
