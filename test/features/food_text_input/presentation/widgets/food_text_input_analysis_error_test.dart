@@ -5,7 +5,6 @@ import 'package:pockeat/features/food_text_input/presentation/widgets/food_text_
 void main() {
   testWidgets('FoodTextInputAnalysisError displays correct UI elements', (WidgetTester tester) async {
     // Define test parameters
-    const String errorMessage = 'No food detected. Please enter a valid food name.';
     const Color primaryPink = Color(0xFFFF6B6B);
     const Color primaryYellow = Color(0xFFFFE893);
     
@@ -17,7 +16,6 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: FoodTextInputAnalysisError(
-            errorMessage: errorMessage,
             primaryPink: primaryPink,
             primaryYellow: primaryYellow,
             onRetry: () => retried = true,
@@ -29,10 +27,7 @@ void main() {
     
     // Verify if the title is present
     expect(find.text('Food Not Recognized'), findsOneWidget);
-    
-    // Verify if the error message is displayed
-    expect(find.text(errorMessage), findsOneWidget);
-    
+        
     // Verify if the tips are displayed
     expect(find.text('Tips for Better Input:'), findsOneWidget);
     expect(find.textContaining('Use common food names'), findsOneWidget);
