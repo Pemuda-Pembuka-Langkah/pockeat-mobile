@@ -4,14 +4,12 @@ import 'package:pockeat/features/food_text_input/presentation/widgets/food_text_
 
 void main() {
   testWidgets('FoodTextInputAnalysisError displays correct UI elements', (WidgetTester tester) async {
-    // Define test parameters
     const Color primaryPink = Color(0xFFFF6B6B);
     const Color primaryYellow = Color(0xFFFFE893);
     
     bool retried = false;
     bool wentBack = false;
     
-    // Build the widget
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -25,21 +23,17 @@ void main() {
       ),
     );
     
-    // Verify if the title is present
-    expect(find.text('Food Not Recognized'), findsOneWidget);
+    expect(find.text('Food Is Not Recognized by Our AI'), findsOneWidget);
         
-    // Verify if the tips are displayed
     expect(find.text('Tips for Better Input:'), findsOneWidget);
     expect(find.textContaining('Use common food names'), findsOneWidget);
     expect(find.textContaining('Include ingredients if possible'), findsOneWidget);
     expect(find.textContaining('Avoid brand names or slang words'), findsOneWidget);
     expect(find.textContaining('Check for typos before submitting'), findsOneWidget);
     
-    // Verify if buttons exist
     expect(find.text('Edit Input'), findsOneWidget);
     expect(find.text('Retry Analysis'), findsOneWidget);
     
-    // Simulate button presses
     await tester.tap(find.text('Retry Analysis'));
     await tester.pump();
     expect(retried, isTrue);
