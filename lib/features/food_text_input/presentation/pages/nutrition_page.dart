@@ -97,7 +97,10 @@ class _NutritionPageState extends State<NutritionPage> {
           primaryPink: const Color(0xFFFF6B6B),
           primaryYellow: const Color(0xFFFFE893),
           onRetry: _analyzeFoodText,
-          onBack: () => Navigator.pop(context),
+          onBack: () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+          },
         ),
       );
     }
