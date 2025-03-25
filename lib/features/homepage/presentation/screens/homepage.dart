@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage>
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
-        
+
         // If switching to the exercises tab (index 2), trigger a rebuild
         if (_tabController.index == 2) {
           setState(() {
@@ -121,8 +121,7 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     final exerciseLogHistoryRepository =
         Provider.of<ExerciseLogHistoryService>(context);
-    final foodLogHistoryService =
-        Provider.of<FoodLogHistoryService>(context);
+    final foodLogHistoryService = Provider.of<FoodLogHistoryService>(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -175,13 +174,13 @@ class _HomePageState extends State<HomePage>
                         icon: Icons.star,
                         value: "8",
                         color: const Color(0xFFFFB946),
-                       ),
+                      ),
                       const SizedBox(width: 8),
                       _buildStatBadge(
                         icon: Icons.monetization_on,
                         value: "2,350",
                         color: const Color(0xFFFFD700),
-                       ),
+                      ),
                       const SizedBox(width: 12),
                     ],
                   ),
@@ -197,11 +196,141 @@ class _HomePageState extends State<HomePage>
                         color: Colors.black87,
                         fontWeight: FontWeight.w500,
                         fontSize: 13,
-                       ),
+                      ),
                     ),
-                   ),
                   ),
+                ),
               ],
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                color: primaryYellow,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 90,
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: 7,
+                        itemBuilder: (context, index) {
+                          bool isToday = index == 0;
+                          return Container(
+                            width: 55,
+                            margin: const EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              color: isToday ? primaryPink : Colors.white,
+                              border: Border.all(
+                                color: isToday ? primaryPink : Colors.black12,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 3,
+                                  offset: Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  [
+                                    'Today',
+                                    'Thu',
+                                    'Wed',
+                                    'Tue',
+                                    'Mon',
+                                    'Sun',
+                                    'Sat'
+                                  ][index],
+                                  style: TextStyle(
+                                    color:
+                                        isToday ? Colors.white : Colors.black54,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  [
+                                    '24',
+                                    '23',
+                                    '22',
+                                    '21',
+                                    '20',
+                                    '19',
+                                    '18'
+                                  ][index],
+                                  style: TextStyle(
+                                    color:
+                                        isToday ? Colors.white : Colors.black87,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Hello, Alex',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            'You\'re doing great today! Keep up with your healthy eating habits.',
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 14,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverPersistentHeader(
+              delegate: _SliverTabBarDelegate(
+                TabBar(
+                  controller: _tabController,
+                  labelColor: Colors.black87,
+                  unselectedLabelColor: Colors.black38,
+                  labelStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  indicatorColor: primaryPink,
+                  indicatorWeight: 2,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  tabs: const [
+                    Tab(text: 'Overview'),
+                    Tab(text: 'Foods'),
+                    Tab(text: 'Exercises'),
+                  ],
+                ),
+              ),
+              pinned: true,
             ),
           ],
           body: TabBarView(
@@ -236,12 +365,13 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   double get minExtent => _tabBar.preferredSize.height;
-  
+
   @override
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Colors.white,
       child: _tabBar,
