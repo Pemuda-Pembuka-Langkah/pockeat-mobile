@@ -12,9 +12,10 @@ import 'package:pockeat/features/cardio_log/presentation/widgets/cycling_form.da
 import 'package:pockeat/features/cardio_log/presentation/widgets/running_form.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/swimming_form.dart';
 
-@GenerateMocks([CardioRepository, FirebaseAuth, FirebaseFirestore])
+@GenerateMocks([CardioRepository, FirebaseFirestore])
 import 'cardio_input_page_test.mocks.dart';
 
+// Manual implementation of MockFirebaseAuth
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 
 // Create a mock User class
@@ -23,8 +24,6 @@ class MockUser extends Mock implements User {
   String get uid => 'test-user-id';
 }
 
-@GenerateMocks([CardioRepository])
-@GenerateMocks([FirebaseFirestore])
 void main() {
   late MockCardioRepository mockRepository;
   late MockFirebaseAuth mockAuth;
