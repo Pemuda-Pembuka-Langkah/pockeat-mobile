@@ -192,8 +192,8 @@ class MyApp extends StatelessWidget {
                 ),
               ),
             ),
-        '/food-text-input': (context) => const AuthWrapper(child: FoodTextInputPage()),
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
+        '/food-text-input': (context) => const AuthWrapper(child: FoodTextInputPage()),
         '/food-analysis': (context) =>
             const AuthWrapper(child: AIAnalysisScreen()),
         '/add-exercise': (context) =>
