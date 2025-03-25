@@ -107,96 +107,100 @@ class _NutritionPageState extends State<NutritionPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: _buildAnalysisResultContent(),
-      bottomSheet: TextBottomActionBar(
-        isLoading: _isLoading || _isSaving,
-        food: food,
-        foodTextInputService: widget.foodTextInputService,
-        primaryYellow: const Color(0xFFFFE893),
-        primaryPink: const Color(0xFFFF6B6B),
-        primaryGreen: const Color(0xFF4ECDC4),
-        onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
-          setState(() {
-            _updateFoodData(correctedResult, isCorrection: true);  
-          });
-        },
-        onSavingStateChange: (bool saving){
-          setState(() {
-            _isSaving = saving;
-          });
-        }
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CustomScrollView(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: const Color(0xFFFFE893),
+                  title: const Text(
+                    'Nutrition Analysis',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  floating: true,
+                  pinned: true,
+                ),
+                SliverToBoxAdapter(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                    child: Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FoodTitleSection(
+                            isLoading: _isLoading,
+                            foodName: _foodName,
+                            primaryGreen: const Color(0xFF4ECDC4),
+                          ),
+                          CalorieSummaryCard(
+                            isLoading: _isLoading,
+                            calories: _calories,
+                            primaryYellow: const Color(0xFFFFE893),
+                            primaryPink: const Color(0xFFFF6B6B),
+                          ),
+                          NutritionalInfoSection(
+                            isLoading: _isLoading,
+                            nutritionData: _nutritionData,
+                            primaryPink: const Color(0xFFFF6B6B),
+                            primaryGreen: const Color(0xFF4ECDC4),
+                            warningYellow: const Color(0xFFF4D03F),
+                          ),
+                          AdditionalNutrientsSection(
+                            isLoading: _isLoading,
+                            nutritionData: _nutritionData,
+                            calories: _calories,
+                            primaryYellow: const Color(0xFFFFE893),
+                          ),
+                          IngredientsSection(
+                            ingredients: _ingredients,
+                            primaryGreen: const Color(0xFF4ECDC4),
+                            isLoading: _isLoading,
+                          ),
+                          DietTagsSection(
+                            warnings: _warnings,
+                            primaryGreen: const Color(0xFF4ECDC4),
+                            warningYellow: const Color(0xFFF4D03F),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            TextBottomActionBar(
+              isLoading: _isLoading || _isSaving,
+              food: food,
+              foodTextInputService: widget.foodTextInputService,
+              primaryYellow: const Color(0xFFFFE893),
+              primaryPink: const Color(0xFFFF6B6B),
+              primaryGreen: const Color(0xFF4ECDC4),
+              onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
+                setState(() {
+                  _updateFoodData(correctedResult, isCorrection: true);  
+                });
+              },
+              onSavingStateChange: (bool saving){
+                setState(() {
+                  _isSaving = saving;
+                });
+              }
+            ),
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildAnalysisResultContent() {
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          backgroundColor: const Color(0xFFFFE893),
-          title: const Text(
-            'Nutrition Analysis',
-            style: TextStyle(
-              color: Colors.black87,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          floating: true,
-          pinned: true,
-        ),
-        
-        SliverToBoxAdapter(
-          child: ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            ),
-            child: Container(
-              color: Colors.white,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FoodTitleSection(
-                    isLoading: _isLoading,
-                    foodName: _foodName,
-                    primaryGreen: const Color(0xFF4ECDC4),
-                  ),
-                  CalorieSummaryCard(
-                    isLoading: _isLoading,
-                    calories: _calories,
-                    primaryYellow: const Color(0xFFFFE893),
-                    primaryPink: const Color(0xFFFF6B6B),
-                  ),
-                  NutritionalInfoSection(
-                    isLoading: _isLoading,
-                    nutritionData: _nutritionData,
-                    primaryPink: const Color(0xFFFF6B6B),
-                    primaryGreen: const Color(0xFF4ECDC4),
-                    warningYellow: const Color(0xFFF4D03F),
-                  ),
-                  AdditionalNutrientsSection(
-                    isLoading: _isLoading,
-                    nutritionData: _nutritionData,
-                    calories: _calories,
-                    primaryYellow: const Color(0xFFFFE893),
-                  ),
-                  IngredientsSection(
-                    ingredients: _ingredients,
-                    primaryGreen: const Color(0xFF4ECDC4),
-                    isLoading: _isLoading,
-                  ),
-                  DietTagsSection(
-                    warnings: _warnings,
-                    primaryGreen: const Color(0xFF4ECDC4),
-                    warningYellow: const Color(0xFFF4D03F),
-                  ),
-                  const SizedBox(height: 100),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

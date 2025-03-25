@@ -43,10 +43,7 @@ class TextBottomActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.black12)),
-      ),
+      color: Colors.white,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -57,6 +54,10 @@ class TextBottomActionBar extends StatelessWidget {
               onTap: isLoading ? null : () => _showCorrectionDialog(context),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: primaryPink.withOpacity(0.8)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -88,31 +89,30 @@ class TextBottomActionBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     onTap: () async {
                       if (!isLoading && food != null) {
-                        onSavingStateChange?.call(true); 
-                        
+                        onSavingStateChange?.call(true);
+
                         try {
                           showSnackBarMessage(context, 'Saving food to log...', backgroundColor: Colors.blue);
-                          
+
                           final message = await foodTextInputService.saveFoodAnalysis(food!);
-                          
+
                           if (!context.mounted) return;
-                          
+
                           showSnackBarMessage(context, message, backgroundColor: primaryGreen);
-                          
+
                           Future.delayed(const Duration(milliseconds: 500), () {
                             if (context.mounted) {
                               Navigator.of(context).popUntil((route) => route.isFirst);
                             }
                           });
-                          
                         } catch (e) {
                           if (!context.mounted) return;
                           showSnackBarMessage(context, 'Failed to save: ${e.toString()}', backgroundColor: Colors.red);
                         } finally {
-                          onSavingStateChange?.call(false); 
+                          onSavingStateChange?.call(false);
                         }
                       }
-                    },                    
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       child: const Row(
