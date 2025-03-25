@@ -7,6 +7,7 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/cycli
 void main() {
   final testActivity = CyclingActivity(
     id: 'cycle-1',
+    userId: "test-user-id",
     date: DateTime(2025, 3, 2),
     startTime: DateTime(2025, 3, 2, 10, 0),
     endTime: DateTime(2025, 3, 2, 11, 0),

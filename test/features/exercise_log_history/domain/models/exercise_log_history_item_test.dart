@@ -139,6 +139,7 @@ void main() {
         () {
       // Arrange - create a RunningActivity instance
       final runningActivity = RunningActivity(
+        userId: "test-user-id",
         id: 'cardio-123',
         date: testTimestamp,
         startTime: testTimestamp,
@@ -165,6 +166,7 @@ void main() {
       // Arrange - create a CyclingActivity instance
       final cyclingActivity = CyclingActivity(
         id: 'cardio-456',
+        userId: "test-user-id",
         date: testTimestamp,
         startTime: testTimestamp,
         endTime: testTimestamp.add(Duration(minutes: 45)),
@@ -191,6 +193,7 @@ void main() {
       // Arrange - create a SwimmingActivity instance
       final swimmingActivity = SwimmingActivity(
         id: 'cardio-789',
+        userId: "test-user-id",
         date: testTimestamp,
         startTime: testTimestamp,
         endTime: testTimestamp.add(Duration(minutes: 40)),
@@ -337,6 +340,7 @@ void main() {
       // Arrange - create a RunningActivity instance
       final runningActivity = RunningActivity(
         id: 'cardio-123',
+        userId: "test-user-id",
         date: testTimestamp,
         startTime: testTimestamp,
         endTime: testTimestamp.add(Duration(minutes: 30)),

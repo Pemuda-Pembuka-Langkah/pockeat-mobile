@@ -102,6 +102,7 @@ void main() {
     // Cardio test data
     final cardioLog1 = RunningActivity(
       id: 'cardio-1',
+      userId: "test-user-id",
       date: DateTime(2025, 3, 6, 11, 0),
       startTime: DateTime(2025, 3, 6, 11, 0),
       endTime: DateTime(2025, 3, 6, 11, 30),
@@ -111,6 +112,7 @@ void main() {
 
     final cardioLog2 = CyclingActivity(
       id: 'cardio-2',
+      userId: "test-user-id",
       date: DateTime(2025, 3, 5, 15, 0),
       startTime: DateTime(2025, 3, 5, 15, 0),
       endTime: DateTime(2025, 3, 5, 16, 0),
@@ -121,6 +123,7 @@ void main() {
 
     final cardioLog3 = SwimmingActivity(
       id: 'cardio-3',
+      userId: "test-user-id",
       date: DateTime(2025, 2, 14, 9, 0),
       startTime: DateTime(2025, 2, 14, 9, 0),
       endTime: DateTime(2025, 2, 14, 9, 45),
@@ -369,6 +372,7 @@ void main() {
 
       final oldCardioLog = RunningActivity(
         id: 'cardio-old',
+        userId: "test-user-id",
         date: oldDate,
         startTime: oldDate,
         endTime: oldDate.add(Duration(minutes: 30)),

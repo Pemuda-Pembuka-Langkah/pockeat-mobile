@@ -30,6 +30,7 @@ void main() {
     // Sample data for testing
     final runningActivity = RunningActivity(
       id: 'run-1',
+      userId: "test-user-id",
       date: DateTime(2025, 3, 1),
       startTime: DateTime(2025, 3, 1, 8, 0),
       endTime: DateTime(2025, 3, 1, 8, 30),
@@ -39,6 +40,7 @@ void main() {
 
     final cyclingActivity = CyclingActivity(
       id: 'cycle-1',
+      userId: "test-user-id",
       date: DateTime(2025, 3, 2),
       startTime: DateTime(2025, 3, 2, 10, 0),
       endTime: DateTime(2025, 3, 2, 11, 0),
@@ -49,6 +51,7 @@ void main() {
 
     final swimmingActivity = SwimmingActivity(
       id: 'swim-1',
+      userId: "test-user-id",
       date: DateTime(2025, 3, 3),
       startTime: DateTime(2025, 3, 3, 16, 0),
       endTime: DateTime(2025, 3, 3, 16, 45),
