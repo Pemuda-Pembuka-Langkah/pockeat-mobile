@@ -37,20 +37,22 @@ void main() {
   });
 
   group('CardioRepository Tests', () {
-
     test('should retrieve activities for a specific user', () async {
       // Setup mock query and response
       final mockQuerySnapshot = MockQuerySnapshot<Map<String, dynamic>>();
       final mockUserQuery = MockQuery<Map<String, dynamic>>();
+      final mockQueryWithOrder = MockQuery<Map<String, dynamic>>();
+      final mockDocs = [
+        _createMockQueryDocSnap('running', DateTime(2023, 3, 15)),
+      ];
 
+      // Set up all mocks before any actions are performed
       when(mockCollection.where('userId', isEqualTo: 'test-user-id'))
           .thenReturn(mockUserQuery);
       when(mockUserQuery.orderBy('date', descending: true))
-          .thenReturn(mockUserQuery);
-      when(mockUserQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
-      when(mockQuerySnapshot.docs).thenReturn([
-        _createMockQueryDocSnap('running', DateTime(2023, 3, 15)),
-      ]);
+          .thenReturn(mockQueryWithOrder);
+      when(mockQueryWithOrder.get()).thenAnswer((_) async => mockQuerySnapshot);
+      when(mockQuerySnapshot.docs).thenReturn(mockDocs);
 
       // Call method under test
       final results = await repository.getActivitiesByUser('test-user-id');
@@ -662,13 +664,15 @@ void main() {
         // Setup mock queries
         final mockQueryWithLimit = MockQuery<Map<String, dynamic>>();
 
+        // Setup all mocks before any repository method is called
         when(mockCollection.orderBy('date', descending: true))
             .thenReturn(mockQueryWithLimit);
         when(mockQueryWithLimit.limit(5)).thenReturn(mockQueryWithLimit);
         when(mockQueryWithLimit.get()).thenThrow(Exception('Test error'));
 
-        // Verify exception is thrown
-        expect(() => repository.getActivitiesWithLimit(5), throwsException);
+        // Use expectLater for async exceptions
+        await expectLater(
+            repository.getActivitiesWithLimit(5), throwsException);
       });
     });
   });
@@ -708,6 +712,8 @@ MockQueryDocumentSnapshot<Map<String, dynamic>> _createMockQueryDocSnap(
       break;
   }
 
+  // Configure mock outside of any other when() block
+  when(mockDoc.id).thenReturn(testId);
   when(mockDoc.data()).thenReturn(data);
   return mockDoc;
 }
