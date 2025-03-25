@@ -20,6 +20,8 @@ import 'package:pockeat/features/authentication/services/deep_link_service_impl.
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/authentication/services/login_service_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -53,7 +55,6 @@ void setupDependencies() {
     FoodScanRepository(),
   );
 
-
   getIt.registerSingleton<FoodScanPhotoService>(
     FoodScanPhotoService(),
   );
@@ -77,6 +78,11 @@ void setupDependencies() {
     RegisterServiceImpl(userRepository: getIt<UserRepository>()),
   );
 
+  // Register LoginService
+  getIt.registerSingleton<LoginService>(
+    LoginServiceImpl(userRepository: getIt<UserRepository>()),
+  );
+
   // Register DeepLinkService
   getIt.registerSingleton<DeepLinkService>(
     DeepLinkServiceImpl(userRepository: getIt<UserRepository>()),
@@ -91,7 +97,7 @@ void setupDependencies() {
   getIt.registerSingleton<FirebaseMessaging>(
     FirebaseMessaging.instance,
   );
-  
+
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
   );
