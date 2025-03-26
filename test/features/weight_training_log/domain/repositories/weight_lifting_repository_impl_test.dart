@@ -435,6 +435,49 @@ void main() {
     verify(mockQueryOrdered.limit(10)).called(1);
     expect(result.length, 1);
   });
+  test('should handle December correctly (month=12)', () async {
+    // Setup
+    final testMonth = 12;
+    final testYear = 2025;
+    
+    // Create start and end timestamps for December
+    final startOfMonth = DateTime(testYear, testMonth, 1);
+    final endOfMonth = DateTime(testYear + 1, 1, 1).subtract(Duration(milliseconds: 1));
+    
+    final mockDocSnap = MockQueryDocumentSnapshot<Map<String, dynamic>>();
+    when(mockDocSnap.data()).thenReturn({
+      ...testExercise.toJson(),
+      'timestamp': DateTime(2025, 12, 25, 12, 0).millisecondsSinceEpoch
+    });
+    mockDocs = [mockDocSnap];
+    
+    // Mock the where queries for timestamp field
+    final mockQueryFirstWhere = MockQuery<Map<String, dynamic>>();
+    final mockQuerySecondWhere = MockQuery<Map<String, dynamic>>();
+    
+    when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfMonth.millisecondsSinceEpoch))
+        .thenReturn(mockQueryFirstWhere);
+    
+    when(mockQueryFirstWhere.where('timestamp', isLessThanOrEqualTo: endOfMonth.millisecondsSinceEpoch))
+        .thenReturn(mockQuerySecondWhere);
+    
+    when(mockQuerySecondWhere.get()).thenAnswer((_) async => mockQuerySnapshot);
+    when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+    
+    // Execute
+    final result = await repository.filterByMonth(testMonth, testYear);
+    
+    // Verify
+    verify(mockFirestore.collection('weight_lifting_logs')).called(1);
+    verify(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfMonth.millisecondsSinceEpoch)).called(1);
+    verify(mockQueryFirstWhere.where('timestamp', isLessThanOrEqualTo: endOfMonth.millisecondsSinceEpoch)).called(1);
+    expect(result.length, 1);
+    
+    // Verify we're testing data from December
+    final timestamp = result[0].toJson()['timestamp'] as int;
+    final resultDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    expect(resultDate.month, 12);
+  });
 });
 
   group('filterByYear', () {

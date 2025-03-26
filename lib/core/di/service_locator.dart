@@ -5,8 +5,6 @@ import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis
 import 'package:pockeat/features/ai_api_scan/services/food/food_image_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
@@ -48,7 +46,10 @@ void setupDependencies() {
   );
 
   getIt.registerSingleton<FoodTextInputService>(
-    FoodTextInputService(),
+    FoodTextInputService(
+      getIt<FoodTextAnalysisService>(), // Will fail if not registered first!
+      getIt<FoodTextInputRepository>(),
+    ),
   );
 
   getIt.registerSingleton<FoodScanRepository>(
@@ -57,15 +58,6 @@ void setupDependencies() {
 
   getIt.registerSingleton<FoodScanPhotoService>(
     FoodScanPhotoService(),
-  );
-
-  getIt.registerSingleton<GeminiService>(
-    GeminiServiceImpl(
-      foodTextAnalysisService: getIt<FoodTextAnalysisService>(),
-      foodImageAnalysisService: getIt<FoodImageAnalysisService>(),
-      nutritionLabelService: getIt<NutritionLabelAnalysisService>(),
-      exerciseAnalysisService: getIt<ExerciseAnalysisService>(),
-    ),
   );
 
   // Register UserRepository
