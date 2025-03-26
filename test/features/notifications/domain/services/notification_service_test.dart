@@ -1,9 +1,9 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -161,7 +161,7 @@ void main() {
         )).thenAnswer((_) async {});
 
     // Setup NotificationService untuk pengujian
-    notificationService = NotificationService();
+    notificationService = NotificationServiceImpl();
 
     await notificationService.initialize();
   });
@@ -189,54 +189,8 @@ void main() {
           .cancel(notificationId.hashCode)).called(1);
     });
 
-    test(
-        'scheduleDailyCalorieReminder should create appropriate notification model',
-        () async {
-      // Arrange
-      final timeOfDay = const TimeOfDay(hour: 10, minute: 0);
 
-      // Act
-      await notificationService.scheduleDailyCalorieReminder(
-          timeOfDay: timeOfDay);
 
-      // Assert - verify internal call with notification having correct properties
-      verify(() => mockFlutterLocalNotificationsPlugin.zonedSchedule(
-            any(),
-            'Pengingat Kalori Harian', // Expected title
-            'Jangan lupa untuk melacak asupan kalori hari ini!', // Expected body
-            any(),
-            any(),
-            androidScheduleMode: any(named: 'androidScheduleMode'),
-            uiLocalNotificationDateInterpretation:
-                any(named: 'uiLocalNotificationDateInterpretation'),
-            matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
-            payload: 'daily_calorie_tracking', // Expected payload
-          )).called(1);
-    });
-
-    test('scheduleDailyRecurringReminder creates recurring notification',
-        () async {
-      // Arrange
-      final timeOfDay = const TimeOfDay(hour: 10, minute: 0);
-
-      // Act
-      await notificationService.scheduleDailyRecurringReminder(
-          timeOfDay: timeOfDay);
-
-      // Assert
-      verify(() => mockFlutterLocalNotificationsPlugin.zonedSchedule(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation:
-                UILocalNotificationDateInterpretation.absoluteTime,
-            matchDateTimeComponents: DateTimeComponents.time,
-            payload: any(named: 'payload'),
-          )).called(1);
-    });
 
     test('mocks are properly registered', () {
       expect(getIt<FirebaseMessaging>(), equals(mockFirebaseMessaging));
@@ -254,75 +208,7 @@ void main() {
           )).called(1);
 
       verify(() => mockAndroidFlutterLocalNotificationsPlugin
-          .createNotificationChannel(any())).called(1);
-    });
-
-    test('showLocalNotification should show notification with correct details', () async {
-      // Arrange
-      final mockRemoteMessage = MockRemoteMessage();
-      final mockRemoteNotification = MockRemoteNotification();
-      final mockAndroidNotification = MockAndroidNotification();
-      
-      when(() => mockRemoteMessage.notification).thenAnswer((_) => mockRemoteNotification);
-      when(() => mockRemoteNotification.android).thenReturn(mockAndroidNotification);
-      when(() => mockRemoteNotification.title).thenReturn('Test Title');
-      when(() => mockRemoteNotification.body).thenReturn('Test Body');
-      when(() => mockRemoteMessage.data).thenReturn({'payload': 'test_payload'});
-      
-      // Act
-      await notificationService.showLocalNotification(mockRemoteMessage);
-      
-      // Assert
-      verify(() => mockFlutterLocalNotificationsPlugin.show(
-            0,
-            'Test Title',
-            'Test Body',
-            any(),
-            payload: 'test_payload',
-          )).called(1);
-    });
-    
-    test('showLocalNotification should not show notification when notification is null', () async {
-      // Arrange
-      final mockRemoteMessage = MockRemoteMessage();
-      
-      when(() => mockRemoteMessage.notification).thenReturn(null);
-      when(() => mockRemoteMessage.data).thenReturn({'payload': 'test_payload'});
-      
-      // Act
-      await notificationService.showLocalNotification(mockRemoteMessage);
-      
-      // Assert
-      verifyNever(() => mockFlutterLocalNotificationsPlugin.show(
-            any(),
-            any(),
-            any(),
-            any(),
-            payload: any(named: 'payload'),
-          ));
-    });
-    
-    test('showLocalNotification should not show notification when android is null', () async {
-      // Arrange
-      final mockRemoteMessage = MockRemoteMessage();
-      final mockRemoteNotification = MockRemoteNotification();
-      
-      when(() => mockRemoteMessage.notification).thenReturn(mockRemoteNotification);
-      when(() => mockRemoteNotification.android).thenReturn(null);
-      when(() => mockRemoteNotification.title).thenReturn('Test Title');
-      when(() => mockRemoteNotification.body).thenReturn('Test Body');
-      
-      // Act
-      await notificationService.showLocalNotification(mockRemoteMessage);
-      
-      // Assert
-      verifyNever(() => mockFlutterLocalNotificationsPlugin.show(
-            any(),
-            any(),
-            any(),
-            any(),
-            payload: any(named: 'payload'),
-          ));
+          .createNotificationChannel(any())).called(4);
     });
   });
 }

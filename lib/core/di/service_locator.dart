@@ -22,10 +22,12 @@ import 'package:pockeat/features/authentication/domain/repositories/user_reposit
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
-void setupDependencies() {
+Future<void> setupDependencies() async {
   // Register specialized services
   getIt.registerSingleton<FoodTextAnalysisService>(
     FoodTextAnalysisService.fromEnv(),
@@ -101,5 +103,11 @@ void setupDependencies() {
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
   );
+
+  getIt.registerSingleton<NotificationService>(
+    NotificationServiceImpl(),
+  );
+  // Initialize notifications
+  await getIt<NotificationService>().initialize();
 }
  // coverage:ignore-end

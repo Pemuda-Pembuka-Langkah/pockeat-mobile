@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
+import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
+import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
+
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({Key? key}) : super(key: key);
@@ -9,7 +13,7 @@ class NotificationSettingsScreen extends StatefulWidget {
 }
 
 class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
-  final NotificationService _notificationService = NotificationService();
+  final NotificationService _notificationService = NotificationServiceImpl();
   bool _isReminderEnabled = false;
   TimeOfDay _reminderTime = const TimeOfDay(hour: 19, minute: 0); // Default: 19:00
 
@@ -47,8 +51,20 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   }
 
   Future<void> _scheduleReminder() async {
-    await _notificationService.scheduleDailyRecurringReminder(
-      timeOfDay: _reminderTime,
+    await _notificationService.scheduleLocalNotification(
+      NotificationModel(
+        title: 'Pengingat Kalori Harian',
+        body: 'Mengingatkan Anda untuk melacak kalori harian',
+        payload: 'daily_calorie_tracking',
+        scheduledTime: DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+          _reminderTime.hour,
+          _reminderTime.minute,
+        ),
+      ),
+      NotificationChannels.caloriesReminder,
     );
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
