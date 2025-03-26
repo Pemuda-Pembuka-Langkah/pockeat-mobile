@@ -91,21 +91,29 @@ jobs:
       - name: Run Flutter Analyze for CI Failure
         run: flutter analyze --no-fatal-warnings --no-fatal-infos
 
+      - name: Check Functions Folder
+        id: check_functions
+        run: |
+          if [ -d "functions" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Node.js
+        if: steps.check_functions.outputs.exists == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "npm"
+          cache-dependency-path: functions/package-lock.json
 
       - name: Test Firebase Functions
+        if: steps.check_functions.outputs.exists == 'true'
+        working-directory: functions
         run: |
-          if [ -d "functions" ]; then
-            cd functions
-            npm install
-            npm test
-          else
-            echo "Functions folder not found, skipping tests"
-          fi
+          npm install
+          npm test
 
   build:
     name: Build Debug APK
