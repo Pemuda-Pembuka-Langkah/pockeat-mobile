@@ -8,11 +8,11 @@ class NutritionAppBar extends StatelessWidget {
   final Color primaryYellow;
 
   const NutritionAppBar({
-    Key? key,
+    super.key,
     required this.isScrolledToTop,
     required this.imagePath,
     required this.primaryYellow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

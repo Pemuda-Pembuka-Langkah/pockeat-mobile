@@ -12,9 +12,10 @@ class TextBottomActionBar extends StatelessWidget {
   final Color primaryPink;
   final Color primaryGreen;
   final Function(FoodAnalysisResult)? onAnalysisCorrected;
+  final Function(bool)? onSavingStateChange;
 
   const TextBottomActionBar({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.food,
     required this.foodTextInputService,
@@ -22,7 +23,8 @@ class TextBottomActionBar extends StatelessWidget {
     required this.primaryPink,
     this.primaryGreen = const Color(0xFF4ECDC4),
     this.onAnalysisCorrected,
-  }) : super(key: key);
+    this.onSavingStateChange,
+  });
 
   void showSnackBarMessage(BuildContext context, String message, {Color? backgroundColor}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -41,10 +43,7 @@ class TextBottomActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.black12)),
-      ),
+      color: Colors.white,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -55,6 +54,10 @@ class TextBottomActionBar extends StatelessWidget {
               onTap: isLoading ? null : () => _showCorrectionDialog(context),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: primaryPink.withOpacity(0.8)),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -86,24 +89,27 @@ class TextBottomActionBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                     onTap: () async {
                       if (!isLoading && food != null) {
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (BuildContext context) {
-                            return const Center(child: CircularProgressIndicator());
-                          },
-                        );
+                        onSavingStateChange?.call(true);
+
                         try {
+                          showSnackBarMessage(context, 'Saving food to log...', backgroundColor: Color(0xFF9B6BFF));
+
                           final message = await foodTextInputService.saveFoodAnalysis(food!);
+
                           if (!context.mounted) return;
-                          Navigator.of(context).pop();
+
                           showSnackBarMessage(context, message, backgroundColor: primaryGreen);
-                          Navigator.pop(context);
-                          Navigator.pop(context);
+
+                          Future.delayed(const Duration(milliseconds: 500), () {
+                            if (context.mounted) {
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                            }
+                          });
                         } catch (e) {
                           if (!context.mounted) return;
-                          Navigator.of(context).pop();
-                          showSnackBarMessage(context, 'Failed to save: ${e.toString()}');
+                          showSnackBarMessage(context, 'Failed to save: ${e.toString()}', backgroundColor: Colors.red);
+                        } finally {
+                          onSavingStateChange?.call(false);
                         }
                       }
                     },
@@ -141,7 +147,7 @@ class TextBottomActionBar extends StatelessWidget {
           onSubmit: (String userComment) async {
             try {
               Navigator.of(context).pop();
-              showSnackBarMessage(context, 'Processing correction...', backgroundColor: Colors.blue);
+              showSnackBarMessage(context, 'Processing correction...', backgroundColor: Color(0xFFFF6B6B));
               final correctedResult = await foodTextInputService.correctFoodAnalysis(food!, userComment);
               if (onAnalysisCorrected != null) {
                 onAnalysisCorrected!(correctedResult);

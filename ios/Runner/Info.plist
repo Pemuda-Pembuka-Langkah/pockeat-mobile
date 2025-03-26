@@ -45,5 +45,24 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Deep Link URL Schemes for iOS -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.pockeat.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>pockeat</string>
+			</array>
+		</dict>
+	</array>
+	<!-- Firebase Dynamic Links Domain -->
+	<key>FirebaseDynamicLinksCustomDomains</key>
+	<array>
+		<string>https://pockeat.page.link</string>
+	</array>
 </dict>
 </plist>

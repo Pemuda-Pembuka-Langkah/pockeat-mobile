@@ -9,13 +9,13 @@ class NutritionalInfoSection extends StatelessWidget {
   final Color warningYellow;
 
   const NutritionalInfoSection({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.nutritionData,
     required this.primaryPink,
     required this.primaryGreen,
     required this.warningYellow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
