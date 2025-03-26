@@ -20,7 +20,7 @@ import 'package:pockeat/features/authentication/domain/repositories/user_reposit
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
-import 'package:pockeat/features/authentication/domain/services/google_sign_in_service.dart';
+import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
 
 final getIt = GetIt.instance;
