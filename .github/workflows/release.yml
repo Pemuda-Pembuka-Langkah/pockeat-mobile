@@ -2,8 +2,8 @@ name: Release CI
 
 on:
   push:
-    tags: ['v*']
-    
+    tags: ["v*"]
+
 # Ensure CHANGELOG.md is readable
 permissions:
   contents: write
@@ -12,17 +12,17 @@ jobs:
   test:
     name: Tests & Analysis
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'
-          channel: 'stable'
+          flutter-version: "3.29.0"
+          channel: "stable"
           cache: true
-      
+
       - name: Create .env file
         run: |
           echo "FLAVOR=production" > .env
@@ -38,34 +38,50 @@ jobs:
           echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
           echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
           echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
-      
+
       - name: Get dependencies
         run: flutter pub get
-        
+
       - name: Generate mocks with build_runner
         run: flutter pub run build_runner build --delete-conflicting-outputs
-        
+
       - name: Run tests
         run: flutter test
-        
+
       - name: Run Flutter Analyze for CI Failure
         run: flutter analyze --no-fatal-warnings --no-fatal-infos
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Test Firebase Functions
+        run: |
+          if [ -d "functions" ]; then
+            cd functions
+            npm install
+            npm test
+          else
+            echo "Functions folder not found, skipping tests"
+          fi
 
   build-and-distribute:
     name: Build & Distribute
     needs: test
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'
-          channel: 'stable'
+          flutter-version: "3.29.0"
+          channel: "stable"
           cache: true
-          
+
       - name: Create .env file
         run: |
           echo "FLAVOR=production" > .env
@@ -81,13 +97,13 @@ jobs:
           echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
           echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
           echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
-          
+
       - name: Get dependencies
         run: flutter pub get
-      
+
       - name: Generate mocks with build_runner
         run: flutter pub run build_runner build --delete-conflicting-outputs
-      
+
       # Setup keystore
       - name: Setup keystore
         run: |
@@ -96,14 +112,14 @@ jobs:
           echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
           echo "keyAlias=upload" >> android/key.properties
           echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
-        
+
       - name: Build Release APK
         run: flutter build apk --release
-      
+
       # Analisis tambahan untuk memastikan kualitas
       - name: Run Flutter Analyze for CI Failure
         run: flutter analyze --no-fatal-warnings --no-fatal-infos
-        
+
       # Extract tag version
       - name: Get version from tag
         id: get_version
@@ -112,7 +128,7 @@ jobs:
           echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           # Simpan versi tanpa 'v' (ex: 1.1.2) untuk Firebase
           echo "VERSION_NO_V=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-          
+
       # Extract release notes from CHANGELOG.md
       - name: Extract changelog for current version
         id: extract_changelog
@@ -127,7 +143,7 @@ jobs:
           echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
           echo "$SECTION" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-          
+
       # Upload to GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -136,7 +152,7 @@ jobs:
           name: Release ${{ steps.get_version.outputs.VERSION }}
           body: ${{ steps.extract_changelog.outputs.CHANGELOG }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          
+
       # Upload to Firebase App Distribution
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
