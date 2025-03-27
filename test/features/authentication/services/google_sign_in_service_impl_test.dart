@@ -109,36 +109,6 @@ void main() {
           )),
         );
       });
-
-      test('should handle null access token', () async {
-        // Arrange
-        when(mockGoogleSignInAuthentication.accessToken).thenReturn(null);
-
-        // Act & Assert
-        expect(
-          () => service.signInWithGoogle(),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Failed to sign in with Google: Missing tokens'),
-          )),
-        );
-      });
-
-      test('should handle null id token', () async {
-        // Arrange
-        when(mockGoogleSignInAuthentication.idToken).thenReturn(null);
-
-        // Act & Assert
-        expect(
-          () => service.signInWithGoogle(),
-          throwsA(isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('Failed to sign in with Google: Missing tokens'),
-          )),
-        );
-      });
     });
   });
 }

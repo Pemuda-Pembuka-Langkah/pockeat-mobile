@@ -116,7 +116,7 @@ jobs:
           npm test
 
   build:
-    name: Build Debug APK
+    name: Build Staging APK
     needs: test
     if: ${{ success() }} # Memastikan build hanya dijalankan jika test sukses
     runs-on: ubuntu-latest
@@ -150,11 +150,25 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build Debug APK
-        run: flutter build apk --profile
+      # Setup Google Services JSON
+      - name: Setup Google Services JSON
+        run: |
+          echo '${{ secrets.STAGING_GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
 
-      - name: Upload Debug APK
+      # Setup keystore
+      - name: Setup keystore
+        run: |
+          echo "${{ secrets.STAGING_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          echo "storeFile=keystore.jks" > android/key.properties 
+          echo "storePassword=${{ secrets.STAGING_KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=upload" >> android/key.properties
+          echo "keyPassword=${{ secrets.STAGING_KEYSTORE_PASSWORD }}" >> android/key.properties
+
+      - name: Build Staging APK
+        run: flutter build apk --release
+
+      - name: Upload Staging APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: build/app/outputs/flutter-apk/app-profile.apk
+          name: app-staging
+          path: build/app/outputs/flutter-apk/app-release.apk
