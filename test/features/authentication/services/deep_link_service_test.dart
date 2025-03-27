@@ -3,13 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
 import 'package:app_links/app_links.dart';
 import 'dart:async';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
+import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 
 // Generate mocks
-@GenerateMocks([FirebaseAuth, User, AppLinks, UserRepository])
+@GenerateMocks([
+  FirebaseAuth,
+  User,
+  AppLinks,
+  UserRepository,
+  EmailVerificationDeepLinkService,
+  ChangePasswordDeepLinkService,
+  NavigatorState
+])
 import 'deep_link_service_test.mocks.dart';
 
 // Helper class for tests
@@ -19,7 +31,7 @@ class MockActionCodeInfo implements ActionCodeInfo {
 }
 
 // Extended implementation for testing
-class TestableDeepLinkServiceImpl extends DeepLinkServiceImpl {
+class TestableDeepLinkServiceImpl extends EmailVerificationDeepLinkServiceImpl {
   final AppLinks mockAppLinks;
 
   TestableDeepLinkServiceImpl({
@@ -43,6 +55,12 @@ void main() {
   late MockUser mockUser;
   late StreamController<Uri> mockUriStreamController;
   late GlobalKey<NavigatorState> mockNavigatorKey;
+  late MockEmailVerificationDeepLinkService mockEmailVerificationService;
+  late MockChangePasswordDeepLinkService mockChangePasswordService;
+  late DeepLinkServiceImpl service;
+  late MockNavigatorState mockNavigatorState;
+  late StreamController<Uri?> mockEmailVerificationLinkStreamController;
+  late StreamController<Uri?> mockChangePasswordLinkStreamController;
 
   setUp(() {
     mockFirebaseAuth = MockFirebaseAuth();
@@ -51,6 +69,12 @@ void main() {
     mockUser = MockUser();
     mockUriStreamController = StreamController<Uri>.broadcast();
     mockNavigatorKey = GlobalKey<NavigatorState>();
+    mockEmailVerificationService = MockEmailVerificationDeepLinkService();
+    mockChangePasswordService = MockChangePasswordDeepLinkService();
+    mockNavigatorState = MockNavigatorState();
+    mockEmailVerificationLinkStreamController =
+        StreamController<Uri?>.broadcast();
+    mockChangePasswordLinkStreamController = StreamController<Uri?>.broadcast();
 
     when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
 
@@ -65,10 +89,24 @@ void main() {
       userRepository: mockUserRepository,
       mockAppLinks: mockAppLinks,
     );
+
+    // Setup navigatorKey
+    when(mockEmailVerificationService.onLinkReceived())
+        .thenAnswer((_) => mockEmailVerificationLinkStreamController.stream);
+    when(mockChangePasswordService.onLinkReceived())
+        .thenAnswer((_) => mockChangePasswordLinkStreamController.stream);
+
+    // Setup service
+    service = DeepLinkServiceImpl(
+      emailVerificationService: mockEmailVerificationService,
+      changePasswordService: mockChangePasswordService,
+    );
   });
 
   tearDown(() {
     mockUriStreamController.close();
+    mockEmailVerificationLinkStreamController.close();
+    mockChangePasswordLinkStreamController.close();
   });
 
   group('DeepLinkService', () {
@@ -239,7 +277,7 @@ void main() {
 
     test('DeepLinkException should format message correctly', () {
       // Arrange
-      final exception = DeepLinkException(
+      final exception = EmailVerificationDeepLinkException(
         'Test message',
         code: 'test-code',
         originalError: Exception('Original error'),
@@ -255,7 +293,7 @@ void main() {
 
     test('DeepLinkException should format message without code correctly', () {
       // Arrange
-      final exception = DeepLinkException(
+      final exception = EmailVerificationDeepLinkException(
         'Test message',
         originalError: Exception('Original error'),
       );
@@ -290,6 +328,106 @@ void main() {
       // Assert
       // This test mostly checks that dispose() doesn't throw
       expect(true, isTrue); // Dummy assertion
+    });
+  });
+
+  group('DeepLinkServiceImpl', () {
+    test('handleDeepLink delegates to the correct service for email links',
+        () async {
+      // Arrange
+      final emailLink =
+          Uri.parse('pockeat://verify?mode=verifyEmail&oobCode=abc123');
+      when(mockEmailVerificationService.isEmailVerificationLink(emailLink))
+          .thenReturn(true);
+      when(mockChangePasswordService.isChangePasswordLink(emailLink))
+          .thenReturn(false);
+      when(mockEmailVerificationService.handleEmailVerificationLink(emailLink))
+          .thenAnswer((_) async => true);
+
+      // Act
+      final result = await service.handleDeepLink(emailLink);
+
+      // Assert
+      expect(result, true);
+      verify(mockEmailVerificationService.isEmailVerificationLink(emailLink))
+          .called(1);
+      verify(mockEmailVerificationService
+              .handleEmailVerificationLink(emailLink))
+          .called(1);
+      verifyNever(mockChangePasswordService.handleChangePasswordLink(any));
+    });
+
+    test('handleDeepLink delegates to the correct service for password links',
+        () async {
+      // Arrange
+      final passwordLink =
+          Uri.parse('pockeat://verify?mode=resetPassword&oobCode=xyz789');
+      when(mockEmailVerificationService.isEmailVerificationLink(passwordLink))
+          .thenReturn(false);
+      when(mockChangePasswordService.isChangePasswordLink(passwordLink))
+          .thenReturn(true);
+      when(mockChangePasswordService.handleChangePasswordLink(passwordLink))
+          .thenAnswer((_) async => true);
+
+      // Act
+      final result = await service.handleDeepLink(passwordLink);
+
+      // Assert
+      expect(result, true);
+      verify(mockEmailVerificationService.isEmailVerificationLink(passwordLink))
+          .called(1);
+      verify(mockChangePasswordService.isChangePasswordLink(passwordLink))
+          .called(1);
+      verify(mockChangePasswordService.handleChangePasswordLink(passwordLink))
+          .called(1);
+      verifyNever(
+          mockEmailVerificationService.handleEmailVerificationLink(any));
+    });
+
+    test('handleDeepLink returns false for unrecognized links', () async {
+      // Arrange
+      final unknownLink =
+          Uri.parse('pockeat://verify?mode=unknown&oobCode=123');
+      when(mockEmailVerificationService.isEmailVerificationLink(unknownLink))
+          .thenReturn(false);
+      when(mockChangePasswordService.isChangePasswordLink(unknownLink))
+          .thenReturn(false);
+
+      // Act
+      final result = await service.handleDeepLink(unknownLink);
+
+      // Assert
+      expect(result, false);
+      verify(mockEmailVerificationService.isEmailVerificationLink(unknownLink))
+          .called(1);
+      verify(mockChangePasswordService.isChangePasswordLink(unknownLink))
+          .called(1);
+      verifyNever(
+          mockEmailVerificationService.handleEmailVerificationLink(any));
+      verifyNever(mockChangePasswordService.handleChangePasswordLink(any));
+    });
+
+    test('handleDeepLink throws DeepLinkException on error', () async {
+      // Arrange
+      final emailLink =
+          Uri.parse('pockeat://verify?mode=verifyEmail&oobCode=abc123');
+      when(mockEmailVerificationService.isEmailVerificationLink(emailLink))
+          .thenReturn(true);
+      when(mockEmailVerificationService.handleEmailVerificationLink(emailLink))
+          .thenThrow(Exception('Test error'));
+
+      // Act & Assert
+      expect(() => service.handleDeepLink(emailLink),
+          throwsA(isA<DeepLinkException>()));
+    });
+
+    test('disposes both services when called', () {
+      // Act
+      service.dispose();
+
+      // Assert
+      verify(mockEmailVerificationService.dispose()).called(1);
+      verify(mockChangePasswordService.dispose()).called(1);
     });
   });
 }

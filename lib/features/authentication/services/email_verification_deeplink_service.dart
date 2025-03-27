@@ -1,11 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-/// Service untuk menangani semua jenis deep link ke aplikasi
-/// Ini adalah facade untuk service-service spesifik seperti:
-/// - EmailVerificationDeepLinkService
-/// - ChangePasswordDeepLinkService
-abstract class DeepLinkService {
+/// Service untuk menangani deep link ke aplikasi
+abstract class EmailVerificationDeepLinkService {
   /// Initialize the deep link service
   ///
   /// NavigatorKey dibutuhkan untuk melakukan navigasi dari service
@@ -17,10 +14,11 @@ abstract class DeepLinkService {
   /// Mendengarkan deep link saat aplikasi sudah berjalan (hot start)
   Stream<Uri?> onLinkReceived();
 
-  /// Menangani semua jenis deep link
-  ///
-  /// Method ini akan mendelegasikan ke service yang sesuai berdasarkan jenis linknya
-  Future<bool> handleDeepLink(Uri link);
+  /// Menangani deep link untuk verifikasi email
+  Future<bool> handleEmailVerificationLink(Uri link);
+
+  /// Mengecek apakah deep link adalah link verifikasi email
+  bool isEmailVerificationLink(Uri link);
 
   /// Menghentikan semua listener
   void dispose();

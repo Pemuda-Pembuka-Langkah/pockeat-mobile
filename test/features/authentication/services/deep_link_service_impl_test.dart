@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
 
 // Generate mocks
 @GenerateMocks([FirebaseAuth, UserRepository, User])
@@ -54,7 +54,7 @@ class MockAppLinks extends Mock implements AppLinks {
   }
 }
 
-class CustomDeepLinkService extends DeepLinkServiceImpl {
+class CustomDeepLinkService extends EmailVerificationDeepLinkServiceImpl {
   final MockAppLinks mockAppLinks;
   bool throwOnDispose = false;
 
@@ -124,7 +124,7 @@ void main() {
     late MockUserRepository mockUserRepository;
     late MockUser mockUser;
     late MockAppLinks mockAppLinks;
-    late DeepLinkServiceImpl deepLinkService;
+    late EmailVerificationDeepLinkServiceImpl deepLinkService;
     late CustomDeepLinkService customDeepLinkService;
     late GlobalKey<NavigatorState> navigatorKey;
 
@@ -142,7 +142,7 @@ void main() {
       navigatorKey = GlobalKey<NavigatorState>();
 
       // Setup deep link service dengan mocks
-      deepLinkService = DeepLinkServiceImpl(
+      deepLinkService = EmailVerificationDeepLinkServiceImpl(
         auth: mockFirebaseAuth,
         userRepository: mockUserRepository,
       );
@@ -287,7 +287,7 @@ void main() {
         // Execute & Verify - menggunakan pump untuk stream testing
         expectLater(
           customDeepLinkService.getInitialLink(),
-          emitsError(isA<DeepLinkException>()),
+          emitsError(isA<EmailVerificationDeepLinkException>()),
         );
       });
     });

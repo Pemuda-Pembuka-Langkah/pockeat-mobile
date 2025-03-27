@@ -5,13 +5,13 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 // Generate mock menggunakan mockito
-@GenerateMocks([RegisterService, DeepLinkService])
+@GenerateMocks([RegisterService, EmailVerificationDeepLinkService])
 import 'register_page_test.mocks.dart';
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {
@@ -21,7 +21,7 @@ class MockNavigatorObserver extends Mock implements NavigatorObserver {
 
 void main() {
   late MockRegisterService mockRegisterService;
-  late MockDeepLinkService mockDeepLinkService;
+  late EmailVerificationDeepLinkService mockDeepLinkService;
   final getIt = GetIt.instance;
 
   // Helper untuk menyetel ukuran screen yang konsisten
@@ -38,18 +38,19 @@ void main() {
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     mockRegisterService = MockRegisterService();
-    mockDeepLinkService = MockDeepLinkService();
+    mockDeepLinkService = MockEmailVerificationDeepLinkService();
 
     // Setup GetIt untuk testing
     if (getIt.isRegistered<RegisterService>()) {
       getIt.unregister<RegisterService>();
     }
-    if (getIt.isRegistered<DeepLinkService>()) {
-      getIt.unregister<DeepLinkService>();
+    if (getIt.isRegistered<EmailVerificationDeepLinkService>()) {
+      getIt.unregister<EmailVerificationDeepLinkService>();
     }
 
     getIt.registerSingleton<RegisterService>(mockRegisterService);
-    getIt.registerSingleton<DeepLinkService>(mockDeepLinkService);
+    getIt.registerSingleton<EmailVerificationDeepLinkService>(
+        mockDeepLinkService);
 
     // Setup behavior dasar
     when(mockDeepLinkService.onLinkReceived())
@@ -63,8 +64,8 @@ void main() {
     if (getIt.isRegistered<RegisterService>()) {
       getIt.unregister<RegisterService>();
     }
-    if (getIt.isRegistered<DeepLinkService>()) {
-      getIt.unregister<DeepLinkService>();
+    if (getIt.isRegistered<EmailVerificationDeepLinkService>()) {
+      getIt.unregister<EmailVerificationDeepLinkService>();
     }
   });
 

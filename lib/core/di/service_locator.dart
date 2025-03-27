@@ -13,8 +13,8 @@ import 'package:pockeat/features/food_log_history/di/food_log_history_module.dar
 import 'package:pockeat/features/exercise_log_history/di/exercise_log_history_module.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
 import 'package:pockeat/features/authentication/services/register_service_impl.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -24,6 +24,10 @@ import 'package:pockeat/features/authentication/services/google_sign_in_service.
 import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_service_impl.dart';
+import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
+import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -89,9 +93,23 @@ void setupDependencies() {
     ChangePasswordServiceImpl(),
   );
 
-  // Register DeepLinkService
+  // Register Email Verification DeepLink Service
+  getIt.registerSingleton<EmailVerificationDeepLinkService>(
+    EmailVerificationDeepLinkServiceImpl(
+        userRepository: getIt<UserRepository>()),
+  );
+
+  // Register Change Password DeepLink Service
+  getIt.registerSingleton<ChangePasswordDeepLinkService>(
+    ChangePasswordDeepLinkServiceImpl(),
+  );
+
+  // Register DeepLink Facade Service
   getIt.registerSingleton<DeepLinkService>(
-    DeepLinkServiceImpl(userRepository: getIt<UserRepository>()),
+    DeepLinkServiceImpl(
+      emailVerificationService: getIt<EmailVerificationDeepLinkService>(),
+      changePasswordService: getIt<ChangePasswordDeepLinkService>(),
+    ),
   );
 
   // Register Food Log History module

@@ -37,9 +37,11 @@ import 'package:pockeat/features/notifications/presentation/screens/notification
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/change_password_error_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
@@ -164,9 +166,17 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
         '/change-password': (context) => const AuthWrapper(
-              child: ChangePasswordPage(),
-              requireAuth: true, // Memastikan user telah login
+              requireAuth: true,
+              child: ChangePasswordPage(), // Memastikan user telah login
             ),
+        '/change-password-error': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return ChangePasswordErrorPage(
+            error: args?['error'] as String? ??
+                'Password reset failed. Please try again.',
+          );
+        },
         '/account-activated': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>?;
