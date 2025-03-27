@@ -44,6 +44,7 @@ import 'package:pockeat/features/authentication/presentation/widgets/auth_wrappe
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
+import 'package:pockeat/features/authentication/presentation/screens/change_password_page.dart';
 
 // Global navigator key untuk akses Navigator dari anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -69,11 +70,10 @@ void main() async {
 
   setupDependencies();
 
-
-    // Initialize notifications
-    if (!kIsWeb) {
-      await NotificationInitializer().initialize();
-    }
+  // Initialize notifications
+  if (!kIsWeb) {
+    await NotificationInitializer().initialize();
+  }
 
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
@@ -163,6 +163,10 @@ class MyApp extends StatelessWidget {
         '/': (context) => const AuthWrapper(child: HomePage()),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
+        '/change-password': (context) => const AuthWrapper(
+              child: ChangePasswordPage(),
+              requireAuth: true, // Memastikan user telah login
+            ),
         '/account-activated': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>?;
@@ -196,7 +200,8 @@ class MyApp extends StatelessWidget {
               ),
             ),
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
-        '/food-text-input': (context) => const AuthWrapper(child: FoodTextInputPage()),
+        '/food-text-input': (context) =>
+            const AuthWrapper(child: FoodTextInputPage()),
         '/food-analysis': (context) =>
             const AuthWrapper(child: AIAnalysisScreen()),
         '/add-exercise': (context) =>
@@ -235,8 +240,8 @@ class MyApp extends StatelessWidget {
           );
         },
         '/analytic': (context) => ProgressPage(
-          service: ProgressTabsService(ProgressTabsRepositoryImpl()),
-        ),
+              service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+            ),
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
       },

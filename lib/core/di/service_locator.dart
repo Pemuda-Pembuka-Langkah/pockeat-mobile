@@ -22,6 +22,8 @@ import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
+import 'package:pockeat/features/authentication/services/change_password_service.dart';
+import 'package:pockeat/features/authentication/services/change_password_service_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -80,6 +82,11 @@ void setupDependencies() {
   // Register GoogleSignInService
   getIt.registerSingleton<GoogleSignInService>(
     GoogleSignInServiceImpl(),
+  );
+
+  // Register ChangePasswordService
+  getIt.registerSingleton<ChangePasswordService>(
+    ChangePasswordServiceImpl(),
   );
 
   // Register DeepLinkService

@@ -20,6 +20,9 @@ abstract class DeepLinkService {
   /// Mengecek apakah deep link adalah link verifikasi email
   bool isEmailVerificationLink(Uri link);
 
+  /// Memeriksa apakah uri adalah link untuk reset/change password
+  bool isChangePasswordLink(Uri link);
+
   /// Menghentikan semua listener
   void dispose();
 }

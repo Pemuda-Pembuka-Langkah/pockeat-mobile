@@ -124,6 +124,20 @@ class DeepLinkServiceImpl implements DeepLinkService {
         });
       }
 
+      // Handle change password links
+      else if (isChangePasswordLink(link)) {
+        // Redirect ke halaman change password
+        _navigatorKey.currentState?.pushReplacementNamed('/change-password');
+
+        // Show info message
+        ScaffoldMessenger.of(_navigatorKey.currentState!.context).showSnackBar(
+          SnackBar(
+            content: Text('Please enter your new password'),
+            backgroundColor: Colors.blue,
+          ),
+        );
+      }
+
       // Broadcast link to stream for other listeners
       _deepLinkStreamController.add(link);
     } catch (e) {
@@ -221,6 +235,15 @@ class DeepLinkServiceImpl implements DeepLinkService {
         originalError: e,
       );
     }
+  }
+
+  @override
+  bool isChangePasswordLink(Uri link) {
+    final mode = link.queryParameters['mode'];
+    final oobCode = link.queryParameters['oobCode'];
+
+    // Cek apakah link memiliki parameter mode = resetPassword dan oobCode
+    return mode == 'resetPassword' && oobCode != null;
   }
 
   @override
