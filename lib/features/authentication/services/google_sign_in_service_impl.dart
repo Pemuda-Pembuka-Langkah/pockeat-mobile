@@ -26,11 +26,6 @@ class GoogleSignInServiceImpl implements GoogleSignInService {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      // Validate tokens
-      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
-        throw Exception('Failed to sign in with Google: Missing tokens');
-      }
-
       // Create new credential
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,

@@ -12,15 +12,19 @@ import 'package:pockeat/features/authentication/services/google_sign_in_service.
 @GenerateMocks([LoginService, UserCredential, GoogleSignInService])
 import 'login_page_google_signin_test.mocks.dart';
 
+class MockNavigatorObserver extends Mock implements NavigatorObserver {}
+
 void main() {
   late MockLoginService mockLoginService;
   late MockUserCredential mockUserCredential;
   late MockGoogleSignInService mockGoogleSignInService;
+  late MockNavigatorObserver mockNavigatorObserver;
 
   setUp(() {
     mockLoginService = MockLoginService();
     mockUserCredential = MockUserCredential();
     mockGoogleSignInService = MockGoogleSignInService();
+    mockNavigatorObserver = MockNavigatorObserver();
 
     // Register services in GetIt
     final getIt = GetIt.instance;
@@ -109,5 +113,38 @@ void main() {
     // Verify error snackbar appears
     expect(find.byType(SnackBar), findsOneWidget);
     expect(find.textContaining('Error:'), findsOneWidget);
+  });
+
+  testWidgets('Should navigate to home after successful Google Sign In',
+      (WidgetTester tester) async {
+    // Set up screen size
+    tester.binding.window.physicalSizeTestValue = const Size(600, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+
+    // Set up mock
+    when(mockGoogleSignInService.signInWithGoogle())
+        .thenAnswer((_) async => mockUserCredential);
+
+    // Build app with initialRoute dan routes
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/login',
+        routes: {
+          '/login': (context) => const LoginPage(),
+          '/': (context) => const Scaffold(body: Text('Home Page')),
+        },
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Find and tap Google Sign In button
+    await tester.tap(find.text('Sign in with Google'));
+    await tester.pumpAndSettle();
+
+    // Verify Google Sign In service was called
+    verify(mockGoogleSignInService.signInWithGoogle()).called(1);
+
+    // Verify we're on the Home Page after navigation
+    expect(find.text('Home Page'), findsOneWidget);
   });
 }

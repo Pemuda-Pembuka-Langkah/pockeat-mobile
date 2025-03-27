@@ -24,7 +24,12 @@ class GoogleSignInButton extends StatelessWidget {
         onPressed: () async {
           try {
             final service = googleAuthService ?? GetIt.I<GoogleSignInService>();
-            await service.signInWithGoogle();
+            final userCredential = await service.signInWithGoogle();
+
+            // Navigate to home page on successful login
+            if (context.mounted) {
+              Navigator.pushReplacementNamed(context, '/');
+            }
           } catch (e) {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(

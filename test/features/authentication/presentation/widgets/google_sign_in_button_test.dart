@@ -10,9 +10,12 @@ import 'package:pockeat/features/authentication/services/google_sign_in_service.
 @GenerateMocks([GoogleSignInService, UserCredential])
 import 'google_sign_in_button_test.mocks.dart';
 
+class MockNavigatorObserver extends Mock implements NavigatorObserver {}
+
 void main() {
   late MockGoogleSignInService mockGoogleSignInService;
   late MockUserCredential mockUserCredential;
+  late MockNavigatorObserver mockNavigatorObserver;
 
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +24,7 @@ void main() {
   setUp(() {
     mockGoogleSignInService = MockGoogleSignInService();
     mockUserCredential = MockUserCredential();
+    mockNavigatorObserver = MockNavigatorObserver();
 
     // Reset GetIt before registering to ensure clean environment
     GetIt.I.reset();
@@ -127,5 +131,47 @@ void main() {
     // Verify snackbar styling
     final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
     expect(snackBar.backgroundColor, Colors.red);
+  });
+
+  testWidgets('navigates to home page after successful sign in',
+      (WidgetTester tester) async {
+    // Set up mock to return UserCredential
+    when(mockGoogleSignInService.signInWithGoogle())
+        .thenAnswer((_) async => mockUserCredential);
+
+    // Build our widget dengan isUnderTest = true, scaffold dan routes
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/button-test',
+        routes: {
+          '/button-test': (context) => Scaffold(
+                body: Center(
+                  child: GoogleSignInButton(
+                    isUnderTest: true,
+                    googleAuthService: mockGoogleSignInService,
+                  ),
+                ),
+              ),
+          '/': (context) => const Scaffold(body: Text('Home Page')),
+        },
+      ),
+    );
+
+    // Tunggu widget selesai build
+    await tester.pumpAndSettle();
+
+    // Tap button yang mengandung teks "Sign in with Google"
+    final textButtonFinder = find.text('Sign in with Google');
+    expect(textButtonFinder, findsOneWidget);
+    await tester.tap(textButtonFinder);
+
+    // Wait for async operations to complete
+    await tester.pumpAndSettle();
+
+    // Verify the method was called
+    verify(mockGoogleSignInService.signInWithGoogle()).called(1);
+
+    // Verify we're on the Home Page after navigation
+    expect(find.text('Home Page'), findsOneWidget);
   });
 }
