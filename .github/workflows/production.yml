@@ -2,7 +2,7 @@ name: Production CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -13,13 +13,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: "17"
-          distribution: "temurin"
-          cache: gradle
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -130,77 +123,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: "17"
-          distribution: "temurin"
-          cache: gradle
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.29.0"
-          channel: "stable"
-          cache: true
-
-      - name: Create .env file
-        run: |
-          echo "FLAVOR=production" > .env
-          echo "GOOGLE_GEMINI_API_KEY=${{ secrets.PRODUCTION_GOOGLE_GEMINI_API_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_PROJECT_ID=${{ secrets.PRODUCTION_FIREBASE_PROJECT_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PRODUCTION_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_STORAGE_BUCKET=${{ secrets.PRODUCTION_FIREBASE_STORAGE_BUCKET }}" >> .env
-          echo "PRODUCTION_FIREBASE_ANDROID_APP_ID=${{ secrets.PRODUCTION_FIREBASE_ANDROID_APP_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_ANDROID_API_KEY=${{ secrets.PRODUCTION_FIREBASE_ANDROID_API_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_IOS_APP_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_APP_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_IOS_API_KEY=${{ secrets.PRODUCTION_FIREBASE_IOS_API_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_IOS_BUNDLE_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_BUNDLE_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      # Setup Google Services JSON
-      - name: Setup Google Services JSON
-        run: |
-          echo '${{ secrets.PRODUCTION_GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
-
-      # Setup keystore
-      - name: Setup keystore
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
-          echo "storeFile=keystore.jks" > android/key.properties
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
-          echo "keyAlias=upload" >> android/key.properties
-          echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
-
-      - name: Build Production APK
-        run: flutter build apk --release
-
-      - name: Upload Production APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-production
-          path: build/app/outputs/flutter-apk/app-release.apk
-
-  build-and-distribute:
-    name: Build & Distribute
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: "17"
-          distribution: "temurin"
-          cache: gradle
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
