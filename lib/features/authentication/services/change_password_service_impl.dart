@@ -11,6 +11,26 @@ class ChangePasswordServiceImpl implements ChangePasswordService {
   }) : _auth = auth ?? FirebaseAuth.instance;
 
   @override
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw FirebaseAuthException(
+        code: e.code,
+        message: e.message,
+      );
+    } catch (e) {
+      // Tangkap exception lain dan lempar sebagai FirebaseAuthException
+      const message =
+          'Terjadi kesalahan tidak terduga saat mengirim email reset password. Silakan coba lagi nanti.';
+      throw FirebaseAuthException(
+        code: 'unknown-error',
+        message: message,
+      );
+    }
+  }
+
+  @override
   Future<User> changePassword({
     required String newPassword,
     required String newPasswordConfirmation,

@@ -16,4 +16,5 @@ abstract class ChangePasswordService {
     required String newPassword,
     required String newPasswordConfirmation,
   });
+  Future<void> sendPasswordResetEmail({required String email});
 }
