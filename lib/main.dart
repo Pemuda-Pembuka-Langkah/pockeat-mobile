@@ -6,8 +6,7 @@ import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
-import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
@@ -37,7 +36,6 @@ import 'package:pockeat/features/notifications/presentation/screens/notification
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
-import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
@@ -162,6 +160,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashScreenPage(),
+        '/forgot-password': (context) => const ForgotPasswordPage(),
         '/': (context) => const AuthWrapper(child: HomePage()),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
