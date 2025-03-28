@@ -21,7 +21,40 @@ void main() {
     );
   });
 
+
+
   group('ChangePasswordServiceImpl', () {
+    test('sendPasswordResetEmail should call sendPasswordResetEmail when credentials are valid',
+        () async {
+      // Arrange
+      final email = 'test@example.com';
+
+      // Act
+      await changePasswordService.sendPasswordResetEmail(email: email);
+
+      // Assert
+      verify(mockFirebaseAuth.sendPasswordResetEmail(email: email)).called(1);
+    });
+    test('sendPasswordResetEmail should throw exception when credentials are invalid',
+        () async {
+      // Arrange
+      const email = 'invalid@example.com';
+      final exception = FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'No user found for that email.',
+      );
+      
+      // Configure the mock to throw an exception when sendPasswordResetEmail is called
+      when(mockFirebaseAuth.sendPasswordResetEmail(email: email))
+          .thenThrow(exception);
+      
+      // Act & Assert
+      // Expect that calling sendPasswordResetEmail throws a FirebaseAuthException
+      await expectLater(
+        () => changePasswordService.sendPasswordResetEmail(email: email),
+        throwsA(isA<FirebaseAuthException>()),
+      );
+    }); 
     test('changePassword should call updatePassword when credentials are valid',
         () async {
       // Arrange
