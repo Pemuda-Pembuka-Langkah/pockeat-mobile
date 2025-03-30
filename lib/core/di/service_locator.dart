@@ -46,7 +46,10 @@ void setupDependencies() {
   );
 
   getIt.registerSingleton<FoodTextInputService>(
-    FoodTextInputService(),
+    FoodTextInputService(
+      getIt<FoodTextAnalysisService>(), // Will fail if not registered first!
+      getIt<FoodTextInputRepository>(),
+    ),
   );
 
   getIt.registerSingleton<FoodScanRepository>(

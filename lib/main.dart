@@ -30,8 +30,10 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/food_log_history/presentation/screens/food_detail_page.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
+import 'package:pockeat/features/food_text_input/presentation/pages/food_text_input_page.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_initializer.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
@@ -63,9 +65,12 @@ void main() async {
 
   setupDependencies();
 
-  // Initialize notifications
-  await NotificationInitializer().initialize();
-  // Setup emulator kalau di dev mode
+
+    // Initialize notifications
+    if (!kIsWeb) {
+      await NotificationInitializer().initialize();
+    }
+
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
@@ -187,6 +192,7 @@ class MyApp extends StatelessWidget {
               ),
             ),
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
+        '/food-text-input': (context) => const AuthWrapper(child: FoodTextInputPage()),
         '/food-analysis': (context) =>
             const AuthWrapper(child: AIAnalysisScreen()),
         '/add-exercise': (context) =>
