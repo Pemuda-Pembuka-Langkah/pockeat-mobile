@@ -1,4 +1,5 @@
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/ai_api_scan/utils/food_analysis_parser.dart';
 import 'package:uuid/uuid.dart';
 
 /// Model untuk item history log makanan
@@ -56,7 +57,7 @@ class FoodLogHistoryItem {
       id: foodAnalysisResult.id,
       title: foodAnalysisResult.foodName,
       subtitle: '${protein}g protein • ${carbs}g carbs',
-      timestamp: foodAnalysisResult.timestamp,
+      timestamp: foodAnalysisResult.timestampAsDateTime,
       calories: calories,
       sourceId: foodAnalysisResult.id, // Use id if available, otherwise use URL
       imageUrl: foodAnalysisResult.foodImageUrl,

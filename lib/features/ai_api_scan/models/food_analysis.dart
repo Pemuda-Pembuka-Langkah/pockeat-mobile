@@ -1,5 +1,6 @@
 // lib/pockeat/features/ai_api_scan/models/food_analysis.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:pockeat/features/ai_api_scan/services/base/api_service.dart';
 import 'package:uuid/uuid.dart';
 
 class FoodAnalysisResult {
@@ -8,14 +9,15 @@ class FoodAnalysisResult {
   final NutritionInfo nutritionInfo;
   final List<String> warnings;
   String? foodImageUrl;
-  final DateTime timestamp;
+  final String timestamp;
   final String id;
   final bool isLowConfidence; // Added low confidence flag
 
   // Constants for warning messages to ensure consistency
   static const String highSodiumWarning = "High sodium content";
   static const String highSugarWarning = "High sugar content";
-  static const String lowConfidenceWarning = "Analysis confidence is low - nutrition values may be less accurate";
+  static const String lowConfidenceWarning =
+      "Analysis confidence is low - nutrition values may be less accurate";
 
   // Thresholds for warnings
   static const double highSodiumThreshold = 500.0; // mg
@@ -25,16 +27,25 @@ class FoodAnalysisResult {
     required this.foodName,
     required this.ingredients,
     required this.nutritionInfo,
-    this.warnings = const [], 
+    this.warnings = const [],
     this.foodImageUrl,
-    DateTime? timestamp,
+    String? timestamp,
     String? id,
     this.isLowConfidence = false, // Default to high confidence
-  }) : 
-    timestamp = timestamp ?? DateTime.now(),
-    id = id ?? const Uuid().v4();
+  })  : timestamp = timestamp ?? DateTime.now().toIso8601String(),
+        id = id ?? const Uuid().v4();
 
   factory FoodAnalysisResult.fromJson(Map<String, dynamic> json, {String? id}) {
+    // Check if response contains error field
+    if (json.containsKey('error')) {
+      String errorMessage = json['error'] is String
+          ? json['error']
+          : json['error'] is Map
+              ? (json['error']['message'] ?? 'Unknown error')
+              : 'Unknown error';
+      throw ApiServiceException(errorMessage);
+    }
+
     final nutritionInfo = NutritionInfo.fromJson(json['nutrition_info'] ?? {});
 
     // Generate warnings for high sodium or sugar if not provided in the JSON
@@ -54,23 +65,26 @@ class FoodAnalysisResult {
       }
     }
 
-    DateTime parsedTimestamp;
+    String parsedTimestamp;
     if (json['timestamp'] != null) {
       // Handle both Timestamp and int formats
       if (json['timestamp'] is Timestamp) {
-        parsedTimestamp = (json['timestamp'] as Timestamp).toDate();
+        parsedTimestamp =
+            (json['timestamp'] as Timestamp).toDate().toIso8601String();
       } else if (json['timestamp'] is int) {
-        parsedTimestamp = DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int);
+        parsedTimestamp =
+            DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int)
+                .toIso8601String();
       } else {
-        parsedTimestamp = DateTime.now();
+        parsedTimestamp = DateTime.now().toIso8601String();
       }
     } else {
-      parsedTimestamp = DateTime.now();
+      parsedTimestamp = DateTime.now().toIso8601String();
     }
 
     // Check for low confidence flag
     bool isLowConfidence = json['is_low_confidence'] == true;
-    
+
     return FoodAnalysisResult(
       foodName: json['food_name'] ?? '',
       ingredients: _parseIngredients(json['ingredients']),
@@ -90,7 +104,7 @@ class FoodAnalysisResult {
       'nutrition_info': nutritionInfo.toJson(),
       'warnings': warnings,
       'food_image_url': foodImageUrl,
-      'timestamp': Timestamp.fromDate(timestamp),
+      'timestamp': Timestamp.fromDate(DateTime.parse(timestamp)),
       'id': id,
       'is_low_confidence': isLowConfidence,
     };
@@ -103,7 +117,7 @@ class FoodAnalysisResult {
     NutritionInfo? nutritionInfo,
     List<String>? warnings,
     String? foodImageUrl,
-    DateTime? timestamp,
+    String? timestamp,
     String? id,
     bool? isLowConfidence,
   }) {
@@ -121,13 +135,11 @@ class FoodAnalysisResult {
 
   static List<Ingredient> _parseIngredients(dynamic ingredientsData) {
     if (ingredientsData == null) return [];
-    
+
     if (ingredientsData is List) {
-      return ingredientsData
-          .map((item) => Ingredient.fromJson(item))
-          .toList();
+      return ingredientsData.map((item) => Ingredient.fromJson(item)).toList();
     }
-    
+
     return [];
   }
 }

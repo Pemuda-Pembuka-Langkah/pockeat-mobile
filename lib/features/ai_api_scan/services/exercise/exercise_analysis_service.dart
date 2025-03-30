@@ -1,96 +1,104 @@
 // lib/features/ai_api_scan/services/exercise/exercise_analysis_service.dart
 import 'dart:convert';
-import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/base_gemini_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
+import 'package:pockeat/features/ai_api_scan/services/base/api_service.dart';
+import 'package:pockeat/features/ai_api_scan/services/base/api_service_interface.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
-class ExerciseAnalysisService extends BaseGeminiService {
+class ExerciseAnalysisService {
+  final ApiServiceInterface _apiService; // Change type to interface
+
   ExerciseAnalysisService({
-    required super.apiKey,
-    super.customModelWrapper,
-  });
-// coverage:ignore-start
+    required ApiServiceInterface
+        apiService, // Change parameter type to interface
+  }) : _apiService = apiService;
+
+  // coverage:ignore-start
   factory ExerciseAnalysisService.fromEnv() {
-    return ExerciseAnalysisService(apiKey: BaseGeminiService.getApiKeyFromEnv());
+    final apiService = ApiService.fromEnv();
+    return ExerciseAnalysisService(apiService: apiService);
   }
-// coverage:ignore-end
+  // coverage:ignore-end
 
-  Future<ExerciseAnalysisResult> analyze(String description, {double? userWeightKg}) async {
+  Future<ExerciseAnalysisResult> analyze(String description,
+      {double? userWeightKg}) async {
     try {
-      final weightInfo =
-          userWeightKg != null ? "The user weighs $userWeightKg kg." : "";
+      final Map<String, dynamic> requestBody = {
+        'description': description,
+      };
 
-      final prompt = '''
-      Calculate calories burned from this exercise description: "$description"
-      $weightInfo
-      
-      Please analyze this exercise and provide:
-      - Type of exercise
-      - Calories burned
-      - Duration in minutes
-      - Intensity level
-      - MET value
-      
-      Return your response as a strict JSON object with this exact format:
-      {
-        "exercise_type": "string",
-        "calories_burned": number,
-        "duration_minutes": number,
-        "intensity_level": "string",
-        "met_value": number
-      }
-      
-      If you cannot determine the exercise details, use this format:
-      {
-        "error": "Could not determine exercise details",
-        "exercise_type": "Unknown",
-        "calories_burned": 0,
-        "duration_minutes": 0,
-        "intensity_level": "Unknown",
-        "met_value": 0
-      }
-      ''';
-
-      final response =
-          await modelWrapper.generateContent([Content.text(prompt)]);
-      if (response.text == null) {
-        throw GeminiServiceException('No response text generated');
+      if (userWeightKg != null) {
+        requestBody['user_weight_kg'] = userWeightKg;
       }
 
-      return parseExerciseResponse(response.text!, description);
+      final responseData = await _apiService.postJsonRequest(
+        '/exercise/analyze',
+        requestBody,
+      );
+
+      // Print respons dengan format yang lebih jelas
+      print("\n\n===== EXERCISE API RESPONSE =====");
+      print("RAW RESPONSE JSON:");
+      JsonEncoder encoder = const JsonEncoder.withIndent('  ');
+      String prettyJson = encoder.convert(responseData);
+      print(prettyJson);
+      print("\n");
+
+      // Print keys yang ada di respons
+      print("AVAILABLE KEYS: ${responseData.keys.toList()}");
+
+      // Print nilai field utama dengan pengecekan null
+      print("\nKEY VALUES:");
+      print("exercise_type: ${responseData['exercise_type']}");
+      print("calories_burned: ${responseData['calories_burned']}");
+      print("duration: ${responseData['duration']}");
+      print("intensity: ${responseData['intensity']}");
+      print("intensity: ${responseData['intensity']}");
+      print("met_value: ${responseData['met_value']}");
+      print("error: ${responseData['error']}");
+      print("================================\n\n");
+
+      return parseExerciseResponse(responseData, description);
     } catch (e) {
-      throw GeminiServiceException("Error analyzing exercise: $e");
+      print("Error during exercise analysis: $e");
+      if (e is ApiServiceException) {
+        rethrow;
+      }
+      throw ApiServiceException("Error analyzing exercise: $e");
     }
   }
 
   ExerciseAnalysisResult parseExerciseResponse(
-      String responseText, String originalInput) {
+      Map<String, dynamic> jsonData, String originalInput) {
     try {
-      // Extract JSON from response text
-      final jsonString = extractJson(responseText);
-      final jsonData = jsonDecode(jsonString);
+      print("Debug: Processing exercise analysis response");
+      print("Debug: Error field value: ${jsonData['error']}");
+      print("Debug: Exercise type: ${jsonData['exercise_type']}");
 
-      // Check for error
-      if (jsonData.containsKey('error')) {
-        // We have an error but we'll still create a result with default values
+      // Check for error field in different formats
+      if (jsonData.containsKey('error') && jsonData['error'] != null) {
+        // Instead of throwing an exception, create a result with the error
+        // This matches how your Python API handles errors
+        print("Debug: Error field is not null, creating error result");
+
         return ExerciseAnalysisResult(
-          exerciseType: 'Unknown',
-          duration: 'Not specified',
-          intensity: 'Not specified',
+          exerciseType: jsonData['exercise_type'] ?? 'Unknown',
+          duration: "Not specified",
+          intensity: jsonData['intensity'] ?? 'Unknown',
           estimatedCalories: 0,
-          metValue: 0.0,
-          summary: 'Could not analyze exercise: ${jsonData['error']}',
+          metValue: (jsonData['met_value'] ?? 0.0).toDouble(),
+          summary: "Could not analyze exercise: ${jsonData['error']}",
           timestamp: DateTime.now(),
           originalInput: originalInput,
-          missingInfo: ['exercise_type', 'duration', 'intensity'],
+          missingInfo: ["exercise_type", "duration", "intensity"],
         );
       }
 
+      print("Debug: Passed error check");
+
       final exerciseType = jsonData['exercise_type'] ?? 'Unknown';
       final caloriesBurned = jsonData['calories_burned'] ?? 0;
-      final durationMinutes = jsonData['duration_minutes'] ?? 0;
-      final intensityLevel = jsonData['intensity_level'] ?? 'Unknown';
+      final durationMinutes = jsonData['duration'] ?? 0;
+      final intensityLevel = jsonData['intensity'] ?? 'Unknown';
       final metValue = (jsonData['met_value'] ?? 0.0).toDouble();
 
       // Create a summary
@@ -113,75 +121,76 @@ class ExerciseAnalysisService extends BaseGeminiService {
         originalInput: originalInput,
       );
     } catch (e) {
-      throw GeminiServiceException(
-          "Failed to parse exercise analysis response: $e");
+      print("Debug: Caught exception in parseExerciseResponse: $e");
+      // Create a result with the error instead of throwing
+      return ExerciseAnalysisResult(
+        exerciseType: 'Unknown',
+        duration: 'Not specified',
+        intensity: 'Unknown',
+        estimatedCalories: 0,
+        metValue: 0.0,
+        summary: "Failed to parse exercise analysis response: $e",
+        timestamp: DateTime.now(),
+        originalInput: originalInput,
+        missingInfo: ["exercise_type", "duration", "intensity"],
+      );
     }
   }
+
   Future<ExerciseAnalysisResult> correctAnalysis(
       ExerciseAnalysisResult previousResult, String userComment) async {
     try {
-      final prompt = '''
-      Original exercise analysis:
-      - Exercise type: ${previousResult.exerciseType}
-      - Duration: ${previousResult.duration}
-      - Intensity: ${previousResult.intensity}
-      - Calories burned: ${previousResult.estimatedCalories}
-      - MET value: ${previousResult.metValue}
-      
-      User correction comment: "$userComment"
-      
-      Please correct the exercise analysis based on the user's comment. 
-      Only modify values that need to be changed according to the user's feedback.
-      
-      Return your response as a strict JSON object with this exact format:
-      {
-        "exercise_type": "string",
-        "calories_burned": number,
-        "duration_minutes": number,
-        "intensity_level": "string",
-        "met_value": number,
-        "correction_applied": "string explaining what was corrected"
-      }
-      ''';
+      // Convert ExerciseAnalysisResult to API format
+      final Map<String, dynamic> apiFormat =
+          _exerciseResultToApiFormat(previousResult);
 
-      final response =
-          await modelWrapper.generateContent([Content.text(prompt)]);
-      if (response.text == null) {
-        throw GeminiServiceException('No response text generated');
-      }
+      final responseData = await _apiService.postJsonRequest(
+        '/exercise/correct',
+        {
+          'previous_result': apiFormat,
+          'user_comment': userComment,
+        },
+      );
 
       return parseCorrectionResponse(
-          response.text!, previousResult, userComment);
+          jsonEncode(responseData), previousResult, userComment);
     } catch (e) {
-      throw GeminiServiceException("Error correcting exercise analysis: $e");
+      if (e is ApiServiceException) {
+        rethrow;
+      }
+      throw ApiServiceException("Error correcting exercise analysis: $e");
     }
   }
 
-  ExerciseAnalysisResult parseCorrectionResponse(
-      String responseText, ExerciseAnalysisResult previousResult, String userComment) {
+  ExerciseAnalysisResult parseCorrectionResponse(String responseText,
+      ExerciseAnalysisResult previousResult, String userComment) {
     try {
-      // Extract JSON from response text
-      final jsonString = extractJson(responseText);
-      final jsonData = jsonDecode(jsonString);
+      // Reuse the existing parsing logic
+      final jsonData = jsonDecode(responseText);
 
       // Extract values from JSON, defaulting to previous values if not provided
-      final exerciseType = jsonData['exercise_type'] ?? previousResult.exerciseType;
-      final caloriesBurned = jsonData['calories_burned'] ?? previousResult.estimatedCalories;
-      
+      final exerciseType =
+          jsonData['exercise_type'] ?? previousResult.exerciseType;
+      final caloriesBurned =
+          jsonData['calories_burned'] ?? previousResult.estimatedCalories;
+
       // Handle duration which might be in string format in previousResult
       int durationMinutes;
-      if (jsonData['duration_minutes'] != null) {
-        durationMinutes = jsonData['duration_minutes'];
+      if (jsonData['duration'] != null) {
+        durationMinutes = jsonData['duration'];
       } else {
         // Try to extract numbers from the previous duration string
         final durationString = previousResult.duration;
         final numbers = RegExp(r'\d+').allMatches(durationString);
-        durationMinutes = numbers.isNotEmpty ? int.parse(numbers.first.group(0)!) : 0;
+        durationMinutes =
+            numbers.isNotEmpty ? int.parse(numbers.first.group(0)!) : 0;
       }
-      
-      final intensityLevel = jsonData['intensity_level'] ?? previousResult.intensity;
-      final metValue = (jsonData['met_value'] ?? previousResult.metValue).toDouble();
-      final correctionApplied = jsonData['correction_applied'] ?? 'Adjustments applied based on user feedback';
+
+      final intensityLevel = jsonData['intensity'] ?? previousResult.intensity;
+      final metValue =
+          (jsonData['met_value'] ?? previousResult.metValue).toDouble();
+      final correctionApplied = jsonData['correction_applied'] ??
+          'Adjustments applied based on user feedback';
 
       // Create a summary incorporating the correction information
       final summary =
@@ -203,11 +212,27 @@ class ExerciseAnalysisService extends BaseGeminiService {
         originalInput: previousResult.originalInput,
       );
     } catch (e) {
-      throw GeminiServiceException(
+      throw ApiServiceException(
           "Failed to parse exercise correction response: $e");
     }
   }
 
-  
-  
+  // Helper method to convert ExerciseAnalysisResult to API format
+  Map<String, dynamic> _exerciseResultToApiFormat(
+      ExerciseAnalysisResult result) {
+    // Extract duration minutes as a number
+    final durationStr = result.duration;
+    final numbers = RegExp(r'\d+').allMatches(durationStr);
+    final durationMinutes =
+        numbers.isNotEmpty ? int.parse(numbers.first.group(0)!) : 0;
+
+    return {
+      'exercise_type': result.exerciseType,
+      'calories_burned': result.estimatedCalories,
+      'duration': durationMinutes,
+      'intensity': result.intensity,
+      'met_value': result.metValue,
+      'description': result.originalInput,
+    };
+  }
 }

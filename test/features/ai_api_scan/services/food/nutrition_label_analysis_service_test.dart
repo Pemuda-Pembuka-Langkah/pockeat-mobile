@@ -1,76 +1,39 @@
 // test/features/ai_api_scan/services/food/nutrition_label_analysis_service_test.dart
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
+import 'package:pockeat/features/ai_api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 
-class MockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
-  String? responseText;
-  Exception? exceptionToThrow;
+// Import the generated mock
+import '../base/api_service_test.mocks.dart';
 
-  @override
-  Future<dynamic> generateContent(dynamic _) async {
-    if (exceptionToThrow != null) {
-      throw exceptionToThrow!;
-    }
-    return _MockGenerateContentResponse(responseText);
-  }
-}
-
-class _MockGenerateContentResponse {
-  final String? text;
-  _MockGenerateContentResponse(this.text);
-}
-
-class MockFile extends Mock implements File {
-  Uint8List? bytesToReturn;
-  Exception? exceptionToThrow;
-
-  @override
-  Future<Uint8List> readAsBytes() async {
-    if (exceptionToThrow != null) {
-      throw exceptionToThrow!;
-    }
-    return bytesToReturn ?? Uint8List(0);
-  }
-}
+// Mock File
+class MockFile extends Mock implements File {}
 
 void main() {
-  late MockGenerativeModelWrapper mockModelWrapper;
+  late MockApiServiceInterface mockApiService;
   late MockFile mockFile;
   late NutritionLabelAnalysisService service;
 
   setUp(() {
-    mockModelWrapper = MockGenerativeModelWrapper();
+    mockApiService = MockApiServiceInterface();
     mockFile = MockFile();
     service = NutritionLabelAnalysisService(
-      apiKey: 'test-api-key',
-      customModelWrapper: mockModelWrapper,
+      apiService: mockApiService,
     );
   });
 
   group('NutritionLabelAnalysisService', () {
-    // Tests remain the same
     test('should analyze nutrition label successfully', () async {
       // Arrange
-      final mockBytes = Uint8List.fromList([1, 2, 3, 4]);
       const servings = 2.5;
-      const validJsonResponse = '''
-      {
+      final validJsonResponse = {
         "food_name": "Cereal",
         "ingredients": [
-          {
-            "name": "Whole Grain Wheat",
-            "servings": 60
-          },
-          {
-            "name": "Sugar",
-            "servings": 20
-          }
+          {"name": "Whole Grain Wheat", "servings": 60},
+          {"name": "Sugar", "servings": 20}
         ],
         "nutrition_info": {
           "calories": 120,
@@ -82,12 +45,12 @@ void main() {
           "sugar": 12
         },
         "warnings": []
-      }
-      ''';
+      };
 
-      // Mock
-      mockFile.bytesToReturn = mockBytes;
-      mockModelWrapper.responseText = validJsonResponse;
+      // Set up mock
+      when(mockApiService.postFileRequest('/food/analyze/nutrition-label',
+              mockFile, 'image', {'servings': servings.toString()}))
+          .thenAnswer((_) async => validJsonResponse);
 
       // Act
       final result = await service.analyze(mockFile, servings);
@@ -97,56 +60,31 @@ void main() {
       expect(result.ingredients.length, equals(2));
       expect(result.nutritionInfo.calories, equals(120));
       expect(result.warnings, isEmpty);
+
+      // Verify the API call was made with correct parameters
+      verify(mockApiService.postFileRequest('/food/analyze/nutrition-label',
+          mockFile, 'image', {'servings': servings.toString()})).called(1);
     });
 
-    test('should throw exception when file read fails', () async {
+    test('should throw exception when API call fails', () async {
       // Arrange
       const servings = 1.0;
-      mockFile.exceptionToThrow = Exception('File read error');
+
+      // Set up mock to throw exception
+      when(mockApiService.postFileRequest('/food/analyze/nutrition-label',
+              mockFile, 'image', {'servings': servings.toString()}))
+          .thenThrow(ApiServiceException('File upload failed'));
 
       // Act & Assert
       expect(
         () => service.analyze(mockFile, servings),
-        throwsA(isA<GeminiServiceException>()),
-      );
-    });
-
-
-    test('should throw exception when API returns error response', () async {
-      // Arrange
-      final mockBytes = Uint8List.fromList([1, 2, 3, 4]);
-      const servings = 1.0;
-      const errorResponse = '{"error": "No nutrition label detected"}';
-      mockFile.bytesToReturn = mockBytes;
-      mockModelWrapper.responseText = errorResponse;
-
-      // Act & Assert
-      expect(
-        () => service.analyze(mockFile, servings),
-        throwsA(isA<GeminiServiceException>()),
+        throwsA(isA<ApiServiceException>().having(
+            (e) => e.message, 'error message', contains('File upload failed'))),
       );
     });
   });
 
-    test('should throw exception when response text is null', () async {
-      // Arrange
-      final mockBytes = Uint8List.fromList([1, 2, 3, 4]);
-      const servings = 1.0;
-      mockFile.bytesToReturn = mockBytes;
-      mockModelWrapper.responseText = null; // Setting response text to null
-
-      // Act & Assert
-      expect(
-        () => service.analyze(mockFile, servings),
-        throwsA(isA<GeminiServiceException>().having(
-          (e) => e.message, 
-          'error message', 
-          'No response text generated'
-        )),
-      );
-    });
-
-    group('NutritionLabelAnalysisService correction functionality', () {
+  group('NutritionLabelAnalysisService correction functionality', () {
     test('should correct nutrition label analysis successfully', () async {
       // Arrange
       final previousResult = FoodAnalysisResult(
@@ -166,26 +104,17 @@ void main() {
         ),
         warnings: [],
       );
-      
-      const userComment = 'The cereal also contains dried fruit and has higher sugar content';
+
+      const userComment =
+          'The cereal also contains dried fruit and has higher sugar content';
       const servings = 2.5;
-      
-      const validJsonResponse = '''
-      {
+
+      final validJsonResponse = {
         "food_name": "Fruit Cereal",
         "ingredients": [
-          {
-            "name": "Whole Grain Wheat",
-            "servings": 60
-          },
-          {
-            "name": "Sugar",
-            "servings": 20
-          },
-          {
-            "name": "Dried Fruit",
-            "servings": 15
-          }
+          {"name": "Whole Grain Wheat", "servings": 60},
+          {"name": "Sugar", "servings": 20},
+          {"name": "Dried Fruit", "servings": 15}
         ],
         "nutrition_info": {
           "calories": 150,
@@ -197,14 +126,21 @@ void main() {
           "sugar": 18
         },
         "warnings": []
-      }
-      ''';
+      };
 
-      // Mock
-      mockModelWrapper.responseText = validJsonResponse;
+      // Set up mock
+      when(mockApiService.postJsonRequest(
+        '/food/correct/nutrition-label',
+        {
+          'previous_result': previousResult.toJson(),
+          'user_comment': userComment,
+          'servings': servings,
+        },
+      )).thenAnswer((_) async => validJsonResponse);
 
       // Act
-      final result = await service.correctAnalysis(previousResult, userComment, servings);
+      final result =
+          await service.correctAnalysis(previousResult, userComment, servings);
 
       // Assert
       expect(result.foodName, equals('Fruit Cereal'));
@@ -214,6 +150,16 @@ void main() {
       expect(result.nutritionInfo.sugar, equals(18));
       expect(result.nutritionInfo.fiber, equals(4));
       expect(result.warnings, isEmpty);
+
+      // Verify the API call was made
+      verify(mockApiService.postJsonRequest(
+        '/food/correct/nutrition-label',
+        {
+          'previous_result': previousResult.toJson(),
+          'user_comment': userComment,
+          'servings': servings,
+        },
+      )).called(1);
     });
 
     test('should update warnings when nutritional values change', () async {
@@ -235,22 +181,16 @@ void main() {
         ),
         warnings: [],
       );
-      
-      const userComment = 'The sugar content is much higher, around 22g, and it has more sodium too';
+
+      const userComment =
+          'The sugar content is much higher, around 22g, and it has more sodium too';
       const servings = 2.5;
-      
-      const validJsonResponse = '''
-      {
+
+      final validJsonResponse = {
         "food_name": "Cereal",
         "ingredients": [
-          {
-            "name": "Whole Grain Wheat",
-            "servings": 60
-          },
-          {
-            "name": "Sugar",
-            "servings": 30
-          }
+          {"name": "Whole Grain Wheat", "servings": 60},
+          {"name": "Sugar", "servings": 30}
         ],
         "nutrition_info": {
           "calories": 140,
@@ -262,88 +202,44 @@ void main() {
           "sugar": 22
         },
         "warnings": ["High sodium content", "High sugar content"]
-      }
-      ''';
+      };
 
-      // Mock
-      mockModelWrapper.responseText = validJsonResponse;
+      // Set up mock
+      when(mockApiService.postJsonRequest(
+        '/food/correct/nutrition-label',
+        {
+          'previous_result': previousResult.toJson(),
+          'user_comment': userComment,
+          'servings': servings,
+        },
+      )).thenAnswer((_) async => validJsonResponse);
 
       // Act
-      final result = await service.correctAnalysis(previousResult, userComment, servings);
+      final result =
+          await service.correctAnalysis(previousResult, userComment, servings);
 
       // Assert
-      expect(result.ingredients[1].servings, equals(30)); // Higher sugar in ingredients
+      expect(result.ingredients[1].servings,
+          equals(30)); // Higher sugar in ingredients
       expect(result.nutritionInfo.sugar, equals(22));
       expect(result.nutritionInfo.sodium, equals(510));
       expect(result.warnings.length, equals(2));
       expect(result.warnings, contains('High sodium content'));
       expect(result.warnings, contains('High sugar content'));
-    });
 
-    test('should handle servings adjustment correctly', () async {
-      // Arrange
-      final previousResult = FoodAnalysisResult(
-        foodName: 'Cereal',
-        ingredients: [
-          Ingredient(name: 'Whole Grain Wheat', servings: 60),
-          Ingredient(name: 'Sugar', servings: 20),
-        ],
-        nutritionInfo: NutritionInfo(
-          calories: 120,
-          protein: 3,
-          carbs: 24,
-          fat: 1,
-          sodium: 210,
-          fiber: 3,
-          sugar: 12,
-        ),
-        warnings: [],
-      );
-      
-      const userComment = 'I\'m actually having a double serving';
-      const servings = 5.0; // Changed from original 2.5
-      
-      const validJsonResponse = '''
-      {
-        "food_name": "Cereal (Double Serving)",
-        "ingredients": [
-          {
-            "name": "Whole Grain Wheat",
-            "servings": 120
-          },
-          {
-            "name": "Sugar",
-            "servings": 40
-          }
-        ],
-        "nutrition_info": {
-          "calories": 240,
-          "protein": 6,
-          "carbs": 48,
-          "fat": 2,
-          "sodium": 420,
-          "fiber": 6,
-          "sugar": 24
+      // Verify the API call was made
+      verify(mockApiService.postJsonRequest(
+        '/food/correct/nutrition-label',
+        {
+          'previous_result': previousResult.toJson(),
+          'user_comment': userComment,
+          'servings': servings,
         },
-        "warnings": ["High sugar content"]
-      }
-      ''';
-
-      // Mock
-      mockModelWrapper.responseText = validJsonResponse;
-
-      // Act
-      final result = await service.correctAnalysis(previousResult, userComment, servings);
-
-      // Assert
-      expect(result.foodName, equals('Cereal (Double Serving)'));
-      expect(result.nutritionInfo.calories, equals(240));
-      expect(result.nutritionInfo.sugar, equals(24));
-      expect(result.warnings.length, equals(1));
-      expect(result.warnings[0], equals('High sugar content'));
+      )).called(1);
     });
 
-    test('should throw exception when response text is null', () async {
+    test('should throw exception when API call fails during correction',
+        () async {
       // Arrange
       final previousResult = FoodAnalysisResult(
         foodName: 'Cereal',
@@ -362,86 +258,25 @@ void main() {
         ),
         warnings: [],
       );
-      
+
       const userComment = 'The sugar content is wrong';
       const servings = 2.5;
-      mockModelWrapper.responseText = null;
+
+      // Set up mock to throw exception
+      when(mockApiService.postJsonRequest(
+        '/food/correct/nutrition-label',
+        {
+          'previous_result': previousResult.toJson(),
+          'user_comment': userComment,
+          'servings': servings,
+        },
+      )).thenThrow(ApiServiceException('API call failed'));
 
       // Act & Assert
       expect(
         () => service.correctAnalysis(previousResult, userComment, servings),
-        throwsA(isA<GeminiServiceException>().having(
-          (e) => e.message, 
-          'error message', 
-          'No response text generated'
-        )),
-      );
-    });
-
-    test('should throw exception when API returns error response', () async {
-      // Arrange
-      final previousResult = FoodAnalysisResult(
-        foodName: 'Cereal',
-        ingredients: [
-          Ingredient(name: 'Whole Grain Wheat', servings: 60),
-          Ingredient(name: 'Sugar', servings: 20),
-        ],
-        nutritionInfo: NutritionInfo(
-          calories: 120,
-          protein: 3,
-          carbs: 24,
-          fat: 1,
-          sodium: 210,
-          fiber: 3,
-          sugar: 12,
-        ),
-        warnings: [],
-      );
-      
-      const userComment = 'The sugar content is wrong';
-      const servings = 2.5;
-      const errorResponse = '{"error": "Could not process correction"}';
-      mockModelWrapper.responseText = errorResponse;
-
-      // Act & Assert
-      expect(
-        () => service.correctAnalysis(previousResult, userComment, servings),
-        throwsA(isA<GeminiServiceException>()),
-      );
-    });
-
-    test('should throw exception when API call fails', () async {
-      // Arrange
-      final previousResult = FoodAnalysisResult(
-        foodName: 'Cereal',
-        ingredients: [
-          Ingredient(name: 'Whole Grain Wheat', servings: 60),
-          Ingredient(name: 'Sugar', servings: 20),
-        ],
-        nutritionInfo: NutritionInfo(
-          calories: 120,
-          protein: 3,
-          carbs: 24,
-          fat: 1,
-          sodium: 210,
-          fiber: 3,
-          sugar: 12,
-        ),
-        warnings: [],
-      );
-      
-      const userComment = 'The sugar content is wrong';
-      const servings = 2.5;
-      mockModelWrapper.exceptionToThrow = Exception('Network error');
-
-      // Act & Assert
-      expect(
-        () => service.correctAnalysis(previousResult, userComment, servings),
-        throwsA(isA<GeminiServiceException>().having(
-          (e) => e.message,
-          'error message',
-          contains('Error correcting nutrition label analysis')
-        )),
+        throwsA(isA<ApiServiceException>().having(
+            (e) => e.message, 'error message', contains('API call failed'))),
       );
     });
   });

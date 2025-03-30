@@ -1,39 +1,21 @@
+// test/features/ai_api_scan/services/food/food_text_analysis_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/generative_model_wrapper.dart';
+import 'package:pockeat/features/ai_api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/utils/food_analysis_parser.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
 
-class MockGenerativeModelWrapper extends Mock implements GenerativeModelWrapper {
-  String? responseText;
-  Exception? exceptionToThrow;
-
-  @override
-  Future<dynamic> generateContent(dynamic _) async {
-    if (exceptionToThrow != null) {
-      throw exceptionToThrow!;
-    }
-    return _MockGenerateContentResponse(responseText);
-  }
-}
-
-class _MockGenerateContentResponse {
-  final String? text;
-  _MockGenerateContentResponse(this.text);
-}
+// Import the generated mock
+import '../base/api_service_test.mocks.dart';
 
 void main() {
-  late MockGenerativeModelWrapper mockModelWrapper;
+  late MockApiServiceInterface mockApiService;
   late FoodTextAnalysisService service;
 
   setUp(() {
-    mockModelWrapper = MockGenerativeModelWrapper();
+    mockApiService = MockApiServiceInterface();
     service = FoodTextAnalysisService(
-      apiKey: 'test-api-key',
-      customModelWrapper: mockModelWrapper,
+      apiService: mockApiService,
     );
   });
 
@@ -41,18 +23,11 @@ void main() {
     test('should analyze food by text successfully', () async {
       // Arrange
       const foodDescription = 'Apple pie with cinnamon';
-      const validJsonResponse = '''
-      {
+      final validJsonResponse = {
         "food_name": "Apple Pie",
         "ingredients": [
-          {
-            "name": "Apples",
-            "servings": 50
-          },
-          {
-            "name": "Flour",
-            "servings": 25
-          }
+          {"name": "Apples", "servings": 50},
+          {"name": "Flour", "servings": 25}
         ],
         "nutrition_info": {
           "calories": 250,
@@ -64,11 +39,12 @@ void main() {
           "sugar": 25
         },
         "warnings": ["High sugar content"]
-      }
-      ''';
+      };
 
-      // Mock
-      mockModelWrapper.responseText = validJsonResponse;
+      // Set up mock
+      when(mockApiService.postJsonRequest(
+              '/food/analyze/text', {'description': foodDescription}))
+          .thenAnswer((_) async => validJsonResponse);
 
       // Act
       final result = await service.analyze(foodDescription);
@@ -80,88 +56,54 @@ void main() {
       expect(result.nutritionInfo.calories, equals(250));
       expect(result.warnings.length, equals(1));
       expect(result.warnings[0], equals('High sugar content'));
-    });
 
-    test('should throw exception when API returns null response', () async {
-      // Arrange
-      const foodDescription = 'Unknown food';
-      mockModelWrapper.responseText = null;
-
-      // Act & Assert
-      expect(
-        () => service.analyze(foodDescription),
-        throwsA(isA<GeminiServiceException>().having(
-          (e) => e.message, 
-          'error message', 
-          contains('No response text generated')
-        )),
-      );
-    });
-
-    test('should throw exception when API returns error response', () async {
-      // Arrange
-      const foodDescription = 'Unknown food';
-      const errorResponse = '{"error": "Could not analyze food"}';
-      mockModelWrapper.responseText = errorResponse;
-
-      // Act & Assert
-      expect(
-        () => service.analyze(foodDescription),
-        throwsA(isA<GeminiServiceException>()),
-      );
+      // Verify the API call was made with correct parameters
+      verify(mockApiService.postJsonRequest(
+          '/food/analyze/text', {'description': foodDescription})).called(1);
     });
 
     test('should throw exception when API call fails', () async {
       // Arrange
       const foodDescription = 'Apple pie';
-      mockModelWrapper.exceptionToThrow = Exception('Network error');
+
+      // Set up mock to throw exception
+      when(mockApiService.postJsonRequest(
+              '/food/analyze/text', {'description': foodDescription}))
+          .thenThrow(ApiServiceException('Network error'));
 
       // Act & Assert
       expect(
         () => service.analyze(foodDescription),
-        throwsA(isA<GeminiServiceException>().having(
-          (e) => e.message,
-          'error message',
-          contains('Failed to analyze food description')
-        )),
+        throwsA(isA<ApiServiceException>().having(
+            (e) => e.message, 'error message', contains('Network error'))),
       );
-    });
-  });
 
-  group('FoodAnalysisParser', () {
-    test('parse should handle error as Map correctly', () {
-      // Arrange
-      final jsonText = '{"error": {"message": "Custom error message"}}';
-      
-      // Act & Assert
-      expect(
-        () => FoodAnalysisParser.parse(jsonText),
-        throwsA(isA<GeminiServiceException>().having(
-          (e) => e.message, 
-          'message', 
-          contains('Custom error message')
-        )),
-      );
+      // Verify the API call was attempted
+      verify(mockApiService.postJsonRequest(
+          '/food/analyze/text', {'description': foodDescription})).called(1);
     });
 
-    test('parse should handle error as Map without message correctly', () {
+    test('should throw exception when API returns error response', () async {
       // Arrange
-      final jsonText = '{"error": {}}'; // Empty error Map
-      
+      const foodDescription = 'Unknown food';
+
+      // Set up mock to throw exception
+      when(mockApiService.postJsonRequest(
+              '/food/analyze/text', {'description': foodDescription}))
+          .thenThrow(ApiServiceException('Could not analyze food'));
+
       // Act & Assert
       expect(
-        () => FoodAnalysisParser.parse(jsonText),
-        throwsA(isA<GeminiServiceException>().having(
-          (e) => e.message, 
-          'message', 
-          contains('Unknown error')
-        )),
+        () => service.analyze(foodDescription),
+        throwsA(isA<ApiServiceException>().having((e) => e.message,
+            'error message', contains('Could not analyze food'))),
       );
     });
   });
 
   group('FoodTextAnalysisService correction functionality', () {
-    test('should correct food analysis successfully based on user comment', () async {
+    test('should correct food analysis successfully based on user comment',
+        () async {
       // Arrange
       final previousResult = FoodAnalysisResult(
         foodName: 'Apple Pie',
@@ -180,29 +122,16 @@ void main() {
         ),
         warnings: ['High sugar content'],
       );
-      
+
       const userComment = 'This apple pie also has cinnamon and butter';
-      
-      const validJsonResponse = '''
-      {
+
+      final validJsonResponse = {
         "food_name": "Apple Pie with Cinnamon",
         "ingredients": [
-          {
-            "name": "Apples",
-            "servings": 50
-          },
-          {
-            "name": "Flour",
-            "servings": 25
-          },
-          {
-            "name": "Butter",
-            "servings": 15
-          },
-          {
-            "name": "Cinnamon",
-            "servings": 2
-          }
+          {"name": "Apples", "servings": 50},
+          {"name": "Flour", "servings": 25},
+          {"name": "Butter", "servings": 15},
+          {"name": "Cinnamon", "servings": 2}
         ],
         "nutrition_info": {
           "calories": 320,
@@ -214,11 +143,16 @@ void main() {
           "sugar": 26
         },
         "warnings": ["High sugar content"]
-      }
-      ''';
+      };
 
-      // Mock
-      mockModelWrapper.responseText = validJsonResponse;
+      // Set up mock
+      when(mockApiService.postJsonRequest(
+        '/food/correct/text',
+        {
+          'previous_result': previousResult.toJson(),
+          'user_comment': userComment,
+        },
+      )).thenAnswer((_) async => validJsonResponse);
 
       // Act
       final result = await service.correctAnalysis(previousResult, userComment);
@@ -232,235 +166,54 @@ void main() {
       expect(result.nutritionInfo.fat, equals(18));
       expect(result.warnings.length, equals(1));
       expect(result.warnings[0], equals('High sugar content'));
-    });
 
-    test('should handle food names and ingredients with special characters during correction', () async {
-      // Arrange
-      final previousResult = FoodAnalysisResult(
-        foodName: 'Apple "Pie"',
-        ingredients: [
-          Ingredient(name: 'Apples\nGranny Smith', servings: 50),
-          Ingredient(name: 'Flour', servings: 25),
-        ],
-        nutritionInfo: NutritionInfo(
-          calories: 250,
-          protein: 2,
-          carbs: 40,
-          fat: 12,
-          sodium: 150,
-          fiber: 3,
-          sugar: 25,
-        ),
-        warnings: ['High "sugar" content'],
-      );
-      
-      const userComment = 'Add cinnamon';
-      
-      const validJsonResponse = '''
-      {
-        "food_name": "Apple Pie with Cinnamon",
-        "ingredients": [
-          {
-            "name": "Apples",
-            "servings": 50
-          },
-          {
-            "name": "Flour",
-            "servings": 25
-          },
-          {
-            "name": "Cinnamon",
-            "servings": 2
-          }
-        ],
-        "nutrition_info": {
-          "calories": 255,
-          "protein": 2,
-          "carbs": 41,
-          "fat": 12,
-          "sodium": 150,
-          "fiber": 3,
-          "sugar": 25
+      // Verify the API call was made
+      verify(mockApiService.postJsonRequest(
+        '/food/correct/text',
+        {
+          'previous_result': previousResult.toJson(),
+          'user_comment': userComment,
         },
-        "warnings": ["High sugar content"]
-      }
-      ''';
-
-      // Mock
-      mockModelWrapper.responseText = validJsonResponse;
-
-      // Act
-      final result = await service.correctAnalysis(previousResult, userComment);
-
-      // Assert
-      expect(result.foodName, equals('Apple Pie with Cinnamon'));
-      expect(result.ingredients.length, equals(3));
-      expect(result.ingredients[2].name, equals('Cinnamon'));
+      )).called(1);
     });
 
-    test('should correct nutrition values based on user comment', () async {
+    test('should throw exception when API call fails during correction',
+        () async {
       // Arrange
       final previousResult = FoodAnalysisResult(
-        foodName: 'Chocolate Brownie',
+        foodName: 'Apple Pie',
         ingredients: [
-          Ingredient(name: 'Chocolate', servings: 30),
+          Ingredient(name: 'Apples', servings: 50),
           Ingredient(name: 'Flour', servings: 25),
-          Ingredient(name: 'Sugar', servings: 40),
         ],
         nutritionInfo: NutritionInfo(
-          calories: 350,
-          protein: 4,
-          carbs: 45,
-          fat: 18,
-          sodium: 120,
-          fiber: 2,
-          sugar: 30,
+          calories: 250,
+          protein: 2,
+          carbs: 40,
+          fat: 12,
+          sodium: 150,
+          fiber: 3,
+          sugar: 25,
         ),
         warnings: ['High sugar content'],
       );
-      
-      const userComment = 'This is a low-sugar version with stevia instead of sugar';
-      
-      const validJsonResponse = '''
-      {
-        "food_name": "Low-Sugar Chocolate Brownie",
-        "ingredients": [
-          {
-            "name": "Chocolate",
-            "servings": 30
-          },
-          {
-            "name": "Flour",
-            "servings": 25
-          },
-          {
-            "name": "Stevia",
-            "servings": 5
-          }
-        ],
-        "nutrition_info": {
-          "calories": 280,
-          "protein": 4,
-          "carbs": 28,
-          "fat": 18,
-          "sodium": 120,
-          "fiber": 2,
-          "sugar": 8
+
+      const userComment = 'This is not accurate';
+
+      // Set up mock to throw exception
+      when(mockApiService.postJsonRequest(
+        '/food/correct/text',
+        {
+          'previous_result': previousResult.toJson(),
+          'user_comment': userComment,
         },
-        "warnings": []
-      }
-      ''';
-
-      // Mock
-      mockModelWrapper.responseText = validJsonResponse;
-
-      // Act
-      final result = await service.correctAnalysis(previousResult, userComment);
-
-      // Assert
-      expect(result.foodName, equals('Low-Sugar Chocolate Brownie'));
-      expect(result.ingredients.length, equals(3));
-      expect(result.ingredients[2].name, equals('Stevia'));
-      expect(result.nutritionInfo.sugar, equals(8));
-      expect(result.warnings.isEmpty, isTrue);
-    });
-
-    test('should throw exception when API returns null response during correction', () async {
-      // Arrange
-      final previousResult = FoodAnalysisResult(
-        foodName: 'Apple Pie',
-        ingredients: [
-          Ingredient(name: 'Apples', servings: 50),
-          Ingredient(name: 'Flour', servings: 25),
-        ],
-        nutritionInfo: NutritionInfo(
-          calories: 250,
-          protein: 2,
-          carbs: 40,
-          fat: 12,
-          sodium: 150,
-          fiber: 3,
-          sugar: 25,
-        ),
-        warnings: ['High sugar content'],
-      );
-      
-      const userComment = 'This is not accurate';
-      mockModelWrapper.responseText = null;
+      )).thenThrow(ApiServiceException('Network error'));
 
       // Act & Assert
       expect(
         () => service.correctAnalysis(previousResult, userComment),
-        throwsA(isA<GeminiServiceException>().having(
-          (e) => e.message, 
-          'error message', 
-          contains('No response text generated')
-        )),
-      );
-    });
-
-    test('should throw exception when API call fails during correction', () async {
-      // Arrange
-      final previousResult = FoodAnalysisResult(
-        foodName: 'Apple Pie',
-        ingredients: [
-          Ingredient(name: 'Apples', servings: 50),
-          Ingredient(name: 'Flour', servings: 25),
-        ],
-        nutritionInfo: NutritionInfo(
-          calories: 250,
-          protein: 2,
-          carbs: 40,
-          fat: 12,
-          sodium: 150,
-          fiber: 3,
-          sugar: 25,
-        ),
-        warnings: ['High sugar content'],
-      );
-      
-      const userComment = 'This is not accurate';
-      mockModelWrapper.exceptionToThrow = Exception('Network error');
-
-      // Act & Assert
-      expect(
-        () => service.correctAnalysis(previousResult, userComment),
-        throwsA(isA<GeminiServiceException>().having(
-          (e) => e.message,
-          'error message',
-          contains('Failed to correct food analysis')
-        )),
-      );
-    });
-
-    test('should throw exception when API returns error response during correction', () async {
-      // Arrange
-      final previousResult = FoodAnalysisResult(
-        foodName: 'Apple Pie',
-        ingredients: [
-          Ingredient(name: 'Apples', servings: 50),
-          Ingredient(name: 'Flour', servings: 25),
-        ],
-        nutritionInfo: NutritionInfo(
-          calories: 250,
-          protein: 2,
-          carbs: 40,
-          fat: 12,
-          sodium: 150,
-          fiber: 3,
-          sugar: 25,
-        ),
-        warnings: ['High sugar content'],
-      );
-      
-      const userComment = 'This is not accurate';
-      const errorResponse = '{"error": "Could not process correction"}';
-      mockModelWrapper.responseText = errorResponse;
-
-      // Act & Assert
-      expect(
-        () => service.correctAnalysis(previousResult, userComment),
-        throwsA(isA<GeminiServiceException>()),
+        throwsA(isA<ApiServiceException>().having(
+            (e) => e.message, 'error message', contains('Network error'))),
       );
     });
   });

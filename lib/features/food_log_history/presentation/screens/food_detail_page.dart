@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/ai_api_scan/utils/food_analysis_parser.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:intl/intl.dart';
@@ -329,7 +330,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                     Icon(CupertinoIcons.calendar, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
                     Text(
-                      _formatDate(food.timestamp),
+                      _formatDate(food.timestampAsDateTime),
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
