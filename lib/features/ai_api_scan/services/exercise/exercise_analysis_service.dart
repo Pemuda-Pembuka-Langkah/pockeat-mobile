@@ -12,11 +12,13 @@ class ExerciseAnalysisService extends BaseGeminiService {
   });
 // coverage:ignore-start
   factory ExerciseAnalysisService.fromEnv() {
-    return ExerciseAnalysisService(apiKey: BaseGeminiService.getApiKeyFromEnv());
+    return ExerciseAnalysisService(
+        apiKey: BaseGeminiService.getApiKeyFromEnv());
   }
 // coverage:ignore-end
 
-  Future<ExerciseAnalysisResult> analyze(String description, {double? userWeightKg}) async {
+  Future<ExerciseAnalysisResult> analyze(String description,
+      {double? userWeightKg, String userId = ''}) async {
     try {
       final weightInfo =
           userWeightKg != null ? "The user weighs $userWeightKg kg." : "";
@@ -58,14 +60,14 @@ class ExerciseAnalysisService extends BaseGeminiService {
         throw GeminiServiceException('No response text generated');
       }
 
-      return parseExerciseResponse(response.text!, description);
+      return parseExerciseResponse(response.text!, description, userId);
     } catch (e) {
       throw GeminiServiceException("Error analyzing exercise: $e");
     }
   }
 
   ExerciseAnalysisResult parseExerciseResponse(
-      String responseText, String originalInput) {
+      String responseText, String originalInput, String userId) {
     try {
       // Extract JSON from response text
       final jsonString = extractJson(responseText);
@@ -84,6 +86,7 @@ class ExerciseAnalysisService extends BaseGeminiService {
           timestamp: DateTime.now(),
           originalInput: originalInput,
           missingInfo: ['exercise_type', 'duration', 'intensity'],
+          userId: userId, // Add userId parameter
         );
       }
 
@@ -111,12 +114,14 @@ class ExerciseAnalysisService extends BaseGeminiService {
         summary: summary,
         timestamp: DateTime.now(),
         originalInput: originalInput,
+        userId: userId,
       );
     } catch (e) {
       throw GeminiServiceException(
           "Failed to parse exercise analysis response: $e");
     }
   }
+
   Future<ExerciseAnalysisResult> correctAnalysis(
       ExerciseAnalysisResult previousResult, String userComment) async {
     try {
@@ -157,17 +162,19 @@ class ExerciseAnalysisService extends BaseGeminiService {
     }
   }
 
-  ExerciseAnalysisResult parseCorrectionResponse(
-      String responseText, ExerciseAnalysisResult previousResult, String userComment) {
+  ExerciseAnalysisResult parseCorrectionResponse(String responseText,
+      ExerciseAnalysisResult previousResult, String userComment) {
     try {
       // Extract JSON from response text
       final jsonString = extractJson(responseText);
       final jsonData = jsonDecode(jsonString);
 
       // Extract values from JSON, defaulting to previous values if not provided
-      final exerciseType = jsonData['exercise_type'] ?? previousResult.exerciseType;
-      final caloriesBurned = jsonData['calories_burned'] ?? previousResult.estimatedCalories;
-      
+      final exerciseType =
+          jsonData['exercise_type'] ?? previousResult.exerciseType;
+      final caloriesBurned =
+          jsonData['calories_burned'] ?? previousResult.estimatedCalories;
+
       // Handle duration which might be in string format in previousResult
       int durationMinutes;
       if (jsonData['duration_minutes'] != null) {
@@ -176,12 +183,16 @@ class ExerciseAnalysisService extends BaseGeminiService {
         // Try to extract numbers from the previous duration string
         final durationString = previousResult.duration;
         final numbers = RegExp(r'\d+').allMatches(durationString);
-        durationMinutes = numbers.isNotEmpty ? int.parse(numbers.first.group(0)!) : 0;
+        durationMinutes =
+            numbers.isNotEmpty ? int.parse(numbers.first.group(0)!) : 0;
       }
-      
-      final intensityLevel = jsonData['intensity_level'] ?? previousResult.intensity;
-      final metValue = (jsonData['met_value'] ?? previousResult.metValue).toDouble();
-      final correctionApplied = jsonData['correction_applied'] ?? 'Adjustments applied based on user feedback';
+
+      final intensityLevel =
+          jsonData['intensity_level'] ?? previousResult.intensity;
+      final metValue =
+          (jsonData['met_value'] ?? previousResult.metValue).toDouble();
+      final correctionApplied = jsonData['correction_applied'] ??
+          'Adjustments applied based on user feedback';
 
       // Create a summary incorporating the correction information
       final summary =
@@ -201,13 +212,11 @@ class ExerciseAnalysisService extends BaseGeminiService {
         summary: summary,
         timestamp: DateTime.now(),
         originalInput: previousResult.originalInput,
+      userId: previousResult.userId,
       );
     } catch (e) {
       throw GeminiServiceException(
           "Failed to parse exercise correction response: $e");
     }
   }
-
-  
-  
 }
