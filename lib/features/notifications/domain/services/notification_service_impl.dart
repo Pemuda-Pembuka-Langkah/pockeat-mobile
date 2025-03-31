@@ -66,7 +66,7 @@ class NotificationServiceImpl implements NotificationService {
       notification.id.hashCode,
       notification.title,
       notification.body,
-      _nextInstanceOfTime(notification.scheduledTime),
+      nextInstanceOfTime(notification.scheduledTime),
       NotificationDetails(
         android: AndroidNotificationDetails(
           channel.id,
@@ -94,7 +94,7 @@ class NotificationServiceImpl implements NotificationService {
   }
 
   // Fungsi helper untuk mendapatkan next instance dari jadwal
-  tz.TZDateTime _nextInstanceOfTime(DateTime scheduledTime) {
+  tz.TZDateTime nextInstanceOfTime(DateTime scheduledTime) {
     final DateTime now = DateTime.now();
     DateTime scheduledDate = DateTime(
       now.year,
@@ -103,10 +103,6 @@ class NotificationServiceImpl implements NotificationService {
       scheduledTime.hour,
       scheduledTime.minute,
     );
-
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
 
     return tz.TZDateTime.from(scheduledDate, tz.getLocation('Asia/Jakarta'));
   }

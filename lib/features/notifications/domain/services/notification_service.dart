@@ -7,7 +7,7 @@ abstract class NotificationService {
   // Inisialisasi service
   Future<void> initialize();
 
-  // Menjadwalkan notifikasi lokal
+  // Menjadwalkan notifikasi (recurring) lokal
   Future<void> scheduleLocalNotification(NotificationModel notification, AndroidNotificationChannel channel);
 
   // Menampilkan notifikasi dari Firebase

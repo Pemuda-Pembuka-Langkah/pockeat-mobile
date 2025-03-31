@@ -37,6 +37,8 @@ class FoodInputPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // add button to go to notification settings
+
                 const Text(
                   'How would you like to\nadd your food?',
                   style: TextStyle(
@@ -60,7 +62,7 @@ class FoodInputPage extends StatelessWidget {
               route: '/scan',
             ),
             const SizedBox(height: 16),
-            
+
             // Manual Input Option
             _buildInputOption(
               context: context,
@@ -76,6 +78,16 @@ class FoodInputPage extends StatelessWidget {
                   ),
                 );
               },
+            ),
+            const SizedBox(height: 16),
+
+            _buildInputOption(
+              context: context,
+              icon: CupertinoIcons.bell,
+              title: 'Notification Settings',
+              subtitle: 'Set your notification preferences',
+              color: primaryGreen,
+              route: '/notification-settings',
             ),
           ],
         ),
@@ -97,7 +109,8 @@ class FoodInputPage extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: route != null ? () => Navigator.pushNamed(context, route) : onTap,
+          onTap:
+              route != null ? () => Navigator.pushNamed(context, route) : onTap,
           borderRadius: BorderRadius.circular(16),
           child: Ink(
             decoration: BoxDecoration(
