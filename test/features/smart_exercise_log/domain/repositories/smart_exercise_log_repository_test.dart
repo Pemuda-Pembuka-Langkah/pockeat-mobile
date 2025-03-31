@@ -75,7 +75,8 @@ void main() {
         intensity: 'Low',
         estimatedCalories: 100,
         timestamp: DateTime.now(),
-        originalInput: 'Test input'
+        originalInput: 'Test input',
+        userId: 'test-user-123',
       ));
       
       // Assert
@@ -94,6 +95,7 @@ void main() {
         estimatedCalories: 300,
         timestamp: DateTime.now(),
         originalInput: 'Lari 30 menit dengan intensitas sedang',
+        userId: 'test-user-123',
       );
 
       // Setup mock Firestore behavior
@@ -118,6 +120,7 @@ void main() {
         estimatedCalories: 300,
         timestamp: DateTime.now(),
         originalInput: 'Lari 30 menit',
+        userId: 'test-user-123',
       );
 
       // Setup mock to throw an error
