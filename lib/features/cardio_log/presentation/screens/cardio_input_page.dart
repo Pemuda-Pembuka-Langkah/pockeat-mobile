@@ -16,7 +16,6 @@ class CardioInputPage extends StatefulWidget {
   final CardioRepository? repository;
   final FirebaseAuth? auth; // Add this parameter
 
-
   const CardioInputPage({
     super.key,
     this.repository,
@@ -71,7 +70,8 @@ class CardioInputPageState extends State<CardioInputPage> {
     // Initialize repository, use injected repository or create a new one
     _repository = widget.repository ??
         CardioRepositoryImpl(firestore: FirebaseFirestore.instance);
-    _auth = widget.auth ?? FirebaseAuth.instance; // Use injected auth or default
+    _auth =
+        widget.auth ?? FirebaseAuth.instance; // Use injected auth or default
   }
 
   @override
@@ -328,7 +328,6 @@ class CardioInputPageState extends State<CardioInputPage> {
     }
   }
 
-  // Function to save activity
   Future<void> _saveActivity(double calories) async {
     try {
       final String userId = _auth.currentUser?.uid ?? '';
@@ -346,13 +345,29 @@ class CardioInputPageState extends State<CardioInputPage> {
         return;
       }
 
+      // Basic validation checks
+      bool isValid = true;
+      String errorMessage = '';
       CardioActivity? activity;
       final todayDate = DateTime.now();
+      Duration activityDuration;
 
       switch (selectedType) {
         case CardioType.running:
-          // Access form state directly using the key
           final formState = _runningFormKey.currentState!;
+          activityDuration =
+              formState.selectedEndTime.difference(formState.selectedStartTime);
+
+          // Validate running inputs
+          if (runningDistance <= 0) {
+            isValid = false;
+            errorMessage = 'Distance must be greater than 0';
+          } else if (activityDuration.inSeconds <= 0) {
+            isValid = false;
+            errorMessage = 'Duration must be greater than 0';
+          }
+
+          if (!isValid) break;
 
           activity = RunningActivity(
             userId: userId,
@@ -366,6 +381,19 @@ class CardioInputPageState extends State<CardioInputPage> {
 
         case CardioType.cycling:
           final formState = _cyclingFormKey.currentState!;
+          activityDuration =
+              formState.selectedEndTime.difference(formState.selectedStartTime);
+
+          // Validate cycling inputs
+          if (cyclingDistance <= 0) {
+            isValid = false;
+            errorMessage = 'Distance must be greater than 0';
+          } else if (activityDuration.inSeconds <= 0) {
+            isValid = false;
+            errorMessage = 'Duration must be greater than 0';
+          }
+
+          if (!isValid) break;
 
           activity = CyclingActivity(
             userId: userId,
@@ -380,6 +408,22 @@ class CardioInputPageState extends State<CardioInputPage> {
 
         case CardioType.swimming:
           final formState = _swimmingFormKey.currentState!;
+          activityDuration =
+              formState.selectedEndTime.difference(formState.selectedStartTime);
+
+          // Validate swimming inputs
+          if (swimmingLaps <= 0) {
+            isValid = false;
+            errorMessage = 'Laps must be greater than 0';
+          } else if (poolLength <= 0) {
+            isValid = false;
+            errorMessage = 'Pool length must be greater than 0';
+          } else if (activityDuration.inSeconds <= 0) {
+            isValid = false;
+            errorMessage = 'Duration must be greater than 0';
+          }
+
+          if (!isValid) break;
 
           activity = SwimmingActivity(
             userId: userId,
@@ -394,12 +438,24 @@ class CardioInputPageState extends State<CardioInputPage> {
           break;
       }
 
+      // If validation failed, show error message
+      if (!isValid) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
       // Save using repository
-      await _repository.saveCardioActivity(activity);
+      await _repository.saveCardioActivity(activity!);
 
       // Show success message to user with navigation after SnackBar is dismissed
       if (mounted) {
-        // Use a longer duration and a callback for when the SnackBar is dismissed
         final snackBar = SnackBar(
           content: Text(
             'Activity successfully saved! Calories burned: ${calories.toStringAsFixed(0)} kcal',
@@ -409,14 +465,11 @@ class CardioInputPageState extends State<CardioInputPage> {
             ),
           ),
           backgroundColor: Colors.green,
-          duration: const Duration(seconds: 1), // Short duration
-          // Set behavior to fixed to ensure it's visible
+          duration: const Duration(seconds: 1),
           behavior: SnackBarBehavior.fixed,
         );
 
-        // Show the SnackBar and navigate after it's dismissed
         ScaffoldMessenger.of(context).showSnackBar(snackBar).closed.then((_) {
-          // Navigate back after SnackBar is dismissed
           if (mounted) {
             Navigator.pop(context);
           }
@@ -428,7 +481,7 @@ class CardioInputPageState extends State<CardioInputPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Failed to save activity. Please try again.',
+              'Failed to save activity: $e',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
