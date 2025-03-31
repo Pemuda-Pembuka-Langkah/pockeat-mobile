@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:get_it/get_it.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_history_card.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
@@ -22,6 +23,7 @@ class ExerciseHistoryPage extends StatefulWidget {
 class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   late ExerciseLogHistoryService _service;
   late Future<List<ExerciseLogHistoryItem>> _exercisesFuture;
+  // final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Filter state
   FilterType _activeFilterType = FilterType.all;
@@ -59,20 +61,25 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   //
 
   void _loadExercises() {
+    // Get the current user's ID
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
     setState(() {
       switch (_activeFilterType) {
         case FilterType.date:
-          _exercisesFuture = _service.getExerciseLogsByDate(_selectedDate);
+          _exercisesFuture =
+              _service.getExerciseLogsByDate(userId, _selectedDate);
           break;
         case FilterType.month:
-          _exercisesFuture =
-              _service.getExerciseLogsByMonth(_selectedMonth, _selectedYear);
+          _exercisesFuture = _service.getExerciseLogsByMonth(
+              userId, _selectedMonth, _selectedYear);
           break;
         case FilterType.year:
-          _exercisesFuture = _service.getExerciseLogsByYear(_selectedYear);
+          _exercisesFuture =
+              _service.getExerciseLogsByYear(userId, _selectedYear);
           break;
         case FilterType.all:
-          _exercisesFuture = _service.getAllExerciseLogs();
+          _exercisesFuture = _service.getAllExerciseLogs(userId);
           break;
       }
 
