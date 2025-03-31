@@ -3,20 +3,137 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:get_it/get_it.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
+import 'package:flutter/services.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_history_page.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:intl/intl.dart';
 
 // Generate mock classes
-@GenerateMocks([ExerciseLogHistoryService])
+@GenerateMocks([ExerciseLogHistoryService, FirebaseAuth, User])
 import 'exercise_history_page_test.mocks.dart';
 
-// Tambahkan import untuk akses ke FilterType
+// Setup Firebase mocks
+class MockFirebaseApp implements FirebaseApp {
+  @override
+  String get name => 'test';
+  
+  @override
+  FirebaseOptions get options => FirebaseOptions(
+    apiKey: '123',
+    appId: '123',
+    messagingSenderId: '123',
+    projectId: '123',
+  );
+  
+  @override
+  Future<void> delete() async {
+    return;
+  }
+  
+  @override
+  bool get isAutomaticDataCollectionEnabled => false;
+  
+  @override
+  Future<void> setAutomaticDataCollectionEnabled(bool enabled) async {
+    return;
+  }
+  
+  @override
+  Future<void> setAutomaticResourceManagementEnabled(bool enabled) async {
+    return;
+  }
+  
+  @override
+  bool operator ==(Object other) => false;
+  
+  @override
+  int get hashCode => 0;
+}
+
+// Mock for FirebasePlatform
+class MockFirebaseCoreImplementation extends Fake implements FirebasePlatform {
+  @override
+  FirebaseAppPlatform app([String name = defaultFirebaseAppName]) {
+    return MockFirebaseAppPlatform();
+  }
+
+  @override
+  Future<FirebaseAppPlatform> initializeApp({
+    String? name,
+    FirebaseOptions? options,
+  }) async {
+    return MockFirebaseAppPlatform();
+  }
+}
+
+class MockFirebaseAppPlatform extends FirebaseAppPlatform {
+  MockFirebaseAppPlatform() : super(
+    defaultFirebaseAppName,
+    FirebaseOptions(
+      apiKey: '123',
+      appId: '123',
+      messagingSenderId: '123',
+      projectId: '123',
+    ),
+  );
+
+  @override
+  FirebaseOptions get options => FirebaseOptions(
+    apiKey: '123',
+    appId: '123',
+    messagingSenderId: '123',
+    projectId: '123',
+  );
+}
+
+// Setup Firebase mocks
+void setupFirebaseMocks() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  
+  // Setup method channel mocks for Firebase
+  const MethodChannel channel = MethodChannel('plugins.flutter.io/firebase_core');
+  channel.setMockMethodCallHandler((MethodCall call) async {
+    if (call.method == 'Firebase#initializeCore') {
+      return [
+        {
+          'name': defaultFirebaseAppName,
+          'options': {
+            'apiKey': '123',
+            'appId': '123',
+            'messagingSenderId': '123',
+            'projectId': '123',
+          },
+          'pluginConstants': {},
+        }
+      ];
+    }
+    if (call.method == 'Firebase#initializeApp') {
+      return {
+        'name': call.arguments['appName'],
+        'options': call.arguments['options'],
+        'pluginConstants': {},
+      };
+    }
+    return null;
+  });
+
+  // Replace the firebase platform implementation
+  FirebasePlatform.instance = MockFirebaseCoreImplementation();
+}
 
 void main() {
+  // Call this before any tests to set up the Firebase mock
+  setupFirebaseMocks();
+  
   late MockExerciseLogHistoryService mockService;
+  late MockFirebaseAuth mockAuth;
+  late MockUser mockUser;
   final getIt = GetIt.instance;
+  final testUserId = 'test-user-id';
 
   // Sample exercise log history items for testing
   final List<ExerciseLogHistoryItem> sampleExerciseLogs = [
@@ -53,8 +170,17 @@ void main() {
     );
   }
 
-  setUp(() {
+  setUp(() async {
+    // Initialize Firebase for testing
+    await Firebase.initializeApp();
+    
     mockService = MockExerciseLogHistoryService();
+    mockAuth = MockFirebaseAuth();
+    mockUser = MockUser();
+
+    // Setup mock Firebase auth
+    when(mockUser.uid).thenReturn(testUserId);
+    when(mockAuth.currentUser).thenReturn(mockUser);
 
     // Register mock service in GetIt
     if (getIt.isRegistered<ExerciseLogHistoryService>()) {
@@ -62,24 +188,30 @@ void main() {
     }
     getIt.registerSingleton<ExerciseLogHistoryService>(mockService);
 
+    // Register mock auth in GetIt to prevent Firebase initialization error
+    if (getIt.isRegistered<FirebaseAuth>()) {
+      getIt.unregister<FirebaseAuth>();
+    }
+    getIt.registerSingleton<FirebaseAuth>(mockAuth);
+
     // Default stub for getAllExerciseLogs
-    when(mockService.getAllExerciseLogs())
+    when(mockService.getAllExerciseLogs(testUserId))
         .thenAnswer((_) async => sampleExerciseLogs);
 
     // Stubs for date filtering
-    when(mockService.getExerciseLogsByDate(any))
+    when(mockService.getExerciseLogsByDate(testUserId, any))
         .thenAnswer((_) async => [sampleExerciseLogs[0]]);
 
     // Stubs for month filtering
-    when(mockService.getExerciseLogsByMonth(any, any))
+    when(mockService.getExerciseLogsByMonth(testUserId, any, any))
         .thenAnswer((_) async => sampleExerciseLogs.sublist(0, 2));
 
     // Stubs for year filtering
-    when(mockService.getExerciseLogsByYear(any))
+    when(mockService.getExerciseLogsByYear(testUserId, any))
         .thenAnswer((_) async => sampleExerciseLogs);
 
     // Stub for empty results
-    when(mockService.getExerciseLogsByDate(DateTime(2020, 1, 1)))
+    when(mockService.getExerciseLogsByDate(testUserId, DateTime(2020, 1, 1)))
         .thenAnswer((_) async => []);
   });
 
@@ -92,7 +224,7 @@ void main() {
     testWidgets('should load all exercises on initial load',
         (WidgetTester tester) async {
       // Arrange
-      when(mockService.getAllExerciseLogs())
+      when(mockService.getAllExerciseLogs(testUserId))
           .thenAnswer((_) async => sampleExerciseLogs);
 
       // Act
@@ -100,7 +232,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert
-      verify(mockService.getAllExerciseLogs()).called(1);
+      verify(mockService.getAllExerciseLogs(testUserId)).called(1);
       expect(find.text('Push-ups').last, findsOneWidget);
       expect(find.text('Running'), findsOneWidget);
       expect(find.text('Bench Press'), findsOneWidget);
@@ -114,7 +246,7 @@ void main() {
     testWidgets('should show empty state when no exercises found',
         (WidgetTester tester) async {
       // Arrange
-      when(mockService.getAllExerciseLogs()).thenAnswer((_) async => []);
+      when(mockService.getAllExerciseLogs(testUserId)).thenAnswer((_) async => []);
 
       // Act
       await tester.pumpWidget(createWidgetUnderTest());
@@ -128,7 +260,7 @@ void main() {
     testWidgets('should show error state when loading fails',
         (WidgetTester tester) async {
       // Arrange - setup service to throw error
-      when(mockService.getAllExerciseLogs())
+      when(mockService.getAllExerciseLogs(testUserId))
           .thenAnswer((_) async => throw Exception('Network error'));
 
       // Act
@@ -196,20 +328,20 @@ void main() {
       expect(find.text('Bench Press'), findsOneWidget);
 
       // Verify service calls
-      verify(mockService.getAllExerciseLogs()).called(greaterThan(0));
+      verify(mockService.getAllExerciseLogs(testUserId)).called(greaterThan(0));
     });
 
     testWidgets(
         'should show empty state with appropriate messages for different filters',
         (WidgetTester tester) async {
       // Create a test widget with an empty exercise list
-      when(mockService.getAllExerciseLogs()).thenAnswer((_) async => []);
+      when(mockService.getAllExerciseLogs(testUserId)).thenAnswer((_) async => []);
 
       // Specifically mock filter calls to test the empty state messages
-      when(mockService.getExerciseLogsByDate(any)).thenAnswer((_) async => []);
-      when(mockService.getExerciseLogsByMonth(any, any))
+      when(mockService.getExerciseLogsByDate(testUserId, any)).thenAnswer((_) async => []);
+      when(mockService.getExerciseLogsByMonth(testUserId, any, any))
           .thenAnswer((_) async => []);
-      when(mockService.getExerciseLogsByYear(any)).thenAnswer((_) async => []);
+      when(mockService.getExerciseLogsByYear(testUserId, any)).thenAnswer((_) async => []);
 
       // Build the widget
       await tester.pumpWidget(createWidgetUnderTest());
@@ -239,7 +371,7 @@ void main() {
       // So we'll test that service call was made in initState
 
       // Verify
-      verify(mockService.getAllExerciseLogs()).called(1);
+      verify(mockService.getAllExerciseLogs(testUserId)).called(1);
 
       // Additional verification for UI
       expect(find.text('Push-ups'), findsOneWidget);
@@ -261,7 +393,7 @@ void main() {
       // So we'll test that service call was made in initState
 
       // Verify
-      verify(mockService.getAllExerciseLogs()).called(1);
+      verify(mockService.getAllExerciseLogs(testUserId)).called(1);
 
       // Additional verification for UI
       expect(find.text('Push-ups'), findsOneWidget);
@@ -283,7 +415,7 @@ void main() {
       // So we'll test that service call was made in initState
 
       // Verify
-      verify(mockService.getAllExerciseLogs()).called(1);
+      verify(mockService.getAllExerciseLogs(testUserId)).called(1);
 
       // Additional verification for UI
       expect(find.text('Push-ups'), findsOneWidget);
@@ -294,7 +426,7 @@ void main() {
     testWidgets('should display empty state with date filter message',
         (WidgetTester tester) async {
       // Arrange - setup for empty state with date filter
-      when(mockService.getExerciseLogsByDate(any)).thenAnswer((_) async => []);
+      when(mockService.getExerciseLogsByDate(testUserId, any)).thenAnswer((_) async => []);
 
       // Act - build widget with initial filter type
       await tester.pumpWidget(createWidgetUnderTest());
@@ -310,7 +442,7 @@ void main() {
     testWidgets('should display empty state with month filter message',
         (WidgetTester tester) async {
       // Arrange - setup for empty state with month filter
-      when(mockService.getExerciseLogsByMonth(any, any))
+      when(mockService.getExerciseLogsByMonth(testUserId, any, any))
           .thenAnswer((_) async => []);
 
       // Act - build widget with initial filter type
@@ -327,7 +459,7 @@ void main() {
     testWidgets('should display empty state with year filter message',
         (WidgetTester tester) async {
       // Arrange - setup for empty state with year filter
-      when(mockService.getExerciseLogsByYear(any)).thenAnswer((_) async => []);
+      when(mockService.getExerciseLogsByYear(testUserId, any)).thenAnswer((_) async => []);
 
       // Act - build widget with initial filter type
       await tester.pumpWidget(createWidgetUnderTest());
@@ -344,7 +476,7 @@ void main() {
     testWidgets('should handle filter and display empty state for date filter',
         (WidgetTester tester) async {
       // Mock data
-      when(mockService.getExerciseLogsByDate(any)).thenAnswer((_) async => []);
+      when(mockService.getExerciseLogsByDate(testUserId, any)).thenAnswer((_) async => []);
 
       // Create a testable widget
       await tester.pumpWidget(createWidgetUnderTest());
@@ -355,13 +487,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify service call - we can't interact with date picker directly
-      verify(mockService.getAllExerciseLogs()).called(1);
+      verify(mockService.getAllExerciseLogs(testUserId)).called(1);
     });
 
     testWidgets('should handle filter and display empty state for month filter',
         (WidgetTester tester) async {
       // Mock data
-      when(mockService.getExerciseLogsByMonth(any, any))
+      when(mockService.getExerciseLogsByMonth(testUserId, any, any))
           .thenAnswer((_) async => []);
 
       // Create a testable widget
@@ -373,13 +505,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify service call - we can't interact with month picker directly
-      verify(mockService.getAllExerciseLogs()).called(1);
+      verify(mockService.getAllExerciseLogs(testUserId)).called(1);
     });
 
     testWidgets('should handle filter and display empty state for year filter',
         (WidgetTester tester) async {
       // Mock data
-      when(mockService.getExerciseLogsByYear(any)).thenAnswer((_) async => []);
+      when(mockService.getExerciseLogsByYear(testUserId, any)).thenAnswer((_) async => []);
 
       // Create a testable widget
       await tester.pumpWidget(createWidgetUnderTest());
@@ -390,172 +522,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify service call - we can't interact with year picker directly
-      verify(mockService.getAllExerciseLogs()).called(1);
-    });
-
-    testWidgets('should test year filter chip text display',
-        (WidgetTester tester) async {
-      // Create a special testable version that exposes the selected year
-      final testYear = DateTime.now().year;
-
-      // Custom widget builder that gives us a way to configure the year display
-      Widget createYearFilterTestWidget() {
-        return MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: FilterChip(
-                label: Text(testYear.toString()),
-                selected: true,
-                onSelected: (_) {},
-              ),
-            ),
-          ),
-        );
-      }
-
-      // Pump the widget
-      await tester.pumpWidget(createYearFilterTestWidget());
-      await tester.pumpAndSettle();
-
-      // Verify the year text is displayed
-      expect(find.text(testYear.toString()), findsOneWidget);
-    });
-
-    testWidgets('should test filter chip selection interactions',
-        (WidgetTester tester) async {
-      // Arrange - setup the mock to return an empty list
-      when(mockService.getExerciseLogsByYear(any)).thenAnswer((_) async => []);
-
-      // Act - build the widget and show it
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle();
-
-      // Test "All" filter is selected by default
-      final allChipFinder = find.text('All');
-      expect(allChipFinder, findsOneWidget);
-
-      // Now tap "By Year" filter
-      final yearFilterFinder = find.text('By Year');
-      expect(yearFilterFinder, findsOneWidget);
-      await tester.tap(yearFilterFinder);
-      await tester.pumpAndSettle();
-    });
-
-    testWidgets('should test filter chip text display with mock',
-        (WidgetTester tester) async {
-      // Create a custom widget that simulates the filter chip with year value
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: FilterChip(
-              label: Text('2024'), // Simulating the year being displayed
-              selected: true,
-              onSelected: (_) {},
-            ),
-          ),
-        ),
-      ));
-      await tester.pumpAndSettle();
-
-      // Verify the year chip text is displayed (this helps cover line 306)
-      expect(find.text('2024'), findsOneWidget);
-    });
-
-    testWidgets(
-        'should build filter chip with year value when active filter is year',
-        (WidgetTester tester) async {
-      // This test specifically targets line 306 in ExerciseHistoryPage
-      // Create the widget with test parameters to cover line 306
-      await tester.pumpWidget(MaterialApp(
-        home: Builder(
-          builder: (context) {
-            // This is a simplified version of the filter chip that's in ExerciseHistoryPage
-            // with just enough code to cover line 306
-            return Scaffold(
-              body: Row(
-                children: [
-                  FilterChip(
-                    label: Text(DateTime.now().year.toString()),
-                    selected: true,
-                    onSelected: (_) {},
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ));
-
-      // Verify the year chip text is displayed (this covers line 306)
-      expect(find.text(DateTime.now().year.toString()), findsOneWidget);
-    });
-
-    testWidgets(
-        'should simulate and test empty state messages for different filter types',
-        (WidgetTester tester) async {
-      // This test uses a custom widget to test the empty state messages
-      // to cover lines 400, 402, 404, and 406 in exercise_history_page.dart
-      final today = DateTime.now();
-      final testDate = DateTime(today.year, today.month, today.day);
-      final testYear = today.year;
-      final testMonth = today.month;
-
-      // Create custom widgets for each filter type
-      // 1. Date filter empty message
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text(
-                'No exercises found for ${DateFormat('dd MMM yyyy').format(testDate)}'),
-          ),
-        ),
-      ));
-      await tester.pumpAndSettle();
-
-      // Verify the date empty state message (covers line 400)
-      expect(
-          find.text(
-              'No exercises found for ${DateFormat('dd MMM yyyy').format(testDate)}'),
-          findsOneWidget);
-
-      // 2. Month filter empty message
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text(
-                'No exercises found for ${DateFormat('MMMM yyyy').format(DateTime(testYear, testMonth))}'),
-          ),
-        ),
-      ));
-      await tester.pumpAndSettle();
-
-      // Verify the month empty state message (covers line 402)
-      expect(
-          find.text(
-              'No exercises found for ${DateFormat('MMMM yyyy').format(DateTime(testYear, testMonth))}'),
-          findsOneWidget);
-
-      // 3. Year filter empty message
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text('No exercises found for $testYear'),
-          ),
-        ),
-      ));
-      await tester.pumpAndSettle();
-
-      // Verify the year empty state message (covers line 404)
-      expect(find.text('No exercises found for $testYear'), findsOneWidget);
-
-      // 4. All filter empty message (already covered in existing tests)
+      verify(mockService.getAllExerciseLogs(testUserId)).called(1);
     });
 
     testWidgets('should call _loadExercises when returning with delete result',
         (WidgetTester tester) async {
       // Arrange - Spy on service to track calls
       int callCount = 0;
-      when(mockService.getAllExerciseLogs()).thenAnswer((_) {
+      when(mockService.getAllExerciseLogs(testUserId)).thenAnswer((_) {
         callCount++;
         return Future.value(sampleExerciseLogs);
       });
@@ -762,7 +736,7 @@ void main() {
     testWidgets('should handle search focus and filtering',
         (WidgetTester tester) async {
       // Arrange
-      when(mockService.getAllExerciseLogs())
+      when(mockService.getAllExerciseLogs(testUserId))
           .thenAnswer((_) async => sampleExerciseLogs);
 
       // Build widget
@@ -805,7 +779,7 @@ void main() {
     testWidgets('should reset search when changing filters',
         (WidgetTester tester) async {
       // Arrange
-      when(mockService.getAllExerciseLogs())
+      when(mockService.getAllExerciseLogs(testUserId))
           .thenAnswer((_) async => sampleExerciseLogs);
 
       // Act
@@ -886,7 +860,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify service call
-      verify(mockService.getExerciseLogsByMonth(1, DateTime.now().year))
+      verify(mockService.getExerciseLogsByMonth(testUserId, 1, DateTime.now().year))
           .called(1);
     });
   });
@@ -908,7 +882,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify service call
-      verify(mockService.getExerciseLogsByYear(currentYear)).called(1);
+      verify(mockService.getExerciseLogsByYear(testUserId, currentYear)).called(1);
     });
   });
 
@@ -919,7 +893,7 @@ void main() {
       final today = DateTime.now();
       final formattedDate = DateFormat('dd MMM yyyy').format(today);
 
-      when(mockService.getExerciseLogsByDate(any))
+      when(mockService.getExerciseLogsByDate(testUserId, any))
           .thenAnswer((_) async => [sampleExerciseLogs[0]]);
 
       // Build widget
@@ -945,7 +919,7 @@ void main() {
       final now = DateTime.now();
       final formattedMonth = DateFormat('MMMM yyyy').format(now);
 
-      when(mockService.getExerciseLogsByMonth(any, any))
+      when(mockService.getExerciseLogsByMonth(testUserId, any, any))
           .thenAnswer((_) async => sampleExerciseLogs);
 
       // Build widget
@@ -969,7 +943,7 @@ void main() {
       // Arrange
       final currentYear = DateTime.now().year;
 
-      when(mockService.getExerciseLogsByYear(any))
+      when(mockService.getExerciseLogsByYear(testUserId, any))
           .thenAnswer((_) async => sampleExerciseLogs);
 
       // Build widget
