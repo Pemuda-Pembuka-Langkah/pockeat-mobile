@@ -70,6 +70,7 @@ void main() {
       metValue: 8.0,
       timestamp: DateTime(2025, 3, 4),
       originalInput: 'I did push-ups for 15 minutes',
+      userId: 'test-user-123',
     );
 
     // Create a sample weight lifting exercise with a set

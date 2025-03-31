@@ -63,6 +63,7 @@ void main() {
         estimatedCalories: 300,
         originalInput: 'I went for a run',
         timestamp: testTimestamp,
+        userId: 'test-user-123',
       );
 
       // Act
