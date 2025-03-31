@@ -16,6 +16,8 @@ class FoodScanPhotoService {
 
   final FoodScanRepository _foodScanRepository = getIt<FoodScanRepository>();
 
+  final FirebaseAuth firebaseAuth = getIt<FirebaseAuth>();
+
   FoodScanPhotoService();
 
   /// Analyzes a food photo and returns the analysis result
@@ -37,7 +39,7 @@ class FoodScanPhotoService {
   /// Returns a success message if data is saved successfully
   Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult) async {
     // Get current user's ID
-    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final userId = firebaseAuth.currentUser?.uid ?? '';
     
     // Create a new analysis result with userId
     final resultWithUserId = analysisResult.copyWith(userId: userId);

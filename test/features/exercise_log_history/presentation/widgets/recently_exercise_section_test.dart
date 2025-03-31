@@ -65,6 +65,10 @@ void main() {
     }
 
     testWidgets('displays title correctly', (WidgetTester tester) async {
+      final completer = Completer<List<ExerciseLogHistoryItem>>();
+      when(mockRepository.getAllExerciseLogs(testUserId, limit: 5))
+          .thenAnswer((_) => completer.future);
+
       await tester.pumpWidget(buildTestWidget());
       expect(find.text('Recent Exercises'), findsOneWidget);
     });
@@ -85,19 +89,20 @@ void main() {
           .thenAnswer((_) async => mockExercises);
 
       await tester.pumpWidget(buildTestWidget());
-      
+
       // Initial pump to start building
       await tester.pump();
-      
+
       // Allow the future to complete
       await tester.pump(const Duration(milliseconds: 50));
-      
+
       // Check that the exercise titles are displayed in the widget tree
       expect(find.text('Morning Run'), findsOneWidget);
       expect(find.text('Gym Workout'), findsOneWidget);
     });
 
-    testWidgets('displays empty state when no exercises', (WidgetTester tester) async {
+    testWidgets('displays empty state when no exercises',
+        (WidgetTester tester) async {
       when(mockRepository.getAllExerciseLogs(testUserId, limit: 5))
           .thenAnswer((_) async => []);
 
@@ -108,16 +113,26 @@ void main() {
       expect(find.text('No exercise history yet'), findsOneWidget);
     });
 
-    testWidgets('displays error state when fetch fails', (WidgetTester tester) async {
-      final testError = Exception('Network error');
+    testWidgets('displays error state when fetch fails',
+        (WidgetTester tester) async {
+      // Arrange
+      final completer = Completer<List<ExerciseLogHistoryItem>>();
+      
       when(mockRepository.getAllExerciseLogs(testUserId, limit: 5))
-          .thenAnswer((_) async => throw testError);
+          .thenAnswer((_) => completer.future);
 
+      // Act
       await tester.pumpWidget(buildTestWidget());
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump(); // Render frame pertama
 
-      expect(find.text('Error loading exercises: $testError'), findsOneWidget);
+      // Complete dengan error
+      completer.completeError('Network error');
+      
+      // Tunggu frame setelah error
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(find.text('Error loading exercises: Network error'), findsOneWidget);
     });
   });
 }

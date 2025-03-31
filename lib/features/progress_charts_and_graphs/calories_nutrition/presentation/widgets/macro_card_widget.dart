@@ -12,6 +12,7 @@ class MacroCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: const Key('macro_card_widget'),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
