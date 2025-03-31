@@ -7,6 +7,7 @@ import 'package:pockeat/features/notifications/domain/services/notification_serv
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
 
 // Mocking kelas yang dibutuhkan
 class MockFirebaseMessaging extends Mock implements FirebaseMessaging {}
@@ -26,7 +27,6 @@ class MockRemoteNotification extends Mock implements RemoteNotification {}
 class MockAndroidNotification extends Mock implements AndroidNotification {}
 
 class MockNotificationResponse extends Mock implements NotificationResponse {}
-
 
 void main() {
   late NotificationService notificationService;
@@ -189,9 +189,6 @@ void main() {
           .cancel(notificationId.hashCode)).called(1);
     });
 
-
-
-
     test('mocks are properly registered', () {
       expect(getIt<FirebaseMessaging>(), equals(mockFirebaseMessaging));
       expect(getIt<FlutterLocalNotificationsPlugin>(),
@@ -209,6 +206,171 @@ void main() {
 
       verify(() => mockAndroidFlutterLocalNotificationsPlugin
           .createNotificationChannel(any())).called(4);
+    });
+  });
+
+  group("test local notification", () {
+    test('scheduleLocalNotification should schedule notification correctly',
+        () async {
+      // Arrange
+      final now = DateTime.now();
+      final scheduledTime = now.add(const Duration(minutes: 1));
+
+      final notification = NotificationModel(
+        id: 'test-notification',
+        title: 'Test Title',
+        body: 'Test Body',
+        payload: 'test_payload',
+        scheduledTime: scheduledTime,
+      );
+
+      final channel = const AndroidNotificationChannel(
+        'test_channel',
+        'Test Channel',
+        description: 'Test Channel Description',
+        importance: Importance.high,
+      );
+
+      // Act
+      await notificationService.scheduleLocalNotification(
+          notification, channel);
+
+      // Assert
+      verify(() => mockFlutterLocalNotificationsPlugin.zonedSchedule(
+            any(), // id.hashCode bisa berbeda
+            'Test Title',
+            'Test Body',
+            any(), // waktu akan berbeda
+            any(), // NotificationDetails bisa berbeda
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            matchDateTimeComponents: DateTimeComponents.time,
+            payload: 'test_payload',
+          )).called(1);
+    });
+
+    test('scheduleLocalNotification should use correct timezone', () async {
+      // Arrange
+      final now = DateTime.now();
+      final scheduledTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        10, // set specific hour
+        30, // set specific minute
+      );
+
+      final notification = NotificationModel(
+        id: 'test-notification',
+        title: 'Test Title',
+        body: 'Test Body',
+        payload: 'test_payload',
+        scheduledTime: scheduledTime,
+      );
+
+      final channel = const AndroidNotificationChannel(
+        'test_channel',
+        'Test Channel',
+        description: 'Test Channel Description',
+        importance: Importance.high,
+      );
+
+      // Act
+      await notificationService.scheduleLocalNotification(
+          notification, channel);
+
+      // Assert
+      verify(() => mockFlutterLocalNotificationsPlugin.zonedSchedule(
+            any(),
+            any(),
+            any(),
+            any(
+                that: predicate((tz.TZDateTime time) =>
+                    time.isUtc ==
+                    tz.TZDateTime.from(time, tz.getLocation('Asia/Jakarta'))
+                        .isUtc)),
+            any(),
+            androidScheduleMode: any(named: 'androidScheduleMode'),
+            uiLocalNotificationDateInterpretation:
+                any(named: 'uiLocalNotificationDateInterpretation'),
+            matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+            payload: any(named: 'payload'),
+          )).called(1);
+    });
+  });
+
+  group('test firebase notification', () {
+    test(
+        'showNotificationFromFirebase should show notification when data valid',
+        () async {
+      // Arrange
+      final mockRemoteNotification = MockRemoteNotification();
+      final mockAndroidNotification = MockAndroidNotification();
+      final mockRemoteMessage = MockRemoteMessage();
+
+      // Setup mock values
+      when(() => mockRemoteMessage.notification)
+          .thenAnswer((_) => mockRemoteNotification);
+      when(() => mockRemoteNotification.android)
+          .thenReturn(mockAndroidNotification);
+      when(() => mockRemoteNotification.title).thenReturn('Test Title');
+      when(() => mockRemoteNotification.body).thenReturn('Test Body');
+      when(() => mockRemoteMessage.data)
+          .thenReturn({'payload': 'test_payload'});
+
+      // Act
+      await notificationService.showNotificationFromFirebase(mockRemoteMessage);
+
+      // Assert
+      verify(() => mockFlutterLocalNotificationsPlugin.show(
+            0,
+            'Test Title',
+            'Test Body',
+            any(),
+            payload: 'test_payload',
+          )).called(1);
+    });
+
+    test('showNotificationFromFirebase should handle null notification data',
+        () async {
+      // Arrange
+      final mockMessage = MockRemoteMessage();
+      when(() => mockMessage.notification).thenReturn(null);
+
+      // Act
+      await notificationService.showNotificationFromFirebase(mockMessage);
+
+      // Assert
+      verifyNever(() => mockFlutterLocalNotificationsPlugin.show(
+            any(),
+            any(),
+            any(),
+            any(),
+            payload: any(named: 'payload'),
+          ));
+    });
+
+    test('showNotificationFromFirebase should handle null android notification',
+        () async {
+      // Arrange
+      final mockRemoteNotification = MockRemoteNotification();
+      final mockMessage = MockRemoteMessage();
+
+      when(() => mockMessage.notification).thenReturn(mockRemoteNotification);
+      when(() => mockMessage.notification?.android).thenReturn(null);
+
+      // Act
+      await notificationService.showNotificationFromFirebase(mockMessage);
+
+      // Assert
+      verifyNever(() => mockFlutterLocalNotificationsPlugin.show(
+            any(),
+            any(),
+            any(),
+            any(),
+            payload: any(named: 'payload'),
+          ));
     });
   });
 }
