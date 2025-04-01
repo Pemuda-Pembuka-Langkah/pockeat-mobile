@@ -4,136 +4,28 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
-import 'package:flutter/services.dart';
+import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_history_page.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:intl/intl.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 
 // Generate mock classes
-@GenerateMocks([ExerciseLogHistoryService, FirebaseAuth, User])
+@GenerateMocks([ExerciseLogHistoryService, FirebaseAuth, User, CardioRepository, WeightLiftingRepository, SmartExerciseLogRepository])
 import 'exercise_history_page_test.mocks.dart';
 
-// Setup Firebase mocks
-class MockFirebaseApp implements FirebaseApp {
-  @override
-  String get name => 'test';
-  
-  @override
-  FirebaseOptions get options => FirebaseOptions(
-    apiKey: '123',
-    appId: '123',
-    messagingSenderId: '123',
-    projectId: '123',
-  );
-  
-  @override
-  Future<void> delete() async {
-    return;
-  }
-  
-  @override
-  bool get isAutomaticDataCollectionEnabled => false;
-  
-  @override
-  Future<void> setAutomaticDataCollectionEnabled(bool enabled) async {
-    return;
-  }
-  
-  @override
-  Future<void> setAutomaticResourceManagementEnabled(bool enabled) async {
-    return;
-  }
-  
-  @override
-  bool operator ==(Object other) => false;
-  
-  @override
-  int get hashCode => 0;
-}
-
-// Mock for FirebasePlatform
-class MockFirebaseCoreImplementation extends Fake implements FirebasePlatform {
-  @override
-  FirebaseAppPlatform app([String name = defaultFirebaseAppName]) {
-    return MockFirebaseAppPlatform();
-  }
-
-  @override
-  Future<FirebaseAppPlatform> initializeApp({
-    String? name,
-    FirebaseOptions? options,
-  }) async {
-    return MockFirebaseAppPlatform();
-  }
-}
-
-class MockFirebaseAppPlatform extends FirebaseAppPlatform {
-  MockFirebaseAppPlatform() : super(
-    defaultFirebaseAppName,
-    FirebaseOptions(
-      apiKey: '123',
-      appId: '123',
-      messagingSenderId: '123',
-      projectId: '123',
-    ),
-  );
-
-  @override
-  FirebaseOptions get options => FirebaseOptions(
-    apiKey: '123',
-    appId: '123',
-    messagingSenderId: '123',
-    projectId: '123',
-  );
-}
-
-// Setup Firebase mocks
-void setupFirebaseMocks() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  
-  // Setup method channel mocks for Firebase
-  const MethodChannel channel = MethodChannel('plugins.flutter.io/firebase_core');
-  channel.setMockMethodCallHandler((MethodCall call) async {
-    if (call.method == 'Firebase#initializeCore') {
-      return [
-        {
-          'name': defaultFirebaseAppName,
-          'options': {
-            'apiKey': '123',
-            'appId': '123',
-            'messagingSenderId': '123',
-            'projectId': '123',
-          },
-          'pluginConstants': {},
-        }
-      ];
-    }
-    if (call.method == 'Firebase#initializeApp') {
-      return {
-        'name': call.arguments['appName'],
-        'options': call.arguments['options'],
-        'pluginConstants': {},
-      };
-    }
-    return null;
-  });
-
-  // Replace the firebase platform implementation
-  FirebasePlatform.instance = MockFirebaseCoreImplementation();
-}
-
 void main() {
-  // Call this before any tests to set up the Firebase mock
-  setupFirebaseMocks();
   
   late MockExerciseLogHistoryService mockService;
   late MockFirebaseAuth mockAuth;
   late MockUser mockUser;
   final getIt = GetIt.instance;
   final testUserId = 'test-user-id';
+  late MockCardioRepository mockCardioRepository;
+  late MockWeightLiftingRepository mockWeightLiftingRepository;
+  late MockSmartExerciseLogRepository mockSmartExerciseLogRepository;
 
   // Sample exercise log history items for testing
   final List<ExerciseLogHistoryItem> sampleExerciseLogs = [
@@ -171,9 +63,11 @@ void main() {
   }
 
   setUp(() async {
-    // Initialize Firebase for testing
-    await Firebase.initializeApp();
-    
+    // create mock for cardio, weightlifting, and smart exercise repository
+    mockCardioRepository = MockCardioRepository();
+    mockWeightLiftingRepository = MockWeightLiftingRepository();
+    mockSmartExerciseLogRepository = MockSmartExerciseLogRepository();
+
     mockService = MockExerciseLogHistoryService();
     mockAuth = MockFirebaseAuth();
     mockUser = MockUser();
@@ -182,17 +76,33 @@ void main() {
     when(mockUser.uid).thenReturn(testUserId);
     when(mockAuth.currentUser).thenReturn(mockUser);
 
-    // Register mock service in GetIt
-    if (getIt.isRegistered<ExerciseLogHistoryService>()) {
-      getIt.unregister<ExerciseLogHistoryService>();
-    }
-    getIt.registerSingleton<ExerciseLogHistoryService>(mockService);
-
     // Register mock auth in GetIt to prevent Firebase initialization error
     if (getIt.isRegistered<FirebaseAuth>()) {
       getIt.unregister<FirebaseAuth>();
     }
     getIt.registerSingleton<FirebaseAuth>(mockAuth);
+
+    // Register mock repository in GetIt
+    if (getIt.isRegistered<CardioRepository>()) {
+      getIt.unregister<CardioRepository>();
+    }
+    getIt.registerSingleton<CardioRepository>(mockCardioRepository);
+
+    if (getIt.isRegistered<WeightLiftingRepository>()) {
+      getIt.unregister<WeightLiftingRepository>();
+    }
+    getIt.registerSingleton<WeightLiftingRepository>(mockWeightLiftingRepository);
+
+    if (getIt.isRegistered<SmartExerciseLogRepository>()) {
+      getIt.unregister<SmartExerciseLogRepository>();
+    }
+    getIt.registerSingleton<SmartExerciseLogRepository>(mockSmartExerciseLogRepository);
+
+    // Register mock service in GetIt
+    if (getIt.isRegistered<ExerciseLogHistoryService>()) {
+      getIt.unregister<ExerciseLogHistoryService>();
+    }
+    getIt.registerSingleton<ExerciseLogHistoryService>(mockService);
 
     // Default stub for getAllExerciseLogs
     when(mockService.getAllExerciseLogs(testUserId))
@@ -238,8 +148,6 @@ void main() {
       expect(find.text('Bench Press'), findsOneWidget);
     });
 
-    // Filter tests yang perlu dimodifikasi lebih lanjut
-    // Untuk sementara, gunakan test lain yang sudah berfungsi dengan baik
   });
 
   group('ExerciseHistoryPage Widget Tests', () {

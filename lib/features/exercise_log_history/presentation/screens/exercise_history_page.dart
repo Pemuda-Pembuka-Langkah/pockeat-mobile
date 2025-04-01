@@ -23,7 +23,7 @@ class ExerciseHistoryPage extends StatefulWidget {
 class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
   late ExerciseLogHistoryService _service;
   late Future<List<ExerciseLogHistoryItem>> _exercisesFuture;
-  // final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth firebaseAuth = GetIt.instance<FirebaseAuth>();
 
   // Filter state
   FilterType _activeFilterType = FilterType.all;
@@ -62,7 +62,7 @@ class _ExerciseHistoryPageState extends State<ExerciseHistoryPage> {
 
   void _loadExercises() {
     // Get the current user's ID
-    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final userId = firebaseAuth.currentUser?.uid ?? '';
 
     setState(() {
       switch (_activeFilterType) {
