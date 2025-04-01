@@ -29,7 +29,7 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/food_log_history/presentation/screens/food_detail_page.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
-import 'package:pockeat/features/food_text_input/presentation/pages/food_text_input_page.dart';
+import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_initializer.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
