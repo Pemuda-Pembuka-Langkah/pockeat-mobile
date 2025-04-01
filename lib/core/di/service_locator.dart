@@ -20,6 +20,7 @@ import 'package:pockeat/features/authentication/domain/repositories/user_reposit
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -92,6 +93,10 @@ void setupDependencies() {
 
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
+  );
+
+  getIt.registerSingleton<FirebaseAuth>(
+    FirebaseAuth.instance,
   );
 }
  // coverage:ignore-end

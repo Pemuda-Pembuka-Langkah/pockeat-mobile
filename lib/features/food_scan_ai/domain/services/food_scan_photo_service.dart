@@ -4,6 +4,8 @@ import 'package:pockeat/features/ai_api_scan/services/food/food_image_analysis_s
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class FoodScanPhotoService {
   final FoodImageAnalysisService _foodImageAnalysisService =
@@ -13,6 +15,8 @@ class FoodScanPhotoService {
       getIt<NutritionLabelAnalysisService>();
 
   final FoodScanRepository _foodScanRepository = getIt<FoodScanRepository>();
+
+  final FirebaseAuth firebaseAuth = getIt<FirebaseAuth>();
 
   FoodScanPhotoService();
 
@@ -34,7 +38,13 @@ class FoodScanPhotoService {
   /// [analysisResult] is the food analysis result to be saved
   /// Returns a success message if data is saved successfully
   Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult) async {
-    await _foodScanRepository.save(analysisResult, analysisResult.id);
+    // Get current user's ID
+    final userId = firebaseAuth.currentUser?.uid ?? '';
+    
+    // Create a new analysis result with userId
+    final resultWithUserId = analysisResult.copyWith(userId: userId);
+    
+    await _foodScanRepository.save(resultWithUserId, resultWithUserId.id);
     return 'Successfully saved food analysis';
   }
 

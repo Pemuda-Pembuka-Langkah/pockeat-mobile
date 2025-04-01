@@ -7,6 +7,7 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/swimm
 void main() {
   final testActivity = SwimmingActivity(
     id: 'swim-1',
+    userId: "test-user-id",
     date: DateTime(2025, 3, 3),
     startTime: DateTime(2025, 3, 3, 16, 0),
     endTime: DateTime(2025, 3, 3, 16, 45),

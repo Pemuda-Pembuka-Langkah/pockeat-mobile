@@ -60,7 +60,7 @@ void main() {
 
       // Verify the end time has a day added to it
       expect(currentState.selectedEndTime.day,
-          currentState.selectedStartTime.day + 1);
+          currentState.selectedStartTime.add(const Duration(days: 1)).day);
       expect(currentState.selectedEndTime.hour, 1);
       expect(currentState.selectedEndTime.minute, 0);
     });
