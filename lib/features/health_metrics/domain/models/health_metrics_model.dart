@@ -30,14 +30,16 @@ class HealthMetricsModel {
   }
 
   factory HealthMetricsModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  final rawData = doc.data();
+  if (rawData == null) throw Exception("Document data is null");
 
-    return HealthMetricsModel(
-      userId: doc.id, // Firestore doc ID should be the userId
-      height: (data['height'] as num).toDouble(),
-      weight: (data['weight'] as num).toDouble(),
-      age: data['age'] as int,
-      fitnessGoal: data['fitnessGoal'] as String,
-    );
-  }
+  final data = rawData as Map<String, dynamic>;
+  return HealthMetricsModel(
+    userId: doc.id,
+    height: (data['height'] as num).toDouble(),
+    weight: (data['weight'] as num).toDouble(),
+    age: data['age'] as int,
+    fitnessGoal: data['fitnessGoal'] as String,
+  );
+}
 }
