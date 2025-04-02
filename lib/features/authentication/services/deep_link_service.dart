@@ -1,27 +1,24 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
 
-/// Service untuk menangani semua jenis deep link ke aplikasi
-/// Ini adalah facade untuk service-service spesifik seperti:
-/// - EmailVerificationDeepLinkService
-/// - ChangePasswordDeepLinkService
+/// Interface untuk menangani deep link
 abstract class DeepLinkService {
-  /// Initialize the deep link service
-  ///
-  /// NavigatorKey dibutuhkan untuk melakukan navigasi dari service
-  Future<void> initialize({required GlobalKey<NavigatorState> navigatorKey});
+  /// Inisialisasi service
+  Future<void> initialize();
 
-  /// Mendengarkan deep link saat aplikasi dibuka melalui link (cold start)
+  /// Stream untuk mendapatkan initial link
   Stream<Uri?> getInitialLink();
 
-  /// Mendengarkan deep link saat aplikasi sudah berjalan (hot start)
+  /// Stream untuk mendapatkan link yang diterima
   Stream<Uri?> onLinkReceived();
 
-  /// Menangani semua jenis deep link
-  ///
-  /// Method ini akan mendelegasikan ke service yang sesuai berdasarkan jenis linknya
+  /// Stream untuk mendapatkan hasil dari deep link
+  Stream<DeepLinkResult> get onDeepLinkResult;
+
+  /// Handle deep link yang diterima
   Future<bool> handleDeepLink(Uri link);
 
-  /// Menghentikan semua listener
+  /// Dispose resources
   void dispose();
 }

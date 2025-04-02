@@ -13,6 +13,49 @@ import 'change_password_page_test.mocks.dart';
 // Create a custom navigator observer that works with mockito
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
+// Kelas helper untuk mengontrol navigasi
+class TestableChangePasswordPage extends StatelessWidget {
+  final String? oobCode;
+  final MockChangePasswordService service;
+  final void Function(BuildContext)? onSuccess;
+
+  const TestableChangePasswordPage({
+    super.key,
+    this.oobCode,
+    required this.service,
+    this.onSuccess,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Builder(
+        builder: (context) {
+          return Scaffold(
+            body: Column(
+              children: [
+                // Widget asli yang akan di-test dengan skipDelay=true
+                Expanded(
+                  child: ChangePasswordPage(
+                    oobCode: oobCode,
+                    skipDelay: true,
+                  ),
+                ),
+                // Button tambahan untuk menangkap navigasi
+                if (onSuccess != null)
+                  ElevatedButton(
+                    onPressed: () => onSuccess!(context),
+                    child: const Text('Simulate Success Navigation'),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 void main() {
   late MockChangePasswordService mockChangePasswordService;
   late MockUser mockUser;
@@ -46,7 +89,7 @@ void main() {
     }
   });
 
-  group('ChangePasswordPage Tests', () {
+  group('ChangePasswordPage Tests (Normal Mode)', () {
     testWidgets('Halaman menampilkan semua elemen UI dengan benar',
         (WidgetTester tester) async {
       // Setup
@@ -60,7 +103,9 @@ void main() {
       expect(find.text('Change Your Password'), findsOneWidget);
       expect(find.text('Enter your new password below'), findsOneWidget);
       expect(find.text('CHANGE PASSWORD'), findsOneWidget);
-      expect(find.text('Back to Home'), findsOneWidget);
+
+      // Tombol "Back to Home" sudah tidak ada di UI terbaru
+      // expect(find.text('Back to Home'), findsOneWidget);
 
       // Verifikasi icon dengan matcher yang lebih spesifik
       expect(find.byType(Icon), findsWidgets);
@@ -225,6 +270,186 @@ void main() {
         newPassword: anyNamed('newPassword'),
         newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
       )).called(1);
+    });
+  });
+
+  group('ChangePasswordPage Tests (Reset Password Mode)', () {
+    testWidgets('Halaman menampilkan UI mode reset password dengan benar',
+        (WidgetTester tester) async {
+      // Setup
+      setScreenSize(tester);
+
+      // Mock service
+      when(mockChangePasswordService.confirmPasswordReset(
+        code: anyNamed('code'),
+        newPassword: anyNamed('newPassword'),
+      )).thenAnswer((_) => Future.value());
+
+      // Build halaman dengan widget testable
+      await tester.pumpWidget(TestableChangePasswordPage(
+        oobCode: 'valid-oob-code',
+        service: mockChangePasswordService,
+      ));
+      await tester.pumpAndSettle();
+
+      // Verifikasi elemen UI untuk mode reset
+      expect(find.text('Reset Your Password'), findsOneWidget);
+      expect(find.text('Enter your new password to complete the reset process'),
+          findsOneWidget);
+      expect(find.text('RESET PASSWORD'), findsOneWidget);
+
+      // Tombol "Back to Home" sudah tidak ada di UI terbaru
+      // expect(find.text('Back to Home'), findsOneWidget);
+
+      // Verifikasi form fields yang sama
+      expect(
+          find.widgetWithText(TextFormField, 'New Password'), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Confirm New Password'),
+          findsOneWidget);
+    });
+
+    testWidgets('Reset password menggunakan confirmPasswordReset service',
+        (WidgetTester tester) async {
+      // Setup
+      setScreenSize(tester);
+      bool navigationCalled = false;
+
+      // Mock service untuk reset password
+      when(mockChangePasswordService.confirmPasswordReset(
+        code: 'valid-oob-code',
+        newPassword: 'NewPassword123',
+      )).thenAnswer((_) => Future.value());
+
+      // Build halaman dengan widget testable
+      await tester.pumpWidget(TestableChangePasswordPage(
+        oobCode: 'valid-oob-code',
+        service: mockChangePasswordService,
+        onSuccess: (_) {
+          navigationCalled = true;
+        },
+      ));
+      await tester.pumpAndSettle();
+
+      // Isi form dengan password valid
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'New Password'), 'NewPassword123');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Confirm New Password'),
+          'NewPassword123');
+
+      // Tap tombol reset password
+      await tester.tap(find.text('RESET PASSWORD'));
+      await tester.pump();
+
+      // Simulasikan navigation success dengan menekan tombol bantuan
+      await tester.tap(find.text('Simulate Success Navigation'));
+      await tester.pumpAndSettle();
+
+      // Verifikasi service confirmPasswordReset dipanggil
+      verify(mockChangePasswordService.confirmPasswordReset(
+        code: 'valid-oob-code',
+        newPassword: 'NewPassword123',
+      )).called(1);
+
+      // Verifikasi service changePassword tidak dipanggil
+      verifyNever(mockChangePasswordService.changePassword(
+        newPassword: anyNamed('newPassword'),
+        newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
+      ));
+
+      // Verifikasi navigation handler dipanggil
+      expect(navigationCalled, true);
+    });
+
+    testWidgets('Menampilkan pesan sukses setelah reset password berhasil',
+        (WidgetTester tester) async {
+      // Setup
+      setScreenSize(tester);
+      bool navigationCalled = false;
+
+      // Mock service untuk reset password
+      when(mockChangePasswordService.confirmPasswordReset(
+        code: 'valid-oob-code',
+        newPassword: 'NewPassword123',
+      )).thenAnswer((_) => Future.value());
+
+      // Build halaman dengan widget testable
+      await tester.pumpWidget(TestableChangePasswordPage(
+        oobCode: 'valid-oob-code',
+        service: mockChangePasswordService,
+        onSuccess: (_) {
+          navigationCalled = true;
+        },
+      ));
+      await tester.pumpAndSettle();
+
+      // Isi form dengan password valid
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'New Password'), 'NewPassword123');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Confirm New Password'),
+          'NewPassword123');
+
+      // Tap tombol reset password
+      await tester.tap(find.text('RESET PASSWORD'));
+      await tester.pump();
+
+      // Simulasikan navigation success dengan menekan tombol bantuan
+      await tester.tap(find.text('Simulate Success Navigation'));
+      await tester.pumpAndSettle();
+
+      // Verifikasi pesan sukses muncul sebelum navigasi
+      expect(find.text('Password reset successfully! Redirecting to login...'),
+          findsOneWidget);
+
+      // Verifikasi navigation handler dipanggil
+      expect(navigationCalled, true);
+    });
+
+    testWidgets('Menampilkan error message saat reset password gagal',
+        (WidgetTester tester) async {
+      // Setup
+      setScreenSize(tester);
+      const errorMessage =
+          'Kode reset password sudah kadaluarsa. Silakan minta kode baru.';
+
+      // Buat instance dari mock yang sudah di-generate
+      final mockAuthException = MockFirebaseAuthException();
+      when(mockAuthException.message).thenReturn(errorMessage);
+
+      // Mock service untuk melempar error
+      when(mockChangePasswordService.confirmPasswordReset(
+        code: 'expired-code',
+        newPassword: 'NewPassword123',
+      )).thenThrow(mockAuthException);
+
+      // Build halaman dengan widget testable
+      await tester.pumpWidget(TestableChangePasswordPage(
+        oobCode: 'expired-code',
+        service: mockChangePasswordService,
+      ));
+      await tester.pumpAndSettle();
+
+      // Isi form dengan password valid
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'New Password'), 'NewPassword123');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Confirm New Password'),
+          'NewPassword123');
+
+      // Tap tombol reset password
+      await tester.tap(find.text('RESET PASSWORD'));
+      await tester.pump();
+
+      // Verifikasi service dipanggil
+      verify(mockChangePasswordService.confirmPasswordReset(
+        code: 'expired-code',
+        newPassword: 'NewPassword123',
+      )).called(1);
+
+      // Verifikasi pesan error muncul
+      await tester.pump();
+      expect(find.text(errorMessage), findsOneWidget);
     });
   });
 }

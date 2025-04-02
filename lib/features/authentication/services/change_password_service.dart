@@ -16,5 +16,19 @@ abstract class ChangePasswordService {
     required String newPassword,
     required String newPasswordConfirmation,
   });
+
+  /// Mengirim email reset password ke alamat [email]
+  ///
+  /// Throws [FirebaseAuthException] jika terjadi kesalahan pada proses pengiriman email
   Future<void> sendPasswordResetEmail({required String email});
+
+  /// Konfirmasi reset password menggunakan oobCode dari email
+  ///
+  /// Memerlukan [code] dari email dan [newPassword] sebagai password baru
+  ///
+  /// Throws [FirebaseAuthException] jika terjadi kesalahan pada proses konfirmasi
+  Future<void> confirmPasswordReset({
+    required String code,
+    required String newPassword,
+  });
 }

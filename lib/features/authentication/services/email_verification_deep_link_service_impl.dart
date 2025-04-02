@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 // Hapus import Firebase Dynamic Links
@@ -29,7 +27,7 @@ class EmailVerificationDeepLinkServiceImpl
     implements EmailVerificationDeepLinkService {
   final FirebaseAuth _auth;
   final AppLinks _appLinks = AppLinks();
-  late final GlobalKey<NavigatorState> _navigatorKey;
+  late final BuildContext _context;
   final UserRepository _userRepository;
 
   StreamSubscription? _appLinksSub;
@@ -38,10 +36,7 @@ class EmailVerificationDeepLinkServiceImpl
 
   // Properti untuk testing
   @visibleForTesting
-  GlobalKey<NavigatorState>? navigatorKeyForTesting;
-
-  @visibleForTesting
-  NavigatorState? currentStateForTesting;
+  BuildContext? contextForTesting;
 
   EmailVerificationDeepLinkServiceImpl({
     FirebaseAuth? auth,
@@ -57,21 +52,15 @@ class EmailVerificationDeepLinkServiceImpl
   Stream<Uri> getUriLinkStream() => _appLinks.uriLinkStream;
 
   @visibleForTesting
-  NavigatorState? get currentState {
-    // Untuk testing
-    if (currentStateForTesting != null) {
-      return currentStateForTesting;
+  BuildContext? get context {
+    if (contextForTesting != null) {
+      return contextForTesting;
     }
-    // Untuk penggunaan normal
-    return _navigatorKey.currentState;
+    return _context;
   }
 
   @override
-  Future<void> initialize(
-      {required GlobalKey<NavigatorState> navigatorKey}) async {
-    _navigatorKey = navigatorKeyForTesting ?? navigatorKey;
-
-    // 1. Handle initial link (app opened from a link)
+  Future<void> initialize() async {
     try {
       final initialLink = await getInitialAppLink();
       if (initialLink != null) {
@@ -84,7 +73,6 @@ class EmailVerificationDeepLinkServiceImpl
       );
     }
 
-    // 2. Handle links while app is running
     try {
       _appLinksSub = getUriLinkStream().listen(
         (Uri uri) {
@@ -105,45 +93,13 @@ class EmailVerificationDeepLinkServiceImpl
     }
   }
 
-  void _handleIncomingLink(Uri link) {
+  void _handleIncomingLink(Uri link) async {
     try {
-      // Handle email verification links
       if (isEmailVerificationLink(link)) {
-        handleEmailVerificationLink(link).then((bool success) {
-          if (success) {
-            final email = _auth.currentUser?.email ?? '';
-            currentState?.pushReplacementNamed(
-              '/account-activated',
-              arguments: {'email': email},
-            );
-
-            // Show success message
-            ScaffoldMessenger.of(currentState!.context).showSnackBar(
-              SnackBar(
-                content: Text('Email successfully verified!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-          } else {
-            // Navigasi ke halaman failed verification
-            currentState?.pushReplacementNamed(
-              '/email-verification-failed',
-              arguments: {
-                'error': 'Email verification failed. Please try again.'
-              },
-            );
-          }
-        }).catchError((error) {
-          // Navigasi ke halaman failed verification dengan error message
-          currentState?.pushReplacementNamed(
-            '/email-verification-failed',
-            arguments: {'error': 'Error: $error'},
-          );
-        });
+        _deepLinkStreamController.add(link);
+      } else {
+        _deepLinkStreamController.add(link);
       }
-
-      // Broadcast link to stream for other listeners
-      _deepLinkStreamController.add(link);
     } catch (e) {
       throw EmailVerificationDeepLinkException('Error handling incoming link',
           originalError: e);
@@ -175,40 +131,35 @@ class EmailVerificationDeepLinkServiceImpl
         return false;
       }
 
-      // Extract oobCode or other params from link
       final oobCode = link.queryParameters['oobCode'];
       if (oobCode == null) {
-        throw EmailVerificationDeepLinkException(
-            'Missing oobCode in verification link');
+        return false;
       }
 
-      // Check if it's a valid action code
       try {
-        await _auth.checkActionCode(oobCode);
-
-        // Apply the action code (verify email)
+        final actionCodeInfo = await _auth.checkActionCode(oobCode);
         await _auth.applyActionCode(oobCode);
 
-        // Reload the user to update emailVerified status
-        await _auth.currentUser?.reload();
+        final currentUser = _auth.currentUser;
+        if (currentUser != null) {
+          await currentUser.reload();
+        }
 
         final isVerified = _auth.currentUser?.emailVerified ?? false;
 
-        // Update user data in Firestore if email was verified successfully
         if (isVerified && _auth.currentUser != null) {
           try {
-            // Update emailVerified status in Firestore
             await _userRepository.updateEmailVerificationStatus(
                 _auth.currentUser!.uid, true);
           } catch (e) {
-            // Continue even if Firestore update fails, because Firebase Auth verification was successful
+            // Continue even if Firestore update fails
           }
         }
 
         return isVerified;
       } on FirebaseAuthException catch (e) {
         throw EmailVerificationDeepLinkException(
-          'Firebase auth error when verifying email',
+          'Firebase auth error when verifying email: ${e.message}',
           code: e.code,
           originalError: e,
         );
@@ -218,9 +169,7 @@ class EmailVerificationDeepLinkServiceImpl
       }
     } catch (e) {
       if (e is EmailVerificationDeepLinkException) {
-        // Untuk backward compatibility dengan code yang ada,
-        // kita tidak melempar exception tapi mengembalikan false
-        return false;
+        rethrow;
       }
       throw EmailVerificationDeepLinkException(
         'Error handling email verification link',
@@ -231,12 +180,11 @@ class EmailVerificationDeepLinkServiceImpl
 
   @override
   bool isEmailVerificationLink(Uri link) {
-    // Hanya check untuk custom scheme pattern (pockeat://)
     try {
       final params = link.queryParameters;
-      return link.scheme == 'pockeat' &&
-          (params.containsKey('mode') && params['mode'] == 'verifyEmail') &&
-          params.containsKey('oobCode');
+      final mode = params['mode'];
+      final oobCode = params['oobCode'];
+      return (mode == 'verifyEmail' && oobCode != null);
     } catch (e) {
       throw EmailVerificationDeepLinkException(
         'Error validating email verification link',

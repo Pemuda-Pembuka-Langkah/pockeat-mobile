@@ -2,20 +2,15 @@ import 'package:flutter/material.dart';
 
 class ChangePasswordErrorPage extends StatelessWidget {
   final String error;
-
+  final Color primaryPink = const Color(0xFFFF6B6B);
   const ChangePasswordErrorPage({
-    Key? key,
+    super.key,
     required this.error,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Password Reset Failed'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -23,9 +18,9 @@ class ChangePasswordErrorPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.error_outline,
-                color: Colors.red,
+                color: primaryPink,
                 size: 80,
               ),
               const SizedBox(height: 24),
@@ -52,22 +47,11 @@ class ChangePasswordErrorPage extends StatelessWidget {
                   Navigator.of(context).pushReplacementNamed('/login');
                 },
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryPink,
                   minimumSize: const Size(double.infinity, 50),
                 ),
                 child: const Text(
                   'Back to Login',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  // Navigasi ke halaman bantuan atau dukungan
-                  // Untuk saat ini, kita hanya akan kembali ke halaman utama
-                  Navigator.of(context).pushReplacementNamed('/');
-                },
-                child: const Text(
-                  'Get Help',
                   style: TextStyle(fontSize: 16),
                 ),
               ),

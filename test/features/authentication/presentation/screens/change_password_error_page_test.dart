@@ -19,11 +19,11 @@ void main() {
 
     // Assert - Periksa semua elemen yang seharusnya muncul
     expect(find.text('Password Reset Failed'),
-        findsNWidgets(2)); // Judul di AppBar dan body
+        findsOneWidget); // Judul hanya di body, tidak di AppBar
     expect(find.text(customErrorMessage), findsOneWidget);
     expect(find.byIcon(Icons.error_outline), findsOneWidget);
     expect(find.text('Back to Login'), findsOneWidget);
-    expect(find.text('Get Help'), findsOneWidget);
+    expect(find.text('Get Help'), findsNothing); // Button ini tidak ada di UI
   });
 
   testWidgets('Back to Login button navigates to login page',
@@ -48,30 +48,6 @@ void main() {
 
     // Assert - Verifikasi navigasi ke login page
     expect(find.text('Login Page'), findsOneWidget);
-  });
-
-  testWidgets('Get Help button navigates to home page',
-      (WidgetTester tester) async {
-    // Arrange - Setup routes untuk navigation testing
-    final routes = <String, WidgetBuilder>{
-      '/': (context) => const Scaffold(body: Text('Home Page')),
-      '/error': (context) => const ChangePasswordErrorPage(error: 'Test Error'),
-    };
-
-    // Act - build widget
-    await tester.pumpWidget(
-      MaterialApp(
-        initialRoute: '/error',
-        routes: routes,
-      ),
-    );
-
-    // Tap the Get Help button
-    await tester.tap(find.text('Get Help'));
-    await tester.pumpAndSettle(); // Tunggu navigasi selesai
-
-    // Assert - Verifikasi navigasi ke home page
-    expect(find.text('Home Page'), findsOneWidget);
   });
 
   testWidgets(

@@ -31,6 +31,59 @@ class ChangePasswordServiceImpl implements ChangePasswordService {
   }
 
   @override
+  Future<void> confirmPasswordReset({
+    required String code,
+    required String newPassword,
+  }) async {
+    try {
+      await _auth.confirmPasswordReset(
+        code: code,
+        newPassword: newPassword,
+      );
+    } on FirebaseAuthException catch (e) {
+      // Ubah pesan error menjadi lebih spesifik dalam bahasa Indonesia
+      String message;
+      switch (e.code) {
+        case 'weak-password':
+          message = 'Password baru terlalu lemah. Gunakan minimal 6 karakter.';
+          break;
+        case 'expired-action-code':
+          message =
+              'Kode reset password sudah kadaluarsa. Silakan minta kode baru.';
+          break;
+        case 'invalid-action-code':
+          message =
+              'Kode reset password tidak valid. Silakan periksa email Anda dan coba lagi.';
+          break;
+        case 'user-disabled':
+          message = 'Akun pengguna dinonaktifkan. Silakan hubungi dukungan.';
+          break;
+        case 'user-not-found':
+          message = 'Tidak ada pengguna yang terkait dengan kode ini.';
+          break;
+        case 'network-request-failed':
+          message = 'Masalah jaringan terjadi. Periksa koneksi internet Anda.';
+          break;
+        default:
+          message = 'Gagal mengubah password: ${e.message ?? e.code}';
+      }
+
+      throw FirebaseAuthException(
+        code: e.code,
+        message: message,
+      );
+    } catch (e) {
+      // Tangkap exception lain dan lempar sebagai FirebaseAuthException
+      const message =
+          'Terjadi kesalahan tidak terduga saat mengubah password. Silakan coba lagi nanti.';
+      throw FirebaseAuthException(
+        code: 'unknown-error',
+        message: message,
+      );
+    }
+  }
+
+  @override
   Future<User> changePassword({
     required String newPassword,
     required String newPasswordConfirmation,

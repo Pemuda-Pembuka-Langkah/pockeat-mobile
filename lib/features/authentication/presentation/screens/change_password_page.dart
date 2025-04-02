@@ -2,13 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
+import 'package:meta/meta.dart';
 
 /// Change Password Page
 ///
 /// This page allows users to change their password
 /// by entering a new password and confirming it.
 class ChangePasswordPage extends StatefulWidget {
-  const ChangePasswordPage({super.key});
+  final String? oobCode;
+
+  // Parameter untuk testing
+  @visibleForTesting
+  final bool skipDelay;
+
+  const ChangePasswordPage({
+    super.key,
+    this.oobCode,
+    this.skipDelay = false,
+  });
 
   @override
   State<ChangePasswordPage> createState() => _ChangePasswordPageState();
@@ -62,10 +73,20 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     });
 
     try {
-      await _changePasswordService.changePassword(
-        newPassword: _newPasswordController.text,
-        newPasswordConfirmation: _confirmPasswordController.text,
-      );
+      // Jika menggunakan oobCode dari deep link
+      if (widget.oobCode != null) {
+        // Konfirmasi password reset dengan oobCode menggunakan service
+        await _changePasswordService.confirmPasswordReset(
+          code: widget.oobCode!,
+          newPassword: _newPasswordController.text,
+        );
+      } else {
+        // Menggunakan metode normal untuk user yang sudah login
+        await _changePasswordService.changePassword(
+          newPassword: _newPasswordController.text,
+          newPasswordConfirmation: _confirmPasswordController.text,
+        );
+      }
 
       setState(() {
         _isLoading = false;
@@ -75,10 +96,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         _confirmPasswordController.clear();
       });
 
-      // Tunggu sebentar untuk menampilkan pesan sukses, lalu redirect ke login
-      if (mounted) {
+      // Penggunaan delay hanya untuk UI di produksi, skip untuk testing
+      if (!widget.skipDelay && mounted) {
         await Future.delayed(const Duration(seconds: 2));
-        // Redirect ke login
+      }
+
+      // Redirect ke login
+      if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');
       }
     } catch (e) {
@@ -105,7 +129,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text('Change Password'),
+        title:
+            Text(widget.oobCode != null ? 'Reset Password' : 'Change Password'),
         backgroundColor: primaryPink,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -140,7 +165,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
           // Title
           Text(
-            'Change Your Password',
+            widget.oobCode != null
+                ? 'Reset Your Password'
+                : 'Change Your Password',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -153,7 +180,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
           // Subtitle
           Text(
-            'Enter your new password below',
+            widget.oobCode != null
+                ? 'Enter your new password to complete the reset process'
+                : 'Enter your new password below',
             style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
@@ -187,9 +216,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.green.shade200),
               ),
-              child: const Text(
-                'Password changed successfully! Redirecting to login...',
-                style: TextStyle(color: Colors.green),
+              child: Text(
+                widget.oobCode != null
+                    ? 'Password reset successfully! Redirecting to login...'
+                    : 'Password changed successfully! Redirecting to login...',
+                style: const TextStyle(color: Colors.green),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -292,27 +323,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               ),
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text(
-                      'CHANGE PASSWORD',
-                      style: TextStyle(
+                  : Text(
+                      widget.oobCode != null
+                          ? 'RESET PASSWORD'
+                          : 'CHANGE PASSWORD',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1,
                       ),
                     ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Back to Home button
-          TextButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/');
-            },
-            child: Text(
-              'Back to Home',
-              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
             ),
           ),
         ],

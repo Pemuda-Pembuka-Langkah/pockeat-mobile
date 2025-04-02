@@ -25,50 +25,27 @@ class ChangePasswordDeepLinkServiceImpl
     implements ChangePasswordDeepLinkService {
   final FirebaseAuth _auth;
   final AppLinks _appLinks = AppLinks();
-  late final GlobalKey<NavigatorState> _navigatorKey;
 
   StreamSubscription? _appLinksSub;
   final StreamController<Uri?> _deepLinkStreamController =
       StreamController<Uri?>.broadcast();
 
-  // Properti untuk testing
-  @visibleForTesting
-  GlobalKey<NavigatorState>? navigatorKeyForTesting;
-
-  @visibleForTesting
-  NavigatorState? currentStateForTesting;
-
   ChangePasswordDeepLinkServiceImpl({
     FirebaseAuth? auth,
   }) : _auth = auth ?? FirebaseAuth.instance;
 
-  // Getter dan metode untuk mempermudah unit testing
   @visibleForTesting
   Future<Uri?> getInitialAppLink() => _appLinks.getInitialAppLink();
 
   @visibleForTesting
   Stream<Uri> getUriLinkStream() => _appLinks.uriLinkStream;
 
-  @visibleForTesting
-  NavigatorState? get currentState {
-    // Untuk testing
-    if (currentStateForTesting != null) {
-      return currentStateForTesting;
-    }
-    // Untuk penggunaan normal
-    return _navigatorKey.currentState;
-  }
-
   @override
-  Future<void> initialize(
-      {required GlobalKey<NavigatorState> navigatorKey}) async {
-    _navigatorKey = navigatorKeyForTesting ?? navigatorKey;
-
-    // 1. Handle initial link (app opened from a link)
+  Future<void> initialize() async {
     try {
       final initialLink = await getInitialAppLink();
       if (initialLink != null) {
-        _handleIncomingLink(initialLink);
+        await _handleIncomingLink(initialLink);
       }
     } catch (e) {
       throw ChangePasswordDeepLinkException(
@@ -77,7 +54,6 @@ class ChangePasswordDeepLinkServiceImpl
       );
     }
 
-    // 2. Handle links while app is running
     try {
       _appLinksSub = getUriLinkStream().listen(
         (Uri uri) {
@@ -98,29 +74,17 @@ class ChangePasswordDeepLinkServiceImpl
     }
   }
 
-  void _handleIncomingLink(Uri link) {
-    try {
-      // Handle change password links
-      if (isChangePasswordLink(link)) {
-        handleChangePasswordLink(link).then((bool success) {
-          if (success) {
-            // Redirect ke halaman change password
-            currentState?.pushReplacementNamed('/change-password');
-          }
-        }).catchError((error) {
-          // Navigasi ke halaman error dengan error message
-          currentState?.pushReplacementNamed(
-            '/change-password-error',
-            arguments: {'error': 'Error: $error'},
-          );
-        });
-      }
+  Future<void> _handleIncomingLink(Uri? uri) async {
+    if (uri == null) return;
 
-      // Broadcast link to stream for other listeners
-      _deepLinkStreamController.add(link);
+    try {
+      _deepLinkStreamController.add(uri);
+
+      if (isChangePasswordLink(uri)) {
+        final success = await handleChangePasswordLink(uri);
+      }
     } catch (e) {
-      throw ChangePasswordDeepLinkException('Error handling incoming link',
-          originalError: e);
+      // Error handling tetap ada tapi tanpa print
     }
   }
 
@@ -147,8 +111,6 @@ class ChangePasswordDeepLinkServiceImpl
     try {
       final mode = link.queryParameters['mode'];
       final oobCode = link.queryParameters['oobCode'];
-
-      // Cek apakah link memiliki parameter mode = resetPassword dan oobCode
       return mode == 'resetPassword' && oobCode != null;
     } catch (e) {
       throw ChangePasswordDeepLinkException(
@@ -165,27 +127,17 @@ class ChangePasswordDeepLinkServiceImpl
         return false;
       }
 
-      // Extract oobCode
       final oobCode = link.queryParameters['oobCode'];
       if (oobCode == null) {
-        throw ChangePasswordDeepLinkException(
-            'Missing oobCode in change password link');
+        return false;
       }
 
-      // Verify action code
       try {
         await _auth.checkActionCode(oobCode);
-        // Lalu simpan oobCode untuk digunakan pada halaman change password
-        // Diasumsikan kita punya halaman change password yang akan menggunakan oobCode ini
-
-        // Kita bisa mengirim oobCode sebagai argumen ke route change password
-        // tapi ini akan membuat oobCode terekspos di stack navigasi
-        // Alternatifnya, gunakan shared preferences, atau state management
-
         return true;
       } on FirebaseAuthException catch (e) {
         throw ChangePasswordDeepLinkException(
-          'Firebase auth error when verifying change password link',
+          'Firebase auth error when verifying change password link :${e.message}',
           code: e.code,
           originalError: e,
         );
@@ -195,9 +147,7 @@ class ChangePasswordDeepLinkServiceImpl
       }
     } catch (e) {
       if (e is ChangePasswordDeepLinkException) {
-        // Untuk backward compatibility dengan code yang ada,
-        // kita tidak melempar exception tapi mengembalikan false
-        return false;
+        rethrow;
       }
       throw ChangePasswordDeepLinkException(
         'Error handling change password link',

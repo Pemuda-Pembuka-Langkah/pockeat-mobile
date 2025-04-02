@@ -21,10 +21,196 @@ void main() {
     );
   });
 
+  group('ChangePasswordServiceImpl - confirmPasswordReset', () {
+    test('confirmPasswordReset should call Firebase confirmPasswordReset',
+        () async {
+      // Arrange
+      const code = 'valid-oob-code';
+      const newPassword = 'newPassword123';
 
+      // Mock Firebase auth to return success
+      when(mockFirebaseAuth.confirmPasswordReset(
+              code: code, newPassword: newPassword))
+          .thenAnswer((_) async => {});
+
+      // Act
+      await changePasswordService.confirmPasswordReset(
+        code: code,
+        newPassword: newPassword,
+      );
+
+      // Assert
+      verify(mockFirebaseAuth.confirmPasswordReset(
+              code: code, newPassword: newPassword))
+          .called(1);
+    });
+
+    test('confirmPasswordReset should throw for weak-password error', () async {
+      // Arrange
+      const code = 'valid-oob-code';
+      const newPassword = 'weak';
+
+      // Mock Firebase auth to throw weak-password exception
+      when(mockFirebaseAuth.confirmPasswordReset(
+              code: code, newPassword: newPassword))
+          .thenThrow(
+        FirebaseAuthException(
+          code: 'weak-password',
+          message: 'Original Firebase error message',
+        ),
+      );
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.confirmPasswordReset(
+          code: code,
+          newPassword: newPassword,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'weak-password')
+              .having(
+                (e) => e.message,
+                'message',
+                'Password baru terlalu lemah. Gunakan minimal 6 karakter.',
+              ),
+        ),
+      );
+    });
+
+    test('confirmPasswordReset should throw for expired-action-code error',
+        () async {
+      // Arrange
+      const code = 'expired-code';
+      const newPassword = 'newPassword123';
+
+      // Mock Firebase auth to throw expired-action-code exception
+      when(mockFirebaseAuth.confirmPasswordReset(
+              code: code, newPassword: newPassword))
+          .thenThrow(
+        FirebaseAuthException(
+          code: 'expired-action-code',
+          message: 'Original Firebase error message',
+        ),
+      );
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.confirmPasswordReset(
+          code: code,
+          newPassword: newPassword,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'expired-action-code')
+              .having(
+                (e) => e.message,
+                'message',
+                'Kode reset password sudah kadaluarsa. Silakan minta kode baru.',
+              ),
+        ),
+      );
+    });
+
+    test('confirmPasswordReset should throw for invalid-action-code error',
+        () async {
+      // Arrange
+      const code = 'invalid-code';
+      const newPassword = 'newPassword123';
+
+      // Mock Firebase auth to throw invalid-action-code exception
+      when(mockFirebaseAuth.confirmPasswordReset(
+              code: code, newPassword: newPassword))
+          .thenThrow(
+        FirebaseAuthException(
+          code: 'invalid-action-code',
+          message: 'Original Firebase error message',
+        ),
+      );
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.confirmPasswordReset(
+          code: code,
+          newPassword: newPassword,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'invalid-action-code')
+              .having(
+                (e) => e.message,
+                'message',
+                'Kode reset password tidak valid. Silakan periksa email Anda dan coba lagi.',
+              ),
+        ),
+      );
+    });
+
+    test('confirmPasswordReset should throw for user-disabled error', () async {
+      // Arrange
+      const code = 'valid-code';
+      const newPassword = 'newPassword123';
+
+      // Mock Firebase auth to throw user-disabled exception
+      when(mockFirebaseAuth.confirmPasswordReset(
+              code: code, newPassword: newPassword))
+          .thenThrow(
+        FirebaseAuthException(
+          code: 'user-disabled',
+          message: 'Original Firebase error message',
+        ),
+      );
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.confirmPasswordReset(
+          code: code,
+          newPassword: newPassword,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'user-disabled')
+              .having(
+                (e) => e.message,
+                'message',
+                'Akun pengguna dinonaktifkan. Silakan hubungi dukungan.',
+              ),
+        ),
+      );
+    });
+
+    test('confirmPasswordReset should handle unknown errors', () async {
+      // Arrange
+      const code = 'valid-code';
+      const newPassword = 'newPassword123';
+
+      // Mock Firebase auth to throw unknown exception
+      when(mockFirebaseAuth.confirmPasswordReset(
+              code: code, newPassword: newPassword))
+          .thenThrow(Exception('Unknown error'));
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.confirmPasswordReset(
+          code: code,
+          newPassword: newPassword,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'unknown-error')
+              .having(
+                (e) => e.message,
+                'message',
+                'Terjadi kesalahan tidak terduga saat mengubah password. Silakan coba lagi nanti.',
+              ),
+        ),
+      );
+    });
+  });
 
   group('ChangePasswordServiceImpl', () {
-    test('sendPasswordResetEmail should call sendPasswordResetEmail when credentials are valid',
+    test(
+        'sendPasswordResetEmail should call sendPasswordResetEmail when credentials are valid',
         () async {
       // Arrange
       final email = 'test@example.com';
@@ -35,7 +221,8 @@ void main() {
       // Assert
       verify(mockFirebaseAuth.sendPasswordResetEmail(email: email)).called(1);
     });
-    test('sendPasswordResetEmail should throw exception when credentials are invalid',
+    test(
+        'sendPasswordResetEmail should throw exception when credentials are invalid',
         () async {
       // Arrange
       const email = 'invalid@example.com';

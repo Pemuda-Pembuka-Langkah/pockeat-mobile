@@ -7,6 +7,8 @@ import 'package:pockeat/features/authentication/services/change_password_deeplin
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
+import 'package:meta/meta.dart';
 
 /// Exception khusus untuk DeepLinkService
 class DeepLinkException implements Exception {
@@ -28,6 +30,8 @@ class DeepLinkServiceImpl implements DeepLinkService {
   final ChangePasswordDeepLinkService _changePasswordService;
   final StreamController<Uri?> _deepLinkStreamController =
       StreamController<Uri?>.broadcast();
+  final StreamController<DeepLinkResult> _resultStreamController =
+      StreamController<DeepLinkResult>.broadcast();
   final AppLinks _appLinks = AppLinks();
 
   StreamSubscription? _appLinksSub;
@@ -51,39 +55,48 @@ class DeepLinkServiceImpl implements DeepLinkService {
   Stream<Uri> getUriLinkStream() => _appLinks.uriLinkStream;
 
   @override
-  Future<void> initialize(
-      {required GlobalKey<NavigatorState> navigatorKey}) async {
+  Stream<DeepLinkResult> get onDeepLinkResult => _resultStreamController.stream;
+
+  @override
+  Future<void> initialize() async {
+    await _emailVerificationService.initialize();
+    await _changePasswordService.initialize();
+
     try {
-      // 1. Handle initial link (app opened from a link)
       final initialLink = await getInitialAppLink();
       if (initialLink != null) {
-        _handleIncomingLink(initialLink);
+        await handleDeepLink(initialLink);
       }
+    } catch (e) {
+      throw DeepLinkException(
+        'Failed to initialize initial link handler',
+        originalError: e,
+      );
+    }
 
-      // 2. Handle links while app is running
+    try {
       _appLinksSub = getUriLinkStream().listen(
-        _handleIncomingLink,
+        (Uri uri) {
+          handleDeepLink(uri);
+        },
         onError: (error) {
-          throw DeepLinkException('Error in app link stream',
-              originalError: error);
+          throw DeepLinkException(
+            'Error in app link stream',
+            originalError: error,
+          );
         },
       );
-
-      // Initialize services tapi tidak pasang listener karena service utama sudah mendengarkan
-      await _emailVerificationService.initialize(navigatorKey: navigatorKey);
-      await _changePasswordService.initialize(navigatorKey: navigatorKey);
     } catch (e) {
-      throw DeepLinkException('Failed to initialize deep link services',
-          originalError: e);
+      throw DeepLinkException(
+        'Failed to setup deep link listener',
+        originalError: e,
+      );
     }
   }
 
   void _handleIncomingLink(Uri link) async {
     try {
-      // Memproses link dengan memanggil handler yang sesuai
       await handleDeepLink(link);
-
-      // Broadcast link to stream for other listeners
       _deepLinkStreamController.add(link);
     } catch (e) {
       throw DeepLinkException('Error handling incoming link', originalError: e);
@@ -118,19 +131,76 @@ class DeepLinkServiceImpl implements DeepLinkService {
   }
 
   @override
-  Future<bool> handleDeepLink(Uri link) async {
+  Future<bool> handleDeepLink(Uri link,
+      [BuildContext? navigationContext]) async {
     try {
-      // Tentukan jenis link dan teruskan ke handler yang sesuai
       if (_isEmailVerificationLink(link)) {
-        return await _emailVerificationService
-            .handleEmailVerificationLink(link);
+        try {
+          final bool success =
+              await _emailVerificationService.handleEmailVerificationLink(link);
+
+          final result = DeepLinkResult.emailVerification(
+            success: success,
+            data: {
+              'email': FirebaseAuth.instance.currentUser?.email ?? '',
+            },
+            originalUri: link,
+          );
+
+          _resultStreamController.add(result);
+          return success;
+        } catch (e) {
+          final result = DeepLinkResult.emailVerification(
+            success: false,
+            error: e.toString(),
+            originalUri: link,
+          );
+
+          _resultStreamController.add(result);
+          return false;
+        }
       } else if (_isChangePasswordLink(link)) {
-        return await _changePasswordService.handleChangePasswordLink(link);
+        try {
+          final bool success =
+              await _changePasswordService.handleChangePasswordLink(link);
+
+          final String? oobCode = link.queryParameters['oobCode'];
+          final result = DeepLinkResult.changePassword(
+            success: success,
+            data: {
+              'oobCode': oobCode,
+            },
+            originalUri: link,
+          );
+
+          _resultStreamController.add(result);
+          return success;
+        } catch (e) {
+          final result = DeepLinkResult.changePassword(
+            success: false,
+            error: e.toString(),
+            originalUri: link,
+          );
+
+          _resultStreamController.add(result);
+          return false;
+        }
       } else {
-        // Jika tidak ada handler yang sesuai
+        final result = DeepLinkResult.unknown(
+          originalUri: link,
+          error: 'Tidak ada handler yang sesuai untuk link ini',
+        );
+
+        _resultStreamController.add(result);
         return false;
       }
     } catch (e) {
+      final result = DeepLinkResult.unknown(
+        originalUri: link,
+        error: 'Error saat memproses deep link: $e',
+      );
+
+      _resultStreamController.add(result);
       throw DeepLinkException('Error handling deep link', originalError: e);
     }
   }
@@ -144,6 +214,7 @@ class DeepLinkServiceImpl implements DeepLinkService {
       _emailVerificationLinkSub?.cancel();
       _changePasswordLinkSub?.cancel();
       _deepLinkStreamController.close();
+      _resultStreamController.close();
     } catch (e) {
       throw DeepLinkException('Error disposing deep link service',
           originalError: e);
