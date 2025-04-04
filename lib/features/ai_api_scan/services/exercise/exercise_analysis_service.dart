@@ -97,16 +97,16 @@ class ExerciseAnalysisService {
 
       final exerciseType = jsonData['exercise_type'] ?? 'Unknown';
       final caloriesBurned = jsonData['calories_burned'] ?? 0;
-      final durationMinutes = jsonData['duration'] ?? 0;
+      final durationAPI = jsonData['duration'] ?? 0;
       final intensityLevel = jsonData['intensity'] ?? 'Unknown';
       final metValue = (jsonData['met_value'] ?? 0.0).toDouble();
 
       // Create a summary
       final summary =
-          'You performed $exerciseType for $durationMinutes minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories.';
+          'You performed $exerciseType for $durationAPI at $intensityLevel intensity, burning approximately $caloriesBurned calories.';
 
       // Determine duration string format
-      final duration = '$durationMinutes minutes';
+      final duration = '$durationAPI ';
 
       // Create the exercise analysis result in the app's model format
       return ExerciseAnalysisResult(
@@ -175,14 +175,14 @@ class ExerciseAnalysisService {
           jsonData['calories_burned'] ?? previousResult.estimatedCalories;
 
       // Handle duration which might be in string format in previousResult
-      int durationMinutes;
+      int durationAPI;
       if (jsonData['duration'] != null) {
-        durationMinutes = jsonData['duration'];
+        durationAPI = jsonData['duration'];
       } else {
         // Try to extract numbers from the previous duration string
         final durationString = previousResult.duration;
         final numbers = RegExp(r'\d+').allMatches(durationString);
-        durationMinutes =
+        durationAPI =
             numbers.isNotEmpty ? int.parse(numbers.first.group(0)!) : 0;
       }
 
@@ -194,10 +194,10 @@ class ExerciseAnalysisService {
 
       // Create a summary incorporating the correction information
       final summary =
-          'You performed $exerciseType for $durationMinutes minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories. ($correctionApplied)';
+          'You performed $exerciseType for $durationAPI minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories. ($correctionApplied)';
 
       // Determine duration string format
-      final duration = '$durationMinutes minutes';
+      final duration = '$durationAPI minutes';
 
       // Create the corrected exercise analysis result
       return ExerciseAnalysisResult(
@@ -223,13 +223,13 @@ class ExerciseAnalysisService {
     // Extract duration minutes as a number
     final durationStr = result.duration;
     final numbers = RegExp(r'\d+').allMatches(durationStr);
-    final durationMinutes =
+    final durationAPI =
         numbers.isNotEmpty ? int.parse(numbers.first.group(0)!) : 0;
 
     return {
       'exercise_type': result.exerciseType,
       'calories_burned': result.estimatedCalories,
-      'duration': durationMinutes,
+      'duration': durationAPI,
       'intensity': result.intensity,
       'met_value': result.metValue,
       'description': result.originalInput,

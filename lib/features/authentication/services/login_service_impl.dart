@@ -113,6 +113,22 @@ class LoginServiceImpl implements LoginService {
     }
   }
 
+  @override
+  Future<String?> getIdToken() async {
+    try {
+      final firebaseUser = _auth.currentUser;
+      if (firebaseUser == null) {
+        return null;
+      }
+
+      // Get Firebase ID token (JWT)
+      return await firebaseUser.getIdToken(true); // Force refresh token
+    } catch (e) {
+      print("Error getting Firebase ID token: $e");
+      return null;
+    }
+  }
+
   /// Membersihkan resource ketika service tidak digunakan lagi
   void dispose() {
     _subscription?.cancel();

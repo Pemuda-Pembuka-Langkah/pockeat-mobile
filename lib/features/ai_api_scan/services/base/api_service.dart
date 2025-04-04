@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pockeat/features/ai_api_scan/services/base/api_service_interface.dart';
+import 'package:pockeat/features/ai_api_scan/services/base/api_auth_interceptor.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
 
 class ApiServiceException implements Exception {
   final String message;
@@ -16,17 +18,35 @@ class ApiServiceException implements Exception {
 class ApiService implements ApiServiceInterface {
   final String baseUrl;
   final http.Client _client;
+  final ApiAuthInterceptor? _authInterceptor;
 
   ApiService({
     required this.baseUrl,
     http.Client? client,
-  }) : _client = client ?? http.Client();
+    LoginService? loginService,
+  })  : _client = client ?? http.Client(),
+        _authInterceptor =
+            loginService != null ? ApiAuthInterceptor(loginService) : null;
 
-  // For testing and DI
-  factory ApiService.fromEnv() {
+  // Updated factory constructor that accepts LoginService
+  factory ApiService.fromEnv({LoginService? loginService}) {
     final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.8:8080/api';
     print("🌐 Initializing API Service with base URL: $baseUrl");
-    return ApiService(baseUrl: baseUrl);
+    return ApiService(baseUrl: baseUrl, loginService: loginService);
+  }
+
+  // Generic method to send requests with JWT auth
+  Future<dynamic> _sendRequest(dynamic request) async {
+    if (_authInterceptor != null) {
+      if (request is http.Request) {
+        request = await _authInterceptor.interceptRequest(request);
+        return await _client.send(request);
+      } else if (request is http.MultipartRequest) {
+        request = await _authInterceptor.interceptMultipartRequest(request);
+        return await _client.send(request);
+      }
+    }
+    return await _client.send(request);
   }
 
   // Health check endpoint
@@ -52,7 +72,7 @@ class ApiService implements ApiServiceInterface {
     }
   }
 
-  // Generic POST request with JSON body
+  // Override the postJsonRequest method to use our custom client
   @override
   Future<Map<String, dynamic>> postJsonRequest(
       String endpoint, Map<String, dynamic> body) async {
@@ -61,11 +81,14 @@ class ApiService implements ApiServiceInterface {
       print("📤 POST request to: $uri");
       print("📦 Request body: ${jsonEncode(body)}");
 
-      final response = await _client.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      );
+      final request = http.Request('POST', uri);
+      request.headers['Content-Type'] = 'application/json';
+      request.body = jsonEncode(body);
+
+      // Use our custom method to send the request with auth
+      final streamedResponse = await _sendRequest(request);
+
+      final response = await http.Response.fromStream(streamedResponse);
 
       print("📥 Response: [${response.statusCode}] ${response.body}");
 
@@ -91,7 +114,7 @@ class ApiService implements ApiServiceInterface {
     }
   }
 
-  // POST request with file upload
+  // Similarly update postFileRequest method to use JWT auth
   @override
   Future<Map<String, dynamic>> postFileRequest(
       String endpoint, File file, String fileField,
@@ -99,28 +122,18 @@ class ApiService implements ApiServiceInterface {
     try {
       final uri = Uri.parse('$baseUrl$endpoint');
       print("📤 File upload request to: $uri");
-      print("📁 File path: ${file.path}, field: $fileField");
-      if (fields != null) {
-        print("📋 Additional fields: $fields");
-      }
 
-      final request = http.MultipartRequest(
-        'POST',
-        uri,
-      );
+      var request = http.MultipartRequest('POST', uri);
 
       // Add the file
       final fileStream = http.ByteStream(file.openRead());
       final length = await file.length();
-      print("📏 File size: $length bytes");
-
       final multipartFile = http.MultipartFile(
         fileField,
         fileStream,
         length,
-        filename: 'file.jpg', // Generic filename
+        filename: 'file.jpg',
       );
-
       request.files.add(multipartFile);
 
       // Add optional form fields
@@ -128,9 +141,9 @@ class ApiService implements ApiServiceInterface {
         request.fields.addAll(fields);
       }
 
-      // Send the request
+      // Send the request using our generic method
       print("🚀 Sending multipart request...");
-      final streamedResponse = await request.send();
+      final streamedResponse = await _sendRequest(request);
       final response = await http.Response.fromStream(streamedResponse);
 
       print("📥 Response: [${response.statusCode}] ${response.body}");
