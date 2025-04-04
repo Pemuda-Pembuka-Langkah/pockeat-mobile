@@ -79,3 +79,4 @@ local.properties
 # Android C++ build files
 android/app/.cxx/
 
+*.lnk
