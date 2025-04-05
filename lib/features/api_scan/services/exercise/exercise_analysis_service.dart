@@ -37,31 +37,8 @@ class ExerciseAnalysisService {
         requestBody,
       );
 
-      // Print respons dengan format yang lebih jelas
-      print("\n\n===== EXERCISE API RESPONSE =====");
-      print("RAW RESPONSE JSON:");
-      JsonEncoder encoder = const JsonEncoder.withIndent('  ');
-      String prettyJson = encoder.convert(responseData);
-      print(prettyJson);
-      print("\n");
-
-      // Print keys yang ada di respons
-      print("AVAILABLE KEYS: ${responseData.keys.toList()}");
-
-      // Print nilai field utama dengan pengecekan null
-      print("\nKEY VALUES:");
-      print("exercise_type: ${responseData['exercise_type']}");
-      print("calories_burned: ${responseData['calories_burned']}");
-      print("duration: ${responseData['duration']}");
-      print("intensity: ${responseData['intensity']}");
-      print("intensity: ${responseData['intensity']}");
-      print("met_value: ${responseData['met_value']}");
-      print("error: ${responseData['error']}");
-      print("================================\n\n");
-
       return parseExerciseResponse(responseData, description);
     } catch (e) {
-      print("Error during exercise analysis: $e");
       if (e is ApiServiceException) {
         rethrow;
       }
@@ -72,15 +49,10 @@ class ExerciseAnalysisService {
   ExerciseAnalysisResult parseExerciseResponse(
       Map<String, dynamic> jsonData, String originalInput) {
     try {
-      print("Debug: Processing exercise analysis response");
-      print("Debug: Error field value: ${jsonData['error']}");
-
       // Check for error field in different formats
       if (jsonData.containsKey('error') && jsonData['error'] != null) {
         // Instead of throwing an exception, create a result with the error
         // This matches how your Python API handles errors
-        print("Debug: Error field is not null, creating error result");
-
         return ExerciseAnalysisResult(
           exerciseType: jsonData['exercise_type'] ?? 'unknown',
           duration: "0 minutes",
@@ -93,8 +65,6 @@ class ExerciseAnalysisService {
           missingInfo: ["exercise_type", "duration", "intensity"],
         );
       }
-
-      print("Debug: Passed error check");
 
       final exerciseType = jsonData['exercise_type'] ?? 'unknown';
       final caloriesBurned = jsonData['calories_burned'] ?? 0;
@@ -133,7 +103,6 @@ class ExerciseAnalysisService {
         missingInfo: missingInfo.isNotEmpty ? missingInfo : null,
       );
     } catch (e) {
-      print("Debug: Caught exception in parseExerciseResponse: $e");
       // Create a result with the error instead of throwing
       return ExerciseAnalysisResult(
         exerciseType: 'unknown',

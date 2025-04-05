@@ -19,46 +19,31 @@ class ApiService implements ApiServiceInterface {
   final String baseUrl;
   final http.Client _client;
   final ApiAuthInterceptor? _authInterceptor;
-ApiService({
-  required this.baseUrl,
-  http.Client? client,
-  TokenManager? tokenManager,
-}) : _client = client ?? http.Client(),
-     _authInterceptor = 
-         tokenManager != null ? ApiAuthInterceptor(tokenManager) : null;
+  ApiService({
+    required this.baseUrl,
+    http.Client? client,
+    TokenManager? tokenManager,
+  })  : _client = client ?? http.Client(),
+        _authInterceptor =
+            tokenManager != null ? ApiAuthInterceptor(tokenManager) : null;
 
-         
   // Updated factory constructor that accepts LoginService
-    factory ApiService.fromEnv({TokenManager? tokenManager}) {
-    final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.10:8080/api';
-    print("🌐 Initializing API Service with base URL: $baseUrl");
+  factory ApiService.fromEnv({TokenManager? tokenManager}) {
+    final baseUrl = dotenv.env['API_BASE_URL'] ??
+        'http://192.168.1.10:8080/api'; //LOCALHOST API
     return ApiService(baseUrl: baseUrl, tokenManager: tokenManager);
   }
 
   // Generic method to send requests with JWT auth
   Future<dynamic> _sendRequest(dynamic request) async {
-    print(
-        "DEBUG: _authInterceptor is ${_authInterceptor == null ? 'NULL' : 'NOT NULL'}");
-
     if (_authInterceptor != null) {
-      print("DEBUG: Inside _authInterceptor not null block");
-
       if (request is http.Request) {
-        print("DEBUG: Request is http.Request");
         request = await _authInterceptor.interceptRequest(request);
-        print("🔒 Bearer token: ${request.headers['Authorization']}");
         return await _client.send(request);
       } else if (request is http.MultipartRequest) {
-        print("DEBUG: Request is http.MultipartRequest");
         request = await _authInterceptor.interceptMultipartRequest(request);
-        print("🔒 Bearer token: ${request.headers['Authorization']}");
         return await _client.send(request);
-      } else {
-        print(
-            "DEBUG: Request is neither http.Request nor http.MultipartRequest, it's: ${request.runtimeType}");
       }
-    } else {
-      print("DEBUG: _authInterceptor is NULL, skipping auth");
     }
 
     return await _client.send(request);
@@ -69,20 +54,14 @@ ApiService({
   Future<bool> checkHealth() async {
     try {
       final uri = Uri.parse('$baseUrl/health');
-      print("🔍 Health check request to: $uri");
-
       final response = await _client.get(uri);
-      print(
-          "✓ Health check response: [${response.statusCode}] ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['status'] == 'healthy';
       }
-      print("❌ Health check failed with status code: ${response.statusCode}");
       return false;
     } catch (e) {
-      print("⚠️ Health check exception: $e");
       throw ApiServiceException("Failed to check API health: $e");
     }
   }
@@ -93,26 +72,17 @@ ApiService({
       String endpoint, Map<String, dynamic> body) async {
     try {
       final uri = Uri.parse('$baseUrl$endpoint');
-      print("📤 POST request to: $uri");
-      print("📦 Request body: ${jsonEncode(body)}");
-
       final request = http.Request('POST', uri);
       request.headers['Content-Type'] = 'application/json';
       request.body = jsonEncode(body);
 
-      print("BEFORE SENDING REQUEST: ${request.url}");
       final streamedResponse = await _sendRequest(request);
-      print("AFTER SENDING REQUEST: ${request.url}");
-
       final response = await http.Response.fromStream(streamedResponse);
-
-      print("📥 Response: [${response.statusCode}] ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
         final error = jsonDecode(response.body);
-        print("❌ API error: ${error['error'] ?? 'Unknown error'}");
         if (error.containsKey('error') && error['error'] != null) {
           String errorMessage = error['error'] is String
               ? error['error']
@@ -124,7 +94,6 @@ ApiService({
         throw ApiServiceException(error['error'] ?? 'Unknown error from API');
       }
     } catch (e) {
-      print("⚠️ Request exception for $endpoint: $e");
       if (e is ApiServiceException) rethrow;
       throw ApiServiceException("Failed API request to $endpoint: $e");
     }
@@ -137,7 +106,6 @@ ApiService({
       [Map<String, String>? fields]) async {
     try {
       final uri = Uri.parse('$baseUrl$endpoint');
-      print("📤 File upload request to: $uri");
 
       var request = http.MultipartRequest('POST', uri);
 
@@ -158,17 +126,13 @@ ApiService({
       }
 
       // Send the request using our generic method
-      print("🚀 Sending multipart request...");
       final streamedResponse = await _sendRequest(request);
       final response = await http.Response.fromStream(streamedResponse);
-
-      print("📥 Response: [${response.statusCode}] ${response.body}");
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
         final error = jsonDecode(response.body);
-        print("❌ File upload error: ${error['error'] ?? 'Unknown error'}");
         if (error.containsKey('error') && error['error'] != null) {
           String errorMessage = error['error'] is String
               ? error['error']
@@ -180,14 +144,12 @@ ApiService({
         throw ApiServiceException(error['error'] ?? 'Unknown error from API');
       }
     } catch (e) {
-      print("⚠️ File upload exception for $endpoint: $e");
       if (e is ApiServiceException) rethrow;
       throw ApiServiceException("Failed file upload to $endpoint: $e");
     }
   }
 
   void dispose() {
-    print("🔄 Closing API service client");
     _client.close();
   }
 }

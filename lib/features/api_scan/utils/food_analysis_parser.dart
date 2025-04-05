@@ -15,13 +15,8 @@ class FoodAnalysisParser {
 
   static FoodAnalysisResult parseMap(Map<String, dynamic> jsonData) {
     try {
-      print("Debug: Processing food analysis response");
-      print("Debug: Error field value: ${jsonData['error']}");
-      print("Debug: Food name: ${jsonData['food_name']}");
-
       // Check for error field in different formats
       if (jsonData.containsKey('error') && jsonData['error'] != null) {
-        print("Debug: Error field is not null, throwing exception");
         String errorMessage = jsonData['error'] is String
             ? jsonData['error']
             : jsonData['error'] is Map
@@ -29,28 +24,24 @@ class FoodAnalysisParser {
                 : 'Unknown error';
         throw ApiServiceException(errorMessage);
       }
-      print("Debug: Passed error check");
 
       // If food_name is "Unknown" and we have nutrition values all at zero,
       // it might be an error case not explicitly marked with an error field
       if (jsonData['food_name'] == 'Unknown' &&
           jsonData.containsKey('nutrition_info') &&
           _isEmptyNutrition(jsonData['nutrition_info'])) {
-        print("Debug: Unknown food with empty nutrition, throwing exception");
         throw ApiServiceException(
             "Cannot identify food from provided information");
       }
-      print("Debug: Passed unknown food check");
 
       // If we get here, proceed with normal parsing
-      print("Debug: Creating FoodAnalysisResult");
       final foodName = jsonData['food_name'] ?? '';
       final ingredients = _parseIngredients(jsonData['ingredients']);
       final nutritionInfo =
           NutritionInfo.fromJson(jsonData['nutrition_info'] ?? {});
       final warnings = jsonData['warnings'] ?? [];
 
-      // Proses timestamp
+      // Process timestamp
       DateTime parsedTimestamp;
       if (jsonData['timestamp'] != null) {
         if (jsonData['timestamp'] is Timestamp) {
@@ -71,9 +62,7 @@ class FoodAnalysisParser {
         parsedTimestamp = DateTime.now();
       }
 
-      print("Debug: All fields validated successfully");
-
-      var result = FoodAnalysisResult(
+      return FoodAnalysisResult(
         foodName: foodName,
         ingredients: ingredients,
         nutritionInfo: nutritionInfo,
@@ -81,10 +70,7 @@ class FoodAnalysisParser {
         timestamp: parsedTimestamp,
         isLowConfidence: jsonData['is_low_confidence'] ?? false,
       );
-      print("Debug: Successfully created FoodAnalysisResult");
-      return result;
     } catch (e) {
-      print("Debug: Caught exception in parseMap: $e");
       if (e is ApiServiceException) {
         rethrow;
       }
