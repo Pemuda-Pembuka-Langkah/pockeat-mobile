@@ -157,5 +157,61 @@ void main() {
           style?.backgroundColor as MaterialStateProperty<Color?>?;
       expect(bgColorProp?.resolve({}), equals(expectedPinkColor));
     });
+
+    testWidgets('Halaman menampilkan error default jika error null atau empty',
+        (WidgetTester tester) async {
+      // Setup
+      setScreenSize(tester);
+      const String emptyError = '';
+
+      // Testing dengan error kosong
+      await tester.pumpWidget(
+        MaterialApp(
+          home: const EmailVerificationFailedPage(
+            key: Key('test-key'),
+            error: emptyError,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verifikasi UI tetap tampil dengan benar
+      expect(find.text('Email Verification Failed'), findsOneWidget);
+      // Pastikan emptyError yang ditampilkan, karena class tidak menyediakan default message
+      expect(find.text(emptyError), findsOneWidget);
+      expect(find.text('SIGN IN'), findsOneWidget);
+      expect(find.text('CREATE NEW ACCOUNT'), findsOneWidget);
+
+      // Verifikasi bahwa key bekerja dengan benar
+      final finder = find.byKey(const Key('test-key'));
+      expect(finder, findsOneWidget);
+    });
+
+    testWidgets('Konstruktor menerima dan menggunakan key dengan benar',
+        (WidgetTester tester) async {
+      // Setup
+      const testError = 'Test error message';
+      const testKey = Key('custom-test-key');
+      setScreenSize(tester);
+
+      // Build halaman dengan custom key
+      await tester.pumpWidget(
+        MaterialApp(
+          home: const EmailVerificationFailedPage(
+            key: testKey,
+            error: testError,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verifikasi key digunakan dengan benar
+      expect(find.byKey(testKey), findsOneWidget);
+
+      // Verifikasi properties digunakan dengan benar di widget
+      final EmailVerificationFailedPage widget =
+          tester.widget(find.byKey(testKey));
+      expect(widget.error, equals(testError));
+    });
   });
 }

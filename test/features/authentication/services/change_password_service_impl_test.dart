@@ -208,6 +208,75 @@ void main() {
     });
   });
 
+  group('ChangePasswordServiceImpl - sendPasswordResetEmail', () {
+    test('sendPasswordResetEmail should call Firebase sendPasswordResetEmail',
+        () async {
+      // Arrange
+      const email = 'test@example.com';
+
+      // Mock Firebase auth to return success
+      when(mockFirebaseAuth.sendPasswordResetEmail(email: email))
+          .thenAnswer((_) async => {});
+
+      // Act
+      await changePasswordService.sendPasswordResetEmail(email: email);
+
+      // Assert
+      verify(mockFirebaseAuth.sendPasswordResetEmail(email: email)).called(1);
+    });
+
+    test('sendPasswordResetEmail should rethrow FirebaseAuthException',
+        () async {
+      // Arrange
+      const email = 'invalid@example.com';
+
+      // Mock Firebase auth to throw FirebaseAuthException
+      when(mockFirebaseAuth.sendPasswordResetEmail(email: email)).thenThrow(
+        FirebaseAuthException(
+          code: 'user-not-found',
+          message: 'There is no user record corresponding to this email.',
+        ),
+      );
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.sendPasswordResetEmail(email: email),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'user-not-found')
+              .having(
+                (e) => e.message,
+                'message',
+                'There is no user record corresponding to this email.',
+              ),
+        ),
+      );
+    });
+
+    test('sendPasswordResetEmail should handle generic exceptions', () async {
+      // Arrange
+      const email = 'test@example.com';
+
+      // Mock Firebase auth to throw generic exception
+      when(mockFirebaseAuth.sendPasswordResetEmail(email: email))
+          .thenThrow(Exception('Network error'));
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.sendPasswordResetEmail(email: email),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'unknown-error')
+              .having(
+                (e) => e.message,
+                'message',
+                'Terjadi kesalahan tidak terduga saat mengirim email reset password. Silakan coba lagi nanti.',
+              ),
+        ),
+      );
+    });
+  });
+
   group('ChangePasswordServiceImpl', () {
     test(
         'sendPasswordResetEmail should call sendPasswordResetEmail when credentials are valid',
@@ -424,6 +493,203 @@ void main() {
 
       when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
       when(mockUser.email).thenReturn(email);
+      when(mockUser.updatePassword(newPassword))
+          .thenThrow(Exception('Unknown error'));
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.changePassword(
+          newPassword: newPassword,
+          newPasswordConfirmation: newPasswordConfirmation,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'unknown-error')
+              .having(
+                (e) => e.message,
+                'message',
+                'Terjadi kesalahan tidak terduga saat mengubah password. Silakan coba lagi nanti.',
+              ),
+        ),
+      );
+    });
+  });
+
+  group('ChangePasswordServiceImpl - changePassword', () {
+    test('changePassword should throw when passwords do not match', () async {
+      // Arrange
+      const newPassword = 'newPassword123';
+      const confirmPassword = 'differentPassword123';
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.changePassword(
+          newPassword: newPassword,
+          newPasswordConfirmation: confirmPassword,
+        ),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            'Konfirmasi password baru tidak sesuai dengan password baru.',
+          ),
+        ),
+      );
+    });
+
+    test('changePassword should throw when no user is logged in', () async {
+      // Arrange
+      const newPassword = 'newPassword123';
+      const confirmPassword = 'newPassword123';
+
+      // Mock currentUser to return null (no user logged in)
+      when(mockFirebaseAuth.currentUser).thenReturn(null);
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.changePassword(
+          newPassword: newPassword,
+          newPasswordConfirmation: confirmPassword,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'user-not-logged-in')
+              .having(
+                (e) => e.message,
+                'message',
+                'No user is currently logged in.',
+              ),
+        ),
+      );
+    });
+
+    test('changePassword should handle generic exceptions', () async {
+      // Arrange
+      const newPassword = 'newPassword123';
+      const confirmPassword = 'newPassword123';
+
+      // Mock currentUser to return a user
+      when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
+
+      // Mock updatePassword to throw generic exception
+      when(mockUser.updatePassword(newPassword))
+          .thenThrow(Exception('Unknown error'));
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.changePassword(
+          newPassword: newPassword,
+          newPasswordConfirmation: confirmPassword,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'unknown-error')
+              .having(
+                (e) => e.message,
+                'message',
+                'Terjadi kesalahan tidak terduga saat mengubah password. Silakan coba lagi nanti.',
+              ),
+        ),
+      );
+    });
+
+    test('changePassword should throw for weak-password error', () async {
+      // Arrange
+      const newPassword = 'weak';
+      const newPasswordConfirmation = 'weak';
+
+      when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
+      when(mockUser.updatePassword(newPassword))
+          .thenThrow(FirebaseAuthException(
+        code: 'weak-password',
+        message: 'Password should be at least 6 characters',
+      ));
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.changePassword(
+          newPassword: newPassword,
+          newPasswordConfirmation: newPasswordConfirmation,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'weak-password')
+              .having(
+                (e) => e.message,
+                'message',
+                'Password baru terlalu lemah. Gunakan minimal 6 karakter.',
+              ),
+        ),
+      );
+    });
+
+    test('changePassword should throw for user-not-found error', () async {
+      // Arrange
+      const newPassword = 'newPassword123';
+      const newPasswordConfirmation = 'newPassword123';
+
+      when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
+      when(mockUser.updatePassword(newPassword))
+          .thenThrow(FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'No user found',
+      ));
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.changePassword(
+          newPassword: newPassword,
+          newPasswordConfirmation: newPasswordConfirmation,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'user-not-found')
+              .having(
+                (e) => e.message,
+                'message',
+                'User tidak ditemukan. Silakan login kembali.',
+              ),
+        ),
+      );
+    });
+
+    test('changePassword should throw for network-request-failed error',
+        () async {
+      // Arrange
+      const newPassword = 'newPassword123';
+      const newPasswordConfirmation = 'newPassword123';
+
+      when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
+      when(mockUser.updatePassword(newPassword))
+          .thenThrow(FirebaseAuthException(
+        code: 'network-request-failed',
+        message: 'Network error',
+      ));
+
+      // Act & Assert
+      expect(
+        () => changePasswordService.changePassword(
+          newPassword: newPassword,
+          newPasswordConfirmation: newPasswordConfirmation,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'network-request-failed')
+              .having(
+                (e) => e.message,
+                'message',
+                'Masalah jaringan terjadi. Periksa koneksi internet Anda.',
+              ),
+        ),
+      );
+    });
+
+    test('changePassword should handle unknown errors', () async {
+      // Arrange
+      const newPassword = 'newPassword123';
+      const newPasswordConfirmation = 'newPassword123';
+
+      when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
       when(mockUser.updatePassword(newPassword))
           .thenThrow(Exception('Unknown error'));
 

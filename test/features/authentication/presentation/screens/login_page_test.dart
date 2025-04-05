@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
+import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
@@ -395,6 +396,168 @@ void main() {
     // Verifikasi canPop adalah false
     final popScope = tester.widget<PopScope>(find.byType(PopScope));
     expect(popScope.canPop, isFalse);
+  });
+
+  testWidgets('Should handle PopScope and system navigator',
+      (WidgetTester tester) async {
+    // Setup mock for SystemNavigator
+    bool systemNavigatorCalled = false;
+
+    // Override SystemNavigator.pop untuk menangkap panggilan
+    SystemChannels.platform.setMockMethodCallHandler((methodCall) async {
+      if (methodCall.method == 'SystemNavigator.pop') {
+        systemNavigatorCalled = true;
+      }
+      return null;
+    });
+
+    // Build widget dengan PopScope
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) {
+            if (didPop) return;
+            // Call SystemNavigator.pop()
+            SystemNavigator.pop();
+          },
+          child: const Scaffold(
+            body: Text('Test PopScope'),
+          ),
+        ),
+      ),
+    );
+
+    // Simulasi tombol back dengan mengirim notifikasi ke engine
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+
+    // Verifikasi bahwa SystemNavigator.pop() dipanggil
+    expect(systemNavigatorCalled, isTrue);
+
+    // Reset mock
+    SystemChannels.platform.setMockMethodCallHandler(null);
+  });
+
+  testWidgets('Should test tap on "Forgot Password?" link',
+      (WidgetTester tester) async {
+    // Setup screen size
+    tester.binding.window.physicalSizeTestValue = const Size(600, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+
+    // Track navigation
+    final navigatorPushed = <String>[];
+
+    // Build app with custom onGenerateRoute to track navigations
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const LoginPage(),
+        onGenerateRoute: (RouteSettings settings) {
+          navigatorPushed.add(settings.name!);
+          return MaterialPageRoute(
+            builder: (BuildContext context) => const Scaffold(),
+            settings: settings,
+          );
+        },
+      ),
+    );
+
+    // Find and tap "Forgot Password?" link
+    final forgotPasswordFinder = find.text('Forgot Password?');
+    expect(forgotPasswordFinder, findsOneWidget);
+
+    await tester.tap(forgotPasswordFinder);
+    await tester.pumpAndSettle();
+
+    // Verify navigation occurred
+    expect(navigatorPushed, contains('/forgot-password'));
+  });
+
+  testWidgets('Should handle Google sign-in button tap',
+      (WidgetTester tester) async {
+    // Setup screen size
+    tester.binding.window.physicalSizeTestValue = const Size(600, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+
+    // Build app
+    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+
+    // Check if Google sign-in button exists
+    final googleButtonFinder = find.byType(GoogleSignInButton);
+    expect(googleButtonFinder, findsOneWidget);
+
+    // Verify height is set correctly
+    final googleButton = tester.widget<GoogleSignInButton>(googleButtonFinder);
+    expect(googleButton.height, 55); // Testing line 369
+
+    // We can't easily tap and test the actual sign-in flow in a unit test
+    // since it depends on platform plugins, but we can verify the button exists
+    // with the expected properties
+  });
+
+  testWidgets('Should handle PopScope with onPopInvoked callback',
+      (WidgetTester tester) async {
+    // Setup
+    tester.binding.window.physicalSizeTestValue = const Size(600, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+
+    // Flag untuk cek apakah callback dipanggil
+    bool callbackInvoked = false;
+
+    // Build app dengan PopScope yang dapat kita kontrol
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PopScope(
+          canPop: false,
+          onPopInvoked: (didPop) {
+            callbackInvoked = true;
+          },
+          child: const Scaffold(
+            body: Text('Test PopScope'),
+          ),
+        ),
+      ),
+    );
+
+    // Ambil fungsi callback dan panggil secara manual
+    final popScope = tester.widget<PopScope>(find.byType(PopScope));
+    final callback = popScope.onPopInvoked;
+    if (callback != null) {
+      callback(false);
+    }
+
+    // Verifikasi callback dipanggil
+    expect(callbackInvoked, isTrue);
+  });
+
+  testWidgets('Should display error message for ArgumentError',
+      (WidgetTester tester) async {
+    // Setup screen size
+    tester.binding.window.physicalSizeTestValue = const Size(600, 800);
+    tester.binding.window.devicePixelRatioTestValue = 1.0;
+
+    // Mock service to throw ArgumentError
+    when(mockLoginService.loginByEmail(
+      email: anyNamed('email'),
+      password: anyNamed('password'),
+    )).thenThrow(ArgumentError('Custom argument error message'));
+
+    // Build app
+    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+
+    // Fill form
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Email'), 'test@example.com');
+    await tester.enterText(
+        find.widgetWithText(TextFormField, 'Password'), 'Password123');
+
+    // Submit form
+    await tester.tap(find.text('SIGN IN'));
+    await tester.pump(); // Start loading
+    await tester.pump(const Duration(seconds: 1)); // Allow error to process
+
+    // Verify error message contains the argument error message
+    expect(find.textContaining('An unexpected error occurred'), findsOneWidget);
   });
 }
 

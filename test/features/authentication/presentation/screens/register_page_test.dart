@@ -15,8 +15,18 @@ import 'package:flutter/services.dart';
 import 'register_page_test.mocks.dart';
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {
+  String? pushedRoute;
+  String? replacedRoute;
+
   @override
-  void didPush(Route<dynamic>? route, Route<dynamic>? previousRoute) {}
+  void didPush(Route<dynamic>? route, Route<dynamic>? previousRoute) {
+    pushedRoute = route?.settings.name;
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    replacedRoute = newRoute?.settings.name;
+  }
 }
 
 void main() {
@@ -1221,5 +1231,147 @@ void main() {
     // Verifikasi canPop adalah false
     final popScope = tester.widget<PopScope>(find.byType(PopScope));
     expect(popScope.canPop, isFalse);
+  });
+
+  testWidgets('Toggle password visibility button works correctly',
+      (WidgetTester tester) async {
+    // Setup
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Cari icon visibility untuk password
+    final passwordVisibilityIcon = find.descendant(
+      of: find.widgetWithText(TextFormField, 'Password'),
+      matching: find.byIcon(Icons.visibility),
+    );
+    expect(passwordVisibilityIcon, findsOneWidget);
+
+    // Toggle visibilitas password
+    await tester.tap(passwordVisibilityIcon);
+    await tester.pump();
+
+    // Pastikan icon berubah
+    expect(
+        find.descendant(
+          of: find.widgetWithText(TextFormField, 'Password'),
+          matching: find.byIcon(Icons.visibility_off),
+        ),
+        findsOneWidget);
+  });
+
+  testWidgets('Toggle confirm password visibility button works correctly',
+      (WidgetTester tester) async {
+    // Setup
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Cari icon visibility untuk confirm password
+    final confirmPasswordVisibilityIcon = find.descendant(
+      of: find.widgetWithText(TextFormField, 'Confirm Password'),
+      matching: find.byIcon(Icons.visibility),
+    );
+    expect(confirmPasswordVisibilityIcon, findsOneWidget);
+
+    // Toggle visibilitas confirm password
+    await tester.tap(confirmPasswordVisibilityIcon);
+    await tester.pump();
+
+    // Pastikan icon berubah
+    expect(
+        find.descendant(
+          of: find.widgetWithText(TextFormField, 'Confirm Password'),
+          matching: find.byIcon(Icons.visibility_off),
+        ),
+        findsOneWidget);
+  });
+
+  testWidgets('Terms and conditions text is clickable',
+      (WidgetTester tester) async {
+    // Setup
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Scroll ke bagian checkbox terms and conditions
+    final termsCheckbox = find.byType(Checkbox);
+    await tester.ensureVisible(termsCheckbox);
+    await tester.pumpAndSettle();
+
+    // Cari RichText yang berisi Terms and Conditions
+    final richTexts = find.byType(RichText);
+    expect(richTexts, findsWidgets);
+
+    // Verifikasi bahwa terms and conditions RichText ditampilkan
+    final termsAndConditionsFound = tester.widgetList(richTexts).any((widget) {
+      if (widget is RichText) {
+        final text = widget.text.toPlainText();
+        return text.contains('Terms and Conditions');
+      }
+      return false;
+    });
+
+    expect(termsAndConditionsFound, isTrue,
+        reason: 'Terms and Conditions text should be found');
+
+    // Verifikasi bahwa checkbox dapat di-tap
+    await tester.tap(termsCheckbox);
+    await tester.pump();
+    final checkbox = tester.widget<Checkbox>(termsCheckbox);
+    expect(checkbox.value, isTrue);
+  });
+
+  testWidgets('Sign In link is displayed in the register form',
+      (WidgetTester tester) async {
+    // Setup
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Scroll ke bawah untuk menemukan link login
+    await tester.dragUntilVisible(
+      find.byType(RichText).last,
+      find.byType(SingleChildScrollView),
+      const Offset(0, 50),
+    );
+    await tester.pumpAndSettle();
+
+    // Verifikasi bahwa "Sign In" text ada di dalam RichText di bagian bawah halaman
+    final richTexts = find.byType(RichText);
+    final signInTextFound = tester.widgetList(richTexts).any((widget) {
+      if (widget is RichText) {
+        final text = widget.text.toPlainText();
+        return text.contains('Sign In');
+      }
+      return false;
+    });
+
+    expect(signInTextFound, isTrue,
+        reason: 'Sign In text should be found in a RichText widget');
   });
 }

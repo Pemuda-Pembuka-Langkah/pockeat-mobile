@@ -109,6 +109,11 @@ class ChangePasswordDeepLinkServiceImpl
   @override
   bool isChangePasswordLink(Uri link) {
     try {
+      // Periksa scheme terlebih dahulu
+      if (link.scheme != 'pockeat') {
+        return false;
+      }
+
       final mode = link.queryParameters['mode'];
       final oobCode = link.queryParameters['oobCode'];
       return mode == 'resetPassword' && oobCode != null;
