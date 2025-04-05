@@ -39,6 +39,9 @@ import 'package:pockeat/features/authentication/services/deep_link_service.dart'
 import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
 
 // Global navigator key untuk akses Navigator dari anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -229,6 +232,9 @@ class MyApp extends StatelessWidget {
             ),
           );
         },
+        '/analytic': (context) => ProgressPage(
+          service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+        ),
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
       },
