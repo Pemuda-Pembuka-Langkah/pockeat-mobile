@@ -28,6 +28,14 @@ final getIt = GetIt.instance;
 // coverage:ignore-start
 void setupDependencies() {
   // Register specialized services
+  getIt.registerSingleton<FirebaseAuth>(
+    FirebaseAuth.instance,
+  );
+
+  getIt.registerSingleton<FirebaseMessaging>(
+    FirebaseMessaging.instance,
+  );
+  
   getIt.registerSingleton<FoodTextAnalysisService>(
     FoodTextAnalysisService.fromEnv(),
   );
@@ -94,16 +102,8 @@ void setupDependencies() {
   // Register Exercise Log History module
   ExerciseLogHistoryModule.register();
 
-  getIt.registerSingleton<FirebaseMessaging>(
-    FirebaseMessaging.instance,
-  );
-
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
-  );
-
-  getIt.registerSingleton<FirebaseAuth>(
-    FirebaseAuth.instance,
   );
 }
  // coverage:ignore-end
