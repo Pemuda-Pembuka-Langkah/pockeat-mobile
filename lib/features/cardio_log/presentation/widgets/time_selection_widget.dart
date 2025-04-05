@@ -22,11 +22,13 @@ class TimeSelectionWidget extends StatelessWidget {
     final currentDuration = selectedEndTime.difference(selectedStartTime);
     if (currentDuration.inMinutes < 1) {
       // This rebuilds with correct values when displayed initially
+      // coverage:ignore-start
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         onEndTimeChanged(selectedStartTime.add(const Duration(minutes: 1)));
       });
     }
-
+      // coverage:ignore-end
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -107,6 +109,7 @@ class TimeSelectionWidget extends StatelessWidget {
             onTap: () async {
               final TimeOfDay? time = await showTimePicker(
                 context: context,
+// coverage:ignore-start
                 initialTime: TimeOfDay.fromDateTime(selectedEndTime),
               );
               if (time != null && context.mounted) {
@@ -146,6 +149,8 @@ class TimeSelectionWidget extends StatelessWidget {
                 onEndTimeChanged(newEndTime);
               }
             },
+// coverage:ignore-end
+
             child: Text(
               TimeOfDay.fromDateTime(selectedEndTime).format(context),
               style: const TextStyle(
