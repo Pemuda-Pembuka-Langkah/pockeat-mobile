@@ -1,10 +1,11 @@
 // lib/core/di/service_locator.dart
 import 'package:get_it/get_it.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/food_image_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/food_image_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
+import 'package:pockeat/features/authentication/services/token_manager.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
@@ -26,21 +27,50 @@ import 'package:pockeat/features/authentication/services/google_sign_in_service_
 final getIt = GetIt.instance;
 // coverage:ignore-start
 void setupDependencies() {
-  // Register specialized services
+  // Register UserRepository
+  getIt.registerSingleton<UserRepository>(
+    UserRepositoryImpl(),
+  );
+
+  // Register RegisterService
+  getIt.registerSingleton<RegisterService>(
+    RegisterServiceImpl(userRepository: getIt<UserRepository>()),
+  );
+
+  // Register LoginService
+  getIt.registerSingleton<LoginService>(
+    LoginServiceImpl(userRepository: getIt<UserRepository>()),
+  );
+
+  // Register GoogleSignInService
+  getIt.registerSingleton<GoogleSignInService>(
+    GoogleSignInServiceImpl(),
+  );
+  
+  // Register TokenManager
+  getIt.registerSingleton<TokenManager>(TokenManager());
+
+
+  // Register DeepLinkService
+  getIt.registerSingleton<DeepLinkService>(
+    DeepLinkServiceImpl(userRepository: getIt<UserRepository>()),
+  );
+
+
   getIt.registerSingleton<FoodTextAnalysisService>(
-    FoodTextAnalysisService.fromEnv(),
+    FoodTextAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
   );
 
   getIt.registerSingleton<FoodImageAnalysisService>(
-    FoodImageAnalysisService.fromEnv(),
+    FoodImageAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
   );
 
   getIt.registerSingleton<NutritionLabelAnalysisService>(
-    NutritionLabelAnalysisService.fromEnv(),
+    NutritionLabelAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
   );
 
   getIt.registerSingleton<ExerciseAnalysisService>(
-    ExerciseAnalysisService.fromEnv(),
+    ExerciseAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
   );
 
   getIt.registerSingleton<FoodTextInputRepository>(
@@ -62,30 +92,6 @@ void setupDependencies() {
     FoodScanPhotoService(),
   );
 
-  // Register UserRepository
-  getIt.registerSingleton<UserRepository>(
-    UserRepositoryImpl(),
-  );
-
-  // Register RegisterService
-  getIt.registerSingleton<RegisterService>(
-    RegisterServiceImpl(userRepository: getIt<UserRepository>()),
-  );
-
-  // Register LoginService
-  getIt.registerSingleton<LoginService>(
-    LoginServiceImpl(userRepository: getIt<UserRepository>()),
-  );
-
-  // Register GoogleSignInService
-  getIt.registerSingleton<GoogleSignInService>(
-    GoogleSignInServiceImpl(),
-  );
-
-  // Register DeepLinkService
-  getIt.registerSingleton<DeepLinkService>(
-    DeepLinkServiceImpl(userRepository: getIt<UserRepository>()),
-  );
 
   // Register Food Log History module
   FoodLogHistoryModule.register();

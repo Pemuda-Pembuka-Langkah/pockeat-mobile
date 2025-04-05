@@ -27,6 +27,21 @@ class ExerciseAnalysisResult {
 
   bool get isComplete => missingInfo == null || missingInfo!.isEmpty;
 
+  Map<String, dynamic> toMap() {
+    return {
+      'exerciseType': exerciseType,
+      'duration': duration,
+      'intensity': intensity,
+      'estimatedCalories': estimatedCalories,
+      'metValue': metValue,
+      'summary': summary,
+      'timestamp': timestamp.millisecondsSinceEpoch,
+      'originalInput': originalInput,
+      'missingInfo': missingInfo,
+    };
+  }
+
+  Map<String, dynamic> toJson() => toMap();
 
   // Factory dari Map (untuk parsing response dari database)
   factory ExerciseAnalysisResult.fromDbMap(
@@ -37,7 +52,8 @@ class ExerciseAnalysisResult {
       duration: map['duration'] ?? 'Tidak ditentukan',
       intensity: map['intensity'] ?? 'Tidak ditentukan',
       estimatedCalories: map['estimatedCalories'] ?? 0,
-      metValue: (map['metValue'] ?? 0.0).toDouble(), // Parsing MET value dari database
+      metValue: (map['metValue'] ?? 0.0)
+          .toDouble(), // Parsing MET value dari database
       summary: map['summary'],
       timestamp: map['timestamp'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['timestamp'])
@@ -47,22 +63,6 @@ class ExerciseAnalysisResult {
           ? List<String>.from(map['missingInfo'])
           : null,
     );
-  }
-
-  // Konversi ke Map (untuk penyimpanan)
-  Map<String, dynamic> toMap() {
-    return {
-      'exerciseType': exerciseType,
-      'duration': duration,
-      'intensity': intensity,
-      'estimatedCalories': estimatedCalories,
-      'metValue': metValue, // Menyimpan MET value ke database
-      'summary': summary,
-      'timestamp': timestamp.millisecondsSinceEpoch,
-      'originalInput': originalInput,
-      'missingInfo': missingInfo,
-      'isComplete': isComplete,
-    };
   }
 
   // Copy with method untuk memudahkan update
@@ -84,7 +84,8 @@ class ExerciseAnalysisResult {
       duration: duration ?? this.duration,
       intensity: intensity ?? this.intensity,
       estimatedCalories: estimatedCalories ?? this.estimatedCalories,
-      metValue: metValue ?? this.metValue, // Mempertahankan MET value atau menggantinya
+      metValue: metValue ??
+          this.metValue, // Mempertahankan MET value atau menggantinya
       summary: summary ?? this.summary,
       timestamp: timestamp ?? this.timestamp,
       originalInput: originalInput ?? this.originalInput,

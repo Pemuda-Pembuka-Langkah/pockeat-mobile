@@ -1,7 +1,8 @@
 // lib/features/ai_api_scan/services/exercise/exercise_analysis_service.dart
 import 'dart:convert';
-import 'package:pockeat/features/ai_api_scan/services/base/api_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/api_service_interface.dart';
+import 'package:pockeat/features/api_scan/services/base/api_service.dart';
+import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
+import 'package:pockeat/features/authentication/services/token_manager.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 class ExerciseAnalysisService {
@@ -13,10 +14,10 @@ class ExerciseAnalysisService {
   }) : _apiService = apiService;
 
   // coverage:ignore-start
-  factory ExerciseAnalysisService.fromEnv() {
-    final apiService = ApiService.fromEnv();
-    return ExerciseAnalysisService(apiService: apiService);
-  }
+  factory ExerciseAnalysisService.fromEnv({TokenManager? tokenManager}) {
+  final ApiServiceInterface apiService = ApiService.fromEnv(tokenManager: tokenManager);
+  return ExerciseAnalysisService(apiService: apiService);
+}
   // coverage:ignore-end
 
   Future<ExerciseAnalysisResult> analyze(String description,

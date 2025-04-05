@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';

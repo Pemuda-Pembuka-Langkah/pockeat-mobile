@@ -1,6 +1,6 @@
 // lib/pockeat/features/ai_api_scan/models/food_analysis.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/api_service.dart';
+import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:uuid/uuid.dart';
 
 class FoodAnalysisResult {
@@ -9,7 +9,7 @@ class FoodAnalysisResult {
   final NutritionInfo nutritionInfo;
   final List<String> warnings;
   String? foodImageUrl;
-  final String timestamp;
+  final DateTime timestamp;
   final String id;
   final bool isLowConfidence; // Added low confidence flag
 
@@ -29,10 +29,10 @@ class FoodAnalysisResult {
     required this.nutritionInfo,
     this.warnings = const [],
     this.foodImageUrl,
-    String? timestamp,
+    DateTime? timestamp,
     String? id,
     this.isLowConfidence = false, // Default to high confidence
-  })  : timestamp = timestamp ?? DateTime.now().toIso8601String(),
+  })  : timestamp = timestamp ?? DateTime.now(),
         id = id ?? const Uuid().v4();
 
   factory FoodAnalysisResult.fromJson(Map<String, dynamic> json, {String? id}) {
@@ -65,21 +65,25 @@ class FoodAnalysisResult {
       }
     }
 
-    String parsedTimestamp;
+    DateTime parsedTimestamp;
     if (json['timestamp'] != null) {
-      // Handle both Timestamp and int formats
+      // Handle different timestamp formats
       if (json['timestamp'] is Timestamp) {
-        parsedTimestamp =
-            (json['timestamp'] as Timestamp).toDate().toIso8601String();
+        parsedTimestamp = (json['timestamp'] as Timestamp).toDate();
       } else if (json['timestamp'] is int) {
         parsedTimestamp =
-            DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int)
-                .toIso8601String();
+            DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int);
+      } else if (json['timestamp'] is String) {
+        try {
+          parsedTimestamp = DateTime.parse(json['timestamp'] as String);
+        } catch (e) {
+          parsedTimestamp = DateTime.now();
+        }
       } else {
-        parsedTimestamp = DateTime.now().toIso8601String();
+        parsedTimestamp = DateTime.now();
       }
     } else {
-      parsedTimestamp = DateTime.now().toIso8601String();
+      parsedTimestamp = DateTime.now();
     }
 
     // Check for low confidence flag
@@ -104,7 +108,7 @@ class FoodAnalysisResult {
       'nutrition_info': nutritionInfo.toJson(),
       'warnings': warnings,
       'food_image_url': foodImageUrl,
-      'timestamp': Timestamp.fromDate(DateTime.parse(timestamp)),
+      'timestamp': Timestamp.fromDate(timestamp),
       'id': id,
       'is_low_confidence': isLowConfidence,
     };
@@ -117,7 +121,7 @@ class FoodAnalysisResult {
     NutritionInfo? nutritionInfo,
     List<String>? warnings,
     String? foodImageUrl,
-    String? timestamp,
+    DateTime? timestamp,
     String? id,
     bool? isLowConfidence,
   }) {

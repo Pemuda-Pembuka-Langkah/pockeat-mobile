@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/api_service_interface.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/api_auth_interceptor.dart';
-import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
+import 'package:pockeat/features/api_scan/services/base/api_auth_interceptor.dart';
+import 'package:pockeat/features/authentication/services/token_manager.dart';
 
 class ApiServiceException implements Exception {
   final String message;
@@ -19,33 +19,48 @@ class ApiService implements ApiServiceInterface {
   final String baseUrl;
   final http.Client _client;
   final ApiAuthInterceptor? _authInterceptor;
+ApiService({
+  required this.baseUrl,
+  http.Client? client,
+  TokenManager? tokenManager,
+}) : _client = client ?? http.Client(),
+     _authInterceptor = 
+         tokenManager != null ? ApiAuthInterceptor(tokenManager) : null;
 
-  ApiService({
-    required this.baseUrl,
-    http.Client? client,
-    LoginService? loginService,
-  })  : _client = client ?? http.Client(),
-        _authInterceptor =
-            loginService != null ? ApiAuthInterceptor(loginService) : null;
-
+         
   // Updated factory constructor that accepts LoginService
-  factory ApiService.fromEnv({LoginService? loginService}) {
-    final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.8:8080/api';
+    factory ApiService.fromEnv({TokenManager? tokenManager}) {
+    final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.10:8080/api';
     print("🌐 Initializing API Service with base URL: $baseUrl");
-    return ApiService(baseUrl: baseUrl, loginService: loginService);
+    return ApiService(baseUrl: baseUrl, tokenManager: tokenManager);
   }
 
   // Generic method to send requests with JWT auth
   Future<dynamic> _sendRequest(dynamic request) async {
+    print(
+        "DEBUG: _authInterceptor is ${_authInterceptor == null ? 'NULL' : 'NOT NULL'}");
+
     if (_authInterceptor != null) {
+      print("DEBUG: Inside _authInterceptor not null block");
+
       if (request is http.Request) {
+        print("DEBUG: Request is http.Request");
         request = await _authInterceptor.interceptRequest(request);
+        print("🔒 Bearer token: ${request.headers['Authorization']}");
         return await _client.send(request);
       } else if (request is http.MultipartRequest) {
+        print("DEBUG: Request is http.MultipartRequest");
         request = await _authInterceptor.interceptMultipartRequest(request);
+        print("🔒 Bearer token: ${request.headers['Authorization']}");
         return await _client.send(request);
+      } else {
+        print(
+            "DEBUG: Request is neither http.Request nor http.MultipartRequest, it's: ${request.runtimeType}");
       }
+    } else {
+      print("DEBUG: _authInterceptor is NULL, skipping auth");
     }
+
     return await _client.send(request);
   }
 
@@ -85,8 +100,9 @@ class ApiService implements ApiServiceInterface {
       request.headers['Content-Type'] = 'application/json';
       request.body = jsonEncode(body);
 
-      // Use our custom method to send the request with auth
+      print("BEFORE SENDING REQUEST: ${request.url}");
       final streamedResponse = await _sendRequest(request);
+      print("AFTER SENDING REQUEST: ${request.url}");
 
       final response = await http.Response.fromStream(streamedResponse);
 
@@ -170,7 +186,6 @@ class ApiService implements ApiServiceInterface {
     }
   }
 
-  @override
   void dispose() {
     print("🔄 Closing API service client");
     _client.close();

@@ -3,15 +3,11 @@ import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 import 'package:uuid/uuid.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
-@GenerateMocks([
-  FoodTextAnalysisService, 
-  FoodTextInputRepository, 
-  Uuid
-])
+@GenerateMocks([FoodTextAnalysisService, FoodTextInputRepository, Uuid])
 import 'food_text_input_service_test.mocks.dart';
 
 void main() {
@@ -76,10 +72,12 @@ void main() {
       when(mockFoodTextInputRepository.save(testFoodAnalysis, '123'))
           .thenAnswer((_) async => 'save-id-123');
 
-      final result = await foodTextInputService.saveFoodAnalysis(testFoodAnalysis);
+      final result =
+          await foodTextInputService.saveFoodAnalysis(testFoodAnalysis);
 
       expect(result, 'Food analysis saved successfully');
-      verify(mockFoodTextInputRepository.save(testFoodAnalysis, '123')).called(1);
+      verify(mockFoodTextInputRepository.save(testFoodAnalysis, '123'))
+          .called(1);
     });
 
     test('saveFoodAnalysis should handle errors', () async {
@@ -88,12 +86,15 @@ void main() {
 
       expect(() => foodTextInputService.saveFoodAnalysis(testFoodAnalysis),
           throwsA(isA<Exception>()));
-      verify(mockFoodTextInputRepository.save(testFoodAnalysis, '123')).called(1);
+      verify(mockFoodTextInputRepository.save(testFoodAnalysis, '123'))
+          .called(1);
     });
 
     test('correctFoodAnalysis should return corrected analysis', () async {
-      final correctedAnalysis = testFoodAnalysis.copyWith(foodName: 'Corrected Food');
-      when(mockFoodTextAnalysisService.correctAnalysis(testFoodAnalysis, 'correction comment'))
+      final correctedAnalysis =
+          testFoodAnalysis.copyWith(foodName: 'Corrected Food');
+      when(mockFoodTextAnalysisService.correctAnalysis(
+              testFoodAnalysis, 'correction comment'))
           .thenAnswer((_) async => correctedAnalysis);
 
       final result = await foodTextInputService.correctFoodAnalysis(
@@ -118,7 +119,8 @@ void main() {
           .called(1);
     });
 
-    test('getAllFoodAnalysis should return all food analysis results', () async {
+    test('getAllFoodAnalysis should return all food analysis results',
+        () async {
       final List<FoodAnalysisResult> analysisResults = [testFoodAnalysis];
       when(mockFoodTextInputRepository.getAll())
           .thenAnswer((_) async => analysisResults);

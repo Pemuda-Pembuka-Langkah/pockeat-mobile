@@ -1,8 +1,9 @@
 // test/features/ai_api_scan/services/exercise/exercise_analysis_service_test.dart
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/api_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
+import 'package:pockeat/features/api_scan/services/base/api_service.dart';
+import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 // Import the generated mock
@@ -29,7 +30,8 @@ void main() {
         "calories_burned": 350,
         "duration_minutes": 30,
         "intensity_level": "Moderate",
-        "met_value": 8.5
+        "met_value": 8.5,
+        "duration": "30 minutes"
       };
 
       // Set up mock
@@ -73,7 +75,8 @@ void main() {
         "calories_burned": 0,
         "duration_minutes": 0,
         "intensity_level": "Unknown",
-        "met_value": 0
+        "met_value": 0,
+        "duration": "0 minutes"
       };
 
       // Set up mock
@@ -88,7 +91,8 @@ void main() {
       // Assert
       expect(result.exerciseType, equals('Unknown'));
       expect(result.estimatedCalories, equals(0));
-      expect(result.intensity, equals('Not specified'));
+      expect(result.duration, equals('0 minutes'));
+      expect(result.intensity, equals('Unknown'));
       expect(result.metValue, equals(0.0));
       expect(result.summary, contains('Could not analyze exercise'));
       expect(result.missingInfo, contains('exercise_type'));
@@ -122,7 +126,8 @@ void main() {
 
       // Act & Assert
       expect(
-        () => service.parseExerciseResponse(invalidText as Map<String, dynamic>, 'jogging'),
+        () => service.parseExerciseResponse(
+            invalidText as Map<String, dynamic>, 'jogging'),
         throwsA(isA<ApiServiceException>().having((e) => e.message, 'message',
             contains('Failed to parse exercise analysis response'))),
       );
@@ -147,22 +152,13 @@ void main() {
 
       const userComment = 'I actually ran for 45 minutes, not 30';
 
-      // Convert ExerciseAnalysisResult to API format first
-      final apiFormat = {
-        'exercise_type': 'Running',
-        'calories_burned': 350,
-        'duration_minutes': 30,
-        'intensity_level': 'Moderate',
-        'met_value': 8.5,
-        'description': 'Running 5km in 30 minutes',
-      };
-
       final correctionJsonResponse = {
         "exercise_type": "Running",
         "calories_burned": 525,
         "duration_minutes": 45,
         "intensity_level": "Moderate",
         "met_value": 8.5,
+        "duration": "45 minutes",
         "correction_applied":
             "Updated duration from 30 to 45 minutes and recalculated calories"
       };
@@ -171,7 +167,7 @@ void main() {
       when(mockApiService.postJsonRequest(
         '/exercise/correct',
         {
-          'previous_result': apiFormat,
+          'previous_result': previousResult.toJson(),
           'user_comment': userComment,
         },
       )).thenAnswer((_) async => correctionJsonResponse);
@@ -194,7 +190,7 @@ void main() {
       verify(mockApiService.postJsonRequest(
         '/exercise/correct',
         {
-          'previous_result': apiFormat,
+          'previous_result': previousResult.toJson(),
           'user_comment': userComment,
         },
       )).called(1);
@@ -217,21 +213,11 @@ void main() {
 
       const userComment = 'I actually ran for 45 minutes';
 
-      // Convert ExerciseAnalysisResult to API format first
-      final apiFormat = {
-        'exercise_type': 'Running',
-        'calories_burned': 350,
-        'duration_minutes': 30,
-        'intensity_level': 'Moderate',
-        'met_value': 8.5,
-        'description': 'Running 5km in 30 minutes',
-      };
-
       // Set up mock to throw exception
       when(mockApiService.postJsonRequest(
         '/exercise/correct',
         {
-          'previous_result': apiFormat,
+          'previous_result': previousResult.toJson(),
           'user_comment': userComment,
         },
       )).thenThrow(ApiServiceException('API call failed'));

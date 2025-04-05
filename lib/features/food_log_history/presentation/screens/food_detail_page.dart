@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/ai_api_scan/utils/food_analysis_parser.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/utils/food_analysis_parser.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:intl/intl.dart';
@@ -29,7 +29,7 @@ class FoodDetailPage extends StatefulWidget {
 class _FoodDetailPageState extends State<FoodDetailPage> {
   late Future<FoodAnalysisResult?> _foodFuture;
   bool _isLoading = false;
-  
+
   // Colors
   final Color primaryGreen = const Color(0xFF4CAF50);
   final Color primaryOrange = const Color(0xFFFF9800);
@@ -60,7 +60,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
 
   Future<void> _deleteFood() async {
     if (!mounted) return;
-    
+
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
@@ -73,9 +73,9 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       // in the UI with _isLoading = true
 
       bool success = await widget.foodRepository.deleteById(widget.foodId);
-      
+
       if (!mounted) return;
-      
+
       if (success) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
@@ -118,7 +118,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       }
     } catch (e) {
       if (!mounted) return;
-      
+
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Row(
@@ -300,7 +300,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
             ),
     );
   }
-  
+
   Widget _buildFoodDetailContent(FoodAnalysisResult food) {
     return SingleChildScrollView(
       child: Column(
@@ -308,7 +308,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
         children: [
           // Header with food image (if available)
           _buildFoodHeader(food),
-          
+
           // Food info section
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -330,7 +330,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                     Icon(CupertinoIcons.calendar, size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
                     Text(
-                      _formatDate(food.timestampAsDateTime),
+                      _formatDate(food.timestamp),
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -339,16 +339,15 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Nutrition section
                 _buildNutritionSection(food),
-                
+
                 // Ingredients section
                 _buildIngredientsSection(food),
-                
+
                 // Warnings section (if any)
-                if (food.warnings.isNotEmpty)
-                  _buildWarningsSection(food),
+                if (food.warnings.isNotEmpty) _buildWarningsSection(food),
               ],
             ),
           ),
@@ -356,7 +355,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       ),
     );
   }
-  
+
   Widget _buildFoodHeader(FoodAnalysisResult food) {
     return Container(
       height: 200,
@@ -378,7 +377,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
             )
           else
             _buildFoodImagePlaceholder(),
-            
+
           // Gradient overlay
           Container(
             decoration: BoxDecoration(
@@ -393,7 +392,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
               ),
             ),
           ),
-          
+
           // Calories indicator
           Positioned(
             bottom: 16,
@@ -436,7 +435,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       ),
     );
   }
-  
+
   Widget _buildFoodImagePlaceholder() {
     return Container(
       color: primaryGreen.withOpacity(0.1),
@@ -449,24 +448,27 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       ),
     );
   }
-  
+
   Widget _buildNutritionSection(FoodAnalysisResult food) {
     // Calculate macronutrient percentages
     final totalCarbs = food.nutritionInfo.carbs.toInt();
     final totalProtein = food.nutritionInfo.protein.toInt();
     final totalFat = food.nutritionInfo.fat.toInt();
     final totalMacros = totalCarbs + totalProtein + totalFat;
-    
-    final carbPercentage = totalMacros > 0 ? (totalCarbs / totalMacros) * 100 : 0;
-    final proteinPercentage = totalMacros > 0 ? (totalProtein / totalMacros) * 100 : 0;
+
+    final carbPercentage =
+        totalMacros > 0 ? (totalCarbs / totalMacros) * 100 : 0;
+    final proteinPercentage =
+        totalMacros > 0 ? (totalProtein / totalMacros) * 100 : 0;
     final fatPercentage = totalMacros > 0 ? (totalFat / totalMacros) * 100 : 0;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Nutrition Information', CupertinoIcons.chart_pie_fill, primaryBlue),
+        _buildSectionHeader('Nutrition Information',
+            CupertinoIcons.chart_pie_fill, primaryBlue),
         const SizedBox(height: 16),
-        
+
         // Macronutrient breakdown
         Container(
           padding: const EdgeInsets.all(16),
@@ -493,7 +495,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Macronutrient bar
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -518,22 +520,25 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Macronutrient details
               Row(
                 children: [
-                  _buildMacronutrientItem('Carbs', '$totalCarbs g', '${carbPercentage.toStringAsFixed(0)}%', Colors.amber),
+                  _buildMacronutrientItem('Carbs', '$totalCarbs g',
+                      '${carbPercentage.toStringAsFixed(0)}%', Colors.amber),
                   const SizedBox(width: 16),
-                  _buildMacronutrientItem('Protein', '$totalProtein g', '${proteinPercentage.toStringAsFixed(0)}%', primaryBlue),
+                  _buildMacronutrientItem('Protein', '$totalProtein g',
+                      '${proteinPercentage.toStringAsFixed(0)}%', primaryBlue),
                   const SizedBox(width: 16),
-                  _buildMacronutrientItem('Fat', '$totalFat g', '${fatPercentage.toStringAsFixed(0)}%', primaryRed),
+                  _buildMacronutrientItem('Fat', '$totalFat g',
+                      '${fatPercentage.toStringAsFixed(0)}%', primaryRed),
                 ],
               ),
             ],
           ),
         ),
         const SizedBox(height: 16),
-        
+
         // Detailed nutrition
         Container(
           padding: const EdgeInsets.all(16),
@@ -560,13 +565,20 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildNutritionRow('Calories', '${food.nutritionInfo.calories.toInt()} cal', primaryOrange),
-              _buildNutritionRow('Protein', '${food.nutritionInfo.protein.toInt()} g', primaryBlue),
-              _buildNutritionRow('Carbs', '${food.nutritionInfo.carbs.toInt()} g', Colors.amber),
-              _buildNutritionRow('Fat', '${food.nutritionInfo.fat.toInt()} g', primaryRed),
-              _buildNutritionRow('Sodium', '${food.nutritionInfo.sodium.toInt()} mg', Colors.grey),
-              _buildNutritionRow('Fiber', '${food.nutritionInfo.fiber.toInt()} g', primaryGreen),
-              _buildNutritionRow('Sugar', '${food.nutritionInfo.sugar.toInt()} g', Colors.pink),
+              _buildNutritionRow('Calories',
+                  '${food.nutritionInfo.calories.toInt()} cal', primaryOrange),
+              _buildNutritionRow('Protein',
+                  '${food.nutritionInfo.protein.toInt()} g', primaryBlue),
+              _buildNutritionRow('Carbs',
+                  '${food.nutritionInfo.carbs.toInt()} g', Colors.amber),
+              _buildNutritionRow(
+                  'Fat', '${food.nutritionInfo.fat.toInt()} g', primaryRed),
+              _buildNutritionRow('Sodium',
+                  '${food.nutritionInfo.sodium.toInt()} mg', Colors.grey),
+              _buildNutritionRow('Fiber',
+                  '${food.nutritionInfo.fiber.toInt()} g', primaryGreen),
+              _buildNutritionRow('Sugar',
+                  '${food.nutritionInfo.sugar.toInt()} g', Colors.pink),
             ],
           ),
         ),
@@ -574,8 +586,9 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       ],
     );
   }
-  
-  Widget _buildMacronutrientItem(String name, String value, String percentage, Color color) {
+
+  Widget _buildMacronutrientItem(
+      String name, String value, String percentage, Color color) {
     return Expanded(
       child: Column(
         children: [
@@ -656,14 +669,14 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       ),
     );
   }
-  
+
   Widget _buildIngredientsSection(FoodAnalysisResult food) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Ingredients', CupertinoIcons.list_bullet, primaryGreen),
+        _buildSectionHeader(
+            'Ingredients', CupertinoIcons.list_bullet, primaryGreen),
         const SizedBox(height: 16),
-        
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -678,70 +691,71 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
             ],
           ),
           child: food.ingredients.isEmpty
-            ? _buildEmptyStateMessage('No ingredients information available', CupertinoIcons.info_circle)
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: food.ingredients.map((ingredient) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: primaryGreen,
-                            shape: BoxShape.circle,
+              ? _buildEmptyStateMessage('No ingredients information available',
+                  CupertinoIcons.info_circle)
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: food.ingredients.map((ingredient) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: primaryGreen,
+                              shape: BoxShape.circle,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                ingredient.name,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              if (ingredient.servings > 0)
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  '${ingredient.servings} grams',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.black54,
+                                  ingredient.name,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black87,
                                   ),
                                 ),
-                            ],
+                                if (ingredient.servings > 0)
+                                  Text(
+                                    '${ingredient.servings} grams',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
         ),
         const SizedBox(height: 24),
       ],
     );
   }
-  
+
   Widget _buildWarningsSection(FoodAnalysisResult food) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Warnings', CupertinoIcons.exclamationmark_triangle_fill, Colors.amber),
+        _buildSectionHeader('Warnings',
+            CupertinoIcons.exclamationmark_triangle_fill, Colors.amber),
         const SizedBox(height: 16),
-        
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -768,7 +782,8 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                 ),
                 child: Row(
                   children: [
-                    Icon(CupertinoIcons.exclamationmark_circle, color: Colors.amber),
+                    Icon(CupertinoIcons.exclamationmark_circle,
+                        color: Colors.amber),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -789,7 +804,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       ],
     );
   }
-  
+
   Widget _buildSectionHeader(String title, IconData icon, Color color) {
     return Row(
       children: [
@@ -806,7 +821,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       ],
     );
   }
-  
+
   Widget _buildEmptyStateMessage(String message, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(16),

@@ -1,9 +1,10 @@
 // lib/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart
 import 'dart:io';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/api_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/api_service_interface.dart';
-import 'package:pockeat/features/ai_api_scan/utils/food_analysis_parser.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/services/base/api_service.dart';
+import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
+import 'package:pockeat/features/api_scan/utils/food_analysis_parser.dart';
+import 'package:pockeat/features/authentication/services/token_manager.dart';
 
 class NutritionLabelAnalysisService {
   final ApiServiceInterface _apiService; // Change type to interface
@@ -14,8 +15,9 @@ class NutritionLabelAnalysisService {
   }) : _apiService = apiService;
 
   // coverage:ignore-start
-  factory NutritionLabelAnalysisService.fromEnv() {
-    final apiService = ApiService.fromEnv();
+  factory NutritionLabelAnalysisService.fromEnv({TokenManager? tokenManager}) {
+    final ApiServiceInterface apiService =
+        ApiService.fromEnv(tokenManager: tokenManager);
     return NutritionLabelAnalysisService(apiService: apiService);
   }
   // coverage:ignore-end

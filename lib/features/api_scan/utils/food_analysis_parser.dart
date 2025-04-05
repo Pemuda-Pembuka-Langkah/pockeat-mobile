@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/ai_api_scan/services/base/api_service.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/services/base/api_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FoodAnalysisParser {
   static FoodAnalysisResult parse(String jsonText) {
@@ -52,9 +53,14 @@ class FoodAnalysisParser {
       // Proses timestamp
       DateTime parsedTimestamp;
       if (jsonData['timestamp'] != null) {
-        if (jsonData['timestamp'] is String) {
+        if (jsonData['timestamp'] is Timestamp) {
+          parsedTimestamp = (jsonData['timestamp'] as Timestamp).toDate();
+        } else if (jsonData['timestamp'] is int) {
+          parsedTimestamp =
+              DateTime.fromMillisecondsSinceEpoch(jsonData['timestamp'] as int);
+        } else if (jsonData['timestamp'] is String) {
           try {
-            parsedTimestamp = DateTime.parse(jsonData['timestamp']);
+            parsedTimestamp = DateTime.parse(jsonData['timestamp'] as String);
           } catch (e) {
             parsedTimestamp = DateTime.now();
           }
@@ -72,7 +78,8 @@ class FoodAnalysisParser {
         ingredients: ingredients,
         nutritionInfo: nutritionInfo,
         warnings: warnings is List ? List<String>.from(warnings) : <String>[],
-        timestamp: parsedTimestamp.toIso8601String(),
+        timestamp: parsedTimestamp,
+        isLowConfidence: jsonData['is_low_confidence'] ?? false,
       );
       print("Debug: Successfully created FoodAnalysisResult");
       return result;
@@ -130,15 +137,5 @@ class FoodAnalysisParser {
     if (value is double) return value;
     if (value is String) return double.tryParse(value) ?? 0.0;
     return 0.0;
-  }
-}
-
-extension FoodAnalysisResultExtension on FoodAnalysisResult {
-  DateTime get timestampAsDateTime {
-    try {
-      return DateTime.parse(timestamp);
-    } catch (e) {
-      return DateTime.now();
-    }
   }
 }
