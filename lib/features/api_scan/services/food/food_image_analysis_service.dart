@@ -15,9 +15,10 @@ class FoodImageAnalysisService {
 
 // coverage:ignore-start
   factory FoodImageAnalysisService.fromEnv({TokenManager? tokenManager}) {
-  final ApiServiceInterface apiService = ApiService.fromEnv(tokenManager: tokenManager);
-  return FoodImageAnalysisService(apiService: apiService);
-}
+    final ApiServiceInterface apiService =
+        ApiService.fromEnv(tokenManager: tokenManager);
+    return FoodImageAnalysisService(apiService: apiService);
+  }
 // coverage:ignore-end
   Future<FoodAnalysisResult> analyze(File imageFile) async {
     try {
@@ -42,7 +43,7 @@ class FoodImageAnalysisService {
       FoodAnalysisResult previousResult, String userComment) async {
     try {
       final responseData = await _apiService.postJsonRequest(
-        '/food/correct/image',
+        '/food/image/correct',
         {
           'previous_result': previousResult.toJson(),
           'user_comment': userComment,
