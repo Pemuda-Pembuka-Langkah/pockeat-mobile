@@ -340,9 +340,17 @@ void main() {
       // Arrange - setup repository to throw
       when(mockSmartExerciseLogRepository.getAnalysisResultsByYear(testYear))
           .thenThrow(Exception('Repository failure'));
+      
+      // Make sure the other repositories return empty lists
+      when(mockCardioRepository.filterByYear(testYear))
+          .thenAnswer((_) async => []);
+      when(mockWeightLiftingRepository.filterByYear(testYear))
+          .thenAnswer((_) async => []);
 
-      // Act and Assert
+      // Act
       final result = await service.getExerciseLogsByYear(testUserId, testYear);
+      
+      // Assert
       expect(result, isEmpty);
     });
   });
