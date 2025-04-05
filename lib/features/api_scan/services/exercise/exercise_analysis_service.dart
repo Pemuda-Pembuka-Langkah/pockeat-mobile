@@ -15,9 +15,10 @@ class ExerciseAnalysisService {
 
   // coverage:ignore-start
   factory ExerciseAnalysisService.fromEnv({TokenManager? tokenManager}) {
-  final ApiServiceInterface apiService = ApiService.fromEnv(tokenManager: tokenManager);
-  return ExerciseAnalysisService(apiService: apiService);
-}
+    final ApiServiceInterface apiService =
+        ApiService.fromEnv(tokenManager: tokenManager);
+    return ExerciseAnalysisService(apiService: apiService);
+  }
   // coverage:ignore-end
 
   Future<ExerciseAnalysisResult> analyze(String description,
@@ -73,7 +74,6 @@ class ExerciseAnalysisService {
     try {
       print("Debug: Processing exercise analysis response");
       print("Debug: Error field value: ${jsonData['error']}");
-      print("Debug: Exercise type: ${jsonData['exercise_type']}");
 
       // Check for error field in different formats
       if (jsonData.containsKey('error') && jsonData['error'] != null) {
@@ -82,9 +82,9 @@ class ExerciseAnalysisService {
         print("Debug: Error field is not null, creating error result");
 
         return ExerciseAnalysisResult(
-          exerciseType: jsonData['exercise_type'] ?? 'Unknown',
-          duration: "Not specified",
-          intensity: jsonData['intensity'] ?? 'Unknown',
+          exerciseType: jsonData['exercise_type'] ?? 'unknown',
+          duration: "0 minutes",
+          intensity: jsonData['intensity'] ?? 'unknown',
           estimatedCalories: 0,
           metValue: (jsonData['met_value'] ?? 0.0).toDouble(),
           summary: "Could not analyze exercise: ${jsonData['error']}",
@@ -96,38 +96,49 @@ class ExerciseAnalysisService {
 
       print("Debug: Passed error check");
 
-      final exerciseType = jsonData['exercise_type'] ?? 'Unknown';
+      final exerciseType = jsonData['exercise_type'] ?? 'unknown';
       final caloriesBurned = jsonData['calories_burned'] ?? 0;
-      final durationAPI = jsonData['duration'] ?? 0;
-      final intensityLevel = jsonData['intensity'] ?? 'Unknown';
+      final durationAPI = jsonData['duration'] ?? '0 minutes';
+
+      // The API sends lowercase intensity values (low, medium, high)
+      // Capitalize the first letter for display in the Flutter app
+      String intensity = jsonData['intensity'] ?? 'unknown';
+      intensity = intensity.isNotEmpty
+          ? intensity[0].toUpperCase() + intensity.substring(1)
+          : 'unknown';
+
       final metValue = (jsonData['met_value'] ?? 0.0).toDouble();
 
       // Create a summary
       final summary =
-          'You performed $exerciseType for $durationAPI at $intensityLevel intensity, burning approximately $caloriesBurned calories.';
+          'You performed $exerciseType for $durationAPI at $intensity intensity, burning approximately $caloriesBurned calories.';
 
-      // Determine duration string format
-      final duration = '$durationAPI ';
+      // Check if any required fields are missing
+      final List<String> missingInfo = [];
+      if (exerciseType == 'unknown') missingInfo.add('exercise_type');
+      if (durationAPI == '0 minutes') missingInfo.add('duration');
+      if (intensity == 'unknown') missingInfo.add('intensity');
 
       // Create the exercise analysis result in the app's model format
       return ExerciseAnalysisResult(
         exerciseType: exerciseType,
-        duration: duration,
-        intensity: intensityLevel,
+        duration: durationAPI.toString().trim(),
+        intensity: intensity,
         estimatedCalories:
             caloriesBurned is int ? caloriesBurned : caloriesBurned.toInt(),
         metValue: metValue,
         summary: summary,
         timestamp: DateTime.now(),
         originalInput: originalInput,
+        missingInfo: missingInfo.isNotEmpty ? missingInfo : null,
       );
     } catch (e) {
       print("Debug: Caught exception in parseExerciseResponse: $e");
       // Create a result with the error instead of throwing
       return ExerciseAnalysisResult(
-        exerciseType: 'Unknown',
-        duration: 'Not specified',
-        intensity: 'Unknown',
+        exerciseType: 'unknown',
+        duration: '0 minutes',
+        intensity: 'unknown',
         estimatedCalories: 0,
         metValue: 0.0,
         summary: "Failed to parse exercise analysis response: $e",
@@ -157,9 +168,9 @@ class ExerciseAnalysisService {
           jsonEncode(responseData), previousResult, userComment);
     } catch (e) {
       if (e is ApiServiceException) {
-        rethrow;
+        throw ApiServiceException("API call failed: ${e.message}");
       }
-      throw ApiServiceException("Error correcting exercise analysis: $e");
+      throw ApiServiceException("API call failed: $e");
     }
   }
 
@@ -169,25 +180,30 @@ class ExerciseAnalysisService {
       // Reuse the existing parsing logic
       final jsonData = jsonDecode(responseText);
 
+      // Validate required fields
+      if (!jsonData.containsKey('exercise_type') ||
+          !jsonData.containsKey('duration') ||
+          !jsonData.containsKey('intensity')) {
+        throw FormatException("Missing required fields in correction response");
+      }
+
       // Extract values from JSON, defaulting to previous values if not provided
       final exerciseType =
           jsonData['exercise_type'] ?? previousResult.exerciseType;
       final caloriesBurned =
           jsonData['calories_burned'] ?? previousResult.estimatedCalories;
 
-      // Handle duration which might be in string format in previousResult
-      int durationAPI;
-      if (jsonData['duration'] != null) {
-        durationAPI = jsonData['duration'];
-      } else {
-        // Try to extract numbers from the previous duration string
-        final durationString = previousResult.duration;
-        final numbers = RegExp(r'\d+').allMatches(durationString);
-        durationAPI =
-            numbers.isNotEmpty ? int.parse(numbers.first.group(0)!) : 0;
+      // Handle duration as string directly from API
+      final durationValue = jsonData['duration'] ?? previousResult.duration;
+
+      // Handle the intensity, capitalizing the first letter
+      String intensity = jsonData['intensity'] ?? previousResult.intensity;
+      if (intensity != previousResult.intensity) {
+        intensity = intensity.isNotEmpty
+            ? intensity[0].toUpperCase() + intensity.substring(1)
+            : 'unknown';
       }
 
-      final intensityLevel = jsonData['intensity'] ?? previousResult.intensity;
       final metValue =
           (jsonData['met_value'] ?? previousResult.metValue).toDouble();
       final correctionApplied = jsonData['correction_applied'] ??
@@ -195,16 +211,13 @@ class ExerciseAnalysisService {
 
       // Create a summary incorporating the correction information
       final summary =
-          'You performed $exerciseType for $durationAPI minutes at $intensityLevel intensity, burning approximately $caloriesBurned calories. ($correctionApplied)';
-
-      // Determine duration string format
-      final duration = '$durationAPI minutes';
+          'You performed $exerciseType for $durationValue at $intensity intensity, burning approximately $caloriesBurned calories. ($correctionApplied)';
 
       // Create the corrected exercise analysis result
       return ExerciseAnalysisResult(
         exerciseType: exerciseType,
-        duration: duration,
-        intensity: intensityLevel,
+        duration: durationValue.toString().trim(),
+        intensity: intensity,
         estimatedCalories:
             caloriesBurned is int ? caloriesBurned : caloriesBurned.toInt(),
         metValue: metValue,
@@ -221,19 +234,15 @@ class ExerciseAnalysisService {
   // Helper method to convert ExerciseAnalysisResult to API format
   Map<String, dynamic> _exerciseResultToApiFormat(
       ExerciseAnalysisResult result) {
-    // Extract duration minutes as a number
-    final durationStr = result.duration;
-    final numbers = RegExp(r'\d+').allMatches(durationStr);
-    final durationAPI =
-        numbers.isNotEmpty ? int.parse(numbers.first.group(0)!) : 0;
+    // Convert to lowercase to match API expectations
+    final intensityLowercase = result.intensity.toLowerCase();
 
     return {
       'exercise_type': result.exerciseType,
       'calories_burned': result.estimatedCalories,
-      'duration': durationAPI,
-      'intensity': result.intensity,
-      'met_value': result.metValue,
-      'description': result.originalInput,
+      'duration': result.duration, // Keep as string
+      'intensity': intensityLowercase,
+      'user_comment': result.originalInput, // Include original input as comment
     };
   }
 }

@@ -10,8 +10,16 @@ import 'package:pockeat/features/api_scan/services/food/food_image_analysis_serv
 // Import the generated mock
 import '../base/api_service_test.mocks.dart';
 
-// Mock File
-class MockFile extends Mock implements File {}
+// Mock File class implementation
+class MockFile extends Mock implements File {
+  final String _mockPath = 'mock_image.jpg';
+
+  @override
+  String get path => _mockPath;
+
+  @override
+  bool existsSync() => true;
+}
 
 void main() {
   late MockApiServiceInterface mockApiService;
@@ -22,10 +30,6 @@ void main() {
     mockApiService = MockApiServiceInterface();
     mockFile = MockFile();
     service = FoodImageAnalysisService(apiService: mockApiService);
-
-    // Set up default mock file behavior
-    when(mockFile.path).thenReturn('mock_image.jpg');
-    when(mockFile.existsSync()).thenReturn(true);
   });
 
   group('FoodImageAnalysisService', () {
@@ -47,7 +51,7 @@ void main() {
 
       // Set up mock
       when(mockApiService.postFileRequest(
-        '/food/image/analyze',
+        '/food/analyze/image',
         mockFile,
         'image',
       )).thenAnswer((_) async => validJsonResponse);
@@ -67,13 +71,13 @@ void main() {
 
       // Verify the API call was made with correct parameters
       verify(mockApiService.postFileRequest(
-        '/food/image/analyze',
+        '/food/analyze/image',
         mockFile,
         'image',
       )).called(1);
     });
 
-    test('should handle error but still return result with default values',
+    test('should handle error as an exception when error field is present',
         () async {
       // Arrange
       final errorJsonResponse = {
@@ -85,28 +89,23 @@ void main() {
 
       // Set up mock
       when(mockApiService.postFileRequest(
-        '/food/image/analyze',
+        '/food/analyze/image',
         mockFile,
         'image',
       )).thenAnswer((_) async => errorJsonResponse);
 
-      // Act
-      final result = await service.analyze(mockFile);
-
-      // Assert
-      expect(result.foodName, equals('Unknown'));
-      expect(result.ingredients, isEmpty);
-      expect(result.nutritionInfo.calories, equals(0));
-      expect(result.nutritionInfo.protein, equals(0));
-      expect(result.nutritionInfo.carbs, equals(0));
-      expect(result.nutritionInfo.fat, equals(0));
+      // Act & Assert
+      expect(
+          () => service.analyze(mockFile),
+          throwsA(isA<ApiServiceException>().having((e) => e.message,
+              'error message', equals('Could not analyze image'))));
     });
 
     test('should throw exception when API returns error', () async {
       // Arrange
       // Set up mock to throw exception
       when(mockApiService.postFileRequest(
-        '/food/image/analyze',
+        '/food/analyze/image',
         mockFile,
         'image',
       )).thenThrow(ApiServiceException('API request failed'));
@@ -165,7 +164,7 @@ void main() {
 
       // Set up mock
       when(mockApiService.postJsonRequest(
-        '/food/correct/image',
+        '/food/image/correct',
         {
           'previous_result': previousResult.toJson(),
           'user_comment': userComment,
@@ -185,7 +184,7 @@ void main() {
 
       // Verify the API call was made
       verify(mockApiService.postJsonRequest(
-        '/food/correct/image',
+        '/food/image/correct',
         {
           'previous_result': previousResult.toJson(),
           'user_comment': userComment,
@@ -218,7 +217,7 @@ void main() {
 
       // Set up mock to throw exception
       when(mockApiService.postJsonRequest(
-        '/food/correct/image',
+        '/food/image/correct',
         {
           'previous_result': previousResult.toJson(),
           'user_comment': userComment,

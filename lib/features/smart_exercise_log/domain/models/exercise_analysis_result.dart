@@ -2,6 +2,7 @@ import 'package:uuid/uuid.dart';
 
 class ExerciseAnalysisResult {
   final String id;
+  final String exerciseName;
   final String exerciseType;
   final String duration;
   final String intensity;
@@ -11,9 +12,11 @@ class ExerciseAnalysisResult {
   final DateTime timestamp;
   final String originalInput;
   final List<String>? missingInfo;
+  final List<String> warnings;
 
   ExerciseAnalysisResult({
     String? id,
+    this.exerciseName = 'Unknown Exercise',
     required this.exerciseType,
     required this.duration,
     required this.intensity,
@@ -23,12 +26,15 @@ class ExerciseAnalysisResult {
     required this.timestamp,
     required this.originalInput,
     this.missingInfo,
-  }) : id = id ?? const Uuid().v4();
+    List<String>? warnings,
+  })  : id = id ?? const Uuid().v4(),
+        warnings = warnings ?? [];
 
   bool get isComplete => missingInfo == null || missingInfo!.isEmpty;
 
   Map<String, dynamic> toMap() {
     return {
+      'exerciseName': exerciseName,
       'exerciseType': exerciseType,
       'duration': duration,
       'intensity': intensity,
@@ -38,6 +44,7 @@ class ExerciseAnalysisResult {
       'timestamp': timestamp.millisecondsSinceEpoch,
       'originalInput': originalInput,
       'missingInfo': missingInfo,
+      'warnings': warnings,
     };
   }
 
@@ -48,6 +55,7 @@ class ExerciseAnalysisResult {
       Map<String, dynamic> map, String id) {
     return ExerciseAnalysisResult(
       id: id,
+      exerciseName: map['exerciseName'] ?? 'Unknown Exercise',
       exerciseType: map['exerciseType'] ?? 'Unknown',
       duration: map['duration'] ?? 'Tidak ditentukan',
       intensity: map['intensity'] ?? 'Tidak ditentukan',
@@ -62,12 +70,15 @@ class ExerciseAnalysisResult {
       missingInfo: map['missingInfo'] != null
           ? List<String>.from(map['missingInfo'])
           : null,
+      warnings:
+          map['warnings'] != null ? List<String>.from(map['warnings']) : [],
     );
   }
 
   // Copy with method untuk memudahkan update
   ExerciseAnalysisResult copyWith({
     String? id,
+    String? exerciseName,
     String? exerciseType,
     String? duration,
     String? intensity,
@@ -77,9 +88,11 @@ class ExerciseAnalysisResult {
     DateTime? timestamp,
     String? originalInput,
     List<String>? missingInfo,
+    List<String>? warnings,
   }) {
     return ExerciseAnalysisResult(
       id: id ?? this.id,
+      exerciseName: exerciseName ?? this.exerciseName,
       exerciseType: exerciseType ?? this.exerciseType,
       duration: duration ?? this.duration,
       intensity: intensity ?? this.intensity,
@@ -90,6 +103,7 @@ class ExerciseAnalysisResult {
       timestamp: timestamp ?? this.timestamp,
       originalInput: originalInput ?? this.originalInput,
       missingInfo: missingInfo ?? this.missingInfo,
+      warnings: warnings ?? this.warnings,
     );
   }
 
