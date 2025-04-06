@@ -10,6 +10,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/p
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/nutrient_progress_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/meal_patterns_widget.dart';
 
+// ignore: depend_on_referenced_packages
 import 'package:logger/logger.dart';
 
 final logger = Logger();

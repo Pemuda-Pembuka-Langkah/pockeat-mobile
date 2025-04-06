@@ -45,7 +45,7 @@ class DetailedAnalysisWidget extends StatelessWidget {
                 if (index < analysisItems.length - 1) const SizedBox(height: 12),
               ],
             );
-          }).toList(),
+          })
         ],
       ),
     );

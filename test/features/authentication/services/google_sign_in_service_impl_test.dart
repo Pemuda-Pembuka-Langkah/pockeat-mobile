@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mockito/annotations.dart';
@@ -16,6 +17,8 @@ import 'package:pockeat/features/authentication/services/google_sign_in_service_
 import 'google_sign_in_service_impl_test.mocks.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late GoogleSignInServiceImpl service;
   late MockFirebaseAuth mockAuth;
   late MockGoogleSignIn mockGoogleSignIn;
@@ -51,6 +54,21 @@ void main() {
   });
 
   group('GoogleSignInServiceImpl', () {
+    group('constructor', () {
+      test('should use provided auth and googleSignIn instances', () {
+        // Arrange & Act
+        final testService = GoogleSignInServiceImpl(
+          auth: mockAuth,
+          googleSignIn: mockGoogleSignIn,
+        );
+
+        // Assert
+        expect(testService, isA<GoogleSignInServiceImpl>());
+        // Tidak bisa langsung memverifikasi private field, hanya memastikan
+        // service berhasil dibuat dengan parameter yang kita berikan
+      });
+    });
+
     group('signInWithGoogle', () {
       test('should successfully sign in with Google', () async {
         // Act

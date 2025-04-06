@@ -23,6 +23,7 @@ void main() {
       name: 'Bench Press',
       bodyPart: 'Chest',
       metValue: 6.0,
+      userId: 'test-user-id',
       timestamp: DateTime(2025, 3, 5, 15, 30), // 3:30 PM
       sets: [weightLiftingSet1, weightLiftingSet2],
     );
@@ -68,6 +69,7 @@ void main() {
         name: 'Empty Sets Exercise',
         bodyPart: 'Test',
         metValue: 5.0,
+        userId: 'test-user-id',
         timestamp: DateTime(2025, 3, 6),
         sets: [],
       );

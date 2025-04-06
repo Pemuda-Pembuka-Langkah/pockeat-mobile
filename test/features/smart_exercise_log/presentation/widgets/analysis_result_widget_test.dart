@@ -15,6 +15,7 @@ void main() {
       summary: 'High-intensity training with short intervals',
       timestamp: DateTime.now(),
       originalInput: 'HIIT workout 30 minutes',
+      userId: 'test-user-123',
     );
 
     // This variable will be used in a test to verify handling of incomplete data
@@ -27,6 +28,7 @@ void main() {
       timestamp: DateTime.now(),
       originalInput: 'Yoga with medium intensity',
       missingInfo: ['duration'], // Marking the duration as missing info
+      userId: 'test-user-123',
     );
 
     testWidgets('renders all analysis data correctly',
@@ -96,6 +98,7 @@ void main() {
         timestamp: DateTime.now(),
         originalInput: 'Yoga with medium intensity',
         // No missingInfo, so isComplete = true
+        userId: 'test-user-123',
       );
       
       await tester.pumpWidget(
@@ -195,6 +198,7 @@ void main() {
         timestamp: DateTime.now(),
         originalInput: 'Exercise this morning',
         missingInfo: ['type', 'duration', 'intensity'],
+        userId: 'test-user-123',
       );
 
       await tester.pumpWidget(
@@ -236,6 +240,7 @@ void main() {
         metValue: 7.0, // MET value for running
         timestamp: DateTime.now(),
         originalInput: 'Running for 45 minutes',
+        userId: 'test-user-123',
       );
 
       await tester.pumpWidget(
@@ -262,6 +267,7 @@ void main() {
         metValue: 7.0, // MET value for running
         timestamp: DateTime.now(),
         originalInput: 'Running for half an hour',
+        userId: 'test-user-123',
       );
 
       await tester.pumpWidget(
@@ -288,6 +294,7 @@ void main() {
         metValue: 7.0, // MET value for running
         timestamp: DateTime.now(),
         originalInput: 'Running for 30-45 minutes',
+        userId: 'test-user-123',
       );
 
       await tester.pumpWidget(
@@ -317,6 +324,7 @@ void main() {
         metValue: 0.0, // Deliberately using MET value 0
         timestamp: DateTime.now(),
         originalInput: 'Light activity for 15 minutes',
+        userId: 'test-user-123',
       );
 
       await tester.pumpWidget(

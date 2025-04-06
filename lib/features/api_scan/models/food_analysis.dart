@@ -12,6 +12,7 @@ class FoodAnalysisResult {
   final DateTime timestamp;
   final String id;
   final bool isLowConfidence; // Added low confidence flag
+  final String userId; // Add this line
 
   // Constants for warning messages to ensure consistency
   static const String highSodiumWarning = "High sodium content";
@@ -32,6 +33,7 @@ class FoodAnalysisResult {
     DateTime? timestamp,
     String? id,
     this.isLowConfidence = false, // Default to high confidence
+    this.userId = '', // Add userId parameter with default value  
   })  : timestamp = timestamp ?? DateTime.now(),
         id = id ?? const Uuid().v4();
 
@@ -98,6 +100,7 @@ class FoodAnalysisResult {
       timestamp: parsedTimestamp,
       id: id ?? json['id'] ?? 'food_${DateTime.now().millisecondsSinceEpoch}',
       isLowConfidence: isLowConfidence,
+      userId: json['userId'] ?? '',
     );
   }
 
@@ -111,6 +114,7 @@ class FoodAnalysisResult {
       'timestamp': Timestamp.fromDate(timestamp),
       'id': id,
       'is_low_confidence': isLowConfidence,
+      'userId': userId, 
     };
   }
 
@@ -124,6 +128,7 @@ class FoodAnalysisResult {
     DateTime? timestamp,
     String? id,
     bool? isLowConfidence,
+    String? userId,
   }) {
     return FoodAnalysisResult(
       foodName: foodName ?? this.foodName,
@@ -134,6 +139,7 @@ class FoodAnalysisResult {
       timestamp: timestamp ?? this.timestamp,
       id: id ?? this.id,
       isLowConfidence: isLowConfidence ?? this.isLowConfidence,
+      userId: userId ?? this.userId,
     );
   }
 

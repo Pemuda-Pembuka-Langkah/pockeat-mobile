@@ -10,6 +10,7 @@ enum CardioType {
 /// Model dasar untuk semua aktivitas kardio
 abstract class CardioActivity {
   final String id;
+  final String userId;
   final DateTime date;
   final DateTime startTime;
   final DateTime endTime;
@@ -19,6 +20,7 @@ abstract class CardioActivity {
 
   CardioActivity({
     String? id,
+    required this.userId,
     required this.date,
     required this.startTime,
     required this.endTime,

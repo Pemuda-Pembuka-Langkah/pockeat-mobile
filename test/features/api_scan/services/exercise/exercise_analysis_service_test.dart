@@ -126,7 +126,8 @@ void main() {
       final Map<String, dynamic> invalidData = {};
 
       // Act
-      final result = service.parseExerciseResponse(invalidData, 'jogging');
+      final result =
+          service.parseExerciseResponse(invalidData, 'jogging', 'test_user_id');
 
       // Assert - force lowercase expectation
       expect(result.exerciseType.toLowerCase(), equals('unknown'));
@@ -156,6 +157,7 @@ void main() {
             'You performed Running for 30 minutes at Medium intensity, burning approximately 350 calories.',
         timestamp: DateTime.now(),
         originalInput: 'Running 5km in 30 minutes',
+        userId: 'test_user_id',
       );
 
       // Create the expected API format map
@@ -226,6 +228,7 @@ void main() {
             'You performed Running for 30 minutes at Medium intensity, burning approximately 350 calories.',
         timestamp: DateTime.now(),
         originalInput: 'Running 5km in 30 minutes',
+        userId: 'test_user_id',
       );
 
       const userComment = 'I actually ran for 45 minutes';
@@ -320,6 +323,7 @@ void main() {
       summary: 'Original summary',
       timestamp: DateTime.now(),
       originalInput: 'Original input',
+      userId: 'test_user_id',
     );
 
     final correctionJSON = {
@@ -375,6 +379,7 @@ void main() {
       summary: 'Original summary',
       timestamp: DateTime.now(),
       originalInput: 'Original input',
+      userId: 'test_user_id',
     );
 
     // Create the expected API format map that will be sent

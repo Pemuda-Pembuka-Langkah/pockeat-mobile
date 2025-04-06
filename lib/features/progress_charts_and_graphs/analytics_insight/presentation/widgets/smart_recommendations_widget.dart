@@ -54,7 +54,7 @@ class SmartRecommendationsWidget extends StatelessWidget {
                 if (index < recommendations.length - 1) const SizedBox(height: 12),
               ],
             );
-          }).toList(),
+          })
         ],
       ),
     );

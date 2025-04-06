@@ -13,6 +13,7 @@ void main() {
       name: 'Bench Press',
       bodyPart: 'Upper Body',
       metValue: 5.0,
+      userId: 'test-user-id',
       sets: [
         WeightLiftingSet(weight: 50, reps: 10, duration: 30),
         WeightLiftingSet(weight: 60, reps: 8, duration: 30),
@@ -84,6 +85,7 @@ void main() {
       name: 'Empty Exercise',
       bodyPart: 'Upper Body',
       metValue: 3.0,
+      userId: 'test-user-id',
       sets: [], // Empty sets
     );
     
@@ -117,6 +119,7 @@ void main() {
       name: 'Duration Test',
       bodyPart: 'Lower Body',
       metValue: 3.5,
+      userId: 'test-user-id',
       sets: [WeightLiftingSet(weight: 75, reps: 12, duration: 2.5)],
     );
     

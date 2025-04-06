@@ -11,18 +11,14 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   }) : _foodScanRepository = foodScanRepository;
 
   @override
-  Future<List<FoodLogHistoryItem>> getAllFoodLogs({int? limit}) async {
+  Future<List<FoodLogHistoryItem>> getAllFoodLogs(String userId, {int? limit}) async {
     try {
       final foodScanResults = await _foodScanRepository.getAll(limit: limit);
-      // final foodTextResults = await _foodTextInputRepository.getAll(limit: limit);
-
-      final foodItems = [
-        ..._convertFoodAnalysisResults(foodScanResults),
-        // ..._convertFoodAnalysisResults(foodTextResults),
-      ];
-
+      final filteredResults = foodScanResults.where((result) => result.userId == userId).toList();
+      final foodItems = _convertFoodAnalysisResults(filteredResults);
+      
       foodItems.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
+      
       if (limit != null && foodItems.length > limit) {
         return foodItems.sublist(0, limit);
       }
@@ -34,64 +30,45 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   }
 
   @override
-  Future<List<FoodLogHistoryItem>> getFoodLogsByDate(DateTime date) async {
+  Future<List<FoodLogHistoryItem>> getFoodLogsByDate(String userId, DateTime date) async {
     try {
-      final foodScanResults =
-          await _foodScanRepository.getAnalysisResultsByDate(date);
-      // final foodTextResults = await _foodTextInputRepository.getAnalysisResultsByDate(date);
-
-      final foodItems = [
-        ..._convertFoodAnalysisResults(foodScanResults),
-        // ..._convertFoodAnalysisResults(foodTextResults),
-      ];
-
-      return foodItems;
+      final foodScanResults = await _foodScanRepository.getAnalysisResultsByDate(date);
+      final filteredResults = foodScanResults.where((result) => result.userId == userId).toList();
+      
+      return _convertFoodAnalysisResults(filteredResults);
     } catch (e) {
       throw Exception('Failed to retrieve food logs by date: $e');
     }
   }
 
   @override
-  Future<List<FoodLogHistoryItem>> getFoodLogsByMonth(
-      int month, int year) async {
+  Future<List<FoodLogHistoryItem>> getFoodLogsByMonth(String userId, int month, int year) async {
     try {
-      final foodScanResults =
-          await _foodScanRepository.getAnalysisResultsByMonth(month, year);
-      // final foodTextResults = await _foodTextInputRepository.getAnalysisResultsByMonth(month, year);
-
-      final foodItems = [
-        ..._convertFoodAnalysisResults(foodScanResults),
-        // ..._convertFoodAnalysisResults(foodTextResults),
-      ];
-
-      return foodItems;
+      final foodScanResults = await _foodScanRepository.getAnalysisResultsByMonth(month, year);
+      final filteredResults = foodScanResults.where((result) => result.userId == userId).toList();
+      
+      return _convertFoodAnalysisResults(filteredResults);
     } catch (e) {
       throw Exception('Failed to retrieve food logs by month: $e');
     }
   }
 
   @override
-  Future<List<FoodLogHistoryItem>> getFoodLogsByYear(int year) async {
+  Future<List<FoodLogHistoryItem>> getFoodLogsByYear(String userId, int year) async {
     try {
-      final foodScanResults =
-          await _foodScanRepository.getAnalysisResultsByYear(year);
-      // final foodTextResults = await _foodTextInputRepository.getAnalysisResultsByYear(year);
-
-      final foodItems = [
-        ..._convertFoodAnalysisResults(foodScanResults),
-        // ..._convertFoodAnalysisResults(foodTextResults),
-      ];
-
-      return foodItems;
+      final foodScanResults = await _foodScanRepository.getAnalysisResultsByYear(year);
+      final filteredResults = foodScanResults.where((result) => result.userId == userId).toList();
+      
+      return _convertFoodAnalysisResults(filteredResults);
     } catch (e) {
       throw Exception('Failed to retrieve food logs by year: $e');
     }
   }
 
   @override
-  Future<List<FoodLogHistoryItem>> searchFoodLogs(String query) async {
+  Future<List<FoodLogHistoryItem>> searchFoodLogs(String userId, String query) async {
     try {
-      final foodItems = await getAllFoodLogs();
+      final foodItems = await getAllFoodLogs(userId);
       final lowercaseQuery = query.toLowerCase();
 
       return foodItems.where((item) {

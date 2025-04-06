@@ -22,7 +22,7 @@ class ExerciseAnalysisService {
   // coverage:ignore-end
 
   Future<ExerciseAnalysisResult> analyze(String description,
-      {double? userWeightKg}) async {
+      {String userId = "", double? userWeightKg}) async {
     try {
       final Map<String, dynamic> requestBody = {
         'description': description,
@@ -37,7 +37,7 @@ class ExerciseAnalysisService {
         requestBody,
       );
 
-      return parseExerciseResponse(responseData, description);
+      return parseExerciseResponse(responseData, description, userId);
     } catch (e) {
       if (e is ApiServiceException) {
         rethrow;
@@ -47,7 +47,7 @@ class ExerciseAnalysisService {
   }
 
   ExerciseAnalysisResult parseExerciseResponse(
-      Map<String, dynamic> jsonData, String originalInput) {
+      Map<String, dynamic> jsonData, String originalInput, String userId) {
     try {
       // Check for error field in different formats
       if (jsonData.containsKey('error') && jsonData['error'] != null) {
@@ -63,6 +63,7 @@ class ExerciseAnalysisService {
           timestamp: DateTime.now(),
           originalInput: originalInput,
           missingInfo: ["exercise_type", "duration", "intensity"],
+          userId: userId,
         );
       }
 
@@ -101,6 +102,7 @@ class ExerciseAnalysisService {
         timestamp: DateTime.now(),
         originalInput: originalInput,
         missingInfo: missingInfo.isNotEmpty ? missingInfo : null,
+        userId: userId,
       );
     } catch (e) {
       // Create a result with the error instead of throwing
@@ -114,6 +116,7 @@ class ExerciseAnalysisService {
         timestamp: DateTime.now(),
         originalInput: originalInput,
         missingInfo: ["exercise_type", "duration", "intensity"],
+        userId: userId,
       );
     }
   }
@@ -193,6 +196,7 @@ class ExerciseAnalysisService {
         summary: summary,
         timestamp: DateTime.now(),
         originalInput: previousResult.originalInput,
+        userId: previousResult.userId,  
       );
     } catch (e) {
       throw ApiServiceException(

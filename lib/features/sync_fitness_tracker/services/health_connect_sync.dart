@@ -167,6 +167,7 @@ class FitnessTrackerSync {
       // Log error but continue - we'll handle reconnection attempts later
       debugPrint('Failed to launch Health Connect: $e');
     }
+
   }
 
   /// Request authorization for required health data types
@@ -265,6 +266,7 @@ class FitnessTrackerSync {
         if (e.toString().contains("SecurityException")) {
           _localPermissionState = false;
           rethrow;
+
         }
       }
 

@@ -3,7 +3,6 @@ import 'distance_selection_widget.dart';
 import 'time_selection_widget.dart';
 import 'personal_data_reminder.dart';
 
-
 class RunningForm extends StatefulWidget {
   final Color primaryPink;
   final Function(double, Duration) onCalculate;
@@ -25,7 +24,7 @@ class RunningForm extends StatefulWidget {
     }
     return 0.0;
   }
-  
+
   @override
   State<RunningForm> createState() => RunningFormState();
 }
@@ -36,10 +35,30 @@ class RunningFormState extends State<RunningForm> {
   DateTime selectedStartTime = DateTime.now();
   DateTime selectedEndTime = DateTime.now().add(const Duration(minutes: 30));
 
+  @override
+  void initState() {
+    super.initState();
+    // Ensure minimum 1 minute difference on initialization
+    selectedStartTime = DateTime.now();
+    selectedEndTime = selectedStartTime.add(const Duration(minutes: 1));
+  }
+
   double calculateCalories() {
-    final totalDistance = selectedKm + (selectedMeter / 1000);
-    final duration = selectedEndTime.difference(selectedStartTime);
-    return widget.onCalculate(totalDistance, duration);
+    try {
+      final totalDistance = selectedKm + (selectedMeter / 1000);
+      final duration = selectedEndTime.difference(selectedStartTime);
+
+      // Check if duration is zero to avoid division by zero
+      if (duration.inSeconds <= 0) {
+        return 0.0;
+      }
+
+      return widget.onCalculate(totalDistance, duration);
+    } catch (e) {
+      // Using Flutter's built-in logger instead of print
+      debugPrint('Error calculating running calories: $e');
+      return 0.0;
+    }
   }
 
   @override
@@ -65,11 +84,12 @@ class RunningFormState extends State<RunningForm> {
                   newStartTime.hour,
                   newStartTime.minute,
                 );
-                
+
                 // If end time is before start time, adjust it to maintain duration
                 // but with today's date
                 if (selectedEndTime.isBefore(selectedStartTime)) {
-                  selectedEndTime = selectedStartTime.add(const Duration(minutes: 30));
+                  selectedEndTime =
+                      selectedStartTime.add(const Duration(minutes: 30));
                 } else {
                   // Keep existing end time but update to today's date
                   selectedEndTime = DateTime(
@@ -93,10 +113,11 @@ class RunningFormState extends State<RunningForm> {
                   newEndTime.hour,
                   newEndTime.minute,
                 );
-                
+
                 // If end time is before start time, add a day to end time
                 if (selectedEndTime.isBefore(selectedStartTime)) {
-                  selectedEndTime = selectedEndTime.add(const Duration(days: 1));
+                  selectedEndTime =
+                      selectedEndTime.add(const Duration(days: 1));
                 }
               });
             },
