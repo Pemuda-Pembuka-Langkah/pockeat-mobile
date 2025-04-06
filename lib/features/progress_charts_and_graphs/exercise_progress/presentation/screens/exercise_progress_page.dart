@@ -11,6 +11,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/pr
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/performance_metric_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/workout_history_widget.dart';
 
+// ignore: depend_on_referenced_packages
 import 'package:logger/logger.dart';
 
 final logger = Logger();

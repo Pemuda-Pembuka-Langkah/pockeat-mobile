@@ -20,7 +20,7 @@ class LoginServiceImpl implements LoginService {
         _userRepository = userRepository;
 
   @override
-  Stream<UserModel?> initialize(GlobalKey<NavigatorState> navigatorKey) {
+  Stream<UserModel?> initialize() {
     // Membatalkan subscription sebelumnya jika ada
     _subscription?.cancel();
 
