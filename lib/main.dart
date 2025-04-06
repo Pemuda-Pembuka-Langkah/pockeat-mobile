@@ -5,6 +5,7 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
@@ -39,43 +40,42 @@ import 'package:pockeat/features/authentication/services/deep_link_service.dart'
 import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/diet_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/desired_weight_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 
-// Global navigator key untuk akses Navigator dari anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Default ke dev untuk development yang aman
-  // Load dotenv dulu
   await dotenv.load(fileName: '.env');
-
-  // Ambil flavor dari dotenv
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
 
   await Firebase.initializeApp(
-      options: flavor == 'production'
-          ? ProductionFirebaseOptions.currentPlatform
-          : flavor == 'staging'
-              ? StagingFirebaseOptions.currentPlatform
-              : StagingFirebaseOptions
-                  .currentPlatform // Dev pake config staging tapi nanti connect ke emulator
-      );
+    options: flavor == 'production'
+        ? ProductionFirebaseOptions.currentPlatform
+        : flavor == 'staging'
+            ? StagingFirebaseOptions.currentPlatform
+            : StagingFirebaseOptions.currentPlatform,
+  );
 
   setupDependencies();
 
-
-    // Initialize notifications
-    if (!kIsWeb) {
-      await NotificationInitializer().initialize();
-    }
+  if (!kIsWeb) {
+    await NotificationInitializer().initialize();
+  }
 
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
 
-  // Initialize the DeepLinkService dengan navigatorKey
   await getIt<DeepLinkService>().initialize(navigatorKey: navigatorKey);
 
   runApp(
@@ -103,7 +103,18 @@ void main() async {
         Provider<FoodTextInputRepository>(
           create: (_) => getIt<FoodTextInputRepository>(),
         ),
-        // Add other providers here if needed
+        BlocProvider<HealthMetricsFormCubit>(
+          create: (_) {
+            final user = FirebaseAuth.instance.currentUser;
+            if (user == null) {
+              throw Exception('User must be logged in');
+            }
+            return HealthMetricsFormCubit(
+              userId: user.uid,
+              repository: getIt<HealthMetricsRepositoryImpl>(),
+            );
+          },
+        ),
       ],
       child: const MyApp(),
     ),
@@ -115,12 +126,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get repositories from context
     final smartExerciseLogRepository =
         Provider.of<SmartExerciseLogRepository>(context);
 
     return MaterialApp(
-      navigatorKey: navigatorKey, // Tambahkan navigator key untuk akses global
+      navigatorKey: navigatorKey,
       title: 'Pockeat',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -139,11 +149,9 @@ class MyApp extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        // Tambah ini
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            foregroundColor:
-                Colors.white, // Ini akan membuat teks button jadi putih
+            foregroundColor: Colors.white,
             backgroundColor: Colors.blue[400],
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -159,25 +167,51 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
         '/account-activated': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments
-              as Map<String, dynamic>?;
-          return AccountActivatedPage(
-            email: args?['email'] as String? ?? '',
-          );
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+          return AccountActivatedPage(email: args?['email'] as String? ?? '');
         },
         '/email-verification-failed': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments
-              as Map<String, dynamic>?;
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
           return EmailVerificationFailedPage(
-            error: args?['error'] as String? ??
-                'Verification failed. Please try again.',
+            error: args?['error'] as String? ?? 'Verification failed. Please try again.',
           );
         },
-        '/smart-exercise-log': (context) => AuthWrapper(
-              child: SmartExerciseLogPage(
-                repository: smartExerciseLogRepository,
-              ),
+        '/onboarding/goal': (context) {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) return const LoginPage();
+          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
+          return AuthWrapper(
+            child: BlocProvider.value(
+              value: cubit,
+              child: const HealthMetricsGoalsPage(),
             ),
+          );
+        },
+        '/height-weight': (context) {
+          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
+          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const HeightWeightPage()));
+        },
+        '/birthdate': (context) {
+          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
+          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const BirthdatePage()));
+        },
+        '/diet': (context) {
+          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
+          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const DietPage()));
+        },
+        '/desired-weight': (context) {
+          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
+          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const DesiredWeightPage()));
+        },
+        '/speed': (context) {
+          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
+          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const SpeedSelectionPage()));
+        },
+        '/review': (context) {
+          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
+          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const ReviewSubmitPage()));
+        },
+        '/smart-exercise-log': (context) => AuthWrapper(child: SmartExerciseLogPage(repository: smartExerciseLogRepository)),
         '/scan': (context) => AuthWrapper(
               child: ScanFoodPage(
                 cameraController: CameraController(
@@ -192,23 +226,18 @@ class MyApp extends StatelessWidget {
             ),
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
         '/food-text-input': (context) => const AuthWrapper(child: FoodTextInputPage()),
-        '/food-analysis': (context) =>
-            const AuthWrapper(child: AIAnalysisScreen()),
-        '/add-exercise': (context) =>
-            const AuthWrapper(child: ExerciseInputPage()),
-        '/weightlifting-input': (context) =>
-            const AuthWrapper(child: WeightliftingPage()),
+        '/food-analysis': (context) => const AuthWrapper(child: AIAnalysisScreen()),
+        '/add-exercise': (context) => const AuthWrapper(child: ExerciseInputPage()),
+        '/weightlifting-input': (context) => const AuthWrapper(child: WeightliftingPage()),
         '/cardio': (context) => const AuthWrapper(child: CardioInputPage()),
-        '/exercise-history': (context) =>
-            const AuthWrapper(child: ExerciseHistoryPage()),
+        '/exercise-history': (context) => const AuthWrapper(child: ExerciseHistoryPage()),
         '/food-history': (context) => AuthWrapper(
               child: FoodHistoryPage(
                 service: Provider.of<FoodLogHistoryService>(context),
               ),
             ),
         '/exercise-detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments
-              as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return AuthWrapper(
             child: ExerciseLogDetailPage(
               exerciseId: args['exerciseId'] as String,
@@ -217,24 +246,16 @@ class MyApp extends StatelessWidget {
           );
         },
         '/food-detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments
-              as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return AuthWrapper(
             child: FoodDetailPage(
               foodId: args['foodId'] as String,
-              foodRepository:
-                  Provider.of<FoodScanRepository>(context, listen: false),
-              foodTextInputRepository:
-                  Provider.of<FoodTextInputRepository>(context, listen: false),
+              foodRepository: Provider.of<FoodScanRepository>(context, listen: false),
+              foodTextInputRepository: Provider.of<FoodTextInputRepository>(context, listen: false),
             ),
           );
         },
-        '/notification-settings': (context) =>
-            const AuthWrapper(child: NotificationSettingsScreen()),
-      },
-      onGenerateRoute: (settings) {
-        // Default jika tidak ada rute yang cocok
-        return null;
+        '/notification-settings': (context) => const AuthWrapper(child: NotificationSettingsScreen()),
       },
     );
   }
