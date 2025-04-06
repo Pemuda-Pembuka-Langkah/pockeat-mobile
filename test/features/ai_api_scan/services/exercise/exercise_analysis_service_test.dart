@@ -137,7 +137,7 @@ void main() {
       
       // Act & Assert
       expect(
-        () => service.parseExerciseResponse(invalidText, 'jogging'),
+        () => service.parseExerciseResponse(invalidText, 'jogging', 'test-user-123'),
         throwsA(
           isA<GeminiServiceException>()
             .having((e) => e.message, 'message', contains('Failed to parse exercise analysis response'))
@@ -152,7 +152,7 @@ void main() {
       
       // Act & Assert
       expect(
-        () => service.parseExerciseResponse(malformedJson, 'running'),
+        () => service.parseExerciseResponse(malformedJson, 'running', 'test-user-123'),
         throwsA(
           isA<GeminiServiceException>()
             .having((e) => e.message, 'message', contains('Failed to parse exercise analysis response'))
@@ -165,7 +165,7 @@ void main() {
       
       // Act
       try {
-        service.parseExerciseResponse(brokenJson, 'exercise');
+        service.parseExerciseResponse(brokenJson, 'exercise', 'test-user-123');
         fail('Expected exception was not thrown');
       } catch (e) {
         // Assert
@@ -191,6 +191,7 @@ void main() {
       summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
       timestamp: DateTime.now(),
       originalInput: 'Running 5km in 30 minutes',
+      userId: 'test-user-123',
     );
     
     const userComment = 'I actually ran for 45 minutes, not 30';
@@ -234,6 +235,7 @@ void main() {
       summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
       timestamp: DateTime.now(),
       originalInput: 'Running 5km in 30 minutes',
+      userId: 'test-user-123',
     );
     
     const userComment = 'It was actually high intensity';
@@ -275,6 +277,7 @@ void main() {
       summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
       timestamp: DateTime.now(),
       originalInput: 'Running 5km in 30 minutes',
+      userId: 'test-user-123',
     );
     
     const userComment = 'I actually ran for 45 minutes';
@@ -312,6 +315,7 @@ void main() {
       summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
       timestamp: DateTime.now(),
       originalInput: 'Running 5km in 30 minutes',
+      userId: 'test-user-123',
     );
     
     const userComment = 'I actually ran for 45 minutes';
@@ -339,6 +343,7 @@ void main() {
       summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
       timestamp: DateTime.now(),
       originalInput: 'Running 5km in 30 minutes',
+      userId: 'test-user-123',
     );
     
     const userComment = 'I actually ran for 45 minutes';
@@ -366,6 +371,7 @@ void main() {
       summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
       timestamp: DateTime.now(),
       originalInput: 'Running 5km in 30 minutes',
+      userId: 'test-user-123',
     );
     
     const userComment = 'I actually ran for 45 minutes';
@@ -392,6 +398,7 @@ void main() {
       summary: 'You performed Running for 30 minutes at Moderate intensity, burning approximately 350 calories.',
       timestamp: DateTime.now(),
       originalInput: 'Running 5km in 30 minutes',
+      userId: 'test-user-123',
     );
     
     const userComment = 'I ran longer';

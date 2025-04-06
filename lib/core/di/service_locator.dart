@@ -22,6 +22,7 @@ import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_service_impl.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
@@ -33,6 +34,14 @@ final getIt = GetIt.instance;
 // coverage:ignore-start
 void setupDependencies() {
   // Register specialized services
+  getIt.registerSingleton<FirebaseAuth>(
+    FirebaseAuth.instance,
+  );
+
+  getIt.registerSingleton<FirebaseMessaging>(
+    FirebaseMessaging.instance,
+  );
+  
   getIt.registerSingleton<FoodTextAnalysisService>(
     FoodTextAnalysisService.fromEnv(),
   );
@@ -117,10 +126,6 @@ void setupDependencies() {
 
   // Register Exercise Log History module
   ExerciseLogHistoryModule.register();
-
-  getIt.registerSingleton<FirebaseMessaging>(
-    FirebaseMessaging.instance,
-  );
 
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),

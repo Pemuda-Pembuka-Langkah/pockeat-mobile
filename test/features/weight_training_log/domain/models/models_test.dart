@@ -12,6 +12,7 @@ void main() {
         name: 'Test',
         bodyPart: 'Test',
         metValue: 1.0,
+        userId: 'test-user-id',
       );
       
       // This will only compile if Exercise is properly exported
@@ -19,6 +20,7 @@ void main() {
         name: 'Test',
         bodyPart: 'Test',
         metValue: 1.0,
+        userId: 'test-user-id',
       );
       
       expect(directExercise.runtimeType, exportedExercise.runtimeType);

@@ -12,6 +12,11 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
   @override
   Future<String> saveAnalysisResult(ExerciseAnalysisResult result) async {
     try {
+      // Validate that userId is not empty
+      if (result.userId.isEmpty) {
+        throw Exception('User ID cannot be empty when saving analysis result');
+      }
+      
       final docRef = _firestore.collection(_collection).doc(result.id);
       await docRef.set(result.toMap());
       return result.id;
@@ -176,6 +181,116 @@ class SmartExerciseLogRepositoryImpl implements SmartExerciseLogRepository {
       return true;
     } catch (e) {
       throw Exception('Failed to delete analysis result: $e');
+    }
+  }
+  
+  @override
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByUser(String userId, {int? limit}) async {
+    try {
+      if (userId.isEmpty) {
+        throw ArgumentError('User ID cannot be empty');
+      }
+      
+      var query = _firestore
+          .collection(_collection)
+          .where('userId', isEqualTo: userId)
+          .orderBy('timestamp', descending: true);
+      
+      // Apply limit if provided
+      if (limit != null && limit > 0) {
+        query = query.limit(limit);
+      }
+      
+      final querySnapshot = await query.get();
+      
+      return querySnapshot.docs
+          .map((doc) => ExerciseAnalysisResult.fromDbMap(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to retrieve analysis results by user: $e');
+    }
+  }
+  
+  @override
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByUserAndDate(
+      String userId, DateTime date, {int? limit}) async {
+    try {
+      if (userId.isEmpty) {
+        throw ArgumentError('User ID cannot be empty');
+      }
+      
+      // Create timestamp for the start of the day
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final startTimestamp = startOfDay.millisecondsSinceEpoch;
+      
+      // Create timestamp for the end of the day
+      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
+      final endTimestamp = endOfDay.millisecondsSinceEpoch;
+      
+      var query = _firestore
+          .collection(_collection)
+          .where('userId', isEqualTo: userId)
+          .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
+          .where('timestamp', isLessThanOrEqualTo: endTimestamp)
+          .orderBy('timestamp', descending: true);
+      
+      // Apply limit if provided
+      if (limit != null && limit > 0) {
+        query = query.limit(limit);
+      }
+      
+      final querySnapshot = await query.get();
+      
+      return querySnapshot.docs
+          .map((doc) => ExerciseAnalysisResult.fromDbMap(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to retrieve analysis results by user and date: $e');
+    }
+  }
+  
+  @override
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByUserAndMonth(
+      String userId, int month, int year, {int? limit}) async {
+    try {
+      if (userId.isEmpty) {
+        throw ArgumentError('User ID cannot be empty');
+      }
+      
+      // Validate month
+      if (month < 1 || month > 12) {
+        throw ArgumentError('Month must be between 1 and 12');
+      }
+      
+      // Create timestamp for the start of the month
+      final startOfMonth = DateTime(year, month, 1);
+      final startTimestamp = startOfMonth.millisecondsSinceEpoch;
+      
+      // Create timestamp for the end of the month
+      final endOfMonth = month < 12 
+          ? DateTime(year, month + 1, 1).subtract(const Duration(milliseconds: 1))
+          : DateTime(year + 1, 1, 1).subtract(const Duration(milliseconds: 1));
+      final endTimestamp = endOfMonth.millisecondsSinceEpoch;
+      
+      var query = _firestore
+          .collection(_collection)
+          .where('userId', isEqualTo: userId)
+          .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
+          .where('timestamp', isLessThanOrEqualTo: endTimestamp)
+          .orderBy('timestamp', descending: true);
+      
+      // Apply limit if provided
+      if (limit != null && limit > 0) {
+        query = query.limit(limit);
+      }
+      
+      final querySnapshot = await query.get();
+      
+      return querySnapshot.docs
+          .map((doc) => ExerciseAnalysisResult.fromDbMap(doc.data(), doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to retrieve analysis results by user and month: $e');
     }
   }
 }

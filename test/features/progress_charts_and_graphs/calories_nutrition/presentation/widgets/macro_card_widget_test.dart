@@ -70,7 +70,7 @@ void main() {
       );
       
       // Find the main container
-      final containerFinder = find.byType(Container);
+      final containerFinder = find.byKey(const Key('macro_card_widget'));
       expect(containerFinder, findsOneWidget);
       
       final container = tester.widget<Container>(containerFinder);

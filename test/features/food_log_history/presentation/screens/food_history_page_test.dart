@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -6,14 +7,23 @@ import 'package:pockeat/features/food_log_history/domain/models/food_log_history
 import 'package:pockeat/features/food_log_history/presentation/screens/food_history_page.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 
-@GenerateMocks([FoodLogHistoryService])
+@GenerateMocks(
+    [FoodLogHistoryService, firebase_auth.FirebaseAuth, firebase_auth.User])
 import 'food_history_page_test.mocks.dart';
 
 void main() {
   late MockFoodLogHistoryService mockService;
+  late MockFirebaseAuth mockAuth;
+  late MockUser mockUser;
 
   setUp(() {
     mockService = MockFoodLogHistoryService();
+    mockAuth = MockFirebaseAuth();
+    mockUser = MockUser();
+
+    // Configure mock auth
+    when(mockUser.uid).thenReturn('test-user-id');
+    when(mockAuth.currentUser).thenReturn(mockUser);
   });
 
   final testFoods = [
@@ -45,7 +55,7 @@ void main() {
 
   Widget createFoodHistoryPage() {
     return MaterialApp(
-      home: FoodHistoryPage(service: mockService),
+      home: FoodHistoryPage(service: mockService, auth: mockAuth),
       routes: {
         '/food-detail': (context) =>
             const Scaffold(body: Text('Food Detail Page')),
@@ -57,7 +67,7 @@ void main() {
     testWidgets('should display loading indicator when loading',
         (WidgetTester tester) async {
       // Arrange
-      when(mockService.getAllFoodLogs()).thenAnswer((_) async {
+      when(mockService.getAllFoodLogs(any)).thenAnswer((_) async {
         // Don't use a timer in tests as it causes pending timer issues
         return testFoods;
       });
@@ -72,7 +82,7 @@ void main() {
     testWidgets('should display food list when loaded',
         (WidgetTester tester) async {
       // Arrange
-      when(mockService.getAllFoodLogs()).thenAnswer((_) async => testFoods);
+      when(mockService.getAllFoodLogs(any)).thenAnswer((_) async => testFoods);
 
       // Act
       await tester.pumpWidget(createFoodHistoryPage());
@@ -87,7 +97,7 @@ void main() {
     testWidgets('should display empty state when no foods',
         (WidgetTester tester) async {
       // Arrange
-      when(mockService.getAllFoodLogs()).thenAnswer((_) async => []);
+      when(mockService.getAllFoodLogs(any)).thenAnswer((_) async => []);
 
       // Act
       await tester.pumpWidget(createFoodHistoryPage());
@@ -130,7 +140,7 @@ void main() {
 
     testWidgets('should search foods by query', (WidgetTester tester) async {
       // Arrange
-      when(mockService.getAllFoodLogs()).thenAnswer((_) async => testFoods);
+      when(mockService.getAllFoodLogs(any)).thenAnswer((_) async => testFoods);
 
       // Act
       await tester.pumpWidget(createFoodHistoryPage());
@@ -159,7 +169,7 @@ void main() {
     testWidgets('should navigate to food detail page when tapping a food item',
         (WidgetTester tester) async {
       // Arrange
-      when(mockService.getAllFoodLogs()).thenAnswer((_) async => testFoods);
+      when(mockService.getAllFoodLogs(any)).thenAnswer((_) async => testFoods);
 
       // Act
       await tester.pumpWidget(createFoodHistoryPage());
@@ -176,7 +186,7 @@ void main() {
     testWidgets('should show empty state when no food items are available',
         (WidgetTester tester) async {
       // Arrange
-      when(mockService.getAllFoodLogs(limit: anyNamed('limit')))
+      when(mockService.getAllFoodLogs(any, limit: anyNamed('limit')))
           .thenAnswer((_) async => []);
 
       // Act

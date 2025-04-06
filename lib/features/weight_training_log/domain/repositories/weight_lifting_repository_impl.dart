@@ -51,6 +51,10 @@ class WeightLiftingRepositoryImpl implements WeightLiftingRepository {
   @override
   Future<String> saveExercise(WeightLifting exercise) async {
     try {
+      if (exercise.userId.isEmpty) {
+        throw Exception('Exercise must have a user ID');
+      }
+
       final docRef = _firestore.collection(_collection).doc(exercise.id);
       await docRef.set(exercise.toJson());
       return exercise.id;
@@ -208,7 +212,26 @@ class WeightLiftingRepositoryImpl implements WeightLiftingRepository {
       throw Exception('Failed to retrieve exercises with limit: $e');
     }
   }
-  
+
+// coverage:ignore-start
+  @override
+  Future<List<WeightLifting>> getExercisesByUser(String userId) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection(_collection)
+          .where('userId', isEqualTo: userId)
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => WeightLifting.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to retrieve user exercises: $e');
+    }
+  }
+// coverage:ignore-end
+
   @override
   List<String> getExerciseCategories() {
     return exercisesByCategory.keys.toList();

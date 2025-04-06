@@ -51,4 +51,30 @@ abstract class SmartExerciseLogRepository {
   /// Returns [bool] true if successfully deleted, false if the document doesn't exist
   /// Throws [Exception] if an error occurs during deletion
   Future<bool> deleteById(String id);
+  
+  /// Retrieves all analysis results for a specific user
+  /// 
+  /// Parameter [userId] to filter results by user ID
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing analysis results for the specified user
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByUser(String userId, {int? limit});
+  
+  /// Retrieves analysis results by date for a specific user
+  /// 
+  /// Parameter [userId] to filter results by user ID
+  /// Parameter [date] to filter results by a specific date
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing analysis results for the specified user on the specified date
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByUserAndDate(String userId, DateTime date, {int? limit});
+  
+  /// Retrieves analysis results by month and year for a specific user
+  /// 
+  /// Parameter [userId] to filter results by user ID
+  /// Parameters [month] (1-12) and [year] to filter results
+  /// Parameter [limit] to restrict the number of returned results, null means no restriction
+  /// Returns [List<ExerciseAnalysisResult>] containing analysis results for the specified user on the specified month and year
+  /// Throws [Exception] if an error occurs during data retrieval
+  Future<List<ExerciseAnalysisResult>> getAnalysisResultsByUserAndMonth(String userId, int month, int year, {int? limit});
 }
