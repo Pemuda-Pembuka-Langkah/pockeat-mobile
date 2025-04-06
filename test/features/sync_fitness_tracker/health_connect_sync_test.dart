@@ -248,6 +248,7 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
 
   @override
   Health get _health => mockHealth;
+  
 
   @override
   MethodChannel get _methodChannel => mockMethodChannel;
