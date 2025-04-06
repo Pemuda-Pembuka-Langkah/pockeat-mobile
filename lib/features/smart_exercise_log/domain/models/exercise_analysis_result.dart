@@ -12,7 +12,6 @@ class ExerciseAnalysisResult {
   final DateTime timestamp;
   final String originalInput;
   final List<String>? missingInfo;
-  final List<String> warnings;
 
   ExerciseAnalysisResult({
     String? id,
@@ -26,9 +25,7 @@ class ExerciseAnalysisResult {
     required this.timestamp,
     required this.originalInput,
     this.missingInfo,
-    List<String>? warnings,
-  })  : id = id ?? const Uuid().v4(),
-        warnings = warnings ?? [];
+  }) : id = id ?? const Uuid().v4();
 
   bool get isComplete => missingInfo == null || missingInfo!.isEmpty;
 
@@ -44,7 +41,6 @@ class ExerciseAnalysisResult {
       'timestamp': timestamp.millisecondsSinceEpoch,
       'originalInput': originalInput,
       'missingInfo': missingInfo,
-      'warnings': warnings,
     };
   }
 
@@ -70,8 +66,6 @@ class ExerciseAnalysisResult {
       missingInfo: map['missingInfo'] != null
           ? List<String>.from(map['missingInfo'])
           : null,
-      warnings:
-          map['warnings'] != null ? List<String>.from(map['warnings']) : [],
     );
   }
 
@@ -88,7 +82,6 @@ class ExerciseAnalysisResult {
     DateTime? timestamp,
     String? originalInput,
     List<String>? missingInfo,
-    List<String>? warnings,
   }) {
     return ExerciseAnalysisResult(
       id: id ?? this.id,
@@ -103,7 +96,6 @@ class ExerciseAnalysisResult {
       timestamp: timestamp ?? this.timestamp,
       originalInput: originalInput ?? this.originalInput,
       missingInfo: missingInfo ?? this.missingInfo,
-      warnings: warnings ?? this.warnings,
     );
   }
 
