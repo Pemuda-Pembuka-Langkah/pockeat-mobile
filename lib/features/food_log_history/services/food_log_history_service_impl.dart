@@ -1,7 +1,7 @@
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   final FoodScanRepository _foodScanRepository;
