@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final credential = await _loginService.loginByEmail(
+      await _loginService.loginByEmail(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
@@ -269,7 +269,7 @@ class _LoginPageState extends State<LoginPage> {
             child: GestureDetector(
               onTap: () {
                 // Navigate to forgot password page
-                // Navigator.pushNamed(context, '/forgot-password');
+                Navigator.pushNamed(context, '/forgot-password');
               },
               child: Text(
                 'Forgot Password?',

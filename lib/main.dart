@@ -6,6 +6,7 @@ import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
@@ -38,13 +39,13 @@ import 'package:pockeat/features/authentication/presentation/screens/login_page.
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/change_password_error_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
-
-// Global navigator key untuk akses Navigator dari anywhere
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+import 'package:pockeat/features/authentication/presentation/screens/change_password_page.dart';
+import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,19 +68,15 @@ void main() async {
 
   setupDependencies();
 
-
-    // Initialize notifications
-    if (!kIsWeb) {
-      await NotificationInitializer().initialize();
-    }
+  // Initialize notifications
+  if (!kIsWeb) {
+    await NotificationInitializer().initialize();
+  }
 
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
-
-  // Initialize the DeepLinkService dengan navigatorKey
-  await getIt<DeepLinkService>().initialize(navigatorKey: navigatorKey);
 
   runApp(
     MultiProvider(
@@ -116,6 +113,13 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // Flag untuk mencegah inisialisasi berulang
+  static bool _isDeepLinkServiceInitialized = false;
+
+  // Tambahkan NavigatorKey global
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     // Get repositories from context
@@ -123,8 +127,9 @@ class MyApp extends StatelessWidget {
         Provider.of<SmartExerciseLogRepository>(context);
 
     return MaterialApp(
-      navigatorKey: navigatorKey, // Tambahkan navigator key untuk akses global
       title: 'Pockeat',
+      // Tambahkan navigatorKey ke MaterialApp
+      navigatorKey: navigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
@@ -156,11 +161,85 @@ class MyApp extends StatelessWidget {
         ),
       ),
       initialRoute: '/splash',
+      // Bungkus semua routes dengan Builder untuk inisialisasi DeepLinkService
+      builder: (context, child) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (!_isDeepLinkServiceInitialized) {
+            try {
+              await getIt<DeepLinkService>().initialize();
+
+              getIt<DeepLinkService>().onDeepLinkResult.listen((result) {
+                switch (result.type) {
+                  case DeepLinkType.emailVerification:
+                    if (result.success) {
+                      final email = result.data?['email'] ?? '';
+                      navigatorKey.currentState?.pushReplacementNamed(
+                        '/account-activated',
+                        arguments: {'email': email},
+                      );
+                    } else {
+                      final error = result.error ?? 'Email verification failed';
+                      navigatorKey.currentState?.pushReplacementNamed(
+                        '/email-verification-failed',
+                        arguments: {'error': error},
+                      );
+                    }
+                    break;
+
+                  case DeepLinkType.changePassword:
+                    if (result.success) {
+                      final oobCode = result.data?['oobCode'] ?? '';
+                      navigatorKey.currentState?.pushReplacementNamed(
+                        '/change-password',
+                        arguments: {'oobCode': oobCode},
+                      );
+                    } else {
+                      final error = result.error ?? 'Password reset failed';
+                      navigatorKey.currentState?.pushReplacementNamed(
+                        '/change-password-error',
+                        arguments: {'error': error},
+                      );
+                    }
+                    break;
+
+                  default:
+                    break;
+                }
+              });
+
+              _isDeepLinkServiceInitialized = true;
+            } catch (e) {
+              // Error handling tanpa print
+            }
+          }
+        });
+
+        return child ?? const SizedBox();
+      },
       routes: {
         '/splash': (context) => const SplashScreenPage(),
+        '/forgot-password': (context) => const ForgotPasswordPage(),
         '/': (context) => const AuthWrapper(child: HomePage()),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
+        '/change-password': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return AuthWrapper(
+            requireAuth: args?['oobCode'] != null ? false : true,
+            child: ChangePasswordPage(
+              oobCode: args?['oobCode'] as String?,
+            ),
+          );
+        },
+        '/change-password-error': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return ChangePasswordErrorPage(
+            error: args?['error'] as String? ??
+                'Password reset failed. Please try again.',
+          );
+        },
         '/account-activated': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>?;
@@ -194,7 +273,8 @@ class MyApp extends StatelessWidget {
               ),
             ),
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
-        '/food-text-input': (context) => const AuthWrapper(child: FoodTextInputPage()),
+        '/food-text-input': (context) =>
+            const AuthWrapper(child: FoodTextInputPage()),
         '/food-analysis': (context) =>
             const AuthWrapper(child: AIAnalysisScreen()),
         '/add-exercise': (context) =>
@@ -233,8 +313,8 @@ class MyApp extends StatelessWidget {
           );
         },
         '/analytic': (context) => ProgressPage(
-          service: ProgressTabsService(ProgressTabsRepositoryImpl()),
-        ),
+              service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+            ),
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
       },

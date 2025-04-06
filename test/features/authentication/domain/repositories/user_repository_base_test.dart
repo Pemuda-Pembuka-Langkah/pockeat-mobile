@@ -136,6 +136,33 @@ void main() {
       );
     });
 
+    test('validateUserAccess should explicitly compare user IDs', () {
+      // Arrange - untuk meng-cover baris 19-20
+      // Gunakan mock dengan ID yang berbeda daripada menggunakan when
+      final customMockUser = MockUser();
+      // Override ID langsung, bukan dengan when()
+      // Ini menggunakan definisi ID dari MockUser
+
+      // Buat repository baru dengan mock ini
+      when(mockAuth.currentUser).thenReturn(customMockUser);
+
+      // Verifikasi bahwa akses ke ID sendiri berhasil
+      // test-user-id adalah nilai default dari implementasi MockUser
+      repository.validateUserAccess('test-user-id');
+
+      // Verifikasi akses ke ID lain gagal dengan exception tepat
+      expect(
+        () => repository.validateUserAccess('different-user-id'),
+        throwsA(predicate((e) =>
+            e is UserRepositoryException &&
+            e.code == 'permission-denied' &&
+            e.message == 'Access to another user\'s data is not allowed')),
+      );
+
+      // Verifikasi memanggil currentUser
+      verify(mockAuth.currentUser).called(greaterThan(0));
+    });
+
     test('notifyUserChanged should add model to stream', () async {
       // Arrange
       final userModel = UserModel(

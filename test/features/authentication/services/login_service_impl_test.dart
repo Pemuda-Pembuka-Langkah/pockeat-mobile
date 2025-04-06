@@ -50,7 +50,7 @@ void main() {
           .thenAnswer((_) => userStream);
 
       // Act
-      final result = loginService.initialize(navigatorKey);
+      final result = loginService.initialize();
 
       // Assert
       expect(result, equals(userStream));
@@ -73,7 +73,7 @@ void main() {
           .thenAnswer((_) => userStream);
 
       // Act
-      final result = loginService.initialize(navigatorKey);
+      final result = loginService.initialize();
 
       // Assert - only verify that the method was called and returns the expected stream
       expect(result, equals(userStream));
@@ -374,7 +374,7 @@ void main() {
           .thenAnswer((_) => controller.stream);
 
       // Act
-      loginService.initialize(navigatorKey);
+      loginService.initialize();
       loginService.dispose();
 
       // Cleanup

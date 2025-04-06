@@ -54,7 +54,7 @@ class TodayInsightsWidget extends StatelessWidget {
                 if (index < focusItems.length - 1) const SizedBox(height: 12),
               ],
             );
-          }).toList(),
+          })
         ],
       ),
     );

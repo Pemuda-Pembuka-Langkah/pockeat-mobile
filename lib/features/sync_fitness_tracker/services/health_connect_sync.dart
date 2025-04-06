@@ -163,6 +163,7 @@ class FitnessTrackerSync {
 
       // We'll attempt to verify permissions later when app resumes
       return;
+    // ignore: empty_catches
     } catch (e) {}
   }
 
@@ -261,6 +262,7 @@ class FitnessTrackerSync {
       } catch (e) {
         if (e.toString().contains("SecurityException")) {
           _localPermissionState = false;
+          // ignore: use_rethrow_when_possible
           throw e; // Rethrow to handle at higher level
         }
       }
