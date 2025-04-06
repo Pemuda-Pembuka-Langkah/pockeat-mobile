@@ -124,7 +124,6 @@ class LoginServiceImpl implements LoginService {
       // Get Firebase ID token (JWT)
       return await firebaseUser.getIdToken(true); // Force refresh token
     } catch (e) {
-      print("Error getting Firebase ID token: $e");
       return null;
     }
   }
