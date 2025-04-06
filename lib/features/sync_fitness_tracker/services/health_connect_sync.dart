@@ -157,14 +157,11 @@ class FitnessTrackerSync {
   Future<void> openHealthConnect(BuildContext context) async {
     if (!Platform.isAndroid) return;
 
-    try {
       // Launch Health Connect using the injected channel
       await _methodChannel.invokeMethod('launchHealthConnect');
 
       // We'll attempt to verify permissions later when app resumes
       return;
-    // ignore: empty_catches
-    } catch (e) {}
   }
 
   /// Request authorization for required health data types
@@ -263,7 +260,7 @@ class FitnessTrackerSync {
         if (e.toString().contains("SecurityException")) {
           _localPermissionState = false;
           // ignore: use_rethrow_when_possible
-          throw e; // Rethrow to handle at higher level
+          rethrow; // Rethrow to handle at higher level
         }
       }
 
