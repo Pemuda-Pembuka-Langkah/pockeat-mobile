@@ -41,6 +41,7 @@ class ExerciseAnalysisResult {
       'timestamp': timestamp.millisecondsSinceEpoch,
       'originalInput': originalInput,
       'missingInfo': missingInfo,
+      'isComplete': isComplete,
     };
   }
 

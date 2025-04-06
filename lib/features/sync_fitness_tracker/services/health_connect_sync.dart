@@ -163,7 +163,10 @@ class FitnessTrackerSync {
 
       // We'll attempt to verify permissions later when app resumes
       return;
-    } catch (e) {}
+    } catch (e) {
+      // Log error but continue - we'll handle reconnection attempts later
+      debugPrint('Failed to launch Health Connect: $e');
+    }
   }
 
   /// Request authorization for required health data types
@@ -261,7 +264,7 @@ class FitnessTrackerSync {
       } catch (e) {
         if (e.toString().contains("SecurityException")) {
           _localPermissionState = false;
-          throw e; // Rethrow to handle at higher level
+          rethrow;
         }
       }
 
@@ -289,7 +292,7 @@ class FitnessTrackerSync {
       } catch (e) {
         if (e.toString().contains("SecurityException")) {
           _localPermissionState = false;
-          throw e; // Rethrow to handle at higher level
+          rethrow;
         }
       }
 
@@ -298,7 +301,7 @@ class FitnessTrackerSync {
     } catch (e) {
       if (e.toString().contains("SecurityException")) {
         _localPermissionState = false;
-        throw e; // Rethrow to handle at higher level
+        rethrow;
       }
       return 0;
     }
@@ -353,7 +356,7 @@ class FitnessTrackerSync {
       } catch (e) {
         if (e.toString().contains("SecurityException")) {
           _localPermissionState = false;
-          throw e; // Rethrow to handle at higher level
+          rethrow;
         }
       }
 
@@ -362,7 +365,7 @@ class FitnessTrackerSync {
     } catch (e) {
       if (e.toString().contains("SecurityException")) {
         _localPermissionState = false;
-        throw e; // Rethrow to handle at higher level
+        rethrow;
       }
       return 0;
     }
@@ -399,7 +402,9 @@ class FitnessTrackerSync {
     if (Platform.isAndroid) {
       try {
         await _methodChannel.invokeMethod('openHealthConnectPlayStore');
-      } catch (e) {}
+      } catch (e) {
+        debugPrint('Failed to open Health Connect Play Store: $e');
+      }
     }
   }
 
