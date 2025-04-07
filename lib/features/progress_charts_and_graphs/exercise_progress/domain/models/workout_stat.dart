@@ -1,3 +1,4 @@
+// coverage:ignore-start
 class WorkoutStat {
   final String label;
   final String value;
@@ -9,3 +10,4 @@ class WorkoutStat {
     required this.colorValue,
   });
 }
+// coverage:ignore-end

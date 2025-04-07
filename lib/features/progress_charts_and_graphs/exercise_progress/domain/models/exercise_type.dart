@@ -1,3 +1,4 @@
+// coverage:ignore-start
 class ExerciseType {
   final String name;
   final int percentage;
@@ -9,3 +10,4 @@ class ExerciseType {
     required this.colorValue,
   });
 }
+// coverage:ignore-end

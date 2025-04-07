@@ -6,39 +6,39 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/do
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/repositories/exercise_progress_repository.dart';
 
 class ExerciseProgressService {
-  final ExerciseProgressRepository _repository;
-
-  ExerciseProgressService(this._repository);
-
-  Future<List<ExerciseData>> getExerciseData(bool isWeeklyView) async {
-    return await _repository.getExerciseData(isWeeklyView);
+  final ExerciseProgressRepository repository;
+  
+  ExerciseProgressService({required this.repository});
+  
+  Future<List<ExerciseData>> getExerciseData(bool isWeeklyView) {
+    return repository.getExerciseData(isWeeklyView);
   }
-
-  Future<List<WorkoutStat>> getWorkoutStats() async {
-    return await _repository.getWorkoutStats();
+  
+  Future<List<WorkoutStat>> getWorkoutStats() {
+    return repository.getWorkoutStats();
   }
-
-  Future<List<ExerciseType>> getExerciseTypes() async {
-    return await _repository.getExerciseTypes();
+  
+  Future<List<ExerciseType>> getExerciseTypes() {
+    return repository.getExerciseTypes();
   }
-
-  Future<List<PerformanceMetric>> getPerformanceMetrics() async {
-    return await _repository.getPerformanceMetrics();
+  
+  Future<List<PerformanceMetric>> getPerformanceMetrics() {
+    return repository.getPerformanceMetrics();
   }
-
-  Future<List<WorkoutItem>> getWorkoutHistory() async {
-    return await _repository.getWorkoutHistory();
+  
+  Future<List<WorkoutItem>> getWorkoutHistory() {
+    return repository.getWorkoutHistory();
   }
-
-  Future<bool> getSelectedViewPeriod() async {
-    return await _repository.getSelectedViewPeriod();
+  
+  Future<bool> getSelectedViewPeriod() {
+    return repository.getSelectedViewPeriod();
   }
-
-  Future<void> setSelectedViewPeriod(bool isWeeklyView) async {
-    await _repository.setSelectedViewPeriod(isWeeklyView);
+  
+  Future<void> setSelectedViewPeriod(bool isWeeklyView) {
+    return repository.setSelectedViewPeriod(isWeeklyView);
   }
-
-  Future<String> getCompletionPercentage() async {
-    return await _repository.getCompletionPercentage();
+  
+  Future<String> getCompletionPercentage() {
+    return repository.getCompletionPercentage();
   }
 }

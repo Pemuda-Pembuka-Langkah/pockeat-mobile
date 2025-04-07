@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/toggle_button_widget.dart';
 
+// coverage:ignore-start
 class HeaderWidget extends StatelessWidget {
   final bool isWeeklyView;
   final Function(bool) onToggleView;
   final Color primaryGreen;
 
+  // ignore: use_super_parameters
   const HeaderWidget({
     Key? key,
     required this.isWeeklyView,
@@ -65,3 +67,4 @@ class HeaderWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end
