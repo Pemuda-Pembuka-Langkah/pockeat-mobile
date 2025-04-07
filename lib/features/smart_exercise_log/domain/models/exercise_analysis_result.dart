@@ -2,6 +2,7 @@ import 'package:uuid/uuid.dart';
 
 class ExerciseAnalysisResult {
   final String id;
+  final String exerciseName;
   final String exerciseType;
   final String duration;
   final String intensity;
@@ -15,6 +16,7 @@ class ExerciseAnalysisResult {
 
   ExerciseAnalysisResult({
     String? id,
+    this.exerciseName = 'Unknown Exercise',
     required this.exerciseType,
     required this.duration,
     required this.intensity,
@@ -34,11 +36,14 @@ class ExerciseAnalysisResult {
       Map<String, dynamic> map, String id) {
     return ExerciseAnalysisResult(
       id: id,
+      exerciseName: map['exerciseName'] ?? 'Unknown Exercise',
       exerciseType: map['exerciseType'] ?? 'Unknown',
       duration: map['duration'] ?? 'Tidak ditentukan',
       intensity: map['intensity'] ?? 'Tidak ditentukan',
       estimatedCalories: map['estimatedCalories'] ?? 0,
-      metValue: (map['metValue'] ?? 0.0).toDouble(),
+      metValue: (map['metValue'] ?? 0.0)
+          .toDouble(), // Parsing MET value dari database
+
       summary: map['summary'],
       timestamp: map['timestamp'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['timestamp'])
@@ -50,6 +55,7 @@ class ExerciseAnalysisResult {
       userId: map['userId'] ?? '', // Parse userId from database
     );
   }
+
 
   // Konversi ke Map (untuk penyimpanan)
   Map<String, dynamic> toMap() {
@@ -67,10 +73,13 @@ class ExerciseAnalysisResult {
       'userId': userId, // Add userId to map
     };
   }
+    Map<String, dynamic> toJson() => toMap();
+
 
   // Copy with method untuk memudahkan update
   ExerciseAnalysisResult copyWith({
     String? id,
+    String? exerciseName,
     String? exerciseType,
     String? duration,
     String? intensity,
@@ -84,11 +93,14 @@ class ExerciseAnalysisResult {
   }) {
     return ExerciseAnalysisResult(
       id: id ?? this.id,
+      exerciseName: exerciseName ?? this.exerciseName,
       exerciseType: exerciseType ?? this.exerciseType,
       duration: duration ?? this.duration,
       intensity: intensity ?? this.intensity,
       estimatedCalories: estimatedCalories ?? this.estimatedCalories,
-      metValue: metValue ?? this.metValue,
+      metValue: metValue ??
+          this.metValue, // Mempertahankan MET value atau menggantinya
+
       summary: summary ?? this.summary,
       timestamp: timestamp ?? this.timestamp,
       originalInput: originalInput ?? this.originalInput,

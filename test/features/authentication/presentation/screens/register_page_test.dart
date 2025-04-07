@@ -5,23 +5,33 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 // Generate mock menggunakan mockito
-@GenerateMocks([RegisterService, DeepLinkService])
+@GenerateMocks([RegisterService, EmailVerificationDeepLinkService])
 import 'register_page_test.mocks.dart';
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {
+  String? pushedRoute;
+  String? replacedRoute;
+
   @override
-  void didPush(Route<dynamic>? route, Route<dynamic>? previousRoute) {}
+  void didPush(Route<dynamic>? route, Route<dynamic>? previousRoute) {
+    pushedRoute = route?.settings.name;
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    replacedRoute = newRoute?.settings.name;
+  }
 }
 
 void main() {
   late MockRegisterService mockRegisterService;
-  late MockDeepLinkService mockDeepLinkService;
+  late EmailVerificationDeepLinkService mockDeepLinkService;
   final getIt = GetIt.instance;
 
   // Helper untuk menyetel ukuran screen yang konsisten
@@ -38,18 +48,19 @@ void main() {
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     mockRegisterService = MockRegisterService();
-    mockDeepLinkService = MockDeepLinkService();
+    mockDeepLinkService = MockEmailVerificationDeepLinkService();
 
     // Setup GetIt untuk testing
     if (getIt.isRegistered<RegisterService>()) {
       getIt.unregister<RegisterService>();
     }
-    if (getIt.isRegistered<DeepLinkService>()) {
-      getIt.unregister<DeepLinkService>();
+    if (getIt.isRegistered<EmailVerificationDeepLinkService>()) {
+      getIt.unregister<EmailVerificationDeepLinkService>();
     }
 
     getIt.registerSingleton<RegisterService>(mockRegisterService);
-    getIt.registerSingleton<DeepLinkService>(mockDeepLinkService);
+    getIt.registerSingleton<EmailVerificationDeepLinkService>(
+        mockDeepLinkService);
 
     // Setup behavior dasar
     when(mockDeepLinkService.onLinkReceived())
@@ -63,8 +74,8 @@ void main() {
     if (getIt.isRegistered<RegisterService>()) {
       getIt.unregister<RegisterService>();
     }
-    if (getIt.isRegistered<DeepLinkService>()) {
-      getIt.unregister<DeepLinkService>();
+    if (getIt.isRegistered<EmailVerificationDeepLinkService>()) {
+      getIt.unregister<EmailVerificationDeepLinkService>();
     }
   });
 
@@ -1220,5 +1231,147 @@ void main() {
     // Verifikasi canPop adalah false
     final popScope = tester.widget<PopScope>(find.byType(PopScope));
     expect(popScope.canPop, isFalse);
+  });
+
+  testWidgets('Toggle password visibility button works correctly',
+      (WidgetTester tester) async {
+    // Setup
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Cari icon visibility untuk password
+    final passwordVisibilityIcon = find.descendant(
+      of: find.widgetWithText(TextFormField, 'Password'),
+      matching: find.byIcon(Icons.visibility),
+    );
+    expect(passwordVisibilityIcon, findsOneWidget);
+
+    // Toggle visibilitas password
+    await tester.tap(passwordVisibilityIcon);
+    await tester.pump();
+
+    // Pastikan icon berubah
+    expect(
+        find.descendant(
+          of: find.widgetWithText(TextFormField, 'Password'),
+          matching: find.byIcon(Icons.visibility_off),
+        ),
+        findsOneWidget);
+  });
+
+  testWidgets('Toggle confirm password visibility button works correctly',
+      (WidgetTester tester) async {
+    // Setup
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Cari icon visibility untuk confirm password
+    final confirmPasswordVisibilityIcon = find.descendant(
+      of: find.widgetWithText(TextFormField, 'Confirm Password'),
+      matching: find.byIcon(Icons.visibility),
+    );
+    expect(confirmPasswordVisibilityIcon, findsOneWidget);
+
+    // Toggle visibilitas confirm password
+    await tester.tap(confirmPasswordVisibilityIcon);
+    await tester.pump();
+
+    // Pastikan icon berubah
+    expect(
+        find.descendant(
+          of: find.widgetWithText(TextFormField, 'Confirm Password'),
+          matching: find.byIcon(Icons.visibility_off),
+        ),
+        findsOneWidget);
+  });
+
+  testWidgets('Terms and conditions text is clickable',
+      (WidgetTester tester) async {
+    // Setup
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Scroll ke bagian checkbox terms and conditions
+    final termsCheckbox = find.byType(Checkbox);
+    await tester.ensureVisible(termsCheckbox);
+    await tester.pumpAndSettle();
+
+    // Cari RichText yang berisi Terms and Conditions
+    final richTexts = find.byType(RichText);
+    expect(richTexts, findsWidgets);
+
+    // Verifikasi bahwa terms and conditions RichText ditampilkan
+    final termsAndConditionsFound = tester.widgetList(richTexts).any((widget) {
+      if (widget is RichText) {
+        final text = widget.text.toPlainText();
+        return text.contains('Terms and Conditions');
+      }
+      return false;
+    });
+
+    expect(termsAndConditionsFound, isTrue,
+        reason: 'Terms and Conditions text should be found');
+
+    // Verifikasi bahwa checkbox dapat di-tap
+    await tester.tap(termsCheckbox);
+    await tester.pump();
+    final checkbox = tester.widget<Checkbox>(termsCheckbox);
+    expect(checkbox.value, isTrue);
+  });
+
+  testWidgets('Sign In link is displayed in the register form',
+      (WidgetTester tester) async {
+    // Setup
+    setScreenSize(tester, width: 600, height: 800);
+
+    // Build Register Page
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const RegisterPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Scroll ke bawah untuk menemukan link login
+    await tester.dragUntilVisible(
+      find.byType(RichText).last,
+      find.byType(SingleChildScrollView),
+      const Offset(0, 50),
+    );
+    await tester.pumpAndSettle();
+
+    // Verifikasi bahwa "Sign In" text ada di dalam RichText di bagian bawah halaman
+    final richTexts = find.byType(RichText);
+    final signInTextFound = tester.widgetList(richTexts).any((widget) {
+      if (widget is RichText) {
+        final text = widget.text.toPlainText();
+        return text.contains('Sign In');
+      }
+      return false;
+    });
+
+    expect(signInTextFound, isTrue,
+        reason: 'Sign In text should be found in a RichText widget');
   });
 }

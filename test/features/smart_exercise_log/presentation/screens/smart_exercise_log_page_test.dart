@@ -6,7 +6,7 @@ import 'package:mockito/annotations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
-import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';

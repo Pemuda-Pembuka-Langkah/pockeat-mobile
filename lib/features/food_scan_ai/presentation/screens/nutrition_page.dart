@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/bottom_action_bar.dart';

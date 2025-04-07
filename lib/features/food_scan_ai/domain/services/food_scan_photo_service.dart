@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/food_image_analysis_service.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/services/food/food_image_analysis_service.dart';
 import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

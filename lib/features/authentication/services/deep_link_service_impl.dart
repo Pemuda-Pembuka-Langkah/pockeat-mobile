@@ -1,15 +1,14 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
-// Hapus import Firebase Dynamic Links
-// import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:app_links/app_links.dart';
-import 'package:meta/meta.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
-import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
+import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
+import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
+import 'package:meta/meta.dart';
 
 /// Exception khusus untuk DeepLinkService
 class DeepLinkException implements Exception {
@@ -24,21 +23,29 @@ class DeepLinkException implements Exception {
       'DeepLinkException: $message${code != null ? ' (code: $code)' : ''}';
 }
 
+/// Implementasi DeepLinkService menggunakan pola Facade
+/// yang menggabungkan EmailVerificationDeepLinkService dan ChangePasswordDeepLinkService
 class DeepLinkServiceImpl implements DeepLinkService {
-  final FirebaseAuth _auth;
-  final AppLinks _appLinks = AppLinks();
-  late final GlobalKey<NavigatorState> _navigatorKey;
-  final UserRepository _userRepository;
-
-  StreamSubscription? _appLinksSub;
+  final EmailVerificationDeepLinkService _emailVerificationService;
+  final ChangePasswordDeepLinkService _changePasswordService;
   final StreamController<Uri?> _deepLinkStreamController =
       StreamController<Uri?>.broadcast();
+  final StreamController<DeepLinkResult> _resultStreamController =
+      StreamController<DeepLinkResult>.broadcast();
+  final AppLinks _appLinks = AppLinks();
+
+  StreamSubscription? _appLinksSub;
+  StreamSubscription? _emailVerificationLinkSub;
+  StreamSubscription? _changePasswordLinkSub;
 
   DeepLinkServiceImpl({
+    EmailVerificationDeepLinkService? emailVerificationService,
+    ChangePasswordDeepLinkService? changePasswordService,
     FirebaseAuth? auth,
-    UserRepository? userRepository,
-  })  : _auth = auth ?? FirebaseAuth.instance,
-        _userRepository = userRepository ?? UserRepositoryImpl(auth: auth);
+  })  : _emailVerificationService = emailVerificationService ??
+            EmailVerificationDeepLinkServiceImpl(auth: auth),
+        _changePasswordService = changePasswordService ??
+            ChangePasswordDeepLinkServiceImpl(auth: auth);
 
   // Getter dan metode untuk mempermudah unit testing
   @visibleForTesting
@@ -48,15 +55,17 @@ class DeepLinkServiceImpl implements DeepLinkService {
   Stream<Uri> getUriLinkStream() => _appLinks.uriLinkStream;
 
   @override
-  Future<void> initialize(
-      {required GlobalKey<NavigatorState> navigatorKey}) async {
-    _navigatorKey = navigatorKey;
+  Stream<DeepLinkResult> get onDeepLinkResult => _resultStreamController.stream;
 
-    // 1. Handle initial link (app opened from a link)
+  @override
+  Future<void> initialize() async {
+    await _emailVerificationService.initialize();
+    await _changePasswordService.initialize();
+
     try {
       final initialLink = await getInitialAppLink();
       if (initialLink != null) {
-        _handleIncomingLink(initialLink);
+        await handleDeepLink(initialLink);
       }
     } catch (e) {
       throw DeepLinkException(
@@ -65,11 +74,10 @@ class DeepLinkServiceImpl implements DeepLinkService {
       );
     }
 
-    // 2. Handle links while app is running
     try {
       _appLinksSub = getUriLinkStream().listen(
         (Uri uri) {
-          _handleIncomingLink(uri);
+          handleDeepLink(uri);
         },
         onError: (error) {
           throw DeepLinkException(
@@ -86,45 +94,9 @@ class DeepLinkServiceImpl implements DeepLinkService {
     }
   }
 
-  void _handleIncomingLink(Uri link) {
+  void _handleIncomingLink(Uri link) async {
     try {
-      // Handle email verification links
-      if (isEmailVerificationLink(link)) {
-        handleEmailVerificationLink(link).then((bool success) {
-          if (success) {
-            final email = _auth.currentUser?.email ?? '';
-            _navigatorKey.currentState?.pushReplacementNamed(
-              '/account-activated',
-              arguments: {'email': email},
-            );
-
-            // Show success message
-            ScaffoldMessenger.of(_navigatorKey.currentState!.context)
-                .showSnackBar(
-              SnackBar(
-                content: Text('Email successfully verified!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-          } else {
-            // Navigasi ke halaman failed verification
-            _navigatorKey.currentState?.pushReplacementNamed(
-              '/email-verification-failed',
-              arguments: {
-                'error': 'Email verification failed. Please try again.'
-              },
-            );
-          }
-        }).catchError((error) {
-          // Navigasi ke halaman failed verification dengan error message
-          _navigatorKey.currentState?.pushReplacementNamed(
-            '/email-verification-failed',
-            arguments: {'error': 'Error: $error'},
-          );
-        });
-      }
-
-      // Broadcast link to stream for other listeners
+      await handleDeepLink(link);
       _deepLinkStreamController.add(link);
     } catch (e) {
       throw DeepLinkException('Error handling incoming link', originalError: e);
@@ -148,78 +120,88 @@ class DeepLinkServiceImpl implements DeepLinkService {
     return _deepLinkStreamController.stream;
   }
 
-  @override
-  Future<bool> handleEmailVerificationLink(Uri link) async {
-    try {
-      if (!isEmailVerificationLink(link)) {
-        return false;
-      }
+  // Private method untuk mengecek jenis link
+  bool _isEmailVerificationLink(Uri link) {
+    return _emailVerificationService.isEmailVerificationLink(link);
+  }
 
-      // Extract oobCode or other params from link
-      final oobCode = link.queryParameters['oobCode'];
-      if (oobCode == null) {
-        throw DeepLinkException('Missing oobCode in verification link');
-      }
-
-      // Check if it's a valid action code
-      try {
-        await _auth.checkActionCode(oobCode);
-
-        // Apply the action code (verify email)
-        await _auth.applyActionCode(oobCode);
-
-        // Reload the user to update emailVerified status
-        await _auth.currentUser?.reload();
-
-        final isVerified = _auth.currentUser?.emailVerified ?? false;
-
-        // Update user data in Firestore if email was verified successfully
-        if (isVerified && _auth.currentUser != null) {
-          try {
-            // Update emailVerified status in Firestore
-            await _userRepository.updateEmailVerificationStatus(
-                _auth.currentUser!.uid, true);
-          } catch (e) {
-            // Continue even if Firestore update fails, because Firebase Auth verification was successful
-          }
-        }
-
-        return isVerified;
-      } on FirebaseAuthException catch (e) {
-        throw DeepLinkException(
-          'Firebase auth error when verifying email',
-          code: e.code,
-          originalError: e,
-        );
-      } catch (e) {
-        throw DeepLinkException('Error applying action code', originalError: e);
-      }
-    } catch (e) {
-      if (e is DeepLinkException) {
-        // Untuk backward compatibility dengan code yang ada,
-        // kita tidak melempar exception tapi mengembalikan false
-        return false;
-      }
-      throw DeepLinkException(
-        'Error handling email verification link',
-        originalError: e,
-      );
-    }
+  // Private method untuk mengecek jenis link
+  bool _isChangePasswordLink(Uri link) {
+    return _changePasswordService.isChangePasswordLink(link);
   }
 
   @override
-  bool isEmailVerificationLink(Uri link) {
-    // Hanya check untuk custom scheme pattern (pockeat://)
+  Future<bool> handleDeepLink(Uri link,
+      [BuildContext? navigationContext]) async {
     try {
-      final params = link.queryParameters;
-      return link.scheme == 'pockeat' &&
-          (params.containsKey('mode') && params['mode'] == 'verifyEmail') &&
-          params.containsKey('oobCode');
+      if (_isEmailVerificationLink(link)) {
+        try {
+          final bool success =
+              await _emailVerificationService.handleEmailVerificationLink(link);
+
+          final result = DeepLinkResult.emailVerification(
+            success: success,
+            data: {
+              'email': FirebaseAuth.instance.currentUser?.email ?? '',
+            },
+            originalUri: link,
+          );
+
+          _resultStreamController.add(result);
+          return success;
+        } catch (e) {
+          final result = DeepLinkResult.emailVerification(
+            success: false,
+            error: e.toString(),
+            originalUri: link,
+          );
+
+          _resultStreamController.add(result);
+          return false;
+        }
+      } else if (_isChangePasswordLink(link)) {
+        try {
+          final bool success =
+              await _changePasswordService.handleChangePasswordLink(link);
+
+          final String? oobCode = link.queryParameters['oobCode'];
+          final result = DeepLinkResult.changePassword(
+            success: success,
+            data: {
+              'oobCode': oobCode,
+            },
+            originalUri: link,
+          );
+
+          _resultStreamController.add(result);
+          return success;
+        } catch (e) {
+          final result = DeepLinkResult.changePassword(
+            success: false,
+            error: e.toString(),
+            originalUri: link,
+          );
+
+          _resultStreamController.add(result);
+          return false;
+        }
+      } else {
+        final result = DeepLinkResult.unknown(
+          originalUri: link,
+          error: 'Tidak ada handler yang sesuai untuk link ini',
+        );
+
+        _resultStreamController.add(result);
+        return false;
+      }
     } catch (e) {
-      throw DeepLinkException(
-        'Error validating email verification link',
-        originalError: e,
+      final result = DeepLinkResult.unknown(
+        originalUri: link,
+        error: 'Error saat memproses deep link: $e',
       );
+
+      _resultStreamController.add(result);
+      throw DeepLinkException('Error handling deep link', originalError: e);
     }
   }
 
@@ -227,12 +209,15 @@ class DeepLinkServiceImpl implements DeepLinkService {
   void dispose() {
     try {
       _appLinksSub?.cancel();
+      _emailVerificationService.dispose();
+      _changePasswordService.dispose();
+      _emailVerificationLinkSub?.cancel();
+      _changePasswordLinkSub?.cancel();
       _deepLinkStreamController.close();
+      _resultStreamController.close();
     } catch (e) {
-      throw DeepLinkException(
-        'Error disposing deep link service',
-        originalError: e,
-      );
+      throw DeepLinkException('Error disposing deep link service',
+          originalError: e);
     }
   }
 }

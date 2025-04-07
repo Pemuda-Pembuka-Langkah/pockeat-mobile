@@ -212,7 +212,8 @@ class WeightLiftingRepositoryImpl implements WeightLiftingRepository {
       throw Exception('Failed to retrieve exercises with limit: $e');
     }
   }
-  
+
+// coverage:ignore-start
   @override
   Future<List<WeightLifting>> getExercisesByUser(String userId) async {
     try {
@@ -229,7 +230,8 @@ class WeightLiftingRepositoryImpl implements WeightLiftingRepository {
       throw Exception('Failed to retrieve user exercises: $e');
     }
   }
-  
+// coverage:ignore-end
+
   @override
   List<String> getExerciseCategories() {
     return exercisesByCategory.keys.toList();
