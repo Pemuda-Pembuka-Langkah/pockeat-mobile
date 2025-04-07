@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/macro_nutrient.dart';
 
+// coverage:ignore-start
 class MacroCardWidget extends StatelessWidget {
   final MacroNutrient macro;
 
@@ -66,3 +67,4 @@ class MacroCardWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end

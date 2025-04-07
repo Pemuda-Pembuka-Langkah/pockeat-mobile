@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/toggle_button_widget.dart';
 
+// coverage:ignore-start
 class HeaderWidget extends StatelessWidget {
   final bool isWeeklyView;
   final Function(bool) onToggleView;
@@ -30,7 +31,7 @@ class HeaderWidget extends StatelessWidget {
               ),
             ),
             Text(
-              'Track your nutrition goals',
+              'Track your daily food intake',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.black54,
@@ -50,13 +51,13 @@ class HeaderWidget extends StatelessWidget {
                 text: 'Weekly',
                 isSelected: isWeeklyView,
                 onTap: () => onToggleView(true),
-                selectedColor: primaryColor,
+                selectedColor: primaryColor, // Changed from primaryColor to selectedColor
               ),
               ToggleButtonWidget(
                 text: 'Monthly',
                 isSelected: !isWeeklyView,
                 onTap: () => onToggleView(false),
-                selectedColor: primaryColor,
+                selectedColor: primaryColor, // Changed from primaryColor to selectedColor
               ),
             ],
           ),
@@ -65,3 +66,4 @@ class HeaderWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end

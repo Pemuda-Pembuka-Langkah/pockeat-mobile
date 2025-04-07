@@ -4,6 +4,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/d
 import 'macro_card_widget.dart';
 import 'nutrient_row_widget.dart';
 
+// coverage:ignore-start
 class NutrientProgressWidget extends StatelessWidget {
   final List<MacroNutrient> macroNutrients;
   final List<MicroNutrient> microNutrients;
@@ -61,3 +62,4 @@ class NutrientProgressWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end

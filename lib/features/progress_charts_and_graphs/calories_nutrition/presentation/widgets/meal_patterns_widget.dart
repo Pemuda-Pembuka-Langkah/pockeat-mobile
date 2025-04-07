@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/meal.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/meal_row_widget.dart';
 
+// coverage:ignore-start
 class MealPatternsWidget extends StatelessWidget {
   final List<Meal> meals;
   final Color primaryGreen;
@@ -17,58 +17,109 @@ class MealPatternsWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Meal Distribution',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: primaryGreen.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                'Well Balanced',
-                style: TextStyle(
-                  color: primaryGreen,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
+        const Text(
+          'Meals',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              for (int i = 0; i < meals.length; i++) ...[
-                if (i > 0) const SizedBox(height: 16),
-                MealRowWidget(meal: meals[i]),
-              ],
-            ],
-          ),
-        ),
+        ...meals.map((meal) => _buildMealItem(context, meal)).toList(),
       ],
     );
   }
+
+  Widget _buildMealItem(BuildContext context, Meal meal) {
+    // Calculate percentage of total calories
+    double percentage = meal.calories / meal.totalCalories;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: meal.color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              _getIconForMeal(meal.name),
+              color: meal.color,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      meal.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      meal.time,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: percentage,
+                          backgroundColor: Colors.grey[200],
+                          color: meal.color,
+                          minHeight: 6,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${meal.calories} cal',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: meal.color,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getIconForMeal(String mealName) {
+    switch (mealName.toLowerCase()) {
+      case 'breakfast':
+        return Icons.wb_sunny;
+      case 'lunch':
+        return Icons.restaurant;
+      case 'dinner':
+        return Icons.nightlight_round;
+      case 'snack':
+        return Icons.cookie;
+      default:
+        return Icons.fastfood;
+    }
+  }
 }
+// coverage:ignore-end

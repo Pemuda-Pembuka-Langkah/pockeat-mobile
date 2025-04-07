@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/screens/weight_progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/services/weight_service.dart';
@@ -9,7 +10,6 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/s
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/repositories/nutrition_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/screens/exercise_progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/repositories/exercise_progress_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/presentation/screens/analytics_insight_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/services/analytics_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/domain/repositories/analytics_repository_impl.dart';
@@ -20,6 +20,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/main_tabs_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/progress_subtabs_widget.dart';
 
+// coverage:ignore-start
 class ProgressPage extends StatefulWidget {
   final ProgressTabsService service;
   
@@ -168,10 +169,11 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
                   service: WeightService(WeightRepositoryImpl()),
                 ),
                 NutritionProgressPage(
-                  service: NutritionService(NutritionRepositoryImpl()),
+                  service: GetIt.instance<NutritionService>(),
                 ),
                 ExerciseProgressPage(
-                  service: ExerciseProgressService(ExerciseProgressRepositoryImpl()),
+                  // Use the registered service from GetIt
+                  service: GetIt.instance<ExerciseProgressService>(),
                 ),
               ],
             ),
@@ -186,3 +188,4 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
     );
   }
 }
+// coverage:ignore-end

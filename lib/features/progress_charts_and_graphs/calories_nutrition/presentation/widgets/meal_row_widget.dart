@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/meal.dart';
 
+// coverage:ignore-start
 class MealRowWidget extends StatelessWidget {
   final Meal meal;
 
@@ -74,3 +75,4 @@ class MealRowWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end

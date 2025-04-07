@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:logger/logger.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/calorie_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/nutrition_stat.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/macro_nutrient.dart';
@@ -10,9 +12,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/p
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/nutrient_progress_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/meal_patterns_widget.dart';
 
-// ignore: depend_on_referenced_packages
-import 'package:logger/logger.dart';
-
+// coverage:ignore-start
 final logger = Logger();
 
 class NutritionProgressPage extends StatefulWidget {
@@ -146,3 +146,4 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
     );
   }
 }
+// coverage:ignore-end

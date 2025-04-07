@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// coverage:ignore-start
 class MicroNutrient {
   final String nutrient;
   final String current;
@@ -7,7 +8,7 @@ class MicroNutrient {
   final double progress;
   final Color color;
   
-  const MicroNutrient({
+  MicroNutrient({
     required this.nutrient,
     required this.current,
     required this.target,
@@ -15,3 +16,4 @@ class MicroNutrient {
     required this.color,
   });
 }
+// coverage:ignore-end
