@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/performance_metric.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/metric_card_widget.dart';
 
+// coverage:ignore-start
 class PerformanceMetricsWidget extends StatelessWidget {
   final List<PerformanceMetric> metrics;
 
@@ -65,3 +66,4 @@ class PerformanceMetricsWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end

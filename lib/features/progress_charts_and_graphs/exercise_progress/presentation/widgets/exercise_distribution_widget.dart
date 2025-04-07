@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/exercise_type.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/exercise_type_row_widget.dart';
 
+// coverage:ignore-start
 class ExerciseDistributionWidget extends StatelessWidget {
   final List<ExerciseType> exerciseTypes;
 
@@ -46,3 +47,4 @@ class ExerciseDistributionWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end

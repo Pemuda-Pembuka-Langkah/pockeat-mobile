@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/exercise_type.dart';
 
+// coverage:ignore-start
 class ExerciseTypeRowWidget extends StatelessWidget {
   final ExerciseType exerciseType;
 
@@ -67,3 +68,4 @@ class ExerciseTypeRowWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end

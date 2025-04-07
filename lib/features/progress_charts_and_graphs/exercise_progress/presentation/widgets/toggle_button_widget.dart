@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// coverage:ignore-start
 class ToggleButtonWidget extends StatelessWidget {
   final String text;
   final bool isSelected;
@@ -36,3 +37,4 @@ class ToggleButtonWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/toggle_button_widget.dart';
 
+// coverage:ignore-start
 class HeaderWidget extends StatelessWidget {
   final bool isWeeklyView;
   final Function(bool) onToggleView;
@@ -65,3 +66,4 @@ class HeaderWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end

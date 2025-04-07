@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/workout_item.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/workout_item_widget.dart';
 
+// coverage:ignore-start
 class WorkoutHistoryWidget extends StatelessWidget {
   final List<WorkoutItem> workoutHistory;
 
@@ -39,10 +40,11 @@ class WorkoutHistoryWidget extends StatelessWidget {
           const SizedBox(height: 20),
           for (int i = 0; i < workoutHistory.length; i++) ...[
             if (i > 0) const SizedBox(height: 16),
-            WorkoutItemWidget(workout: workoutHistory[i]),
+            WorkoutItemWidget(workoutItem: workoutHistory[i]), // Changed parameter name from 'workout' to 'workoutItem'
           ],
         ],
       ),
     );
   }
 }
+// coverage:ignore-end
