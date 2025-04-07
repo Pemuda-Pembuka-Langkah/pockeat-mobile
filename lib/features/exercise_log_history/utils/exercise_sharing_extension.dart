@@ -1,12 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_summary_card.dart';
 
 /// Extension for sharing exercise summaries
 extension ExerciseSharing on BuildContext {
@@ -90,14 +86,5 @@ extension ExerciseSharing on BuildContext {
         backgroundColor: Colors.red.shade800,
       ),
     );
-  }
-
-  /// Saves image bytes to a temporary file
-  Future<File> _saveImageToTempFile(Uint8List imageBytes) async {
-    final tempDir = await getTemporaryDirectory();
-    final file = File(
-        '${tempDir.path}/exercise_summary_${DateTime.now().millisecondsSinceEpoch}.png');
-    await file.writeAsBytes(imageBytes);
-    return file;
   }
 }

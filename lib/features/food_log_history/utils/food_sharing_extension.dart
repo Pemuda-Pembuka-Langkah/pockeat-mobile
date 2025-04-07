@@ -1,13 +1,9 @@
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/food_log_history/presentation/widgets/food_summary_card.dart';
-import 'package:share_plus/share_plus.dart';
+
 
 /// Extension for sharing food summary
 extension FoodSharing on BuildContext {
@@ -94,11 +90,5 @@ extension FoodSharing on BuildContext {
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(content: Text(message)),
     );
-  }
-
-  /// Saves image bytes to a temporary file
-  Future<File> _saveImageToTempFile(Uint8List imageBytes) async {
-    // TODO: Implement saving image to temporary file
-    throw UnimplementedError('_saveImageToTempFile not yet implemented');
   }
 }
