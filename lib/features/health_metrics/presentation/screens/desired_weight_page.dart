@@ -13,43 +13,105 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> {
   final _formKey = GlobalKey<FormState>();
   double? _desiredWeight;
 
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("What's your target weight?")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Target weight (kg)',
-                ),
-                validator: (value) {
-                  final weight = double.tryParse(value ?? '');
-                  if (weight == null || weight <= 0) {
-                    return 'Please enter a valid weight';
-                  }
-                  return null;
-                },
-                onSaved: (value) => _desiredWeight = double.tryParse(value ?? ''),
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    _formKey.currentState?.save();
-                    context.read<HealthMetricsFormCubit>().setDesiredWeight(_desiredWeight!);
-                    Navigator.pushNamed(context, '/speed');
-                  }
-                },
-                child: const Text("Next"),
-              )
-            ],
+      backgroundColor: primaryYellow,
+      appBar: AppBar(
+        backgroundColor: primaryYellow,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "Target Weight",
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
           ),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "What's your target weight?",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                height: 1.3,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryPink.withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Target weight (kg)',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          final weight = double.tryParse(value ?? '');
+                          if (weight == null || weight <= 0) {
+                            return 'Please enter a valid weight';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) =>
+                            _desiredWeight = double.tryParse(value ?? ''),
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black87,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          if (_formKey.currentState?.validate() ?? false) {
+                            _formKey.currentState?.save();
+                            context
+                                .read<HealthMetricsFormCubit>()
+                                .setDesiredWeight(_desiredWeight!);
+                            Navigator.pushNamed(context, '/speed');
+                          }
+                        },
+                        child: const Text("Next"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

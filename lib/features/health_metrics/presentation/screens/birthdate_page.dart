@@ -12,6 +12,9 @@ class BirthdatePage extends StatefulWidget {
 class _BirthdatePageState extends State<BirthdatePage> {
   DateTime? _selectedDate;
 
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+
   Future<void> _pickDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -19,6 +22,21 @@ class _BirthdatePageState extends State<BirthdatePage> {
       initialDate: now,
       firstDate: DateTime(now.year - 100),
       lastDate: now,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: primaryPink,
+              onPrimary: Colors.white,
+              onSurface: Colors.black87,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: primaryPink),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -29,33 +47,96 @@ class _BirthdatePageState extends State<BirthdatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: primaryYellow,
       appBar: AppBar(
-        leading: const BackButton(),
-        title: const Text("When were you born?"),
+        backgroundColor: primaryYellow,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          "Your Birthdate",
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ElevatedButton(
-              onPressed: _pickDate,
-              child: Text(_selectedDate != null
-                  ? "Selected: ${_selectedDate!.toLocal().toString().split(' ')[0]}"
-                  : "Choose your birthdate"),
+            const Text(
+              "When were you born?",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                height: 1.3,
+                color: Colors.black87,
+              ),
             ),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: _selectedDate == null
-                  ? null
-                  : () {
-                      context
-                          .read<HealthMetricsFormCubit>()
-                          .setBirthDate(_selectedDate!);
-                      Navigator.pushNamed(context, '/diet');
-                    },
-              child: const Text("Next"),
-            )
+            const SizedBox(height: 24),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryPink.withOpacity(0.2),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryPink,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: _pickDate,
+                      child: Text(
+                        _selectedDate != null
+                            ? "Selected: ${_selectedDate!.toLocal().toString().split(' ')[0]}"
+                            : "Choose your birthdate",
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    const Spacer(),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black87,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: _selectedDate == null
+                          ? null
+                          : () {
+                              context
+                                  .read<HealthMetricsFormCubit>()
+                                  .setBirthDate(_selectedDate!);
+                              Navigator.pushNamed(context, '/diet');
+                            },
+                      child: const Text("Next"),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
