@@ -106,6 +106,9 @@ void main() {
 
       // Assert
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Cleanup - pump all pending timers
+      await tester.pumpAndSettle(const Duration(seconds: 10));
     });
 
     testWidgets(
@@ -124,6 +127,9 @@ void main() {
       // Assert
       expect(find.text('Sharing functionality not yet implemented'),
           findsOneWidget);
+
+      // Cleanup - pump all pending timers
+      await tester.pumpAndSettle(const Duration(seconds: 10));
     });
 
     testWidgets('Should show error snackbar when saving image fails',

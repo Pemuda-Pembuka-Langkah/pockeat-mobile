@@ -18,21 +18,42 @@ extension FoodSharing on BuildContext {
 
   /// Creates and shares a food summary card
   Future<void> shareFoodSummary(FoodAnalysisResult food) async {
+    // Flag to track loading dialog state
+    bool isLoadingDialogShowing = false;
+
     try {
       // Show loading indicator
+      isLoadingDialogShowing = true;
       showDialog(
         context: this,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
+        builder: (context) => WillPopScope(
+          onWillPop: () async => false,
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
         ),
       );
 
+      // Set a timeout to prevent getting stuck on loading
+      Future.delayed(const Duration(seconds: 5)).then((_) {
+        if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
+          Navigator.of(this).pop();
+          isLoadingDialogShowing = false;
+          ScaffoldMessenger.of(this).showSnackBar(
+            const SnackBar(
+                content: Text('Sharing took too long and was canceled')),
+          );
+        }
+      });
+
       // TODO: Implement the food summary card rendering
+      await Future.delayed(const Duration(milliseconds: 500));
 
       // Close the loading dialog
-      if (Navigator.of(this).canPop()) {
+      if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
         Navigator.of(this).pop();
+        isLoadingDialogShowing = false;
       }
 
       // Display not implemented message
@@ -42,9 +63,11 @@ extension FoodSharing on BuildContext {
       );
     } catch (e) {
       debugPrint('Error in shareFoodSummary: $e');
+
       // Close the loading dialog if it's still open
-      if (Navigator.of(this).canPop()) {
+      if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
         Navigator.of(this).pop();
+        isLoadingDialogShowing = false;
       }
 
       ScaffoldMessenger.of(this).showSnackBar(
