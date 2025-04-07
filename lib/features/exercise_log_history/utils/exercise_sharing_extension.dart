@@ -11,15 +11,22 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/exerc
 extension ExerciseSharing on BuildContext {
   /// Saves image bytes to a temporary file
   Future<File> _saveImageToTempFile(Uint8List imageBytes) async {
-    // TODO: Implement saving image to temporary file
-    throw UnimplementedError('_saveImageToTempFile not yet implemented');
+    // For GREEN phase: Minimal implementation that works
+    final tempDir = await getTemporaryDirectory();
+    final file = File(
+        '${tempDir.path}/exercise_summary_${DateTime.now().millisecondsSinceEpoch}.png');
+    await file.writeAsBytes(imageBytes);
+    return file;
   }
 
   /// Creates and shares an exercise summary card
   Future<void> shareExerciseSummary(
       dynamic exercise, String activityType) async {
+    bool isLoadingDialogShowing = false;
+
     try {
       // Show loading indicator
+      isLoadingDialogShowing = true;
       showDialog(
         context: this,
         barrierDismissible: false,
@@ -28,14 +35,16 @@ extension ExerciseSharing on BuildContext {
         ),
       );
 
-      // TODO: Implement exercise summary card rendering and sharing
+      // Minimal delay for testing
+      await Future.delayed(const Duration(milliseconds: 500));
 
-      // Close loading dialog when done
-      if (Navigator.of(this).canPop()) {
+      // In the GREEN phase, we're just showing the message without actual implementation
+      if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
         Navigator.of(this).pop();
+        isLoadingDialogShowing = false;
       }
 
-      // For skeletal implementation, just show a message
+      // For GREEN phase implementation, just show a message
       ScaffoldMessenger.of(this).showSnackBar(
         const SnackBar(content: Text('Exercise sharing not implemented yet')),
       );
@@ -43,7 +52,7 @@ extension ExerciseSharing on BuildContext {
       debugPrint('Error in shareExerciseSummary: $e');
 
       // Close loading dialog if open
-      if (Navigator.of(this).canPop()) {
+      if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
         Navigator.of(this).pop();
       }
 
