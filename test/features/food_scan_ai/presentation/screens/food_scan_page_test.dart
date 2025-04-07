@@ -8,7 +8,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_photo_help_widget.dart';
 import 'dart:io';
 
 class MockCameraController extends Mock implements CameraController {
@@ -358,5 +359,320 @@ void main() {
 
     // Verify error message
     expect(find.text('Mohon masukkan angka positif'), findsOneWidget);
+  });
+
+  testWidgets('FoodPhotoHelpWidget renders correctly',
+      (WidgetTester tester) async {
+    // Arrange
+    final widget = MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => FoodPhotoHelpWidget(
+                  primaryColor: const Color(0xFF4ECDC4),
+                ),
+              );
+            },
+            child: const Text('Show Help'),
+          ),
+        ),
+      ),
+    );
+
+    // Act
+    await tester.pumpWidget(widget);
+    await tester.tap(find.text('Show Help'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    // Check dialog title
+    expect(find.text('How to Take a Good Food Photo'), findsOneWidget);
+
+    // Check all tip items are present
+    expect(find.text('Good Lighting'), findsOneWidget);
+    expect(find.text('Center Your Food'), findsOneWidget);
+    expect(find.text('Appropriate Distance'), findsOneWidget);
+    expect(find.text('Steady Hand'), findsOneWidget);
+    expect(find.text('Avoid Reflections'), findsOneWidget);
+
+    // Check descriptions
+    expect(
+        find.text('Try to take photos in natural light. Avoid harsh shadows.'),
+        findsOneWidget);
+    expect(
+        find.text('Keep the food inside the scanning frame.'), findsOneWidget);
+    expect(find.text('Not too close, not too far. 8-12 inches is ideal.'),
+        findsOneWidget);
+    expect(find.text('Hold your phone steady to avoid blur.'), findsOneWidget);
+    expect(find.text('Avoid glare from shiny surfaces or packaging.'),
+        findsOneWidget);
+
+    // Check button exists
+    expect(find.text('Got it!'), findsOneWidget);
+  });
+
+  testWidgets('FoodPhotoHelpWidget dismisses when button is tapped',
+      (WidgetTester tester) async {
+    // Arrange
+    when(() => mockNavigatorObserver.didPop(any(), any())).thenReturn(null);
+
+    final widget = MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => FoodPhotoHelpWidget(
+                  primaryColor: const Color(0xFF4ECDC4),
+                ),
+              );
+            },
+            child: const Text('Show Help'),
+          ),
+        ),
+      ),
+      navigatorObservers: [mockNavigatorObserver],
+    );
+
+    // Act
+    await tester.pumpWidget(widget);
+    await tester.tap(find.text('Show Help'));
+    await tester.pumpAndSettle();
+
+    // Reset observer to clear previous calls
+    clearInteractions(mockNavigatorObserver);
+
+    // Tap the "Got it!" button
+    await tester.tap(find.text('Got it!'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    // Verify dialog is closed
+    expect(find.text('How to Take a Good Food Photo'), findsNothing);
+    verify(() => mockNavigatorObserver.didPop(any(), any())).called(1);
+  });
+
+  testWidgets('FoodPhotoHelpWidget displays with correct styling',
+      (WidgetTester tester) async {
+    // Arrange
+    const primaryColor = Color(0xFF4ECDC4);
+
+    final widget = MaterialApp(
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => const FoodPhotoHelpWidget(
+                  primaryColor: primaryColor,
+                ),
+              );
+            },
+            child: const Text('Show Help'),
+          ),
+        ),
+      ),
+    );
+
+    // Act
+    await tester.pumpWidget(widget);
+    await tester.tap(find.text('Show Help'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    // Check title has correct style
+    final titleText =
+        tester.widget<Text>(find.text('How to Take a Good Food Photo'));
+    expect(titleText.style?.color, primaryColor);
+    expect(titleText.style?.fontWeight, FontWeight.bold);
+    expect(titleText.style?.fontSize, 18.0);
+
+    // Check icons have correct color
+    final icons = tester.widgetList<Icon>(find.byType(Icon));
+    for (final icon in icons) {
+      expect(icon.color, primaryColor);
+    }
+
+    // Check button styling
+    final button = tester.widget<TextButton>(find.byType(TextButton).last);
+    final buttonStyle = button.style as ButtonStyle;
+
+    // Extract background color
+    final backgroundColor = buttonStyle.backgroundColor?.resolve({});
+    expect(backgroundColor, primaryColor);
+
+    // Check button text style
+    final buttonText = tester.widget<Text>(find.text('Got it!'));
+    expect(buttonText.style?.color, Colors.white);
+    expect(buttonText.style?.fontWeight, FontWeight.bold);
+  });
+
+  testWidgets('Help button shows FoodPhotoHelpWidget when tapped',
+      (WidgetTester tester) async {
+    // Arrange - Pump the widget to test
+    await tester.pumpWidget(scanFoodPage);
+
+    // Find the help button using the key you've defined
+    final helpButtonFinder = find.byKey(const Key('help_button'));
+    expect(helpButtonFinder, findsOneWidget);
+
+    // Act - Tap the help button
+    await tester.tap(helpButtonFinder);
+
+    // Pump a few frames to allow the dialog to start showing, but don't wait indefinitely
+    await tester.pump(); // Schedule the animation
+    await tester.pump(const Duration(milliseconds: 100)); // Pump one frame
+
+    // Assert - Check if the FoodPhotoHelpWidget is shown
+    expect(find.byType(FoodPhotoHelpWidget), findsOneWidget);
+
+    // Verify the title appears in the widget
+    expect(find.text('How to Take a Good Food Photo'), findsOneWidget);
+
+    // Verify the dialog has the correct primary color
+    final helpWidget =
+        tester.widget<FoodPhotoHelpWidget>(find.byType(FoodPhotoHelpWidget));
+    final state = tester.state<ScanFoodPageState>(find.byType(ScanFoodPage));
+    expect(helpWidget.primaryColor, state.primaryGreen);
+  });
+
+  testWidgets('Help button has correct styling and icon',
+      (WidgetTester tester) async {
+    // Arrange
+    await tester.pumpWidget(scanFoodPage);
+
+    // Find the help button
+    final helpButtonFinder = find.byKey(const Key('help_button'));
+
+    // Find the Container that wraps the Icon
+    final containerFinder = find.descendant(
+      of: helpButtonFinder,
+      matching: find.byType(Container),
+    );
+
+    // Get the Container widget
+    final container = tester.widget<Container>(containerFinder);
+
+    // Verify container styling
+    final decoration = container.decoration as BoxDecoration;
+    expect(decoration.color, Colors.black.withOpacity(0.5));
+    expect(decoration.shape, BoxShape.circle);
+
+    // Find and verify the icon
+    final iconFinder = find.descendant(
+      of: helpButtonFinder,
+      matching: find.byType(Icon),
+    );
+
+    final icon = tester.widget<Icon>(iconFinder);
+    expect(icon.icon, Icons.help_outline);
+    expect(icon.color, Colors.white);
+    expect(icon.size, 20);
+  });
+
+// Add this test to directly test the _showHelpDialog method
+  testWidgets('_showHelpDialog method shows dialog with correct content',
+      (WidgetTester tester) async {
+    // Create a simple test widget that will call the showDialog method
+    final testWidget = MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return FoodPhotoHelpWidget(
+                          primaryColor: const Color(0xFF4ECDC4));
+                    },
+                  );
+                },
+                child: const Text('Show Dialog'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.pumpWidget(testWidget);
+
+    // Tap the button to show the dialog
+    await tester.tap(find.text('Show Dialog'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Verify the dialog appears with correct content
+    expect(find.byType(FoodPhotoHelpWidget), findsOneWidget);
+    expect(find.text('How to Take a Good Food Photo'), findsOneWidget);
+
+    // Check for all tip items
+    expect(find.text('Good Lighting'), findsOneWidget);
+    expect(find.text('Center Your Food'), findsOneWidget);
+    expect(find.text('Appropriate Distance'), findsOneWidget);
+    expect(find.text('Steady Hand'), findsOneWidget);
+    expect(find.text('Avoid Reflections'), findsOneWidget);
+  });
+
+  testWidgets('FoodPhotoHelpWidget closes when "Got it!" button is tapped',
+      (WidgetTester tester) async {
+    // Create a simpler test that doesn't rely on navigation observers
+    final testWidget = MaterialApp(
+      home: Builder(
+        builder: (BuildContext context) {
+          return Scaffold(
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return FoodPhotoHelpWidget(
+                        primaryColor: const Color(0xFF4ECDC4), // primaryGreen
+                      );
+                    },
+                  );
+                },
+                child: const Text('Show Help'),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.pumpWidget(testWidget);
+
+    // Act - Show the dialog
+    await tester.tap(find.text('Show Help'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Verify dialog is shown
+    expect(find.byType(FoodPhotoHelpWidget), findsOneWidget);
+    expect(find.text('Got it!'), findsOneWidget);
+
+    // Tap the "Got it!" button
+    await tester.tap(find.text('Got it!'));
+
+    // Need to pump multiple times to complete the dialog dismissal animation
+    await tester.pump(); // Start the dismiss animation
+    await tester
+        .pump(const Duration(milliseconds: 300)); // Animation in progress
+    await tester
+        .pump(const Duration(seconds: 1)); // Animation should be complete
+
+    // Assert - Dialog should be closed
+    expect(find.byType(Dialog), findsNothing);
+    // Instead of checking for FoodPhotoHelpWidget directly, check for Dialog
+    // or text that should be gone
+    expect(find.text('How to Take a Good Food Photo'), findsNothing);
   });
 }

@@ -20,7 +20,7 @@ class LoginServiceImpl implements LoginService {
         _userRepository = userRepository;
 
   @override
-  Stream<UserModel?> initialize(GlobalKey<NavigatorState> navigatorKey) {
+  Stream<UserModel?> initialize() {
     // Membatalkan subscription sebelumnya jika ada
     _subscription?.cancel();
 
@@ -108,6 +108,20 @@ class LoginServiceImpl implements LoginService {
         createdAt:
             DateTime.now(), // We don't know the actual creation time here
       );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<String?> getIdToken() async {
+    try {
+      final firebaseUser = _auth.currentUser;
+      if (firebaseUser == null) {
+        return null;
+      }
+
+      // Get Firebase ID token (JWT)
+      return await firebaseUser.getIdToken(true); // Force refresh token
     } catch (e) {
       return null;
     }

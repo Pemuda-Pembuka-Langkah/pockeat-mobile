@@ -38,6 +38,7 @@ void main() {
     group('RunningActivity Tests', () {
       test('RunningActivity should be created correctly', () {
         final activity = RunningActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -55,6 +56,7 @@ void main() {
 
       test('RunningActivity toMap should convert correctly', () {
         final activity = RunningActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -74,6 +76,7 @@ void main() {
 
       test('RunningActivity pace calculation should be correct', () {
         final activity = RunningActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -87,6 +90,7 @@ void main() {
 
       test('RunningActivity duration calculation should be correct', () {
         final activity = RunningActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -99,6 +103,7 @@ void main() {
       test('RunningActivity calculateCalories method should call calculator',
           () {
         final activity = RunningActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -116,6 +121,7 @@ void main() {
           'RunningActivity copyWith should create a new instance with updated values',
           () {
         final originalActivity = RunningActivity(
+          userId: "test-user-id",
           id: 'test-id',
           date: testDate,
           startTime: testStartTime,
@@ -193,6 +199,7 @@ void main() {
           'CyclingActivity copyWith should create a new instance with updated values',
           () {
         final originalActivity = CyclingActivity(
+          userId: "test-user-id",
           id: 'test-id',
           date: testDate,
           startTime: testStartTime,
@@ -235,6 +242,7 @@ void main() {
       test('CyclingActivity calculateCalories method should call calculator',
           () {
         final activity = CyclingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -251,6 +259,7 @@ void main() {
       });
       test('CyclingActivity should be created correctly', () {
         final activity = CyclingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -270,6 +279,7 @@ void main() {
 
       test('CyclingActivity toMap should convert correctly', () {
         final activity = CyclingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -291,6 +301,7 @@ void main() {
 
       test('CyclingActivity speed calculation should be correct', () {
         final activity = CyclingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime:
@@ -308,6 +319,7 @@ void main() {
     group('SwimmingActivity Tests', () {
       test('SwimmingActivity should be created correctly', () {
         final activity = SwimmingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -329,6 +341,7 @@ void main() {
 
       test('SwimmingActivity toMap should convert correctly', () {
         final activity = SwimmingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -352,6 +365,7 @@ void main() {
 
       test('SwimmingActivity distance calculation should be correct', () {
         final activity = SwimmingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -368,6 +382,7 @@ void main() {
 
       test('SwimmingActivity pace calculation should be correct', () {
         final activity = SwimmingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -383,6 +398,7 @@ void main() {
       test('SwimmingActivity calculateCalories method should call calculator',
           () {
         final activity = SwimmingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -402,6 +418,7 @@ void main() {
           'SwimmingActivity copyWith should create a new instance with updated values',
           () {
         final originalActivity = SwimmingActivity(
+          userId: "test-user-id",
           id: 'test-id',
           date: testDate,
           startTime: testStartTime,
@@ -520,6 +537,7 @@ void main() {
         };
 
         final activity = CardioActivityFactory.fromFormData(
+          userId: "test-user-id",
           type: CardioType.running,
           date: testDate,
           startTime: testStartTime,
@@ -540,6 +558,7 @@ void main() {
         };
 
         final activity = CardioActivityFactory.fromFormData(
+          userId: "test-user-id",
           type: CardioType.cycling,
           date: testDate,
           startTime: testStartTime,
@@ -561,6 +580,7 @@ void main() {
         };
 
         final activity = CardioActivityFactory.fromFormData(
+          userId: "test-user-id",
           type: CardioType.swimming,
           date: testDate,
           startTime: testStartTime,
@@ -575,6 +595,7 @@ void main() {
 
       test('RunningActivity constructor should handle null ID', () {
         final activity = RunningActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -586,6 +607,7 @@ void main() {
 
       test('CyclingActivity constructor should handle optional calories', () {
         final activity = CyclingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -611,6 +633,7 @@ void main() {
       });
       test('RunningActivity copyWith should create new instance', () {
         final originalActivity = RunningActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -628,6 +651,7 @@ void main() {
       });
       test('RunningActivity copyWith should create new instance', () {
         final originalActivity = RunningActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -645,6 +669,7 @@ void main() {
       });
       test('RunningActivity copyWith should create new instance', () {
         final originalActivity = RunningActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -663,6 +688,7 @@ void main() {
 
       test('CyclingActivity should handle zero distance', () {
         final activity = CyclingActivity(
+          userId: "test-user-id",
           date: testDate,
           startTime: testStartTime,
           endTime: testEndTime,
@@ -676,6 +702,7 @@ void main() {
 
       test('CardioActivityFactory fromFormData with missing optional data', () {
         final activity = CardioActivityFactory.fromFormData(
+          userId: "test-user-id",
           type: CardioType.swimming,
           date: testDate,
           startTime: testStartTime,
@@ -696,6 +723,7 @@ void main() {
         };
 
         final activity = CardioActivityFactory.fromFormData(
+          userId: "test-user-id",
           type: CardioType.cycling,
           date: testDate,
           startTime: testStartTime,
@@ -719,6 +747,7 @@ void main() {
         };
 
         final activity = CardioActivityFactory.fromFormData(
+          userId: "test-user-id",
           type: CardioType.cycling,
           date: testDate,
           startTime: testStartTime,
@@ -740,6 +769,7 @@ void main() {
         };
 
         final activity = CardioActivityFactory.fromFormData(
+          userId: "test-user-id",
           type: CardioType.cycling,
           date: DateTime(2023, 1, 1),
           startTime: DateTime(2023, 1, 1, 10, 0),
@@ -760,6 +790,7 @@ void main() {
         };
 
         final activity = CardioActivityFactory.fromFormData(
+          userId: "test-user-id",
           type: CardioType.cycling,
           date: DateTime(2023, 1, 1),
           startTime: DateTime(2023, 1, 1, 10, 0),

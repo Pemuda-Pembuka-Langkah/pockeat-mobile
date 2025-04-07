@@ -15,6 +15,7 @@ void main() {
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
+        userId: 'test-user-id',
         sets: testSets,
       );
     });
@@ -32,6 +33,7 @@ void main() {
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
+        userId: 'test-user-id',
       );
 
       expect(exerciseWithGeneratedId.id, isNotEmpty);
@@ -43,6 +45,7 @@ void main() {
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
+        userId: 'test-user-id',
       );
 
       expect(exerciseWithoutSets.sets, []);
@@ -65,6 +68,7 @@ void main() {
         'name': 'Bench Press',
         'bodyPart': 'Chest',
         'metValue': 3.5,
+        'userId': 'test-user-id',
         'sets': [
           {'weight': 20.0, 'reps': 12, 'duration': 60.0},
           {'weight': 25.0, 'reps': 10, 'duration': 45.0},
@@ -77,6 +81,7 @@ void main() {
       expect(exerciseFromJson.name, 'Bench Press');
       expect(exerciseFromJson.bodyPart, 'Chest');
       expect(exerciseFromJson.metValue, 3.5);
+      expect(exerciseFromJson.userId, 'test-user-id');
       expect(exerciseFromJson.sets.length, 2);
       expect(exerciseFromJson.sets[0].weight, 20.0);
       expect(exerciseFromJson.sets[0].reps, 12);
@@ -92,6 +97,7 @@ void main() {
         'name': 'Bench Press',
         'bodyPart': 'Chest',
         'metValue': 3.5,
+        'userId': 'test-user-id',
         'sets': [],
       };
 
@@ -105,6 +111,7 @@ void main() {
         'name': 'Bench Press',
         'bodyPart': 'Chest',
         'metValue': 3.5,
+        'userId': 'test-user-id',
       };
 
       final exerciseFromJson = WeightLifting.fromJson(json);

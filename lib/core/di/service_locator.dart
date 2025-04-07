@@ -1,12 +1,11 @@
 // lib/core/di/service_locator.dart
 import 'package:get_it/get_it.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/food_image_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/food_text_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service.dart';
-import 'package:pockeat/features/ai_api_scan/services/gemini_service_impl.dart';
+import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/food_image_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
+import 'package:pockeat/features/authentication/services/token_manager.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
@@ -15,8 +14,8 @@ import 'package:pockeat/features/food_log_history/di/food_log_history_module.dar
 import 'package:pockeat/features/exercise_log_history/di/exercise_log_history_module.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
 import 'package:pockeat/features/authentication/services/register_service_impl.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -24,52 +23,27 @@ import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
+import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
+import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pockeat/features/authentication/services/change_password_service.dart';
+import 'package:pockeat/features/authentication/services/change_password_service_impl.dart';
+import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
+import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
 Future<void> setupDependencies() async {
   // Register specialized services
-  getIt.registerSingleton<FoodTextAnalysisService>(
-    FoodTextAnalysisService.fromEnv(),
+  getIt.registerSingleton<FirebaseAuth>(
+    FirebaseAuth.instance,
   );
 
-  getIt.registerSingleton<FoodImageAnalysisService>(
-    FoodImageAnalysisService.fromEnv(),
+  getIt.registerSingleton<FirebaseMessaging>(
+    FirebaseMessaging.instance,
   );
-
-  getIt.registerSingleton<NutritionLabelAnalysisService>(
-    NutritionLabelAnalysisService.fromEnv(),
-  );
-
-  getIt.registerSingleton<ExerciseAnalysisService>(
-    ExerciseAnalysisService.fromEnv(),
-  );
-
-  getIt.registerSingleton<FoodTextInputRepository>(
-    FoodTextInputRepository(),
-  );
-
-  getIt.registerSingleton<FoodTextInputService>(
-    FoodTextInputService(),
-  );
-
-  getIt.registerSingleton<FoodScanRepository>(
-    FoodScanRepository(),
-  );
-
-  getIt.registerSingleton<FoodScanPhotoService>(
-    FoodScanPhotoService(),
-  );
-
-  getIt.registerSingleton<GeminiService>(
-    GeminiServiceImpl(
-      foodTextAnalysisService: getIt<FoodTextAnalysisService>(),
-      foodImageAnalysisService: getIt<FoodImageAnalysisService>(),
-      nutritionLabelService: getIt<NutritionLabelAnalysisService>(),
-      exerciseAnalysisService: getIt<ExerciseAnalysisService>(),
-    ),
-  );
-
   // Register UserRepository
   getIt.registerSingleton<UserRepository>(
     UserRepositoryImpl(),
@@ -85,9 +59,71 @@ Future<void> setupDependencies() async {
     LoginServiceImpl(userRepository: getIt<UserRepository>()),
   );
 
-  // Register DeepLinkService
+  // Register GoogleSignInService
+  getIt.registerSingleton<GoogleSignInService>(
+    GoogleSignInServiceImpl(),
+  );
+
+  // Register ChangePasswordService
+  getIt.registerSingleton<ChangePasswordService>(
+    ChangePasswordServiceImpl(),
+  );
+
+  // Register Email Verification DeepLink Service
+  getIt.registerSingleton<EmailVerificationDeepLinkService>(
+    EmailVerificationDeepLinkServiceImpl(
+        userRepository: getIt<UserRepository>()),
+  );
+
+  // Register Change Password DeepLink Service
+  getIt.registerSingleton<ChangePasswordDeepLinkService>(
+    ChangePasswordDeepLinkServiceImpl(),
+  );
+
+  // Register DeepLink Facade Service
   getIt.registerSingleton<DeepLinkService>(
-    DeepLinkServiceImpl(userRepository: getIt<UserRepository>()),
+    DeepLinkServiceImpl(
+      emailVerificationService: getIt<EmailVerificationDeepLinkService>(),
+      changePasswordService: getIt<ChangePasswordDeepLinkService>(),
+    ),
+  );
+
+  // Register TokenManager
+  getIt.registerSingleton<TokenManager>(TokenManager());
+
+  getIt.registerSingleton<FoodTextAnalysisService>(
+    FoodTextAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
+  );
+
+  getIt.registerSingleton<FoodImageAnalysisService>(
+    FoodImageAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
+  );
+
+  getIt.registerSingleton<NutritionLabelAnalysisService>(
+    NutritionLabelAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
+  );
+
+  getIt.registerSingleton<ExerciseAnalysisService>(
+    ExerciseAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
+  );
+
+  getIt.registerSingleton<FoodTextInputRepository>(
+    FoodTextInputRepository(),
+  );
+
+  getIt.registerSingleton<FoodTextInputService>(
+    FoodTextInputService(
+      getIt<FoodTextAnalysisService>(), // Will fail if not registered first!
+      getIt<FoodTextInputRepository>(),
+    ),
+  );
+
+  getIt.registerSingleton<FoodScanRepository>(
+    FoodScanRepository(),
+  );
+
+  getIt.registerSingleton<FoodScanPhotoService>(
+    FoodScanPhotoService(),
   );
 
   // Register Food Log History module
@@ -95,10 +131,6 @@ Future<void> setupDependencies() async {
 
   // Register Exercise Log History module
   ExerciseLogHistoryModule.register();
-
-  getIt.registerSingleton<FirebaseMessaging>(
-    FirebaseMessaging.instance,
-  );
 
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),

@@ -1,13 +1,15 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/food_image_analysis_service.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/services/food/food_image_analysis_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Mock classes
 class MockFoodImageAnalysisService extends Mock
@@ -21,6 +23,10 @@ class MockUuid extends Mock implements Uuid {}
 
 class MockNutritionLabelAnalysisService extends Mock implements NutritionLabelAnalysisService {}
 
+class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
+class MockUser extends Mock implements User {}
+
 void main() {
   late FoodScanPhotoService foodScanPhotoService;
   late MockFoodImageAnalysisService mockFoodImageAnalysisService;
@@ -31,6 +37,8 @@ void main() {
   late FoodAnalysisResult correctedResult;
   late DateTime testDateTime;
   late MockNutritionLabelAnalysisService mockNutritionLabelAnalysisService;
+  late MockFirebaseAuth mockFirebaseAuth;
+  late MockUser mockUser;
 
   setUpAll(() {
     // Register fallback values
@@ -85,6 +93,12 @@ void main() {
     // Daftarkan mock services ke GetIt dengan cara yang aman
     final getIt = GetIt.instance;
 
+    mockFirebaseAuth = MockFirebaseAuth();
+    if (getIt.isRegistered<FirebaseAuth>()) {
+      getIt.unregister<FirebaseAuth>();
+    }
+    getIt.registerSingleton<FirebaseAuth>(mockFirebaseAuth);
+
     mockFoodScanRepository = MockFoodScanRepository();
 
     if (getIt.isRegistered<FoodScanRepository>()) {
@@ -115,6 +129,8 @@ void main() {
       getIt.unregister<FoodScanPhotoService>();
     }
     getIt.registerSingleton<FoodScanPhotoService>(foodScanPhotoService);
+
+    mockUser = MockUser();
   });
 
   tearDown(() {
@@ -191,13 +207,15 @@ void main() {
     test('should return success message when saving is successful', () async {
       final uuid = '123e4567-e89b-12d3-a456-426614174000';
 
+      when(() => mockUser.uid).thenReturn('123e4567-e89b-12d3-a456-426614174000');
+      when(() => mockFirebaseAuth.currentUser).thenReturn(mockUser);
+
       when(() => mockUuid.v4()).thenReturn(uuid);
       when(() => mockFoodScanRepository.save(any(), any()))
           .thenAnswer((_) async => 'Successfully saved food analysis');
 
       // Act
-      final result =
-          await foodScanPhotoService.saveFoodAnalysis(analysisResult);
+      final result = await foodScanPhotoService.saveFoodAnalysis(analysisResult);
 
       // Assert
       expect(result, equals('Successfully saved food analysis'));

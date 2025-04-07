@@ -56,4 +56,7 @@ abstract class CardioRepository {
   /// Parameter [limit] menentukan jumlah maksimum data yang diambil
   /// Throws [Exception] jika terjadi error saat pengambilan data
   Future<List<CardioActivity>> getActivitiesWithLimit(int limit);
+
+/// Get activities for a specific user
+  Future<List<CardioActivity>> getActivitiesByUser(String userId);
 }

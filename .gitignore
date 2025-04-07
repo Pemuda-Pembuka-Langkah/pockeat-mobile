@@ -8,6 +8,7 @@
 .buildlog/
 .history
 .svn/
+node_modules/
 migrate_working_dir/
 
 # IntelliJ related
@@ -65,7 +66,6 @@ lcov.info
 *.bak
 
 *.rules
-*.json
 
 # Generated files
 *.g.dart
@@ -79,3 +79,4 @@ local.properties
 # Android C++ build files
 android/app/.cxx/
 
+*.lnk

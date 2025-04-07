@@ -63,6 +63,7 @@ void main() {
         estimatedCalories: 300,
         originalInput: 'I went for a run',
         timestamp: testTimestamp,
+        userId: 'test-user-123',
       );
 
       // Act
@@ -83,6 +84,7 @@ void main() {
       // Arrange - create a real WeightLifting instance
       final weightLifting = WeightLifting(
         id: 'weight-123',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 4.0,
@@ -113,6 +115,7 @@ void main() {
       // Arrange - create a real WeightLifting instance
       final weightLifting = WeightLifting(
         id: 'weight-123',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 4.0,
@@ -139,6 +142,7 @@ void main() {
         () {
       // Arrange - create a RunningActivity instance
       final runningActivity = RunningActivity(
+        userId: "test-user-id",
         id: 'cardio-123',
         date: testTimestamp,
         startTime: testTimestamp,
@@ -165,6 +169,7 @@ void main() {
       // Arrange - create a CyclingActivity instance
       final cyclingActivity = CyclingActivity(
         id: 'cardio-456',
+        userId: "test-user-id",
         date: testTimestamp,
         startTime: testTimestamp,
         endTime: testTimestamp.add(Duration(minutes: 45)),
@@ -191,6 +196,7 @@ void main() {
       // Arrange - create a SwimmingActivity instance
       final swimmingActivity = SwimmingActivity(
         id: 'cardio-789',
+        userId: "test-user-id",
         date: testTimestamp,
         startTime: testTimestamp,
         endTime: testTimestamp.add(Duration(minutes: 40)),
@@ -224,6 +230,7 @@ void main() {
 
       final weightLifting = WeightLifting(
         id: 'weight-123',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 6.0,
@@ -259,6 +266,7 @@ void main() {
 
       final weightLifting = WeightLifting(
         id: 'weight-456',
+        userId: 'test-user-123',
         name: 'Deadlift',
         bodyPart: 'Back',
         metValue: 8.0,
@@ -290,6 +298,7 @@ void main() {
       // Arrange
       final weightLifting = WeightLifting(
         id: 'weight-empty',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         timestamp: testTimestamp,
@@ -312,6 +321,7 @@ void main() {
       // Arrange - create a WeightLifting instance with different weights
       final weightLifting = WeightLifting(
         id: 'weight-123',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         timestamp: testTimestamp,
@@ -337,6 +347,7 @@ void main() {
       // Arrange - create a RunningActivity instance
       final runningActivity = RunningActivity(
         id: 'cardio-123',
+        userId: "test-user-id",
         date: testTimestamp,
         startTime: testTimestamp,
         endTime: testTimestamp.add(Duration(minutes: 30)),
@@ -359,6 +370,7 @@ void main() {
       // Arrange - create a WeightLifting instance with specific duration
       final weightLifting = WeightLifting(
         id: 'weight-123',
+        userId: 'test-user-123',
         name: 'Bench Press',
         bodyPart: 'Chest',
         timestamp: testTimestamp,

@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 
 /// Login page for existing users
 ///
@@ -62,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final credential = await _loginService.loginByEmail(
+      await _loginService.loginByEmail(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
@@ -268,7 +269,7 @@ class _LoginPageState extends State<LoginPage> {
             child: GestureDetector(
               onTap: () {
                 // Navigate to forgot password page
-                // Navigator.pushNamed(context, '/forgot-password');
+                Navigator.pushNamed(context, '/forgot-password');
               },
               child: Text(
                 'Forgot Password?',
@@ -307,6 +308,44 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
             ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Or divider
+          Row(
+            children: [
+              Expanded(
+                child: Divider(
+                  color: Colors.grey.shade300,
+                  thickness: 1,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'OR',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Divider(
+                  color: Colors.grey.shade300,
+                  thickness: 1,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Google Sign In Button
+          const GoogleSignInButton(
+            height: 55, // Sama dengan button sign in
           ),
 
           const SizedBox(height: 20),
