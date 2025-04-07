@@ -6,6 +6,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/pr
 class ExerciseDistributionWidget extends StatelessWidget {
   final List<ExerciseType> exerciseTypes;
 
+  // ignore: use_super_parameters
   const ExerciseDistributionWidget({
     Key? key,
     required this.exerciseTypes,

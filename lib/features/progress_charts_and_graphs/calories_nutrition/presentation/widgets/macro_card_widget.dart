@@ -5,6 +5,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/d
 class MacroCardWidget extends StatelessWidget {
   final MacroNutrient macro;
 
+  // ignore: use_super_parameters
   const MacroCardWidget({
     Key? key,
     required this.macro,

@@ -6,6 +6,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/pr
 class PerformanceMetricsWidget extends StatelessWidget {
   final List<PerformanceMetric> metrics;
 
+  // ignore: use_super_parameters
   const PerformanceMetricsWidget({
     Key? key,
     required this.metrics,

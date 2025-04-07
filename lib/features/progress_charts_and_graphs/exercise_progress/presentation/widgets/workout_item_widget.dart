@@ -5,6 +5,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/do
 class WorkoutItemWidget extends StatelessWidget {
   final WorkoutItem workoutItem;
   
+  // ignore: use_super_parameters
   const WorkoutItemWidget({
     Key? key,
     required this.workoutItem,

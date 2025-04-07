@@ -6,6 +6,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/pr
 class WorkoutHistoryWidget extends StatelessWidget {
   final List<WorkoutItem> workoutHistory;
 
+  // ignore: use_super_parameters
   const WorkoutHistoryWidget({
     Key? key,
     required this.workoutHistory,

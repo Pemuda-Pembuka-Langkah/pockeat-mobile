@@ -5,6 +5,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/d
 class NutrientRowWidget extends StatelessWidget {
   final MicroNutrient nutrient;
 
+  // ignore: use_super_parameters
   const NutrientRowWidget({
     Key? key,
     required this.nutrient,

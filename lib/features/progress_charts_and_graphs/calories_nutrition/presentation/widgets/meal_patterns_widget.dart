@@ -6,6 +6,7 @@ class MealPatternsWidget extends StatelessWidget {
   final List<Meal> meals;
   final Color primaryGreen;
 
+  // ignore: use_super_parameters
   const MealPatternsWidget({
     Key? key,
     required this.meals,
@@ -25,6 +26,7 @@ class MealPatternsWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        // ignore: unnecessary_to_list_in_spreads
         ...meals.map((meal) => _buildMealItem(context, meal)).toList(),
       ],
     );

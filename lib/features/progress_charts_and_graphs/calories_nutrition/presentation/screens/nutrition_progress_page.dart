@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+// ignore: depend_on_referenced_packages
 import 'package:logger/logger.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/calorie_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/nutrition_stat.dart';
@@ -18,6 +18,7 @@ final logger = Logger();
 class NutritionProgressPage extends StatefulWidget {
   final NutritionService service;
   
+  // ignore: use_super_parameters
   const NutritionProgressPage({
     Key? key,
     required this.service,

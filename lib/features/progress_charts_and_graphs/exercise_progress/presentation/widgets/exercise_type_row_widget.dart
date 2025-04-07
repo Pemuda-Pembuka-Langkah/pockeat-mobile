@@ -5,6 +5,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/do
 class ExerciseTypeRowWidget extends StatelessWidget {
   final ExerciseType exerciseType;
 
+  // ignore: use_super_parameters
   const ExerciseTypeRowWidget({
     Key? key,
     required this.exerciseType,

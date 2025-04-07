@@ -12,6 +12,7 @@ class ProgressOverviewWidget extends StatelessWidget {
   final Color primaryPink;
   final bool isLoading;
 
+  // ignore: use_super_parameters
   const ProgressOverviewWidget({
     Key? key,
     required this.calorieData,

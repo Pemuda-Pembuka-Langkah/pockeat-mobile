@@ -7,6 +7,7 @@ class HeaderWidget extends StatelessWidget {
   final Function(bool) onToggleView;
   final Color primaryColor;
 
+  // ignore: use_super_parameters
   const HeaderWidget({
     Key? key,
     required this.isWeeklyView,

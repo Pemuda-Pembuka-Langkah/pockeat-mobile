@@ -5,6 +5,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/d
 class MealRowWidget extends StatelessWidget {
   final Meal meal;
 
+  // ignore: use_super_parameters
   const MealRowWidget({
     Key? key,
     required this.meal,

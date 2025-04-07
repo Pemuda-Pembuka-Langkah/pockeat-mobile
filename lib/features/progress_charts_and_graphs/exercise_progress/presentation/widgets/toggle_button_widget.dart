@@ -7,6 +7,7 @@ class ToggleButtonWidget extends StatelessWidget {
   final Function() onTap;
   final Color primaryColor;
 
+  // ignore: use_super_parameters
   const ToggleButtonWidget({
     Key? key,
     required this.text,

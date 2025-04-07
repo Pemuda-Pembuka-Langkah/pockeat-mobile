@@ -15,6 +15,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/pr
 class AnalyticsInsightPage extends StatefulWidget {
   final AnalyticsService service;
   
+  // ignore: use_super_parameters
   const AnalyticsInsightPage({
     Key? key,
     required this.service,

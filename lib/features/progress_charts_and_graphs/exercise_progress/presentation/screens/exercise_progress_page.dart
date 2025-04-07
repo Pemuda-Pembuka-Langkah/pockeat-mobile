@@ -20,6 +20,7 @@ final logger = Logger();
 class ExerciseProgressPage extends StatefulWidget {
   final ExerciseProgressService service;
   
+  // ignore: use_super_parameters
   const ExerciseProgressPage({
     Key? key,
     required this.service,

@@ -5,6 +5,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/d
 class NutritionStatWidget extends StatelessWidget {
   final NutritionStat stat;
   
+  // ignore: use_super_parameters
   const NutritionStatWidget({
     Key? key, 
     required this.stat,

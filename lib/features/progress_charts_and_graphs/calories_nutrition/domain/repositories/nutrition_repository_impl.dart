@@ -124,7 +124,6 @@ class NutritionRepositoryImpl implements NutritionRepository {
         // OPTIMIZED MONTHLY VIEW - fetch all month data at once
         
         // Get the first and last day of the current month
-        final firstDayOfMonth = DateTime(now.year, now.month, 1);
         final lastDayOfMonth = DateTime(now.year, now.month + 1, 0); // Last day of month
         
         // Calculate total days in month and divide into 4 weeks
@@ -193,11 +192,6 @@ class NutritionRepositoryImpl implements NutritionRepository {
   }
 
   // Helper method to check if two dates are the same day
-  bool _isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year && 
-           date1.month == date2.month && 
-           date1.day == date2.day;
-  }
 
   List<CalorieData> _getDefaultCalorieData(bool isWeeklyView) {
     if (isWeeklyView) {
@@ -258,17 +252,17 @@ class NutritionRepositoryImpl implements NutritionRepository {
       return [
         NutritionStat(
           label: 'Consumed', 
-          value: formatter.format(consumedCalories) + " kcal", 
+          value: "${formatter.format(consumedCalories)} kcal", 
           color: primaryPink
         ),
         NutritionStat(
           label: 'Burned', 
-          value: formatter.format(burnedCalories) + " kcal", 
+          value: "${formatter.format(burnedCalories)} kcal", 
           color: primaryGreen
         ),
         NutritionStat(
           label: 'Net', 
-          value: formatter.format(netCalories) + " kcal", 
+          value: "${formatter.format(netCalories)} kcal", 
           color: netCalories > 0 ? primaryPink : primaryGreen
         ),
       ];

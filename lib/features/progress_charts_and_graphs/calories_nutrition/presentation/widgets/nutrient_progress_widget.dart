@@ -9,6 +9,7 @@ class NutrientProgressWidget extends StatelessWidget {
   final List<MacroNutrient> macroNutrients;
   final List<MicroNutrient> microNutrients;
 
+  // ignore: use_super_parameters
   const NutrientProgressWidget({
     Key? key,
     required this.macroNutrients,
