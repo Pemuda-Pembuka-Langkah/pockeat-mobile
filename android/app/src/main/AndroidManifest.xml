@@ -1,23 +1,25 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Queries section (consolidated) -->
+    <!-- Add these inside the manifest tag -->
     <queries>
-        <!-- Health Connect query -->
         <package android:name="com.google.android.apps.healthdata" />
-        <intent>
-            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-        </intent>
-        <!-- Required to query activities that can process text -->
+        
+        <!-- Intent queries -->
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        
+        <!-- Health Connect query -->
+        <intent>
+            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+        </intent>
     </queries>
     
-    <!-- Required Health Connect permissions -->
+    <!-- Required Health Connect permissions - READ only -->
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
     <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED"/>
-    <uses-permission android:name="android.permission.health.READ_ACTIVE_ENERGY_BURNED"/>
+    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED"/>
     
     <!-- Activity recognition permission (needed for steps) -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>

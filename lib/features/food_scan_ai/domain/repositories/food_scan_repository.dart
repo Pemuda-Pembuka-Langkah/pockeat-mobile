@@ -1,5 +1,5 @@
 import 'package:pockeat/firebase/firebase_repository.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 /// Repository for managing food analysis results
 ///

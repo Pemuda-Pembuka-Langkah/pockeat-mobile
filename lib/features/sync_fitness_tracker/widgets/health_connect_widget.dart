@@ -38,10 +38,13 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      // Always check permissions when app resumes
-      _fitnessSync.resetPermissionState();
+    if (state == AppLifecycleState.resumed && _hasAttemptedConnection) {
+      // Only check permissions when the app resumes after a connection attempt
+      // This prevents unnecessary permission checks that could cause loops
+      debugPrint('App resumed after connection attempt, checking permissions');
       _checkPermissionsAfterResume();
+      // Reset the flag after checking
+      _hasAttemptedConnection = false;
     }
   }
 
@@ -55,10 +58,9 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
       final isAvailable = await _fitnessSync.isHealthConnectAvailable();
 
       if (isAvailable) {
-        // Reset permission state for fresh check
-        _fitnessSync.resetPermissionState();
-
-        final hasPermissions = await _fitnessSync.hasRequiredPermissions();
+        // Use the initialization method which does a simple permission check
+        final hasPermissions =
+            await _fitnessSync.initializeAndCheckPermissions();
 
         setState(() {
           _isHealthConnectAvailable = true;
@@ -96,6 +98,7 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
     try {
       // Always do a direct permission check
       final hasPermissions = await _fitnessSync.hasRequiredPermissions();
+      debugPrint('Permission check after resume: $hasPermissions');
 
       setState(() {
         _isConnected = hasPermissions;
@@ -103,8 +106,11 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
       });
 
       if (hasPermissions) {
+        debugPrint('Permissions granted, loading fitness data');
         // Load data if we have permissions
         _loadFitnessData();
+      } else {
+        debugPrint('Permissions still not granted after resume');
       }
     } catch (e) {
       debugPrint('Error checking permissions after resume: $e');
@@ -123,39 +129,21 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
     try {
       final data = await _fitnessSync.getTodayFitnessData();
 
-      // Check if we still have permissions
+      // Check if we still have permissions from the returned data
       final hasPermissions = data['hasPermissions'] != false;
-
-      if (!hasPermissions) {
-        // Permission error detected, update UI to show connect card
-        setState(() {
-          _isConnected = false;
-          _isLoading = false;
-        });
-        return;
-      }
 
       setState(() {
         _steps = data['steps'] ?? 0;
         _calories = (data['calories'] ?? 0);
         _isLoading = false;
-        _isConnected = true;
+        _isConnected = hasPermissions;
       });
     } catch (e) {
       debugPrint('Error loading fitness data: $e');
-
-      // On error, check if we still have permissions
-      final hasPermissions = await _fitnessSync.hasRequiredPermissions();
-
       setState(() {
         _isLoading = false;
-        _isConnected = hasPermissions;
+        _isConnected = false;
       });
-
-      if (!hasPermissions) {
-        // Try requesting authorization
-        await _requestAuthorization();
-      }
     }
   }
 
@@ -184,7 +172,7 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
   }
 
   Future<void> _showPermissionsTutorial() async {
-    await showDialog(
+    return showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Health Connect Permissions'),
@@ -237,7 +225,8 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _connectToHealthServices();
+              // Directly open Health Connect from here
+              _fitnessSync.openHealthConnect(context);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: widget.primaryColor,
@@ -331,10 +320,58 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
     );
   }
 
+  Future<void> _showHealthConnectExplanation() async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Connect to Health Connect'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.health_and_safety,
+              size: 48,
+              color: Color(0xFFFF6B6B),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'We need to access your fitness data from Health Connect.',
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8),
+            Text(
+              'When Health Connect opens, please select "Allow" for Steps, Active energy burned, and Total calories burned.',
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _fitnessSync.openHealthConnect(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: widget.primaryColor,
+            ),
+            child: const Text('Open Health Connect'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _connectToHealthServices() async {
     setState(() {
       _isLoading = true;
-      _hasAttemptedConnection = true;
+      _hasAttemptedConnection = true; // Set flag to check permissions on resume
     });
 
     try {
@@ -346,20 +383,23 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
         return;
       }
 
-      // Try direct authorization first (shows system permission dialog)
+      // Try requesting authorization directly first
+      debugPrint('Requesting Health Connect authorization directly...');
       final granted = await _fitnessSync.requestAuthorization();
 
       if (granted) {
+        debugPrint('Authorization granted directly');
         setState(() {
           _isConnected = true;
+          _isLoading = false;
         });
         _loadFitnessData();
         return;
       }
 
-      // If direct authorization failed, open Health Connect app
-      // ignore: use_build_context_synchronously
-      await _fitnessSync.openHealthConnect(context);
+      // If direct authorization failed, show explanation and launch Health Connect
+      debugPrint('Direct authorization failed, showing explanation...');
+      await _showHealthConnectExplanation();
 
       // We'll check permissions when the app resumes
       setState(() {
@@ -406,7 +446,12 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
 
   Widget _buildConnectCard() {
     return GestureDetector(
-      onTap: _isLoading ? null : _showPermissionsTutorial,
+      onTap: _isLoading
+          ? null
+          : () {
+              debugPrint('Connect to Health Connect button tapped');
+              _connectToHealthServices();
+            },
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(

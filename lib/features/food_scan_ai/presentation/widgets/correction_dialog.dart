@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 class CorrectionDialog extends StatefulWidget {
   final Color primaryYellow;
