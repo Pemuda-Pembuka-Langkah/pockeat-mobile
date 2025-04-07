@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/exercise_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/workout_stat.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/exercise_type.dart';
@@ -19,15 +19,15 @@ void main() {
 
   setUp(() {
     mockRepository = MockExerciseProgressRepository();
-    service = ExerciseProgressService(mockRepository);
+    service = ExerciseProgressService(repository: mockRepository);
   });
 
   group('ExerciseProgressService', () {
     test('getExerciseData should call repository.getExerciseData with the same parameter', () async {
-      // Arrange
+      // Arrange - test weekly view
       final mockExerciseData = [
-        ExerciseData('M', 320),
-        ExerciseData('T', 280),
+        ExerciseData('Mon', 320),
+        ExerciseData('Tue', 280),
       ];
       when(mockRepository.getExerciseData(true)).thenAnswer((_) async => mockExerciseData);
 
@@ -37,13 +37,25 @@ void main() {
       // Assert
       expect(result, equals(mockExerciseData));
       verify(mockRepository.getExerciseData(true)).called(1);
+      
+      // Test with isWeeklyView = false (monthly view)
+      final mockMonthlyData = [
+        ExerciseData('Week 1', 1850),
+        ExerciseData('Week 2', 2100),
+      ];
+      when(mockRepository.getExerciseData(false)).thenAnswer((_) async => mockMonthlyData);
+      
+      final monthlyResult = await service.getExerciseData(false);
+      
+      expect(monthlyResult, equals(mockMonthlyData));
+      verify(mockRepository.getExerciseData(false)).called(1);
     });
 
     test('getWorkoutStats should call repository.getWorkoutStats', () async {
       // Arrange
       final mockWorkoutStats = [
         WorkoutStat(label: 'Duration', value: '45 min', colorValue: 0xFF4ECDC4),
-        WorkoutStat(label: 'Calories', value: '320', colorValue: 0xFFFF6B6B),
+        WorkoutStat(label: 'Calories', value: '320 kcal', colorValue: 0xFFFF6B6B),
       ];
       when(mockRepository.getWorkoutStats()).thenAnswer((_) async => mockWorkoutStats);
 
@@ -79,7 +91,7 @@ void main() {
           value: '92%',
           subtext: 'Last week: 87%',
           colorValue: 0xFFFF6B6B,
-          icon: Icons.trending_up, // Fixed: Replaced null with an actual IconData
+          icon: Icons.trending_up,
         ),
       ];
       when(mockRepository.getPerformanceMetrics()).thenAnswer((_) async => mockPerformanceMetrics);
@@ -135,16 +147,16 @@ void main() {
       // Assert
       verify(mockRepository.setSelectedViewPeriod(false)).called(1);
     });
-
+    
     test('getCompletionPercentage should call repository.getCompletionPercentage', () async {
       // Arrange
-      when(mockRepository.getCompletionPercentage()).thenAnswer((_) async => '75%');
+      when(mockRepository.getCompletionPercentage()).thenAnswer((_) async => '75% completed');
 
       // Act
       final result = await service.getCompletionPercentage();
 
       // Assert
-      expect(result, equals('75%'));
+      expect(result, equals('75% completed'));
       verify(mockRepository.getCompletionPercentage()).called(1);
     });
   });
