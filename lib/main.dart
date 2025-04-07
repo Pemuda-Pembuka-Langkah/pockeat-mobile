@@ -32,6 +32,17 @@ import 'package:pockeat/features/food_log_history/presentation/screens/food_deta
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/diet_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/desired_weight_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+
 import 'package:pockeat/features/notifications/domain/services/notification_initializer.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -47,6 +58,8 @@ import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
 import 'package:pockeat/features/authentication/presentation/screens/change_password_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,8 +85,6 @@ void main() async {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
-
-  await getIt<DeepLinkService>().initialize(navigatorKey: navigatorKey);
 
   runApp(
     MultiProvider(
@@ -137,7 +148,6 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       title: 'Pockeat',
       // Tambahkan navigatorKey ke MaterialApp
-      navigatorKey: navigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,

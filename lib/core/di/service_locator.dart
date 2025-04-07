@@ -144,9 +144,11 @@ void setupDependencies() {
 
   // Register DeepLinkService
   getIt.registerSingleton<DeepLinkService>(
-    DeepLinkServiceImpl(userRepository: getIt<UserRepository>()),
+    DeepLinkServiceImpl(
+      emailVerificationService: getIt<EmailVerificationDeepLinkService>(),
+      changePasswordService: getIt<ChangePasswordDeepLinkService>(),
+    ),
   );
-  
 
   getIt.registerSingleton<HealthMetricsRepository>(
   HealthMetricsRepositoryImpl(),
