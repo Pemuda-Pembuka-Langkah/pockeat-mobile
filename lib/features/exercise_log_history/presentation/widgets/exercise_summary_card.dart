@@ -292,8 +292,6 @@ class ExerciseSummaryCard extends StatelessWidget {
       ];
     } else if (exercise is ExerciseAnalysisResult) {
       final smartExercise = exercise as ExerciseAnalysisResult;
-      // Parse duration string to seconds for formatting
-      final durationSeconds = _parseDurationString(smartExercise.duration);
       return [
         _buildStatItem('Duration', smartExercise.duration, Icons.timer),
         _buildStatItem(
@@ -416,29 +414,5 @@ class ExerciseSummaryCard extends StatelessWidget {
     return DateFormat('h:mm a').format(time);
   }
 
-  int _parseDurationString(String durationStr) {
-    try {
-      // Try to parse strings like "30 minutes", "1 hour", etc.
-      final regex = RegExp(r'(\d+)\s*(hour|hr|minute|min|second|sec)');
-      final match = regex.firstMatch(durationStr);
 
-      if (match != null) {
-        final value = int.parse(match.group(1) ?? '0');
-        final unit = match.group(2) ?? '';
-
-        if (unit.contains('hour')) {
-          return value * 3600;
-        } else if (unit.contains('min')) {
-          return value * 60;
-        } else if (unit.contains('sec')) {
-          return value;
-        }
-      }
-
-      // Default to 30 minutes if parsing fails
-      return 1800;
-    } catch (e) {
-      return 1800; // Default 30 minutes
-    }
-  }
 }

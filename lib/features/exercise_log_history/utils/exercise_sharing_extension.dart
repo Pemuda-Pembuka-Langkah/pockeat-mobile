@@ -11,197 +11,46 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/exerc
 extension ExerciseSharing on BuildContext {
   /// Saves image bytes to a temporary file
   Future<File> _saveImageToTempFile(Uint8List imageBytes) async {
-    final tempDir = await getTemporaryDirectory();
-    final file = File(
-        '${tempDir.path}/exercise_summary_${DateTime.now().millisecondsSinceEpoch}.png');
-    await file.writeAsBytes(imageBytes);
-    return file;
+    // TODO: Implement saving image to temporary file
+    throw UnimplementedError('_saveImageToTempFile not yet implemented');
   }
 
   /// Creates and shares an exercise summary card
   Future<void> shareExerciseSummary(
       dynamic exercise, String activityType) async {
-    bool isLoadingDialogShowing = false;
-
     try {
-      // Create a GlobalKey to identify the RepaintBoundary
-      final cardKey = GlobalKey();
-
       // Show loading indicator
-      isLoadingDialogShowing = true;
       showDialog(
         context: this,
         barrierDismissible: false,
-        builder: (context) => WillPopScope(
-          onWillPop: () async => false,
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
-                Text(
-                  'Preparing to share...',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
         ),
       );
 
-      // Set a timeout to prevent getting stuck loading
-      Future.delayed(const Duration(seconds: 10)).then((_) {
-        if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
-          Navigator.of(this).pop();
-          isLoadingDialogShowing = false;
-          ScaffoldMessenger.of(this).showSnackBar(
-            const SnackBar(
-                content: Text('Sharing took too long and was canceled')),
-          );
-        }
-      });
+      // TODO: Implement exercise summary card rendering and sharing
 
-      // Create the exercise summary card
-      final summaryCard = ExerciseSummaryCard(
-        cardKey: cardKey,
-        exercise: exercise,
-        activityType: activityType,
-      );
-
-      // Add the card to an overlay so it can be rendered
-      final overlayState = Overlay.of(this);
-      final entry = OverlayEntry(
-        builder: (context) => Positioned(
-          left: 20, // Place slightly off-screen but still rendered
-          top: 20,
-          child: Opacity(
-            opacity: 0.05, // Almost invisible, but still rendered
-            child: Material(
-              color: Colors.transparent,
-              child: summaryCard,
-            ),
-          ),
-        ),
-      );
-
-      overlayState.insert(entry);
-
-      try {
-        // Wait for widget to be rendered
-        await Future.delayed(const Duration(milliseconds: 1000));
-
-        // Capture the rendered widget
-        final boundary = cardKey.currentContext?.findRenderObject()
-            as RenderRepaintBoundary?;
-
-        if (boundary == null) {
-          debugPrint('Error: Boundary not found when sharing exercise');
-          // Clean up
-          entry.remove();
-          if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
-            Navigator.of(this).pop();
-            isLoadingDialogShowing = false;
-          }
-
-          ScaffoldMessenger.of(this).showSnackBar(
-            const SnackBar(
-                content:
-                    Text('Failed to generate exercise summary - try again')),
-          );
-          return;
-        }
-
-        // Capture the image
-        final image = await boundary.toImage(pixelRatio: 2.0);
-        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-        final imageBytes = byteData?.buffer.asUint8List();
-
-        // Remove the overlay entry
-        entry.remove();
-
-        // Close the loading dialog
-        if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
-          Navigator.of(this).pop();
-          isLoadingDialogShowing = false;
-        }
-
-        if (imageBytes == null) {
-          debugPrint('Error: Image bytes are null when sharing exercise');
-          ScaffoldMessenger.of(this).showSnackBar(
-            const SnackBar(
-                content: Text('Failed to capture exercise image - try again')),
-          );
-          return;
-        }
-
-        // Save the image to a temporary file
-        final imageFile = await _saveImageToTempFile(imageBytes);
-
-        // Share the image
-        await Share.shareXFiles(
-          [XFile(imageFile.path)],
-          text: 'Check out my exercise!',
-          subject: 'PockEat - Exercise Summary',
-        );
-      } catch (e) {
-        debugPrint('Error capturing/sharing exercise image: $e');
-        // Clean up
-        entry.remove();
-        if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
-          Navigator.of(this).pop();
-          isLoadingDialogShowing = false;
-        }
-        ScaffoldMessenger.of(this).showSnackBar(
-          SnackBar(content: Text('Failed to share exercise: ${e.toString()}')),
-        );
-      }
-    } catch (e) {
-      debugPrint('Error in shareExerciseSummary: $e');
-      // Close the loading dialog if it's still open
-      if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
+      // Close loading dialog when done
+      if (Navigator.of(this).canPop()) {
         Navigator.of(this).pop();
       }
 
+      // For skeletal implementation, just show a message
       ScaffoldMessenger.of(this).showSnackBar(
-        SnackBar(content: Text('Error sharing exercise: ${e.toString()}')),
+        const SnackBar(content: Text('Exercise sharing not implemented yet')),
       );
-    }
-  }
+    } catch (e) {
+      debugPrint('Error in shareExerciseSummary: $e');
 
-  // Helper method to get the exercise title
-  String _getExerciseTitle(dynamic exercise) {
-    try {
-      if (exercise == null) return 'Exercise';
-
-      // Use reflection to access a property named 'name' or 'exerciseName'
-      if (exercise.runtimeType.toString().contains('Running')) {
-        return 'Running Session';
-      } else if (exercise.runtimeType.toString().contains('Cycling')) {
-        return 'Cycling Session';
-      } else if (exercise.runtimeType.toString().contains('Swimming')) {
-        return 'Swimming Session';
-      } else if (exercise.runtimeType.toString().contains('WeightLifting')) {
-        try {
-          return exercise.name ?? 'Weight Training Session';
-        } catch (_) {
-          return 'Weight Training Session';
-        }
-      } else if (exercise.runtimeType.toString().contains('ExerciseAnalysis')) {
-        try {
-          return exercise.exerciseName ?? 'Exercise Session';
-        } catch (_) {
-          return 'Exercise Session';
-        }
+      // Close loading dialog if open
+      if (Navigator.of(this).canPop()) {
+        Navigator.of(this).pop();
       }
 
-      return 'Exercise Session';
-    } catch (e) {
-      return 'Exercise Session';
+      // Show error message
+      ScaffoldMessenger.of(this).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
     }
   }
 }
