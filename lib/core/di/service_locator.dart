@@ -6,6 +6,7 @@ import 'package:pockeat/features/api_scan/services/food/food_image_analysis_serv
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
 import 'package:pockeat/features/authentication/services/token_manager.dart';
+import 'package:pockeat/features/calorie_stats/di/calorie_stats_module.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
@@ -21,6 +22,8 @@ import 'package:pockeat/features/authentication/domain/repositories/user_reposit
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,7 +38,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
-void setupDependencies() {
+Future<void> setupDependencies() async {
   // Register specialized services
   getIt.registerSingleton<FirebaseAuth>(
     FirebaseAuth.instance,
@@ -131,10 +134,19 @@ void setupDependencies() {
 
   // Register Exercise Log History module
   ExerciseLogHistoryModule.register();
+  
+  // Register Calorie Stats module
+  CalorieStatsModule.register();
 
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
   );
+
+  getIt.registerSingleton<NotificationService>(
+    NotificationServiceImpl(),
+  );
+  // Initialize notifications
+  await getIt<NotificationService>().initialize();
 
   // Register Nutrition module
   NutritionModule.register();

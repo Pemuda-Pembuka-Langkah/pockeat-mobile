@@ -9,6 +9,7 @@ import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:camera/camera.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
@@ -31,7 +32,6 @@ import 'package:pockeat/features/food_log_history/presentation/screens/food_deta
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_text_input/presentation/pages/food_text_input_page.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_initializer.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
@@ -66,13 +66,14 @@ void main() async {
                   .currentPlatform // Dev pake config staging tapi nanti connect ke emulator
       );
 
-  setupDependencies();
+  await setupDependencies();
 
   // Initialize notifications
   if (!kIsWeb) {
-    await NotificationInitializer().initialize();
+    await getIt<NotificationService>().initialize();
   }
 
+  // Setup emulator kalau di dev mode
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);

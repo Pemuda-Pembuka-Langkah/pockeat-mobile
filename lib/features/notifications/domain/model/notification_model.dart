@@ -17,17 +17,6 @@ class NotificationModel {
     this.isRead = false,
   }) : id = id ?? const Uuid().v4();
 
-  factory NotificationModel.dailyCalorieReminder({
-    required DateTime scheduledTime,
-  }) {
-    return NotificationModel(
-      title: 'Pengingat Kalori Harian',
-      body: 'Jangan lupa untuk melacak asupan kalori hari ini!',
-      payload: 'daily_calorie_tracking',
-      scheduledTime: scheduledTime,
-    );
-  }
-
   NotificationModel copyWith({
     String? id,
     String? title,
