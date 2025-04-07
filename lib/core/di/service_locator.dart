@@ -30,6 +30,8 @@ import 'package:pockeat/features/authentication/services/change_password_deeplin
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -133,5 +135,11 @@ void setupDependencies() {
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
   );
+
+  // Register Nutrition module
+  NutritionModule.register();
+
+  // Register Exercise Progress Module
+  ExerciseProgressModule.register();
 }
  // coverage:ignore-end
