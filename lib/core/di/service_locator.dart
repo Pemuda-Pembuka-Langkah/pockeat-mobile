@@ -6,6 +6,7 @@ import 'package:pockeat/features/api_scan/services/food/food_image_analysis_serv
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
 import 'package:pockeat/features/authentication/services/token_manager.dart';
+import 'package:pockeat/features/calorie_stats/di/calorie_stats_module.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
@@ -129,6 +130,9 @@ void setupDependencies() {
 
   // Register Exercise Log History module
   ExerciseLogHistoryModule.register();
+  
+  // Register Calorie Stats module
+  CalorieStatsModule.register();
 
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
