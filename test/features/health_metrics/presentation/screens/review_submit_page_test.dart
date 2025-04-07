@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
@@ -19,15 +21,17 @@ void main() {
   });
 
   Widget createTestWidget(HealthMetricsFormState state) {
-    when(mockCubit.state).thenReturn(state);
+  when(mockCubit.state).thenReturn(state);
 
-    return MaterialApp(
-      home: BlocProvider<HealthMetricsFormCubit>.value(
+  return MaterialApp(
+    home: ScaffoldMessenger(
+      child: BlocProvider<HealthMetricsFormCubit>.value(
         value: mockCubit,
         child: const ReviewSubmitPage(),
       ),
-    );
-  }
+    ),
+  );
+}
 
   testWidgets('displays all values correctly with "Other" goal', (WidgetTester tester) async {
   final state = HealthMetricsFormState(
@@ -61,26 +65,34 @@ void main() {
 });
 
 
-  testWidgets('calls submit and shows success message', (WidgetTester tester) async {
-    final state = HealthMetricsFormState(
-      selectedGoals: ["Gain Muscle"],
-      height: 180,
-      weight: 75,
-      birthDate: DateTime(2000),
-      desiredWeight: 80,
-      weeklyGoal: 1,
-    );
+  testWidgets('calls submit and updates SharedPreferences', (WidgetTester tester) async {
+  final state = HealthMetricsFormState(
+    selectedGoals: ["Gain Muscle"],
+    height: 180,
+    weight: 75,
+    birthDate: DateTime(2000),
+    desiredWeight: 80,
+    weeklyGoal: 1,
+  );
 
-    when(mockCubit.submit()).thenAnswer((_) async {});
-    await tester.pumpWidget(createTestWidget(state));
-    await tester.pump();
+  when(mockCubit.submit()).thenAnswer((_) async {});
 
-    await tester.tap(find.text("Submit"));
-    await tester.pumpAndSettle();
+  // Use fake preferences for testing
+  SharedPreferences.setMockInitialValues({});
 
-    verify(mockCubit.submit()).called(1);
-    expect(find.text("Submitted successfully!"), findsOneWidget);
-  });
+  await tester.pumpWidget(createTestWidget(state));
+  await tester.pump();
+
+  await tester.tap(find.text("Submit"));
+  await tester.pumpAndSettle();
+
+  verify(mockCubit.submit()).called(1);
+
+  final prefs = await SharedPreferences.getInstance();
+  expect(prefs.getBool('onboardingInProgress'), false);
+  expect(prefs.getBool('hasCompletedOnboarding'), true);
+});
+
 
   testWidgets('shows error message on submit failure', (WidgetTester tester) async {
     final state = HealthMetricsFormState(
