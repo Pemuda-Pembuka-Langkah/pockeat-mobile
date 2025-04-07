@@ -3,86 +3,86 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/do
 
 void main() {
   group('ExerciseData', () {
-    test('should create an instance with the given day and calories', () {
+    test('should create an instance with the given date and value', () {
       // Arrange
-      const String testDay = 'Monday';
-      const double testCalories = 320.5;
+      const String testDate = 'Monday';
+      const double testValue = 320.5;
       
       // Act
-      final exerciseData = ExerciseData(testDay, testCalories);
+      final exerciseData = ExerciseData(testDate, testValue);
       
       // Assert
       expect(exerciseData, isNotNull);
       expect(exerciseData, isA<ExerciseData>());
-      expect(exerciseData.day, equals(testDay));
-      expect(exerciseData.calories, equals(testCalories));
+      expect(exerciseData.date, equals(testDate));
+      expect(exerciseData.value, equals(testValue));
     });
 
-    test('should handle integer values for calories by converting to double', () {
+    test('should handle integer values for value by converting to double', () {
       // Arrange
-      const String testDay = 'Tuesday';
-      const int testCalories = 500; // Integer value
+      const String testDate = 'Tuesday';
+      const int testValue = 500; // Integer value
       
       // Act
-      final exerciseData = ExerciseData(testDay, testCalories.toDouble());
+      final exerciseData = ExerciseData(testDate, testValue.toDouble());
       
       // Assert
-      expect(exerciseData.day, equals(testDay));
-      expect(exerciseData.calories, equals(500.0)); // Should be converted to double
-      expect(exerciseData.calories, isA<double>());
+      expect(exerciseData.date, equals(testDate));
+      expect(exerciseData.value, equals(500.0)); // Should be converted to double
+      expect(exerciseData.value, isA<double>());
     });
 
-    test('should handle empty string for day', () {
+    test('should handle empty string for date', () {
       // Arrange
-      const String testDay = '';
-      const double testCalories = 150.0;
+      const String testDate = '';
+      const double testValue = 150.0;
       
       // Act
-      final exerciseData = ExerciseData(testDay, testCalories);
+      final exerciseData = ExerciseData(testDate, testValue);
       
       // Assert
-      expect(exerciseData.day, equals(''));
-      expect(exerciseData.calories, equals(testCalories));
+      expect(exerciseData.date, equals(''));
+      expect(exerciseData.value, equals(testValue));
     });
     
-    test('should handle zero calories', () {
+    test('should handle zero values', () {
       // Arrange
-      const String testDay = 'Sunday';
-      const double testCalories = 0.0;
+      const String testDate = 'Sunday';
+      const double testValue = 0.0;
       
       // Act
-      final exerciseData = ExerciseData(testDay, testCalories);
+      final exerciseData = ExerciseData(testDate, testValue);
       
       // Assert
-      expect(exerciseData.day, equals(testDay));
-      expect(exerciseData.calories, equals(0.0));
+      expect(exerciseData.date, equals(testDate));
+      expect(exerciseData.value, equals(0.0));
     });
     
-    test('should handle negative calories', () {
-      // Arrange - Even though negative calories don't make physical sense, 
+    test('should handle negative values', () {
+      // Arrange - Even though negative values don't make physical sense, 
       // the model should still accept them to avoid runtime errors
-      const String testDay = 'Friday';
-      const double testCalories = -100.0;
+      const String testDate = 'Friday';
+      const double testValue = -100.0;
       
       // Act
-      final exerciseData = ExerciseData(testDay, testCalories);
+      final exerciseData = ExerciseData(testDate, testValue);
       
       // Assert
-      expect(exerciseData.day, equals(testDay));
-      expect(exerciseData.calories, equals(testCalories));
+      expect(exerciseData.date, equals(testDate));
+      expect(exerciseData.value, equals(testValue));
     });
 
-    test('should allow creation with abbreviations as day', () {
+    test('should handle week labels for monthly view', () {
       // Arrange
-      const String testDay = 'M';
-      const double testCalories = 250.0;
+      const String testDate = 'Week 3';
+      const double testValue = 1500.0;
       
       // Act
-      final exerciseData = ExerciseData(testDay, testCalories);
+      final exerciseData = ExerciseData(testDate, testValue);
       
       // Assert
-      expect(exerciseData.day, equals(testDay));
-      expect(exerciseData.calories, equals(testCalories));
+      expect(exerciseData.date, equals(testDate));
+      expect(exerciseData.value, equals(testValue));
     });
   });
 }
