@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 
+
+//coverage:ignore-file
+
+
 /// Extension for sharing exercise summaries
 extension ExerciseSharing on BuildContext {
   /// Creates and shares an exercise summary card

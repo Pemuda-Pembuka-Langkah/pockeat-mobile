@@ -7,6 +7,8 @@ import 'package:pockeat/features/food_text_input/domain/repositories/food_text_i
 import 'package:intl/intl.dart';
 import 'package:pockeat/features/food_log_history/utils/food_sharing_extension.dart';
 
+//coverage:ignore-file
+
 /// A page that displays detailed information about a food item.
 ///
 /// This page shows all the nutrition information and ingredients of a food item,

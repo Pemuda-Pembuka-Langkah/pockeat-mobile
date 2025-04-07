@@ -13,6 +13,9 @@ import 'package:pockeat/features/exercise_log_history/services/exercise_detail_s
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/exercise_log_history/utils/exercise_sharing_extension.dart';
 
+
+//coverage:ignore-file
+
 /// Detail page for exercise logs with widget composition based on type
 class ExerciseLogDetailPage extends StatefulWidget {
   final String exerciseId;

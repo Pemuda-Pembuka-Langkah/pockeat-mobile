@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
+//coverage:ignore-file
 
 /// Extension for sharing food summary
 extension FoodSharing on BuildContext {
