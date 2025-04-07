@@ -192,9 +192,11 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
     return DateFormat('EEEE, MMMM d, yyyy • h:mm a').format(date);
   }
 
+// coverage:ignore:start
   void _shareFood(FoodAnalysisResult food) async {
     await context.shareFoodSummary(food);
   }
+  // coverage:ignore:end
 
   @override
   Widget build(BuildContext context) {

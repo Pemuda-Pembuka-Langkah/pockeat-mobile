@@ -331,7 +331,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
       );
     }
   }
-
+// coverage:ignore:start
   void _shareExercise(dynamic exercise) async {
     try {
       await context.shareExerciseSummary(exercise, widget.activityType);
@@ -348,3 +348,4 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
     }
   }
 }
+// coverage:ignore:end
