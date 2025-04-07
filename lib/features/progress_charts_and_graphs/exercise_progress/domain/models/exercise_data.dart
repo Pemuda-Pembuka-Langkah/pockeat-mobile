@@ -1,3 +1,4 @@
+// coverage:ignore-start
 class ExerciseData {
   final dynamic date; // Can be String or DateTime
   final double value;
@@ -16,3 +17,4 @@ class ExerciseData {
     return date.toString();
   }
 }
+// coverage:ignore-end

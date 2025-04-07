@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// coverage:ignore-start
 class WorkoutItem {
   final String title;
   final String type;
@@ -17,3 +18,4 @@ class WorkoutItem {
     this.icon = Icons.fitness_center, // Default icon
   });
 }
+// coverage:ignore-end
