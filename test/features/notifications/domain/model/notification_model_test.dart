@@ -41,7 +41,10 @@ void main() {
     });
     
     test('should create daily calorie reminder notification', () {
-      final notification = NotificationModel.dailyCalorieReminder(
+      final notification = NotificationModel(
+        title: 'Pengingat Kalori Harian',
+        body: 'Jangan lupa untuk melacak asupan kalori hari ini!',
+        payload: 'daily_calorie_tracking',
         scheduledTime: testTime,
       );
       

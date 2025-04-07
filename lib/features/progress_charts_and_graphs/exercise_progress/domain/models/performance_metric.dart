@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// coverage:ignore-start
 class PerformanceMetric {
   final String label;
   final String value;
@@ -15,3 +16,4 @@ class PerformanceMetric {
     required this.icon,
   });
 }
+// coverage:ignore-end

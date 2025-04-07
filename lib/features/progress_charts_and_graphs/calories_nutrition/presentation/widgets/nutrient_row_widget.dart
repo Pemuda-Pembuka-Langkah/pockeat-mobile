@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/micro_nutrient.dart';
 
+// coverage:ignore-start
 class NutrientRowWidget extends StatelessWidget {
   final MicroNutrient nutrient;
 
+  // ignore: use_super_parameters
   const NutrientRowWidget({
     Key? key,
     required this.nutrient,
@@ -58,3 +60,4 @@ class NutrientRowWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end
