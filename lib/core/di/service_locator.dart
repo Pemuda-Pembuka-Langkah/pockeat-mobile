@@ -20,7 +20,9 @@ import 'package:pockeat/features/authentication/domain/repositories/user_reposit
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 final getIt = GetIt.instance;
@@ -85,11 +87,15 @@ void setupDependencies() {
   getIt.registerSingleton<DeepLinkService>(
     DeepLinkServiceImpl(userRepository: getIt<UserRepository>()),
   );
+  
 
-  getIt.registerSingleton<HealthMetricsRepositoryImpl>(
+  getIt.registerSingleton<HealthMetricsRepository>(
   HealthMetricsRepositoryImpl(),
-);
+  );
 
+  getIt.registerSingleton<HealthMetricsCheckService>(
+  HealthMetricsCheckService(),
+  );
 
   // Register Food Log History module
   FoodLogHistoryModule.register();

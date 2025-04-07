@@ -41,6 +41,7 @@ import 'package:pockeat/features/authentication/presentation/screens/account_act
 import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
@@ -111,7 +112,7 @@ void main() async {
             }
             return HealthMetricsFormCubit(
               userId: user.uid,
-              repository: getIt<HealthMetricsRepositoryImpl>(),
+              repository: getIt<HealthMetricsRepository>(),
             );
           },
         ),
@@ -187,30 +188,17 @@ class MyApp extends StatelessWidget {
             ),
           );
         },
-        '/height-weight': (context) {
-          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
-          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const HeightWeightPage()));
-        },
-        '/birthdate': (context) {
-          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
-          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const BirthdatePage()));
-        },
-        '/diet': (context) {
-          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
-          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const DietPage()));
-        },
-        '/desired-weight': (context) {
-          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
-          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const DesiredWeightPage()));
-        },
-        '/speed': (context) {
-          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
-          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const SpeedSelectionPage()));
-        },
-        '/review': (context) {
-          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
-          return AuthWrapper(child: BlocProvider.value(value: cubit, child: const ReviewSubmitPage()));
-        },
+        '/height-weight': (context) => const AuthWrapper(child: HeightWeightPage()),
+
+        '/birthdate': (context) => const AuthWrapper(child: BirthdatePage()),
+
+        '/diet': (context) => const AuthWrapper(child: DietPage()),
+
+        '/desired-weight': (context) => const AuthWrapper(child: DesiredWeightPage()),
+
+        '/speed': (context) => const AuthWrapper(child: SpeedSelectionPage()),
+
+        '/review': (context) => const AuthWrapper(child: ReviewSubmitPage()),
         '/smart-exercise-log': (context) => AuthWrapper(child: SmartExerciseLogPage(repository: smartExerciseLogRepository)),
         '/scan': (context) => AuthWrapper(
               child: ScanFoodPage(
