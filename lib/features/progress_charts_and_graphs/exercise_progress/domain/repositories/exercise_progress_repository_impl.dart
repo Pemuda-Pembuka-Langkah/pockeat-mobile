@@ -8,7 +8,6 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/do
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/performance_metric.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/workout_item.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/repositories/exercise_progress_repository.dart';
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math';
@@ -59,7 +58,9 @@ class ExerciseProgressRepositoryImpl implements ExerciseProgressRepository {
       // For weekly view, show current calendar week (Monday to Sunday)
       
       // Get the current year and month
+      // ignore: unused_local_variable
       final currentYear = now.year;
+      // ignore: unused_local_variable
       final currentMonth = now.month;
       
       // Calculate current week's Monday (start of week)
@@ -119,6 +120,7 @@ class ExerciseProgressRepositoryImpl implements ExerciseProgressRepository {
       // Monthly view - Show exactly 4 weeks of data for the current month
       
       // Get the first and last day of the current month
+      // ignore: unused_local_variable
       final firstDayOfMonth = DateTime(now.year, now.month, 1);
       final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
       

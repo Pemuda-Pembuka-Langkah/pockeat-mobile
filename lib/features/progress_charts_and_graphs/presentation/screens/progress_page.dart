@@ -7,7 +7,6 @@ import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/serv
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/repositories/weight_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/screens/nutrition_progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/services/nutrition_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/repositories/nutrition_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/screens/exercise_progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/presentation/screens/analytics_insight_page.dart';
@@ -24,6 +23,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets
 class ProgressPage extends StatefulWidget {
   final ProgressTabsService service;
   
+  // ignore: use_super_parameters
   const ProgressPage({
     Key? key,
     required this.service,
