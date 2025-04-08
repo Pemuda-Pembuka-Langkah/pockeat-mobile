@@ -83,6 +83,29 @@ void main() {
             (e) => e.message, 'error message', contains('File upload failed'))),
       );
     });
+
+    test('should throw ApiServiceException when analysis fails', () async {
+      // Arrange
+      const servings = 2.5;
+      final error = Exception('Analysis failed');
+
+      // Set up mock to throw exception
+      when(mockApiService.postFileRequest(
+          '/food/analyze/nutrition-label',
+          mockFile,
+          'image',
+          {'servings': servings.toString()})).thenThrow(error);
+
+      // Act & Assert
+      expect(
+        () => service.analyze(mockFile, servings),
+        throwsA(isA<ApiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          contains('Error analyzing nutrition label'),
+        )),
+      );
+    });
   });
 
   group('NutritionLabelAnalysisService correction functionality', () {
@@ -278,6 +301,51 @@ void main() {
         () => service.correctAnalysis(previousResult, userComment, servings),
         throwsA(isA<ApiServiceException>().having(
             (e) => e.message, 'error message', contains('API call failed'))),
+      );
+    });
+
+    test('should throw ApiServiceException when correction fails', () async {
+      // Arrange
+      final previousResult = FoodAnalysisResult(
+        foodName: 'Cereal',
+        ingredients: [
+          Ingredient(name: 'Whole Grain Wheat', servings: 60),
+          Ingredient(name: 'Sugar', servings: 20),
+        ],
+        nutritionInfo: NutritionInfo(
+          calories: 120,
+          protein: 3,
+          carbs: 24,
+          fat: 1,
+          sodium: 210,
+          fiber: 3,
+          sugar: 12,
+        ),
+        warnings: [],
+      );
+
+      const userComment = 'The sugar content is wrong';
+      const servings = 2.5;
+      final error = Exception('Correction failed');
+
+      // Set up mock to throw exception
+      when(mockApiService.postJsonRequest(
+        '/food/correct/nutrition-label',
+        {
+          'previous_result': previousResult.toJson(),
+          'user_comment': userComment,
+          'servings': servings,
+        },
+      )).thenThrow(error);
+
+      // Act & Assert
+      expect(
+        () => service.correctAnalysis(previousResult, userComment, servings),
+        throwsA(isA<ApiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          contains('Error correcting nutrition label analysis'),
+        )),
       );
     });
   });

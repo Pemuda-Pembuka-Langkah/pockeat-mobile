@@ -100,6 +100,28 @@ void main() {
             'error message', contains('Could not analyze food'))),
       );
     });
+
+    test('should throw ApiServiceException when analysis fails', () async {
+      // Arrange
+      const foodDescription = 'Apple pie';
+      final error = Exception('Analysis failed');
+
+      // Set up mock to throw exception
+      when(mockApiService.postJsonRequest(
+        '/food/analyze/text',
+        {'description': foodDescription},
+      )).thenThrow(error);
+
+      // Act & Assert
+      expect(
+        () => service.analyze(foodDescription),
+        throwsA(isA<ApiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          contains("Failed to analyze food description '$foodDescription'"),
+        )),
+      );
+    });
   });
 
   group('FoodTextAnalysisService correction functionality', () {
@@ -215,6 +237,46 @@ void main() {
         () => service.correctAnalysis(previousResult, userComment),
         throwsA(isA<ApiServiceException>().having(
             (e) => e.message, 'error message', contains('Network error'))),
+      );
+    });
+
+    test('should throw ApiServiceException when correction fails', () async {
+      // Arrange
+      final previousResult = FoodAnalysisResult(
+        foodName: 'Apple Pie',
+        ingredients: [
+          Ingredient(name: 'Apples', servings: 50),
+          Ingredient(name: 'Flour', servings: 25),
+        ],
+        nutritionInfo: NutritionInfo(
+          calories: 250,
+          protein: 2,
+          carbs: 40,
+          fat: 12,
+          sodium: 150,
+          fiber: 3,
+          sugar: 25,
+        ),
+        warnings: ['High sugar content'],
+      );
+
+      const userComment = 'This is not accurate';
+      final error = Exception('Correction failed');
+
+      // Set up mock to throw exception
+      when(mockApiService.postJsonRequest(
+        '/food/correct/text',
+        {
+          'previous_result': previousResult.toJson(),
+          'user_comment': userComment,
+        },
+      )).thenThrow(error);
+
+      // Act & Assert
+      expect(
+        () => service.correctAnalysis(previousResult, userComment),
+        throwsA(isA<ApiServiceException>().having((e) => e.message,
+            'error message', contains('Failed to correct food analysis'))),
       );
     });
   });

@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'dart:io' show Platform;
 import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
-//coverage:ignore-start
 
 class FitnessTrackerSync {
   /// Health plugin instance
@@ -244,6 +243,7 @@ class FitnessTrackerSync {
   }
 
   /// Request authorization for required health data types
+  // coverage:ignore-start
   Future<bool> requestAuthorization() async {
     try {
       debugPrint('Requesting Health Connect authorization...');
@@ -281,6 +281,7 @@ class FitnessTrackerSync {
       return false;
     }
   }
+  // coverage:ignore-end
 
   /// Perform a forced data read to ensure permissions are working
   Future<bool> performForcedDataRead() async {
@@ -546,4 +547,3 @@ class FitnessTrackerSync {
     return DateFormat('yyyy-MM-dd').format(date);
   }
 }
-//coverage:ignore-end

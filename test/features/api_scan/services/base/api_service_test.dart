@@ -103,6 +103,194 @@ void main() {
       verify(mockClient.send(argThat(predicate((http.BaseRequest request) =>
           !request.headers.containsKey('Authorization'))))).called(1);
     });
+
+    test('checkHealth should return true for healthy API', () async {
+      // Arrange
+      final healthyResponse = http.Response(
+        '{"status": "healthy"}',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      when(mockClient.get(any)).thenAnswer((_) async => healthyResponse);
+
+      // Act
+      final result = await apiService.checkHealth();
+
+      // Assert
+      expect(result, isTrue);
+    });
+
+    test('checkHealth should return false for unhealthy API', () async {
+      // Arrange
+      final unhealthyResponse = http.Response(
+        '{"status": "unhealthy"}',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      when(mockClient.get(any)).thenAnswer((_) async => unhealthyResponse);
+
+      // Act
+      final result = await apiService.checkHealth();
+
+      // Assert
+      expect(result, isFalse);
+    });
+
+    test('checkHealth should throw ApiServiceException on error', () async {
+      // Arrange
+      when(mockClient.get(any)).thenThrow(Exception('Connection failed'));
+
+      // Act & Assert
+      expect(
+        () => apiService.checkHealth(),
+        throwsA(isA<ApiServiceException>()),
+      );
+    });
+
+    test('postJsonRequest should handle error response with string error',
+        () async {
+      // Arrange
+      final errorResponse = http.StreamedResponse(
+        Stream.value(utf8.encode('{"error": "Invalid request"}')),
+        400,
+        headers: {'content-type': 'application/json'},
+      );
+      when(mockClient.send(any)).thenAnswer((_) async => errorResponse);
+
+      // Act & Assert
+      expect(
+        () => apiService.postJsonRequest('/test', {'key': 'value'}),
+        throwsA(isA<ApiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          equals('Invalid request'),
+        )),
+      );
+    });
+
+    test('postJsonRequest should handle error response with map error',
+        () async {
+      // Arrange
+      final errorResponse = http.StreamedResponse(
+        Stream.value(utf8.encode('{"error": {"message": "Invalid data"}}')),
+        400,
+        headers: {'content-type': 'application/json'},
+      );
+      when(mockClient.send(any)).thenAnswer((_) async => errorResponse);
+
+      // Act & Assert
+      expect(
+        () => apiService.postJsonRequest('/test', {'key': 'value'}),
+        throwsA(isA<ApiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          equals('Invalid data'),
+        )),
+      );
+    });
+
+    test('postJsonRequest should handle unknown error format', () async {
+      // Arrange
+      final errorResponse = http.StreamedResponse(
+        Stream.value(utf8.encode('{"error": null}')),
+        400,
+        headers: {'content-type': 'application/json'},
+      );
+      when(mockClient.send(any)).thenAnswer((_) async => errorResponse);
+
+      // Act & Assert
+      expect(
+        () => apiService.postJsonRequest('/test', {'key': 'value'}),
+        throwsA(isA<ApiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          equals('Unknown error from API'),
+        )),
+      );
+    });
+
+    test('postFileRequest should handle error response with string error',
+        () async {
+      // Arrange
+      final errorResponse = http.StreamedResponse(
+        Stream.value(utf8.encode('{"error": "File upload failed"}')),
+        400,
+        headers: {'content-type': 'application/json'},
+      );
+      when(mockClient.send(any)).thenAnswer((_) async => errorResponse);
+
+      // Act & Assert
+      expect(
+        () => apiService.postFileRequest('/test', MockTestFile(), 'image'),
+        throwsA(isA<ApiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          equals('File upload failed'),
+        )),
+      );
+    });
+
+    test('postFileRequest should handle error response with map error',
+        () async {
+      // Arrange
+      final errorResponse = http.StreamedResponse(
+        Stream.value(
+            utf8.encode('{"error": {"message": "Invalid file format"}}')),
+        400,
+        headers: {'content-type': 'application/json'},
+      );
+      when(mockClient.send(any)).thenAnswer((_) async => errorResponse);
+
+      // Act & Assert
+      expect(
+        () => apiService.postFileRequest('/test', MockTestFile(), 'image'),
+        throwsA(isA<ApiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          equals('Invalid file format'),
+        )),
+      );
+    });
+
+    test('postFileRequest should handle unknown error format', () async {
+      // Arrange
+      final errorResponse = http.StreamedResponse(
+        Stream.value(utf8.encode('{"error": null}')),
+        400,
+        headers: {'content-type': 'application/json'},
+      );
+      when(mockClient.send(any)).thenAnswer((_) async => errorResponse);
+
+      // Act & Assert
+      expect(
+        () => apiService.postFileRequest('/test', MockTestFile(), 'image'),
+        throwsA(isA<ApiServiceException>().having(
+          (e) => e.message,
+          'error message',
+          equals('Unknown error from API'),
+        )),
+      );
+    });
+
+    test('postFileRequest should handle additional form fields', () async {
+      // Arrange
+      final fields = {'type': 'image', 'category': 'food'};
+      final mockFile = MockTestFile();
+
+      // Act
+      await apiService.postFileRequest('/test', mockFile, 'image', fields);
+
+      // Assert
+      verify(mockClient.send(any)).called(1);
+    });
+
+    test('dispose should close the client', () {
+      // Act
+      apiService.dispose();
+
+      // Assert
+      verify(mockClient.close()).called(1);
+    });
   });
 }
 

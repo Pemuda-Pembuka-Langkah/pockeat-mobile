@@ -6,6 +6,7 @@ import 'package:health/health.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 // Mock classes
 class MockHealth extends Mock implements Health {}
@@ -173,6 +174,62 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
     HealthDataType.TOTAL_CALORIES_BURNED,
   ];
 
+  TestFitnessTrackerSync({
+    required this.mockHealth,
+    required this.mockMethodChannel,
+  });
+
+  @override
+  Health get _health => mockHealth;
+
+  @override
+  MethodChannel get _methodChannel => mockMethodChannel;
+
+  @override
+  Future<void> configureHealth() async {
+    try {
+      await mockHealth.configure();
+    } catch (e) {
+      debugPrint('Error configuring Health Connect: $e');
+    }
+  }
+
+  @override
+  void resetPermissionState() {
+    _localPermissionState = false;
+  }
+
+  // Override requestAuthorization to make it testable
+  @override
+  Future<bool> requestAuthorization() async {
+    try {
+      // Skip the Activity Recognition permission in tests
+
+      // Ensure health is properly configured
+      await configureHealth();
+
+      // Request permissions with explicit READ access only
+      final granted = await _health.requestAuthorization(
+        _requiredTypes,
+        permissions: List.filled(_requiredTypes.length, HealthDataAccess.READ),
+      );
+
+      debugPrint('Authorization request result: $granted');
+
+      if (granted) {
+        _localPermissionState = true;
+        return true;
+      }
+
+      _localPermissionState = false;
+      return false;
+    } catch (e) {
+      debugPrint('Error requesting authorization: $e');
+      _localPermissionState = false;
+      return false;
+    }
+  }
+
   // Implementation of the protected method to be tested
   @override
   Future<bool> canReadHealthData() async {
@@ -240,18 +297,6 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
       return false;
     }
   }
-
-  TestFitnessTrackerSync({
-    required this.mockHealth,
-    required this.mockMethodChannel,
-  });
-
-  @override
-  Health get _health => mockHealth;
-  
-
-  @override
-  MethodChannel get _methodChannel => mockMethodChannel;
 
   // Override method to make it public in test class
   @override
@@ -448,6 +493,7 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
     }
   }
 
+  @override
   Future<bool> performForcedDataRead() async {
     try {
       final result = await canReadHealthData();
@@ -555,6 +601,20 @@ class FakePlatform {
 class Platform {
   static bool get isAndroid => FakePlatform.isAndroid;
 }
+
+// Add this class before the main() function
+class NonAndroidFitnessTrackerSync extends TestFitnessTrackerSync {
+  NonAndroidFitnessTrackerSync({
+    required super.mockHealth,
+    required super.mockMethodChannel,
+  });
+
+  @override
+  bool get isAndroid => false;
+}
+
+// Add this mock class at the top with other mocks
+class MockPermission extends Mock implements Permission {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -1153,6 +1213,56 @@ void main() {
       // Assert
       expect(result, false);
       expect(freshSync._localPermissionState, false);
+    });
+  });
+
+  group('Helper Methods', () {
+    test('getDateRange returns correct date range for a day', () {
+      // Arrange
+      final testDate = DateTime(2024, 3, 15); // March 15, 2024
+
+      // Act
+      final dateRange = fitnessTrackerSync.getDateRange(testDate);
+
+      // Assert
+      expect(dateRange.start, equals(DateTime(2024, 3, 15)));
+      expect(dateRange.end, equals(DateTime(2024, 3, 15, 23, 59, 59, 999)));
+    });
+
+    test('formatDate formats date correctly', () {
+      // Arrange
+      final testDate = DateTime(2024, 3, 15);
+
+      // Act
+      final formattedDate = fitnessTrackerSync.formatDate(testDate);
+
+      // Assert
+      expect(formattedDate, equals('2024-03-15'));
+    });
+  });
+
+  group('Configuration and Authorization', () {
+    test('configureHealth handles configuration errors gracefully', () async {
+      // Arrange
+      when(() => mockHealth.configure())
+          .thenThrow(Exception('Configuration failed'));
+
+      // Act - should not throw
+      await fitnessTrackerSync.configureHealth();
+
+      // Assert
+      verify(() => mockHealth.configure()).called(1);
+    });
+
+    test('resetPermissionState resets the permission state', () {
+      // Arrange
+      fitnessTrackerSync._localPermissionState = true;
+
+      // Act
+      fitnessTrackerSync.resetPermissionState();
+
+      // Assert
+      expect(fitnessTrackerSync._localPermissionState, false);
     });
   });
 }
