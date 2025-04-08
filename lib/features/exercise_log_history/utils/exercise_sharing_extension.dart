@@ -176,35 +176,5 @@ extension ExerciseSharing on BuildContext {
     }
   }
 
-  // Helper method to get the exercise title
-  String _getExerciseTitle(dynamic exercise) {
-    try {
-      if (exercise == null) return 'Exercise';
 
-      // Use reflection to access a property named 'name' or 'exerciseName'
-      if (exercise.runtimeType.toString().contains('Running')) {
-        return 'Running Session';
-      } else if (exercise.runtimeType.toString().contains('Cycling')) {
-        return 'Cycling Session';
-      } else if (exercise.runtimeType.toString().contains('Swimming')) {
-        return 'Swimming Session';
-      } else if (exercise.runtimeType.toString().contains('WeightLifting')) {
-        try {
-          return exercise.name ?? 'Weight Training Session';
-        } catch (_) {
-          return 'Weight Training Session';
-        }
-      } else if (exercise.runtimeType.toString().contains('ExerciseAnalysis')) {
-        try {
-          return exercise.exerciseName ?? 'Exercise Session';
-        } catch (_) {
-          return 'Exercise Session';
-        }
-      }
-
-      return 'Exercise Session';
-    } catch (e) {
-      return 'Exercise Session';
-    }
-  }
 }
