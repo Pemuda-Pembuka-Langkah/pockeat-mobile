@@ -25,13 +25,21 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
     super.initState();
     _loadCalorieStats();
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh when dependencies change
+    _loadCalorieStats();
+  }
   
   void _loadCalorieStats() {
     final calorieService = GetIt.instance<CalorieStatsService>();
     final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     
+    // Add cache-busting by forcing recalculation
     setState(() {
-      _statsFuture = calorieService.getStatsByDate(userId, DateTime.now());
+      _statsFuture = calorieService.calculateStatsForDate(userId, DateTime.now());
     });
   }
   
