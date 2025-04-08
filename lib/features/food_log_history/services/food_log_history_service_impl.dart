@@ -83,7 +83,25 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   List<FoodLogHistoryItem> _convertFoodAnalysisResults(
       List<FoodAnalysisResult> results) {
     return results
-        .map((result) => FoodLogHistoryItem.fromFoodAnalysisResult(result))
+        .map((result) {
+          // Add 7 hours to the timestamp to convert from UTC to Indonesia time (UTC+7)
+          final localTimestamp = result.timestamp.add(const Duration(hours: 7));
+          
+          // Create a modified result with the adjusted timestamp
+          final adjustedResult = FoodAnalysisResult(
+            foodName: result.foodName,
+            ingredients: result.ingredients,
+            nutritionInfo: result.nutritionInfo,
+            warnings: result.warnings,
+            foodImageUrl: result.foodImageUrl,
+            timestamp: localTimestamp,  // Use the adjusted timestamp
+            id: result.id,
+            isLowConfidence: result.isLowConfidence,
+            userId: result.userId,
+          );
+          
+          return FoodLogHistoryItem.fromFoodAnalysisResult(adjustedResult);
+        })
         .toList();
   }
 }

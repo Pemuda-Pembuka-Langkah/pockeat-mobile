@@ -120,7 +120,6 @@ class ExerciseProgressRepositoryImpl implements ExerciseProgressRepository {
       // Monthly view - Show exactly 4 weeks of data for the current month
       
       // Get the first and last day of the current month
-      // ignore: unused_local_variable
       final firstDayOfMonth = DateTime(now.year, now.month, 1);
       final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
       
