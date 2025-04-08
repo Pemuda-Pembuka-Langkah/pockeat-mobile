@@ -1239,6 +1239,43 @@ void main() {
       // Assert
       expect(formattedDate, equals('2024-03-15'));
     });
+
+    test('resetPermissionState resets the permission state', () {
+      // Arrange
+      fitnessTrackerSync._localPermissionState = true;
+
+      // Act
+      fitnessTrackerSync.resetPermissionState();
+
+      // Assert
+      expect(fitnessTrackerSync._localPermissionState, false);
+    });
+
+    test('setPermissionGranted sets the permission state to true', () {
+      // Arrange
+      fitnessTrackerSync._localPermissionState = false;
+
+      // Act
+      fitnessTrackerSync.setPermissionGranted();
+
+      // Assert
+      expect(fitnessTrackerSync._localPermissionState, true);
+    });
+  });
+
+  group('Health Connect Operations', () {
+    test('openHealthConnectPlayStore handles errors gracefully', () async {
+      // Arrange
+      when(() => mockMethodChannel.invokeMethod('openHealthConnectPlayStore'))
+          .thenThrow(Exception('Play Store error'));
+
+      // Act - should not throw
+      await fitnessTrackerSync.openHealthConnectPlayStore();
+
+      // Assert
+      verify(() => mockMethodChannel.invokeMethod('openHealthConnectPlayStore'))
+          .called(1);
+    });
   });
 
   group('Configuration and Authorization', () {
