@@ -8,6 +8,7 @@ import 'package:pockeat/features/weight_training_log/domain/repositories/weight_
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   late final SmartExerciseLogRepository _smartExerciseLogRepository;
@@ -56,7 +57,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       return allItems;
     } catch (e) {
       // Return empty list on error instead of throwing
-      print('Error getting exercise logs: $e');
+      debugPrint('Error getting exercise logs: $e');
       return [];
     }
   }
@@ -92,7 +93,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       return allLogs;
     } catch (e) {
       // Return empty list instead of throwing
-      print('Error getting exercise logs by date: $e');
+      debugPrint('Error getting exercise logs by date: $e');
       return [];
     }
   }
@@ -129,7 +130,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       return allLogs;
     } catch (e) {
       // Return empty list instead of throwing
-      print('Error getting exercise logs by month: $e');
+      debugPrint('Error getting exercise logs by month: $e');
       return [];
     }
   }
@@ -165,7 +166,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       return allLogs;
     } catch (e) {
       // Return empty list instead of throwing
-      print('Error getting exercise logs by year: $e');
+      debugPrint('Error getting exercise logs by year: $e');
       return [];
     }
   }
