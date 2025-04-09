@@ -28,6 +28,8 @@ import 'package:pockeat/features/authentication/services/change_password_deeplin
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/authentication/services/logout_service_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -124,6 +126,11 @@ void setupDependencies() {
 
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
+  );
+
+  // Register LogoutService
+  getIt.registerSingleton<LogoutService>(
+    LogoutServiceImpl(),
   );
 }
  // coverage:ignore-end
