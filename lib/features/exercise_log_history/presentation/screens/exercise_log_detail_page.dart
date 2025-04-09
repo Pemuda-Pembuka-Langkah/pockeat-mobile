@@ -14,7 +14,6 @@ import 'package:pockeat/features/weight_training_log/domain/models/weight_liftin
 import 'package:pockeat/features/exercise_log_history/utils/exercise_sharing_extension.dart';
 
 
-//coverage:ignore-file
 
 /// Detail page for exercise logs with widget composition based on type
 class ExerciseLogDetailPage extends StatefulWidget {
@@ -87,6 +86,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
         title: Text(_getPageTitle()),
         backgroundColor: Colors.white,
         elevation: 0,
+        //coverage:ignore-start
         actions: [
           // Share button in the app bar
           IconButton(
@@ -103,6 +103,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
             },
             tooltip: 'Share',
           ),
+          //coverage:ignore-end
           IconButton(
             icon: const Icon(
               Icons.delete_outline,
