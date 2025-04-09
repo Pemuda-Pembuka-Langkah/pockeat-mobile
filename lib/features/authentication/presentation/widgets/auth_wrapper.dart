@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 
 /// A wrapper widget that handles authentication state
 /// and redirects users to the appropriate screens
@@ -50,6 +52,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
       // Redirect ke login jika tidak terautentikasi dan widget masih mounted
       if (user == null && mounted) {
         Navigator.of(context).pushReplacementNamed('/login');
+      } else if (user != null && mounted) {
+        // Call the health metrics check when user is authenticated
+        await _checkHealthMetrics(user.uid);
       }
     } catch (e) {
       // Jika terjadi error, asumsikan user tidak terautentikasi
@@ -58,6 +63,27 @@ class _AuthWrapperState extends State<AuthWrapper> {
       }
     }
   }
+
+  Future<void> _checkHealthMetrics(String uid) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingInProgress = prefs.getBool('onboardingInProgress') ?? false;
+
+    final healthMetricsCheckService = GetIt.instance<HealthMetricsCheckService>();
+    final completed = await healthMetricsCheckService.hasCompletedOnboarding(uid);
+
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    final isInsideOnboardingFlow = currentRoute?.startsWith('/onboarding') ?? false;
+
+    // 🛑 Jangan redirect kalau user udah dalam onboarding atau lagi ngisi
+    if ((!completed && !onboardingInProgress) && mounted && !isInsideOnboardingFlow) {
+      Navigator.of(context).pushReplacementNamed('/onboarding/goal');
+    }
+  } catch (e) {
+    debugPrint("Error checking health metrics: $e");
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
