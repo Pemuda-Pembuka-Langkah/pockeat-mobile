@@ -43,7 +43,6 @@ import 'package:pockeat/features/health_metrics/presentation/screens/desired_wei
 import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_initializer.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';

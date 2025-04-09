@@ -132,28 +132,6 @@ Future<void> setupDependencies() async {
     FoodScanPhotoService(),
   );
 
-  // Register UserRepository
-  getIt.registerSingleton<UserRepository>(
-    UserRepositoryImpl(),
-  );
-
-  // Register RegisterService
-  getIt.registerSingleton<RegisterService>(
-    RegisterServiceImpl(userRepository: getIt<UserRepository>()),
-  );
-
-  // Register LoginService
-  getIt.registerSingleton<LoginService>(
-    LoginServiceImpl(userRepository: getIt<UserRepository>()),
-  );
-
-  // Register DeepLinkService
-  getIt.registerSingleton<DeepLinkService>(
-    DeepLinkServiceImpl(
-      emailVerificationService: getIt<EmailVerificationDeepLinkService>(),
-      changePasswordService: getIt<ChangePasswordDeepLinkService>(),
-    ),
-  );
 
   getIt.registerSingleton<HealthMetricsRepository>(
   HealthMetricsRepositoryImpl(),
