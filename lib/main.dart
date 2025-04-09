@@ -42,6 +42,8 @@ import 'package:pockeat/features/health_metrics/presentation/screens/diet_page.d
 import 'package:pockeat/features/health_metrics/presentation/screens/desired_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -285,6 +287,10 @@ class MyApp extends StatelessWidget {
         '/height-weight': (context) => const AuthWrapper(child: HeightWeightPage()),
 
         '/birthdate': (context) => const AuthWrapper(child: BirthdatePage()),
+
+        '/gender': (context) => const AuthWrapper(child: GenderPage()),
+
+        '/activity-level': (context) => const AuthWrapper(child: ActivityLevelPage()),
 
         '/diet': (context) => const AuthWrapper(child: DietPage()),
 

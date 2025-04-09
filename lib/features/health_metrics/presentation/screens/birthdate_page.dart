@@ -129,7 +129,7 @@ class _BirthdatePageState extends State<BirthdatePage> {
                               context
                                   .read<HealthMetricsFormCubit>()
                                   .setBirthDate(_selectedDate!);
-                              Navigator.pushNamed(context, '/diet');
+                              Navigator.pushNamed(context, '/gender');
                             },
                       child: const Text("Next"),
                     ),

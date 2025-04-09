@@ -40,6 +40,8 @@ void main() {
     height: 180,
     weight: 75,
     birthDate: DateTime(1995, 5, 10),
+    gender: "Male",
+    activityLevel: "Moderately Active",
     dietType: "Keto",
     desiredWeight: 70,
     weeklyGoal: 0.5,
@@ -64,20 +66,19 @@ void main() {
   expect(find.text("0.5 kg/week"), findsOneWidget);
 });
 
-
-  testWidgets('calls submit and updates SharedPreferences', (WidgetTester tester) async {
+testWidgets('calls submit and updates SharedPreferences', (WidgetTester tester) async {
   final state = HealthMetricsFormState(
     selectedGoals: ["Gain Muscle"],
     height: 180,
     weight: 75,
     birthDate: DateTime(2000),
+    gender: "Female",
+    activityLevel: "Very Active",
     desiredWeight: 80,
     weeklyGoal: 1,
   );
 
   when(mockCubit.submit()).thenAnswer((_) async {});
-
-  // Use fake preferences for testing
   SharedPreferences.setMockInitialValues({});
 
   await tester.pumpWidget(createTestWidget(state));
@@ -93,25 +94,27 @@ void main() {
   expect(prefs.getBool('hasCompletedOnboarding'), true);
 });
 
+testWidgets('shows error message on submit failure', (WidgetTester tester) async {
+  final state = HealthMetricsFormState(
+    selectedGoals: ["Stay healthy"],
+    height: 160,
+    weight: 60,
+    birthDate: DateTime(1998),
+    gender: "Female",
+    activityLevel: "Lightly Active",
+    desiredWeight: 58,
+    weeklyGoal: 0.5,
+  );
 
-  testWidgets('shows error message on submit failure', (WidgetTester tester) async {
-    final state = HealthMetricsFormState(
-      selectedGoals: ["Stay healthy"],
-      height: 160,
-      weight: 60,
-      birthDate: DateTime(1998),
-      desiredWeight: 58,
-      weeklyGoal: 0.5,
-    );
+  when(mockCubit.submit()).thenThrow(Exception("Something went wrong"));
+  await tester.pumpWidget(createTestWidget(state));
+  await tester.pump();
 
-    when(mockCubit.submit()).thenThrow(Exception("Something went wrong"));
-    await tester.pumpWidget(createTestWidget(state));
-    await tester.pump();
+  await tester.tap(find.text("Submit"));
+  await tester.pumpAndSettle();
 
-    await tester.tap(find.text("Submit"));
-    await tester.pumpAndSettle();
+  verify(mockCubit.submit()).called(1);
+  expect(find.textContaining("Error: Exception: Something went wrong"), findsOneWidget);
+});
 
-    verify(mockCubit.submit()).called(1);
-    expect(find.textContaining("Error: Exception: Something went wrong"), findsOneWidget);
-  });
 }

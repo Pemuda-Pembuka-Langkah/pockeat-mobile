@@ -9,6 +9,11 @@ class HealthMetricsModel {
 
   final int age; // year old
 
+  final String gender; // male or female
+
+  // sedentary, light, moderate, active, very active, extra active
+  final String activityLevel; 
+
   final String fitnessGoal;
 
   HealthMetricsModel({
@@ -16,6 +21,8 @@ class HealthMetricsModel {
     required this.height,
     required this.weight,
     required this.age,
+    required this.gender,
+    required this.activityLevel,
     required this.fitnessGoal,
   });
 
@@ -25,6 +32,8 @@ class HealthMetricsModel {
       'height': height,
       'weight': weight,
       'age': age,
+      'gender': gender,
+      'activityLevel': activityLevel,
       'fitnessGoal': fitnessGoal,
     };
   }
@@ -39,6 +48,8 @@ class HealthMetricsModel {
     height: (data['height'] as num).toDouble(),
     weight: (data['weight'] as num).toDouble(),
     age: data['age'] as int,
+    gender: data['gender'] as String,
+    activityLevel: data['activityLevel'] as String,
     fitnessGoal: data['fitnessGoal'] as String,
   );
 }

@@ -9,6 +9,16 @@ class ReviewSubmitPage extends StatelessWidget {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
 
+  String formatActivityLevel(String? level) {
+  if (level == null) return "-";
+  return level
+      .replaceAll("_", " ")                
+      .split(' ')                          
+      .map((word) =>                       
+          word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : "")
+      .join(' ');
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,6 +89,8 @@ class ReviewSubmitPage extends StatelessWidget {
                         _buildItem("Height", state.height != null ? "${state.height} cm" : "-"),
                         _buildItem("Weight", state.weight != null ? "${state.weight} kg" : "-"),
                         _buildItem("Birth Date", state.birthDate?.toLocal().toString().split(" ")[0] ?? "-"),
+                        _buildItem("Gender", state.gender ?? "-"),
+                        _buildItem("Activity Level", formatActivityLevel(state.activityLevel)),
                         _buildItem("Diet Type", state.dietType ?? "-"),
                         _buildItem("Desired Weight", state.desiredWeight != null ? "${state.desiredWeight} kg" : "-"),
                         _buildItem("Weekly Goal", state.weeklyGoal != null ? "${state.weeklyGoal} kg/week" : "-"),

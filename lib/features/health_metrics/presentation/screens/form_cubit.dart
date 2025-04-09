@@ -9,6 +9,8 @@ class HealthMetricsFormState {
   final double? height;
   final double? weight;
   final DateTime? birthDate;
+  final String? gender;
+  final String? activityLevel;
   final String? dietType;
   final double? desiredWeight;
   final double? weeklyGoal;
@@ -19,6 +21,8 @@ class HealthMetricsFormState {
     this.height,
     this.weight,
     this.birthDate,
+    this.gender,
+    this.activityLevel,
     this.dietType,
     this.desiredWeight,
     this.weeklyGoal,
@@ -30,6 +34,8 @@ class HealthMetricsFormState {
     double? height,
     double? weight,
     DateTime? birthDate,
+    String? gender,
+    String? activityLevel,
     String? dietType,
     double? desiredWeight,
     double? weeklyGoal,
@@ -40,6 +46,8 @@ class HealthMetricsFormState {
       height: height ?? this.height,
       weight: weight ?? this.weight,
       birthDate: birthDate ?? this.birthDate,
+      gender: gender ?? this.gender,
+      activityLevel: activityLevel ?? this.activityLevel,
       dietType: dietType ?? this.dietType,
       desiredWeight: desiredWeight ?? this.desiredWeight,
       weeklyGoal: weeklyGoal ?? this.weeklyGoal,
@@ -76,6 +84,10 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
 
   void setBirthDate(DateTime date) => emit(state.copyWith(birthDate: date));
 
+  void setGender(String gender) => emit(state.copyWith(gender: gender));
+
+  void setActivityLevel(String level) => emit(state.copyWith(activityLevel: level));
+
   void setDietType(String type) => emit(state.copyWith(dietType: type));
 
   void setDesiredWeight(double weight) =>
@@ -90,6 +102,8 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
         state.birthDate == null ||
         state.desiredWeight == null ||
         state.weeklyGoal == null ||
+        state.gender == null ||
+        state.activityLevel == null ||
         state.selectedGoals.isEmpty ||
         (state.selectedGoals.contains("Other") &&
             (state.otherGoalReason == null ||
@@ -111,6 +125,8 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
       weight: state.weight!,
       age: age,
       fitnessGoal: allGoals.join(", "),
+      gender: state.gender!,
+      activityLevel: state.activityLevel!,
     );
 
     await repository.saveHealthMetrics(model);

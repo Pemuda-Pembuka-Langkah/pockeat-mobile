@@ -38,7 +38,7 @@ void main() {
       ),
       navigatorObservers: [mockNavigatorObserver],
       routes: {
-        '/diet': (context) => const Scaffold(body: Text('Diet Page')),
+        '/gender': (context) => const Scaffold(body: Text('Gender Page')),
       },
     );
   }
