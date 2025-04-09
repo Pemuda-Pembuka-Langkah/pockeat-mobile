@@ -91,6 +91,9 @@ class _HeightWeightPageState extends State<HeightWeightPage> {
                           if (height == null || height <= 0) {
                             return 'Please enter a valid height';
                           }
+                          if (height < 50 || height > 300) {
+                            return 'Height must be between 50 and 300 cm';
+                          }
                           return null;
                         },
                         onSaved: (value) =>
@@ -107,6 +110,9 @@ class _HeightWeightPageState extends State<HeightWeightPage> {
                           final weight = double.tryParse(value ?? '');
                           if (weight == null || weight <= 0) {
                             return 'Please enter a valid weight';
+                          }
+                          if (weight < 10 || weight > 500) {
+                            return 'Weight must be between 10 and 500 kg';
                           }
                           return null;
                         },

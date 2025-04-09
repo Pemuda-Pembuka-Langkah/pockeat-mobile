@@ -90,6 +90,9 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> {
                           if (weight == null || weight <= 0) {
                             return 'Please enter a valid weight';
                           }
+                          if (weight < 10 || weight > 500) {
+                            return 'Weight must be between 10 and 500 kg';
+                          }
                           return null;
                         },
                         onSaved: (value) =>
