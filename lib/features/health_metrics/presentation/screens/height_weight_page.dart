@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'form_cubit.dart';
 
@@ -26,7 +27,16 @@ class _HeightWeightPageState extends State<HeightWeightPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () async {
+            final prefs = await SharedPreferences.getInstance();
+            final inProgress = prefs.getBool('onboardingInProgress') ?? true;
+
+            if (inProgress && Navigator.of(context).canPop()) {
+              Navigator.of(context).pop(); 
+            } else {
+              Navigator.of(context).popUntil((route) => route.isFirst); 
+            }
+          },
         ),
         title: const Text(
           "Height & Weight",
@@ -120,7 +130,7 @@ class _HeightWeightPageState extends State<HeightWeightPage> {
                                   height: _height!,
                                   weight: _weight!,
                                 );
-                            Navigator.pushReplacementNamed(context, '/birthdate');
+                            Navigator.pushNamed(context, '/birthdate');
                           }
                         },
                         child: const Center(child: Text("Next")),

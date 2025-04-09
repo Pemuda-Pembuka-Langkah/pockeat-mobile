@@ -31,10 +31,6 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> {
       appBar: AppBar(
         backgroundColor: primaryYellow,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
           "Your Goals",
           style: TextStyle(
@@ -123,7 +119,7 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setBool('onboardingInProgress', true); // ✅ set flag
 
-                    Navigator.pushReplacementNamed(context, '/height-weight');
+                    Navigator.pushNamed(context, '/height-weight');
                   }
                 : null,
                   child: const Center(child: Text("Next")),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'form_cubit.dart';
 
@@ -34,7 +35,16 @@ class _DietPageState extends State<DietPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () async {
+            final prefs = await SharedPreferences.getInstance();
+            final inProgress = prefs.getBool('onboardingInProgress') ?? true;
+
+            if (inProgress && Navigator.of(context).canPop()) {
+              Navigator.of(context).pop(); 
+            } else {
+              Navigator.of(context).popUntil((route) => route.isFirst); 
+            }
+          },
         ),
         title: const Text(
           "Diet Preference",

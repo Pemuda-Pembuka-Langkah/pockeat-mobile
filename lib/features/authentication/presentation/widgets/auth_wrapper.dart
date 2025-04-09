@@ -77,7 +77,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
     // 🛑 Jangan redirect kalau user udah dalam onboarding atau lagi ngisi
     if ((!completed && !onboardingInProgress) && mounted && !isInsideOnboardingFlow) {
-      Navigator.of(context).pushReplacementNamed('/onboarding/goal');
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/onboarding/goal',
+        (route) => false,
+      );
+
     }
   } catch (e) {
     debugPrint("Error checking health metrics: $e");
