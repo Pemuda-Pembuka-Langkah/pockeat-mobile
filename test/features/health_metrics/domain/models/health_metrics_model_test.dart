@@ -23,6 +23,8 @@ void main() {
         height: 175.0,
         weight: 72.5,
         age: 25,
+        gender: 'male',
+        activityLevel: 'moderate',
         fitnessGoal: 'Lose weight',
       );
 
@@ -30,6 +32,8 @@ void main() {
       expect(metrics.height, equals(175.0));
       expect(metrics.weight, equals(72.5));
       expect(metrics.age, equals(25));
+      expect(metrics.gender, equals('male'));
+      expect(metrics.activityLevel, equals('moderate'));
       expect(metrics.fitnessGoal, equals('Lose weight'));
     });
 
@@ -39,6 +43,8 @@ void main() {
         height: 175.0,
         weight: 72.5,
         age: 25,
+        gender: 'female',
+        activityLevel: 'active',
         fitnessGoal: 'Lose weight',
       );
 
@@ -48,6 +54,8 @@ void main() {
       expect(map['height'], equals(175.0));
       expect(map['weight'], equals(72.5));
       expect(map['age'], equals(25));
+      expect(map['gender'], equals('female'));
+      expect(map['activityLevel'], equals('active'));
       expect(map['fitnessGoal'], equals('Lose weight'));
     });
 
@@ -56,6 +64,8 @@ void main() {
         'height': 175.0,
         'weight': 72.5,
         'age': 25,
+        'gender': 'female',
+        'activityLevel': 'light',
         'fitnessGoal': 'Lose weight',
       };
 
@@ -66,6 +76,8 @@ void main() {
       expect(metrics.height, equals(175.0));
       expect(metrics.weight, equals(72.5));
       expect(metrics.age, equals(25));
+      expect(metrics.gender, equals('female'));
+      expect(metrics.activityLevel, equals('light'));
       expect(metrics.fitnessGoal, equals('Lose weight'));
     });
 
@@ -86,6 +98,8 @@ void main() {
         height: 180.5,
         weight: 75.0,
         age: 30,
+        gender: 'male',
+        activityLevel: 'very_active',
         fitnessGoal: 'Gain muscle',
       );
 
@@ -94,6 +108,8 @@ void main() {
       expect(map['height'], isA<double>());
       expect(map['weight'], isA<double>());
       expect(map['age'], isA<int>());
+      expect(map['gender'], isA<String>());
+      expect(map['activityLevel'], isA<String>());
       expect(map['fitnessGoal'], isA<String>());
     });
 
@@ -107,6 +123,8 @@ void main() {
         'height': 175,
         'weight': 72,
         'age': 25,
+        'gender': 'female',
+        'activityLevel': 'moderate',
         'fitnessGoal': 'Maintain',
       };
 
@@ -116,6 +134,8 @@ void main() {
       expect(metrics.height, equals(175.0));
       expect(metrics.weight, equals(72.0));
       expect(metrics.age, equals(25));
+      expect(metrics.gender, equals('female'));
+      expect(metrics.activityLevel, equals('moderate'));
       expect(metrics.fitnessGoal, equals('Maintain'));
     });
   });

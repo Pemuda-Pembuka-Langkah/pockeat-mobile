@@ -26,6 +26,8 @@ void main() {
     height: 180.0,
     weight: 75.0,
     age: 28,
+    gender: 'male',
+    activityLevel: 'moderate',
     fitnessGoal: 'Maintain',
   );
 
@@ -66,6 +68,8 @@ void main() {
     expect(result?.height, equals(180.0));
     expect(result?.weight, equals(75.0));
     expect(result?.age, equals(28));
+    expect(result?.gender, equals('male'));
+    expect(result?.activityLevel, equals('moderate'));
     expect(result?.fitnessGoal, equals('Maintain'));
   });
 

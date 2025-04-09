@@ -46,12 +46,31 @@ void main() {
     expect(() => cubit.submit(), throwsException);
   });
 
+  test('setGender updates gender', () {
+  cubit.setGender("Male");
+  expect(cubit.state.gender, "Male");
+
+  cubit.setGender("Female");
+  expect(cubit.state.gender, "Female");
+});
+
+test('setActivityLevel updates activity level', () {
+  cubit.setActivityLevel("Moderately Active");
+  expect(cubit.state.activityLevel, "Moderately Active");
+
+  cubit.setActivityLevel("Sedentary");
+  expect(cubit.state.activityLevel, "Sedentary");
+});
+
+
   test('submit calls repository when all data is valid', () async {
     cubit
       ..setHeightWeight(height: 170, weight: 65)
       ..setBirthDate(DateTime(2000, 1, 1))
       ..setDesiredWeight(60)
       ..setWeeklyGoal(0.5)
+      ..setGender("Male")
+      ..setActivityLevel("Lightly Active")
       ..toggleGoal("Lose Weight");
 
     await cubit.submit();
@@ -65,6 +84,8 @@ void main() {
       ..setBirthDate(DateTime(2000, 1, 1))
       ..setDesiredWeight(60)
       ..setWeeklyGoal(0.5)
+      ..setGender("Male")
+      ..setActivityLevel("Lightly Active")
       ..toggleGoal("Other");
 
     expect(() => cubit.submit(), throwsException);
@@ -76,6 +97,8 @@ void main() {
       ..setBirthDate(DateTime(1995, 5, 5))
       ..setDesiredWeight(70)
       ..setWeeklyGoal(1)
+      ..setGender("Male")
+      ..setActivityLevel("Lightly Active")
       ..toggleGoal("Other")
       ..setOtherGoalReason("Build muscle");
 
