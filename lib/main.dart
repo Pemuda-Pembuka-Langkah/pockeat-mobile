@@ -47,6 +47,8 @@ import 'package:pockeat/features/progress_charts_and_graphs/services/progress_ta
 import 'package:pockeat/features/authentication/presentation/screens/change_password_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
 import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/edit_profile_page.dart';
+import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -319,6 +321,12 @@ class MyApp extends StatelessWidget {
             ),
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
+        '/edit-profile': (context) {
+          final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
+          return AuthWrapper(
+            child: EditProfilePage(initialUser: user),
+          );
+        },
       },
       onGenerateRoute: (settings) {
         // Default jika tidak ada rute yang cocok

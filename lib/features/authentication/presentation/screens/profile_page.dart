@@ -611,14 +611,17 @@ class _ProfilePageState extends State<ProfilePage> {
             title: 'Edit Profil',
             subtitle: 'Perbarui informasi profil Anda',
             icon: Icons.edit,
-            onTap: () {
-              // Navigasi ke halaman edit profil (belum diimplementasi)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fitur edit profil akan segera hadir'),
-                  behavior: SnackBarBehavior.floating,
-                ),
+            onTap: () async {
+              // Navigasi ke halaman edit profil
+              final result = await Navigator.of(context).pushNamed(
+                '/edit-profile',
+                arguments: _currentUser,
               );
+
+              // Reload user data jika ada perubahan
+              if (result == true) {
+                _loadUserData();
+              }
             },
           ),
           if (!isGoogleLogin) ...[

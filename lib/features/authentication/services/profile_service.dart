@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
 /// Service untuk mengelola profil pengguna
@@ -22,4 +23,12 @@ abstract class ProfileService {
   ///
   /// Mengembalikan [true] jika berhasil, [false] jika gagal
   Future<bool> sendEmailVerification();
+
+  /// Mengupload gambar profil ke Firebase Storage
+  ///
+  /// Parameter:
+  /// - [imageFile]: File gambar yang akan diupload
+  ///
+  /// Mengembalikan URL gambar jika berhasil, null jika gagal
+  Future<String?> uploadProfileImage(File imageFile);
 }
