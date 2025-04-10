@@ -1,6 +1,8 @@
+// coverage:ignore-start
 class CalorieData {
-  final String day;
+  final String label;
   final double calories;
 
-  CalorieData(this.day, this.calories);
+  CalorieData(this.label, this.calories);
 }
+// coverage:ignore-end

@@ -22,6 +22,26 @@ void main() {
       expect(workoutStat.colorValue, equals(colorValue));
     });
 
+    test('should handle calories with kcal suffix', () {
+      // Arrange
+      const String label = 'Calories';
+      const String value = '320 kcal';
+      const int colorValue = 0xFFFF6B6B;
+
+      // Act
+      final workoutStat = WorkoutStat(
+        label: label,
+        value: value,
+        colorValue: colorValue,
+      );
+
+      // Assert
+      expect(workoutStat.label, equals(label));
+      expect(workoutStat.value, equals(value));
+      expect(workoutStat.value, contains('kcal'));
+      expect(workoutStat.colorValue, equals(colorValue));
+    });
+
     test('should handle empty strings', () {
       // Arrange
       const String label = '';
@@ -44,7 +64,7 @@ void main() {
     test('should handle different color values', () {
       // Arrange
       const String label = 'Calories';
-      const String value = '320';
+      const String value = '320 kcal';
       const int colorValue = 0xFFFFB946;  // Yellow
 
       // Act

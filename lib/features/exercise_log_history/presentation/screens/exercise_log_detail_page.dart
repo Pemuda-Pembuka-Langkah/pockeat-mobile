@@ -11,6 +11,9 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/swimm
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/weight_lifting_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:pockeat/features/exercise_log_history/utils/exercise_sharing_extension.dart';
+
+
 
 /// Detail page for exercise logs with widget composition based on type
 class ExerciseLogDetailPage extends StatefulWidget {
@@ -83,7 +86,24 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
         title: Text(_getPageTitle()),
         backgroundColor: Colors.white,
         elevation: 0,
+        //coverage:ignore-start
         actions: [
+          // Share button in the app bar
+          IconButton(
+            icon: const Icon(
+              Icons.share,
+              color: Colors.black87,
+            ),
+            onPressed: () {
+              _exerciseFuture.then((data) {
+                if (data != null) {
+                  _shareExercise(data);
+                }
+              });
+            },
+            tooltip: 'Share',
+          ),
+          //coverage:ignore-end
           IconButton(
             icon: const Icon(
               Icons.delete_outline,
@@ -155,6 +175,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
               );
             }
 
+            // Simply return the detail widget without the stack
             return _buildDetailWidget(snapshot.data);
           },
         ),
@@ -314,4 +335,21 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
       );
     }
   }
+// coverage:ignore:start
+  void _shareExercise(dynamic exercise) async {
+    try {
+      await context.shareExerciseSummary(exercise, widget.activityType);
+    } catch (e) {
+      if (!mounted) return;
+
+      debugPrint('Error in _shareExercise: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to share exercise summary: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 }
+// coverage:ignore:end

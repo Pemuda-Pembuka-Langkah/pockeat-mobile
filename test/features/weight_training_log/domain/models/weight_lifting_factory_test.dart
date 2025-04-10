@@ -9,6 +9,7 @@ void main() {
         'name': 'Bench Press',
         'bodyPart': 'Chest',
         'metValue': 3.5,
+        'userId': 'test-user-id',
         'sets': [
           {'weight': 20.0, 'reps': 12, 'duration': 60.0},
           {'weight': 25.0, 'reps': 10, 'duration': 45.0},
@@ -21,6 +22,7 @@ void main() {
       expect(exercise.name, 'Bench Press');
       expect(exercise.bodyPart, 'Chest');
       expect(exercise.metValue, 3.5);
+      expect(exercise.userId, 'test-user-id');
       expect(exercise.sets.length, 2);
       expect(exercise.sets[0].weight, 20.0);
       expect(exercise.sets[0].reps, 12);
@@ -40,12 +42,14 @@ void main() {
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
+        userId: 'test-user-id',
         setsData: setsData,
       );
       
       expect(exercise.name, 'Bench Press');
       expect(exercise.bodyPart, 'Chest');
       expect(exercise.metValue, 3.5);
+      expect(exercise.userId, 'test-user-id');
       expect(exercise.sets.length, 2);
       expect(exercise.sets[0].weight, 20.0);
       expect(exercise.sets[0].reps, 12);
@@ -60,11 +64,13 @@ void main() {
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
+        userId: 'test-user-id',
       );
       
       expect(exercise.name, 'Bench Press');
       expect(exercise.bodyPart, 'Chest');
       expect(exercise.metValue, 3.5);
+      expect(exercise.userId, 'test-user-id');
       expect(exercise.sets, isEmpty);
     });
 
@@ -73,6 +79,7 @@ void main() {
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
+        userId: 'test-user-id',
         setsData: [],
       );
       
@@ -90,6 +97,7 @@ void main() {
         name: 'Bench Press',
         bodyPart: 'Chest',
         metValue: 3.5,
+        userId: 'test-user-id',
         setsData: setsData,
       );
       

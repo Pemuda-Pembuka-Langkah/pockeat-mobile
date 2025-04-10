@@ -8,6 +8,7 @@ void main() {
       name: 'Bench Press',
       bodyPart: 'Upper Body',
       metValue: 5.0,
+      userId: 'test-user-id',
       sets: [
         WeightLiftingSet(weight: 50, reps: 10, duration: 30),
         WeightLiftingSet(weight: 60, reps: 8, duration: 30),
@@ -18,6 +19,7 @@ void main() {
       name: 'Squats',
       bodyPart: 'Lower Body',
       metValue: 6.0,
+      userId: 'test-user-id',
       sets: [
         WeightLiftingSet(weight: 70, reps: 5, duration: 20),
       ],
@@ -27,6 +29,7 @@ void main() {
       name: 'Empty Exercise',
       bodyPart: 'None',
       metValue: 4.0,
+      userId: 'test-user-id',
       sets: [],
     );
 
@@ -77,6 +80,7 @@ void main() {
         name: 'Low Value',
         bodyPart: 'Test',
         metValue: 4.0,
+        userId: 'test-user-id',
         sets: [
           WeightLiftingSet(weight: 0.1, reps: 1, duration: 0.1),
           WeightLiftingSet(weight: 0.1, reps: 1, duration: 0.1),
@@ -92,6 +96,7 @@ void main() {
         name: 'High Intensity',
         bodyPart: 'Full Body',
         metValue: 10.0,
+        userId: 'test-user-id',
         sets: [
           WeightLiftingSet(weight: 500, reps: 100, duration: 120),
         ],
@@ -104,6 +109,7 @@ void main() {
         name: 'Minimal Duration',
         bodyPart: 'Test',
         metValue: 5.0,
+        userId: 'test-user-id',
         sets: [
           WeightLiftingSet(weight: 50, reps: 10, duration: 0.1),
         ],

@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/ai_api_scan/services/exercise/exercise_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SmartExerciseLogPage extends StatefulWidget {
   final SmartExerciseLogRepository repository;
+  final FirebaseAuth? auth; // Add optional auth parameter for dependency injection
 
   const SmartExerciseLogPage({
     super.key,
     required this.repository,
+    this.auth,
   });
 
   @override
@@ -31,11 +34,29 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
   final ExerciseAnalysisService _exerciseAnalysisService =
       getIt<ExerciseAnalysisService>();
   late final SmartExerciseLogRepository _repository;
+  late final FirebaseAuth _auth; // Instance for Firebase Auth
 
   @override
   void initState() {
     super.initState();
     _repository = widget.repository;
+    _auth = widget.auth ?? FirebaseAuth.instance; // Initialize auth
+  }
+
+  // Get current user ID with a helper method
+  String _getCurrentUserId() {
+    final user = _auth.currentUser;
+    if (user == null) {
+      // Handle the case where user is not logged in
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User not logged in. Please log in to save exercise logs.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return ''; // Return empty string if user is not logged in
+    }
+    return user.uid;
   }
 
   Future<void> analyzeWorkout(String workoutDescription) async {
@@ -43,9 +64,13 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
 
     try {
       final result = await _exerciseAnalysisService.analyze(workoutDescription);
+      
+      // Add user ID to the analysis result
+      final String userId = _getCurrentUserId();
+      final resultWithUserId = result.copyWith(userId: userId);
 
       setState(() {
-        analysisResult = result;
+        analysisResult = resultWithUserId;
         isAnalyzing = false;
       });
     } catch (e) {
@@ -75,16 +100,21 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
         analysisResult!,
         userComment,
       );
+      
+      // Ensure user ID is preserved in corrected result
+      final correctedResultWithUserId = correctedResult.userId.isEmpty 
+          ? correctedResult.copyWith(userId: _getCurrentUserId()) 
+          : correctedResult;
 
       setState(() {
-        analysisResult = correctedResult;
+        analysisResult = correctedResultWithUserId;
         isCorrectingAnalysis = false;
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Analysis corrected successfully!'),
+          const SnackBar(
+            content: Text('Analysis corrected successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -115,12 +145,26 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
     if (analysisResult == null || !analysisResult!.isComplete) return;
 
     try {
-      await _repository.saveAnalysisResult(analysisResult!);
+      // Get current user ID
+      final userId = _getCurrentUserId();
+      
+      // Validate that user is logged in
+      if (userId.isEmpty) {
+        // Error message already shown in _getCurrentUserId
+        return;
+      }
+      
+      // Ensure the analysis result has the user ID before saving
+      final resultToSave = analysisResult!.userId.isEmpty 
+          ? analysisResult!.copyWith(userId: userId) 
+          : analysisResult!;
+
+      await _repository.saveAnalysisResult(resultToSave);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Workout log saved successfully!'),
+          const SnackBar(
+            content: Text('Workout log saved successfully!'),
             backgroundColor: Colors.green,
           ),
         );

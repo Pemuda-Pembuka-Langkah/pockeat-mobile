@@ -22,4 +22,9 @@ abstract class LoginService {
   ///
   /// Return null jika tidak ada user yang sedang login
   Future<UserModel?> getCurrentUser();
+
+  /// Get Firebase ID token for API authentication
+  ///
+  /// Returns JWT token string, or null if no authenticated user
+  Future<String?> getIdToken();
 }

@@ -5,24 +5,26 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:camera/camera.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_input_page.dart';
-import 'package:pockeat/features/ai_api_scan/presentation/pages/ai_analysis_page.dart';
+import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_history_page.dart';
-import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_log_detail_page.dart';
+import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
 import 'package:pockeat/features/food_log_history/presentation/screens/food_history_page.dart';
@@ -30,8 +32,19 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/food_log_history/presentation/screens/food_detail_page.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
-import 'package:pockeat/features/food_text_input/presentation/pages/food_text_input_page.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_initializer.dart';
+import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/diet_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/desired_weight_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
@@ -50,32 +63,29 @@ import 'package:pockeat/features/authentication/presentation/screens/profile_pag
 import 'package:pockeat/features/authentication/presentation/screens/edit_profile_page.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Default ke dev untuk development yang aman
-  // Load dotenv dulu
   await dotenv.load(fileName: '.env');
-
-  // Ambil flavor dari dotenv
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
 
   await Firebase.initializeApp(
-      options: flavor == 'production'
-          ? ProductionFirebaseOptions.currentPlatform
-          : flavor == 'staging'
-              ? StagingFirebaseOptions.currentPlatform
-              : StagingFirebaseOptions
-                  .currentPlatform // Dev pake config staging tapi nanti connect ke emulator
-      );
+    options: flavor == 'production'
+        ? ProductionFirebaseOptions.currentPlatform
+        : flavor == 'staging'
+            ? StagingFirebaseOptions.currentPlatform
+            : StagingFirebaseOptions.currentPlatform,
+  );
 
-  setupDependencies();
+  await setupDependencies();
 
   // Initialize notifications
   if (!kIsWeb) {
-    await NotificationInitializer().initialize();
+    await getIt<NotificationService>().initialize();
   }
 
+  // Setup emulator kalau di dev mode
   if (flavor == 'dev') {
     await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
@@ -106,7 +116,18 @@ void main() async {
         Provider<FoodTextInputRepository>(
           create: (_) => getIt<FoodTextInputRepository>(),
         ),
-        // Add other providers here if needed
+        BlocProvider<HealthMetricsFormCubit>(
+          create: (_) {
+            final user = FirebaseAuth.instance.currentUser;
+            if (user == null) {
+              throw Exception('User must be logged in');
+            }
+            return HealthMetricsFormCubit(
+              userId: user.uid,
+              repository: getIt<HealthMetricsRepository>(),
+            );
+          },
+        ),
       ],
       child: const MyApp(),
     ),
@@ -125,14 +146,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get repositories from context
     final smartExerciseLogRepository =
         Provider.of<SmartExerciseLogRepository>(context);
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Pockeat',
       // Tambahkan navigatorKey ke MaterialApp
-      navigatorKey: navigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
@@ -150,11 +170,9 @@ class MyApp extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        // Tambah ini
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            foregroundColor:
-                Colors.white, // Ini akan membuat teks button jadi putih
+            foregroundColor: Colors.white,
             backgroundColor: Colors.blue[400],
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -259,11 +277,33 @@ class MyApp extends StatelessWidget {
                 'Verification failed. Please try again.',
           );
         },
-        '/smart-exercise-log': (context) => AuthWrapper(
-              child: SmartExerciseLogPage(
-                repository: smartExerciseLogRepository,
-              ),
+        '/onboarding/goal': (context) {
+          final user = FirebaseAuth.instance.currentUser;
+          if (user == null) return const LoginPage();
+          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
+          return AuthWrapper(
+            child: BlocProvider.value(
+              value: cubit,
+              child: const HealthMetricsGoalsPage(),
             ),
+          );
+        },
+        '/height-weight': (context) => const AuthWrapper(child: HeightWeightPage()),
+
+        '/birthdate': (context) => const AuthWrapper(child: BirthdatePage()),
+
+        '/gender': (context) => const AuthWrapper(child: GenderPage()),
+
+        '/activity-level': (context) => const AuthWrapper(child: ActivityLevelPage()),
+
+        '/diet': (context) => const AuthWrapper(child: DietPage()),
+
+        '/desired-weight': (context) => const AuthWrapper(child: DesiredWeightPage()),
+
+        '/speed': (context) => const AuthWrapper(child: SpeedSelectionPage()),
+
+        '/review': (context) => const AuthWrapper(child: ReviewSubmitPage()),
+        '/smart-exercise-log': (context) => AuthWrapper(child: SmartExerciseLogPage(repository: smartExerciseLogRepository)),
         '/scan': (context) => AuthWrapper(
               child: ScanFoodPage(
                 cameraController: CameraController(
@@ -286,16 +326,14 @@ class MyApp extends StatelessWidget {
         '/weightlifting-input': (context) =>
             const AuthWrapper(child: WeightliftingPage()),
         '/cardio': (context) => const AuthWrapper(child: CardioInputPage()),
-        '/exercise-history': (context) =>
-            const AuthWrapper(child: ExerciseHistoryPage()),
+        '/exercise-history': (context) => const AuthWrapper(child: ExerciseHistoryPage()),
         '/food-history': (context) => AuthWrapper(
               child: FoodHistoryPage(
                 service: Provider.of<FoodLogHistoryService>(context),
               ),
             ),
         '/exercise-detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments
-              as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return AuthWrapper(
             child: ExerciseLogDetailPage(
               exerciseId: args['exerciseId'] as String,
@@ -304,33 +342,25 @@ class MyApp extends StatelessWidget {
           );
         },
         '/food-detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments
-              as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return AuthWrapper(
             child: FoodDetailPage(
               foodId: args['foodId'] as String,
-              foodRepository:
-                  Provider.of<FoodScanRepository>(context, listen: false),
-              foodTextInputRepository:
-                  Provider.of<FoodTextInputRepository>(context, listen: false),
+              foodRepository: Provider.of<FoodScanRepository>(context, listen: false),
+              foodTextInputRepository: Provider.of<FoodTextInputRepository>(context, listen: false),
             ),
           );
         },
         '/analytic': (context) => ProgressPage(
               service: ProgressTabsService(ProgressTabsRepositoryImpl()),
             ),
-        '/notification-settings': (context) =>
-            const AuthWrapper(child: NotificationSettingsScreen()),
+        '/notification-settings': (context) => const AuthWrapper(child: NotificationSettingsScreen()),
         '/edit-profile': (context) {
           final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
           return AuthWrapper(
             child: EditProfilePage(initialUser: user),
           );
         },
-      },
-      onGenerateRoute: (settings) {
-        // Default jika tidak ada rute yang cocok
-        return null;
       },
     );
   }

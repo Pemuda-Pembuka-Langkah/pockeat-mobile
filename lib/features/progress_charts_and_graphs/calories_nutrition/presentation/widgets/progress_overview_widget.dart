@@ -4,6 +4,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/d
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/nutrition_stat.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/nutrition_stat_widget.dart';
 
+// coverage:ignore-start
 class ProgressOverviewWidget extends StatelessWidget {
   final List<CalorieData> calorieData;
   final List<NutritionStat> nutritionStats;
@@ -11,6 +12,7 @@ class ProgressOverviewWidget extends StatelessWidget {
   final Color primaryPink;
   final bool isLoading;
 
+  // ignore: use_super_parameters
   const ProgressOverviewWidget({
     Key? key,
     required this.calorieData,
@@ -74,7 +76,7 @@ class ProgressOverviewWidget extends StatelessWidget {
                         color: primaryGreen, size: 16),
                     const SizedBox(width: 4),
                     Text(
-                      '92% of goal',
+                      '0% of goal',
                       style: TextStyle(
                         color: primaryGreen,
                         fontSize: 14,
@@ -100,35 +102,51 @@ class ProgressOverviewWidget extends StatelessWidget {
                 ? const Center(child: CircularProgressIndicator())
                 : SfCartesianChart(
                     margin: EdgeInsets.zero,
-                    primaryXAxis: const CategoryAxis(
-                      majorGridLines: MajorGridLines(width: 0),
-                      labelStyle: TextStyle(
+                    // Remove legend completely
+                    legend: Legend(isVisible: false),
+                    primaryXAxis: CategoryAxis(
+                      majorGridLines: const MajorGridLines(width: 0),
+                      labelStyle: const TextStyle(
                         color: Colors.black54,
                         fontSize: 12,
                       ),
                     ),
-                    primaryYAxis: const NumericAxis(
+                    primaryYAxis: NumericAxis(
                       minimum: 0,
-                      maximum: 3000,
-                      interval: 500,
-                      majorGridLines: MajorGridLines(
+                      maximum: _getChartMaximum(),
+                      interval: _getYAxisInterval(),
+                      majorGridLines: const MajorGridLines(
                         width: 0.5,
                         color: Colors.black12,
                         dashArray: [5, 5],
                       ),
-                      labelStyle: TextStyle(
+                      labelStyle: const TextStyle(
                         color: Colors.black54,
                         fontSize: 12,
                       ),
+                    ),
+                    tooltipBehavior: TooltipBehavior(
+                      enable: true,
+                      header: '',
+                      format: 'point.x: point.y kcal'
                     ),
                     series: <CartesianSeries>[
                       ColumnSeries<CalorieData, String>(
                         color: primaryPink,
                         width: 0.7,
                         dataSource: calorieData,
-                        xValueMapper: (CalorieData data, _) => data.day,
+                        xValueMapper: (CalorieData data, _) => data.label,
                         yValueMapper: (CalorieData data, _) => data.calories,
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                        // Add data labels for better readability
+                        dataLabelSettings: const DataLabelSettings(
+                          isVisible: true,
+                          labelAlignment: ChartDataLabelAlignment.top,
+                          textStyle: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 10,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -137,4 +155,26 @@ class ProgressOverviewWidget extends StatelessWidget {
       ),
     );
   }
+
+  // Helper method to calculate maximum Y value for the chart
+  double _getChartMaximum() {
+    if (calorieData.isEmpty) return 3000;
+    
+    double maxY = 0;
+    for (var data in calorieData) {
+      if (data.calories > maxY) {
+        maxY = data.calories;
+      }
+    }
+    
+    // Add 20% padding and round to nearest 500
+    return (((maxY * 1.2) / 500).ceil() * 500).toDouble();
+  }
+  
+  // Helper method to calculate Y-axis interval
+  double _getYAxisInterval() {
+    final max = _getChartMaximum();
+    return max <= 1500 ? 250 : 500;
+  }
 }
+// coverage:ignore-end

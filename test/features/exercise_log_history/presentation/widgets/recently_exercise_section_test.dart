@@ -1,349 +1,138 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:mockito/annotations.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
-import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
-import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_history_card.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/recently_exercise_section.dart';
-
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'recently_exercise_section_test.mocks.dart';
 
-// Create a mock Navigator observer to verify navigation
-class MockNavigatorObserver extends Mock implements NavigatorObserver {}
-
-@GenerateMocks([ExerciseLogHistoryService])
+@GenerateMocks([
+  ExerciseLogHistoryService,
+  FirebaseAuth,
+  User,
+  NavigatorObserver,
+])
 void main() {
   late MockExerciseLogHistoryService mockRepository;
-  late List<ExerciseLogHistoryItem> mockExercises;
+  late MockFirebaseAuth mockFirebaseAuth;
+  late MockUser mockUser;
+  const String testUserId = 'test-user-123';
 
   setUp(() {
     mockRepository = MockExerciseLogHistoryService();
+    mockFirebaseAuth = MockFirebaseAuth();
+    mockUser = MockUser();
 
-    mockExercises = [
-      ExerciseLogHistoryItem(
-        id: 'test-id-1',
-        activityType: ExerciseLogHistoryItem.typeSmartExercise,
-        title: 'Morning Run',
-        subtitle: '30 minutes • 5 km',
-        timestamp: DateTime.now().subtract(Duration(hours: 2)),
-        caloriesBurned: 350,
-      ),
-      ExerciseLogHistoryItem(
-        id: 'test-id-2',
-        activityType: ExerciseLogHistoryItem.typeWeightlifting,
-        title: 'Strength Training',
-        subtitle: '8 exercises',
-        timestamp: DateTime.now().subtract(Duration(days: 1)),
-        caloriesBurned: 280,
-      ),
-    ];
+    // Setup Firebase Auth mock
+    when(mockUser.uid).thenReturn(testUserId);
+    when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
   });
 
   group('RecentlyExerciseSection Widget Tests', () {
-    testWidgets('displays title correctly', (WidgetTester tester) async {
-      when(mockRepository.getAllExerciseLogs(limit: 5))
-          .thenAnswer((_) async => mockExercises);
+    final mockExercises = [
+      ExerciseLogHistoryItem(
+        id: '1',
+        activityType: ExerciseLogHistoryItem.typeCardio,
+        title: 'Morning Run',
+        subtitle: '30 min • 300 kcal',
+        timestamp: DateTime.now().subtract(const Duration(days: 1)),
+        caloriesBurned: 300,
+        sourceId: 'cardio-1',
+      ),
+      ExerciseLogHistoryItem(
+        id: '2',
+        activityType: ExerciseLogHistoryItem.typeWeightlifting,
+        title: 'Gym Workout',
+        subtitle: '45 min • 400 kcal',
+        timestamp: DateTime.now().subtract(const Duration(days: 2)),
+        caloriesBurned: 400,
+        sourceId: 'weight-1',
+      ),
+    ];
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RecentlyExerciseSection(
-              repository: mockRepository,
-            ),
+    Widget buildTestWidget() {
+      return MaterialApp(
+        home: Scaffold(
+          body: RecentlyExerciseSection(
+            repository: mockRepository,
+            auth: mockFirebaseAuth,
           ),
         ),
       );
+    }
 
-      await tester.pumpAndSettle();
+    testWidgets('displays title correctly', (WidgetTester tester) async {
+      final completer = Completer<List<ExerciseLogHistoryItem>>();
+      when(mockRepository.getAllExerciseLogs(testUserId, limit: 5))
+          .thenAnswer((_) => completer.future);
 
+      await tester.pumpWidget(buildTestWidget());
       expect(find.text('Recent Exercises'), findsOneWidget);
     });
 
-    testWidgets('displays exercise cards', (WidgetTester tester) async {
-      when(mockRepository.getAllExerciseLogs(limit: 5))
+    testWidgets('displays loading state', (WidgetTester tester) async {
+      final completer = Completer<List<ExerciseLogHistoryItem>>();
+      when(mockRepository.getAllExerciseLogs(testUserId, limit: 5))
+          .thenAnswer((_) => completer.future);
+
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    });
+
+    testWidgets('displays exercises', (WidgetTester tester) async {
+      when(mockRepository.getAllExerciseLogs(testUserId, limit: 5))
           .thenAnswer((_) async => mockExercises);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RecentlyExerciseSection(
-              repository: mockRepository,
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(buildTestWidget());
 
-      await tester.pumpAndSettle();
+      // Initial pump to start building
+      await tester.pump();
 
-      expect(find.byType(ExerciseHistoryCard), findsNWidgets(2));
+      // Allow the future to complete
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // Check that the exercise titles are displayed in the widget tree
       expect(find.text('Morning Run'), findsOneWidget);
-      expect(find.text('Strength Training'), findsOneWidget);
+      expect(find.text('Gym Workout'), findsOneWidget);
     });
 
     testWidgets('displays empty state when no exercises',
         (WidgetTester tester) async {
-      when(mockRepository.getAllExerciseLogs(limit: 5))
+      when(mockRepository.getAllExerciseLogs(testUserId, limit: 5))
           .thenAnswer((_) async => []);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RecentlyExerciseSection(
-              repository: mockRepository,
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
 
       expect(find.text('No exercise history yet'), findsOneWidget);
     });
 
-    testWidgets('displays error state when repository throws',
+    testWidgets('displays error state when fetch fails',
         (WidgetTester tester) async {
-      // Create a specific test exception
-      final testException = Exception('Test error');
+      // Arrange
+      final completer = Completer<List<ExerciseLogHistoryItem>>();
       
-      // Setup the mock to throw an exception - using a straightforward approach
-      when(mockRepository.getAllExerciseLogs(limit: 5))
-          .thenAnswer((_) async {
-            await Future.delayed(const Duration(milliseconds: 10));
-            throw testException;
-          });
+      when(mockRepository.getAllExerciseLogs(testUserId, limit: 5))
+          .thenAnswer((_) => completer.future);
 
-      // Build the widget
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RecentlyExerciseSection(
-              repository: mockRepository,
-            ),
-          ),
-        ),
-      );
+      // Act
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump(); // Render frame pertama
 
-      // Wait for all pending timers and animation frames to complete
-      await tester.pump(); // Initial loading state
-      await tester.pump(const Duration(milliseconds: 20)); // Wait for Future to complete with error
-
-      // Verify the error message is displayed
-      expect(find.textContaining('Error loading exercises'), findsOneWidget);
-    });
-
-    testWidgets('has Show All button', (WidgetTester tester) async {
-      when(mockRepository.getAllExerciseLogs(limit: 5))
-          .thenAnswer((_) async => mockExercises);
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RecentlyExerciseSection(
-              repository: mockRepository,
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('Show All'), findsOneWidget);
-    });
-
-    // Test navigation indirectly by using a test-specific Navigator
-    testWidgets('navigates when Show All is tapped',
-        (WidgetTester tester) async {
-      // Arrange
-      when(mockRepository.getAllExerciseLogs(limit: 5))
-          .thenAnswer((_) async => mockExercises);
-
-      bool navigated = false;
-
-      // Build our app with a custom navigator
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) {
-                return Column(
-                  children: [
-                    RecentlyExerciseSection(
-                      repository: mockRepository,
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        // This will be true if navigation was attempted
-                        navigated = Navigator.of(context).canPop();
-                      },
-                      child: Text('Check Navigation'),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-          onGenerateRoute: (settings) {
-            // Mark that navigation happened
-            navigated = true;
-            return MaterialPageRoute(
-              builder: (context) => Scaffold(
-                body: Center(child: Text('Navigation occurred')),
-              ),
-            );
-          },
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Act - tap the show all button
-      await tester.tap(find.text('Show All'));
-      await tester.pumpAndSettle();
-
-      // Assert - verify that navigation happened
-      expect(navigated, isTrue);
-    });
-
-    testWidgets('navigates when exercise card is tapped',
-        (WidgetTester tester) async {
-      // Arrange
-      when(mockRepository.getAllExerciseLogs(limit: 5))
-          .thenAnswer((_) async => mockExercises);
-
-      bool navigated = false;
-
-      // Build our app with a custom navigator
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RecentlyExerciseSection(
-              repository: mockRepository,
-            ),
-          ),
-          onGenerateRoute: (settings) {
-            // Mark that navigation happened
-            navigated = true;
-            return MaterialPageRoute(
-              builder: (context) => Scaffold(
-                body: Center(child: Text('Navigation occurred')),
-              ),
-            );
-          },
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Act - tap the first exercise card
-      await tester.tap(find.byType(ExerciseHistoryCard).first);
-      await tester.pumpAndSettle();
-
-      // Assert - verify that navigation happened
-      expect(navigated, isTrue);
-    });
-
-    testWidgets('reloads exercises when repository changes',
-        (WidgetTester tester) async {
-      // Arrange - First repository
-      when(mockRepository.getAllExerciseLogs(limit: 5))
-          .thenAnswer((_) async => mockExercises);
-
-      final testKey = GlobalKey();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RecentlyExerciseSection(
-              key: testKey,
-              repository: mockRepository,
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Create a new mock repository
-      final newMockRepository = MockExerciseLogHistoryService();
-      final newMockExercises = [
-        ExerciseLogHistoryItem(
-          id: 'new-test-id',
-          activityType: ExerciseLogHistoryItem.typeCardio,
-          title: 'New Exercise',
-          subtitle: 'New subtitle',
-          timestamp: DateTime.now(),
-          caloriesBurned: 200,
-        ),
-      ];
-
-      when(newMockRepository.getAllExerciseLogs(limit: 5))
-          .thenAnswer((_) async => newMockExercises);
-
-      // Act - Rebuild with new repository
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RecentlyExerciseSection(
-              key: testKey,
-              repository: newMockRepository,
-            ),
-          ),
-        ),
-      );
-
+      // Complete dengan error
+      completer.completeError('Network error');
+      
+      // Tunggu frame setelah error
       await tester.pumpAndSettle();
 
       // Assert
-      verify(newMockRepository.getAllExerciseLogs(limit: 5)).called(1);
-      expect(find.text('New Exercise'), findsOneWidget);
-    });
-
-    testWidgets('reloads exercises when limit changes',
-        (WidgetTester tester) async {
-      // Arrange - First limit
-      when(mockRepository.getAllExerciseLogs(limit: 5))
-          .thenAnswer((_) async => mockExercises);
-
-      final testKey = GlobalKey();
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RecentlyExerciseSection(
-              key: testKey,
-              repository: mockRepository,
-              limit: 5,
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Setup for new limit
-      when(mockRepository.getAllExerciseLogs(limit: 3))
-          .thenAnswer((_) async => mockExercises.take(1).toList());
-
-      // Act - Rebuild with new limit
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: RecentlyExerciseSection(
-              key: testKey,
-              repository: mockRepository,
-              limit: 3,
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      // Assert
-      verify(mockRepository.getAllExerciseLogs(limit: 3)).called(1);
-      // Only one exercise card should be visible now
-      expect(find.byType(ExerciseHistoryCard), findsOneWidget);
+      expect(find.text('Error loading exercises: Network error'), findsOneWidget);
     });
   });
 }

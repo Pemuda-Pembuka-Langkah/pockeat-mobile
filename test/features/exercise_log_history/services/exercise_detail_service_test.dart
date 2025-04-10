@@ -30,6 +30,7 @@ void main() {
     // Sample data for testing
     final runningActivity = RunningActivity(
       id: 'run-1',
+      userId: "test-user-id",
       date: DateTime(2025, 3, 1),
       startTime: DateTime(2025, 3, 1, 8, 0),
       endTime: DateTime(2025, 3, 1, 8, 30),
@@ -39,6 +40,7 @@ void main() {
 
     final cyclingActivity = CyclingActivity(
       id: 'cycle-1',
+      userId: "test-user-id",
       date: DateTime(2025, 3, 2),
       startTime: DateTime(2025, 3, 2, 10, 0),
       endTime: DateTime(2025, 3, 2, 11, 0),
@@ -49,6 +51,7 @@ void main() {
 
     final swimmingActivity = SwimmingActivity(
       id: 'swim-1',
+      userId: "test-user-id",
       date: DateTime(2025, 3, 3),
       startTime: DateTime(2025, 3, 3, 16, 0),
       endTime: DateTime(2025, 3, 3, 16, 45),
@@ -67,6 +70,7 @@ void main() {
       metValue: 8.0,
       timestamp: DateTime(2025, 3, 4),
       originalInput: 'I did push-ups for 15 minutes',
+      userId: 'test-user-123',
     );
 
     // Create a sample weight lifting exercise with a set
@@ -81,6 +85,7 @@ void main() {
       name: 'Bench Press',
       bodyPart: 'Chest',
       metValue: 6.0,
+      userId: 'test-user-id',
       timestamp: DateTime(2025, 3, 5),
       sets: [weightLiftingSet],
     );

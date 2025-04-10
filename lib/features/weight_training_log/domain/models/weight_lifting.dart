@@ -6,6 +6,7 @@ class WeightLifting {
   final String bodyPart;
   final double metValue;
   final DateTime timestamp;
+  final String userId;
   List<WeightLiftingSet> sets;
 
   WeightLifting({
@@ -15,6 +16,7 @@ class WeightLifting {
     required this.metValue,
     List<WeightLiftingSet>? sets,
     DateTime? timestamp,
+    required this.userId,
   })  : id = id ?? const Uuid().v4(),
         sets = sets ?? [],
         timestamp = timestamp ?? DateTime.now();
@@ -28,16 +30,22 @@ class WeightLifting {
       'metValue': metValue,
       'sets': sets.map((set) => set.toJson()).toList(),
       'timestamp': timestamp.millisecondsSinceEpoch,
+      'userId': userId,
     };
   }
 
   // Create Exercise object from JSON
   factory WeightLifting.fromJson(Map<String, dynamic> json) {
+    // Safe conversion for metValue
+    final metValue = json['metValue'] is int 
+        ? (json['metValue'] as int).toDouble() 
+        : double.parse(json['metValue'].toString());
+        
     return WeightLifting(
       id: json['id'],
       name: json['name'],
       bodyPart: json['bodyPart'],
-      metValue: json['metValue'],
+      metValue: metValue,
       sets: json['sets'] != null
           ? List<WeightLiftingSet>.from(
               json['sets'].map((x) => WeightLiftingSet.fromJson(x)))
@@ -45,6 +53,7 @@ class WeightLifting {
       timestamp: json['timestamp'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['timestamp'])
           : null,
+      userId: json['userId'] ?? '',
     );
   }
 }
