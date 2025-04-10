@@ -46,7 +46,7 @@ import 'package:pockeat/features/authentication/services/profile_service_impl.da
 final getIt = GetIt.instance;
 // coverage:ignore-start
 Future<void> setupDependencies() async {
-  // Register specialized services
+  // Register Firebase instances first
   getIt.registerSingleton<FirebaseAuth>(
     FirebaseAuth.instance,
   );
@@ -54,53 +54,28 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<FirebaseMessaging>(
     FirebaseMessaging.instance,
   );
-  // Register UserRepository
+
+  // Register TokenManager before any services that need it
+  getIt.registerSingleton<TokenManager>(TokenManager());
+
+  // Register repositories before services that depend on them
   getIt.registerSingleton<UserRepository>(
     UserRepositoryImpl(),
   );
 
-  // Register RegisterService
-  getIt.registerSingleton<RegisterService>(
-    RegisterServiceImpl(userRepository: getIt<UserRepository>()),
+  getIt.registerSingleton<FoodTextInputRepository>(
+    FoodTextInputRepository(),
   );
 
-  // Register LoginService
-  getIt.registerSingleton<LoginService>(
-    LoginServiceImpl(userRepository: getIt<UserRepository>()),
+  getIt.registerSingleton<FoodScanRepository>(
+    FoodScanRepository(),
   );
 
-  // Register GoogleSignInService
-  getIt.registerSingleton<GoogleSignInService>(
-    GoogleSignInServiceImpl(),
+  getIt.registerSingleton<HealthMetricsRepository>(
+    HealthMetricsRepositoryImpl(),
   );
 
-  // Register ChangePasswordService
-  getIt.registerSingleton<ChangePasswordService>(
-    ChangePasswordServiceImpl(),
-  );
-
-  // Register Email Verification DeepLink Service
-  getIt.registerSingleton<EmailVerificationDeepLinkService>(
-    EmailVerificationDeepLinkServiceImpl(
-        userRepository: getIt<UserRepository>()),
-  );
-
-  // Register Change Password DeepLink Service
-  getIt.registerSingleton<ChangePasswordDeepLinkService>(
-    ChangePasswordDeepLinkServiceImpl(),
-  );
-
-  // Register DeepLink Facade Service
-  getIt.registerSingleton<DeepLinkService>(
-    DeepLinkServiceImpl(
-      emailVerificationService: getIt<EmailVerificationDeepLinkService>(),
-      changePasswordService: getIt<ChangePasswordDeepLinkService>(),
-    ),
-  );
-
-  // Register TokenManager
-  getIt.registerSingleton<TokenManager>(TokenManager());
-
+  // Register API Services that depend on TokenManager
   getIt.registerSingleton<FoodTextAnalysisService>(
     FoodTextAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
   );
@@ -117,43 +92,57 @@ Future<void> setupDependencies() async {
     ExerciseAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
   );
 
-  getIt.registerSingleton<FoodTextInputRepository>(
-    FoodTextInputRepository(),
+  // Register authentication related services
+  getIt.registerSingleton<RegisterService>(
+    RegisterServiceImpl(userRepository: getIt<UserRepository>()),
   );
 
-  getIt.registerSingleton<FoodTextInputService>(
-    FoodTextInputService(
-      getIt<FoodTextAnalysisService>(), // Will fail if not registered first!
-      getIt<FoodTextInputRepository>(),
+  getIt.registerSingleton<LoginService>(
+    LoginServiceImpl(userRepository: getIt<UserRepository>()),
+  );
+
+  getIt.registerSingleton<GoogleSignInService>(
+    GoogleSignInServiceImpl(),
+  );
+
+  getIt.registerSingleton<ChangePasswordService>(
+    ChangePasswordServiceImpl(),
+  );
+
+  // Register DeepLink Services
+  getIt.registerSingleton<EmailVerificationDeepLinkService>(
+    EmailVerificationDeepLinkServiceImpl(
+        userRepository: getIt<UserRepository>()),
+  );
+
+  getIt.registerSingleton<ChangePasswordDeepLinkService>(
+    ChangePasswordDeepLinkServiceImpl(),
+  );
+
+  getIt.registerSingleton<DeepLinkService>(
+    DeepLinkServiceImpl(
+      emailVerificationService: getIt<EmailVerificationDeepLinkService>(),
+      changePasswordService: getIt<ChangePasswordDeepLinkService>(),
     ),
   );
 
-  getIt.registerSingleton<FoodScanRepository>(
-    FoodScanRepository(),
+  // Register Food and Exercise services
+  getIt.registerSingleton<FoodTextInputService>(
+    FoodTextInputService(
+      getIt<FoodTextAnalysisService>(),
+      getIt<FoodTextInputRepository>(),
+    ),
   );
 
   getIt.registerSingleton<FoodScanPhotoService>(
     FoodScanPhotoService(),
   );
 
-
-  getIt.registerSingleton<HealthMetricsRepository>(
-  HealthMetricsRepositoryImpl(),
-  );
-
   getIt.registerSingleton<HealthMetricsCheckService>(
-  HealthMetricsCheckService(),
+    HealthMetricsCheckService(),
   );
 
-  // Register Food Log History module
-  FoodLogHistoryModule.register();
-
-  // Register Exercise Log History module
-  ExerciseLogHistoryModule.register();
-  
-  // Register Calorie Stats module
-  CalorieStatsModule.register();
-
+  // Register Notification services
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
   );
@@ -161,23 +150,25 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<NotificationService>(
     NotificationServiceImpl(),
   );
+  
   // Initialize notifications
   await getIt<NotificationService>().initialize();
 
-  // Register Nutrition module
+  // Register feature modules
+  // Make sure to register these modules after all their dependencies
+  FoodLogHistoryModule.register();
+  ExerciseLogHistoryModule.register();
+  CalorieStatsModule.register();
   NutritionModule.register();
-
-  // Register Exercise Progress Module
   ExerciseProgressModule.register();
 
-  // Register LogoutService
+  // Register additional services
   getIt.registerSingleton<LogoutService>(
     LogoutServiceImpl(),
   );
 
-  // Register ProfileService
   getIt.registerSingleton<ProfileService>(
     ProfileServiceImpl(),
   );
 }
- // coverage:ignore-end
+// coverage:ignore-end
