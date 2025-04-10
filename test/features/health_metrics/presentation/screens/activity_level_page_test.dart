@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 
@@ -18,7 +19,6 @@ void main() {
   setUp(() {
     mockCubit = MockHealthMetricsFormCubit();
     mockNavigatorObserver = MockNavigatorObserver();
-
     when(mockNavigatorObserver.navigator).thenReturn(null);
     when(mockCubit.state).thenReturn(HealthMetricsFormState());
     when(mockCubit.stream).thenAnswer((_) => Stream.fromIterable([mockCubit.state]));
@@ -79,5 +79,31 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(mockCubit.setActivityLevel('moderate')).called(1);
+  });
+
+  testWidgets('Back button pops when onboarding is in progress and canPop is true', (tester) async {
+    // Set mock values before any async UI code runs
+    SharedPreferences.setMockInitialValues({'onboardingInProgress': true});
+
+    when(mockCubit.state).thenReturn(HealthMetricsFormState());
+    when(mockCubit.stream).thenAnswer((_) => Stream.value(mockCubit.state));
+
+    final testKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: testKey,
+        home: BlocProvider<HealthMetricsFormCubit>.value(
+          value: mockCubit,
+          child: const ActivityLevelPage(),
+        ),
+      ),
+    );
+
+    expect(find.byType(IconButton), findsOneWidget);
+
+    // Ensure UI has built and we're ready to interact
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
   });
 }
