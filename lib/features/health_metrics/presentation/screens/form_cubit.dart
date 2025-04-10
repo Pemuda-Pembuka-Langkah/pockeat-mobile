@@ -111,7 +111,11 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
       throw Exception("Incomplete data");
     }
 
-    final age = DateTime.now().year - state.birthDate!.year;
+    final now = DateTime.now();
+    int age = now.year - state.birthDate!.year;
+    if (now.month < state.birthDate!.month || 
+    (now.month == state.birthDate!.month && now.day < state.birthDate!.day)) {
+   age--;}
 
     // Combine selected goals + other
     final allGoals = List<String>.from(state.selectedGoals);

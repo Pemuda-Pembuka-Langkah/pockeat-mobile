@@ -321,10 +321,6 @@ class MyApp extends StatelessWidget {
             const AuthWrapper(child: ExerciseInputPage()),
         '/weightlifting-input': (context) =>
             const AuthWrapper(child: WeightliftingPage()),
-        '/food-text-input': (context) => const AuthWrapper(child: FoodTextInputPage()),
-        '/food-analysis': (context) => const AuthWrapper(child: AIAnalysisScreen()),
-        '/add-exercise': (context) => const AuthWrapper(child: ExerciseInputPage()),
-        '/weightlifting-input': (context) => const AuthWrapper(child: WeightliftingPage()),
         '/cardio': (context) => const AuthWrapper(child: CardioInputPage()),
         '/exercise-history': (context) => const AuthWrapper(child: ExerciseHistoryPage()),
         '/food-history': (context) => AuthWrapper(
