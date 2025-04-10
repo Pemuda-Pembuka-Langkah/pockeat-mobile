@@ -35,7 +35,12 @@ class ReviewSubmitPage extends StatelessWidget {
             if (inProgress && Navigator.of(context).canPop()) {
               Navigator.of(context).pop(); 
             } else {
-              Navigator.of(context).popUntil((route) => route.isFirst); 
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/', // or whatever your homepage route is
+                (route) => false,
+              );
+
             }
           },
         ),
@@ -133,7 +138,11 @@ class ReviewSubmitPage extends StatelessWidget {
                             content: const Text("Submitted successfully!"),
                           ),
                         );
-                        Navigator.popUntil(context, (route) => route.isFirst);
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/', // or whatever your homepage/dashboard route is
+                          (route) => false,
+                        );
                       }
                     } catch (e) {
                       if (context.mounted) {
