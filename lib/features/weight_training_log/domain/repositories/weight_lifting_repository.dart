@@ -44,4 +44,10 @@ abstract class WeightLiftingRepository {
   
   /// Mengambil nilai MET untuk latihan tertentu
   double getExerciseMETValue(String exerciseName, [String? category]);
+  
+  /// Mengambil latihan beban untuk pengguna tertentu
+  ///
+  /// Mengembalikan [List<WeightLifting>] berisi latihan beban untuk pengguna dengan ID tertentu
+  /// Throws [Exception] jika terjadi error saat pengambilan data
+  Future<List<WeightLifting>> getExercisesByUser(String userId);
 }

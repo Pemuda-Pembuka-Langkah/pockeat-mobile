@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 class IngredientsSection extends StatelessWidget {
   final List<Ingredient> ingredients;
@@ -8,11 +8,11 @@ class IngredientsSection extends StatelessWidget {
   final bool isLoading;
 
   const IngredientsSection({
-    Key? key,
+    super.key,
     required this.ingredients,
     required this.primaryGreen,
     required this.isLoading,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

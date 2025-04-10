@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage>
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
-        
+
         // If switching to the exercises tab (index 2), trigger a rebuild
         if (_tabController.index == 2) {
           setState(() {
@@ -121,8 +121,7 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     final exerciseLogHistoryRepository =
         Provider.of<ExerciseLogHistoryService>(context);
-    final foodLogHistoryService =
-        Provider.of<FoodLogHistoryService>(context);
+    final foodLogHistoryService = Provider.of<FoodLogHistoryService>(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -150,6 +149,16 @@ class _HomePageState extends State<HomePage>
                 ],
               ),
               actions: [
+                // Notifications icon
+                IconButton(
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                    color: Colors.black87,
+                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/notification-settings');
+                  },
+                ),
                 // Wrap badges in a Flexible widget with Row to prevent overflow
                 Flexible(
                   child: Row(
@@ -356,12 +365,13 @@ class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   double get minExtent => _tabBar.preferredSize.height;
-  
+
   @override
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Colors.white,
       child: _tabBar,

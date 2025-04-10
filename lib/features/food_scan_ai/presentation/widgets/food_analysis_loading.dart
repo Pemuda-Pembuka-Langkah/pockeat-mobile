@@ -4,22 +4,27 @@ class FoodAnalysisLoading extends StatelessWidget {
   final Color primaryYellow;
   final Color primaryPink;
   final String message;
-
+  
   const FoodAnalysisLoading({
     Key? key,
     required this.primaryYellow,
     required this.primaryPink,
     this.message = 'Analyzing Food',
   }) : super(key: key);
-
+  
   @override
   Widget build(BuildContext context) {
+    // Determine the description based on the message
+    final String description = message == 'Analyzing Food'
+        ? 'Our AI is identifying the food and calculating its nutritional value...'
+        : 'Our AI is updating the analysis based on your correction...';
+    
     return Container(
       color: Colors.white,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Animasi loading
+          // Animation loading
           Container(
             width: 120,
             height: 120,
@@ -39,8 +44,8 @@ class FoodAnalysisLoading extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-
-          // Judul
+          
+          // Title
           Text(
             message,
             style: const TextStyle(
@@ -50,14 +55,12 @@ class FoodAnalysisLoading extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-
-          // Deskripsi
+          
+          // Description
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              message == 'Analyzing Food'
-                  ? 'Our AI is identifying the food and calculating its nutritional value...'
-                  : 'Our AI is updating the analysis based on your correction...',
+              description,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 16,

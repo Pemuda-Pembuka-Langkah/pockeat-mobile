@@ -1,5 +1,5 @@
 import 'package:pockeat/firebase/firebase_repository.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 /// Repository for managing food analysis results
 ///
@@ -77,6 +77,7 @@ class FoodScanRepository extends BaseFirestoreRepository<FoodAnalysisResult> {
   ///
   /// Parameter [id] the ID of the food analysis result to delete
   /// Returns true if deletion was successful, false if the item wasn't found
+  @override
   Future<bool> deleteById(String id) async {
     return super.deleteById(id);
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/correction_dialog.dart';
 
 class BottomActionBar extends StatelessWidget {
@@ -16,7 +16,7 @@ class BottomActionBar extends StatelessWidget {
   final bool isLabelScan;
 
   const BottomActionBar({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.food,
     required this.foodScanPhotoService,
@@ -26,7 +26,7 @@ class BottomActionBar extends StatelessWidget {
     this.onAnalysisCorrected,
     this.servingSize = 1.0,
     this.isLabelScan = false,
-  }) : super(key: key);
+  });
 
   // Helper method to show SnackBar messages consistently
   void showSnackBarMessage(BuildContext context, String message,

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/presentation/widgets/food_history_card.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// A page that displays the user's food history with filtering options.
 /// 
@@ -11,10 +12,12 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 /// individual food items.
 class FoodHistoryPage extends StatefulWidget {
   final FoodLogHistoryService service;
+  final FirebaseAuth? auth;
 
   const FoodHistoryPage({
     super.key,
     required this.service,
+    this.auth,
   });
 
   @override
@@ -59,29 +62,31 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
   //
   
   void _loadFoods() {
+    // Get current user's ID
+    final userId = (widget.auth ?? FirebaseAuth.instance).currentUser?.uid ?? '';
+    
     setState(() {
-      _foodsFuture = _fetchFoods();
+      _foodsFuture = _fetchFoods(userId);
       _resetSearch();
     });
   }
 
-  Future<List<FoodLogHistoryItem>> _fetchFoods() async {
+  Future<List<FoodLogHistoryItem>> _fetchFoods(String userId) async {
     try {
       List<FoodLogHistoryItem> foods;
       
-      // Apply filter based on active filter type
       switch (_activeFilterType) {
         case FilterType.date:
-          foods = await widget.service.getFoodLogsByDate(_selectedDate);
+          foods = await widget.service.getFoodLogsByDate(userId, _selectedDate);
           break;
         case FilterType.month:
-          foods = await widget.service.getFoodLogsByMonth(_selectedMonth, _selectedYear);
+          foods = await widget.service.getFoodLogsByMonth(userId, _selectedMonth, _selectedYear);
           break;
         case FilterType.year:
-          foods = await widget.service.getFoodLogsByYear(_selectedYear);
+          foods = await widget.service.getFoodLogsByYear(userId, _selectedYear);
           break;
         case FilterType.all:
-          foods = await widget.service.getAllFoodLogs();
+          foods = await widget.service.getAllFoodLogs(userId);
           break;
       }
       

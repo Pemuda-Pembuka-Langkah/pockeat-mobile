@@ -15,4 +15,10 @@ void main() {
     
     expect(foodEntry.foodDescription.isEmpty, true);
   });
+
+  test('FoodEntry toString method returns correct format', () {
+    final foodEntry = FoodEntry(foodDescription: 'Pizza with cheese');
+
+    expect(foodEntry.toString(), 'FoodEntry(description: Pizza with cheese)');
+  });
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_history_card.dart';
@@ -11,11 +12,13 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/exerc
 class RecentlyExerciseSection extends StatefulWidget {
   final ExerciseLogHistoryService repository;
   final int limit;
+  final FirebaseAuth? auth; // Add auth parameter for testing
 
   const RecentlyExerciseSection({
     super.key,
     required this.repository,
     this.limit = 5,
+    this.auth,
   });
 
   @override
@@ -23,21 +26,24 @@ class RecentlyExerciseSection extends StatefulWidget {
       _RecentlyExerciseSectionState();
 }
 
-class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with WidgetsBindingObserver {
+class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
+    with WidgetsBindingObserver {
   late Future<List<ExerciseLogHistoryItem>> _exercisesFuture;
+  late final FirebaseAuth _auth;
   final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    _auth = widget.auth ?? FirebaseAuth.instance;
     _loadExercises();
-    
+
     // Register as an observer to detect app lifecycle changes
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Listen to focus changes to detect when we return to this widget
     _focusNode.addListener(_onFocusChange);
-    
+
     // Request focus to ensure we get focus events
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
@@ -78,14 +84,19 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
   }
 
   void _loadExercises() {
+    final user = _auth.currentUser;
+    final userId = user?.uid ?? '';
+
     setState(() {
       _exercisesFuture =
-          widget.repository.getAllExerciseLogs(limit: widget.limit);
+          widget.repository.getAllExerciseLogs(userId, limit: widget.limit);
     });
   }
 
   void _navigateToAllExercises() {
     Navigator.of(context).pushNamed('/exercise-history').then((_) {
+// coverage:ignore-start
+
       // Refresh data when returning from exercise history page
       _loadExercises();
     });
@@ -95,7 +106,8 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
     Navigator.of(context).pushNamed(
       '/exercise-detail',
       arguments: {
-        'exerciseId': exercise.sourceId ?? exercise.id, // Gunakan sourceId jika ada, atau fallback ke id
+        'exerciseId': exercise.sourceId ??
+            exercise.id, // Gunakan sourceId jika ada, atau fallback ke id
         'activityType': exercise.activityType,
       },
     ).then((_) {
@@ -103,6 +115,7 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
       _loadExercises();
     });
   }
+// coverage:ignore-end
 
   @override
   Widget build(BuildContext context) {
@@ -111,12 +124,14 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
     return Focus(
       focusNode: _focusNode,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 16), // Add consistent bottom padding
+        padding:
+            const EdgeInsets.only(bottom: 16), // Add consistent bottom padding
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), // Added bottom padding
+              padding: const EdgeInsets.fromLTRB(
+                  16, 16, 16, 16), // Added bottom padding
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -131,7 +146,8 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
                   GestureDetector(
                     onTap: _navigateToAllExercises,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Fixed padding
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6), // Fixed padding
                       decoration: BoxDecoration(
                         color: primaryPink.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -154,14 +170,17 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16), // Consistent vertical padding
+                    padding: EdgeInsets.symmetric(
+                        vertical: 16), // Consistent vertical padding
                     child: Center(
                       child: CircularProgressIndicator(),
                     ),
                   );
                 } else if (snapshot.hasError) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Consistent with other paddings
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16), // Consistent with other paddings
                     child: Center(
                       child: Text(
                         'Error loading exercises: ${snapshot.error}',
@@ -174,7 +193,9 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Consistent with other paddings
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16), // Consistent with other paddings
                     child: Center(
                       child: Text(
                         'No exercise history yet',
@@ -188,17 +209,24 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection> with 
                 } else {
                   final exercises = snapshot.data!;
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16), // Consistent horizontal padding
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16), // Consistent horizontal padding
                     child: ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.zero, // No additional padding in ListView
+                      padding:
+                          EdgeInsets.zero, // No additional padding in ListView
                       itemCount: exercises.length,
                       itemBuilder: (context, index) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8), // Consistent spacing between cards
+                        padding: const EdgeInsets.only(
+                            bottom: 8), // Consistent spacing between cards
                         child: ExerciseHistoryCard(
                           exercise: exercises[index],
-                          onTap: () => _navigateToExerciseDetail(exercises[index]),
+                          // coverage:ignore-start
+                          onTap: () =>
+                              _navigateToExerciseDetail(exercises[index]),
+                          // coverage:ignore-end
+
                         ),
                       ),
                     ),

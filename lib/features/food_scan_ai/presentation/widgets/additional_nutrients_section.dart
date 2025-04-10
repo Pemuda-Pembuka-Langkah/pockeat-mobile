@@ -7,12 +7,12 @@ class AdditionalNutrientsSection extends StatelessWidget {
   final Color primaryYellow;
 
   const AdditionalNutrientsSection({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.nutritionData,
     required this.calories,
     required this.primaryYellow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 class CorrectionDialog extends StatefulWidget {
   final Color primaryYellow;
@@ -10,13 +10,13 @@ class CorrectionDialog extends StatefulWidget {
   final FoodAnalysisResult foodAnalysisResult;
 
   const CorrectionDialog({
-    Key? key,
+    super.key,
     required this.primaryYellow,
     required this.primaryPink,
     required this.primaryGreen,
     required this.onSubmit,
     required this.foodAnalysisResult,
-  }) : super(key: key);
+  });
 
   @override
   State<CorrectionDialog> createState() => _CorrectionDialogState();

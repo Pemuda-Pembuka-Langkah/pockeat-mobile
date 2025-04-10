@@ -431,7 +431,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

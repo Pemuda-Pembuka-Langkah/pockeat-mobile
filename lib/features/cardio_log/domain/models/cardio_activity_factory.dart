@@ -26,6 +26,7 @@ class CardioActivityFactory {
   
   /// Membuat CardioActivity dari form data yang dikumpulkan dari UI
   static CardioActivity fromFormData({
+    required String userId,
     required CardioType type,
     required DateTime date,
     required DateTime startTime,
@@ -35,6 +36,7 @@ class CardioActivityFactory {
     switch (type) {
       case CardioType.running:
         return RunningActivity(
+          userId: userId,
           date: date,
           startTime: startTime,
           endTime: endTime,
@@ -43,6 +45,7 @@ class CardioActivityFactory {
       
       case CardioType.cycling:
         return CyclingActivity(
+          userId: userId,
           date: date,
           startTime: startTime,
           endTime: endTime,
@@ -52,6 +55,7 @@ class CardioActivityFactory {
       
       case CardioType.swimming:
         return SwimmingActivity(
+          userId: userId,
           date: date,
           startTime: startTime,
           endTime: endTime,

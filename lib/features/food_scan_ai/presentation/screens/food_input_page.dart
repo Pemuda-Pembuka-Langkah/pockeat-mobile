@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:pockeat/features/food_text_input/presentation/pages/food_text_input_page.dart';
 
 class FoodInputPage extends StatelessWidget {
   final Color primaryYellow = const Color(0xFFFFE893);
@@ -37,6 +36,8 @@ class FoodInputPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // add button to go to notification settings
+
                 const Text(
                   'How would you like to\nadd your food?',
                   style: TextStyle(
@@ -60,7 +61,7 @@ class FoodInputPage extends StatelessWidget {
               route: '/scan',
             ),
             const SizedBox(height: 16),
-            
+
             // Manual Input Option
             _buildInputOption(
               context: context,
@@ -68,14 +69,17 @@ class FoodInputPage extends StatelessWidget {
               title: 'Input Manually',
               subtitle: 'Search or prompt food details',
               color: primaryPink,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FoodTextInputPage(),
-                  ),
-                );
-              },
+              route: '/food-text-input',
+            ),
+            const SizedBox(height: 16),
+
+            _buildInputOption(
+              context: context,
+              icon: CupertinoIcons.bell,
+              title: 'Notification Settings',
+              subtitle: 'Set your notification preferences',
+              color: primaryGreen,
+              route: '/notification-settings',
             ),
           ],
         ),
@@ -97,7 +101,8 @@ class FoodInputPage extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: route != null ? () => Navigator.pushNamed(context, route) : onTap,
+          onTap:
+              route != null ? () => Navigator.pushNamed(context, route) : onTap,
           borderRadius: BorderRadius.circular(16),
           child: Ink(
             decoration: BoxDecoration(

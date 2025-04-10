@@ -42,13 +42,24 @@ class CyclingFormState extends State<CyclingForm> {
   DateTime selectedEndTime = DateTime.now().add(const Duration(minutes: 30));
 
   double calculateCalories() {
-    final totalDistance = selectedKm + (selectedMeter / 1000);
-    final duration = selectedEndTime.difference(selectedStartTime);
-    final type = selectedCyclingType
-        .toString()
-        .split('.')
-        .last; // 'mountain', 'commute', or 'stationary'
-    return widget.onCalculate(totalDistance, duration, type);
+    try {
+      final totalDistance = selectedKm + (selectedMeter / 1000);
+      final duration = selectedEndTime.difference(selectedStartTime);
+
+      // Check if duration is zero to avoid division by zero
+      if (duration.inSeconds <= 0) {
+        return 0.0;
+      }
+
+      final type = selectedCyclingType
+          .toString()
+          .split('.')
+          .last; // 'mountain', 'commute', or 'stationary'
+      return widget.onCalculate(totalDistance, duration, type);
+    } catch (e) {
+      debugPrint('Error calculating cycling calories: $e');
+      return 0.0;
+    }
   }
 
   @override
@@ -85,11 +96,12 @@ class CyclingFormState extends State<CyclingForm> {
                   newStartTime.hour,
                   newStartTime.minute,
                 );
-                
+
                 // If end time is before start time (e.g. cycling past midnight),
                 // adjust end time to maintain duration but with today's date
                 if (selectedEndTime.isBefore(selectedStartTime)) {
-                  selectedEndTime = selectedStartTime.add(const Duration(minutes: 30));
+                  selectedEndTime =
+                      selectedStartTime.add(const Duration(minutes: 30));
                 } else {
                   // Keep existing end time but update to today's date
                   selectedEndTime = DateTime(
@@ -113,10 +125,11 @@ class CyclingFormState extends State<CyclingForm> {
                   newEndTime.hour,
                   newEndTime.minute,
                 );
-                
+
                 // If end time is before start time, add a day to end time
                 if (selectedEndTime.isBefore(selectedStartTime)) {
-                  selectedEndTime = selectedEndTime.add(const Duration(days: 1));
+                  selectedEndTime =
+                      selectedEndTime.add(const Duration(days: 1));
                 }
               });
             },
@@ -188,7 +201,7 @@ class CyclingFormState extends State<CyclingForm> {
       child: InkWell(
         onTap: () {
           setState(() => selectedCyclingType = type);
-          
+
           // Call the onTypeChanged callback when the type changes
           if (widget.onTypeChanged != null) {
             widget.onTypeChanged!(type.toString().split('.').last);

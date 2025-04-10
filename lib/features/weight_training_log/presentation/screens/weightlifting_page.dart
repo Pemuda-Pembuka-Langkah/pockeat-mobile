@@ -9,11 +9,13 @@ import 'package:pockeat/features/weight_training_log/presentation/widgets/exerci
 import 'package:pockeat/features/weight_training_log/presentation/widgets/workout_summary.dart';
 import 'package:pockeat/features/weight_training_log/presentation/widgets/bottom_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class WeightliftingPage extends StatefulWidget {
   final WeightLiftingRepository? repository;
+  final FirebaseAuth? auth;
   
-  const WeightliftingPage({Key? key, this.repository}) : super(key: key);
+  const WeightliftingPage({super.key, this.repository, this.auth});
 
   @override
   _WeightliftingPageState createState() => _WeightliftingPageState();
@@ -25,6 +27,8 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   
   // Repository instance
   late final WeightLiftingRepository _exerciseRepository;
+  // Auth instance
+  late final FirebaseAuth _auth;
   
   final Map<String, Map<String, double>> exercisesByCategory = WeightLiftingRepositoryImpl.exercisesByCategory;
 
@@ -39,6 +43,8 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     _exerciseRepository = widget.repository ?? WeightLiftingRepositoryImpl(
       firestore: FirebaseFirestore.instance,
     );
+    // Initialize auth - use injected auth if available, otherwise use Firebase instance
+    _auth = widget.auth ?? FirebaseAuth.instance;
   }
 
   void addExercise(String name) {
@@ -55,11 +61,15 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
         )
       );
     } else {
+      // Get current user ID
+      final userId = _auth.currentUser?.uid ?? '';
+      
       setState(() {
         exercises.add(WeightLifting(
           name: name,
           bodyPart: selectedBodyPart,
           metValue: exercisesByCategory[selectedBodyPart]?[name] ?? 3.15,
+          userId: userId, // Add user ID to the exercise
         ));
       });
     }
@@ -119,9 +129,13 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     setState(() => _isSaving = true);
     
     try {
-      // Add current date to each exercise before saving
-      final now = DateTime.now();
-      final dateString = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      // Get current user ID
+      final userId = _auth.currentUser?.uid;
+      
+      // Verify user is logged in
+      if (userId == null || userId.isEmpty) {
+        throw Exception('You must be logged in to save a workout');
+      }
       
       // Save each exercise
       List<Future<String>> saveFutures = [];
@@ -134,6 +148,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           bodyPart: exercise.bodyPart,
           metValue: exercise.metValue,
           sets: exercise.sets,
+          userId: userId, // Ensure user ID is set on save
         );
         
         // Save exercise to repository

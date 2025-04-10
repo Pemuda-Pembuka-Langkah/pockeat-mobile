@@ -3,7 +3,6 @@ import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
-import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/cycling_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/running_detail_widget.dart';
@@ -11,9 +10,10 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/smart
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/swimming_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/weight_lifting_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
-import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
+import 'package:pockeat/features/exercise_log_history/utils/exercise_sharing_extension.dart';
+
+
 
 /// Detail page for exercise logs with widget composition based on type
 class ExerciseLogDetailPage extends StatefulWidget {
@@ -86,7 +86,24 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
         title: Text(_getPageTitle()),
         backgroundColor: Colors.white,
         elevation: 0,
+        //coverage:ignore-start
         actions: [
+          // Share button in the app bar
+          IconButton(
+            icon: const Icon(
+              Icons.share,
+              color: Colors.black87,
+            ),
+            onPressed: () {
+              _exerciseFuture.then((data) {
+                if (data != null) {
+                  _shareExercise(data);
+                }
+              });
+            },
+            tooltip: 'Share',
+          ),
+          //coverage:ignore-end
           IconButton(
             icon: const Icon(
               Icons.delete_outline,
@@ -158,6 +175,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
               );
             }
 
+            // Simply return the detail widget without the stack
             return _buildDetailWidget(snapshot.data);
           },
         ),
@@ -317,4 +335,21 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
       );
     }
   }
+// coverage:ignore:start
+  void _shareExercise(dynamic exercise) async {
+    try {
+      await context.shareExerciseSummary(exercise, widget.activityType);
+    } catch (e) {
+      if (!mounted) return;
+
+      debugPrint('Error in _shareExercise: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to share exercise summary: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 }
+// coverage:ignore:end

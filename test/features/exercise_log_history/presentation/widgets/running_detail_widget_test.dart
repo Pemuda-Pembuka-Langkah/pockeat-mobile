@@ -7,6 +7,7 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/runni
 void main() {
   final testActivity = RunningActivity(
     id: 'run-1',
+    userId: "test-user-id",
     date: DateTime(2025, 3, 1),
     startTime: DateTime(2025, 3, 1, 8, 0),
     endTime: DateTime(2025, 3, 1, 8, 30),

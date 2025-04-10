@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/presentation/widgets/food_history_card.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// A widget that displays a section of recent food logs
 ///
@@ -15,12 +16,15 @@ class FoodRecentSection extends StatefulWidget {
   /// The maximum number of food logs to display
   final int limit;
 
+  final FirebaseAuth? auth;
+
   /// Creates a new [FoodRecentSection] widget
   const FoodRecentSection({
-    Key? key,
+    super.key,
     required this.service,
     this.limit = 5,
-  }) : super(key: key);
+    this.auth,
+  });
 
   @override
   State<FoodRecentSection> createState() => _FoodRecentSectionState();
@@ -80,8 +84,11 @@ class _FoodRecentSectionState extends State<FoodRecentSection> with WidgetsBindi
   }
 
   void _loadFoods() {
+    // Get current user's ID
+    final userId = (widget.auth ?? FirebaseAuth.instance).currentUser?.uid ?? '';
+
     setState(() {
-      _foodsFuture = widget.service.getAllFoodLogs(limit: widget.limit);
+      _foodsFuture = widget.service.getAllFoodLogs(userId, limit: widget.limit);
     });
   }
 
