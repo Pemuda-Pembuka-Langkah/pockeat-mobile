@@ -26,6 +26,9 @@ import 'package:pockeat/features/notifications/domain/services/notification_serv
 import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_service_impl.dart';
@@ -127,6 +130,15 @@ Future<void> setupDependencies() async {
 
   getIt.registerSingleton<FoodScanPhotoService>(
     FoodScanPhotoService(),
+  );
+
+
+  getIt.registerSingleton<HealthMetricsRepository>(
+  HealthMetricsRepositoryImpl(),
+  );
+
+  getIt.registerSingleton<HealthMetricsCheckService>(
+  HealthMetricsCheckService(),
   );
 
   // Register Food Log History module
