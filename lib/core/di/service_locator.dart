@@ -30,6 +30,8 @@ import 'package:pockeat/features/authentication/services/deep_link_service.dart'
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service_impl.dart';
+import 'package:pockeat/features/authentication/services/profile_service.dart';
+import 'package:pockeat/features/authentication/services/profile_service_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -131,6 +133,11 @@ void setupDependencies() {
   // Register LogoutService
   getIt.registerSingleton<LogoutService>(
     LogoutServiceImpl(),
+  );
+
+  // Register ProfileService
+  getIt.registerSingleton<ProfileService>(
+    ProfileServiceImpl(),
   );
 }
  // coverage:ignore-end
