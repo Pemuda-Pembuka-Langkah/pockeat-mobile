@@ -11,39 +11,56 @@ jobs:
     name: SonarCloud
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'  # Specify Flutter version as needed
+          flutter-version: '3.29.0'
           channel: 'stable'
           cache: true
+          
+      - name: Create .env file
+        run: |
+          echo "FLAVOR=staging" > .env
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
+          echo "STAGING_FIREBASE_PROJECT_ID=${{ secrets.STAGING_FIREBASE_PROJECT_ID }}" >> .env
+          echo "STAGING_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.STAGING_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "STAGING_FIREBASE_STORAGE_BUCKET=${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_APP_ID=${{ secrets.STAGING_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_API_KEY=${{ secrets.STAGING_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_APP_ID=${{ secrets.STAGING_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_IOS_API_KEY=${{ secrets.STAGING_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_BUNDLE_ID=${{ secrets.STAGING_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
 
       - name: Install dependencies
         run: flutter pub get
+        
+      - name: Generate mocks with build_runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Run tests with coverage
         run: flutter test --coverage
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Generate this in SonarCloud
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: >
+          args: |
             -Dsonar.projectKey=Pemuda-Pembuka-Langkah_pockeat-mobile
             -Dsonar.organization=pemuda-pembuka-langkah
             -Dsonar.sources=lib
             -Dsonar.tests=test
             -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
             -Dsonar.sourceEncoding=UTF-8
-            # Exclude generated files and specific directories from analysis
             -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/generated_plugin_registrant.dart,**/l10n/**,**/*.config.dart,**/*.pb.dart,**/*.pb.*.dart
-            # Exclude generated files and specific directories from coverage
             -Dsonar.coverage.exclusions=**/*.g.dart,**/*.freezed.dart,**/generated_plugin_registrant.dart,**/l10n/**,**/*.config.dart,**/*.pb.dart,**/*.pb.*.dart
-            # Only files in the lib directory are considered source code for analysis
             -Dsonar.inclusions=lib/**/*
