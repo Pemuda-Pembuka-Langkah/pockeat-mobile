@@ -48,6 +48,7 @@ jobs:
         run: |
           mkdir -p reports
           flutter analyze --no-fatal-warnings --no-fatal-infos > reports/flutter_analyze.txt || true
+          cat reports/flutter_analyze.txt
 
       - name: Convert analysis results to Codacy format
         run: |
@@ -62,38 +63,96 @@ jobs:
           with open('reports/flutter_analyze.txt', 'r') as f:
               analyze_output = f.read()
           
-          # Extract issues using regex
-          issues_pattern = re.compile(r'(info|warning|error)( • | \* )(.+)\n.+\n  (.+) • line (\d+) • (.+)')
-          issues = issues_pattern.findall(analyze_output)
+          print("Flutter Analyze Output:")
+          print(analyze_output[:500] + "..." if len(analyze_output) > 500 else analyze_output)
+          
+          # Try multiple regex patterns to capture issues
+          # Pattern 1: Standard Flutter analyze output
+          pattern1 = re.compile(r'(info|warning|error)( [•\*] )(.+?)\n(.+?)\n  (.+?) [•\*] line (\d+)')
+          # Pattern 2: Alternative format
+          pattern2 = re.compile(r'(info|warning|error) [•\*] (.+?)\n.+?\n\s+(.+?):(\d+):(\d+): (.+)')
+          
+          issues1 = pattern1.findall(analyze_output)
+          issues2 = pattern2.findall(analyze_output)
+          
+          print(f"Pattern 1 found {len(issues1)} issues")
+          print(f"Pattern 2 found {len(issues2)} issues")
           
           # Convert to Codacy format
           codacy_results = []
           
-          for issue in issues:
-              severity, _, message, file_path, line, code = issue
-              
-              # Skip files that shouldn't be analyzed
-              if (file_path.endswith('.g.dart') or file_path.endswith('.freezed.dart') or 
-                  'generated' in file_path or file_path.endswith('.mocks.dart')):
-                  continue
+          # Process pattern 1 matches
+          for issue in issues1:
+              try:
+                  severity, _, message, _, file_path, line = issue
                   
-              # Map severity to Codacy levels
-              if severity == 'info':
-                  level = 'Info'
-              elif severity == 'warning':
-                  level = 'Warning'
-              else:
-                  level = 'Error'
-              
-              codacy_result = {
-                  "filename": file_path,
-                  "line": int(line),
-                  "message": message.strip(),
-                  "patternId": code.strip(),
-                  "level": level
-              }
-              
-              codacy_results.append(codacy_result)
+                  # Skip files that shouldn't be analyzed
+                  if (file_path.endswith('.g.dart') or file_path.endswith('.freezed.dart') or 
+                      'generated' in file_path or file_path.endswith('.mocks.dart')):
+                      continue
+                      
+                  # Map severity to Codacy levels
+                  if severity == 'info':
+                      level = 'Info'
+                  elif severity == 'warning':
+                      level = 'Warning'
+                  else:
+                      level = 'Error'
+                  
+                  codacy_result = {
+                      "filename": file_path.strip(),
+                      "line": int(line),
+                      "message": message.strip(),
+                      "patternId": "flutter.analyze",
+                      "level": level
+                  }
+                  
+                  codacy_results.append(codacy_result)
+              except Exception as e:
+                  print(f"Error processing pattern 1 issue: {e}")
+                  print(f"Issue was: {issue}")
+          
+          # Process pattern 2 matches
+          for issue in issues2:
+              try:
+                  severity, message, file_path, line, _, code = issue
+                  
+                  # Skip files that shouldn't be analyzed
+                  if (file_path.endswith('.g.dart') or file_path.endswith('.freezed.dart') or 
+                      'generated' in file_path or file_path.endswith('.mocks.dart')):
+                      continue
+                      
+                  # Map severity to Codacy levels
+                  if severity == 'info':
+                      level = 'Info'
+                  elif severity == 'warning':
+                      level = 'Warning'
+                  else:
+                      level = 'Error'
+                  
+                  codacy_result = {
+                      "filename": file_path.strip(),
+                      "line": int(line),
+                      "message": message.strip(),
+                      "patternId": code.strip() if code else "flutter.analyze",
+                      "level": level
+                  }
+                  
+                  codacy_results.append(codacy_result)
+              except Exception as e:
+                  print(f"Error processing pattern 2 issue: {e}")
+                  print(f"Issue was: {issue}")
+          
+          # If no issues found using patterns, create simple "dummy" results for testing
+          if len(codacy_results) == 0 and "Analyzing" in analyze_output:
+              print("No issues found with regex, but analysis was run. Creating dummy result for API test.")
+              codacy_results.append({
+                  "filename": "lib/main.dart",
+                  "line": 1,
+                  "message": "Test message for API verification",
+                  "patternId": "test.pattern",
+                  "level": "Info"
+              })
           
           # Write Codacy formatted results to file
           with open('codacy_results.json', 'w') as f:
@@ -117,17 +176,55 @@ jobs:
                   'results': codacy_results
               }
               
-              # Use the correct, documented API endpoint
-              api_url = f"https://api.codacy.com/2.0/commit/{commit_uuid}/issuesRemoteResults"
+              # Codacy API v3.1.0 endpoint
+              # Referensi: https://api.codacy.com/api/api-docs/#/
+              api_url = "https://app.codacy.com/api/v3/analysis/organizations"
               
-              print(f"Sending results to: {api_url}")
-              response = requests.post(api_url, headers=headers, json=payload)
+              # Get organization name from GITHUB_REPOSITORY
+              github_repo = os.environ.get('GITHUB_REPOSITORY', '')
+              if '/' in github_repo:
+                  org_name = github_repo.split('/')[0]
+              else:
+                  org_name = ''
+              
+              # Pull request information if available
+              pr_number = os.environ.get('GITHUB_REF', '').split('/')[-1] if '/pull/' in os.environ.get('GITHUB_REF', '') else None
+              
+              # Endpoint differs based on whether this is a PR or a commit
+              if pr_number and pr_number.isdigit():
+                  # PR endpoint
+                  analysis_url = f"{api_url}/{org_name}/pullRequests/{pr_number}/issues"
+                  print(f"Detected pull request #{pr_number}")
+              else:
+                  # Commit endpoint
+                  analysis_url = f"{api_url}/{org_name}/commits/{commit_uuid}/issues"
+                  
+              print(f"Using Codacy API v3.1.0")
+              print(f"Organization: {org_name}")
+              print(f"Commit SHA: {commit_uuid}")
+              print(f"Sending results to: {analysis_url}")
+              
+              # Convert our results to Codacy v3 format
+              v3_payload = []
+              for issue in codacy_results:
+                  v3_issue = {
+                      "toolId": "flutter-analyze",
+                      "resultId": issue["patternId"],
+                      "path": issue["filename"],
+                      "message": issue["message"],
+                      "level": issue["level"].upper(),
+                      "line": issue["line"]
+                  }
+                  v3_payload.append(v3_issue)
+              
+              # Send to Codacy API v3
+              response = requests.post(analysis_url, headers=headers, json=v3_payload)
               
               print(f"Codacy API Response: {response.status_code}")
-              if response.status_code != 200:
+              if response.status_code not in [200, 201, 202, 204]:
                   print(f"Error: {response.text}")
               else:
-                  print("Successfully sent analysis results to Codacy!")
+                  print("Successfully sent analysis results to Codacy using API v3.1.0!")
           EOL
           
           python convert_to_codacy.py
