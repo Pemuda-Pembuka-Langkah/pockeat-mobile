@@ -47,20 +47,21 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
+      - name: Create sonar-project.properties
+        run: |
+          echo "sonar.projectKey=Pemuda-Pembuka-Langkah_pockeat-mobile" > sonar-project.properties
+          echo "sonar.organization=pemuda-pembuka-langkah" >> sonar-project.properties
+          echo "sonar.sources=lib" >> sonar-project.properties
+          echo "sonar.tests=test" >> sonar-project.properties
+          echo "sonar.dart.coverage.reportPaths=coverage/lcov.info" >> sonar-project.properties
+          echo "sonar.sourceEncoding=UTF-8" >> sonar-project.properties
+          echo "sonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/generated_plugin_registrant.dart,**/l10n/**,**/*.config.dart,**/*.pb.dart,**/*.pb.*.dart" >> sonar-project.properties
+          echo "sonar.coverage.exclusions=**/*.g.dart,**/*.freezed.dart,**/generated_plugin_registrant.dart,**/l10n/**,**/*.config.dart,**/*.pb.dart,**/*.pb.*.dart" >> sonar-project.properties
+          echo "sonar.inclusions=lib/**/*" >> sonar-project.properties
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: |
-            -Dsonar.projectKey=Pemuda-Pembuka-Langkah_pockeat-mobile
-            -Dsonar.organization=pemuda-pembuka-langkah
-            -Dsonar.sources=lib
-            -Dsonar.tests=test
-            -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
-            -Dsonar.sourceEncoding=UTF-8
-            -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/generated_plugin_registrant.dart,**/l10n/**,**/*.config.dart,**/*.pb.dart,**/*.pb.*.dart
-            -Dsonar.coverage.exclusions=**/*.g.dart,**/*.freezed.dart,**/generated_plugin_registrant.dart,**/l10n/**,**/*.config.dart,**/*.pb.dart,**/*.pb.*.dart
-            -Dsonar.inclusions=lib/**/*
