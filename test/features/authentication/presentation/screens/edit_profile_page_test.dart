@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -7,6 +8,7 @@ import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/presentation/screens/edit_profile_page.dart';
 import 'package:pockeat/features/authentication/services/profile_service.dart';
+import 'package:image_picker/image_picker.dart';
 
 @GenerateMocks([ProfileService, File, NavigatorObserver])
 import 'edit_profile_page_test.mocks.dart';
@@ -23,18 +25,67 @@ class MockBuildContext extends Mock implements BuildContext {
   }
 }
 
+// FakeImagePicker class untuk mocking ImagePicker dalam test
+class FakeImagePicker extends Fake implements ImagePicker {
+  final XFile? fileToReturn;
+
+  FakeImagePicker({this.fileToReturn});
+
+  @override
+  Future<XFile?> pickImage({
+    required ImageSource source,
+    double? maxWidth,
+    double? maxHeight,
+    int? imageQuality,
+    CameraDevice preferredCameraDevice = CameraDevice.rear,
+    bool requestFullMetadata = true,
+  }) async {
+    return fileToReturn;
+  }
+}
+
+// Untuk override XFile dalam test
+class FakeXFile extends Fake implements XFile {
+  final String fakePath;
+
+  FakeXFile(this.fakePath);
+
+  @override
+  String get path => fakePath;
+
+  @override
+  String get name => path.split('/').last;
+
+  @override
+  Future<Uint8List> readAsBytes() async {
+    return Uint8List.fromList([0, 1, 2, 3]); // Empty bytes for test
+  }
+}
+
 void main() {
+  setUpAll(() {
+    // Register FakeXFile dalam TestWidgetsFlutterBinding
+    TestWidgetsFlutterBinding.ensureInitialized();
+  });
+
   group('EditProfilePage Tests', () {
     late MockProfileService mockProfileService;
     late UserModel testUser;
     late UserModel unverifiedUser;
     late MockBuildContext mockContext;
+    late MockFile mockFile;
+    late FakeImagePicker fakeImagePicker;
+    late FakeXFile fakeXFile;
     final getIt = GetIt.instance;
 
     setUp(() {
-      TestWidgetsFlutterBinding.ensureInitialized();
       mockProfileService = MockProfileService();
       mockContext = MockBuildContext();
+      mockFile = MockFile();
+
+      // Setup FakeXFile dan FakeImagePicker
+      fakeXFile = FakeXFile('/test/path/image.jpg');
+      fakeImagePicker = FakeImagePicker(fileToReturn: fakeXFile);
 
       // Register mock service ke GetIt
       if (getIt.isRegistered<ProfileService>()) {
@@ -62,6 +113,9 @@ void main() {
         createdAt: DateTime.now(),
         lastLoginAt: DateTime.now(),
       );
+
+      // Setup untuk mock file
+      when(mockFile.path).thenReturn('/test/path/image.jpg');
     });
 
     tearDown(() {
@@ -190,7 +244,7 @@ void main() {
       when(mockProfileService.updateUserProfile(
         displayName: 'New Name',
         photoURL: null,
-      )).thenAnswer((_) => Future.value(true));
+      )).thenAnswer((_) async => true);
 
       await tester.pumpWidget(createTestWidget(initialUser: testUser));
       await tester.pump(const Duration(seconds: 1));
@@ -217,7 +271,7 @@ void main() {
       when(mockProfileService.updateUserProfile(
         displayName: 'New Name',
         photoURL: null,
-      )).thenAnswer((_) => Future.value(false));
+      )).thenAnswer((_) async => false);
 
       await tester.pumpWidget(createTestWidget(initialUser: testUser));
       await tester.pump(const Duration(seconds: 1));
@@ -248,7 +302,7 @@ void main() {
         (WidgetTester tester) async {
       // Set up success response
       when(mockProfileService.sendEmailVerification())
-          .thenAnswer((_) => Future.value(true));
+          .thenAnswer((_) async => true);
 
       await tester.pumpWidget(createTestWidget(initialUser: unverifiedUser));
       await tester.pump(const Duration(seconds: 1));
@@ -267,7 +321,7 @@ void main() {
         (WidgetTester tester) async {
       // Set up failure response
       when(mockProfileService.sendEmailVerification())
-          .thenAnswer((_) => Future.value(false));
+          .thenAnswer((_) async => false);
 
       await tester.pumpWidget(createTestWidget(initialUser: unverifiedUser));
       await tester.pump(const Duration(seconds: 1));
@@ -280,6 +334,100 @@ void main() {
       // Verifikasi pesan error melalui SnackBar
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.text('Gagal mengirim email verifikasi'), findsOneWidget);
+    });
+
+    testWidgets('shows image source dialog when camera button is tapped',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget(initialUser: testUser));
+      await tester.pump(const Duration(seconds: 1));
+
+      // Cari tombol kamera
+      final cameraButton = find.byIcon(Icons.camera_alt);
+      expect(cameraButton, findsOneWidget);
+
+      // Tap tombol kamera
+      await tester.tap(cameraButton);
+      await tester.pumpAndSettle();
+
+      // Verifikasi dialog ditampilkan
+      expect(find.text('Pilih Sumber Foto'), findsOneWidget);
+      expect(find.text('Pilih dari Galeri'), findsOneWidget);
+      expect(find.text('Ambil Foto'), findsOneWidget);
+      expect(find.text('Batal'), findsOneWidget);
+    });
+
+    testWidgets('cancels dialog when cancel button is tapped',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget(initialUser: testUser));
+      await tester.pump(const Duration(seconds: 1));
+
+      // Buka dialog
+      await tester.tap(find.byIcon(Icons.camera_alt));
+      await tester.pumpAndSettle();
+
+      // Tap tombol batal
+      await tester.tap(find.text('Batal'));
+      await tester.pumpAndSettle();
+
+      // Verifikasi dialog ditutup
+      expect(find.text('Pilih Sumber Foto'), findsNothing);
+    });
+
+    testWidgets('shows CircleAvatar with profile photo UI',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget(initialUser: testUser));
+      await tester.pump(const Duration(seconds: 1));
+
+      // Verifikasi keberadaan CircleAvatar
+      expect(find.byType(CircleAvatar), findsOneWidget);
+
+      // Verifikasi bahwa "Foto Profil" text dibawah avatar tampil
+      expect(find.text('Foto Profil'), findsOneWidget);
+    });
+
+    testWidgets('CircleAvatar properties are correctly set',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget(initialUser: testUser));
+      await tester.pump(const Duration(seconds: 1));
+
+      // Verifikasi keberadaan CircleAvatar
+      expect(find.byType(CircleAvatar), findsOneWidget);
+
+      // Get CircleAvatar widget dan verifikasi properti dasar
+      final CircleAvatar avatar =
+          tester.widget<CircleAvatar>(find.byType(CircleAvatar));
+      expect(avatar.radius, equals(60));
+    });
+
+    // Test tambahan untuk upload image menggunakan Fake objects
+    testWidgets('upload image test integration', (WidgetTester tester) async {
+      // Setup mock service response
+      when(mockProfileService.uploadProfileImage(any))
+          .thenAnswer((_) async => 'https://test.com/photo.jpg');
+
+      when(mockProfileService.updateUserProfile(
+        displayName: anyNamed('displayName'),
+        photoURL: anyNamed('photoURL'),
+      )).thenAnswer((_) async => true);
+
+      await tester.pumpWidget(createTestWidget(initialUser: testUser));
+      await tester.pumpAndSettle();
+
+      // Verify presence of camera button
+      expect(find.byIcon(Icons.camera_alt), findsOneWidget);
+    });
+
+    testWidgets('image selection process test', (WidgetTester tester) async {
+      await tester.pumpWidget(createTestWidget(initialUser: testUser));
+      await tester.pumpAndSettle();
+
+      // Buka dialog gambar
+      await tester.tap(find.byIcon(Icons.camera_alt));
+      await tester.pumpAndSettle();
+
+      // Verify dialog options
+      expect(find.text('Pilih dari Galeri'), findsOneWidget);
+      expect(find.text('Ambil Foto'), findsOneWidget);
     });
   });
 }

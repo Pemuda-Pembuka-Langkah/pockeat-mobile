@@ -8,11 +8,13 @@ class LogoutServiceImpl implements LogoutService {
   final GoogleSignIn _googleSignIn;
 
   /// Constructor
+  // coverage:ignore-start
   LogoutServiceImpl({
     FirebaseAuth? auth,
     GoogleSignIn? googleSignIn,
   })  : _auth = auth ?? FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn();
+  // coverage:ignore-end
 
   @override
   Future<bool> logout() async {

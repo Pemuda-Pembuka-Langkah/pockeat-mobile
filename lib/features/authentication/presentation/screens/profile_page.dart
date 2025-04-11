@@ -504,17 +504,16 @@ class _ProfilePageState extends State<ProfilePage> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildStatItem(
-            icon: Icons.calendar_today_outlined,
-            label: 'Bergabung',
-            value: _formatDate(_currentUser?.createdAt),
+            icon: Icons.email_outlined,
+            label: 'Email',
+            value: _currentUser?.email ?? 'N/A',
             color: primaryGreen,
           ),
           _buildVerticalDivider(),
           _buildStatItem(
-            icon: Icons.access_time,
-            label: 'Login Terakhir',
-            value: _formatDate(
-                _currentUser?.lastLoginAt ?? _currentUser?.createdAt),
+            icon: Icons.person_outline_rounded,
+            label: 'Status',
+            value: _currentUser?.emailVerified == true ? 'Terverifikasi' : 'Belum Terverifikasi',
             color: primaryPink,
           ),
         ],
@@ -753,12 +752,5 @@ class _ProfilePageState extends State<ProfilePage> {
     return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
   }
 
-  /// Helper untuk memformat tanggal
-  String _formatDate(DateTime? date) {
-    if (date == null) {
-      return 'N/A';
-    }
 
-    return '${date.day}/${date.month}/${date.year}';
-  }
 }

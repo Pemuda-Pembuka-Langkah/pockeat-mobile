@@ -91,8 +91,8 @@ void main() {
     String? displayName = 'Test User',
     String? photoURL = null,
     bool emailVerified = true,
-    DateTime? createdAt,
-    DateTime? lastLoginAt,
+    String? gender = 'Male',
+    DateTime? birthDate,
   }) {
     return UserModel(
       uid: uid,
@@ -100,10 +100,10 @@ void main() {
       displayName: displayName,
       photoURL: photoURL,
       emailVerified: emailVerified,
-      gender: 'Male',
-      birthDate: DateTime(1990, 1, 1),
-      createdAt: createdAt ?? DateTime(2023, 1, 1),
-      lastLoginAt: lastLoginAt ?? DateTime(2023, 6, 1),
+      gender: gender,
+      birthDate: birthDate ?? DateTime(1990, 1, 1),
+      createdAt: DateTime.now(),
+      lastLoginAt: null,
     );
   }
 
