@@ -83,10 +83,70 @@ class ChangePasswordServiceImpl implements ChangePasswordService {
     }
   }
 
+  /// Re-autentikasi pengguna dengan email dan password
+  Future<void> reauthenticateUser({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw FirebaseAuthException(
+          code: 'user-not-logged-in',
+          message: 'No user is currently logged in.',
+        );
+      }
+
+      // Buat credential untuk re-autentikasi
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: email,
+        password: password,
+      );
+
+      // Re-autentikasi pengguna
+      await user.reauthenticateWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'user-mismatch':
+          message = 'Email yang dimasukkan tidak cocok dengan akun saat ini.';
+          break;
+        case 'user-not-found':
+          message = 'Tidak ada pengguna yang terkait dengan email ini.';
+          break;
+        case 'invalid-credential':
+          message = 'Kredensial tidak valid.';
+          break;
+        case 'invalid-email':
+          message = 'Format email tidak valid.';
+          break;
+        case 'wrong-password':
+          message = 'Password yang dimasukkan salah.';
+          break;
+        default:
+          message = 'Gagal melakukan autentikasi ulang: ${e.message ?? e.code}';
+      }
+
+      throw FirebaseAuthException(
+        code: e.code,
+        message: message,
+      );
+    } catch (e) {
+      const message =
+          'Terjadi kesalahan tidak terduga saat melakukan autentikasi ulang.';
+      throw FirebaseAuthException(
+        code: 'unknown-error',
+        message: message,
+      );
+    }
+  }
+
   @override
   Future<User> changePassword({
     required String newPassword,
     required String newPasswordConfirmation,
+    String? currentPassword,
+    String? email,
   }) async {
     try {
       // Validasi password baru dan konfirmasi
@@ -104,13 +164,36 @@ class ChangePasswordServiceImpl implements ChangePasswordService {
         );
       }
 
-      // Ubah password langsung
-      await user.updatePassword(newPassword);
+      // Untuk mode login, selalu lakukan re-autentikasi terlebih dahulu jika currentPassword tersedia
+      if (currentPassword != null && email != null) {
+        try {
+          // Re-autentikasi user
+          await reauthenticateUser(
+            email: email,
+            password: currentPassword,
+          );
+        } catch (e) {
+          // Lemparkan error dari proses re-autentikasi
+          rethrow;
+        }
+      }
 
+      // Setelah re-autentikasi berhasil atau tidak diperlukan, ubah password
+      await user.updatePassword(newPassword);
       return user;
     } on ArgumentError {
       rethrow; // Lempar kembali error validasi
     } on FirebaseAuthException catch (e) {
+      // Jika masih mendapat error requires-recent-login, itu berarti user belum re-autentikasi
+      // atau re-autentikasi gagal
+      if (e.code == 'requires-recent-login' && currentPassword == null) {
+        throw FirebaseAuthException(
+          code: 'requires-recent-login',
+          message:
+              'Untuk alasan keamanan, silakan masukkan password saat ini Anda.',
+        );
+      }
+
       // Ubah pesan error menjadi lebih spesifik dalam bahasa Indonesia
       String message;
       switch (e.code) {

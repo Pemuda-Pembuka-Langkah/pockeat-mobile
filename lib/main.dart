@@ -59,6 +59,9 @@ import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
 import 'package:pockeat/features/authentication/presentation/screens/change_password_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
+import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/edit_profile_page.dart';
+import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -240,6 +243,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const AuthWrapper(child: HomePage()),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
+        '/profile': (context) => const AuthWrapper(child: ProfilePage()),
         '/change-password': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>?;
@@ -351,6 +355,12 @@ class MyApp extends StatelessWidget {
               service: ProgressTabsService(ProgressTabsRepositoryImpl()),
             ),
         '/notification-settings': (context) => const AuthWrapper(child: NotificationSettingsScreen()),
+        '/edit-profile': (context) {
+          final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
+          return AuthWrapper(
+            child: EditProfilePage(initialUser: user),
+          );
+        },
       },
     );
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
 
-
 class NavigationProvider extends ChangeNotifier {
   int _currentIndex = 0;
   bool _isMenuOpen = false;
@@ -35,13 +34,14 @@ class CustomBottomNavBar extends StatefulWidget {
 
 class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
   OverlayEntry? _overlayEntry;
-  
+
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
 
-  void _showOverlay(BuildContext context, NavigationProvider navigationProvider) {
+  void _showOverlay(
+      BuildContext context, NavigationProvider navigationProvider) {
     _overlayEntry = OverlayEntry(
       builder: (context) => Stack(
         children: [
@@ -58,7 +58,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
               ),
             ),
           ),
-          
+
           // Floating Menu Buttons
           Positioned(
             bottom: 80,
@@ -167,7 +167,8 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           onPressed: () {
                             navigationProvider.closeMenu();
                             navigationProvider.setIndex(1);
-                            Navigator.pushReplacementNamed(context, '/analytic');
+                            Navigator.pushReplacementNamed(
+                                context, '/analytic');
                           },
                         ),
                       ),
@@ -180,7 +181,8 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           onPressed: () {
                             navigationProvider.closeMenu();
                             navigationProvider.setIndex(3);
-                            Navigator.pushReplacementNamed(context, '/progress');
+                            Navigator.pushReplacementNamed(
+                                context, '/progress');
                           },
                         ),
                       ),
@@ -192,7 +194,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           onPressed: () {
                             navigationProvider.closeMenu();
                             navigationProvider.setIndex(4);
-                            Navigator.pushReplacementNamed(context, '/account');
+                            Navigator.pushReplacementNamed(context, '/profile');
                           },
                         ),
                       ),
@@ -215,15 +217,16 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: navigationProvider.isMenuOpen 
-                          ? primaryGreen 
-                          : primaryPink,
+                        color: navigationProvider.isMenuOpen
+                            ? primaryGreen
+                            : primaryPink,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: (navigationProvider.isMenuOpen 
-                              ? primaryGreen 
-                              : primaryPink).withOpacity(0.3),
+                            color: (navigationProvider.isMenuOpen
+                                    ? primaryGreen
+                                    : primaryPink)
+                                .withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -253,12 +256,12 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
-                    color: navigationProvider.isMenuOpen 
-                      ? primaryGreen
-                      : Colors.black54,
-                    fontWeight: navigationProvider.isMenuOpen 
-                      ? FontWeight.w500 
-                      : FontWeight.normal,
+                    color: navigationProvider.isMenuOpen
+                        ? primaryGreen
+                        : Colors.black54,
+                    fontWeight: navigationProvider.isMenuOpen
+                        ? FontWeight.w500
+                        : FontWeight.normal,
                   ),
                 ),
               ),

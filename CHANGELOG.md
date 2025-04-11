@@ -1,4 +1,12 @@
 # Changelog
+## v1.2.1
+**Release Date: April 11, 2025**
+
+### Features
+- Hadir Fitur Profil Pengguna. Pada fitur tersebut, pengguna dapat mengubah profil, password, dan logout
+
+### Technical
+= Implementasi fitur profil display dan edit, ganti password, dan logout
 
 ## v1.2.0
 **Release Date: April 10, 2025**
