@@ -167,6 +167,7 @@ void main() {
 
       // Verify user data is displayed - gunakan nilai yang sesuai dari helper
       expect(find.text('Test User'), findsOneWidget);
+      // Email sekarang hanya muncul sekali di header profil
       expect(find.text('test@example.com'), findsOneWidget);
       expect(find.text('Email terverifikasi'), findsOneWidget);
     });

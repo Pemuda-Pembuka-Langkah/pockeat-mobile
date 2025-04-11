@@ -504,9 +504,11 @@ class _ProfilePageState extends State<ProfilePage> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildStatItem(
-            icon: Icons.email_outlined,
-            label: 'Email',
-            value: _currentUser?.email ?? 'N/A',
+            icon: Icons.calendar_today_outlined,
+            label: 'Bergabung',
+            value: _currentUser?.createdAt != null
+                ? '${_currentUser!.createdAt.day}/${_currentUser!.createdAt.month}/${_currentUser!.createdAt.year}'
+                : 'N/A',
             color: primaryGreen,
           ),
           _buildVerticalDivider(),
