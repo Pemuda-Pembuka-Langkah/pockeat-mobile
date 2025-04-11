@@ -1,0 +1,49 @@
+name: SonarCloud Analysis
+on:
+  push:
+    branches:
+      - '**'  # Runs on all branches
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.28.x'  # Specify Flutter version as needed
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # Generate this in SonarCloud
+        with:
+          args: >
+            -Dsonar.projectKey=Pemuda-Pembuka-Langkah_pockeat-mobile
+            -Dsonar.organization=pemuda-pembuka-langkah
+            -Dsonar.sources=lib
+            -Dsonar.tests=test
+            -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
+            -Dsonar.sourceEncoding=UTF-8
+            # Exclude generated files and specific directories from analysis
+            -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/generated_plugin_registrant.dart,**/l10n/**,**/*.config.dart,**/*.pb.dart,**/*.pb.*.dart
+            # Exclude generated files and specific directories from coverage
+            -Dsonar.coverage.exclusions=**/*.g.dart,**/*.freezed.dart,**/generated_plugin_registrant.dart,**/l10n/**,**/*.config.dart,**/*.pb.dart,**/*.pb.*.dart
+            # Only files in the lib directory are considered source code for analysis
+            -Dsonar.inclusions=lib/**/*
