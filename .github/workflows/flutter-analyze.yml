@@ -1,0 +1,135 @@
+name: Codacy Analyze
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  analyze:
+    name: Flutter Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full git history for better analysis
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.0"
+          channel: "stable"
+          cache: true
+
+      - name: Create .env file
+        run: |
+          echo "FLAVOR=staging" > .env
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
+          echo "STAGING_FIREBASE_PROJECT_ID=${{ secrets.STAGING_FIREBASE_PROJECT_ID }}" >> .env
+          echo "STAGING_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.STAGING_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "STAGING_FIREBASE_STORAGE_BUCKET=${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_APP_ID=${{ secrets.STAGING_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_API_KEY=${{ secrets.STAGING_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_APP_ID=${{ secrets.STAGING_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_IOS_API_KEY=${{ secrets.STAGING_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_BUNDLE_ID=${{ secrets.STAGING_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Generate mocks with build_runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Run flutter analyze
+        run: |
+          mkdir -p reports
+          flutter analyze --no-fatal-warnings --no-fatal-infos > reports/flutter_analyze.txt || true
+
+      - name: Convert analysis results to Codacy format
+        run: |
+          pip install requests
+          cat > convert_to_codacy.py << 'EOL'
+          import os
+          import re
+          import json
+          import requests
+          
+          # Read the analyze output
+          with open('reports/flutter_analyze.txt', 'r') as f:
+              analyze_output = f.read()
+          
+          # Extract issues using regex
+          issues_pattern = re.compile(r'(info|warning|error)( • | \* )(.+)\n.+\n  (.+) • line (\d+) • (.+)')
+          issues = issues_pattern.findall(analyze_output)
+          
+          # Convert to Codacy format
+          codacy_results = []
+          
+          for issue in issues:
+              severity, _, message, file_path, line, code = issue
+              
+              # Skip files that shouldn't be analyzed
+              if (file_path.endswith('.g.dart') or file_path.endswith('.freezed.dart') or 
+                  'generated' in file_path or file_path.endswith('.mocks.dart')):
+                  continue
+                  
+              # Map severity to Codacy levels
+              if severity == 'info':
+                  level = 'Info'
+              elif severity == 'warning':
+                  level = 'Warning'
+              else:
+                  level = 'Error'
+              
+              codacy_result = {
+                  "filename": file_path,
+                  "line": int(line),
+                  "message": message.strip(),
+                  "patternId": code.strip(),
+                  "level": level
+              }
+              
+              codacy_results.append(codacy_result)
+          
+          # Write Codacy formatted results to file
+          with open('codacy_results.json', 'w') as f:
+              json.dump(codacy_results, f, indent=2)
+              
+          print(f"Found {len(codacy_results)} issues to report to Codacy")
+          
+          # Upload to Codacy API
+          if 'CODACY_PROJECT_TOKEN' in os.environ:
+              commit_uuid = os.environ.get('GITHUB_SHA', '')
+              
+              # Documentation from https://docs.codacy.com/codacy-api/using-the-codacy-api/
+              headers = {
+                  'api-token': os.environ['CODACY_PROJECT_TOKEN'],
+                  'Content-Type': 'application/json'
+              }
+              
+              # Format according to Codacy API documentation
+              payload = {
+                  'tool': 'flutter-analyze',
+                  'results': codacy_results
+              }
+              
+              # Use the correct, documented API endpoint
+              api_url = f"https://api.codacy.com/2.0/commit/{commit_uuid}/issuesRemoteResults"
+              
+              print(f"Sending results to: {api_url}")
+              response = requests.post(api_url, headers=headers, json=payload)
+              
+              print(f"Codacy API Response: {response.status_code}")
+              if response.status_code != 200:
+                  print(f"Error: {response.text}")
+              else:
+                  print("Successfully sent analysis results to Codacy!")
+          EOL
+          
+          python convert_to_codacy.py
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}

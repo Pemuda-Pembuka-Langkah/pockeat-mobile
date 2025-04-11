@@ -1,0 +1,46 @@
+---
+engines:
+  # Nonaktifkan dartanalyzer bawaan Codacy
+  dartanalyzer:
+    enabled: false
+  
+  # Nonaktifkan semua tools analisis lain
+  prospector:
+    enabled: false
+  eslint:
+    enabled: false
+  remark-lint:
+    enabled: false
+  pmd:
+    enabled: false
+  bandit:
+    enabled: false
+  coffeelint:
+    enabled: false
+  stylelint:
+    enabled: false
+  codestyle-analysis:
+    enabled: false
+    
+  # Tetap aktifkan duplication analysis
+  duplication:
+    enabled: true
+    exclude_paths:
+      - "**/*.g.dart"
+      - "**/*.freezed.dart"
+      - "**/generated_plugin_registrant.dart"
+      - "**/l10n/**"
+      - "**/*.config.dart"
+      - "**/*.pb.dart"
+      - "**/*.mocks.dart"
+      
+# Exclude paths tetap dipertahankan untuk filter tools lain yang mungkin tetap berjalan
+exclude_paths:
+  - "test/**"
+  - "**/*.g.dart"
+  - "**/*.freezed.dart"
+  - "**/generated_plugin_registrant.dart"
+  - "**/l10n/**"
+  - "**/*.config.dart"
+  - "**/*.pb.dart"
+  - "**/*.mocks.dart"
