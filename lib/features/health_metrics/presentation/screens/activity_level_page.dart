@@ -28,12 +28,12 @@ class ActivityLevelPage extends StatelessWidget {
       "description": "Daily exercise or intense exercise 3–4 times/week"
     },
     {
-      "value": "very_active",
+      "value": "very active",
       "label": "Very Active",
       "description": "Intense exercise 6–7 times/week"
     },
     {
-      "value": "extra_active",
+      "value": "extra active",
       "label": "Extra Active",
       "description": "Very intense daily exercise or physical job"
     },
