@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_calculator.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
-import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 
 void main() {
   group('CaloricRequirementCalculator', () {

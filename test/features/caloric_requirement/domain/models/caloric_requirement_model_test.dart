@@ -1,19 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 
-class MockCaloricRequirementSnapshot extends Mock implements DocumentSnapshot {
-  final Map<String, dynamic>? _data;
-
-  MockCaloricRequirementSnapshot(this._data);
-
-  @override
-  Map<String, dynamic>? data() => _data;
-
-  @override
-  String get id => _data?['userId'] ?? 'test-user';
-}
+// Mock class using mocktail
+class MockDocumentSnapshot extends Mock implements DocumentSnapshot {}
 
 void main() {
   group('CaloricRequirementModel', () {
@@ -57,7 +48,10 @@ void main() {
         'timestamp': DateTime(2024, 1, 1).toIso8601String(),
       };
 
-      final snapshot = MockCaloricRequirementSnapshot(mockData);
+      final snapshot = MockDocumentSnapshot();
+      when(() => snapshot.data()).thenReturn(mockData);
+      when(() => snapshot.id).thenReturn('test-user');
+      
       final model = CaloricRequirementModel.fromFirestore(snapshot);
 
       expect(model.userId, equals('test-user'));
@@ -67,7 +61,8 @@ void main() {
     });
 
     test('fromFirestore throws when data is null', () {
-      final snapshot = MockCaloricRequirementSnapshot(null);
+      final snapshot = MockDocumentSnapshot();
+      when(() => snapshot.data()).thenReturn(null);
 
       expect(() => CaloricRequirementModel.fromFirestore(snapshot), throwsException);
     });
@@ -80,7 +75,10 @@ void main() {
         'timestamp': DateTime(2024, 1, 1).toIso8601String(),
       };
 
-      final snapshot = MockCaloricRequirementSnapshot(mockData);
+      final snapshot = MockDocumentSnapshot();
+      when(() => snapshot.data()).thenReturn(mockData);
+      when(() => snapshot.id).thenReturn('user-id');
+
       final model = CaloricRequirementModel.fromFirestore(snapshot);
 
       expect(model.bmr, equals(1350.0));
