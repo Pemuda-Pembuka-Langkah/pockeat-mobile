@@ -1,36 +1,106 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
+
+class MockCaloricRequirementSnapshot extends Mock implements DocumentSnapshot {
+  final Map<String, dynamic>? _data;
+
+  MockCaloricRequirementSnapshot(this._data);
+
+  @override
+  Map<String, dynamic>? data() => _data;
+
+  @override
+  String get id => _data?['userId'] ?? 'test-user';
+}
 
 void main() {
   group('CaloricRequirementModel', () {
-    test('should correctly create an instance via constructor', () {
-      final model = CaloricRequirementModel(bmr: 1500.0, tdee: 2000.0);
+    test('Constructor creates valid instance', () {
+      final now = DateTime.now();
+      final model = CaloricRequirementModel(
+        userId: 'user123',
+        bmr: 1500.0,
+        tdee: 2000.0,
+        timestamp: now,
+      );
 
-      expect(model.bmr, 1500.0);
-      expect(model.tdee, 2000.0);
+      expect(model.userId, equals('user123'));
+      expect(model.bmr, equals(1500.0));
+      expect(model.tdee, equals(2000.0));
+      expect(model.timestamp, equals(now));
     });
 
-    test('toMap should return correct map representation', () {
-      final model = CaloricRequirementModel(bmr: 1600.5, tdee: 2200.75);
+    test('toMap returns correct values', () {
+      final now = DateTime(2024, 4, 12, 10);
+      final model = CaloricRequirementModel(
+        userId: 'user456',
+        bmr: 1600.0,
+        tdee: 2100.0,
+        timestamp: now,
+      );
+
       final map = model.toMap();
 
-      expect(map, {'bmr': 1600.5, 'tdee': 2200.75});
+      expect(map['userId'], equals('user456'));
+      expect(map['bmr'], equals(1600.0));
+      expect(map['tdee'], equals(2100.0));
+      expect(map['timestamp'], equals(now.toIso8601String()));
     });
 
-    test('fromMap should create an instance with correct values', () {
-      final map = {'bmr': 1400, 'tdee': 1800};
-      final model = CaloricRequirementModel.fromMap(map);
+    test('fromFirestore creates valid model', () {
+      final mockData = {
+        'userId': 'test-user',
+        'bmr': 1450.0,
+        'tdee': 1900.0,
+        'timestamp': DateTime(2024, 1, 1).toIso8601String(),
+      };
 
-      expect(model.bmr, 1400.0);
-      expect(model.tdee, 1800.0);
+      final snapshot = MockCaloricRequirementSnapshot(mockData);
+      final model = CaloricRequirementModel.fromFirestore(snapshot);
+
+      expect(model.userId, equals('test-user'));
+      expect(model.bmr, equals(1450.0));
+      expect(model.tdee, equals(1900.0));
+      expect(model.timestamp, equals(DateTime(2024, 1, 1)));
     });
 
-    test('fromMap should handle num values like int and double correctly', () {
-      final map = {'bmr': 1350.75, 'tdee': 1750}; // mix of double and int
-      final model = CaloricRequirementModel.fromMap(map);
+    test('fromFirestore throws when data is null', () {
+      final snapshot = MockCaloricRequirementSnapshot(null);
 
-      expect(model.bmr, 1350.75);
-      expect(model.tdee, 1750.0);
+      expect(() => CaloricRequirementModel.fromFirestore(snapshot), throwsException);
+    });
+
+    test('fromFirestore parses numeric fields correctly', () {
+      final mockData = {
+        'userId': 'user-id',
+        'bmr': 1350,       // int
+        'tdee': 1800.5,    // double
+        'timestamp': DateTime(2024, 1, 1).toIso8601String(),
+      };
+
+      final snapshot = MockCaloricRequirementSnapshot(mockData);
+      final model = CaloricRequirementModel.fromFirestore(snapshot);
+
+      expect(model.bmr, equals(1350.0));
+      expect(model.tdee, equals(1800.5));
+    });
+
+    test('toMap has correct value types', () {
+      final model = CaloricRequirementModel(
+        userId: 'test-user',
+        bmr: 1700.25,
+        tdee: 2200.75,
+        timestamp: DateTime.now(),
+      );
+
+      final map = model.toMap();
+
+      expect(map['bmr'], isA<double>());
+      expect(map['tdee'], isA<double>());
+      expect(map['userId'], isA<String>());
+      expect(map['timestamp'], isA<String>());
     });
   });
 }
