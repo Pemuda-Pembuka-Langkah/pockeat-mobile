@@ -31,7 +31,7 @@ class CaloricRequirementRepositoryImpl implements CaloricRequirementRepository {
       final doc = await firestore.collection('caloric_requirements').doc(userId).get();
       if (!doc.exists) return null;
 
-      return CaloricRequirementModel.fromMap(doc.data()!);
+      return CaloricRequirementModel.fromFirestore(doc);
     } catch (e) {
       throw Exception('Failed to fetch caloric requirement: $e');
     }
