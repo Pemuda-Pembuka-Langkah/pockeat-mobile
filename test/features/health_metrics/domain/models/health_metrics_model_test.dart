@@ -99,7 +99,7 @@ void main() {
         weight: 75.0,
         age: 30,
         gender: 'male',
-        activityLevel: 'very_active',
+        activityLevel: 'very active',
         fitnessGoal: 'Gain muscle',
       );
 
