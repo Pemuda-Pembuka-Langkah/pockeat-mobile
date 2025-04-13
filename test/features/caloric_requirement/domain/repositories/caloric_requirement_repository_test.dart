@@ -21,7 +21,13 @@ void main() {
   late CaloricRequirementRepositoryImpl repository;
 
   const userId = 'test-user';
-  final testModel = CaloricRequirementModel(bmr: 1500.0, tdee: 2000.0);
+  final timestamp = DateTime(2024, 4, 12, 10, 0, 0);
+  final testModel = CaloricRequirementModel(
+    userId: userId,
+    bmr: 1500.0,
+    tdee: 2000.0,
+    timestamp: timestamp,
+  );
 
   setUp(() {
     mockFirestore = MockFirebaseFirestore();
@@ -62,13 +68,21 @@ void main() {
   test('getCaloricRequirement returns model if document exists', () async {
     when(mockDocRef.get()).thenAnswer((_) async => mockSnapshot);
     when(mockSnapshot.exists).thenReturn(true);
-    when(mockSnapshot.data()).thenReturn(testModel.toMap());
+    when(mockSnapshot.id).thenReturn(userId);
+    when(mockSnapshot.data()).thenReturn({
+      'userId': userId,
+      'bmr': 1500.0,
+      'tdee': 2000.0,
+      'timestamp': timestamp.toIso8601String(),
+    });
 
     final result = await repository.getCaloricRequirement(userId);
 
     expect(result, isA<CaloricRequirementModel>());
     expect(result?.bmr, 1500.0);
     expect(result?.tdee, 2000.0);
+    expect(result?.timestamp, timestamp);
+    expect(result?.userId, userId);
   });
 
   test('getCaloricRequirement returns null if document does not exist', () async {
