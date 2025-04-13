@@ -56,7 +56,6 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       return allItems;
     } catch (e) {
       // Return empty list on error instead of throwing
-      print('Error getting exercise logs: $e');
       return [];
     }
   }
@@ -92,7 +91,6 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       return allLogs;
     } catch (e) {
       // Return empty list instead of throwing
-      print('Error getting exercise logs by date: $e');
       return [];
     }
   }
@@ -129,7 +127,6 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       return allLogs;
     } catch (e) {
       // Return empty list instead of throwing
-      print('Error getting exercise logs by month: $e');
       return [];
     }
   }
@@ -165,7 +162,6 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       return allLogs;
     } catch (e) {
       // Return empty list instead of throwing
-      print('Error getting exercise logs by year: $e');
       return [];
     }
   }
