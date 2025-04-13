@@ -153,15 +153,6 @@ Future<void> setupDependencies() async {
     CaloricRequirementService(),
   );
 
-  // Register Food Log History module
-  FoodLogHistoryModule.register();
-
-  // Register Exercise Log History module
-  ExerciseLogHistoryModule.register();
-  
-  // Register Calorie Stats module
-  CalorieStatsModule.register();
-
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
   );
