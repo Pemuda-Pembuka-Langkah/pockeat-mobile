@@ -5,7 +5,10 @@ import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requi
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_calculator.dart';
 
 class CaloricRequirementService {
-  CaloricRequirementModel analyze(HealthMetricsModel model) {
+  CaloricRequirementModel analyze({
+    required String userId,
+    required HealthMetricsModel model,
+  }) {
     final bmr = CaloricRequirementCalculator.calculateBMR(
       weight: model.weight,
       height: model.height,
@@ -18,6 +21,11 @@ class CaloricRequirementService {
       model.activityLevel,
     );
 
-    return CaloricRequirementModel(bmr: bmr, tdee: tdee);
+    return CaloricRequirementModel(
+      userId: userId,
+      bmr: bmr,
+      tdee: tdee,
+      timestamp: DateTime.now(),
+    );
   }
 }
