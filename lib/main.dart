@@ -35,6 +35,8 @@ import 'package:pockeat/features/food_text_input/domain/repositories/food_text_i
 import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
+import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
@@ -122,6 +124,8 @@ void main() async {
             return HealthMetricsFormCubit(
               userId: user.uid,
               repository: getIt<HealthMetricsRepository>(),
+              caloricRequirementRepository: getIt<CaloricRequirementRepository>(),
+              caloricRequirementService: getIt<CaloricRequirementService>(),
             );
           },
         ),

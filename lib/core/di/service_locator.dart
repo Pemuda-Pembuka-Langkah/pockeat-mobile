@@ -29,6 +29,9 @@ import 'package:pockeat/features/authentication/services/google_sign_in_service_
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository_impl.dart';
+import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_service_impl.dart';
@@ -139,6 +142,14 @@ Future<void> setupDependencies() async {
 
   getIt.registerSingleton<HealthMetricsCheckService>(
   HealthMetricsCheckService(),
+  );
+
+  getIt.registerSingleton<CaloricRequirementRepository>(
+    CaloricRequirementRepositoryImpl(),
+  );
+
+  getIt.registerSingleton<CaloricRequirementService>(
+    CaloricRequirementService(),
   );
 
   // Register Food Log History module

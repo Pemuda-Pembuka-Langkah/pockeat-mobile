@@ -1,7 +1,11 @@
 // File: form_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
+import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
+
+import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 
 class HealthMetricsFormState {
   final List<String> selectedGoals;
@@ -57,10 +61,14 @@ class HealthMetricsFormState {
 
 class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
   final HealthMetricsRepository repository;
+  final CaloricRequirementRepository caloricRequirementRepository;
+  final CaloricRequirementService caloricRequirementService;
   final String userId;
 
   HealthMetricsFormCubit({
     required this.repository,
+    required this.caloricRequirementRepository,
+    required this.caloricRequirementService,
     required this.userId,
   }) : super(HealthMetricsFormState());
 
@@ -113,11 +121,11 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
 
     final now = DateTime.now();
     int age = now.year - state.birthDate!.year;
-    if (now.month < state.birthDate!.month || 
-    (now.month == state.birthDate!.month && now.day < state.birthDate!.day)) {
-   age--;}
+    if (now.month < state.birthDate!.month ||
+        (now.month == state.birthDate!.month && now.day < state.birthDate!.day)) {
+      age--;
+    }
 
-    // Combine selected goals + other
     final allGoals = List<String>.from(state.selectedGoals);
     if (allGoals.contains("Other") && state.otherGoalReason != null) {
       allGoals[allGoals.indexOf("Other")] = "Other: ${state.otherGoalReason}";
@@ -128,11 +136,21 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
       height: state.height!,
       weight: state.weight!,
       age: age,
-      fitnessGoal: allGoals.join(", "),
       gender: state.gender!,
       activityLevel: state.activityLevel!,
+      fitnessGoal: allGoals.join(", "),
     );
 
     await repository.saveHealthMetrics(model);
+
+    final caloricResult = caloricRequirementService.analyze(
+      userId: userId,
+      model: model,
+    );
+
+    await caloricRequirementRepository.saveCaloricRequirement(
+      userId: userId,
+      result: caloricResult,
+    );
   }
 }
