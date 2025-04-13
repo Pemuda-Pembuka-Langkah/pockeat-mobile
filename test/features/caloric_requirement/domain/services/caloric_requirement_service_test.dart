@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_calculator.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
+import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 
 void main() {
   group('CaloricRequirementCalculator', () {
@@ -33,12 +34,12 @@ void main() {
         'active': 1.725,
         'very active': 1.9,
         'extra active': 2.0,
-        'unknown': 1.2, // default fallback
+        'unknown': 1.2, // fallback
       };
 
-      levels.forEach((level, expectedMultiplier) {
+      levels.forEach((level, expected) {
         final result = CaloricRequirementCalculator.activityMultiplier(level);
-        expect(result, expectedMultiplier);
+        expect(result, expected);
       });
     });
 
@@ -62,7 +63,10 @@ void main() {
       );
 
       final service = CaloricRequirementService();
-      final result = service.analyze(model);
+      final result = service.analyze(
+        userId: model.userId,
+        model: model,
+        );
 
       final expectedBMR = CaloricRequirementCalculator.calculateBMR(
         weight: 65,
@@ -76,8 +80,10 @@ void main() {
         'active',
       );
 
+      expect(result.userId, model.userId);
       expect(result.bmr, closeTo(expectedBMR, 0.01));
       expect(result.tdee, closeTo(expectedTDEE, 0.01));
+      expect(result.timestamp, isA<DateTime>());
     });
   });
 }
