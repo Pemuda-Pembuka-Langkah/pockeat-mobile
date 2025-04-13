@@ -11,15 +11,37 @@ class DietPage extends StatefulWidget {
 }
 
 class _DietPageState extends State<DietPage> {
-  final List<String> _options = [
-    'No specific diet',
-    'Vegetarian',
-    'Vegan',
-    'Keto',
-    'Paleo',
-    'Low-carb',
-    'Other',
+  final List<Map<String, String>> _options = [
+    {
+      'title': 'No specific diet',
+      'description': 'You eat a general diet without any specific restrictions.',
+    },
+    {
+      'title': 'Vegetarian',
+      'description': 'No meat or fish, but may include dairy and eggs.',
+    },
+    {
+      'title': 'Vegan',
+      'description': 'No animal products, including dairy, eggs, and honey.',
+    },
+    {
+      'title': 'Keto',
+      'description': 'Low-carb, high-fat diet focused on ketosis.',
+    },
+    {
+      'title': 'Paleo',
+      'description': 'Whole foods, lean meats, vegetables, no processed items.',
+    },
+    {
+      'title': 'Low-carb',
+      'description': 'Reduces carbohydrate intake, often for weight loss.',
+    },
+    {
+      'title': 'Other',
+      'description': 'A different diet not listed above.',
+    },
   ];
+
 
   String? _selected;
 
@@ -84,25 +106,40 @@ class _DietPageState extends State<DietPage> {
                     ),
                   ],
                 ),
-                child: ListView.separated(
-                  itemCount: _options.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final option = _options[index];
-                    return RadioListTile<String>(
-                      title: Text(option),
-                      value: option,
-                      groupValue: _selected,
-                      activeColor: primaryPink,
-                      contentPadding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      onChanged: (value) {
-                        setState(() => _selected = value);
-                      },
-                    );
-                  },
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  thickness: 4,
+                  radius: const Radius.circular(8),
+                  child: ListView.separated(
+                    itemCount: _options.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final option = _options[index];
+                      return RadioListTile<String>(
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(option['title']!, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 4),
+                            Text(
+                              option['description']!,
+                              style: const TextStyle(fontSize: 13, color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                        value: option['title']!,
+                        groupValue: _selected,
+                        activeColor: primaryPink,
+                        contentPadding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        onChanged: (value) {
+                          setState(() => _selected = value);
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
