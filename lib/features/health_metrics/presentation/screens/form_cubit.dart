@@ -170,14 +170,18 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
     await repository.saveHealthMetrics(model);
 
     // Analyze and save caloric requirements
-    final caloricResult = caloricRequirementService.analyze(
-      userId: userId,
-      model: model,
-    );
+    try{
+      final caloricResult = caloricRequirementService.analyze(
+        userId: userId,
+        model: model,
+      );
 
-    await caloricRequirementRepository.saveCaloricRequirement(
-      userId: userId,
-      result: caloricResult,
-    );
+      await caloricRequirementRepository.saveCaloricRequirement(
+        userId: userId,
+        result: caloricResult,
+      );
+    } catch (e) {
+      throw Exception("Failed to save caloric requirement: $e");
+    }
   }
 }
