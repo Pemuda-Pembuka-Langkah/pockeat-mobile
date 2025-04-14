@@ -107,7 +107,7 @@ class ReviewSubmitPage extends StatelessWidget {
                         _buildItem("Activity Level", formatActivityLevel(state.activityLevel)),
                         _buildItem("Diet Type", state.dietType ?? "-"),
                         _buildItem("Desired Weight", state.desiredWeight != null ? "${state.desiredWeight} kg" : "-"),
-                        _buildItem("Weekly Goal", state.weeklyGoal != null ? "${state.weeklyGoal} kg/week" : "-"),
+                        _buildItem("Weekly Goal", state.weeklyGoal != null ? "${state.weeklyGoal!.toStringAsFixed(1)} kg/week" : "-"),
                       ],
                     ),
                   ),

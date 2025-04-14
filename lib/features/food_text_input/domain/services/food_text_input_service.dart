@@ -1,6 +1,5 @@
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
-import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:uuid/uuid.dart';
 import 'package:firebase_auth/firebase_auth.dart';

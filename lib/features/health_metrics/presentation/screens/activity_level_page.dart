@@ -3,9 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'form_cubit.dart';
 
+/// A page that allows users to select their weekly physical activity level.
+///
+/// The selection updates the state managed by [HealthMetricsFormCubit] and is
+/// used in calculating the user's caloric requirements later in onboarding.
 class ActivityLevelPage extends StatelessWidget {
   const ActivityLevelPage({super.key});
 
+  /// Available activity levels with a label and description for each option.
   static final List<Map<String, String>> activityLevels = [
     {
       "value": "sedentary",
@@ -28,17 +33,18 @@ class ActivityLevelPage extends StatelessWidget {
       "description": "Daily exercise or intense exercise 3–4 times/week"
     },
     {
-      "value": "very_active",
+      "value": "very active",
       "label": "Very Active",
       "description": "Intense exercise 6–7 times/week"
     },
     {
-      "value": "extra_active",
+      "value": "extra active",
       "label": "Extra Active",
       "description": "Very intense daily exercise or physical job"
     },
   ];
 
+  /// Theme colors used for background and highlights.
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
 
@@ -52,6 +58,7 @@ class ActivityLevelPage extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () async {
+            // Navigate back based on onboarding progress status
             final prefs = await SharedPreferences.getInstance();
             final inProgress = prefs.getBool('onboardingInProgress') ?? true;
 
@@ -79,6 +86,7 @@ class ActivityLevelPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Section title
                   const Text(
                     "What best describes your weekly activity level?",
                     style: TextStyle(
@@ -89,6 +97,8 @@ class ActivityLevelPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  // Activity level options
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -115,7 +125,10 @@ class ActivityLevelPage extends StatelessWidget {
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 24),
+
+                  // "Next" button to continue onboarding
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black87,
@@ -127,23 +140,26 @@ class ActivityLevelPage extends StatelessWidget {
                     ),
                     onPressed: state.activityLevel != null
                         ? () async {
+                            // Mark onboarding as in progress and navigate
                             final prefs = await SharedPreferences.getInstance();
                             await prefs.setBool('onboardingInProgress', true);
                             Navigator.pushNamed(context, '/diet');
                           }
-                        : null,
+                        : null, // Disabled if no selection
                     child: const Center(child: Text("Next")),
                   ),
                 ],
               ),
             ),
           );
-
         },
       ),
     );
   }
 
+  /// Builds a single tappable activity level option.
+  ///
+  /// Tapping the option updates the selected activity level in the Cubit state.
   Widget _buildActivityOption(
     BuildContext context,
     String value,
