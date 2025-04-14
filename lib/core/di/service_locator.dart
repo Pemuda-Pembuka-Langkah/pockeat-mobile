@@ -47,6 +47,9 @@ import 'package:pockeat/features/authentication/services/profile_service_impl.da
 final getIt = GetIt.instance;
 // coverage:ignore-start
 Future<void> setupDependencies() async {
+  final prefs = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(prefs);
+
   // Register Firebase instances first
   getIt.registerSingleton<FirebaseAuth>(
     FirebaseAuth.instance,
@@ -154,9 +157,6 @@ Future<void> setupDependencies() async {
   
   // Initialize notifications
   await getIt<NotificationService>().initialize();
-
-  final prefs = await SharedPreferences.getInstance();
-  getIt.registerSingleton<SharedPreferences>(prefs);
   // Register feature modules
   // Make sure to register these modules after all their dependencies
   FoodLogHistoryModule.register();
