@@ -11,4 +11,10 @@ class InstabugClient {
   Future<void> logOut() async {
     await Instabug.logOut();
   }
+  
+  /// Shows the main Instabug reporting menu with all options
+  /// (Report a bug, Suggest an improvement, Ask a question)
+  Future<void> showReportingUI() async {
+    await Instabug.show();
+  }
 }

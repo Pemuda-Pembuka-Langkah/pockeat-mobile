@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:provider/provider.dart';
@@ -31,6 +32,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   late final LoginService _loginService;
   late final LogoutService _logoutService;
+  late final BugReportService _bugReportService;
   UserModel? _currentUser;
   bool _isLoading = true;
   String? _errorMessage;
@@ -43,6 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     _loginService = GetIt.instance<LoginService>();
     _logoutService = GetIt.instance<LogoutService>();
+    _bugReportService = GetIt.instance<BugReportService>();
     _loadUserData();
   }
 
@@ -642,14 +645,19 @@ class _ProfilePageState extends State<ProfilePage> {
             title: 'Laporkan Bug',
             subtitle: 'Bantu kami meningkatkan aplikasi',
             icon: Icons.bug_report_outlined,
-            onTap: () {
-              // Implementasi Instabug akan dilakukan nanti
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fitur laporan bug akan segera hadir'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+            onTap: () async {
+              // Tampilkan UI Instabug untuk pelaporan bug via service
+              final result = await _bugReportService.show();
+              
+              if (!result && mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Gagal membuka pelaporan bug'),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
           ),
           _buildDivider(),

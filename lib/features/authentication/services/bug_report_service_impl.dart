@@ -49,4 +49,17 @@ class BugReportServiceImpl implements BugReportService {
       return false;
     }
   }
+  
+  @override
+  Future<bool> show() async {
+    try {
+      await _instabugClient.showReportingUI();
+      return true;
+    } catch (e) {
+      // Log error ke console
+      final errorMsg = 'ERROR: Gagal menampilkan UI pelaporan bug Instabug: $e';
+      debugPrint(errorMsg);
+      return false;
+    }
+  }
 }

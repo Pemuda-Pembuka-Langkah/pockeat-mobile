@@ -18,4 +18,12 @@ abstract class BugReportService {
   /// 
   /// Returns: `true` jika data pengguna berhasil dihapus, `false` jika gagal
   Future<bool> clearUserData();
+  
+  /// Menampilkan UI pelaporan bug Instabug
+  /// 
+  /// Menampilkan dialog yang memungkinkan pengguna melaporkan bug,
+  /// memberikan saran, atau mengajukan pertanyaan
+  /// 
+  /// Returns: `true` jika  berhasil ditampilkan, `false` jika gagal
+  Future<bool> show();
 }
