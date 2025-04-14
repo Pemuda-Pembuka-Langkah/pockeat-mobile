@@ -141,6 +141,30 @@ void main() {
       expect(result.missingInfo!.contains('duration'), isTrue);
       // Don't check for 'intensity' as it might not be included in all cases
     });
+
+    test('parseExerciseResponse should handle general exceptions', () {
+      // Arrange - use a Map that will cause an exception when accessed
+      final Map<String, dynamic> invalidData = {
+        'calories_burned': 'not-a-number', // Will cause number format exception
+        'met_value': 'not-a-number', // Will cause number format exception
+      };
+
+      // Act
+      final result =
+          service.parseExerciseResponse(invalidData, 'jogging', 'test_user_id');
+
+      // Assert
+      expect(result.exerciseType, equals('unknown'));
+      expect(result.duration, equals('0 minutes'));
+      expect(result.intensity, equals('unknown'));
+      expect(result.estimatedCalories, equals(0));
+      expect(result.metValue, equals(0.0));
+      expect(result.missingInfo, contains('exercise_type'));
+      expect(result.missingInfo, contains('duration'));
+      expect(result.missingInfo, contains('intensity'));
+      expect(result.summary,
+          contains('Failed to parse exercise analysis response'));
+    });
   });
 
   group('ExerciseAnalysisService correction functionality', () {

@@ -16,8 +16,8 @@ class DailyCalorieStats {
     required this.caloriesBurned,
     required this.caloriesConsumed,
   }) : 
-    this.id = id ?? const Uuid().v4(),
-    this.netCalories = caloriesConsumed - caloriesBurned;
+    id = id ?? const Uuid().v4(),
+    netCalories = caloriesConsumed - caloriesBurned;
 
   Map<String, dynamic> toMap() => {
     'userId': userId,

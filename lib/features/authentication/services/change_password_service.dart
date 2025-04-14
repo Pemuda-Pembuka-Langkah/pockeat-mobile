@@ -7,6 +7,11 @@ abstract class ChangePasswordService {
   /// Memerlukan [newPassword] sebagai password baru dan
   /// [newPasswordConfirmation] untuk konfirmasi password baru
   ///
+  /// Parameter opsional [currentPassword] digunakan untuk re-autentikasi
+  /// jika Firebase memerlukan login ulang
+  ///
+  /// Parameter opsional [email] digunakan bersama [currentPassword] untuk re-autentikasi
+  ///
   /// Throws [ArgumentError] jika [newPassword] tidak sama dengan [newPasswordConfirmation]
   ///
   /// Mengembalikan [User] jika berhasil
@@ -15,6 +20,8 @@ abstract class ChangePasswordService {
   Future<User> changePassword({
     required String newPassword,
     required String newPasswordConfirmation,
+    String? currentPassword,
+    String? email,
   });
 
   /// Mengirim email reset password ke alamat [email]

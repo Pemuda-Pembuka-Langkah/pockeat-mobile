@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
 import 'package:pockeat/features/food_text_input/presentation/widgets/food_entry_form_page.dart';
-import 'package:pockeat/features/food_text_input/presentation/pages/nutrition_page.dart';
+import 'package:pockeat/features/food_text_input/presentation/screens/nutrition_page.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
 

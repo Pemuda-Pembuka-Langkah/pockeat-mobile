@@ -299,18 +299,18 @@ void main() {
         code: 'user-not-found',
         message: 'No user found for that email.',
       );
-      
+
       // Configure the mock to throw an exception when sendPasswordResetEmail is called
       when(mockFirebaseAuth.sendPasswordResetEmail(email: email))
           .thenThrow(exception);
-      
+
       // Act & Assert
       // Expect that calling sendPasswordResetEmail throws a FirebaseAuthException
       await expectLater(
         () => changePasswordService.sendPasswordResetEmail(email: email),
         throwsA(isA<FirebaseAuthException>()),
       );
-    }); 
+    });
     test('changePassword should call updatePassword when credentials are valid',
         () async {
       // Arrange
@@ -444,7 +444,7 @@ void main() {
               .having(
                 (e) => e.message,
                 'message',
-                'Untuk alasan keamanan, silakan login ulang sebelum mengubah password.',
+                'Untuk alasan keamanan, silakan masukkan password saat ini Anda.',
               ),
         ),
       );
