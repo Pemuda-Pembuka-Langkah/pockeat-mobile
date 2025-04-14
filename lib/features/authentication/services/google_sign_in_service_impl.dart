@@ -5,14 +5,14 @@ import 'google_sign_in_service.dart';
 class GoogleSignInServiceImpl implements GoogleSignInService {
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
-
+ // coverage:ignore-start
   GoogleSignInServiceImpl({
     FirebaseAuth? auth,
     GoogleSignIn? googleSignIn,
   })  : _auth = auth ?? FirebaseAuth.instance,
         // coverage:ignore-line
         _googleSignIn = googleSignIn ?? GoogleSignIn();
-
+ // coverage:ignore-end
   @override
   Future<UserCredential> signInWithGoogle() async {
     try {

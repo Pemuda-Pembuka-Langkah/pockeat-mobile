@@ -94,14 +94,6 @@ class DeepLinkServiceImpl implements DeepLinkService {
     }
   }
 
-  void _handleIncomingLink(Uri link) async {
-    try {
-      await handleDeepLink(link);
-      _deepLinkStreamController.add(link);
-    } catch (e) {
-      throw DeepLinkException('Error handling incoming link', originalError: e);
-    }
-  }
 
   @override
   Stream<Uri?> getInitialLink() async* {

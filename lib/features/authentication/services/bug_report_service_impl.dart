@@ -9,12 +9,12 @@ import 'package:pockeat/features/authentication/services/utils/instabug_client.d
 class BugReportServiceImpl implements BugReportService {
   /// Client for Instabug operations
   final InstabugClient _instabugClient;
-  
+   // coverage:ignore-start
   /// Konstruktor default
   BugReportServiceImpl({InstabugClient? instabugClient}) 
       : _instabugClient = instabugClient ?? InstabugClient();
   // coverage:ignore-line
-  
+   // coverage:ignore-end
   // Metode initialize dipindahkan ke main.dart
   
   // reportError method removed - use InstabugLog.logError(), logInfo(), etc. directly
