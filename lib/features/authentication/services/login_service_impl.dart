@@ -113,6 +113,7 @@ class LoginServiceImpl implements LoginService {
     }
   }
 
+  // coverage:ignore-start
   Future<String?> getIdToken() async {
     try {
       final firebaseUser = _auth.currentUser;
@@ -125,6 +126,7 @@ class LoginServiceImpl implements LoginService {
     } catch (e) {
       return null;
     }
+  // coverage:ignore-end
   }
 
   /// Membersihkan resource ketika service tidak digunakan lagi

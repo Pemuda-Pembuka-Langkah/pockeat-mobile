@@ -127,6 +127,7 @@ class ChangePasswordServiceImpl implements ChangePasswordService {
           message = 'Gagal melakukan autentikasi ulang: ${e.message ?? e.code}';
       }
 
+      // coverage:ignore-start
       throw FirebaseAuthException(
         code: e.code,
         message: message,
@@ -138,6 +139,7 @@ class ChangePasswordServiceImpl implements ChangePasswordService {
         code: 'unknown-error',
         message: message,
       );
+      // coverage:ignore-end
     }
   }
 

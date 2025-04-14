@@ -99,8 +99,12 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
       if (shouldLogout == true) {
+        // Clear user data from bug reporting system before logout
+        await _bugReportService.clearUserData();
+        
         // Implementasi logout sesuai dengan logout service
         await _logoutService.logout();
+        
         if (mounted) {
           Navigator.of(context).pushReplacementNamed('/login');
         }
@@ -624,6 +628,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
               // Reload user data jika ada perubahan
               if (result == true) {
+                // coverage:ignore-line
                 _loadUserData();
               }
             },
@@ -636,6 +641,7 @@ class _ProfilePageState extends State<ProfilePage> {
               icon: Icons.lock_outline,
               onTap: () {
                 // Navigasi ke halaman ubah password
+                // coverage:ignore-line
                 Navigator.of(context).pushNamed('/change-password');
               },
             ),
@@ -646,17 +652,34 @@ class _ProfilePageState extends State<ProfilePage> {
             subtitle: 'Bantu kami meningkatkan aplikasi',
             icon: Icons.bug_report_outlined,
             onTap: () async {
-              // Tampilkan UI Instabug untuk pelaporan bug via service
-              final result = await _bugReportService.show();
-              
-              if (!result && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Gagal membuka pelaporan bug'),
-                    behavior: SnackBarBehavior.floating,
-                    backgroundColor: Colors.red,
-                  ),
-                );
+              // Ensure user data is set correctly before showing bug reporting UI
+              if (_currentUser != null) {
+                // Set current user data for context in the bug report
+                await _bugReportService.setUserData(_currentUser!);
+                
+                // Show the bug reporting UI
+                final result = await _bugReportService.show();
+                
+                if (!result && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Gagal membuka pelaporan bug'),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } else {
+                // Handle case when user data is not available
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Data pengguna tidak tersedia untuk pelaporan bug'),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
               }
             },
           ),

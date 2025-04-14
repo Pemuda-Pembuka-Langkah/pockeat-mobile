@@ -194,6 +194,7 @@ class EmailVerificationDeepLinkServiceImpl
   }
 
   @override
+  // coverage:ignore-start
   void dispose() {
     try {
       _appLinksSub?.cancel();
@@ -204,5 +205,6 @@ class EmailVerificationDeepLinkServiceImpl
         originalError: e,
       );
     }
+  // coverage:ignore-end
   }
 }

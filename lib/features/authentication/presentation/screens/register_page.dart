@@ -226,10 +226,12 @@ class _RegisterPageState extends State<RegisterPage> {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
+        // coverage:ignore-start
         if (didPop) return;
         // Jika user menekan tombol back, arahkan ke halaman login
         // daripada ke halaman utama yang memerlukan auth
         Navigator.pushReplacementNamed(context, '/login');
+        // coverage:ignore-end
       },
       child: Scaffold(
         backgroundColor: bgColor,

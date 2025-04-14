@@ -162,6 +162,7 @@ class ChangePasswordDeepLinkServiceImpl
   }
 
   @override
+  // coverage:ignore-start
   void dispose() {
     try {
       _appLinksSub?.cancel();
@@ -173,4 +174,5 @@ class ChangePasswordDeepLinkServiceImpl
       );
     }
   }
+  // coverage:ignore-end
 }

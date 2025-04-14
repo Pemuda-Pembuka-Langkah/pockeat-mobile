@@ -91,7 +91,7 @@ Future<bool> _initializeInstabug(String flavor) async {
     // Inisialisasi SDK dengan token dari dotenv
     await Instabug.init(
       token: token,
-      invocationEvents: [InvocationEvent.floatingButton],
+      invocationEvents: [], // No automatic invocation events - only shown when explicitly called
       debugLogsLevel: logLevel,
     );
     

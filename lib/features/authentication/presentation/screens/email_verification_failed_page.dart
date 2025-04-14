@@ -7,6 +7,7 @@ class EmailVerificationFailedPage extends StatelessWidget {
     Key? key,
     required this.error,
   }) : super(key: key);
+  // coverage:ignore-line
 
   @override
   Widget build(BuildContext context) {

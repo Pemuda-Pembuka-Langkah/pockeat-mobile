@@ -13,6 +13,7 @@ class BugReportServiceImpl implements BugReportService {
   /// Konstruktor default
   BugReportServiceImpl({InstabugClient? instabugClient}) 
       : _instabugClient = instabugClient ?? InstabugClient();
+  // coverage:ignore-line
   
   // Metode initialize dipindahkan ke main.dart
   

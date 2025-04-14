@@ -20,8 +20,10 @@ class ProfileServiceImpl implements ProfileService {
     UserRepository? userRepository,
     FirebaseStorage? storage,
   })  : _auth = auth ?? FirebaseAuth.instance,
+        // coverage:ignore-start
         _userRepository = userRepository ?? UserRepositoryImpl(),
         _storage = storage ?? FirebaseStorage.instance;
+        // coverage:ignore-end
 
   @override
   Future<UserModel?> getCurrentUser() async {

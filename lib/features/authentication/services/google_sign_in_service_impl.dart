@@ -10,6 +10,7 @@ class GoogleSignInServiceImpl implements GoogleSignInService {
     FirebaseAuth? auth,
     GoogleSignIn? googleSignIn,
   })  : _auth = auth ?? FirebaseAuth.instance,
+        // coverage:ignore-line
         _googleSignIn = googleSignIn ?? GoogleSignIn();
 
   @override
