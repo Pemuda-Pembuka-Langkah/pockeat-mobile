@@ -36,6 +36,7 @@ jobs:
           echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
           echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
           echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "INSTABUG_TOKEN=${{ secrets.STAGING_INSTABUG_TOKEN }}" >> .env
 
       - name: Get dependencies
         run: flutter pub get
@@ -146,6 +147,7 @@ jobs:
           echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
           echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
           echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "INSTABUG_TOKEN=${{ secrets.STAGING_INSTABUG_TOKEN }}" >> .env
 
       - name: Get dependencies
         run: flutter pub get
