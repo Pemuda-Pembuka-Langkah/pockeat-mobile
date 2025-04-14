@@ -6,7 +6,6 @@ class HeaderWidget extends StatelessWidget {
   final Function(bool) onToggleView;
   final Color primaryGreen;
 
-  // ignore: use_super_parameters
   const HeaderWidget({
     Key? key,
     required this.isWeeklyView,
@@ -16,53 +15,32 @@ class HeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Exercise Progress',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+    // Get screen width to adjust font size and spacing
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Adjust font size based on screen size
+    double fontSize = screenWidth < 360 ? 18.0 : 24.0; // Smaller font for smaller screens
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Exercise Progress',
+            style: TextStyle(
+              fontSize: fontSize, // Dynamic font size
+              fontWeight: FontWeight.bold,
             ),
-            Text(
-              'Track your fitness journey',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
-            ),
-          ],
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.black12),
           ),
-          child: Row(
-            children: [
-              ToggleButtonWidget(
-                text: 'Weekly',
-                isSelected: isWeeklyView,
-                onTap: () => onToggleView(true),
-                primaryColor: primaryGreen,
-              ),
-              ToggleButtonWidget(
-                text: 'Monthly',
-                isSelected: !isWeeklyView,
-                onTap: () => onToggleView(false),
-                primaryColor: primaryGreen,
-              ),
-            ],
+          ToggleButtonWidget(
+            text: isWeeklyView ? 'Weekly' : 'Monthly',
+            isSelected: isWeeklyView,
+            onTap: () => onToggleView(!isWeeklyView),
+            primaryColor: primaryGreen,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
