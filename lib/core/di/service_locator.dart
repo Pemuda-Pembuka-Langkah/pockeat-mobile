@@ -39,6 +39,7 @@ import 'package:pockeat/features/authentication/services/change_password_deeplin
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
@@ -49,6 +50,9 @@ import 'package:pockeat/features/authentication/services/profile_service_impl.da
 final getIt = GetIt.instance;
 // coverage:ignore-start
 Future<void> setupDependencies() async {
+  final prefs = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(prefs);
+
   // Register Firebase instances first
   getIt.registerSingleton<FirebaseAuth>(
     FirebaseAuth.instance,
@@ -163,7 +167,6 @@ Future<void> setupDependencies() async {
   
   // Initialize notifications
   await getIt<NotificationService>().initialize();
-
   // Register feature modules
   // Make sure to register these modules after all their dependencies
   FoodLogHistoryModule.register();

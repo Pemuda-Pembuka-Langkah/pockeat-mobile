@@ -18,6 +18,12 @@ abstract class NotificationService {
 
   // Membatalkan semua notifikasi
   Future<void> cancelAllNotifications();
+  
+  // Mengaktifkan atau menonaktifkan channel notifikasi
+  Future<void> toggleNotification(String channelId, bool enabled);
+
+  // Memeriksa apakah notifikasi aktif
+  Future<bool> isNotificationEnabled(String channelId);
 
 }
 

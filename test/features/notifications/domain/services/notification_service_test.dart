@@ -8,6 +8,7 @@ import 'package:pockeat/core/di/service_locator.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Mocking kelas yang dibutuhkan
 class MockFirebaseMessaging extends Mock implements FirebaseMessaging {}
@@ -28,12 +29,15 @@ class MockAndroidNotification extends Mock implements AndroidNotification {}
 
 class MockNotificationResponse extends Mock implements NotificationResponse {}
 
+class MockSharedPreferences extends Mock implements SharedPreferences {}
+
 void main() {
   late NotificationService notificationService;
   late MockFirebaseMessaging mockFirebaseMessaging;
   late MockFlutterLocalNotificationsPlugin mockFlutterLocalNotificationsPlugin;
   late MockAndroidFlutterLocalNotificationsPlugin
       mockAndroidFlutterLocalNotificationsPlugin;
+  late MockSharedPreferences mockPrefs;
 
   setUpAll(() {
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -92,17 +96,22 @@ void main() {
     if (getIt.isRegistered<FlutterLocalNotificationsPlugin>()) {
       getIt.unregister<FlutterLocalNotificationsPlugin>();
     }
+    if (getIt.isRegistered<SharedPreferences>()) {
+      getIt.unregister<SharedPreferences>();
+    }
 
     // Setup mocks
     mockFirebaseMessaging = MockFirebaseMessaging();
     mockFlutterLocalNotificationsPlugin = MockFlutterLocalNotificationsPlugin();
     mockAndroidFlutterLocalNotificationsPlugin =
         MockAndroidFlutterLocalNotificationsPlugin();
+    mockPrefs = MockSharedPreferences();
 
     // register mockFirebaseMessaging and mockFlutterLocalNotificationsPlugin
     getIt.registerSingleton<FirebaseMessaging>(mockFirebaseMessaging);
     getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
         mockFlutterLocalNotificationsPlugin);
+    getIt.registerSingleton<SharedPreferences>(mockPrefs);
   });
 
   setUp(() async {
@@ -370,6 +379,166 @@ void main() {
             any(),
             any(),
             payload: any(named: 'payload'),
+          ));
+    });
+  });
+
+  group('Notification Toggle Tests', () {
+    test('toggleNotification should enable notification correctly', () async {
+      // Arrange
+      const String channelId = 'calories_reminder_channel';
+      const String channelId2 = 'workout_reminder_channel';
+      when(() => mockPrefs.setBool('notification_status_$channelId', true))
+          .thenAnswer((_) async => true);
+      when(() => mockPrefs.getBool('notification_status_$channelId'))
+          .thenReturn(true);
+
+      // Act
+      await notificationService.toggleNotification(channelId, true);
+
+      // Assert
+      verify(() => mockPrefs.setBool('notification_status_$channelId', true))
+          .called(1);
+      verify(() => mockFlutterLocalNotificationsPlugin.zonedSchedule(
+            any(),
+            'Waktu Tracking Kalori!',
+            'Jangan lupa untuk mencatat asupan kalori hari ini',
+            any(),
+            any(),
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            matchDateTimeComponents: DateTimeComponents.time,
+            payload: 'daily_calorie_tracking',
+          )).called(1);
+
+      reset(mockPrefs);
+      when(() => mockPrefs.setBool('notification_status_$channelId2', true))
+          .thenAnswer((_) async => true);
+      when(() => mockPrefs.getBool('notification_status_$channelId2'))
+          .thenReturn(true);
+
+      // Act
+      await notificationService.toggleNotification(channelId2, true);
+
+      // Assert
+      verify(() => mockPrefs.setBool('notification_status_$channelId2', true))
+          .called(1);
+      verify(() => mockFlutterLocalNotificationsPlugin.zonedSchedule(
+            any(),
+            'Waktunya Workout!',
+            'Jangan lewatkan sesi workout hari ini',
+            any(),
+            any(),
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+                UILocalNotificationDateInterpretation.absoluteTime,
+            matchDateTimeComponents: DateTimeComponents.time,
+            payload: 'daily_workout',
+          )).called(1);
+    });
+
+    test('toggleNotification should disable notification correctly', () async {
+      // Arrange
+      const String channelId = 'calories_reminder_channel';
+      when(() => mockPrefs.setBool('notification_status_$channelId', false))
+          .thenAnswer((_) async => true);
+
+      // Act
+      await notificationService.toggleNotification(channelId, false);
+
+      // Assert
+      verify(() => mockPrefs.setBool('notification_status_$channelId', false))
+          .called(1);
+      verify(() =>
+              mockFlutterLocalNotificationsPlugin.cancel('daily_calorie_reminder'.hashCode))
+          .called(1);
+
+      reset(mockPrefs);
+      const String channelId2 = 'workout_reminder_channel';
+      when(() => mockPrefs.setBool('notification_status_$channelId2', false))
+          .thenAnswer((_) async => true);
+
+      // Act
+      await notificationService.toggleNotification(channelId2, false);
+
+      // Assert
+      verify(() => mockPrefs.setBool('notification_status_$channelId2', false))
+          .called(1);
+      verify(() =>
+              mockFlutterLocalNotificationsPlugin.cancel('daily_workout_reminder'.hashCode))
+          .called(1);
+    });
+
+    test('isNotificationEnabled should return correct status', () async {
+      // Arrange
+      reset(mockPrefs);
+      const String channelId = 'calories_reminder_channel';
+      when(() => mockPrefs.getBool('notification_status_$channelId'))
+          .thenReturn(true);
+
+      
+      // Act
+      final result = await notificationService.isNotificationEnabled(channelId);
+
+      // Assert
+      expect(result, true);
+      verify(() => mockPrefs.getBool('notification_status_$channelId')).called(1);
+    });
+
+    test('isNotificationEnabled should return false when no status saved', () async {
+      // Arrange
+      reset(mockPrefs);
+      const String channelId = 'calories_reminder_channel';
+      when(() => mockPrefs.getBool('notification_status_$channelId'))
+          .thenReturn(null);
+      
+      // Act
+      final result = await notificationService.isNotificationEnabled(channelId);
+
+      // Assert
+      expect(result, false);
+      verify(() => mockPrefs.getBool('notification_status_$channelId')).called(1);
+    });
+
+    test('_setupDefaultRecurringNotifications should schedule enabled notifications only',
+        () async {
+      // Arrange
+      when(() => mockPrefs.getBool('notification_status_calories_reminder_channel'))
+          .thenReturn(true);
+      when(() => mockPrefs.getBool('notification_status_workout_reminder_channel'))
+          .thenReturn(false);
+
+      // Re-initialize service to trigger _setupDefaultRecurringNotifications
+      await notificationService.initialize();
+
+      // Assert
+      // Verify calories reminder was scheduled
+      verify(() => mockFlutterLocalNotificationsPlugin.zonedSchedule(
+            any(),
+            'Waktu Tracking Kalori!',
+            'Jangan lupa untuk mencatat asupan kalori hari ini',
+            any(),
+            any(),
+            androidScheduleMode: any(named: 'androidScheduleMode'),
+            uiLocalNotificationDateInterpretation:
+                any(named: 'uiLocalNotificationDateInterpretation'),
+            matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+            payload: 'daily_calorie_tracking',
+          )).called(1);
+
+      // Verify workout reminder was not scheduled
+      verifyNever(() => mockFlutterLocalNotificationsPlugin.zonedSchedule(
+            any(),
+            'Waktunya Workout!',
+            any(),
+            any(),
+            any(),
+            androidScheduleMode: any(named: 'androidScheduleMode'),
+            uiLocalNotificationDateInterpretation:
+                any(named: 'uiLocalNotificationDateInterpretation'),
+            matchDateTimeComponents: any(named: 'matchDateTimeComponents'),
+            payload: 'daily_workout',
           ));
     });
   });
