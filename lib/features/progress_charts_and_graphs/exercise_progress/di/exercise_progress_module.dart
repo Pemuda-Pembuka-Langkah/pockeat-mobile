@@ -5,6 +5,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/do
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/repositories/exercise_progress_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
 
+// coverage:ignore-start
 class ExerciseProgressModule {
   static void register() {
     final getIt = GetIt.instance;
@@ -29,3 +30,4 @@ class ExerciseProgressModule {
     }
   }
 }
+// coverage:ignore-end
