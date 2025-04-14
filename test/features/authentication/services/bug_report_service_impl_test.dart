@@ -155,4 +155,31 @@ void main() {
       expect(result, false);
     });
   });
+  
+  group('show', () {
+    test('should show bug reporting UI successfully', () async {
+      // Arrange
+      when(mockInstabugClient.showReportingUI())
+          .thenAnswer((_) async => null);
+      
+      // Act
+      final result = await bugReportService.show();
+      
+      // Assert
+      expect(result, true);
+      verify(mockInstabugClient.showReportingUI()).called(1);
+    });
+    
+    test('should return false when showReportingUI throws an exception', () async {
+      // Arrange
+      when(mockInstabugClient.showReportingUI())
+          .thenThrow(Exception('Show reporting UI error'));
+      
+      // Act
+      final result = await bugReportService.show();
+      
+      // Assert
+      expect(result, false);
+    });
+  });
 }

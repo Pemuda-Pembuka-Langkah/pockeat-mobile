@@ -11,10 +11,12 @@ import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 
 @GenerateNiceMocks([
   MockSpec<LoginService>(),
   MockSpec<LogoutService>(),
+  MockSpec<BugReportService>(),
   MockSpec<NavigatorObserver>(onMissingStub: OnMissingStub.returnDefault),
   MockSpec<FirebaseAuth>(),
   MockSpec<User>(),
@@ -28,6 +30,7 @@ void main() {
   // Mock dependencies
   late MockLoginService mockLoginService;
   late MockLogoutService mockLogoutService;
+  late MockBugReportService mockBugReportService;
   late MockNavigatorObserver mockNavigatorObserver;
   late MockFirebaseAuth mockAuth;
   late MockUser mockUser;
@@ -42,6 +45,7 @@ void main() {
     // Initialize mocks
     mockLoginService = MockLoginService();
     mockLogoutService = MockLogoutService();
+    mockBugReportService = MockBugReportService();
     mockNavigatorObserver = MockNavigatorObserver();
     mockAuth = MockFirebaseAuth();
     mockUser = MockUser();
@@ -55,8 +59,12 @@ void main() {
     if (getIt.isRegistered<LogoutService>()) {
       getIt.unregister<LogoutService>();
     }
+    if (getIt.isRegistered<BugReportService>()) {
+      getIt.unregister<BugReportService>();
+    }
     getIt.registerSingleton<LoginService>(mockLoginService);
     getIt.registerSingleton<LogoutService>(mockLogoutService);
+    getIt.registerSingleton<BugReportService>(mockBugReportService);
 
     // Setup default User behavior
     when(mockUser.uid).thenReturn('test-uid');
@@ -78,6 +86,7 @@ void main() {
   tearDown(() {
     reset(mockLoginService);
     reset(mockLogoutService);
+    reset(mockBugReportService);
     reset(mockNavigatorObserver);
     reset(mockAuth);
     reset(mockUser);
@@ -232,6 +241,56 @@ void main() {
 
       // Verify error snackbar shown
       expect(find.textContaining('Gagal logout'), findsOneWidget);
+    });
+    
+    testWidgets('Menampilkan UI pelaporan bug saat tombol Report Bug ditekan',
+        (WidgetTester tester) async {
+      // Setup user and successful bug report response
+      when(mockLoginService.getCurrentUser())
+          .thenAnswer((_) async => createTestUser());
+      when(mockBugReportService.show()).thenAnswer((_) async => true);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Find Report Bug button
+      final reportBugFinder = find.text('Laporkan Bug');
+      expect(reportBugFinder, findsOneWidget);
+
+      // Tap Report Bug button
+      await tester.ensureVisible(reportBugFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(reportBugFinder);
+      await tester.pumpAndSettle();
+
+      // Verify BugReportService.show was called
+      verify(mockBugReportService.show()).called(1);
+    });
+    
+    testWidgets('Menampilkan error saat gagal menampilkan UI pelaporan bug',
+        (WidgetTester tester) async {
+      // Setup user and failed bug report response
+      when(mockLoginService.getCurrentUser())
+          .thenAnswer((_) async => createTestUser());
+      when(mockBugReportService.show()).thenAnswer((_) async => false);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Find Report Bug button
+      final reportBugFinder = find.text('Laporkan Bug');
+      expect(reportBugFinder, findsOneWidget);
+
+      // Tap Report Bug button
+      await tester.ensureVisible(reportBugFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(reportBugFinder);
+      await tester.pumpAndSettle();
+
+      // Verify error snackbar shown
+      expect(find.text('Gagal membuka pelaporan bug'), findsOneWidget);
     });
   });
 
