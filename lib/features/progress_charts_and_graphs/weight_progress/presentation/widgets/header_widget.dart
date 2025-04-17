@@ -6,10 +6,10 @@ class HeaderWidget extends StatelessWidget {
   final Color primaryPink;
   
   const HeaderWidget({
-    Key? key,
+    super.key,
     required this.weightStatus,
     required this.primaryPink,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

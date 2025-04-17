@@ -113,6 +113,7 @@ class LoginServiceImpl implements LoginService {
   }
 
   // coverage:ignore-start
+  @override
   Future<String?> getIdToken() async {
     try {
       final firebaseUser = _auth.currentUser;

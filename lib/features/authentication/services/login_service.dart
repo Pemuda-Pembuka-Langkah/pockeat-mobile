@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
 /// LoginService menangani operasi autentikasi user,
