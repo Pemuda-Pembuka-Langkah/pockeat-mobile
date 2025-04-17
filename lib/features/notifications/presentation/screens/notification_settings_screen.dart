@@ -67,13 +67,14 @@ class _NotificationSettingsScreenState
       ),
       NotificationChannels.caloriesReminder,
     );
-    // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Pengingat kalori harian telah diatur'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pengingat kalori harian telah diatur'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<void> _scheduleOneMinuteNotification() async {
@@ -86,13 +87,14 @@ class _NotificationSettingsScreenState
       ),
       NotificationChannels.caloriesReminder,
     );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Notifikasi akan muncul dalam 1 menit'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Notifikasi akan muncul dalam 1 menit'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   String _formatTimeOfDay(TimeOfDay tod) {
