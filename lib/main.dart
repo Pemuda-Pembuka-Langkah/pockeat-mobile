@@ -6,6 +6,7 @@ import 'package:pockeat/config/staging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:instabug_flutter/instabug_flutter.dart';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
@@ -67,10 +68,52 @@ import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
+/// Initialize Instabug with token from .env file
+Future<bool> _initializeInstabug(String flavor) async {
+  try {
+    // Ambil token dari dotenv sesuai konfigurasi di GitHub workflow
+    final token = dotenv.env['INSTABUG_TOKEN'];
+    if (token == null || token.isEmpty) {
+      debugPrint('ERROR: INSTABUG_TOKEN tidak ditemukan di dotenv');
+      return false;
+    }
+    
+    // Log inisialisasi
+    debugPrint('Memulai inisialisasi Instabug dengan token: ${token.substring(0, 3)}...');
+    
+    // Tentukan level log berdasarkan environment dari dotenv
+    final LogLevel logLevel = flavor.toLowerCase() == 'production' 
+        ? LogLevel.error  // Production gunakan error level saja
+        : LogLevel.debug; // Selain production gunakan debug level
+    
+    debugPrint('Instabug diinisialisasi dengan log level: $logLevel untuk flavor: $flavor');
+    
+    // Inisialisasi SDK dengan token dari dotenv
+    await Instabug.init(
+      token: token,
+      invocationEvents: [], // No automatic invocation events - only shown when explicitly called
+      debugLogsLevel: logLevel,
+    );
+    
+    return true;
+  } catch (e) {
+    // Log error dengan debugPrint dan Instabug
+    final errorMsg = 'FATAL ERROR: Gagal menginisialisasi Instabug: $e';
+    debugPrint(errorMsg);
+    return false;
+  }
+}
+
+// Note: We initialize Instabug directly in main.dart instead of using BugReportService
+// because initialization needs to happen early in the app lifecycle
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
+
+  // Initialize Instabug
+  await _initializeInstabug(flavor);
 
   await Firebase.initializeApp(
     options: flavor == 'production'

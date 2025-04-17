@@ -12,13 +12,18 @@ void main() {
   late MockFirebaseAuth mockFirebaseAuth;
   late ChangePasswordServiceImpl changePasswordService;
   late MockUser mockUser;
+  late MockUserCred mockUserCred;
 
   setUp(() {
     mockFirebaseAuth = MockFirebaseAuth();
     mockUser = MockUser();
+    mockUserCred = MockUserCred();
     changePasswordService = ChangePasswordServiceImpl(
       auth: mockFirebaseAuth,
     );
+    // Default setup for current user
+    when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
+    when(mockUser.email).thenReturn('test@example.com');
   });
 
   group('ChangePasswordServiceImpl - confirmPasswordReset', () {
@@ -707,6 +712,191 @@ void main() {
                 'message',
                 'Terjadi kesalahan tidak terduga saat mengubah password. Silakan coba lagi nanti.',
               ),
+        ),
+      );
+    });
+  });
+
+  group('ChangePasswordServiceImpl - reauthenticateUser', () {
+    test('reauthenticateUser should successfully reauthenticate user', () async {
+      // Arrange
+      const email = 'test@example.com';
+      const password = 'password123';
+      
+      // Mock user reauthentication
+      when(mockUser.reauthenticateWithCredential(any))
+          .thenAnswer((_) async => mockUserCred);
+      
+      // Act
+      await changePasswordService.reauthenticateUser(
+        email: email,
+        password: password,
+      );
+      
+      // Assert
+      verify(mockUser.reauthenticateWithCredential(any)).called(1);
+    });
+    
+    test('reauthenticateUser should handle user-mismatch error', () async {
+      // Arrange
+      const email = 'wrong@example.com';
+      const password = 'password123';
+      
+      // Mock reauthentication failure
+      when(mockUser.reauthenticateWithCredential(any)).thenThrow(
+        FirebaseAuthException(
+          code: 'user-mismatch',
+          message: 'Original error message',
+        ),
+      );
+      
+      // Act & Assert
+      expect(
+        () => changePasswordService.reauthenticateUser(
+          email: email,
+          password: password,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'user-mismatch')
+              .having((e) => e.message, 'message', 'Email yang dimasukkan tidak cocok dengan akun saat ini.'),
+        ),
+      );
+    });
+    
+    test('reauthenticateUser should handle wrong-password error', () async {
+      // Arrange
+      const email = 'test@example.com';
+      const password = 'wrongpassword';
+      
+      // Mock reauthentication failure
+      when(mockUser.reauthenticateWithCredential(any)).thenThrow(
+        FirebaseAuthException(
+          code: 'wrong-password',
+          message: 'Original error message',
+        ),
+      );
+      
+      // Act & Assert
+      expect(
+        () => changePasswordService.reauthenticateUser(
+          email: email,
+          password: password,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'wrong-password')
+              .having((e) => e.message, 'message', 'Password yang dimasukkan salah.'),
+        ),
+      );
+    });
+  });
+
+  group('ChangePasswordServiceImpl - changePassword', () {
+    test('changePassword should successfully change password with current password', () async {
+      // Arrange
+      const newPassword = 'newPassword123';
+      const currentPassword = 'currentPassword123';
+      
+      // Mock user reauthentication
+      when(mockUser.reauthenticateWithCredential(any))
+          .thenAnswer((_) async => mockUserCred);
+      
+      // Mock password update
+      when(mockUser.updatePassword(newPassword))
+          .thenAnswer((_) async => {});
+      
+      // Act
+      final result = await changePasswordService.changePassword(
+        newPassword: newPassword,
+        newPasswordConfirmation: newPassword,
+        currentPassword: currentPassword,
+      );
+      
+      // Assert
+      expect(result, isNotNull);
+      verify(mockUser.updatePassword(newPassword)).called(1);
+    });
+    
+    test('changePassword should throw when passwords do not match', () async {
+      // Arrange
+      const newPassword = 'newPassword123';
+      const differentPassword = 'differentPassword456';
+      const currentPassword = 'currentPassword123';
+      
+      // Act & Assert
+      expect(
+        () => changePasswordService.changePassword(
+          newPassword: newPassword,
+          newPasswordConfirmation: differentPassword,
+          currentPassword: currentPassword,
+        ),
+        throwsA(
+          isA<ArgumentError>()
+              .having((e) => e.message, 'message', 'Konfirmasi password baru tidak sesuai dengan password baru.')
+        ),
+      );
+    });
+    
+    test('changePassword should handle weak-password error', () async {
+      // Arrange
+      const newPassword = 'weak';
+      const currentPassword = 'currentPassword123';
+      
+      // Mock user reauthentication
+      when(mockUser.reauthenticateWithCredential(any))
+          .thenAnswer((_) async => mockUserCred);
+      
+      // Mock password update failure
+      when(mockUser.updatePassword(newPassword)).thenThrow(
+        FirebaseAuthException(
+          code: 'weak-password',
+          message: 'Password should be at least 6 characters',
+        ),
+      );
+      
+      // Act & Assert
+      expect(
+        () => changePasswordService.changePassword(
+          newPassword: newPassword,
+          newPasswordConfirmation: newPassword,
+          currentPassword: currentPassword,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'weak-password')
+              .having((e) => e.message, 'message', contains('Password')),
+        ),
+      );
+    });
+    
+    test('changePassword should handle requires-recent-login error', () async {
+      // Arrange
+      const newPassword = 'newPassword123';
+      const currentPassword = 'currentPassword123';
+      
+      // Mock user reauthentication
+      when(mockUser.reauthenticateWithCredential(any))
+          .thenAnswer((_) async => mockUserCred);
+      
+      // Mock password update failure
+      when(mockUser.updatePassword(newPassword)).thenThrow(
+        FirebaseAuthException(
+          code: 'requires-recent-login',
+          message: 'This operation requires recent authentication.',
+        ),
+      );
+      
+      // Act & Assert
+      expect(
+        () => changePasswordService.changePassword(
+          newPassword: newPassword,
+          newPasswordConfirmation: newPassword,
+          currentPassword: currentPassword,
+        ),
+        throwsA(
+          isA<FirebaseAuthException>()
+              .having((e) => e.code, 'code', 'requires-recent-login'),
         ),
       );
     });

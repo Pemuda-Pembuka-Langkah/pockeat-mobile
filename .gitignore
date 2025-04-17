@@ -81,3 +81,7 @@ local.properties
 android/app/.cxx/
 
 *.lnk
+.fvmrc
+
+# FVM Version Cache
+.fvm/

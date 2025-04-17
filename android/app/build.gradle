@@ -63,6 +63,8 @@ repositories {
 
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+    // Add support for older Flutter plugin registration API
+    implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
 }
 
 

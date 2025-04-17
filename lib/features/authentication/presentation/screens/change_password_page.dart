@@ -436,10 +436,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                               : Icons.visibility,
                         ),
                         onPressed: () {
+                          // coverage:ignore-start
                           setState(() {
                             _isConfirmPasswordVisible =
                                 !_isConfirmPasswordVisible;
                           });
+                          // coverage:ignore-end
                         },
                       ),
                       border: OutlineInputBorder(

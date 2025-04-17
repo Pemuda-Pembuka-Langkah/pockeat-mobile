@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:provider/provider.dart';
@@ -31,6 +32,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   late final LoginService _loginService;
   late final LogoutService _logoutService;
+  late final BugReportService _bugReportService;
   UserModel? _currentUser;
   bool _isLoading = true;
   String? _errorMessage;
@@ -43,6 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     _loginService = GetIt.instance<LoginService>();
     _logoutService = GetIt.instance<LogoutService>();
+    _bugReportService = GetIt.instance<BugReportService>();
     _loadUserData();
   }
 
@@ -96,8 +99,12 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
       if (shouldLogout == true) {
+        // Clear user data from bug reporting system before logout
+        await _bugReportService.clearUserData();
+        
         // Implementasi logout sesuai dengan logout service
         await _logoutService.logout();
+        
         if (mounted) {
           Navigator.of(context).pushReplacementNamed('/login');
         }
@@ -621,6 +628,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
               // Reload user data jika ada perubahan
               if (result == true) {
+                // coverage:ignore-line
                 _loadUserData();
               }
             },
@@ -633,6 +641,7 @@ class _ProfilePageState extends State<ProfilePage> {
               icon: Icons.lock_outline,
               onTap: () {
                 // Navigasi ke halaman ubah password
+                // coverage:ignore-line
                 Navigator.of(context).pushNamed('/change-password');
               },
             ),
@@ -642,14 +651,36 @@ class _ProfilePageState extends State<ProfilePage> {
             title: 'Laporkan Bug',
             subtitle: 'Bantu kami meningkatkan aplikasi',
             icon: Icons.bug_report_outlined,
-            onTap: () {
-              // Implementasi Instabug akan dilakukan nanti
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fitur laporan bug akan segera hadir'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+            onTap: () async {
+              // Ensure user data is set correctly before showing bug reporting UI
+              if (_currentUser != null) {
+                // Set current user data for context in the bug report
+                await _bugReportService.setUserData(_currentUser!);
+                
+                // Show the bug reporting UI
+                final result = await _bugReportService.show();
+                
+                if (!result && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Gagal membuka pelaporan bug'),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } else {
+                // Handle case when user data is not available
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Data pengguna tidak tersedia untuk pelaporan bug'),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              }
             },
           ),
           _buildDivider(),

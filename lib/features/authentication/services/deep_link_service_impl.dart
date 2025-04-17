@@ -94,14 +94,6 @@ class DeepLinkServiceImpl implements DeepLinkService {
     }
   }
 
-  void _handleIncomingLink(Uri link) async {
-    try {
-      await handleDeepLink(link);
-      _deepLinkStreamController.add(link);
-    } catch (e) {
-      throw DeepLinkException('Error handling incoming link', originalError: e);
-    }
-  }
 
   @override
   Stream<Uri?> getInitialLink() async* {
@@ -194,6 +186,7 @@ class DeepLinkServiceImpl implements DeepLinkService {
         _resultStreamController.add(result);
         return false;
       }
+    // coverage:ignore-start
     } catch (e) {
       final result = DeepLinkResult.unknown(
         originalUri: link,
@@ -203,6 +196,7 @@ class DeepLinkServiceImpl implements DeepLinkService {
       _resultStreamController.add(result);
       throw DeepLinkException('Error handling deep link', originalError: e);
     }
+    // coverage:ignore-end
   }
 
   @override

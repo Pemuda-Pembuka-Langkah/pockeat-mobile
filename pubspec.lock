@@ -792,6 +792,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1+1"
+  instabug_flutter:
+    dependency: "direct main"
+    description:
+      name: instabug_flutter
+      sha256: c17513d000a1d6ecf5ee9cd1d820760143985b5b006d06c65744db949988aa17
+      url: "https://pub.dev"
+    source: hosted
+    version: "14.1.0"
   intl:
     dependency: "direct main"
     description:

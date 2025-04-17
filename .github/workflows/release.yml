@@ -19,7 +19,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.29.0"
+          flutter-version: "3.27.4"
           channel: "stable"
           cache: true
 
@@ -38,6 +38,7 @@ jobs:
           echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
           echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
           echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "INSTABUG_TOKEN=${{ secrets.PRODUCTION_INSTABUG_TOKEN }}" >> .env
 
       - name: Get dependencies
         run: flutter pub get
@@ -86,7 +87,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.29.0"
+          flutter-version: "3.27.4"
           channel: "stable"
           cache: true
 
@@ -105,6 +106,7 @@ jobs:
           echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
           echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
           echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "INSTABUG_TOKEN=${{ secrets.PRODUCTION_INSTABUG_TOKEN }}" >> .env
 
       - name: Get dependencies
         run: flutter pub get
