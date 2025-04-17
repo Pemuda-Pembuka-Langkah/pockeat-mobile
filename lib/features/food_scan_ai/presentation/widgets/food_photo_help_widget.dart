@@ -4,9 +4,9 @@ class FoodPhotoHelpWidget extends StatelessWidget {
   final Color primaryColor;
   
   const FoodPhotoHelpWidget({
-    Key? key,
+    super.key,
     required this.primaryColor,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

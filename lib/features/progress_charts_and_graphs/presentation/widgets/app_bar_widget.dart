@@ -7,10 +7,10 @@ class AppBarWidget extends StatelessWidget {
   final VoidCallback onCalendarPressed;
 
   const AppBarWidget({
-    Key? key,
+    super.key,
     required this.colors,
     required this.onCalendarPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

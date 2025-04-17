@@ -67,7 +67,6 @@ void main() {
         () async {
       // Arrange
       final mockFile = MockTestFile();
-      final bytes = Uint8List.fromList([1, 2, 3]);
 
       // Act
       final response =

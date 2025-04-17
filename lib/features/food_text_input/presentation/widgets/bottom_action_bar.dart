@@ -154,6 +154,7 @@ class TextBottomActionBar extends StatelessWidget {
               }
               return true;
             } catch (e) {
+              // ignore: use_build_context_synchronously
               showSnackBarMessage(context, 'Failed to correct analysis: ${e.toString()}', backgroundColor: Colors.red);
               return false;
             }

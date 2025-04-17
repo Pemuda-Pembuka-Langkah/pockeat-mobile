@@ -24,7 +24,7 @@ class GoogleSignInButton extends StatelessWidget {
         onPressed: () async {
           try {
             final service = googleAuthService ?? GetIt.I<GoogleSignInService>();
-            final userCredential = await service.signInWithGoogle();
+            await service.signInWithGoogle();
 
             // Navigate to home page on successful login
             if (context.mounted) {

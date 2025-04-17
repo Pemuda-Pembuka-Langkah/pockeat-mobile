@@ -5,21 +5,23 @@ import 'package:pockeat/features/notifications/domain/model/notification_model.d
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
-  const NotificationSettingsScreen({Key? key}) : super(key: key);
+  const NotificationSettingsScreen({super.key});
 
   @override
-  State<NotificationSettingsScreen> createState() => _NotificationSettingsScreenState();
+  State<NotificationSettingsScreen> createState() =>
+      _NotificationSettingsScreenState();
 }
 
-class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
+class _NotificationSettingsScreenState
+    extends State<NotificationSettingsScreen> {
   final NotificationService _notificationService = getIt<NotificationService>();
   bool _isReminderEnabled = false;
-  TimeOfDay _reminderTime = const TimeOfDay(hour: 19, minute: 0); // Default: 19:00
+  TimeOfDay _reminderTime =
+      const TimeOfDay(hour: 19, minute: 0); // Default: 19:00
 
   @override
   void initState() {
     super.initState();
-    // TODO: Load saved settings
   }
 
   Future<void> _selectTime(BuildContext context) async {
@@ -65,6 +67,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       ),
       NotificationChannels.caloriesReminder,
     );
+    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Pengingat kalori harian telah diatur'),
@@ -83,7 +86,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       ),
       NotificationChannels.caloriesReminder,
     );
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Notifikasi akan muncul dalam 1 menit'),
@@ -232,4 +235,4 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       ),
     );
   }
-} 
+}

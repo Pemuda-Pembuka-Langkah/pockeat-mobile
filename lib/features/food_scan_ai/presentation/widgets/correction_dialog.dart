@@ -135,6 +135,7 @@ class _CorrectionDialogState extends State<CorrectionDialog> {
                         await widget.onSubmit(_correctionController.text.trim());
                         
                         if (mounted) {
+                          // ignore: use_build_context_synchronously
                           Navigator.pop(context);
                         }
                       },
