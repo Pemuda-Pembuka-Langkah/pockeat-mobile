@@ -650,6 +650,141 @@ void main() {
           .called(1);
     });
   });
+  
+  group('forceUpdate method tests', () {
+    setUp(() {
+      mockLoginService = MockLoginService();
+      mockCaloricRequirementService = MockCaloricRequirementService();
+      mockHealthMetricsRepository = MockHealthMetricsRepository();
+      mockHealthMetricsCheckService = MockHealthMetricsCheckService();
+      mockSimpleController = MockSimpleFoodTrackingController();
+      mockDetailedController = MockDetailedFoodTrackingController();
+      mockCalorieCalculationStrategy = MockCalorieCalculationStrategy();
+      mockPermissionHelper = MockPermissionHelperInterface();
+      mockBackgroundServiceHelper = MockWidgetBackgroundServiceHelperInterface();
+      navigatorKey = GlobalKey<NavigatorState>();
+
+      controller = FoodTrackingClientControllerImpl(
+        loginService: mockLoginService,
+        caloricRequirementService: mockCaloricRequirementService,
+        healthMetricsRepository: mockHealthMetricsRepository,
+        healthMetricsCheckService: mockHealthMetricsCheckService,
+        simpleController: mockSimpleController,
+        detailedController: mockDetailedController,
+        calorieCalculationStrategy: mockCalorieCalculationStrategy,
+        permissionHelper: mockPermissionHelper,
+        backgroundServiceHelper: mockBackgroundServiceHelper,
+      );
+      
+      // Setup standard mocks
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => null);
+      when(mockSimpleController.initialize(navigatorKey: anyNamed('navigatorKey'))).thenAnswer((_) async => null);
+      when(mockDetailedController.initialize(navigatorKey: anyNamed('navigatorKey'))).thenAnswer((_) async => null);
+      when(mockPermissionHelper.requestNotificationPermission()).thenAnswer((_) async => PermissionStatus.granted);
+      when(mockPermissionHelper.isBatteryOptimizationExemptionGranted()).thenAnswer((_) async => true);
+      when(mockBackgroundServiceHelper.initialize()).thenAnswer((_) async => null);
+      when(mockBackgroundServiceHelper.registerPeriodicTask()).thenAnswer((_) async => null);
+      when(mockBackgroundServiceHelper.registerMidnightTask()).thenAnswer((_) async => null);
+      when(mockBackgroundServiceHelper.cancelAllTasks()).thenAnswer((_) async => null);
+      when(mockSimpleController.registerWidgetClickCallback()).thenAnswer((_) async => null);
+      when(mockDetailedController.registerWidgetClickCallback()).thenAnswer((_) async => null);
+      when(mockSimpleController.setRefreshCallback(any)).thenReturn(null);
+      when(mockDetailedController.setRefreshCallback(any)).thenReturn(null);
+      when(mockSimpleController.updateWidgetData(any, targetCalories: anyNamed('targetCalories'))).thenAnswer((_) async => null);
+      when(mockDetailedController.updateWidgetData(any, targetCalories: anyNamed('targetCalories'))).thenAnswer((_) async => null);
+      when(mockCalorieCalculationStrategy.calculateTargetCalories(any, any, any)).thenAnswer((_) async => 2500);
+    });
+    
+    test('should update widget when _currentUser is already set', () async {
+      // Arrange
+      await controller.initialize(navigatorKey); // Initialize the controller first
+      await controller.processUserStatusChange(testUser); // Set _currentUser
+      
+      // Clear interactions after setup
+      clearInteractions(mockSimpleController);
+      clearInteractions(mockDetailedController);
+      clearInteractions(mockCalorieCalculationStrategy);
+      clearInteractions(mockLoginService);
+      
+      // Act
+      await controller.forceUpdate();
+      
+      // Assert
+      // Should use existing _currentUser without calling login service
+      verifyNever(mockLoginService.getCurrentUser());
+      
+      // Should calculate target calories
+      verify(mockCalorieCalculationStrategy.calculateTargetCalories(
+        mockHealthMetricsRepository,
+        mockCaloricRequirementService,
+        testUserId
+      )).called(1);
+      
+      // Should update both controllers
+      verify(mockSimpleController.updateWidgetData(testUser, targetCalories: 2500)).called(1);
+      verify(mockDetailedController.updateWidgetData(testUser, targetCalories: 2500)).called(1);
+    });
+    
+    test('should fetch user from login service when _currentUser is null', () async {
+      // Arrange
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+      
+      // Just create the controller, don't initialize it to avoid setting _currentUser
+      clearInteractions(mockLoginService); // Make sure to reset before the real action
+      
+      // Act
+      await controller.forceUpdate();
+      
+      // Assert
+      // Should try to get user from login service
+      verify(mockLoginService.getCurrentUser()).called(1);
+      
+      // Should calculate target calories
+      verify(mockCalorieCalculationStrategy.calculateTargetCalories(
+        mockHealthMetricsRepository,
+        mockCaloricRequirementService,
+        testUserId
+      )).called(1);
+      
+      // Should update both controllers
+      verify(mockSimpleController.updateWidgetData(testUser, targetCalories: 2500)).called(1);
+      verify(mockDetailedController.updateWidgetData(testUser, targetCalories: 2500)).called(1);
+    });
+    
+    test('should update with null when user not found anywhere', () async {
+      // Arrange
+      // Ensure login service returns null
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => null);
+      
+      // Don't initialize to avoid changing test state
+      // Clear interactions
+      clearInteractions(mockLoginService);
+      clearInteractions(mockSimpleController);
+      clearInteractions(mockDetailedController);
+      
+      // Act
+      await controller.forceUpdate();
+      
+      // Assert
+      // Should try to get user from login service
+      verify(mockLoginService.getCurrentUser()).called(1);
+      
+      // Should not calculate calories since no user
+      verifyNever(mockCalorieCalculationStrategy.calculateTargetCalories(any, any, any));
+      
+      // Should update controllers with null
+      verify(mockSimpleController.updateWidgetData(null)).called(1);
+      verify(mockDetailedController.updateWidgetData(null)).called(1);
+    });
+    
+    test('should throw WidgetUpdateException when update fails', () async {
+      // Arrange
+      when(mockLoginService.getCurrentUser()).thenThrow(Exception('Network error'));
+      
+      // Act & Assert
+      expect(() => controller.forceUpdate(), throwsA(isA<WidgetUpdateException>()));
+    });
+  });
 }
 
 // We no longer need the MockPermission class since we're using PermissionHelperInterface
