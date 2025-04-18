@@ -21,8 +21,6 @@ import 'package:pockeat/features/food_scan_ai/presentation/screens/food_input_pa
 import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
-import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
-import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
