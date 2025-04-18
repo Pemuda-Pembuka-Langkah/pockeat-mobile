@@ -78,19 +78,13 @@ Future<bool> _initializeInstabug(String flavor) async {
     // Ambil token dari dotenv sesuai konfigurasi di GitHub workflow
     final token = dotenv.env['INSTABUG_TOKEN'];
     if (token == null || token.isEmpty) {
-      debugPrint('ERROR: INSTABUG_TOKEN tidak ditemukan di dotenv');
       return false;
     }
-    
-    // Log inisialisasi
-    debugPrint('Memulai inisialisasi Instabug dengan token: ${token.substring(0, 3)}...');
     
     // Tentukan level log berdasarkan environment dari dotenv
     final LogLevel logLevel = flavor.toLowerCase() == 'production' 
         ? LogLevel.error  // Production gunakan error level saja
         : LogLevel.debug; // Selain production gunakan debug level
-    
-    debugPrint('Instabug diinisialisasi dengan log level: $logLevel untuk flavor: $flavor');
     
     // Inisialisasi SDK dengan token dari dotenv
     await Instabug.init(
