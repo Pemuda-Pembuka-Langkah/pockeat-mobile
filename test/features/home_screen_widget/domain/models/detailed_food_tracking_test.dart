@@ -15,6 +15,7 @@ void main() {
           currentProtein: 75.5,
           currentCarb: 200.0,
           currentFat: 50.2,
+          userId: 'test_user_123',
         );
 
         // Assert
@@ -23,6 +24,7 @@ void main() {
         expect(tracking.currentProtein, 75.5);
         expect(tracking.currentCarb, 200.0);
         expect(tracking.currentFat, 50.2);
+        expect(tracking.userId, 'test_user_123');
       });
 
       test('should handle zero values', () {
@@ -33,6 +35,7 @@ void main() {
           currentProtein: 0.0,
           currentCarb: 0.0,
           currentFat: 0.0,
+          userId: null,
         );
 
         // Assert
@@ -41,6 +44,7 @@ void main() {
         expect(tracking.currentProtein, 0.0);
         expect(tracking.currentCarb, 0.0);
         expect(tracking.currentFat, 0.0);
+        expect(tracking.userId, null);
       });
 
       test('should inherit properties from SimpleFoodTracking', () {
@@ -60,7 +64,7 @@ void main() {
     });
 
     group('toMap', () {
-      test('should convert model to map correctly including parent fields', () {
+      test('should convert model to map correctly including parent fields and userId', () {
         // Arrange
         final tracking = DetailedFoodTracking(
           caloriesNeeded: 2000,
@@ -68,6 +72,7 @@ void main() {
           currentProtein: 75.5,
           currentCarb: 200.0,
           currentFat: 50.2,
+          userId: 'test_user_123',
         );
 
         // Act
@@ -77,6 +82,32 @@ void main() {
         expect(map, {
           FoodTrackingKey.caloriesNeeded.toStorageKey(): 2000,
           FoodTrackingKey.currentCaloriesConsumed.toStorageKey(): 1500,
+          FoodTrackingKey.userId.toStorageKey(): 'test_user_123',
+          FoodTrackingKey.currentProtein.toStorageKey(): 75.5,
+          FoodTrackingKey.currentCarb.toStorageKey(): 200.0,
+          FoodTrackingKey.currentFat.toStorageKey(): 50.2,
+        });
+      });
+
+      test('should convert model to map correctly with null userId', () {
+        // Arrange
+        final tracking = DetailedFoodTracking(
+          caloriesNeeded: 2000,
+          currentCaloriesConsumed: 1500,
+          currentProtein: 75.5,
+          currentCarb: 200.0,
+          currentFat: 50.2,
+          userId: null,
+        );
+
+        // Act
+        final map = tracking.toMap();
+
+        // Assert
+        expect(map, {
+          FoodTrackingKey.caloriesNeeded.toStorageKey(): 2000,
+          FoodTrackingKey.currentCaloriesConsumed.toStorageKey(): 1500,
+          FoodTrackingKey.userId.toStorageKey(): null,
           FoodTrackingKey.currentProtein.toStorageKey(): 75.5,
           FoodTrackingKey.currentCarb.toStorageKey(): 200.0,
           FoodTrackingKey.currentFat.toStorageKey(): 50.2,
@@ -85,7 +116,30 @@ void main() {
     });
 
     group('fromMap', () {
-      test('should create instance from valid map', () {
+      test('should create instance from valid map with userId', () {
+        // Arrange
+        final map = {
+          FoodTrackingKey.caloriesNeeded.toStorageKey(): 2000,
+          FoodTrackingKey.currentCaloriesConsumed.toStorageKey(): 1500,
+          FoodTrackingKey.currentProtein.toStorageKey(): 75.5,
+          FoodTrackingKey.currentCarb.toStorageKey(): 200.0,
+          FoodTrackingKey.currentFat.toStorageKey(): 50.2,
+          FoodTrackingKey.userId.toStorageKey(): 'test_user_123',
+        };
+
+        // Act
+        final tracking = DetailedFoodTracking.fromMap(map);
+
+        // Assert
+        expect(tracking.caloriesNeeded, 2000);
+        expect(tracking.currentCaloriesConsumed, 1500);
+        expect(tracking.currentProtein, 75.5);
+        expect(tracking.currentCarb, 200.0);
+        expect(tracking.currentFat, 50.2);
+        expect(tracking.userId, 'test_user_123');
+      });
+
+      test('should create instance from valid map without userId', () {
         // Arrange
         final map = {
           FoodTrackingKey.caloriesNeeded.toStorageKey(): 2000,
@@ -104,6 +158,7 @@ void main() {
         expect(tracking.currentProtein, 75.5);
         expect(tracking.currentCarb, 200.0);
         expect(tracking.currentFat, 50.2);
+        expect(tracking.userId, null);
       });
 
       test('should handle integer values for double fields', () {
@@ -182,7 +237,7 @@ void main() {
     });
 
     group('empty', () {
-      test('should create instance with all values set to 0', () {
+      test('should create instance with all values set to 0 and null userId', () {
         // Act
         final tracking = DetailedFoodTracking.empty();
 
@@ -194,11 +249,12 @@ void main() {
         expect(tracking.currentFat, 0.0);
         expect(tracking.percentageConsumed, 0.0);
         expect(tracking.remainingCalories, 0);
+        expect(tracking.userId, null);
       });
     });
 
     group('toSimpleFoodTracking', () {
-      test('should convert to SimpleFoodTracking correctly', () {
+      test('should convert to SimpleFoodTracking correctly with userId', () {
         // Arrange
         final detailedTracking = DetailedFoodTracking(
           caloriesNeeded: 2000,
@@ -206,6 +262,7 @@ void main() {
           currentProtein: 75.5,
           currentCarb: 200.0,
           currentFat: 50.2,
+          userId: 'test_user_123',
         );
 
         // Act
@@ -217,6 +274,30 @@ void main() {
         expect(simpleTracking.currentCaloriesConsumed, 1500);
         expect(simpleTracking.percentageConsumed, 75.0);
         expect(simpleTracking.remainingCalories, 500);
+        expect(simpleTracking.userId, 'test_user_123'); // userId should be transferred
+      });
+
+      test('should convert to SimpleFoodTracking correctly with null userId', () {
+        // Arrange
+        final detailedTracking = DetailedFoodTracking(
+          caloriesNeeded: 2000,
+          currentCaloriesConsumed: 1500,
+          currentProtein: 75.5,
+          currentCarb: 200.0,
+          currentFat: 50.2,
+          userId: null,
+        );
+
+        // Act
+        final simpleTracking = detailedTracking.toSimpleFoodTracking();
+
+        // Assert
+        expect(simpleTracking, isA<SimpleFoodTracking>());
+        expect(simpleTracking.caloriesNeeded, 2000);
+        expect(simpleTracking.currentCaloriesConsumed, 1500);
+        expect(simpleTracking.percentageConsumed, 75.0);
+        expect(simpleTracking.remainingCalories, 500);
+        expect(simpleTracking.userId, null); // null userId should be transferred
       });
     });
 

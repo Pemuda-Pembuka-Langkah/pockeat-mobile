@@ -21,14 +21,16 @@ class DetailedFoodTracking extends SimpleFoodTracking {
     required this.currentProtein,
     required this.currentCarb,
     required this.currentFat,
+    super.userId,
   });
   
   /// Mengkonversi model ke Map untuk disimpan di widget storage
   @override
   Map<String, dynamic> toMap() {
-    final baseMap = super.toMap();
     return {
-      ...baseMap,
+      FoodTrackingKey.caloriesNeeded.toStorageKey(): caloriesNeeded,
+      FoodTrackingKey.currentCaloriesConsumed.toStorageKey(): currentCaloriesConsumed,
+      FoodTrackingKey.userId.toStorageKey(): userId,
       FoodTrackingKey.currentProtein.toStorageKey(): currentProtein,
       FoodTrackingKey.currentCarb.toStorageKey(): currentCarb,
       FoodTrackingKey.currentFat.toStorageKey(): currentFat,
@@ -37,12 +39,56 @@ class DetailedFoodTracking extends SimpleFoodTracking {
   
   /// Membuat model dari Map yang disimpan di widget storage
   factory DetailedFoodTracking.fromMap(Map<String, dynamic> map) {
+    // Ambil userId dengan tipe yang benar
+    final userIdKey = FoodTrackingKey.userId.toStorageKey();
+    final String? userId = map.containsKey(userIdKey) ? map[userIdKey] as String? : null;
+    
+    // Extract key constants
+    final caloriesNeededKey = FoodTrackingKey.caloriesNeeded.toStorageKey();
+    final calConsumedKey = FoodTrackingKey.currentCaloriesConsumed.toStorageKey();
+    final proteinKey = FoodTrackingKey.currentProtein.toStorageKey();
+    final carbKey = FoodTrackingKey.currentCarb.toStorageKey();
+    final fatKey = FoodTrackingKey.currentFat.toStorageKey();
+    
+    // Handle berbagai tipe data numerik dan konversi ke tipe yang sesuai
+    final caloriesNeeded = map.containsKey(caloriesNeededKey) 
+        ? (map[caloriesNeededKey] is int 
+            ? map[caloriesNeededKey] as int 
+            : (map[caloriesNeededKey] as num?)?.toInt() ?? 0)
+        : 0;
+        
+    final currentCaloriesConsumed = map.containsKey(calConsumedKey)
+        ? (map[calConsumedKey] is int 
+            ? map[calConsumedKey] as int 
+            : (map[calConsumedKey] as num?)?.toInt() ?? 0)
+        : 0;
+    
+    // Convert makronutrien ke double secara aman
+    final currentProtein = map.containsKey(proteinKey)
+        ? (map[proteinKey] is double 
+            ? map[proteinKey] as double 
+            : (map[proteinKey] as num?)?.toDouble() ?? 0.0)
+        : 0.0;
+        
+    final currentCarb = map.containsKey(carbKey)
+        ? (map[carbKey] is double 
+            ? map[carbKey] as double 
+            : (map[carbKey] as num?)?.toDouble() ?? 0.0)
+        : 0.0;
+        
+    final currentFat = map.containsKey(fatKey)
+        ? (map[fatKey] is double 
+            ? map[fatKey] as double 
+            : (map[fatKey] as num?)?.toDouble() ?? 0.0)
+        : 0.0;
+    
     return DetailedFoodTracking(
-      caloriesNeeded: map[FoodTrackingKey.caloriesNeeded.toStorageKey()] ?? 0,
-      currentCaloriesConsumed: map[FoodTrackingKey.currentCaloriesConsumed.toStorageKey()] ?? 0,
-      currentProtein: (map[FoodTrackingKey.currentProtein.toStorageKey()] ?? 0).toDouble(),
-      currentCarb: (map[FoodTrackingKey.currentCarb.toStorageKey()] ?? 0).toDouble(),
-      currentFat: (map[FoodTrackingKey.currentFat.toStorageKey()] ?? 0).toDouble(),
+      caloriesNeeded: caloriesNeeded,
+      currentCaloriesConsumed: currentCaloriesConsumed,
+      currentProtein: currentProtein,
+      currentCarb: currentCarb,
+      currentFat: currentFat,
+      userId: userId,
     );
   }
   
@@ -54,6 +100,7 @@ class DetailedFoodTracking extends SimpleFoodTracking {
       currentProtein: 0,
       currentCarb: 0,
       currentFat: 0,
+      userId: null,
     );
   }
   
@@ -62,6 +109,7 @@ class DetailedFoodTracking extends SimpleFoodTracking {
     return SimpleFoodTracking(
       caloriesNeeded: caloriesNeeded,
       currentCaloriesConsumed: currentCaloriesConsumed,
+      userId: userId,
     );
   }
 }

@@ -13,7 +13,10 @@ enum FoodTrackingKey {
   currentCarb,
   
   /// Total lemak yang sudah dikonsumsi (gram)
-  currentFat;
+  currentFat,
+  
+  /// ID pengguna yang digunakan untuk identifikasi
+  userId;
   
   /// Mengembalikan string value dari enum
   String get value => toString().split('.').last;

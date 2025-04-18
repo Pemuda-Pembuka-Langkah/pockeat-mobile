@@ -63,12 +63,15 @@ class SimpleFoodTrackingWidgetService implements WidgetDataService<SimpleFoodTra
       FoodTrackingKey.currentCaloriesConsumed.toStorageKey()
     );
     
-    // Gunakan key yang sama untuk map
-    final caloriesNeededKey = FoodTrackingKey.caloriesNeeded.toStorageKey();
-    final currentCaloriesConsumedKey = FoodTrackingKey.currentCaloriesConsumed.toStorageKey();
+    // Dapatkan userId jika ada
+    final userId = await _homeWidget.getWidgetData<String>(
+      FoodTrackingKey.userId.toStorageKey()
+    );
     
-    if (caloriesNeeded != null) map[caloriesNeededKey] = caloriesNeeded;
-    if (currentCaloriesConsumed != null) map[currentCaloriesConsumedKey] = currentCaloriesConsumed;
+    // Masukkan semua data ke map
+    map[FoodTrackingKey.caloriesNeeded.toStorageKey()] = caloriesNeeded ?? 0;
+    map[FoodTrackingKey.currentCaloriesConsumed.toStorageKey()] = currentCaloriesConsumed ?? 0;
+    map[FoodTrackingKey.userId.toStorageKey()] = userId;
     
     return map;
   }

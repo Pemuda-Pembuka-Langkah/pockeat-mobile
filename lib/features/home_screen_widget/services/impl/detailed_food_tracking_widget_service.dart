@@ -60,6 +60,8 @@ class DetailedFoodTrackingWidgetService implements WidgetDataService<DetailedFoo
       FoodTrackingKey.currentProtein: (dynamic value) => value?.toDouble(),
       FoodTrackingKey.currentCarb: (dynamic value) => value?.toDouble(),
       FoodTrackingKey.currentFat: (dynamic value) => value?.toDouble(),
+      // Tambahkan userId handler
+      FoodTrackingKey.userId: (dynamic value) => value as String?,
     };
     
     // Ambil semua data dari widget storage

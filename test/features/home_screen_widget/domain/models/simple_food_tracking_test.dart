@@ -11,11 +11,13 @@ void main() {
         final tracking = SimpleFoodTracking(
           caloriesNeeded: 2000,
           currentCaloriesConsumed: 1500,
+          userId: 'test_user_123',
         );
 
         // Assert
         expect(tracking.caloriesNeeded, 2000);
         expect(tracking.currentCaloriesConsumed, 1500);
+        expect(tracking.userId, 'test_user_123');
       });
 
       test('should handle zero values', () {
@@ -23,11 +25,13 @@ void main() {
         final tracking = SimpleFoodTracking(
           caloriesNeeded: 0,
           currentCaloriesConsumed: 0,
+          userId: null,
         );
 
         // Assert
         expect(tracking.caloriesNeeded, 0);
         expect(tracking.currentCaloriesConsumed, 0);
+        expect(tracking.userId, null);
       });
     });
 
@@ -78,11 +82,12 @@ void main() {
     });
 
     group('toMap', () {
-      test('should convert model to map correctly', () {
+      test('should convert model to map correctly with userId', () {
         // Arrange
         final tracking = SimpleFoodTracking(
           caloriesNeeded: 2000,
           currentCaloriesConsumed: 1500,
+          userId: 'test_user_123',
         );
 
         // Act
@@ -92,12 +97,49 @@ void main() {
         expect(map, {
           FoodTrackingKey.caloriesNeeded.toStorageKey(): 2000,
           FoodTrackingKey.currentCaloriesConsumed.toStorageKey(): 1500,
+          FoodTrackingKey.userId.toStorageKey(): 'test_user_123',
+        });
+      });
+      
+      test('should convert model to map correctly with null userId', () {
+        // Arrange
+        final tracking = SimpleFoodTracking(
+          caloriesNeeded: 2000,
+          currentCaloriesConsumed: 1500,
+          userId: null,
+        );
+
+        // Act
+        final map = tracking.toMap();
+
+        // Assert
+        expect(map, {
+          FoodTrackingKey.caloriesNeeded.toStorageKey(): 2000,
+          FoodTrackingKey.currentCaloriesConsumed.toStorageKey(): 1500,
+          FoodTrackingKey.userId.toStorageKey(): null,
         });
       });
     });
 
     group('fromMap', () {
-      test('should create instance from valid map', () {
+      test('should create instance from valid map with userId', () {
+        // Arrange
+        final map = {
+          FoodTrackingKey.caloriesNeeded.toStorageKey(): 2000,
+          FoodTrackingKey.currentCaloriesConsumed.toStorageKey(): 1500,
+          FoodTrackingKey.userId.toStorageKey(): 'test_user_123',
+        };
+
+        // Act
+        final tracking = SimpleFoodTracking.fromMap(map);
+
+        // Assert
+        expect(tracking.caloriesNeeded, 2000);
+        expect(tracking.currentCaloriesConsumed, 1500);
+        expect(tracking.userId, 'test_user_123');
+      });
+      
+      test('should create instance from valid map without userId', () {
         // Arrange
         final map = {
           FoodTrackingKey.caloriesNeeded.toStorageKey(): 2000,
@@ -110,6 +152,7 @@ void main() {
         // Assert
         expect(tracking.caloriesNeeded, 2000);
         expect(tracking.currentCaloriesConsumed, 1500);
+        expect(tracking.userId, null);
       });
 
       test('should handle missing keys by using defaults', () {
@@ -141,7 +184,7 @@ void main() {
     });
 
     group('empty', () {
-      test('should create instance with all values set to 0', () {
+      test('should create instance with all values set to 0 and null userId', () {
         // Act
         final tracking = SimpleFoodTracking.empty();
 
@@ -150,6 +193,7 @@ void main() {
         expect(tracking.currentCaloriesConsumed, 0);
         expect(tracking.percentageConsumed, 0.0);
         expect(tracking.remainingCalories, 0);
+        expect(tracking.userId, null);
       });
     });
 
