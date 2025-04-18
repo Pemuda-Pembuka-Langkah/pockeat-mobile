@@ -36,4 +36,11 @@ abstract class FoodTrackingClientController {
   ///
   /// Dipanggil saat aplikasi ditutup
   Future<void> stopPeriodicUpdates();
+  
+  /// Paksa update widget secara manual
+  ///
+  /// Berguna untuk komponen eksternal yang perlu memperbarui widget
+  /// setelah perubahan data, misalnya setelah menambahkan food log
+  /// @throws WidgetUpdateException jika gagal update
+  Future<void> forceUpdate();
 }

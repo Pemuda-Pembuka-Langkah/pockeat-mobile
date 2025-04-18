@@ -25,6 +25,7 @@ import 'package:pockeat/features/home_screen_widget/services/utils/widget_backgr
 /// 3. Mengatur update periodik dan event handling
 import '../../services/calorie_calculation_strategy.dart';
 
+
 class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   // Service & Repository dependencies
   final LoginService _loginService;
@@ -71,13 +72,12 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
       // 1. Initialize sub-controllers
       await _simpleController.initialize(navigatorKey: navigatorKey);
       await _detailedController.initialize(navigatorKey: navigatorKey);
-  
       // 2. Setup auto-updates
       _setupAutoUpdate();
   
       // 3. Register widget callbacks
       await _registerWidgetCallbacks();
-  
+      
       // 4. Get current user and update if already logged in
       _currentUser = await _loginService.getCurrentUser();
       if (_currentUser != null) {
@@ -92,6 +92,7 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   @override
   Future<void> processUserStatusChange(UserModel? user) async {
     try {
+      // Update current user reference
       _currentUser = user;
       
       if (user == null) {
@@ -151,6 +152,36 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
     
     // Cancel background tasks
     await _backgroundServiceHelper.cancelAllTasks();
+  }
+  
+  /// Paksa update widget secara manual
+  /// 
+  /// Berguna untuk komponen eksternal yang perlu memperbarui widget
+  /// setelah perubahan data, misalnya setelah menambahkan food log
+  @override
+  Future<void> forceUpdate() async {
+    try {
+      // Jika user aktif, gunakan _currentUser
+      if (_currentUser != null) {
+        await processUserStatusChange(_currentUser);
+        return;
+      }
+      
+      // Jika tidak ada user aktif, coba ambil user dari login service
+      final currentUser = await _loginService.getCurrentUser();
+      if (currentUser != null) {
+        await processUserStatusChange(currentUser);
+        return;
+      }
+      
+      // Jika masih null, update widget dengan data kosong
+      await Future.wait([
+        _simpleController.updateWidgetData(null),
+        _detailedController.updateWidgetData(null)
+      ]);
+    } catch (e) {
+      throw WidgetUpdateException('Failed to force update: $e');
+    }
   }
 
   /// Setup auto-update untuk update periodik
@@ -224,6 +255,8 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
       throw WidgetCallbackRegistrationException('Failed to register widget callbacks: $e');
     }
   }
+  
+
   
   /// Kalkulasi target kalori untuk user tertentu 
   /// 
