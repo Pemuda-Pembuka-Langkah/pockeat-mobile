@@ -1,5 +1,5 @@
 import 'package:home_widget/home_widget.dart';
-
+// coverage:ignore-file
 /// Interface untuk HomeWidget yang memudahkan mocking di unit tests
 abstract class HomeWidgetInterface {
   Future<void> setAppGroupId(String groupId);
