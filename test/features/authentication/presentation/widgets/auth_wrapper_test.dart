@@ -5,15 +5,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 
-@GenerateMocks([LoginService, GlobalKey, NavigatorState])
+@GenerateMocks([LoginService, GlobalKey, NavigatorState, HealthMetricsCheckService])
 import 'auth_wrapper_test.mocks.dart';
 
 void main() {
   late MockLoginService mockLoginService;
+  late MockHealthMetricsCheckService mockCheckService;
   final navigatorKey = GlobalKey<NavigatorState>();
   final authenticatedUser = UserModel(
     uid: 'test-user-id',
@@ -25,13 +28,16 @@ void main() {
 
   setUp(() {
     mockLoginService = MockLoginService();
+    mockCheckService = MockHealthMetricsCheckService();
 
     // Register mockLoginService in GetIt
     final getIt = GetIt.instance;
     if (getIt.isRegistered<LoginService>()) {
       getIt.unregister<LoginService>();
     }
+    if (getIt.isRegistered<HealthMetricsCheckService>()) getIt.unregister<HealthMetricsCheckService>();
     getIt.registerSingleton<LoginService>(mockLoginService);
+    getIt.registerSingleton<HealthMetricsCheckService>(mockCheckService);
   });
 
   tearDown(() {
@@ -203,6 +209,70 @@ void main() {
       expect(find.text('Login Page'), findsOneWidget);
     });
   });
+
+  testWidgets('redirects to onboarding when not completed and not in progress', (tester) async {
+  SharedPreferences.setMockInitialValues({'onboardingInProgress': false});
+  when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
+  when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
+
+  await tester.pumpWidget(
+    MaterialApp(
+      routes: {
+        '/onboarding/goal': (_) => const Scaffold(body: Text('Onboarding Page')),
+      },
+      home: AuthWrapper(
+        requireAuth: true,
+        child: const Text('Child Widget'),
+      ),
+    ),
+  );
+
+  await tester.pumpAndSettle();
+
+  expect(find.text('Onboarding Page'), findsOneWidget);
+});
+
+testWidgets('does not redirect if onboarding is in progress', (tester) async {
+  SharedPreferences.setMockInitialValues({'onboardingInProgress': true});
+  when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
+  when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
+
+  await tester.pumpWidget(
+    MaterialApp(
+      home: AuthWrapper(
+        requireAuth: true,
+        child: const Text('Child Widget'),
+      ),
+    ),
+  );
+
+  await tester.pumpAndSettle();
+
+  expect(find.text('Child Widget'), findsOneWidget);
+});
+
+testWidgets('does not redirect if already inside onboarding route', (tester) async {
+  SharedPreferences.setMockInitialValues({'onboardingInProgress': false});
+  when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
+  when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
+
+  await tester.pumpWidget(
+    MaterialApp(
+      initialRoute: '/onboarding/goal',
+      routes: {
+        '/onboarding/goal': (_) => AuthWrapper(
+              requireAuth: true,
+              child: const Text('Inside Onboarding'),
+            ),
+      },
+    ),
+  );
+
+  await tester.pumpAndSettle();
+
+  expect(find.text('Inside Onboarding'), findsOneWidget);
+});
+
 }
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}

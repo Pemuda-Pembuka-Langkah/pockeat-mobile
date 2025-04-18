@@ -22,8 +22,16 @@ import 'package:pockeat/features/authentication/domain/repositories/user_reposit
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository_impl.dart';
+import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_service_impl.dart';
@@ -31,11 +39,24 @@ import 'package:pockeat/features/authentication/services/change_password_deeplin
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
+import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/authentication/services/logout_service_impl.dart';
+import 'package:pockeat/features/authentication/services/profile_service.dart';
+import 'package:pockeat/features/authentication/services/profile_service_impl.dart';
+import 'package:pockeat/features/authentication/services/bug_report_service.dart';
+import 'package:pockeat/features/authentication/services/bug_report_service_impl.dart';
+import 'package:pockeat/features/authentication/services/utils/instabug_client.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
-void setupDependencies() {
-  // Register specialized services
+Future<void> setupDependencies() async {
+  final prefs = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(prefs);
+
+  // Register Firebase instances first
   getIt.registerSingleton<FirebaseAuth>(
     FirebaseAuth.instance,
   );
@@ -43,53 +64,28 @@ void setupDependencies() {
   getIt.registerSingleton<FirebaseMessaging>(
     FirebaseMessaging.instance,
   );
-  // Register UserRepository
+
+  // Register TokenManager before any services that need it
+  getIt.registerSingleton<TokenManager>(TokenManager());
+
+  // Register repositories before services that depend on them
   getIt.registerSingleton<UserRepository>(
     UserRepositoryImpl(),
   );
 
-  // Register RegisterService
-  getIt.registerSingleton<RegisterService>(
-    RegisterServiceImpl(userRepository: getIt<UserRepository>()),
+  getIt.registerSingleton<FoodTextInputRepository>(
+    FoodTextInputRepository(),
   );
 
-  // Register LoginService
-  getIt.registerSingleton<LoginService>(
-    LoginServiceImpl(userRepository: getIt<UserRepository>()),
+  getIt.registerSingleton<FoodScanRepository>(
+    FoodScanRepository(),
   );
 
-  // Register GoogleSignInService
-  getIt.registerSingleton<GoogleSignInService>(
-    GoogleSignInServiceImpl(),
+  getIt.registerSingleton<HealthMetricsRepository>(
+    HealthMetricsRepositoryImpl(),
   );
 
-  // Register ChangePasswordService
-  getIt.registerSingleton<ChangePasswordService>(
-    ChangePasswordServiceImpl(),
-  );
-
-  // Register Email Verification DeepLink Service
-  getIt.registerSingleton<EmailVerificationDeepLinkService>(
-    EmailVerificationDeepLinkServiceImpl(
-        userRepository: getIt<UserRepository>()),
-  );
-
-  // Register Change Password DeepLink Service
-  getIt.registerSingleton<ChangePasswordDeepLinkService>(
-    ChangePasswordDeepLinkServiceImpl(),
-  );
-
-  // Register DeepLink Facade Service
-  getIt.registerSingleton<DeepLinkService>(
-    DeepLinkServiceImpl(
-      emailVerificationService: getIt<EmailVerificationDeepLinkService>(),
-      changePasswordService: getIt<ChangePasswordDeepLinkService>(),
-    ),
-  );
-
-  // Register TokenManager
-  getIt.registerSingleton<TokenManager>(TokenManager());
-
+  // Register API Services that depend on TokenManager
   getIt.registerSingleton<FoodTextAnalysisService>(
     FoodTextAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
   );
@@ -106,36 +102,98 @@ void setupDependencies() {
     ExerciseAnalysisService.fromEnv(tokenManager: getIt<TokenManager>()),
   );
 
-  getIt.registerSingleton<FoodTextInputRepository>(
-    FoodTextInputRepository(),
+  // Register authentication related services
+  getIt.registerSingleton<RegisterService>(
+    RegisterServiceImpl(userRepository: getIt<UserRepository>()),
   );
 
-  getIt.registerSingleton<FoodTextInputService>(
-    FoodTextInputService(
-      getIt<FoodTextAnalysisService>(), // Will fail if not registered first!
-      getIt<FoodTextInputRepository>(),
+  getIt.registerSingleton<LoginService>(
+    LoginServiceImpl(userRepository: getIt<UserRepository>()),
+  );
+
+  getIt.registerSingleton<GoogleSignInService>(
+    GoogleSignInServiceImpl(),
+  );
+
+  getIt.registerSingleton<ChangePasswordService>(
+    ChangePasswordServiceImpl(),
+  );
+
+  // Register DeepLink Services
+  getIt.registerSingleton<EmailVerificationDeepLinkService>(
+    EmailVerificationDeepLinkServiceImpl(
+        userRepository: getIt<UserRepository>()),
+  );
+
+  getIt.registerSingleton<ChangePasswordDeepLinkService>(
+    ChangePasswordDeepLinkServiceImpl(),
+  );
+
+  getIt.registerSingleton<DeepLinkService>(
+    DeepLinkServiceImpl(
+      emailVerificationService: getIt<EmailVerificationDeepLinkService>(),
+      changePasswordService: getIt<ChangePasswordDeepLinkService>(),
     ),
   );
 
-  getIt.registerSingleton<FoodScanRepository>(
-    FoodScanRepository(),
+  // Register Food and Exercise services
+  getIt.registerSingleton<FoodTextInputService>(
+    FoodTextInputService(
+      getIt<FoodTextAnalysisService>(),
+      getIt<FoodTextInputRepository>(),
+    ),
   );
 
   getIt.registerSingleton<FoodScanPhotoService>(
     FoodScanPhotoService(),
   );
 
-  // Register Food Log History module
-  FoodLogHistoryModule.register();
+  getIt.registerSingleton<HealthMetricsCheckService>(
+    HealthMetricsCheckService(),
+  );
 
-  // Register Exercise Log History module
-  ExerciseLogHistoryModule.register();
-  
-  // Register Calorie Stats module
-  CalorieStatsModule.register();
+  getIt.registerSingleton<CaloricRequirementRepository>(
+    CaloricRequirementRepositoryImpl(),
+  );
+
+  getIt.registerSingleton<CaloricRequirementService>(
+    CaloricRequirementService(),
+  );
 
   getIt.registerSingleton<FlutterLocalNotificationsPlugin>(
     FlutterLocalNotificationsPlugin(),
   );
+
+  getIt.registerSingleton<NotificationService>(
+    NotificationServiceImpl(),
+  );
+  
+  // Initialize notifications
+  await getIt<NotificationService>().initialize();
+  // Register feature modules
+  // Make sure to register these modules after all their dependencies
+  FoodLogHistoryModule.register();
+  ExerciseLogHistoryModule.register();
+  CalorieStatsModule.register();
+  NutritionModule.register();
+  ExerciseProgressModule.register();
+
+  // Register additional services
+  getIt.registerSingleton<LogoutService>(
+    LogoutServiceImpl(),
+  );
+
+  getIt.registerSingleton<ProfileService>(
+    ProfileServiceImpl(),
+  );
+
+  // Register InstabugClient and BugReportService
+  getIt.registerSingleton<InstabugClient>(
+    InstabugClient(),
+  );
+
+  getIt.registerSingleton<BugReportService>(
+    BugReportServiceImpl(instabugClient: getIt<InstabugClient>()),
+  );
 }
- // coverage:ignore-end
+// coverage:ignore-end

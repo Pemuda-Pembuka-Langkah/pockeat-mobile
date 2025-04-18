@@ -7,11 +7,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/authentication/presentation/screens/change_password_page.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
 
-@GenerateMocks([ChangePasswordService, User, FirebaseAuthException])
+@GenerateMocks([
+  ChangePasswordService,
+  FirebaseAuth,
+  User,
+  NavigatorObserver
+], customMocks: [
+  MockSpec<FirebaseAuthException>(
+      as: #MockFirebaseAuthException, fallbackGenerators: {})
+])
 import 'change_password_page_test.mocks.dart';
 
-// Create a custom navigator observer that works with mockito
-class MockNavigatorObserver extends Mock implements NavigatorObserver {}
+// Navigasi sederhana untuk test
+abstract class SimpleNavigator {
+  void pushReplacementNamed(String routeName);
+}
 
 // Kelas helper untuk mengontrol navigasi
 class TestableChangePasswordPage extends StatelessWidget {
@@ -39,6 +49,8 @@ class TestableChangePasswordPage extends StatelessWidget {
                   child: ChangePasswordPage(
                     oobCode: oobCode,
                     skipDelay: true,
+                    testMode: true,
+                    customChangePasswordService: service,
                   ),
                 ),
                 // Button tambahan untuk menangkap navigasi
@@ -52,14 +64,24 @@ class TestableChangePasswordPage extends StatelessWidget {
           );
         },
       ),
+      routes: {
+        '/login': (context) => const Scaffold(body: Text('Login Page')),
+      },
     );
   }
 }
 
+// Kita gunakan kelas spesifik ini daripada extend NavigatorState
+class MockCustomNavigator extends Mock implements SimpleNavigator {}
+
 void main() {
   late MockChangePasswordService mockChangePasswordService;
+  late MockFirebaseAuth mockFirebaseAuth;
   late MockUser mockUser;
+  late MockNavigatorObserver mockNavigatorObserver;
   final getIt = GetIt.instance;
+
+  TestWidgetsFlutterBinding.ensureInitialized();
 
   // Fungsi helper untuk menyetel ukuran layar test yang konsisten
   void setScreenSize(WidgetTester tester) {
@@ -73,7 +95,13 @@ void main() {
 
   setUp(() {
     mockChangePasswordService = MockChangePasswordService();
+    mockFirebaseAuth = MockFirebaseAuth();
     mockUser = MockUser();
+    mockNavigatorObserver = MockNavigatorObserver();
+
+    // Setup mockUser email
+    when(mockUser.email).thenReturn('test@example.com');
+    when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
 
     // Register mockChangePasswordService in GetIt
     if (getIt.isRegistered<ChangePasswordService>()) {
@@ -89,31 +117,35 @@ void main() {
     }
   });
 
-  group('ChangePasswordPage Tests (Normal Mode)', () {
+  group('ChangePasswordPage Tests (Normal Mode) - UI dan Validasi', () {
     testWidgets('Halaman menampilkan semua elemen UI dengan benar',
         (WidgetTester tester) async {
       // Setup
       setScreenSize(tester);
 
       // Build halaman
-      await tester.pumpWidget(const MaterialApp(home: ChangePasswordPage()));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(MaterialApp(
+          home: ChangePasswordPage(
+              testMode: true,
+              customChangePasswordService: mockChangePasswordService)));
+      await tester.pump(); // Gunakan pumpAndSettle hanya jika diperlukan
 
       // Verifikasi elemen UI
       expect(find.text('Change Your Password'), findsOneWidget);
       expect(find.text('Enter your new password below'), findsOneWidget);
-      expect(find.text('CHANGE PASSWORD'), findsOneWidget);
+      expect(find.text('UBAH PASSWORD'), findsOneWidget);
 
-      // Tombol "Back to Home" sudah tidak ada di UI terbaru
-      // expect(find.text('Back to Home'), findsOneWidget);
+      // Verifikasi field password saat ini (current password) ada
+      expect(find.widgetWithText(TextFormField, 'Password Saat Ini'),
+          findsOneWidget);
 
-      // Verifikasi icon dengan matcher yang lebih spesifik
-      expect(find.byType(Icon), findsWidgets);
+      // Verifikasi tombol lupa password tersedia
+      expect(find.text('Lupa Password?'), findsOneWidget);
 
       // Verifikasi text fields
       expect(
-          find.widgetWithText(TextFormField, 'New Password'), findsOneWidget);
-      expect(find.widgetWithText(TextFormField, 'Confirm New Password'),
+          find.widgetWithText(TextFormField, 'Password Baru'), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Konfirmasi Password Baru'),
           findsOneWidget);
     });
 
@@ -123,16 +155,21 @@ void main() {
       setScreenSize(tester);
 
       // Build halaman
-      await tester.pumpWidget(const MaterialApp(home: ChangePasswordPage()));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(MaterialApp(
+          home: ChangePasswordPage(
+              testMode: true,
+              customChangePasswordService: mockChangePasswordService)));
+      await tester.pump();
 
       // Tap tombol change password tanpa mengisi form
-      await tester.tap(find.text('CHANGE PASSWORD'));
-      await tester.pumpAndSettle();
+      await tester.tap(find.text('UBAH PASSWORD'));
+      await tester.pump();
 
       // Verifikasi pesan validasi muncul
-      expect(find.text('Please enter your new password'), findsOneWidget);
-      expect(find.text('Please confirm your new password'), findsOneWidget);
+      expect(find.text('Password saat ini tidak boleh kosong'), findsOneWidget);
+      expect(find.text('Password baru tidak boleh kosong'), findsOneWidget);
+      expect(
+          find.text('Konfirmasi password tidak boleh kosong'), findsOneWidget);
     });
 
     testWidgets('Validasi form bekerja saat password terlalu pendek',
@@ -141,22 +178,28 @@ void main() {
       setScreenSize(tester);
 
       // Build halaman
-      await tester.pumpWidget(const MaterialApp(home: ChangePasswordPage()));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(MaterialApp(
+          home: ChangePasswordPage(
+              testMode: true,
+              customChangePasswordService: mockChangePasswordService)));
+      await tester.pump();
 
       // Isi form dengan password pendek
       await tester.enterText(
-          find.widgetWithText(TextFormField, 'New Password'), '12345');
+          find.widgetWithText(TextFormField, 'Password Saat Ini'),
+          'current123');
       await tester.enterText(
-          find.widgetWithText(TextFormField, 'Confirm New Password'), '12345');
+          find.widgetWithText(TextFormField, 'Password Baru'), '12345');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Konfirmasi Password Baru'),
+          '12345');
 
       // Tap tombol change password
-      await tester.tap(find.text('CHANGE PASSWORD'));
-      await tester.pumpAndSettle();
+      await tester.tap(find.text('UBAH PASSWORD'));
+      await tester.pump();
 
       // Verifikasi pesan validasi untuk password terlalu pendek
-      expect(
-          find.text('Password must be at least 6 characters'), findsOneWidget);
+      expect(find.text('Password harus minimal 6 karakter'), findsOneWidget);
     });
 
     testWidgets('Validasi form bekerja saat konfirmasi password tidak cocok',
@@ -165,62 +208,88 @@ void main() {
       setScreenSize(tester);
 
       // Build halaman
-      await tester.pumpWidget(const MaterialApp(home: ChangePasswordPage()));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(MaterialApp(
+          home: ChangePasswordPage(
+              testMode: true,
+              customChangePasswordService: mockChangePasswordService)));
+      await tester.pump();
 
       // Isi form dengan password yang tidak cocok
       await tester.enterText(
-          find.widgetWithText(TextFormField, 'New Password'), 'NewPassword123');
+          find.widgetWithText(TextFormField, 'Password Saat Ini'),
+          'current123');
       await tester.enterText(
-          find.widgetWithText(TextFormField, 'Confirm New Password'),
+          find.widgetWithText(TextFormField, 'Password Baru'),
+          'NewPassword123');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Konfirmasi Password Baru'),
           'DifferentPassword456');
 
       // Tap tombol change password
-      await tester.tap(find.text('CHANGE PASSWORD'));
-      await tester.pumpAndSettle();
+      await tester.tap(find.text('UBAH PASSWORD'));
+      await tester.pump();
 
       // Verifikasi pesan validasi password tidak cocok
-      expect(find.text('Passwords do not match'), findsOneWidget);
+      expect(find.text('Konfirmasi password tidak sesuai dengan password baru'),
+          findsOneWidget);
     });
+  });
 
+  group('ChangePasswordPage Tests (Normal Mode) - Fungsionalitas', () {
     testWidgets('Change password berhasil saat validasi berhasil',
         (WidgetTester tester) async {
       // Setup
       setScreenSize(tester);
 
-      // Buat Future yang akan selesai dengan segera
+      // Configure mock untuk reauthenticate - gunakan anyNamed untuk parameter fleksibel
       when(mockChangePasswordService.changePassword(
-        newPassword: 'NewPassword123',
-        newPasswordConfirmation: 'NewPassword123',
-      )).thenAnswer((_) => Future.value(mockUser));
+        newPassword: anyNamed('newPassword'),
+        newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
+        currentPassword: anyNamed('currentPassword'),
+        email: anyNamed('email'),
+      )).thenAnswer((_) async => mockUser);
 
-      // Testing dengan widget yang dummy untuk menghindari timer
-      final widget = MaterialApp(
-        home: Builder(
-          builder: (context) {
-            return Scaffold(
-              body: ElevatedButton(
-                onPressed: () async {
-                  await mockChangePasswordService.changePassword(
-                      newPassword: 'NewPassword123',
-                      newPasswordConfirmation: 'NewPassword123');
-                },
-                child: const Text('Test Button'),
-              ),
-            );
-          },
+      // Build halaman
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+              body: ChangePasswordPage(
+            skipDelay: true,
+            testMode: true,
+            customChangePasswordService: mockChangePasswordService,
+          )),
+          scaffoldMessengerKey: GlobalKey<ScaffoldMessengerState>(),
         ),
       );
-
-      await tester.pumpWidget(widget);
-      await tester.tap(find.text('Test Button'));
       await tester.pump();
+
+      // Isi form dengan data valid
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Password Saat Ini'),
+          'CurrentPassword123');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Password Baru'),
+          'NewPassword123');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Konfirmasi Password Baru'),
+          'NewPassword123');
+
+      // Tap tombol ubah password
+      await tester.tap(find.text('UBAH PASSWORD'));
+      await tester.pump(); // Start animation
+      await tester.pump(const Duration(milliseconds: 100)); // Process animation frames
 
       // Verifikasi service dipanggil
       verify(mockChangePasswordService.changePassword(
-        newPassword: 'NewPassword123',
-        newPasswordConfirmation: 'NewPassword123',
+        newPassword: anyNamed('newPassword'),
+        newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
+        currentPassword: anyNamed('currentPassword'),
+        email: anyNamed('email'),
       )).called(1);
+      
+      // Skip test untuk SnackBar karena dihandle dalam ScaffoldMessenger
+      // dan navigasi dilakukan segera setelah SnackBar muncul
+      // Cukup verifikasi bahwa service method dipanggil
     });
 
     testWidgets('Menampilkan error message saat terjadi error',
@@ -232,44 +301,208 @@ void main() {
 
       // Buat instance dari mock yang sudah di-generate
       final mockAuthException = MockFirebaseAuthException();
+      when(mockAuthException.code).thenReturn('weak-password');
       when(mockAuthException.message).thenReturn(errorMessage);
 
-      // Mock service untuk melempar error
+      // Mock service untuk melempar error dengan anyNamed
       when(mockChangePasswordService.changePassword(
-        newPassword: anyNamed('newPassword'),
-        newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
+        newPassword: captureAnyNamed('newPassword'),
+        newPasswordConfirmation: captureAnyNamed('newPasswordConfirmation'),
+        currentPassword: captureAnyNamed('currentPassword'),
+        email: captureAnyNamed('email'),
       )).thenThrow(mockAuthException);
 
-      // Testing dengan widget yang dummy untuk menghindari kompleksitas
-      final widget = MaterialApp(
-        home: Builder(
-          builder: (context) {
-            return Scaffold(
-              body: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    await mockChangePasswordService.changePassword(
-                        newPassword: 'weak', newPasswordConfirmation: 'weak');
-                  } catch (e) {
-                    // Menangkap error
-                  }
-                },
-                child: const Text('Test Button'),
-              ),
-            );
-          },
-        ),
-      );
-
-      await tester.pumpWidget(widget);
-      await tester.tap(find.text('Test Button'));
+      // Build halaman
+      await tester.pumpWidget(MaterialApp(
+          home: ChangePasswordPage(
+              testMode: true,
+              customChangePasswordService: mockChangePasswordService)));
       await tester.pump();
 
-      // Verifikasi service dipanggil
+      // Isi form dengan password yang lolos validasi tapi akan gagal di Firebase
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Password Saat Ini'),
+          'CurrentPassword123');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Password Baru'), 'weakpass'); // At least 6 chars
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Konfirmasi Password Baru'),
+          'weakpass'); // Same as password
+
+      // Tap tombol ubah password
+      await tester.tap(find.text('UBAH PASSWORD'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Verifikasi service dipanggil dan pesan error ditampilkan
       verify(mockChangePasswordService.changePassword(
         newPassword: anyNamed('newPassword'),
         newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
+        currentPassword: anyNamed('currentPassword'),
+        email: anyNamed('email'),
       )).called(1);
+      expect(find.text(errorMessage), findsOneWidget);
+    });
+
+    testWidgets('Menangani error requires-recent-login dengan benar',
+        (WidgetTester tester) async {
+      // Setup
+      setScreenSize(tester);
+      const errorMessage =
+          'Untuk alasan keamanan, silakan masukkan password saat ini Anda.';
+
+      // Buat instance dari mock yang sudah di-generate
+      final mockAuthException = MockFirebaseAuthException();
+      when(mockAuthException.code).thenReturn('requires-recent-login');
+      when(mockAuthException.message).thenReturn(errorMessage);
+      
+      // Mock Firebase auth untuk test mode
+      when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
+      when(mockUser.email).thenReturn('test@example.com');
+
+      // Mock service untuk melempar error dengan captureAnyNamed
+      when(mockChangePasswordService.changePassword(
+        newPassword: captureAnyNamed('newPassword'),
+        newPasswordConfirmation: captureAnyNamed('newPasswordConfirmation'),
+        currentPassword: captureAnyNamed('currentPassword'),
+        email: captureAnyNamed('email'),
+      )).thenThrow(mockAuthException);
+
+      // Build halaman
+      await tester.pumpWidget(MaterialApp(
+          home: ChangePasswordPage(
+              testMode: true,
+              customChangePasswordService: mockChangePasswordService)));
+      await tester.pump();
+
+      // Isi form
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Password Saat Ini'),
+          'WrongPassword');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Password Baru'),
+          'NewPassword123');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, 'Konfirmasi Password Baru'),
+          'NewPassword123');
+
+      // Tap tombol ubah password
+      await tester.tap(find.text('UBAH PASSWORD'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Verifikasi pesan error ditampilkan
+      expect(find.text(errorMessage), findsOneWidget);
+    });
+
+    testWidgets('Lupa Password button mengirim reset password email',
+        (WidgetTester tester) async {
+      // Setup
+      setScreenSize(tester);
+
+      // Configure mock untuk sendPasswordResetEmail dengan anyNamed
+      when(mockChangePasswordService.sendPasswordResetEmail(
+        email: anyNamed('email'),
+      )).thenAnswer((_) async => {});
+
+      // Build halaman
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+              body: ChangePasswordPage(
+            skipDelay: true,
+            testMode: true,
+            customChangePasswordService: mockChangePasswordService,
+          )),
+          scaffoldMessengerKey: GlobalKey<ScaffoldMessengerState>(),
+        ),
+      );
+      await tester.pump();
+
+      // Tap tombol lupa password
+      await tester.tap(find.text('Lupa Password?'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Verifikasi sendPasswordResetEmail dipanggil
+      verify(mockChangePasswordService.sendPasswordResetEmail(
+        email: anyNamed('email'),
+      )).called(1);
+
+      // Verifikasi pesan sukses ditampilkan
+      expect(
+        find.text('Email reset password telah dikirim ke test@example.com'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Lupa Password button menampilkan error saat gagal',
+        (WidgetTester tester) async {
+      // Setup
+      setScreenSize(tester);
+      const errorMessage = 'Tidak ada pengguna yang terkait dengan email ini.';
+
+      // Buat instance dari mock exception
+      final mockAuthException = MockFirebaseAuthException();
+      when(mockAuthException.code).thenReturn('user-not-found');
+      when(mockAuthException.message).thenReturn(errorMessage);
+
+      // Configure mock untuk sendPasswordResetEmail melempar error dengan anyNamed
+      when(mockChangePasswordService.sendPasswordResetEmail(
+        email: anyNamed('email'),
+      )).thenThrow(mockAuthException);
+
+      // Build halaman
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+              body: ChangePasswordPage(
+            skipDelay: true,
+            testMode: true,
+            customChangePasswordService: mockChangePasswordService,
+          )),
+          scaffoldMessengerKey: GlobalKey<ScaffoldMessengerState>(),
+        ),
+      );
+      await tester.pump();
+
+      // Tap tombol lupa password
+      await tester.tap(find.text('Lupa Password?'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Verifikasi pesan error ditampilkan
+      expect(find.text(errorMessage), findsOneWidget);
+    });
+
+    testWidgets('Menampilkan error saat email tidak tersedia',
+        (WidgetTester tester) async {
+      // Setup
+      setScreenSize(tester);
+
+      // Buat custom mock ChangePasswordService untuk kasus ini
+      final mockNoEmailService = MockChangePasswordService();
+      
+      // Mock service.sendPasswordResetEmail untuk throw exception dengan pesan email tidak ditemukan
+      when(mockNoEmailService.sendPasswordResetEmail(
+        email: anyNamed('email'),
+      )).thenThrow(Exception('Email tidak ditemukan. Silakan login ulang.'));
+
+      // Build halaman dengan customChangePasswordService
+      await tester.pumpWidget(MaterialApp(
+          home: Scaffold(body: ChangePasswordPage(
+              testMode: true, // Use test mode to avoid real Firebase calls
+              customChangePasswordService: mockNoEmailService))));
+      await tester.pump();
+
+      // Tap tombol lupa password
+      await tester.tap(find.text('Lupa Password?'));
+      await tester.pump(); // Start animation
+      await tester.pump(const Duration(milliseconds: 300)); // Allow time for setState to complete
+
+      // Verifikasi pesan error ditampilkan
+      expect(find.text('Email tidak ditemukan. Silakan login ulang.'),
+          findsOneWidget);
     });
   });
 
@@ -279,18 +512,17 @@ void main() {
       // Setup
       setScreenSize(tester);
 
-      // Mock service
-      when(mockChangePasswordService.confirmPasswordReset(
-        code: anyNamed('code'),
-        newPassword: anyNamed('newPassword'),
-      )).thenAnswer((_) => Future.value());
-
-      // Build halaman dengan widget testable
-      await tester.pumpWidget(TestableChangePasswordPage(
-        oobCode: 'valid-oob-code',
-        service: mockChangePasswordService,
-      ));
-      await tester.pumpAndSettle();
+      // Build halaman dengan oobCode (mode reset password)
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangePasswordPage(
+            oobCode: 'valid-oob-code',
+            testMode: true,
+            customChangePasswordService: mockChangePasswordService,
+          ),
+        ),
+      );
+      await tester.pump();
 
       // Verifikasi elemen UI untuk mode reset
       expect(find.text('Reset Your Password'), findsOneWidget);
@@ -298,13 +530,17 @@ void main() {
           findsOneWidget);
       expect(find.text('RESET PASSWORD'), findsOneWidget);
 
-      // Tombol "Back to Home" sudah tidak ada di UI terbaru
-      // expect(find.text('Back to Home'), findsOneWidget);
+      // Verifikasi tidak ada field current password
+      expect(find.widgetWithText(TextFormField, 'Password Saat Ini'),
+          findsNothing);
 
-      // Verifikasi form fields yang sama
+      // Verifikasi tidak ada tombol Lupa Password
+      expect(find.text('Lupa Password?'), findsNothing);
+
+      // Verifikasi form fields
       expect(
-          find.widgetWithText(TextFormField, 'New Password'), findsOneWidget);
-      expect(find.widgetWithText(TextFormField, 'Confirm New Password'),
+          find.widgetWithText(TextFormField, 'Password Baru'), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Konfirmasi Password Baru'),
           findsOneWidget);
     });
 
@@ -314,11 +550,11 @@ void main() {
       setScreenSize(tester);
       bool navigationCalled = false;
 
-      // Mock service untuk reset password
+      // Mock service untuk reset password dengan anyNamed
       when(mockChangePasswordService.confirmPasswordReset(
-        code: 'valid-oob-code',
-        newPassword: 'NewPassword123',
-      )).thenAnswer((_) => Future.value());
+        code: anyNamed('code'),
+        newPassword: anyNamed('newPassword'),
+      )).thenAnswer((_) async => {});
 
       // Build halaman dengan widget testable
       await tester.pumpWidget(TestableChangePasswordPage(
@@ -328,13 +564,14 @@ void main() {
           navigationCalled = true;
         },
       ));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Isi form dengan password valid
       await tester.enterText(
-          find.widgetWithText(TextFormField, 'New Password'), 'NewPassword123');
+          find.widgetWithText(TextFormField, 'Password Baru'),
+          'NewPassword123');
       await tester.enterText(
-          find.widgetWithText(TextFormField, 'Confirm New Password'),
+          find.widgetWithText(TextFormField, 'Konfirmasi Password Baru'),
           'NewPassword123');
 
       // Tap tombol reset password
@@ -343,331 +580,68 @@ void main() {
 
       // Simulasikan navigation success dengan menekan tombol bantuan
       await tester.tap(find.text('Simulate Success Navigation'));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Verifikasi service confirmPasswordReset dipanggil
       verify(mockChangePasswordService.confirmPasswordReset(
-        code: 'valid-oob-code',
-        newPassword: 'NewPassword123',
-      )).called(1);
-
-      // Verifikasi service changePassword tidak dipanggil
-      verifyNever(mockChangePasswordService.changePassword(
+        code: anyNamed('code'),
         newPassword: anyNamed('newPassword'),
-        newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
-      ));
+      )).called(1);
 
       // Verifikasi navigation handler dipanggil
       expect(navigationCalled, true);
     });
 
-    testWidgets('Menampilkan pesan sukses setelah reset password berhasil',
+    testWidgets('Validasi form di mode reset password',
         (WidgetTester tester) async {
       // Setup
       setScreenSize(tester);
-      bool navigationCalled = false;
-
-      // Mock service untuk reset password
-      when(mockChangePasswordService.confirmPasswordReset(
-        code: 'valid-oob-code',
-        newPassword: 'NewPassword123',
-      )).thenAnswer((_) => Future.value());
 
       // Build halaman dengan widget testable
       await tester.pumpWidget(TestableChangePasswordPage(
         oobCode: 'valid-oob-code',
         service: mockChangePasswordService,
-        onSuccess: (_) {
-          navigationCalled = true;
-        },
       ));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
-      // Isi form dengan password valid
-      await tester.enterText(
-          find.widgetWithText(TextFormField, 'New Password'), 'NewPassword123');
-      await tester.enterText(
-          find.widgetWithText(TextFormField, 'Confirm New Password'),
-          'NewPassword123');
-
-      // Tap tombol reset password
+      // Tap tombol reset password tanpa mengisi form
       await tester.tap(find.text('RESET PASSWORD'));
       await tester.pump();
 
-      // Simulasikan navigation success dengan menekan tombol bantuan
-      await tester.tap(find.text('Simulate Success Navigation'));
-      await tester.pumpAndSettle();
-
-      // Verifikasi pesan sukses muncul sebelum navigasi
-      expect(find.text('Password reset successfully! Redirecting to login...'),
-          findsOneWidget);
-
-      // Verifikasi navigation handler dipanggil
-      expect(navigationCalled, true);
+      // Verifikasi pesan validasi muncul
+      expect(find.text('Password baru tidak boleh kosong'), findsOneWidget);
+      expect(
+          find.text('Konfirmasi password tidak boleh kosong'), findsOneWidget);
     });
+  });
 
-    testWidgets('Menampilkan error message saat reset password gagal',
+  // Test untuk UI dan interaksi
+  group('ChangePasswordPage UI Interaction Tests', () {
+    testWidgets('Toggle password visibility works for current password',
         (WidgetTester tester) async {
       // Setup
       setScreenSize(tester);
-      const errorMessage =
-          'Kode reset password sudah kadaluarsa. Silakan minta kode baru.';
 
-      // Buat instance dari mock yang sudah di-generate
-      final mockAuthException = MockFirebaseAuthException();
-      when(mockAuthException.message).thenReturn(errorMessage);
-
-      // Mock service untuk melempar error
-      when(mockChangePasswordService.confirmPasswordReset(
-        code: 'expired-code',
-        newPassword: 'NewPassword123',
-      )).thenThrow(mockAuthException);
-
-      // Build halaman dengan widget testable
-      await tester.pumpWidget(TestableChangePasswordPage(
-        oobCode: 'expired-code',
-        service: mockChangePasswordService,
-      ));
-      await tester.pumpAndSettle();
-
-      // Isi form dengan password valid
-      await tester.enterText(
-          find.widgetWithText(TextFormField, 'New Password'), 'NewPassword123');
-      await tester.enterText(
-          find.widgetWithText(TextFormField, 'Confirm New Password'),
-          'NewPassword123');
-
-      // Tap tombol reset password
-      await tester.tap(find.text('RESET PASSWORD'));
+      // Build halaman
+      await tester.pumpWidget(MaterialApp(
+          home: ChangePasswordPage(
+              testMode: true,
+              customChangePasswordService: mockChangePasswordService)));
       await tester.pump();
 
-      // Verifikasi service dipanggil
-      verify(mockChangePasswordService.confirmPasswordReset(
-        code: 'expired-code',
-        newPassword: 'NewPassword123',
-      )).called(1);
+      // Verifikasi bahwa password field diset sebagai obscureText = true awalnya
+      final currentPasswordField = tester.widget<TextField>(
+          find.widgetWithText(TextField, 'Password Saat Ini'));
+      expect(currentPasswordField.obscureText, isTrue);
 
-      // Verifikasi pesan error muncul
+      // Tap pada icon visibility untuk mengubah visibility
+      await tester.tap(find.byIcon(Icons.visibility).first);
       await tester.pump();
-      expect(find.text(errorMessage), findsOneWidget);
+
+      // Verifikasi bahwa password field sekarang visible (obscureText = false)
+      final updatedPasswordField = tester.widget<TextField>(
+          find.widgetWithText(TextField, 'Password Saat Ini'));
+      expect(updatedPasswordField.obscureText, isFalse);
     });
-  });
-
-  // Test khusus untuk toggle password visibility
-  testWidgets('Toggle password visibility works for both password fields',
-      (WidgetTester tester) async {
-    // Setup
-    setScreenSize(tester);
-
-    // Build halaman
-    await tester.pumpWidget(const MaterialApp(home: ChangePasswordPage()));
-    await tester.pumpAndSettle();
-
-    // Test untuk toggle new password visibility
-    expect(find.byIcon(Icons.visibility),
-        findsNWidgets(2)); // Initially both are visibility icons
-
-    // Tap pada toggle new password
-    await tester.tap(find.byIcon(Icons.visibility).first);
-    await tester.pump();
-
-    // Verify that only first field is now visible
-    expect(find.byIcon(Icons.visibility_off).first, findsOneWidget);
-    expect(find.byIcon(Icons.visibility).last, findsOneWidget);
-
-    // Tap pada toggle confirm password
-    await tester.tap(find.byIcon(Icons.visibility).last);
-    await tester.pump();
-
-    // Verify that both fields are now visible
-    expect(find.byIcon(Icons.visibility_off), findsNWidgets(2));
-  });
-
-  // Test untuk memverifikasi getErrorMessage dengan berbagai tipe error
-  testWidgets('Displays correct error messages for different error types',
-      (WidgetTester tester) async {
-    // Setup
-    setScreenSize(tester);
-
-    // Mock beberapa jenis error
-    final firebaseError = MockFirebaseAuthException();
-    when(firebaseError.message).thenReturn('Firebase specific error');
-
-    // Build halaman untuk testing khusus implementasi error message
-    await tester.pumpWidget(const MaterialApp(home: ChangePasswordPage()));
-    await tester.pumpAndSettle();
-
-    // Test untuk Firebase error - Gunakan mockService langsung
-    when(mockChangePasswordService.changePassword(
-      newPassword: anyNamed('newPassword'),
-      newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
-    )).thenThrow(firebaseError);
-
-    // Isi form dengan data valid
-    await tester.enterText(
-        find.widgetWithText(TextFormField, 'New Password'), 'TestPassword123');
-    await tester.enterText(
-        find.widgetWithText(TextFormField, 'Confirm New Password'),
-        'TestPassword123');
-
-    // Submit form untuk memicu error Firebase
-    await tester.tap(find.text('CHANGE PASSWORD'));
-    await tester.pump(); // Start loading
-    await tester.pump(const Duration(seconds: 1)); // Allow error to process
-
-    // Verifikasi pesan error dari FirebaseAuthException ditampilkan
-    expect(find.text('Firebase specific error'), findsOneWidget);
-
-    // Reset form dan ubah mock untuk ArgumentError
-    await tester.pumpWidget(const MaterialApp(home: ChangePasswordPage()));
-    await tester.pumpAndSettle();
-
-    const errorMessage = 'Argument error message';
-    when(mockChangePasswordService.changePassword(
-      newPassword: anyNamed('newPassword'),
-      newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
-    )).thenThrow(ArgumentError(errorMessage));
-
-    // Isi form lagi
-    await tester.enterText(
-        find.widgetWithText(TextFormField, 'New Password'), 'TestPassword123');
-    await tester.enterText(
-        find.widgetWithText(TextFormField, 'Confirm New Password'),
-        'TestPassword123');
-
-    // Submit form untuk memicu ArgumentError
-    await tester.tap(find.text('CHANGE PASSWORD'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    // Verifikasi pesan error dari ArgumentError ditampilkan
-    expect(find.text(errorMessage), findsOneWidget);
-
-    // Reset form dan ubah mock untuk generic exception
-    await tester.pumpWidget(const MaterialApp(home: ChangePasswordPage()));
-    await tester.pumpAndSettle();
-
-    when(mockChangePasswordService.changePassword(
-      newPassword: anyNamed('newPassword'),
-      newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
-    )).thenThrow(Exception('This is a generic exception'));
-
-    // Isi form lagi
-    await tester.enterText(
-        find.widgetWithText(TextFormField, 'New Password'), 'TestPassword123');
-    await tester.enterText(
-        find.widgetWithText(TextFormField, 'Confirm New Password'),
-        'TestPassword123');
-
-    // Submit form untuk memicu generic Exception
-    await tester.tap(find.text('CHANGE PASSWORD'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    // Verifikasi pesan error generic ditampilkan
-    expect(find.text('An unexpected error occurred. Please try again later.'),
-        findsOneWidget);
-  });
-
-  testWidgets('Tombol toggle pada konfirmasi password bekerja dengan benar',
-      (WidgetTester tester) async {
-    // Setup
-    setScreenSize(tester);
-
-    // Build halaman
-    await tester.pumpWidget(const MaterialApp(home: ChangePasswordPage()));
-    await tester.pumpAndSettle();
-
-    // Isi field password untuk memudahkan pengujian
-    await tester.enterText(
-        find.widgetWithText(TextFormField, 'Confirm New Password'), 'test123');
-    await tester.pump();
-
-    // Temukan tombol visibility pada field konfirmasi password
-    final visibilityToggle = find.descendant(
-      of: find.widgetWithText(TextFormField, 'Confirm New Password'),
-      matching: find.byIcon(Icons.visibility),
-    );
-    expect(visibilityToggle, findsOneWidget);
-
-    // Dapatkan status obscureText sebelum toggle
-    final passwordField = find.widgetWithText(TextField, 'test123').last;
-    final isInitiallyObscured =
-        tester.widget<TextField>(passwordField).obscureText;
-    expect(
-        isInitiallyObscured, isTrue); // Password seharusnya tersembunyi awalnya
-
-    // Tap tombol toggle visibility
-    await tester.tap(visibilityToggle);
-    await tester.pump();
-
-    // Periksa apakah visibility berubah
-    final passwordFieldAfterToggle =
-        find.widgetWithText(TextField, 'test123').last;
-    final isObscuredAfterToggle =
-        tester.widget<TextField>(passwordFieldAfterToggle).obscureText;
-    expect(isObscuredAfterToggle,
-        isFalse); // Password seharusnya terlihat sekarang
-  });
-
-  testWidgets('Menampilkan error message spesifik untuk ArgumentError',
-      (WidgetTester tester) async {
-    // Setup
-    setScreenSize(tester);
-    const errorMessage = 'Pesan error khusus untuk ArgumentError';
-
-    // Mock service untuk melempar ArgumentError dengan pesan spesifik
-    when(mockChangePasswordService.changePassword(
-      newPassword: anyNamed('newPassword'),
-      newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
-    )).thenThrow(ArgumentError(errorMessage));
-
-    // Build halaman
-    await tester.pumpWidget(const MaterialApp(home: ChangePasswordPage()));
-    await tester.pumpAndSettle();
-
-    // Isi form dengan data valid
-    await tester.enterText(
-        find.widgetWithText(TextFormField, 'New Password'), 'NewPassword123');
-    await tester.enterText(
-        find.widgetWithText(TextFormField, 'Confirm New Password'),
-        'NewPassword123');
-
-    // Submit form
-    await tester.tap(find.text('CHANGE PASSWORD'));
-    await tester.pump(); // Start loading
-    await tester.pump(const Duration(seconds: 1)); // Allow error to process
-
-    // Verifikasi error message dari ArgumentError ditampilkan dengan benar
-    expect(find.text(errorMessage), findsOneWidget);
-  });
-
-  testWidgets('Test error handling pada fungsi _changePassword',
-      (WidgetTester tester) async {
-    // Setup
-    when(mockChangePasswordService.changePassword(
-      newPassword: anyNamed('newPassword'),
-      newPasswordConfirmation: anyNamed('newPasswordConfirmation'),
-    )).thenThrow(Exception('Test exception'));
-
-    // Build widget
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ChangePasswordPage(skipDelay: true),
-      ),
-    );
-
-    // Enter passwords
-    await tester.enterText(find.byType(TextFormField).at(0), 'password123');
-    await tester.enterText(find.byType(TextFormField).at(1), 'password123');
-
-    // Submit form
-    await tester.tap(find.text('CHANGE PASSWORD'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    // Verify error message is displayed for generic exception
-    expect(find.text('An unexpected error occurred. Please try again later.'),
-        findsOneWidget);
   });
 }

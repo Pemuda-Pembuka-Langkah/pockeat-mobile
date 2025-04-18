@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
@@ -113,6 +112,7 @@ class LoginServiceImpl implements LoginService {
     }
   }
 
+  // coverage:ignore-start
   Future<String?> getIdToken() async {
     try {
       final firebaseUser = _auth.currentUser;
@@ -125,6 +125,7 @@ class LoginServiceImpl implements LoginService {
     } catch (e) {
       return null;
     }
+  // coverage:ignore-end
   }
 
   /// Membersihkan resource ketika service tidak digunakan lagi

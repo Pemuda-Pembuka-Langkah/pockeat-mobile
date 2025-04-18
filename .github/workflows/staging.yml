@@ -17,7 +17,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.29.0"
+          flutter-version: "3.27.4"
           channel: "stable"
           cache: true
 
@@ -36,6 +36,7 @@ jobs:
           echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
           echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
           echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "INSTABUG_TOKEN=${{ secrets.STAGING_INSTABUG_TOKEN }}" >> .env
 
       - name: Get dependencies
         run: flutter pub get
@@ -127,14 +128,14 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.29.0"
+          flutter-version: "3.27.4"
           channel: "stable"
           cache: true
 
       - name: Create .env file
         run: |
           echo "FLAVOR=staging" > .env
-          echo "GOOGLE_GEMINI_API_KEY=${{ secrets.STAGING_GOOGLE_GEMINI_API_KEY }}" >> .env
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
           echo "STAGING_FIREBASE_PROJECT_ID=${{ secrets.STAGING_FIREBASE_PROJECT_ID }}" >> .env
           echo "STAGING_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.STAGING_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
           echo "STAGING_FIREBASE_STORAGE_BUCKET=${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}" >> .env
@@ -146,6 +147,7 @@ jobs:
           echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
           echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
           echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "INSTABUG_TOKEN=${{ secrets.STAGING_INSTABUG_TOKEN }}" >> .env
 
       - name: Get dependencies
         run: flutter pub get

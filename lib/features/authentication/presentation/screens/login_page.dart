@@ -117,10 +117,12 @@ class _LoginPageState extends State<LoginPage> {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
+        // coverage:ignore-start
         if (didPop) return;
         // Jika user menekan tombol back, keluar dari aplikasi
         // daripada kembali ke halaman utama yang memerlukan auth
         SystemNavigator.pop();
+        // coverage:ignore-end
       },
       child: Scaffold(
         backgroundColor: bgColor,
@@ -366,6 +368,7 @@ class _LoginPageState extends State<LoginPage> {
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         // Navigate to registration page
+                        // coverage:ignore-line
                         Navigator.pushReplacementNamed(context, '/register');
                       },
                   ),

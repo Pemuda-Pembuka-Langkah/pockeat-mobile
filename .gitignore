@@ -2,6 +2,7 @@
 *.class
 *.log
 *.pyc
+.cursor
 *.swp
 .DS_Store
 .atom/
@@ -80,3 +81,7 @@ local.properties
 android/app/.cxx/
 
 *.lnk
+.fvmrc
+
+# FVM Version Cache
+.fvm/

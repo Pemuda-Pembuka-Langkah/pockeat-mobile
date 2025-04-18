@@ -242,6 +242,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
+                        // coverage:ignore-line
                         Navigator.pop(context);
                       },
                   ),

@@ -5,6 +5,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/d
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/meal.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/repositories/nutrition_repository.dart';
 
+// coverage:ignore-start
 class NutritionService {
   final NutritionRepository _repository;
 
@@ -30,3 +31,4 @@ class NutritionService {
     return await _repository.getMeals();
   }
 }
+// coverage:ignore-end

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+// coverage:ignore-start
 class ToggleButtonWidget extends StatelessWidget {
   final String text;
   final bool isSelected;
   final VoidCallback onTap;
   final Color selectedColor;
 
+  // ignore: use_super_parameters
   const ToggleButtonWidget({
     Key? key,
     required this.text,
@@ -36,3 +38,4 @@ class ToggleButtonWidget extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end

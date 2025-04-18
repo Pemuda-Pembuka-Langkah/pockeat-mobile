@@ -29,14 +29,14 @@ class FoodAnalysisParser {
       // it might be an error case not explicitly marked with an error field
       if (jsonData['food_name'] == 'Unknown' &&
           jsonData.containsKey('nutrition_info') &&
-          _isEmptyNutrition(jsonData['nutrition_info'])) {
+          isEmptyNutrition(jsonData['nutrition_info'])) {
         throw ApiServiceException(
             "Cannot identify food from provided information");
       }
 
       // If we get here, proceed with normal parsing
       final foodName = jsonData['food_name'] ?? '';
-      final ingredients = _parseIngredients(jsonData['ingredients']);
+      final ingredients = parseIngredients(jsonData['ingredients']);
       final nutritionInfo =
           NutritionInfo.fromJson(jsonData['nutrition_info'] ?? {});
       final warnings = jsonData['warnings'] ?? [];
@@ -79,7 +79,7 @@ class FoodAnalysisParser {
   }
 
   // Helper method to check if nutrition info is empty/zeros
-  static bool _isEmptyNutrition(Map<String, dynamic> nutritionInfo) {
+  static bool isEmptyNutrition(Map<String, dynamic> nutritionInfo) {
     final values = [
       nutritionInfo['calories'],
       nutritionInfo['protein'],
@@ -99,7 +99,7 @@ class FoodAnalysisParser {
         value == "0.0");
   }
 
-  static List<Ingredient> _parseIngredients(dynamic ingredients) {
+  static List<Ingredient> parseIngredients(dynamic ingredients) {
     if (ingredients == null) return [];
 
     if (ingredients is List) {
@@ -107,7 +107,7 @@ class FoodAnalysisParser {
           .map((item) => item is Map<String, dynamic>
               ? Ingredient(
                   name: item['name'] ?? 'Unknown ingredient',
-                  servings: _parseDouble(item['servings'] ?? 0),
+                  servings: parseDouble(item['servings'] ?? 0),
                 )
               : Ingredient(name: 'Unknown ingredient', servings: 0))
           .toList();
@@ -117,7 +117,7 @@ class FoodAnalysisParser {
   }
 
   // Helper method to parse doubles from various formats
-  static double _parseDouble(dynamic value) {
+  static double parseDouble(dynamic value) {
     if (value == null) return 0.0;
     if (value is int) return value.toDouble();
     if (value is double) return value;

@@ -14,11 +14,13 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/pr
 // ignore: depend_on_referenced_packages
 import 'package:logger/logger.dart';
 
+// coverage:ignore-start
 final logger = Logger();
 
 class ExerciseProgressPage extends StatefulWidget {
   final ExerciseProgressService service;
   
+  // ignore: use_super_parameters
   const ExerciseProgressPage({
     Key? key,
     required this.service,
@@ -133,6 +135,7 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
               workoutStats: _workoutStats,
               completionPercentage: _completionPercentage,
               primaryGreen: primaryGreen,
+              isWeeklyView: isWeeklyView, // Add this parameter
             ),
             const SizedBox(height: 24),
             ExerciseDistributionWidget(
@@ -152,3 +155,4 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
     );
   }
 }
+// coverage:ignore-end

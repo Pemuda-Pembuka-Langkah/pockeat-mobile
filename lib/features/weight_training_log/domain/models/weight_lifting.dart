@@ -36,11 +36,16 @@ class WeightLifting {
 
   // Create Exercise object from JSON
   factory WeightLifting.fromJson(Map<String, dynamic> json) {
+    // Safe conversion for metValue
+    final metValue = json['metValue'] is int 
+        ? (json['metValue'] as int).toDouble() 
+        : double.parse(json['metValue'].toString());
+        
     return WeightLifting(
       id: json['id'],
       name: json['name'],
       bodyPart: json['bodyPart'],
-      metValue: json['metValue'],
+      metValue: metValue,
       sets: json['sets'] != null
           ? List<WeightLiftingSet>.from(
               json['sets'].map((x) => WeightLiftingSet.fromJson(x)))

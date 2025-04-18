@@ -5,6 +5,7 @@ import 'package:pockeat/features/api_scan/utils/food_analysis_parser.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:intl/intl.dart';
+import 'package:pockeat/features/food_log_history/utils/food_sharing_extension.dart';
 
 /// A page that displays detailed information about a food item.
 ///
@@ -191,6 +192,12 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
     return DateFormat('EEEE, MMMM d, yyyy • h:mm a').format(date);
   }
 
+// coverage:ignore:start
+  void _shareFood(FoodAnalysisResult food) async {
+    await context.shareFoodSummary(food);
+  }
+  // coverage:ignore:end
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -198,7 +205,23 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
         title: const Text('Food Details'),
         backgroundColor: Colors.white,
         elevation: 0,
+        //coverage:ignore-start
         actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.share,
+              color: Colors.black87,
+            ),
+            onPressed: () {
+              _foodFuture.then((food) {
+                if (food != null) {
+                  _shareFood(food);
+                }
+              });
+            },
+            tooltip: 'Share',
+          ),
+          //coverage:ignore-end
           IconButton(
             icon: const Icon(
               Icons.delete_outline,

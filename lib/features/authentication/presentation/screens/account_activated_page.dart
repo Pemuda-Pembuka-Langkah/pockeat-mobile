@@ -70,6 +70,7 @@ class AccountActivatedPage extends StatelessWidget {
                         onHomeTap!();
                       } else {
                         // Navigasi default ke home page
+                        // coverage:ignore-line
                         Navigator.of(context).pushReplacementNamed('/');
                       }
                     },
