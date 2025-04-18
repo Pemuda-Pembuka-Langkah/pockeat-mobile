@@ -371,6 +371,7 @@ class MyApp extends StatelessWidget {
         '/food-history': (context) => AuthWrapper(
               child: FoodHistoryPage(
                 service: Provider.of<FoodLogHistoryService>(context),
+                
               ),
             ),
         '/exercise-detail': (context) {
@@ -387,6 +388,7 @@ class MyApp extends StatelessWidget {
           return AuthWrapper(
             child: FoodDetailPage(
               foodId: args['foodId'] as String,
+              foodTrackingController: getIt<FoodTrackingClientController>(),
               foodRepository: Provider.of<FoodScanRepository>(context, listen: false),
               foodTextInputRepository: Provider.of<FoodTextInputRepository>(context, listen: false),
             ),
