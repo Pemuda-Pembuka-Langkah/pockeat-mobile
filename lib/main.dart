@@ -95,9 +95,6 @@ Future<bool> _initializeInstabug(String flavor) async {
     
     return true;
   } catch (e) {
-    // Log error dengan debugPrint dan Instabug
-    final errorMsg = 'FATAL ERROR: Gagal menginisialisasi Instabug: $e';
-    debugPrint(errorMsg);
     return false;
   }
 }
