@@ -39,8 +39,6 @@ class DetailedFoodTrackingWidgetService implements WidgetDataService<DetailedFoo
   Future<void> initialize() async {
     // Set app group ID untuk berbagi data dengan widget
     await _homeWidget.setAppGroupId(_appGroupId);
-    // Register callback untuk menangani interaksi widget
-    await registerWidgetClickCallback();
   }
 
   @override
@@ -134,6 +132,4 @@ class DetailedFoodTrackingWidgetService implements WidgetDataService<DetailedFoo
   Future<void> registerWidgetClickCallback() async {
     await _homeWidget.registerBackgroundCallback(handleWidgetClicked);
   }
-
-
 }

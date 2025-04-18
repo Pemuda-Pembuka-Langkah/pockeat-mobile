@@ -39,9 +39,6 @@ class SimpleFoodTrackingWidgetService implements WidgetDataService<SimpleFoodTra
   Future<void> initialize() async {
     // Set app group ID untuk berbagi data dengan widget
     await _homeWidget.setAppGroupId(_appGroupId);
-    
-    // Register callback untuk menangani interaksi widget
-    await registerWidgetClickCallback();
   }
 
   @override
