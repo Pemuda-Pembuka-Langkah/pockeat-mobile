@@ -42,6 +42,15 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
 
   void _showOverlay(
       BuildContext context, NavigationProvider navigationProvider) {
+    // Temukan posisi tombol add saat ini
+    final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+    final size = renderBox?.size;
+    final offset = renderBox?.localToGlobal(Offset.zero);
+    
+    // Perkirakan posisi tombol berdasarkan layar
+    final screenWidth = MediaQuery.of(context).size.width;
+    final buttonRightPosition = screenWidth * 0.04 + 75.0; // Perkiraan jarak tombol dari sisi kanan + ukuran tombol
+    
     _overlayEntry = OverlayEntry(
       builder: (context) => Stack(
         children: [
@@ -59,40 +68,35 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
             ),
           ),
 
-          // Floating Menu Buttons
+          // Exercise Button (Barat Laut / Pojok Kiri Atas relatif terhadap tombol add)
           Positioned(
-            bottom: 80,
-            width: MediaQuery.of(context).size.width,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 15),
-                  child: _buildFloatingButton(
-                    icon: Icons.fitness_center,
-                    color: primaryPink,
-                    onTap: () {
-                      navigationProvider.closeMenu();
-                      _overlayEntry?.remove();
-                      _overlayEntry = null;
-                      Navigator.pushNamed(context, '/add-exercise');
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15),
-                  child: _buildFloatingButton(
-                    icon: Icons.lunch_dining,
-                    color: primaryGreen,
-                    onTap: () {
-                      navigationProvider.closeMenu();
-                      _overlayEntry?.remove();
-                      _overlayEntry = null;
-                      Navigator.pushNamed(context, '/add-food');
-                    },
-                  ),
-                ),
-              ],
+            bottom: 80, // Lebih tinggi dari tombol add
+            right: buttonRightPosition + 25, // Ke kiri dari tombol add
+            child: _buildFloatingButton(
+              icon: Icons.fitness_center,
+              color: primaryPink,
+              onTap: () {
+                navigationProvider.closeMenu();
+                _overlayEntry?.remove();
+                _overlayEntry = null;
+                Navigator.pushNamed(context, '/add-exercise');
+              },
+            ),
+          ),
+          
+          // Food Button (Utara / Atas relatif terhadap tombol add)
+          Positioned(
+            bottom: 120, // Lebih tinggi dari tombol add dan exercise
+            right: buttonRightPosition - 50, // Sejajar dengan tombol add
+            child: _buildFloatingButton(
+              icon: Icons.lunch_dining,
+              color: primaryGreen,
+              onTap: () {
+                navigationProvider.closeMenu();
+                _overlayEntry?.remove();
+                _overlayEntry = null;
+                Navigator.pushNamed(context, '/add-food');
+              },
             ),
           ),
         ],
@@ -121,8 +125,10 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
           }
         });
 
+        final addButtonSize = 80.0; // Even larger button size
+        
         return SizedBox(
-          height: 65,
+          height: 80, // Meningkatkan height agar mencakup seluruh tombol add
           child: Stack(
             clipBehavior: Clip.none,
             children: [
@@ -162,27 +168,13 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                       Expanded(
                         child: _buildNavItem(
                           icon: Icons.auto_graph_outlined,
-                          label: 'Analytics',
+                          label: 'Progress',
                           isSelected: navigationProvider.currentIndex == 1,
                           onPressed: () {
                             navigationProvider.closeMenu();
                             navigationProvider.setIndex(1);
                             Navigator.pushReplacementNamed(
                                 context, '/analytic');
-                          },
-                        ),
-                      ),
-                      const Expanded(child: SizedBox()),
-                      Expanded(
-                        child: _buildNavItem(
-                          icon: Icons.stars_outlined,
-                          label: 'My Goals',
-                          isSelected: navigationProvider.currentIndex == 3,
-                          onPressed: () {
-                            navigationProvider.closeMenu();
-                            navigationProvider.setIndex(3);
-                            Navigator.pushReplacementNamed(
-                                context, '/progress');
                           },
                         ),
                       ),
@@ -198,24 +190,27 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           },
                         ),
                       ),
+                      // Ruang kosong diganti dengan tombol "+" yang tidak terlihat (untuk menjaga layout)
+                      Expanded(child: Container()), 
                     ],
                   ),
                 ),
               ),
-
-              // Add Button
+              
+              // Prominent "+ Add" Button positioned at the right side
               Positioned(
-                bottom: 30,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: GestureDetector(
+                bottom: 20.0, // Tetap positioned higher agar menonjol
+                right: MediaQuery.of(context).size.width * 0.05, // Sedikit masuk dari tepi kanan
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
                     onTap: () {
                       navigationProvider.toggleMenu();
                     },
+                    customBorder: const CircleBorder(),
                     child: Container(
-                      width: 50,
-                      height: 50,
+                      width: addButtonSize,
+                      height: addButtonSize,
                       decoration: BoxDecoration(
                         color: navigationProvider.isMenuOpen
                             ? primaryGreen
@@ -227,7 +222,8 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                                     ? primaryGreen
                                     : primaryPink)
                                 .withOpacity(0.3),
-                            blurRadius: 8,
+                            blurRadius: 10,
+                            spreadRadius: 2,
                             offset: const Offset(0, 4),
                           ),
                         ],
@@ -238,30 +234,10 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                         child: const Icon(
                           Icons.add,
                           color: Colors.white,
-                          size: 24,
+                          size: 36, // Ukuran ikon tetap sama
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-
-              // Add Log Text
-              Positioned(
-                bottom: 6,
-                left: 0,
-                right: 0,
-                child: Text(
-                  'Add Log',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: navigationProvider.isMenuOpen
-                        ? primaryGreen
-                        : Colors.black54,
-                    fontWeight: navigationProvider.isMenuOpen
-                        ? FontWeight.w500
-                        : FontWeight.normal,
                   ),
                 ),
               ),
@@ -286,14 +262,14 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
         children: [
           Icon(
             icon,
-            size: 24,
+            size: 28, // Ukuran ikon diperbesar dari 24 menjadi 28
             color: isSelected ? primaryPink : Colors.black38,
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 12, // Sedikit memperbesar ukuran font label
               color: isSelected ? primaryPink : Colors.black38,
               fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
             ),
