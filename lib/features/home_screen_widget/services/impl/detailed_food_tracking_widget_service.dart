@@ -113,10 +113,6 @@ class DetailedFoodTrackingWidgetService implements WidgetDataService<DetailedFoo
     final params = uri.queryParameters;
     final actionType = params['type']?.toLowerCase() ?? '';
     
-    print("uri: $uri");
-    print("params: $params");
-    print("actionType: $actionType");
-    
     // Logika khusus untuk widget DetailedFoodTracking berdasarkan parameter type
     if (actionType.contains('click') || actionType.contains('tap')) {
       return FoodWidgetEventType.clicked;
