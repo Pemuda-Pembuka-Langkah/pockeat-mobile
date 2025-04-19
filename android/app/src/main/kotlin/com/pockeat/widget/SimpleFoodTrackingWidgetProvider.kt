@@ -129,12 +129,7 @@ class SimpleFoodTrackingWidgetProvider : AppWidgetProvider() {
         val widgetName = WIDGET_NAME  // Nama widget ini
         val appGroupId = PREFS_NAME  // App group ID
         
-        // Check if user is logged in
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val userId = prefs.getString(KEY_USER_ID, null)
-        val isLoggedIn = !userId.isNullOrEmpty()
-        
-        // Different action type based on login status
+        // Different action type based on login status (menggunakan isLoggedIn yang sudah dideklarasikan)
         val actionType = if (isLoggedIn) {
             "log"  // Action "log" digunakan untuk "Log your food"
         } else {

@@ -110,16 +110,12 @@ class CustomHomeWidgetClient implements HomeWidgetInterface {
           // Panggil callback dengan URI yang diterima
           if (uriString != null) {
             await callback(Uri.parse(uriString));
-          } else {
-            // Fallback jika uri string null
-            await callback(Uri.parse('pockeat://widget/click?type=click'));
           }
           return true;
         }
         return null;
       });
     } catch (e) {
-      print('Error registering widget callback: $e');
       rethrow;
     }
   }

@@ -40,20 +40,26 @@ class MainActivity: FlutterFragmentActivity() {
             val uri = intent.data
             Log.d(TAG, "Received deep link: $uri")
             
-            // Tangkap semua deep link dari widget dengan scheme pockeat://
+            // Tangkap deep link dari widget dengan scheme pockeat:// dan pastikan memiliki parameter yang diperlukan
             if (uri.toString().startsWith("pockeat://")) {
                 Log.d(TAG, "Detected widget deep link: $uri")
                 
-                // Widget sekarang langsung memberikan URI dengan format yang benar:
-                // Format: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-                // Jadi tidak perlu parsing atau formatting khusus lagi
+                // Validasi apakah URI memiliki parameter yang diperlukan
+                val hasWidgetName = uri.getQueryParameter("widgetName") != null
+                val hasType = uri.getQueryParameter("type") != null
                 
-                // Tunda sedikit untuk memastikan Flutter engine sudah siap
-                Handler(Looper.getMainLooper()).postDelayed({
-                    MethodChannel(flutterEngine?.dartExecutor?.binaryMessenger, WIDGET_CHANNEL)
-                        .invokeMethod("onWidgetClick", mapOf("uri" to uri.toString()))
-                    Log.d(TAG, "Sent widget deep link to Flutter: $uri")
-                }, 500)
+                if (hasWidgetName && hasType) {
+                    Log.d(TAG, "Valid widget deep link with required parameters: $uri")
+                    
+                    // Tidak perlu delay, langsung kirim ke Flutter
+                    flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+                        MethodChannel(messenger, WIDGET_CHANNEL)
+                            .invokeMethod("onWidgetClick", mapOf("uri" to uri.toString()))
+                        Log.d(TAG, "Sent widget deep link to Flutter: $uri")
+                    }
+                } else {
+                    Log.d(TAG, "Invalid widget deep link, missing parameters: $uri")
+                }
             }
         }
     }
@@ -62,23 +68,8 @@ class MainActivity: FlutterFragmentActivity() {
         super.configureFlutterEngine(flutterEngine)
         
         // Daftarkan CustomHomeWidgetPlugin untuk widget kita
+        // Plugin ini sudah menangani semua interaksi widget <-> Flutter
         flutterEngine.plugins.add(CustomHomeWidgetPlugin())
-        
-        // Setup widget channel untuk menerima deep link callback
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIDGET_CHANNEL).setMethodCallHandler { call, result ->
-            when (call.method) {
-                "handleWidgetDeepLink" -> {
-                    val uriString = call.argument<String>("uri")
-                    if (uriString != null) {
-                        Log.d(TAG, "Handling widget deep link: $uriString")
-                        result.success(true)
-                    } else {
-                        result.error("INVALID_ARGUMENT", "URI cannot be null", null)
-                    }
-                }
-                else -> result.notImplemented()
-            }
-        }
         
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
