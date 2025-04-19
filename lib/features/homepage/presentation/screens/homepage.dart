@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
 import 'package:pockeat/features/food_log_history/presentation/widgets/food_recent_section.dart';
@@ -26,6 +27,8 @@ class _HomePageState extends State<HomePage>
   final Color primaryGreen = const Color(0xFF4ECDC4);
   String? dbInfo;
   bool _shouldRefreshExerciseSection = false;
+  bool _foodStreakMaintained = true;
+  int _foodStreakDays = 0;
 
   Future<void> _checkDatabase() async {
     try {
@@ -40,6 +43,21 @@ class _HomePageState extends State<HomePage>
     } catch (e) {
       setState(() {
         dbInfo = 'Error: $e';
+      });
+    }
+  }
+
+  Future<void> _loadFoodStreakInfo() async {
+    final foodService = Provider.of<FoodLogHistoryService>(context, listen: false);
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    final maintained = await foodService.isFoodStreakMaintained(userId);
+    final days = await foodService.getFoodStreakDays(userId);
+
+    if (mounted) {
+      setState(() {
+        _foodStreakMaintained = maintained;
+        _foodStreakDays = days;
       });
     }
   }
@@ -72,8 +90,9 @@ class _HomePageState extends State<HomePage>
       Provider.of<NavigationProvider>(context, listen: false).setIndex(0);
     });
     _checkDatabase();
+    _loadFoodStreakInfo();
   }
-
+  
   @override
   void dispose() {
     _tabController.dispose();
@@ -336,7 +355,10 @@ class _HomePageState extends State<HomePage>
           body: TabBarView(
             controller: _tabController,
             children: [
-              const OverviewSection(),
+              OverviewSection(
+                foodStreakMaintained: _foodStreakMaintained,
+                foodStreakDays: _foodStreakDays,
+              ),
               FoodRecentSection(
                 service: foodLogHistoryService,
               ),

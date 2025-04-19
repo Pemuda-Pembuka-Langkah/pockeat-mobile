@@ -41,4 +41,8 @@ abstract class FoodLogHistoryService {
   /// Mengembalikan [List<FoodLogHistoryItem>] berisi log yang sesuai dengan query
   /// Throws [Exception] jika terjadi error saat pengambilan data
   Future<List<FoodLogHistoryItem>> searchFoodLogs(String userId, String query);
+
+
+  Future<bool> isFoodStreakMaintained(String userId);
+  Future<int> getFoodStreakDays(String userId);
 }

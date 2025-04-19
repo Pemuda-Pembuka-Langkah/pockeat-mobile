@@ -104,4 +104,52 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
         })
         .toList();
   }
+
+  @override
+  Future<bool> isFoodStreakMaintained(String userId) async {
+    try {
+      // Check today
+      final today = DateTime.now();
+      final todayLogs = await getFoodLogsByDate(userId, today);
+      if (todayLogs.isNotEmpty) return true;
+
+      // Check yesterday
+      final yesterday = today.subtract(const Duration(days: 1));
+      final yesterdayLogs = await getFoodLogsByDate(userId, yesterday);
+      return yesterdayLogs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  @override
+  Future<int> getFoodStreakDays(String userId) async {
+    try {
+      int streakDays = 0;
+      bool streakContinues = true;
+      DateTime checkDate = DateTime.now();
+
+      // If no logs today yet, start checking from yesterday
+      final todayLogs = await getFoodLogsByDate(userId, checkDate);
+      if (todayLogs.isEmpty) {
+        checkDate = checkDate.subtract(const Duration(days: 1));
+      }
+
+      // Check consecutive days
+      while (streakContinues && streakDays < 100) {
+        final logs = await getFoodLogsByDate(userId, checkDate);
+
+        if (logs.isNotEmpty) {
+          streakDays++;
+          checkDate = checkDate.subtract(const Duration(days: 1));
+        } else {
+          streakContinues = false;
+        }
+      }
+
+      return streakDays;
+    } catch (e) {
+      return 0;
+    }
+  }
 }
