@@ -141,20 +141,40 @@ class SimpleFoodTrackingWidgetProvider : AppWidgetProvider() {
             "gologin"  // Action "gologin" digunakan untuk navigasi ke halaman login
         }
         
-        val intent = Intent(context, MainActivity::class.java).apply {
+        // Intent untuk button (log food atau login)  
+        val buttonIntent = Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_VIEW
             data = Uri.parse("pockeat://$appGroupId?widgetName=$widgetName&&type=$actionType")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         
-        val pendingIntent = PendingIntent.getActivity(
+        val buttonPendingIntent = PendingIntent.getActivity(
             context,
             0,
-            intent,
+            buttonIntent,
             pendingIntentFlags
         )
         
-        views.setOnClickPendingIntent(R.id.log_food_button, pendingIntent)
+        // Set button click listener
+        views.setOnClickPendingIntent(R.id.log_food_button, buttonPendingIntent)
+        
+        // Intent untuk area utama widget (selalu membuka dashboard utama)
+        val mainAreaIntent = Intent(context, MainActivity::class.java).apply {
+            action = Intent.ACTION_VIEW
+            // Selalu menggunakan type=click untuk area utama widget
+            data = Uri.parse("pockeat://$appGroupId?widgetName=$widgetName&&type=click") 
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        
+        val mainAreaPendingIntent = PendingIntent.getActivity(
+            context,
+            1, // Gunakan requestCode yang berbeda dari button
+            mainAreaIntent,
+            pendingIntentFlags
+        )
+        
+        // Set click listener untuk layout utama widget
+        views.setOnClickPendingIntent(R.id.main_widget_area, mainAreaPendingIntent)
         
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views)
