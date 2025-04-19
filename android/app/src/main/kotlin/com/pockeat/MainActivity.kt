@@ -5,17 +5,12 @@ import io.flutter.plugin.common.MethodChannel
 import android.content.Intent
 import android.provider.Settings
 import android.net.Uri
-import io.flutter.plugins.GeneratedPluginRegistrant
-import es.antonborri.home_widget.HomeWidgetPlugin
 
 class MainActivity: FlutterFragmentActivity() {
     private val CHANNEL = "com.pockeat/health_connect"
-    private val WIDGET_CHANNEL = "com.pockeat/home_widget"
     
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        
-        HomeWidgetPlugin.registerWith(flutterEngine)
         
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
@@ -84,14 +79,6 @@ class MainActivity: FlutterFragmentActivity() {
                     result.notImplemented()
                 }
             }
-        }
-    }
-    
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        val data = intent.data
-        if (data != null && "pockeat" == data.scheme) {
-            HomeWidgetPlugin.handleIntent(intent)
         }
     }
 }

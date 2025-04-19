@@ -3,6 +3,7 @@ package com.pockeat.widget
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -83,7 +84,7 @@ class SimpleFoodTrackingWidgetProvider : AppWidgetProvider() {
         // Set level pada drawable (0-10000)
         // Android drawable levels berkisar dari 0 hingga 10000
         val level = percentageConsumed * 100
-        views.setImageLevel(R.id.progress_arc, level)
+        views.setInt(R.id.progress_arc, "setLevel", level)
         
         // Set up "Log your food" button click
         val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
