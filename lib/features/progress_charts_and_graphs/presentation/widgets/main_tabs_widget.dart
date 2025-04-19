@@ -6,10 +6,10 @@ class MainTabsWidget extends StatelessWidget {
   final AppColors colors;
 
   const MainTabsWidget({
-    Key? key,
+    super.key,
     required this.tabController,
     required this.colors,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

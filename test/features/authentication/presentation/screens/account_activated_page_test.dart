@@ -127,7 +127,7 @@ void main() {
 
       // Cek warna tombol
       final MaterialStateProperty<Color?>? bgColorProp =
-          style?.backgroundColor as MaterialStateProperty<Color?>?;
+          style?.backgroundColor;
       expect(bgColorProp?.resolve({}), equals(expectedGreenColor));
     });
 

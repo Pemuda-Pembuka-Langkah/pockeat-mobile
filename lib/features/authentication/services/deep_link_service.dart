@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
 
 /// Interface untuk menangani deep link

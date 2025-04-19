@@ -159,7 +159,6 @@ class NotificationServiceImpl implements NotificationService {
   void _onNotificationTapped(NotificationResponse details) {
     // Handle notifikasi tap berdasarkan payload
     if (details.payload == 'daily_calorie_tracking') {
-      // TODO: Implementasi navigasi ke halaman tracking kalori
     }
   }
 

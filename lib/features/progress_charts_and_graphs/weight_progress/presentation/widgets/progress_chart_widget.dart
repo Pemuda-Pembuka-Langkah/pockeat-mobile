@@ -9,12 +9,12 @@ class ProgressChartWidget extends StatefulWidget {
   final Color primaryPink;
   
   const ProgressChartWidget({
-    Key? key,
+    super.key,
     required this.periodData,
     required this.selectedPeriod,
     required this.onPeriodChanged,
     required this.primaryPink,
-  }) : super(key: key);
+  });
 
   @override
   _ProgressChartWidgetState createState() => _ProgressChartWidgetState();

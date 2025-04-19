@@ -8,7 +8,6 @@ import 'package:pockeat/features/authentication/services/deep_link_service.dart'
 import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
-import 'package:meta/meta.dart';
 
 /// Exception khusus untuk DeepLinkService
 class DeepLinkException implements Exception {

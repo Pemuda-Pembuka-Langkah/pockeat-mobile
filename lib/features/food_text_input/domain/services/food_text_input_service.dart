@@ -1,7 +1,6 @@
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
-import 'package:uuid/uuid.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 
@@ -9,7 +8,6 @@ class FoodTextInputService {
   final FoodTextAnalysisService _foodTextAnalysisService;
   final FoodTextInputRepository _foodTextInputRepository;
   final FirebaseAuth _auth;
-  final Uuid _uuid = Uuid();
 
   FoodTextInputService(
     this._foodTextAnalysisService, 
@@ -29,7 +27,7 @@ class FoodTextInputService {
   /// Saves the food analysis result to the database
   Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult, {bool isCorrected = false}) async {
     try {
-      final String analysisId = analysisResult.id ?? _uuid.v4();
+      final String analysisId = analysisResult.id;
       
       // Get current user's ID
       final userId = _auth.currentUser?.uid ?? '';

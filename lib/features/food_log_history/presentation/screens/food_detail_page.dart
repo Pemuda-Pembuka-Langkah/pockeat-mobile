@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/api_scan/utils/food_analysis_parser.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:pockeat/features/food_log_history/utils/food_sharing_extension.dart';
 
@@ -15,12 +15,14 @@ class FoodDetailPage extends StatefulWidget {
   final String foodId;
   final FoodScanRepository foodRepository;
   final FoodTextInputRepository foodTextInputRepository;
+  final FoodTrackingClientController? foodTrackingController;
 
   const FoodDetailPage({
     super.key,
     required this.foodId,
     required this.foodRepository,
     required this.foodTextInputRepository,
+    this.foodTrackingController,
   });
 
   @override
@@ -94,6 +96,17 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
             ),
           ),
         );
+        
+        // Force update home screen widget if controller is available
+        if (widget.foodTrackingController != null) {
+          try {
+            await widget.foodTrackingController!.forceUpdate();
+          } catch (e) {
+            // Silently log error but continue - don't block navigation for widget update failure
+            debugPrint('Failed to update home screen widget: $e');
+          }
+        }
+        
         // Return true to indicate deletion was successful
         navigator.pop(true);
       } else {

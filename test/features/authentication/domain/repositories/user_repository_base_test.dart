@@ -50,11 +50,11 @@ class FakeIdTokenResult implements IdTokenResult {
   @override
   String? get signInProvider => 'password';
 
-  @override
   Map<String, dynamic>? get parameters => {};
 }
 
 // Custom mock untuk CollectionReference dengan tipe generic
+// ignore: must_be_immutable, subtype_of_sealed_class
 class MockCollectionReference extends Mock
     implements CollectionReference<Map<String, dynamic>> {}
 

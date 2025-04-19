@@ -22,6 +22,7 @@ import 'package:pockeat/features/authentication/domain/repositories/user_reposit
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
+import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
@@ -195,5 +196,6 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<BugReportService>(
     BugReportServiceImpl(instabugClient: getIt<InstabugClient>()),
   );
+  HomeWidgetModule.register();
 }
 // coverage:ignore-end

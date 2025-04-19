@@ -5,7 +5,6 @@ import 'package:pockeat/features/health_metrics/domain/models/health_metrics_mod
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
-import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 
 /// Represents the state of the health metrics onboarding form.
 ///

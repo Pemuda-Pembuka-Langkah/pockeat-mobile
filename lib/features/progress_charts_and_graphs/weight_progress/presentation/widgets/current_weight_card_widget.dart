@@ -6,10 +6,10 @@ class CurrentWeightCardWidget extends StatelessWidget {
   final Color primaryGreen;
   
   const CurrentWeightCardWidget({
-    Key? key,
+    super.key,
     required this.weightStatus,
     required this.primaryGreen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

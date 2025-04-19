@@ -14,13 +14,13 @@ class WorkoutOverviewWidget extends StatelessWidget {
   final bool isWeeklyView;
 
   const WorkoutOverviewWidget({
-    Key? key,
+    super.key,
     required this.exerciseData,
     required this.workoutStats,
     required this.completionPercentage,
     required this.primaryGreen,
     required this.isWeeklyView, // Add this parameter
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

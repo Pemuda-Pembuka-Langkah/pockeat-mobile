@@ -17,6 +17,14 @@ android {
     namespace = "com.pockeat"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    
+    // Mengatasi konflik dependensi
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.work:work-runtime:2.8.1'
+            force 'androidx.work:work-runtime-ktx:2.8.1'
+        }
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -65,6 +73,10 @@ dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
     // Add support for older Flutter plugin registration API
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
+    
+    // WorkManager dependencies - memaksa versi yang sama
+    implementation 'androidx.work:work-runtime:2.8.1'
+    implementation 'androidx.work:work-runtime-ktx:2.8.1'
 }
 
 

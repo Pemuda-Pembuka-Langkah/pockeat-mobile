@@ -5,10 +5,10 @@ class AccountActivatedPage extends StatelessWidget {
   final VoidCallback? onHomeTap;
 
   const AccountActivatedPage({
-    Key? key,
+    super.key,
     required this.email,
     this.onHomeTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
