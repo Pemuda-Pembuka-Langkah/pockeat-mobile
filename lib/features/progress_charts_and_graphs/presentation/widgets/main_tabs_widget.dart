@@ -36,7 +36,7 @@ class MainTabsWidget extends StatelessWidget {
         labelPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         tabs: const [
           Text('Progress'),
-          Text('Insights'),
+          Text('Log History'),
         ],
       ),
     );

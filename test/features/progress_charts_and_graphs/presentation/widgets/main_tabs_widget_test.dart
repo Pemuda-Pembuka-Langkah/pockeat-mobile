@@ -39,7 +39,7 @@ void main() {
       
       // Verify the tab titles
       expect(find.text('Progress'), findsOneWidget);
-      expect(find.text('Insights'), findsOneWidget);
+      expect(find.text('Log History'), findsOneWidget);
       
       // Clean up
       controller.dispose();

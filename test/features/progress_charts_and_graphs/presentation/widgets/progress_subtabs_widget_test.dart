@@ -51,6 +51,8 @@ void main() {
       mainTabCount: 2,
       progressTabCount: 3,
       progressTabLabels: ['Weight', 'Nutrition', 'Exercise'],
+      logHistoryTabCount: 1,
+      logHistoryTabLabels: ['Log History'],
     );
     scrollController = MockScrollController();
   });
