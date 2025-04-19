@@ -5,12 +5,16 @@ import io.flutter.plugin.common.MethodChannel
 import android.content.Intent
 import android.provider.Settings
 import android.net.Uri
+import com.pockeat.widget.CustomHomeWidgetPlugin
 
 class MainActivity: FlutterFragmentActivity() {
     private val CHANNEL = "com.pockeat/health_connect"
     
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        
+        // Daftarkan CustomHomeWidgetPlugin untuk widget kita
+        flutterEngine.plugins.add(CustomHomeWidgetPlugin())
         
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {

@@ -4,6 +4,7 @@ import 'package:pockeat/features/home_screen_widget/domain/constants/food_tracki
 import 'package:pockeat/features/home_screen_widget/domain/constants/widget_event_type.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/home_widget_client.dart';
+import 'package:pockeat/features/home_screen_widget/services/utils/home_widget_provider.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
 
 /// Implementasi WidgetDataService khusus untuk SimpleFoodTracking
@@ -33,7 +34,7 @@ class SimpleFoodTrackingWidgetService implements WidgetDataService<SimpleFoodTra
   }) : 
     _widgetName = widgetName,
     _appGroupId = appGroupId,
-    _homeWidget = homeWidget ?? HomeWidgetClient();
+    _homeWidget = homeWidget ?? HomeWidgetProvider.getInstance();
   
   @override
   Future<void> initialize() async {
@@ -52,16 +53,16 @@ class SimpleFoodTrackingWidgetService implements WidgetDataService<SimpleFoodTra
     final map = <String, dynamic>{};
     
     // Gunakan FoodTrackingKey untuk konsistensi
-    final caloriesNeeded = await _homeWidget.getWidgetData<int>(
+    final caloriesNeeded = await _homeWidget.getWidgetData<int?>(
       FoodTrackingKey.caloriesNeeded.toStorageKey()
     );
     
-    final currentCaloriesConsumed = await _homeWidget.getWidgetData<int>(
+    final currentCaloriesConsumed = await _homeWidget.getWidgetData<int?>(
       FoodTrackingKey.currentCaloriesConsumed.toStorageKey()
     );
     
     // Dapatkan userId jika ada
-    final userId = await _homeWidget.getWidgetData<String>(
+    final userId = await _homeWidget.getWidgetData<String?>(
       FoodTrackingKey.userId.toStorageKey()
     );
     
@@ -103,6 +104,7 @@ class SimpleFoodTrackingWidgetService implements WidgetDataService<SimpleFoodTra
   
   /// Menentukan tipe event berdasarkan URI
   /// Implementasi spesifik untuk SimpleFoodTracking
+  // ignore: unintended_html_in_doc_comment
   /// Format URI: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
   FoodWidgetEventType _determineEventType(Uri? uri) {
     if (uri == null) return FoodWidgetEventType.other;

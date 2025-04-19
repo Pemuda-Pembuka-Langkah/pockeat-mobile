@@ -7,7 +7,10 @@ enum HomeWidgetConfig {
   detailedWidgetName('detailed_food_tracking_widget'),
   
   /// App group ID for communication with widgets
-  appGroupId('group.com.pockeat.widgets');
+  appGroupId('group.com.pockeat.widgets'),
+  
+  /// Channel name for custom widget communication
+  customChannelName('com.pockeat/custom_home_widget');
 
   /// The string value
   final String value;

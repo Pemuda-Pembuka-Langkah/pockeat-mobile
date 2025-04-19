@@ -37,6 +37,13 @@ abstract class FoodTrackingClientController {
   /// Dipanggil saat aplikasi ditutup
   Future<void> stopPeriodicUpdates();
   
+  /// Mulai mendengarkan perubahan status user (login/logout)
+  ///
+  /// Berlangganan ke stream perubahan auth state dari LoginService
+  /// dan otomatis memanggil processUserStatusChange saat terjadi perubahan
+  /// @throws WidgetInitializationException jika gagal setup listener
+  Future<void> startListeningToUserChanges();
+  
   /// Paksa update widget secara manual
   ///
   /// Berguna untuk komponen eksternal yang perlu memperbarui widget

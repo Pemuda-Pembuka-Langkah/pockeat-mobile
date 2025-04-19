@@ -69,18 +69,18 @@ void main() {
       test('should retrieve and convert widget data correctly', () async {
         // Arrange
         // Handle userId parameter first
-        when(mockHomeWidget.getWidgetData<String>(FoodTrackingKey.userId.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<String?>(FoodTrackingKey.userId.toStorageKey()))
             .thenAnswer((_) async => 'test-user-id');
         
-        when(mockHomeWidget.getWidgetData<int>(FoodTrackingKey.caloriesNeeded.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<int?>(FoodTrackingKey.caloriesNeeded.toStorageKey()))
             .thenAnswer((_) async => 2000);
-        when(mockHomeWidget.getWidgetData<int>(FoodTrackingKey.currentCaloriesConsumed.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<int?>(FoodTrackingKey.currentCaloriesConsumed.toStorageKey()))
             .thenAnswer((_) async => 1500);
-        when(mockHomeWidget.getWidgetData<double>(FoodTrackingKey.currentProtein.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentProtein.toStorageKey()))
             .thenAnswer((_) async => 75.5);
-        when(mockHomeWidget.getWidgetData<double>(FoodTrackingKey.currentCarb.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentCarb.toStorageKey()))
             .thenAnswer((_) async => 200.0);
-        when(mockHomeWidget.getWidgetData<double>(FoodTrackingKey.currentFat.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentFat.toStorageKey()))
             .thenAnswer((_) async => 50.2);
         
         // Act
@@ -97,7 +97,7 @@ void main() {
       
       test('should handle missing widget data with defaults', () async {
         // Arrange
-        when(mockHomeWidget.getWidgetData<String>(FoodTrackingKey.userId.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<String?>(FoodTrackingKey.userId.toStorageKey()))
             .thenAnswer((_) async => 'test-user-id');
         when(mockHomeWidget.getWidgetData<dynamic>(any)).thenAnswer((_) async => null);
         
@@ -115,17 +115,17 @@ void main() {
       
       test('should handle partial widget data', () async {
         // Arrange
-        when(mockHomeWidget.getWidgetData<String>(FoodTrackingKey.userId.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<String?>(FoodTrackingKey.userId.toStorageKey()))
             .thenAnswer((_) async => 'test-user-id');
-        when(mockHomeWidget.getWidgetData<int>(FoodTrackingKey.caloriesNeeded.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<int?>(FoodTrackingKey.caloriesNeeded.toStorageKey()))
             .thenAnswer((_) async => 2000);
-        when(mockHomeWidget.getWidgetData<int>(FoodTrackingKey.currentCaloriesConsumed.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<int?>(FoodTrackingKey.currentCaloriesConsumed.toStorageKey()))
             .thenAnswer((_) async => 1500);
-        when(mockHomeWidget.getWidgetData<double>(FoodTrackingKey.currentProtein.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentProtein.toStorageKey()))
             .thenAnswer((_) async => null);
-        when(mockHomeWidget.getWidgetData<double>(FoodTrackingKey.currentCarb.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentCarb.toStorageKey()))
             .thenAnswer((_) async => null);
-        when(mockHomeWidget.getWidgetData<double>(FoodTrackingKey.currentFat.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentFat.toStorageKey()))
             .thenAnswer((_) async => null);
         
         // Act
@@ -141,7 +141,7 @@ void main() {
       
       test('should handle integer values for double fields', () async {
         // Arrange
-        when(mockHomeWidget.getWidgetData<String>(FoodTrackingKey.userId.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<String?>(FoodTrackingKey.userId.toStorageKey()))
             .thenAnswer((_) async => 'test-user-id');
         
         // Simple mocking approach: mock the return of ints for the protein, carb, and fat fields
@@ -715,17 +715,17 @@ void main() {
 
       test('should handle negative numeric values in widget storage', () async {
         // Arrange
-        when(mockHomeWidget.getWidgetData<String>(FoodTrackingKey.userId.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<String?>(FoodTrackingKey.userId.toStorageKey()))
             .thenAnswer((_) async => 'test-user-id');
-        when(mockHomeWidget.getWidgetData<int>(FoodTrackingKey.caloriesNeeded.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<int?>(FoodTrackingKey.caloriesNeeded.toStorageKey()))
             .thenAnswer((_) async => -2000);
-        when(mockHomeWidget.getWidgetData<int>(FoodTrackingKey.currentCaloriesConsumed.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<int?>(FoodTrackingKey.currentCaloriesConsumed.toStorageKey()))
             .thenAnswer((_) async => -1500);
-        when(mockHomeWidget.getWidgetData<double>(FoodTrackingKey.currentProtein.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentProtein.toStorageKey()))
             .thenAnswer((_) async => -75.5);
-        when(mockHomeWidget.getWidgetData<double>(FoodTrackingKey.currentCarb.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentCarb.toStorageKey()))
             .thenAnswer((_) async => -200.0);
-        when(mockHomeWidget.getWidgetData<double>(FoodTrackingKey.currentFat.toStorageKey()))
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentFat.toStorageKey()))
             .thenAnswer((_) async => -50.2);
         
         // Act
@@ -737,6 +737,34 @@ void main() {
         expect(result.currentProtein, -75.5);
         expect(result.currentCarb, -200.0);
         expect(result.currentFat, -50.2);
+      });
+
+      test('should handle explicit null values from platform channel', () async {
+        // Arrange - all values return null
+        when(mockHomeWidget.getWidgetData<String?>(FoodTrackingKey.userId.toStorageKey()))
+            .thenAnswer((_) async => null);
+        when(mockHomeWidget.getWidgetData<int?>(FoodTrackingKey.caloriesNeeded.toStorageKey()))
+            .thenAnswer((_) async => null);
+        when(mockHomeWidget.getWidgetData<int?>(FoodTrackingKey.currentCaloriesConsumed.toStorageKey()))
+            .thenAnswer((_) async => null);
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentProtein.toStorageKey()))
+            .thenAnswer((_) async => null);
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentCarb.toStorageKey()))
+            .thenAnswer((_) async => null);
+        when(mockHomeWidget.getWidgetData<double?>(FoodTrackingKey.currentFat.toStorageKey()))
+            .thenAnswer((_) async => null);
+        
+        // Act
+        final result = await service.getData();
+        
+        // Assert
+        expect(result, isA<DetailedFoodTracking>());
+        expect(result.caloriesNeeded, 0);
+        expect(result.currentCaloriesConsumed, 0);
+        expect(result.currentProtein, 0.0);
+        expect(result.currentCarb, 0.0);
+        expect(result.currentFat, 0.0);
+        expect(result.userId, isNull);
       });
     });
   });

@@ -82,7 +82,7 @@ Future<bool> _initializeInstabug(String flavor) async {
     // Tentukan level log berdasarkan environment dari dotenv
     final LogLevel logLevel = flavor.toLowerCase() == 'production' 
         ? LogLevel.error  // Production gunakan error level saja
-        : LogLevel.debug; // Selain production gunakan debug level
+        : LogLevel.error; // Selain production gunakan debug level
     
     // Inisialisasi SDK dengan token dari dotenv
     await Instabug.init(

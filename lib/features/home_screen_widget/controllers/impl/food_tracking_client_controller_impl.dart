@@ -41,6 +41,7 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   // State variables
   UserModel? _currentUser;
   Timer? _updateTimer;
+  StreamSubscription<UserModel?>? _userSubscription;
 
   final CalorieCalculationStrategy _calorieCalculationStrategy;
   final Duration _updateInterval = const Duration(minutes: 5);
@@ -83,6 +84,9 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
       if (_currentUser != null) {
         await processUserStatusChange(_currentUser);
       }
+      
+      // 5. Start listening to auth changes
+      await startListeningToUserChanges();
     } catch (e) {
       throw WidgetInitializationException('Failed to initialize client controller: $e');
     }
@@ -134,12 +138,21 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   @override
   Future<void> cleanup() async {
     try {
-      await Future.wait([
-        _simpleController.cleanupData(),
-        _detailedController.cleanupData(),
-      ]);
+      // Cancel periodic updates
+      stopPeriodicUpdates();
+      
+      // Cancel user subscription
+      _userSubscription?.cancel();
+      _userSubscription = null;
+      
+      // Cleanup sub-controllers
+      await _simpleController.cleanupData();
+      await _detailedController.cleanupData();
+      
+      // Clear cached user data
+      _currentUser = null;
     } catch (e) {
-      throw WidgetCleanupException('Failed to clean up widget data: $e');
+      throw WidgetCleanupException('Failed to cleanup: $e');
     }
   }
 
@@ -152,6 +165,26 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
     
     // Cancel background tasks
     await _backgroundServiceHelper.cancelAllTasks();
+  }
+  
+  /// Mulai mendengarkan perubahan status user (login/logout)
+  @override
+  Future<void> startListeningToUserChanges() async {
+    try {
+      // Cancel existing subscription jika ada
+      await _userSubscription?.cancel();
+      
+      // Berlangganan ke stream user changes dari LoginService
+      final authStream = _loginService.initialize();
+      _userSubscription = authStream.listen((user) async {
+        // Jika user berubah, update widget
+        if (user?.uid != _currentUser?.uid) {
+          await processUserStatusChange(user);
+        }
+      });
+    } catch (e) {
+      throw WidgetInitializationException('Failed to setup user changes listener: $e');
+    }
   }
   
   /// Paksa update widget secara manual

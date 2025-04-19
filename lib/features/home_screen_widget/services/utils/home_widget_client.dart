@@ -22,21 +22,30 @@ class HomeWidgetClient implements HomeWidgetInterface {
   }
   
   @override
-  Future<void> saveWidgetData(String key, dynamic value) async {
-    await HomeWidget.saveWidgetData(key, value);
+  Future<void> saveWidgetData(String id, dynamic data) async {
+    try {
+      await HomeWidget.saveWidgetData(id, data);
+    } catch (e) {
+      rethrow;
+    }
   }
   
   @override
   Future<void> updateWidget({required String name, String? androidName, String? iOSName}) async {
-    await HomeWidget.updateWidget(
-      name: name,
-      androidName: androidName,
-      iOSName: iOSName,
-    );
+    try {
+      await HomeWidget.updateWidget(
+        name: name,
+        androidName: androidName,
+        iOSName: iOSName,
+      );
+    } catch (e) {
+      throw e;
+    }
   }
   
   @override
   Future<void> registerBackgroundCallback(Future<void> Function(Uri? uri) callback) async {
-    await HomeWidget.registerBackgroundCallback(callback);
+    // Komentari sementara untuk menghindari crash
+    // await HomeWidget.registerInteractivityCallback(callback);
   }
 }

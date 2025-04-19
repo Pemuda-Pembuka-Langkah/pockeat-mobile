@@ -4,6 +4,7 @@ import 'package:pockeat/features/home_screen_widget/domain/constants/food_tracki
 import 'package:pockeat/features/home_screen_widget/domain/constants/widget_event_type.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/detailed_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/home_widget_client.dart';
+import 'package:pockeat/features/home_screen_widget/services/utils/home_widget_provider.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
 
 /// Implementasi WidgetDataService khusus untuk DetailedFoodTracking
@@ -33,7 +34,7 @@ class DetailedFoodTrackingWidgetService implements WidgetDataService<DetailedFoo
   }) : 
     _widgetName = widgetName,
     _appGroupId = appGroupId,
-    _homeWidget = homeWidget ?? HomeWidgetClient();
+    _homeWidget = homeWidget ?? HomeWidgetProvider.getInstance();
   
   @override
   Future<void> initialize() async {
@@ -53,13 +54,13 @@ class DetailedFoodTrackingWidgetService implements WidgetDataService<DetailedFoo
     
     // Gunakan FoodTrackingKey untuk konsistensi
     final dataToFetch = {
-      FoodTrackingKey.caloriesNeeded: (dynamic value) => value is double ? value.toInt() : value,
-      FoodTrackingKey.currentCaloriesConsumed: (dynamic value) => value is double ? value.toInt() : value,
-      FoodTrackingKey.currentProtein: (dynamic value) => value?.toDouble(),
-      FoodTrackingKey.currentCarb: (dynamic value) => value?.toDouble(),
-      FoodTrackingKey.currentFat: (dynamic value) => value?.toDouble(),
+      FoodTrackingKey.caloriesNeeded: (dynamic value) => value is double ? value.toInt() : (value is int ? value : 0),
+      FoodTrackingKey.currentCaloriesConsumed: (dynamic value) => value is double ? value.toInt() : (value is int ? value : 0),
+      FoodTrackingKey.currentProtein: (dynamic value) => value is double ? value : (value is int ? value.toDouble() : 0.0),
+      FoodTrackingKey.currentCarb: (dynamic value) => value is double ? value : (value is int ? value.toDouble() : 0.0),
+      FoodTrackingKey.currentFat: (dynamic value) => value is double ? value : (value is int ? value.toDouble() : 0.0),
       // Tambahkan userId handler
-      FoodTrackingKey.userId: (dynamic value) => value as String?,
+      FoodTrackingKey.userId: (dynamic value) => value?.toString(),
     };
     
     // Ambil semua data dari widget storage
@@ -67,10 +68,9 @@ class DetailedFoodTrackingWidgetService implements WidgetDataService<DetailedFoo
       final key = entry.key.toStorageKey();
       final converter = entry.value;
       
-      final value = await _homeWidget.getWidgetData(key);
-      if (value != null) {
-        map[key] = converter(value);
-      }
+      final value = await _homeWidget.getWidgetData<dynamic>(key);
+      // Tambahkan nilai ke map bahkan jika null, converter akan menangani default value
+      map[key] = converter(value);
     }
     
     return map;
