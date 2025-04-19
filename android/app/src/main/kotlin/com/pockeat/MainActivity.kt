@@ -45,8 +45,8 @@ class MainActivity: FlutterFragmentActivity() {
                 Log.d(TAG, "Detected widget deep link: $uri")
                 
                 // Validasi apakah URI memiliki parameter yang diperlukan
-                val hasWidgetName = uri.getQueryParameter("widgetName") != null
-                val hasType = uri.getQueryParameter("type") != null
+                val hasWidgetName = uri?.getQueryParameter("widgetName") != null
+                val hasType = uri?.getQueryParameter("type") != null
                 
                 if (hasWidgetName && hasType) {
                     Log.d(TAG, "Valid widget deep link with required parameters: $uri")
