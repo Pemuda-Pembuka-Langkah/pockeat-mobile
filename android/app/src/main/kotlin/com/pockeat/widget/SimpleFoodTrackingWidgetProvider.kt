@@ -78,6 +78,11 @@ class SimpleFoodTrackingWidgetProvider : AppWidgetProvider() {
             val allKeys = prefs.all.keys
             Log.d(TAG, "Available SharedPreference keys: $allKeys")
             
+            // Check if user is logged in by looking for userId
+            val userId = prefs.getString(KEY_USER_ID, null)
+            val isLoggedIn = !userId.isNullOrEmpty()
+            Log.d(TAG, "User login status: $isLoggedIn, userId: $userId")
+            
             val caloriesConsumed = prefs.getInt(KEY_CURRENT_CALORIES_CONSUMED, 0)
             val caloriesTarget = prefs.getInt(KEY_CALORIES_NEEDED, 2000) // Default target is 2000
             
@@ -86,19 +91,31 @@ class SimpleFoodTrackingWidgetProvider : AppWidgetProvider() {
         // Create RemoteViews dengan layout widget yang ada
         val views = RemoteViews(context.packageName, R.layout.simple_food_tracking_widget)
         
-        // Set calorie text
-        views.setTextViewText(R.id.calories_text, "$caloriesConsumed/$caloriesTarget")
-        
-        // Hitung persentase kalori yang sudah dikonsumsi (0-100)
-        val percentageConsumed = if (caloriesTarget > 0) {
-            // Min antara 100% dan persentase aktual (agar tidak melebihi 100%)
-            (caloriesConsumed.toFloat() / caloriesTarget.toFloat() * 100).coerceAtMost(100f).toInt()
-        } else 0
-        
-        // Set progress pada progress bar dengan setProgress
-        // Menggunakan setInt yang lebih aman daripada setProgressBar
-        views.setInt(R.id.calories_progress, "setProgress", percentageConsumed)
-        Log.d(TAG, "Progress set to $percentageConsumed%")
+        if (isLoggedIn) {
+            // User is logged in, show normal calorie tracking view
+            // Set calorie text
+            views.setTextViewText(R.id.calories_text, "$caloriesConsumed/$caloriesTarget")
+            
+            // Set button text
+            views.setTextViewText(R.id.log_food_button, "Log your food")
+            
+            // Hitung persentase kalori yang sudah dikonsumsi (0-100)
+            val percentageConsumed = if (caloriesTarget > 0) {
+                // Min antara 100% dan persentase aktual (agar tidak melebihi 100%)
+                (caloriesConsumed.toFloat() / caloriesTarget.toFloat() * 100).coerceAtMost(100f).toInt()
+            } else 0
+            
+            // Set progress pada progress bar dengan setProgress
+            views.setInt(R.id.calories_progress, "setProgress", percentageConsumed)
+            Log.d(TAG, "Progress set to $percentageConsumed%")
+        } else {
+            // User is NOT logged in, show login prompt
+            views.setTextViewText(R.id.calories_text, "Not logged in")
+            views.setTextViewText(R.id.log_food_button, "Login")
+            
+            // Reset progress bar to 0
+            views.setInt(R.id.calories_progress, "setProgress", 0)
+        }
         
         // Set up "Log your food" button click
         val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -107,9 +124,26 @@ class SimpleFoodTrackingWidgetProvider : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT
         }
         
+        // Buat intent dengan format URI yang konsisten dengan yang diharapkan di Flutter
+        // Format: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
+        val widgetName = WIDGET_NAME  // Nama widget ini
+        val appGroupId = PREFS_NAME  // App group ID
+        
+        // Check if user is logged in
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val userId = prefs.getString(KEY_USER_ID, null)
+        val isLoggedIn = !userId.isNullOrEmpty()
+        
+        // Different action type based on login status
+        val actionType = if (isLoggedIn) {
+            "log"  // Action "log" digunakan untuk "Log your food"
+        } else {
+            "gologin"  // Action "gologin" digunakan untuk navigasi ke halaman login
+        }
+        
         val intent = Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_VIEW
-            data = Uri.parse("pockeat://food-tracking/add")
+            data = Uri.parse("pockeat://$appGroupId?widgetName=$widgetName&&type=$actionType")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         

@@ -111,6 +111,14 @@ class DetailedFoodTrackingWidgetService implements WidgetDataService<DetailedFoo
     if (uri == null) return FoodWidgetEventType.other;
     
     final params = uri.queryParameters;
+    
+    // Verifikasi widget name untuk mencegah race condition
+    final widgetName = params['widgetName']?.toLowerCase() ?? '';
+    if (widgetName.isNotEmpty && widgetName != _widgetName.toLowerCase()) {
+      // Abaikan event jika widget name tidak cocok dengan service ini
+      return FoodWidgetEventType.other;
+    }
+    
     final actionType = params['type']?.toLowerCase() ?? '';
     
     // Logika khusus untuk widget DetailedFoodTracking berdasarkan parameter type

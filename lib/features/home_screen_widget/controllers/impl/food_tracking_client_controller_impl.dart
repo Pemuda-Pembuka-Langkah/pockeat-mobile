@@ -42,6 +42,9 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   UserModel? _currentUser;
   Timer? _updateTimer;
   StreamSubscription<UserModel?>? _userSubscription;
+  
+  // Controller tidak perlu mengakses widget client langsung
+  // Controller bergantung pada service layer untuk interaksi dengan widget
 
   final CalorieCalculationStrategy _calorieCalculationStrategy;
   final Duration _updateInterval = const Duration(minutes: 5);
@@ -294,4 +297,7 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   /// Kalkulasi target kalori untuk user tertentu 
   /// 
   /// Ini dipindahkan dari controller individual ke client controller
+  
+  // Tidak perlu menyediakan akses langsung ke widget client di level controller
+  // Semua interaksi widget sudah ditangani di level service
 }

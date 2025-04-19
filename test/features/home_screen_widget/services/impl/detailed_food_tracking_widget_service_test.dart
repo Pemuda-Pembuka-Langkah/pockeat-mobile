@@ -290,7 +290,7 @@ void main() {
       test('should emit clicked event type for click type', () async {
         // Arrange
         // Format URI: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=click');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=click');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -304,7 +304,7 @@ void main() {
       test('should emit clicked event type for tap type', () async {
         // Arrange
         // Format URI: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=tap');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=tap');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -318,7 +318,7 @@ void main() {
       test('should emit quicklog event type for quick type', () async {
         // Arrange
         // Format URI: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=quick');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=quick');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -332,7 +332,7 @@ void main() {
       test('should emit quicklog event type for log type', () async {
         // Arrange
         // Format URI: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=log');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=log');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -346,7 +346,7 @@ void main() {
       test('should emit refresh event type for refresh type', () async {
         // Arrange
         // Format URI: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=refresh');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=refresh');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -360,7 +360,7 @@ void main() {
       test('should emit refresh event type with refresh parameter', () async {
         // Arrange
         // Format URI dengan parameter refresh
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&refresh=true');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&refresh=true');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -374,7 +374,7 @@ void main() {
       test('should emit default event type for unknown type', () async {
         // Arrange
         // Format URI dengan type yang tidak dikenal
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=unknown');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=unknown');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -388,7 +388,7 @@ void main() {
       test('should emit default event type for URI without type', () async {
         // Arrange
         // URI tanpa parameter type
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -414,7 +414,7 @@ void main() {
       test('should handle case-insensitive type with proper params', () async {
         // Arrange
         // Format URI with uppercase TYPE
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=CLICK&&nutrient=protein');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=CLICK&&nutrient=protein');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -471,18 +471,18 @@ void main() {
         });
         
         group('handleWidgetClicked', () {
-          test('should emit default event type for nutrition path with protein param', () async {
+          test('should emit clicked event type for nutrition path with proper widgetName', () async {
             // Arrange
-            // URI tanpa parameter type seharusnya mengembalikan FoodWidgetEventType.other
-            final uri = Uri.parse('pockeat://nutrition?protein=75');
+            // URI dengan widget name yang benar dan type=click seharusnya mengembalikan FoodWidgetEventType.clicked
+            final uri = Uri.parse('pockeat://nutrition?widgetName=$testWidgetName&&type=click');
             final eventsFuture = service.widgetEvents.first;
             
             // Act
             await service.handleWidgetClicked(uri);
             final emittedEvent = await eventsFuture;
             
-            // Assert - sesuai implementasi _determineEventType
-            expect(emittedEvent, FoodWidgetEventType.other);
+            // Assert - sesuai implementasi _determineEventType yang sudah diupdate
+            expect(emittedEvent, FoodWidgetEventType.clicked);
           });
           
           test('should emit default event type for detail path with carb param', () async {
@@ -502,7 +502,7 @@ void main() {
           test('should emit quicklog event type for quick type', () async {
             // Arrange
             // Format URI: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-            final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=quick');
+            final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=quick');
             final eventsFuture = service.widgetEvents.first;
             
             // Act
@@ -516,7 +516,7 @@ void main() {
           test('should emit correct event type for log type', () async {
             // Arrange
             // Format URI: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-            final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=log');
+            final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=log');
             final eventsFuture = service.widgetEvents.first;
             
             // Act
@@ -530,7 +530,7 @@ void main() {
           test('should emit correct event type for refresh type', () async {
             // Arrange
             // Format URI: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-            final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=refresh');
+            final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=refresh');
             final eventsFuture = service.widgetEvents.first;
             
             // Act
@@ -557,7 +557,8 @@ void main() {
           test('should handle case-insensitive type parameter', () async {
             // Arrange
             // URI dengan type parameter dalam huruf kapital
-            final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=CLICK');
+            // Pastikan menggunakan testWidgetName yang sesuai dengan yang diset di setUp()
+            final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=CLICK');
             final eventsFuture = service.widgetEvents.first;
             
             // Act
@@ -597,7 +598,7 @@ void main() {
             
             // Act - menggunakan URI dengan format yang benar sesuai implementasi terbaru
             // Format: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-            final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&type=click');
+            final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=click');
             await service.handleWidgetClicked(uri);
             
             // Assert - both listeners should receive the same event
@@ -626,7 +627,8 @@ void main() {
           
           test('should handle URI with query parameters only', () async {
             // Arrange
-            final uri = Uri.parse('pockeat://?refresh=true');
+            // Gunakan testWidgetName agar URI diproses dengan benar
+            final uri = Uri.parse('pockeat://?widgetName=$testWidgetName&&refresh=true');
             final eventsFuture = service.widgetEvents.first;
             
             // Act
@@ -666,12 +668,38 @@ void main() {
             
             // No exception expected, even though we can't verify the event was processed
           });
+          
+          test('should ignore event with different widget name', () async {
+            // Arrange - URI dengan widgetName yang tidak sesuai dengan service
+            final uri = Uri.parse('pockeat://app_group?widgetName=wrong_widget_name&&type=click');
+            final eventsFuture = service.widgetEvents.first;
+            
+            // Act
+            await service.handleWidgetClicked(uri);
+            final emittedEvent = await eventsFuture;
+            
+            // Assert - event seharusnya diabaikan (diproses sebagai FoodWidgetEventType.other)
+            expect(emittedEvent, FoodWidgetEventType.other);
+          });
+          
+          test('should process event with correct widget name', () async {
+            // Arrange - URI dengan widgetName yang sesuai dengan service
+            final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=click');
+            final eventsFuture = service.widgetEvents.first;
+            
+            // Act
+            await service.handleWidgetClicked(uri);
+            final emittedEvent = await eventsFuture;
+            
+            // Assert - event seharusnya diproses dengan benar
+            expect(emittedEvent, FoodWidgetEventType.clicked);
+          });
       });
       
       test('should handle URI with refresh parameter', () async {
         // Arrange
         // Format URI dengan parameter refresh
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food&&refresh=true');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&refresh=true');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -685,7 +713,7 @@ void main() {
       test('should handle URI without type parameter gracefully', () async {
         // Arrange
         // URI tanpa parameter type
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food');
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName');
         final eventsFuture = service.widgetEvents.first;
         
         // Act

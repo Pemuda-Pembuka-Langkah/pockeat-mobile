@@ -110,8 +110,15 @@ class SimpleFoodTrackingWidgetService implements WidgetDataService<SimpleFoodTra
     if (uri == null) return FoodWidgetEventType.other;
     
     final params = uri.queryParameters;
-    final actionType = params['type']?.toLowerCase() ?? '';
     
+    // Verifikasi widget name untuk mencegah race condition
+    final widgetName = params['widgetName']?.toLowerCase() ?? '';
+    if (widgetName.isNotEmpty && widgetName != _widgetName.toLowerCase()) {
+      // Abaikan event jika widget name tidak cocok dengan service ini
+      return FoodWidgetEventType.other;
+    }
+    
+    final actionType = params['type']?.toLowerCase() ?? '';
     
     // Logika khusus untuk widget SimpleFoodTracking berdasarkan parameter type
     if (actionType.contains('click') || actionType.contains('tap')) {

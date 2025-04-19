@@ -97,6 +97,10 @@ class SimpleFoodTrackingController implements FoodTrackingWidgetController {
           // Navigasi ke halaman tambah makanan
           _navigatorKey.currentState?.pushNamed('/add-food');
           break;
+        case FoodWidgetEventType.gologin:
+          // Navigasi ke halaman login
+          _navigatorKey.currentState?.pushNamed('/login');
+          break;
         case FoodWidgetEventType.other:
           // Handle other events
           break;

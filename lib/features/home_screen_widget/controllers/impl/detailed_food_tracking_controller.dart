@@ -20,10 +20,10 @@ typedef RefreshCallback = void Function(FoodWidgetEventType event);
 class DetailedFoodTrackingController implements FoodTrackingWidgetController {
   final WidgetDataService<DetailedFoodTracking> _widgetService;
   final FoodLogHistoryService _foodLogHistoryService;
-  
+
   /// Navigator key untuk navigasi antar halaman
   late GlobalKey<NavigatorState> _navigatorKey;
-  
+
   /// Callback untuk event refresh, diset oleh client controller
   RefreshCallback? _refreshCallback;
 
@@ -38,19 +38,23 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
     NutrientCalculationStrategy? nutrientCalculationStrategy,
   })  : _widgetService = widgetService,
         _foodLogHistoryService = foodLogHistoryService,
-        _calorieCalculationStrategy = calorieCalculationStrategy ?? DefaultCalorieCalculationStrategy(),
-        _nutrientCalculationStrategy = nutrientCalculationStrategy ?? DefaultNutrientCalculationStrategy();
+        _calorieCalculationStrategy =
+            calorieCalculationStrategy ?? DefaultCalorieCalculationStrategy(),
+        _nutrientCalculationStrategy =
+            nutrientCalculationStrategy ?? DefaultNutrientCalculationStrategy();
 
   /// Inisialisasi controller
   @override
-  Future<void> initialize({required GlobalKey<NavigatorState> navigatorKey}) async {
+  Future<void> initialize(
+      {required GlobalKey<NavigatorState> navigatorKey}) async {
     try {
       // Set navigator key
       _navigatorKey = navigatorKey;
       await _widgetService.initialize();
       await registerWidgetClickCallback();
     } catch (e) {
-      throw WidgetInitializationException('Failed to initialize detailed widget controller: $e');
+      throw WidgetInitializationException(
+          'Failed to initialize detailed widget controller: $e');
     }
   }
 
@@ -64,26 +68,28 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
 
     try {
       final userId = user.uid;
-      
+
       // Hitung total kalori hari ini menggunakan strategy
-      final consumedCalories = await _calorieCalculationStrategy.calculateTodayTotalCalories(
-        _foodLogHistoryService, 
-        userId
-      );
-      
+      final consumedCalories = await _calorieCalculationStrategy
+          .calculateTodayTotalCalories(_foodLogHistoryService, userId);
+
       // Dapatkan data untuk nutrisi
       final DateTime now = DateTime.now();
       final DateTime startOfDay = DateTime(now.year, now.month, now.day);
-      final todayLogs = await _foodLogHistoryService.getFoodLogsByDate(userId, startOfDay);
-      
+      final todayLogs =
+          await _foodLogHistoryService.getFoodLogsByDate(userId, startOfDay);
+
       // Hitung nutrisi menggunakan strategy
-      final protein = _nutrientCalculationStrategy.calculateNutrientFromLogs(todayLogs, 'protein');
-      final carbs = _nutrientCalculationStrategy.calculateNutrientFromLogs(todayLogs, 'carbs');
-      final fat = _nutrientCalculationStrategy.calculateNutrientFromLogs(todayLogs, 'fat');
-      
+      final protein = _nutrientCalculationStrategy.calculateNutrientFromLogs(
+          todayLogs, 'protein');
+      final carbs = _nutrientCalculationStrategy.calculateNutrientFromLogs(
+          todayLogs, 'carbs');
+      final fat = _nutrientCalculationStrategy.calculateNutrientFromLogs(
+          todayLogs, 'fat');
+
       // Target kalori sekarang dihitung oleh client controller dan diberikan sebagai parameter
       final calculatedTarget = targetCalories ?? 0;
-      
+
       // Update data widget
       final detailedFoodTracking = DetailedFoodTracking(
         caloriesNeeded: calculatedTarget,
@@ -93,15 +99,14 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
         currentFat: fat,
         userId: userId,
       );
-      
+
       await _widgetService.updateData(detailedFoodTracking);
       await _widgetService.updateWidget();
-      
     } catch (e) {
       throw WidgetUpdateException('Failed to update detailed widget: $e');
     }
   }
-  
+
   /// Menangani interaksi dari widget
   @override
   Future<void> handleWidgetInteraction(FoodWidgetEventType eventType) async {
@@ -119,20 +124,25 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
           // Navigasi ke halaman tambah makanan
           _navigatorKey.currentState?.pushNamed('/add-food');
           break;
+        case FoodWidgetEventType.gologin:
+          // Navigasi ke halaman login
+          _navigatorKey.currentState?.pushNamed('/login');
+          break;
         case FoodWidgetEventType.other:
           // Handle other events
           break;
       }
     } catch (e) {
-      throw HomeScreenWidgetException('Failed to handle widget interaction: $e');
+      throw HomeScreenWidgetException(
+          'Failed to handle widget interaction: $e');
     }
   }
-  
+
   /// Set refresh callback dari client controller
   void setRefreshCallback(RefreshCallback callback) {
     _refreshCallback = callback;
   }
-  
+
   /// Mendaftarkan callback untuk widget events
   @override
   Future<void> registerWidgetClickCallback() async {
@@ -142,10 +152,11 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
         handleWidgetInteraction(event);
       });
     } catch (e) {
-      throw WidgetCallbackRegistrationException('Failed to register widget callbacks: $e');
+      throw WidgetCallbackRegistrationException(
+          'Failed to register widget callbacks: $e');
     }
   }
-  
+
   /// Membersihkan data saat logout/app reset
   @override
   Future<void> cleanupData() async {
@@ -154,11 +165,8 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
       await _widgetService.updateData(emptyData);
       await _widgetService.updateWidget();
     } catch (e) {
-      throw WidgetCleanupException('Failed to clean up detailed widget data: $e');
+      throw WidgetCleanupException(
+          'Failed to clean up detailed widget data: $e');
     }
   }
-  
- 
-  
-
 }

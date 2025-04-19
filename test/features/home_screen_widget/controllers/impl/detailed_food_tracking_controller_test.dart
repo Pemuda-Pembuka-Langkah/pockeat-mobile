@@ -366,6 +366,17 @@ void main() {
       // In a real integration test, we would verify navigation happens
     });
     
+    test('should handle gologin event correctly', () async {
+      // First initialize to set the navigator key
+      await controller.initialize(navigatorKey: navigatorKey);
+      
+      // Act
+      await controller.handleWidgetInteraction(FoodWidgetEventType.gologin);
+      
+      // Since we can't easily mock GlobalKey.currentState, we just verify no exceptions are thrown
+      // In a real integration test, we would verify navigation to the login page
+    });
+    
     test('should call refresh callback when refresh event occurs', () async {
       // Arrange
       bool callbackCalled = false;

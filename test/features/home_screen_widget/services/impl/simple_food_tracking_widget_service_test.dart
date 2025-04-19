@@ -225,7 +225,8 @@ void main() {
       test('should emit correct event type for click type', () async {
         // Arrange
         // URI dengan format yang benar: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        final uri = Uri.parse('pockeat://app_group?widgetName=simple_food&&type=click');
+        // Pastikan menggunakan testWidgetName yang sama dengan yang diset di setUp()
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=click');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -239,7 +240,8 @@ void main() {
       test('should emit correct event type for log type', () async {
         // Arrange
         // URI dengan format yang benar: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        final uri = Uri.parse('pockeat://app_group?widgetName=simple_food&&type=log');
+        // Gunakan testWidgetName yang sesuai
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=log');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -253,7 +255,8 @@ void main() {
       test('should emit correct event type for refresh parameter', () async {
         // Arrange
         // URI dengan format alternatif yang menggunakan parameter refresh
-        final uri = Uri.parse('pockeat://app_group?widgetName=simple_food&&refresh=true');
+        // Gunakan testWidgetName yang sesuai
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&refresh=true');
         final eventsFuture = service.widgetEvents.first;
         
         // Act
@@ -319,7 +322,8 @@ void main() {
         
         // Act - URI dengan format yang benar untuk memicu event clicked
         // Format: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        final uri = Uri.parse('pockeat://app_group?widgetName=simple_food&&type=click');
+        // Gunakan testWidgetName yang sesuai
+        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=click');
         await service.handleWidgetClicked(uri);
         
         // Assert - both listeners should receive the same event
@@ -342,6 +346,48 @@ void main() {
         
         // Assert
         expect(emittedEvent, FoodWidgetEventType.other);
+      });
+      
+      test('should ignore events for different widgets to prevent race conditions', () async {
+        // Arrange
+        // URI dengan widgetName yang bukan untuk service ini
+        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food_tracking_widget&&type=click');
+        final eventsFuture = service.widgetEvents.first;
+        
+        // Act
+        await service.handleWidgetClicked(uri);
+        final emittedEvent = await eventsFuture;
+        
+        // Assert - seharusnya mengembalikan "other" karena widget name tidak cocok
+        expect(emittedEvent, FoodWidgetEventType.other);
+      });
+      
+      test('should process events for this widget correctly', () async {
+        // Arrange
+        // URI dengan widgetName yang tepat untuk service ini
+        final uri = Uri.parse('pockeat://app_group?widgetName=${testWidgetName}&&type=click');
+        final eventsFuture = service.widgetEvents.first;
+        
+        // Act
+        await service.handleWidgetClicked(uri);
+        final emittedEvent = await eventsFuture;
+        
+        // Assert - seharusnya mengembalikan "clicked" karena widget name cocok
+        expect(emittedEvent, FoodWidgetEventType.clicked);
+      });
+      
+      test('should process log food events correctly with correct widget name', () async {
+        // Arrange
+        // URI dengan widgetName yang tepat dan type=log untuk "Log your food"
+        final uri = Uri.parse('pockeat://app_group?widgetName=${testWidgetName}&&type=log');
+        final eventsFuture = service.widgetEvents.first;
+        
+        // Act
+        await service.handleWidgetClicked(uri);
+        final emittedEvent = await eventsFuture;
+        
+        // Assert - seharusnya mengembalikan "quicklog" untuk aksi "Log your food"
+        expect(emittedEvent, FoodWidgetEventType.quicklog);
       });
       
       test('should handle negative numeric values in widget storage', () async {
