@@ -4,7 +4,14 @@ import 'package:pockeat/features/homepage/presentation/screens/pet_section.dart'
 import 'package:pockeat/features/sync_fitness_tracker/widgets/health_connect_widget.dart';
 
 class OverviewSection extends StatefulWidget {
-  const OverviewSection({super.key});
+  final bool foodStreakMaintained;
+  final int foodStreakDays;
+  
+  const OverviewSection({
+    super.key, 
+    this.foodStreakMaintained = true,
+    this.foodStreakDays = 5,
+  });
 
   @override
   State<OverviewSection> createState() => _OverviewSectionState();
@@ -201,7 +208,10 @@ class _OverviewSectionState extends State<OverviewSection> {
 
         // Pet Section
         const SizedBox(height: 24),
-        const PetSection(),
+        PetSection(
+          streakMaintained: widget.foodStreakMaintained,
+          streakDays: widget.foodStreakDays,
+        ),
 
         // Weekly Stats
         const SizedBox(height: 24),

@@ -1,8 +1,16 @@
 import 'package:pockeat/features/pet_companion/presentation/pet_store_page.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class PetSection extends StatefulWidget {
-  const PetSection({super.key});
+  final bool streakMaintained;
+  final int streakDays;
+
+  const PetSection({
+    super.key,
+    this.streakMaintained = true,
+    this.streakDays = 5,
+  });
 
   @override
   _PetCompanionSectionState createState() => _PetCompanionSectionState();
@@ -180,8 +188,14 @@ class _PetCompanionSectionState extends State<PetSection> {
             children: [
               SizedBox(
                 height: 180,
-                child: Image.asset('assets/images/kucing.png',
-                    fit: BoxFit.contain),
+                child: Lottie.asset(
+                  widget.streakMaintained
+                      ? 'assets/animations/happy_emoji.json'
+                      : 'assets/animations/sad_emoji.json',
+                  fit: BoxFit.contain,
+                  repeat: true,
+                  animate: true,
+                ),
               ),
               Positioned(
                 top: 4,
@@ -189,7 +203,7 @@ class _PetCompanionSectionState extends State<PetSection> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.green,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: const [
                       BoxShadow(color: Colors.black12, blurRadius: 4)
