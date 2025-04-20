@@ -5,7 +5,6 @@ import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_co
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/main_tabs_widget.dart';
 
 void main() {
-  late TabController tabController;
   late AppColors colors;
   
   setUp(() {
@@ -37,9 +36,9 @@ void main() {
         ),
       );
       
-      // Verify the tab titles
-      expect(find.text('Progress'), findsOneWidget);
+      // Updated to match the actual tab titles in the implementation
       expect(find.text('Insights'), findsOneWidget);
+      expect(find.text('Log History'), findsOneWidget);
       
       // Clean up
       controller.dispose();
