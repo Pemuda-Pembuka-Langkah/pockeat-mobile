@@ -58,9 +58,12 @@ class _BirthdatePageState extends State<BirthdatePage> {
             final prefs = await SharedPreferences.getInstance();
             final inProgress = prefs.getBool('onboardingInProgress') ?? true;
 
+            // ignore: use_build_context_synchronously
             if (inProgress && Navigator.of(context).canPop()) {
+              // ignore: use_build_context_synchronously
               Navigator.of(context).pop(); 
             } else {
+              // ignore: use_build_context_synchronously
               Navigator.of(context).popUntil((route) => route.isFirst); 
             }
           },

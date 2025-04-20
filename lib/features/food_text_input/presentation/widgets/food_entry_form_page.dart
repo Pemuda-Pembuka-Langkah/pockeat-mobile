@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
-import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
 
 class FoodEntryForm extends StatefulWidget {
@@ -24,12 +23,10 @@ class FoodEntryForm extends StatefulWidget {
 class _FoodEntryFormState extends State<FoodEntryForm> {
   final _descriptionController = TextEditingController();
   String? _descriptionError;
-  late FoodTextAnalysisService _analysisService;
 
   @override
   void initState() {
     super.initState();
-    _analysisService = FoodTextAnalysisService.fromEnv();
     if (widget.existingEntry != null) {
       _descriptionController.text = widget.existingEntry!.foodDescription;
     }

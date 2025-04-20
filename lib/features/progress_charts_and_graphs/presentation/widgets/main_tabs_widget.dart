@@ -6,10 +6,10 @@ class MainTabsWidget extends StatelessWidget {
   final AppColors colors;
 
   const MainTabsWidget({
-    Key? key,
+    super.key,
     required this.tabController,
     required this.colors,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class MainTabsWidget extends StatelessWidget {
         labelPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         tabs: const [
           Text('Progress'),
-          Text('Insights'),
+          Text('Log History'),
         ],
       ),
     );

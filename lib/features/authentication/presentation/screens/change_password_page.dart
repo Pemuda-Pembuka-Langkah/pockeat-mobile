@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
-import 'package:meta/meta.dart';
 
 /// Change Password Page
 ///
@@ -23,13 +22,13 @@ class ChangePasswordPage extends StatefulWidget {
   final ChangePasswordService? customChangePasswordService;
 
   const ChangePasswordPage({
-    Key? key,
+    super.key,
     this.oobCode,
     this.showAppBar = true,
     this.skipDelay = false,
     this.testMode = false,
     this.customChangePasswordService,
-  }) : super(key: key);
+  });
 
   @override
   State<ChangePasswordPage> createState() => _ChangePasswordPageState();

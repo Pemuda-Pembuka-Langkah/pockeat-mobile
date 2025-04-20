@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/api_scan/utils/food_analysis_parser.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   group('FoodAnalysisParser', () {

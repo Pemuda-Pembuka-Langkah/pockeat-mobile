@@ -72,20 +72,17 @@ void main() {
     late MockProfileService mockProfileService;
     late UserModel testUser;
     late UserModel unverifiedUser;
-    late MockBuildContext mockContext;
     late MockFile mockFile;
-    late FakeImagePicker fakeImagePicker;
+    // ignore: unused_local_variable
     late FakeXFile fakeXFile;
     final getIt = GetIt.instance;
 
     setUp(() {
       mockProfileService = MockProfileService();
-      mockContext = MockBuildContext();
       mockFile = MockFile();
 
       // Setup FakeXFile dan FakeImagePicker
       fakeXFile = FakeXFile('/test/path/image.jpg');
-      fakeImagePicker = FakeImagePicker(fileToReturn: fakeXFile);
 
       // Register mock service ke GetIt
       if (getIt.isRegistered<ProfileService>()) {
