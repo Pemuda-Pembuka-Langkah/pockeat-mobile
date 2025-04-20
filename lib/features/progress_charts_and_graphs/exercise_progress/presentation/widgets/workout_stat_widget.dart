@@ -6,9 +6,9 @@ class WorkoutStatWidget extends StatelessWidget {
   final WorkoutStat stat;
 
   const WorkoutStatWidget({
-    Key? key,
+    super.key,
     required this.stat,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

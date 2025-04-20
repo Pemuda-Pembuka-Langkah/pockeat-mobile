@@ -5,12 +5,28 @@ import io.flutter.plugin.common.MethodChannel
 import android.content.Intent
 import android.provider.Settings
 import android.net.Uri
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import com.pockeat.widget.CustomHomeWidgetPlugin
 
 class MainActivity: FlutterFragmentActivity() {
     private val CHANNEL = "com.pockeat/health_connect"
+    private val WIDGET_CHANNEL = "com.pockeat/custom_home_widget"
+    
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+    
+    // Deep link handling sudah ditangani otomatis oleh AppLinks plugin
     
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        
+        // Daftarkan CustomHomeWidgetPlugin untuk widget kita
+        // Plugin ini sudah menangani semua interaksi widget <-> Flutter
+        flutterEngine.plugins.add(CustomHomeWidgetPlugin())
         
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {

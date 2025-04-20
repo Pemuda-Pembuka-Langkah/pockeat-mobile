@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'user_auth_repository_test.mocks.dart';
 
 // Membuat interface untuk tipe CollectionReference yang dibutuhkan
+// ignore: subtype_of_sealed_class
 abstract class TestCollectionReference
     implements CollectionReference<Map<String, dynamic>> {}
 

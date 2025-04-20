@@ -114,7 +114,6 @@ abstract class BaseFirestoreRepository<T> {
           .map((doc) {
             final data = doc.data();
             return fromMap(data, doc.id);
-                      throw Exception('Document data is not in the expected format');
           })
           .toList();
     } catch (e) {
@@ -169,7 +168,6 @@ abstract class BaseFirestoreRepository<T> {
           .map((doc) {
             final data = doc.data();
             return fromMap(data, doc.id);
-                      throw Exception('Document data is not in the expected format');
           })
           .toList();
     } catch (e) {
@@ -216,7 +214,6 @@ abstract class BaseFirestoreRepository<T> {
           .map((doc) {
             final data = doc.data();
             return fromMap(data, doc.id);
-                      throw Exception('Document data is not in the expected format');
           })
           .toList();
     } catch (e) {

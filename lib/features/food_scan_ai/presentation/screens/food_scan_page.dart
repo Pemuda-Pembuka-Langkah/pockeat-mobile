@@ -320,9 +320,11 @@ class ScanFoodPageState extends State<ScanFoodPage>
                           if (mounted) {
                             if (_currentMode == 1) {
                               // Jika mode label scan, tampilkan popup untuk serving size
+                              // ignore: use_build_context_synchronously
                               _showServingSizeDialog(context, image.path);
                             } else {
                               // Jika mode food scan, langsung navigasi ke NutritionPage
+                              // ignore: use_build_context_synchronously
                               _navigateToNutritionPage(context, image.path);
                             }
                           }

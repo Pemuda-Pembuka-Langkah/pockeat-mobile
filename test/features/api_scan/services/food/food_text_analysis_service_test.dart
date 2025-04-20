@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
-import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 
 // Import the generated mock
