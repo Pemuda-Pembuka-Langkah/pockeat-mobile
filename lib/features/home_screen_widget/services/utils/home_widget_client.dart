@@ -6,7 +6,6 @@ abstract class HomeWidgetInterface {
   Future<T?> getWidgetData<T>(String key);
   Future<void> saveWidgetData(String key, dynamic value);
   Future<void> updateWidget({required String name, String? androidName, String? iOSName});
-  Future<void> registerBackgroundCallback(Future<void> Function(Uri? uri) callback);
 }
 
 /// Implementasi default dari HomeWidgetInterface menggunakan package home_widget
@@ -39,13 +38,7 @@ class HomeWidgetClient implements HomeWidgetInterface {
         iOSName: iOSName,
       );
     } catch (e) {
-      throw e;
+      rethrow;
     }
-  }
-  
-  @override
-  Future<void> registerBackgroundCallback(Future<void> Function(Uri? uri) callback) async {
-    // Komentari sementara untuk menghindari crash
-    // await HomeWidget.registerInteractivityCallback(callback);
   }
 }

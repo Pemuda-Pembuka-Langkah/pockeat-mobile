@@ -93,30 +93,4 @@ class CustomHomeWidgetClient implements HomeWidgetInterface {
       rethrow;
     }
   }
-  
-  @override
-  Future<void> registerBackgroundCallback(Future<void> Function(Uri? uri) callback) async {
-    try {
-      // Mendaftarkan callback ke platform native untuk menangani widget click
-      await _channel.invokeMethod('registerWidgetClickCallback', {});
-      
-      // Set up handler untuk menerima event dari Android widget
-      _channel.setMethodCallHandler((call) async {
-        if (call.method == 'onWidgetClick') {
-          // Extract URI dari method call arguments
-          final Map<dynamic, dynamic> args = call.arguments;
-          final String? uriString = args['uri'] as String?;
-          
-          // Panggil callback dengan URI yang diterima
-          if (uriString != null) {
-            await callback(Uri.parse(uriString));
-          }
-          return true;
-        }
-        return null;
-      });
-    } catch (e) {
-      rethrow;
-    }
-  }
 }

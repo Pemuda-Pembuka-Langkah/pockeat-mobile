@@ -1,8 +1,6 @@
 // lib/features/home_screen_widget/controllers/impl/food_tracking_client_controller_impl.dart
 
 import 'dart:async';
-
-import 'package:flutter/material.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
@@ -11,18 +9,10 @@ import 'package:pockeat/features/health_metrics/domain/service/health_metrics_ch
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/impl/detailed_food_tracking_controller.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/impl/simple_food_tracking_controller.dart';
-import 'package:pockeat/features/home_screen_widget/domain/constants/widget_event_type.dart';
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/default_calorie_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/permission_helper.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/widget_background_service_helper.dart';
-
-/// Implementasi controller client untuk food tracking dengan pendekatan komposisi
-///
-/// Controller ini:
-/// 1. Mengelola lifecycle controller spesifik (simple & detailed)
-/// 2. Menangani perhitungan target kalori secara terpusat
-/// 3. Mengatur update periodik dan event handling
 import '../../services/calorie_calculation_strategy.dart';
 
 
@@ -70,19 +60,16 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
 
   /// Inisialisasi controller
   @override
-  Future<void> initialize(GlobalKey<NavigatorState> navigatorKey) async {
+  Future<void> initialize() async {
     try {
   
       // 1. Initialize sub-controllers
-      await _simpleController.initialize(navigatorKey: navigatorKey);
-      await _detailedController.initialize(navigatorKey: navigatorKey);
+      await _simpleController.initialize();
+      await _detailedController.initialize();
       // 2. Setup auto-updates
       _setupAutoUpdate();
   
-      // 3. Register widget callbacks
-      await _registerWidgetCallbacks();
-      
-      // 4. Get current user and update if already logged in
+      // 3. Get current user and update if already logged in
       _currentUser = await _loginService.getCurrentUser();
       if (_currentUser != null) {
         await processUserStatusChange(_currentUser);
@@ -268,36 +255,4 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
       await _permissionHelper.requestBatteryOptimizationExemption();
     }
   }
-
-  /// Register callbacks untuk widget events
-  Future<void> _registerWidgetCallbacks() async {
-    try {
-      await _simpleController.registerWidgetClickCallback();
-      await _detailedController.registerWidgetClickCallback();
-      
-      // Tambahkan handler khusus untuk event refresh
-      _simpleController.setRefreshCallback((event) {
-        if (event == FoodWidgetEventType.refresh) {
-          processPeriodicUpdate();
-        }
-      });
-      
-      _detailedController.setRefreshCallback((event) {
-        if (event == FoodWidgetEventType.refresh) {
-          processPeriodicUpdate();
-        }
-      });
-    } catch (e) {
-      throw WidgetCallbackRegistrationException('Failed to register widget callbacks: $e');
-    }
-  }
-  
-
-  
-  /// Kalkulasi target kalori untuk user tertentu 
-  /// 
-  /// Ini dipindahkan dari controller individual ke client controller
-  
-  // Tidak perlu menyediakan akses langsung ke widget client di level controller
-  // Semua interaksi widget sudah ditangani di level service
 }

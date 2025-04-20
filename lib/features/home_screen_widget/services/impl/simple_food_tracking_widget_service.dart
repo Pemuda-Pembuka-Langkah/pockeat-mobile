@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:pockeat/features/home_screen_widget/domain/constants/food_tracking_keys.dart';
-import 'package:pockeat/features/home_screen_widget/domain/constants/widget_event_type.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/home_widget_client.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/home_widget_provider.dart';
@@ -21,10 +20,6 @@ class SimpleFoodTrackingWidgetService implements WidgetDataService<SimpleFoodTra
   /// Client untuk berinteraksi dengan HomeWidget API
   /// Ini memungkinkan untuk di-mock saat testing
   final HomeWidgetInterface _homeWidget;
-  
-  /// Stream controller untuk event widget
-  final StreamController<FoodWidgetEventType> _eventController = 
-      StreamController<FoodWidgetEventType>.broadcast();
   
   /// Konstruktor dengan dependency injection untuk memudahkan testing
   SimpleFoodTrackingWidgetService({
@@ -94,53 +89,6 @@ class SimpleFoodTrackingWidgetService implements WidgetDataService<SimpleFoodTra
       name: _widgetName,
     );
   }
-
-  @override
-  Future<void> handleWidgetClicked(Uri? uri) async {
-    // Konversi URI ke tipe event dan kirim ke stream
-    final eventType = _determineEventType(uri);
-    _eventController.add(eventType);
-  }
-  
-  /// Menentukan tipe event berdasarkan URI
-  /// Implementasi spesifik untuk SimpleFoodTracking
-  // ignore: unintended_html_in_doc_comment
-  /// Format URI: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-  FoodWidgetEventType _determineEventType(Uri? uri) {
-    if (uri == null) return FoodWidgetEventType.other;
-    
-    final params = uri.queryParameters;
-    
-    // Verifikasi widget name untuk mencegah race condition
-    final widgetName = params['widgetName']?.toLowerCase() ?? '';
-    if (widgetName.isNotEmpty && widgetName != _widgetName.toLowerCase()) {
-      // Abaikan event jika widget name tidak cocok dengan service ini
-      return FoodWidgetEventType.other;
-    }
-    
-    final actionType = params['type']?.toLowerCase() ?? '';
-    
-    // Logika khusus untuk widget SimpleFoodTracking berdasarkan parameter type
-    if (actionType.contains('click') || actionType.contains('tap')) {
-      return FoodWidgetEventType.clicked;
-    } else if (actionType.contains('quick') || actionType.contains('log')) {
-      return FoodWidgetEventType.quicklog;
-    } else if (actionType.contains('refresh') || params.containsKey('refresh')) {
-      return FoodWidgetEventType.refresh;
-    }
-    
-    return FoodWidgetEventType.other;
-  }
-  
-  @override
-  Stream<FoodWidgetEventType> get widgetEvents => _eventController.stream;
-
-  @override
-  Future<void> registerWidgetClickCallback() async {
-    await _homeWidget.registerBackgroundCallback(handleWidgetClicked);
-  }
-
-
 }
 
 

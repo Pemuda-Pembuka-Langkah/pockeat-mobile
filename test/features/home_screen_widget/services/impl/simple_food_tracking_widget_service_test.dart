@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/home_screen_widget/domain/constants/food_tracking_keys.dart';
-import 'package:pockeat/features/home_screen_widget/domain/constants/widget_event_type.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/simple_food_tracking_widget_service.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/home_widget_client.dart';
@@ -51,7 +50,6 @@ void main() {
         
         // Assert
         verify(mockHomeWidget.setAppGroupId(testAppGroupId)).called(1);
-        // Not verifying registerBackgroundCallback since it's not called in initialize
       });
       
       test('should handle failure to set app group ID', () async {
@@ -221,175 +219,7 @@ void main() {
       });
     });
     
-    group('handleWidgetClicked', () {
-      test('should emit correct event type for click type', () async {
-        // Arrange
-        // URI dengan format yang benar: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        // Pastikan menggunakan testWidgetName yang sama dengan yang diset di setUp()
-        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=click');
-        final eventsFuture = service.widgetEvents.first;
-        
-        // Act
-        await service.handleWidgetClicked(uri);
-        final emittedEvent = await eventsFuture;
-        
-        // Assert
-        expect(emittedEvent, FoodWidgetEventType.clicked);
-      });
-      
-      test('should emit correct event type for log type', () async {
-        // Arrange
-        // URI dengan format yang benar: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        // Gunakan testWidgetName yang sesuai
-        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=log');
-        final eventsFuture = service.widgetEvents.first;
-        
-        // Act
-        await service.handleWidgetClicked(uri);
-        final emittedEvent = await eventsFuture;
-        
-        // Assert
-        expect(emittedEvent, FoodWidgetEventType.quicklog);
-      });
-      
-      test('should emit correct event type for refresh parameter', () async {
-        // Arrange
-        // URI dengan format alternatif yang menggunakan parameter refresh
-        // Gunakan testWidgetName yang sesuai
-        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&refresh=true');
-        final eventsFuture = service.widgetEvents.first;
-        
-        // Act
-        await service.handleWidgetClicked(uri);
-        final emittedEvent = await eventsFuture;
-        
-        // Assert
-        expect(emittedEvent, FoodWidgetEventType.refresh);
-      });
-      
-      test('should emit default event type for unknown type', () async {
-        // Arrange
-        // URI dengan type yang tidak dikenal
-        final uri = Uri.parse('pockeat://app_group?widgetName=simple_food&&type=unknown');
-        final eventsFuture = service.widgetEvents.first;
-        
-        // Act
-        await service.handleWidgetClicked(uri);
-        final emittedEvent = await eventsFuture;
-        
-        // Assert
-        expect(emittedEvent, FoodWidgetEventType.other);
-      });
-      
-      test('should emit default event type for null URI', () async {
-        // Arrange
-        final eventsFuture = service.widgetEvents.first;
-        
-        // Act
-        await service.handleWidgetClicked(null);
-        final emittedEvent = await eventsFuture;
-        
-        // Assert
-        expect(emittedEvent, FoodWidgetEventType.other);
-      });
-    });
-    
-    group('registerWidgetClickCallback', () {
-      test('should register callback for widget clicks', () async {
-        // Arrange
-        when(mockHomeWidget.registerBackgroundCallback(any))
-            .thenAnswer((_) async {});
-        
-        // Act
-        await service.registerWidgetClickCallback();
-        
-        // Assert
-        verify(mockHomeWidget.registerBackgroundCallback(any)).called(1);
-      });
-    });
-    
-    group('widgetEvents stream', () {
-      test('should be a broadcast stream', () {
-        // Assert
-        expect(service.widgetEvents.isBroadcast, isTrue);
-      });
-      
-      test('should allow multiple subscribers', () async {
-        // Arrange
-        // Create two listeners to the same stream
-        final eventsFuture1 = service.widgetEvents.first;
-        final eventsFuture2 = service.widgetEvents.first;
-        
-        // Act - URI dengan format yang benar untuk memicu event clicked
-        // Format: pockeat://<groupId>?widgetName=<widgetName>&&type=<action type>
-        // Gunakan testWidgetName yang sesuai
-        final uri = Uri.parse('pockeat://app_group?widgetName=$testWidgetName&&type=click');
-        await service.handleWidgetClicked(uri);
-        
-        // Assert - both listeners should receive the same event
-        final emittedEvent1 = await eventsFuture1;
-        final emittedEvent2 = await eventsFuture2;
-        
-        expect(emittedEvent1, FoodWidgetEventType.clicked);
-        expect(emittedEvent2, FoodWidgetEventType.clicked);
-      });
-      
-      test('should handle URI without type parameter', () async {
-        // Arrange
-        // URI tanpa parameter type
-        final uri = Uri.parse('pockeat://app_group?widgetName=simple_food');
-        final eventsFuture = service.widgetEvents.first;
-        
-        // Act
-        await service.handleWidgetClicked(uri);
-        final emittedEvent = await eventsFuture;
-        
-        // Assert
-        expect(emittedEvent, FoodWidgetEventType.other);
-      });
-      
-      test('should ignore events for different widgets to prevent race conditions', () async {
-        // Arrange
-        // URI dengan widgetName yang bukan untuk service ini
-        final uri = Uri.parse('pockeat://app_group?widgetName=detailed_food_tracking_widget&&type=click');
-        final eventsFuture = service.widgetEvents.first;
-        
-        // Act
-        await service.handleWidgetClicked(uri);
-        final emittedEvent = await eventsFuture;
-        
-        // Assert - seharusnya mengembalikan "other" karena widget name tidak cocok
-        expect(emittedEvent, FoodWidgetEventType.other);
-      });
-      
-      test('should process events for this widget correctly', () async {
-        // Arrange
-        // URI dengan widgetName yang tepat untuk service ini
-        final uri = Uri.parse('pockeat://app_group?widgetName=${testWidgetName}&&type=click');
-        final eventsFuture = service.widgetEvents.first;
-        
-        // Act
-        await service.handleWidgetClicked(uri);
-        final emittedEvent = await eventsFuture;
-        
-        // Assert - seharusnya mengembalikan "clicked" karena widget name cocok
-        expect(emittedEvent, FoodWidgetEventType.clicked);
-      });
-      
-      test('should process log food events correctly with correct widget name', () async {
-        // Arrange
-        // URI dengan widgetName yang tepat dan type=log untuk "Log your food"
-        final uri = Uri.parse('pockeat://app_group?widgetName=${testWidgetName}&&type=log');
-        final eventsFuture = service.widgetEvents.first;
-        
-        // Act
-        await service.handleWidgetClicked(uri);
-        final emittedEvent = await eventsFuture;
-        
-        // Assert - seharusnya mengembalikan "quicklog" untuk aksi "Log your food"
-        expect(emittedEvent, FoodWidgetEventType.quicklog);
-      });
-      
+    group('handle widget values', () {
       test('should handle negative numeric values in widget storage', () async {
         // Arrange
         // Handle the userId parameter first

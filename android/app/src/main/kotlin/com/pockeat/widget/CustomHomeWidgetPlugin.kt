@@ -212,16 +212,6 @@ class CustomHomeWidgetPlugin : FlutterPlugin, MethodCallHandler {
                     result.error("EXCEPTION", "Error updating widget: ${e.message}", null)
                 }
             }
-            "registerWidgetClickCallback" -> {
-                try {
-                    Log.d(TAG, "Registering widget click callback")
-                    // Tidak perlu parameter tambahan, cukup berikan sukses sebagai indikasi
-                    // bahwa sisi native sudah siap menerima dan meneruskan widget click events
-                    result.success(true)
-                } catch (e: Exception) {
-                    result.error("EXCEPTION", "Error registering widget callback: ${e.message}", null)
-                }
-            }
             else -> {
                 result.notImplemented()
             }

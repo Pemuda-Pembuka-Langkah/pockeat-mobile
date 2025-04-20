@@ -18,6 +18,9 @@ abstract class DeepLinkService {
   /// Handle deep link yang diterima
   Future<bool> handleDeepLink(Uri link);
 
+  /// Mendapatkan hasil dari cold start deep link
+  Future<DeepLinkResult?> getColdStartResult();
+
   /// Dispose resources
   void dispose();
 }

@@ -1,6 +1,5 @@
 // lib/features/home_screen_widget/controllers/food_tracking_client_controller.dart
 
-import 'package:flutter/material.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
 /// Interface controller client untuk food tracking yang berinteraksi dengan UI
@@ -13,7 +12,7 @@ abstract class FoodTrackingClientController {
   /// 
   /// Menyiapkan controller dan semua resources yang dibutuhkan
   /// @throws WidgetInitializationException jika gagal inisialisasi
-  Future<void> initialize(GlobalKey<NavigatorState> navigatorKey);
+  Future<void> initialize();
   
   /// Proses perubahan status user (login/logout)
   ///

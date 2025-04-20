@@ -133,7 +133,7 @@ class SimpleFoodTrackingWidgetProvider : AppWidgetProvider() {
         val actionType = if (isLoggedIn) {
             "log"  // Action "log" digunakan untuk "Log your food"
         } else {
-            "gologin"  // Action "gologin" digunakan untuk navigasi ke halaman login
+            "login"  // Action "login" digunakan untuk navigasi ke halaman login
         }
         
         // Intent untuk button (log food atau login)  
@@ -156,8 +156,8 @@ class SimpleFoodTrackingWidgetProvider : AppWidgetProvider() {
         // Intent untuk area utama widget (selalu membuka dashboard utama)
         val mainAreaIntent = Intent(context, MainActivity::class.java).apply {
             action = Intent.ACTION_VIEW
-            // Selalu menggunakan type=click untuk area utama widget
-            data = Uri.parse("pockeat://$appGroupId?widgetName=$widgetName&&type=click") 
+            // Selalu menggunakan type=home untuk area utama widget
+            data = Uri.parse("pockeat://$appGroupId?widgetName=$widgetName&&type=home") 
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         

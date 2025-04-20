@@ -18,13 +18,4 @@ abstract class WidgetDataService<T> {
   
   /// Mengirim pembaruan ke widget home screen
   Future<void> updateWidget();
-  
-  /// Menangani callback dari widget ketika ditekan
-  Future<void> handleWidgetClicked(Uri? uri);
-  
-  /// Mendaftarkan callback yang akan dipanggil ketika widget ditekan
-  Future<void> registerWidgetClickCallback();
-  
-  /// Stream untuk berlangganan event dari widget
-  Stream<FoodWidgetEventType> get widgetEvents;
 }

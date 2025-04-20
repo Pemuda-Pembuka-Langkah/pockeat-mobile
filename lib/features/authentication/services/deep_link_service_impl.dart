@@ -120,72 +120,59 @@ class DeepLinkServiceImpl implements DeepLinkService {
   bool _isChangePasswordLink(Uri link) {
     return _changePasswordService.isChangePasswordLink(link);
   }
+  
+  // Method untuk mengecek apakah link dari widget quick log
+  bool _isQuickLogLink(Uri link) {
+    // Cek apakah link memiliki scheme pockeat
+    if (link.scheme != 'pockeat') return false;
+    
+    // Cek adanya parameter widgetName dan type = log
+    final hasWidgetName = link.queryParameters.containsKey('widgetName');
+    final hasType = link.queryParameters.containsKey('type');
+    final type = link.queryParameters['type'];
+    
+    return hasWidgetName && hasType && type == 'log';
+  }
+  
+  // Method untuk mengecek apakah link dari widget login
+  bool _isLoginLink(Uri link) {
+    // Cek apakah link memiliki scheme pockeat
+    if (link.scheme != 'pockeat') return false;
+    
+    // Cek adanya parameter widgetName dan type = login
+    final hasWidgetName = link.queryParameters.containsKey('widgetName');
+    final hasType = link.queryParameters.containsKey('type');
+    final type = link.queryParameters['type'];
+    
+    return hasWidgetName && hasType && type == 'login';
+  }
+  
+  // Method untuk mengecek apakah link ke dashboard/home
+  bool _isDashboardLink(Uri link) {
+    // Cek apakah link memiliki scheme pockeat
+    if (link.scheme != 'pockeat') return false;
+    
+    // Cek adanya parameter widgetName dan type = dashboard atau home
+    final hasWidgetName = link.queryParameters.containsKey('widgetName');
+    final hasType = link.queryParameters.containsKey('type');
+    final type = link.queryParameters['type'];
+    
+    return hasWidgetName && hasType && (type == 'dashboard' || type == 'home');
+  }
 
+ // coverage:ignore-start
   @override
   Future<bool> handleDeepLink(Uri link,
       [BuildContext? navigationContext]) async {
     try {
-      if (_isEmailVerificationLink(link)) {
-        try {
-          final bool success =
-              await _emailVerificationService.handleEmailVerificationLink(link);
-
-          final result = DeepLinkResult.emailVerification(
-            success: success,
-            data: {
-              'email': FirebaseAuth.instance.currentUser?.email ?? '',
-            },
-            originalUri: link,
-          );
-
-          _resultStreamController.add(result);
-          return success;
-        } catch (e) {
-          final result = DeepLinkResult.emailVerification(
-            success: false,
-            error: e.toString(),
-            originalUri: link,
-          );
-
-          _resultStreamController.add(result);
-          return false;
-        }
-      } else if (_isChangePasswordLink(link)) {
-        try {
-          final bool success =
-              await _changePasswordService.handleChangePasswordLink(link);
-
-          final String? oobCode = link.queryParameters['oobCode'];
-          final result = DeepLinkResult.changePassword(
-            success: success,
-            data: {
-              'oobCode': oobCode,
-            },
-            originalUri: link,
-          );
-
-          _resultStreamController.add(result);
-          return success;
-        } catch (e) {
-          final result = DeepLinkResult.changePassword(
-            success: false,
-            error: e.toString(),
-            originalUri: link,
-          );
-
-          _resultStreamController.add(result);
-          return false;
-        }
-      } else {
-        final result = DeepLinkResult.unknown(
-          originalUri: link,
-          error: 'Tidak ada handler yang sesuai untuk link ini',
-        );
-
-        _resultStreamController.add(result);
-        return false;
-      }
-    // coverage:ignore-start
+      // Gunakan helper method untuk mendapatkan DeepLinkResult
+      final result = await _getDeepLinkResult(link);
+      
+      // Broadcast hasil ke stream
+      _resultStreamController.add(result);
+      
+      // Return success status dari result
+      return result.success;
     } catch (e) {
       final result = DeepLinkResult.unknown(
         originalUri: link,
@@ -196,6 +183,129 @@ class DeepLinkServiceImpl implements DeepLinkService {
       throw DeepLinkException('Error handling deep link', originalError: e);
     }
     // coverage:ignore-end
+  }
+
+
+
+  // Helper method untuk mendapatkan DeepLinkResult dari Uri
+  Future<DeepLinkResult> _getDeepLinkResult(Uri uri) async {
+    if (_isEmailVerificationLink(uri)) {
+      try {
+        final bool success =
+            await _emailVerificationService.handleEmailVerificationLink(uri);
+
+        return DeepLinkResult.emailVerification(
+          success: success,
+          data: {
+            'email': FirebaseAuth.instance.currentUser?.email ?? '',
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.emailVerification(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else if (_isChangePasswordLink(uri)) {
+      try {
+        final bool success =
+            await _changePasswordService.handleChangePasswordLink(uri);
+        final String? oobCode = uri.queryParameters['oobCode'];
+        return DeepLinkResult.changePassword(
+          success: success,
+          data: {
+            'oobCode': oobCode,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.changePassword(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else if (_isQuickLogLink(uri)) {
+      try {
+        final widgetName = uri.queryParameters['widgetName'] ?? '';
+        final type = uri.queryParameters['type'] ?? '';
+        
+        return DeepLinkResult.quickLog(
+          success: true,
+          data: {
+            'widgetName': widgetName,
+            'type': type,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.quickLog(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else if (_isLoginLink(uri)) {
+      try {
+        final widgetName = uri.queryParameters['widgetName'] ?? '';
+        
+        return DeepLinkResult.login(
+          success: true,
+          data: {
+            'widgetName': widgetName,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.login(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else if (_isDashboardLink(uri)) {
+      try {
+        final widgetName = uri.queryParameters['widgetName'] ?? '';
+        
+        return DeepLinkResult.dashboard(
+          success: true,
+          data: {
+            'widgetName': widgetName,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.dashboard(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else {
+      return DeepLinkResult.unknown(
+        originalUri: uri,
+        error: 'Tidak ada handler yang sesuai untuk link ini',
+      );
+    }
+  }
+
+  @override
+  Future<DeepLinkResult?> getColdStartResult() async {
+    try {
+      final initialLink = await getInitialAppLink();
+      if (initialLink == null) {
+        return null;
+      }
+      
+      return await _getDeepLinkResult(initialLink);
+    } catch (e) {
+      throw DeepLinkException(
+        'Error getting cold start result',
+        originalError: e,
+      );
+    }
   }
 
   @override
