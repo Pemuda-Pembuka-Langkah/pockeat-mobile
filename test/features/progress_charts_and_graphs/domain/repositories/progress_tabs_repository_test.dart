@@ -17,6 +17,8 @@ class TestProgressTabsRepository implements ProgressTabsRepository {
       mainTabCount: 2,
       progressTabCount: 3,
       progressTabLabels: ['Weight', 'Nutrition', 'Exercise'],
+      logHistoryTabCount: 2,
+      logHistoryTabLabels: ['Food', 'Exercise'],
     );
   }
 }
