@@ -9,9 +9,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/p
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/services/nutrition_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/screens/exercise_progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/presentation/screens/analytics_insight_page.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/services/analytics_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/domain/repositories/analytics_repository_impl.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/log_history/presentation/screens/log_history_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
@@ -177,10 +175,8 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
                 ),
               ],
             ),
-            // Insights Tab Content
-            AnalyticsInsightPage(
-              service: AnalyticsService(AnalyticsRepositoryImpl()),
-            ),
+            // Insights Tab Content - Remove service parameter since it's been removed
+            const LogHistoryPage(),
           ],
         ),
       ),
