@@ -31,9 +31,6 @@ class _SplashScreenPageState extends State<SplashScreenPage>
   bool _isThirdDotActive = false;
   Timer? _dotsTimer;
 
-  // Store authentication result
-  bool? _isAuthenticated;
-
   @override
   void initState() {
     super.initState();
@@ -70,8 +67,30 @@ class _SplashScreenPageState extends State<SplashScreenPage>
       });
     });
 
-    // Check auth immediately but delay navigation
-    _checkAuthStatus();
+    _startRedirectFlow();
+  }
+
+  Future<void> _startRedirectFlow() async {
+    final loginService = GetIt.instance<LoginService>();
+
+    // Wait splash duration
+    await Future.delayed(const Duration(seconds: 3));
+
+    try {
+      final user = await loginService.getCurrentUser();
+
+      if (!mounted) return;
+
+      if (user != null) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      } else {
+        Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
+      }
+    }
   }
 
   @override
@@ -79,41 +98,6 @@ class _SplashScreenPageState extends State<SplashScreenPage>
     _animationController.dispose();
     _dotsTimer?.cancel();
     super.dispose();
-  }
-
-  /// Check authentication status immediately
-  Future<void> _checkAuthStatus() async {
-    final loginService = GetIt.instance<LoginService>();
-
-    try {
-      final user = await loginService.getCurrentUser();
-      _isAuthenticated = user != null;
-
-      // Delay navigation for 4 seconds to show splash screen
-      Future.delayed(const Duration(seconds: 5), () {
-        _navigateBasedOnAuth();
-      });
-    } catch (e) {
-      _isAuthenticated = false;
-
-      // Delay navigation for 4 seconds to show splash screen
-      Future.delayed(const Duration(seconds: 5), () {
-        _navigateBasedOnAuth();
-      });
-    }
-  }
-
-  /// Navigate based on stored authentication result
-  void _navigateBasedOnAuth() {
-    if (!mounted) return;
-
-    if (_isAuthenticated == true) {
-      // User is authenticated, navigate to home
-      Navigator.of(context).pushReplacementNamed('/');
-    } else {
-      // User is not authenticated, navigate to welcome page
-      Navigator.of(context).pushReplacementNamed('/welcome');
-    }
   }
 
   @override
@@ -143,9 +127,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                   );
                 },
               ),
-
               const SizedBox(height: 12),
-
               // Subtitle
               Text(
                 'Your health companion',
@@ -155,9 +137,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                   letterSpacing: 0.5,
                 ),
               ),
-
               const SizedBox(height: 40),
-
               // Interactive loading animation with dots
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
