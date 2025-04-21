@@ -31,8 +31,9 @@ class CustomHomeWidgetPlugin : FlutterPlugin, MethodCallHandler {
         private const val KEY_CURRENT_FAT = "currentFat"
         private const val KEY_USER_ID = "userId"
         
-        // Nama widget sesuai dengan HomeWidgetConfig.simpleWidgetName
+        // Nama widget sesuai dengan HomeWidgetConfig widget names
         private const val SIMPLE_WIDGET_NAME = "simple_food_tracking_widget"
+        private const val DETAILED_WIDGET_NAME = "detailed_food_tracking_widget"
     }
     
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -256,7 +257,39 @@ class CustomHomeWidgetPlugin : FlutterPlugin, MethodCallHandler {
     }
     
     private fun updateDetailedWidget() {
-        // Untuk saat ini kita hanya update simple widget
-        // Nanti bisa ditambahkan untuk detailed widget
+        try {
+            Log.d(TAG, "Updating detailed widget")
+            
+            // Ambil app widget manager
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            
+            // Dapatkan ID widget yang aktif
+            val appWidgetIds = appWidgetManager.getAppWidgetIds(
+                ComponentName(context, DetailedFoodTrackingWidgetProvider::class.java)
+            )
+            
+            Log.d(TAG, "Found ${appWidgetIds.size} detailed widget instances")
+            
+            // Update semua widget yang aktif
+            if (appWidgetIds.isNotEmpty()) {
+                // Cara 1: Menggunakan broadcast dengan intent
+                val intent = Intent(context, DetailedFoodTrackingWidgetProvider::class.java)
+                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
+                context.sendBroadcast(intent)
+                
+                // Cara 2: Update widget langsung (alternatif)
+                for (appWidgetId in appWidgetIds) {
+                    Log.d(TAG, "Direct updating detailed widget ID: $appWidgetId")
+                    val provider = DetailedFoodTrackingWidgetProvider()
+                    provider.onUpdate(context, appWidgetManager, intArrayOf(appWidgetId))
+                }
+            } else {
+                Log.d(TAG, "No detailed widget instances found")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating detailed widget: ${e.message}")
+            e.printStackTrace()
+        }
     }
 }
