@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 
-class ProgressTabItemWidget extends StatelessWidget {
+class LogHistoryTabWidget extends StatelessWidget {
   final String label;
   final int index;
   final bool isSelected;
   final VoidCallback onTap;
   final AppColors colors;
 
-  const ProgressTabItemWidget({
+  const LogHistoryTabWidget({
     Key? key,
     required this.label,
     required this.index,

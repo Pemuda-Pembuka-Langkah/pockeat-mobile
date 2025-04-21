@@ -65,8 +65,8 @@ void main() {
           mainTabCount: 2,
           progressTabCount: 3,
           progressTabLabels: ['Weight', 'Nutrition', 'Exercise'],
-          logHistoryTabCount: 1,
-          logHistoryTabLabels: ['Log History'],
+          logHistoryTabCount: 2,                       // Add this line
+          logHistoryTabLabels: ['Food', 'Exercise'],   // Add this line
         );
         when(mockRepository.getTabConfiguration()).thenAnswer((_) async => mockConfig);
 
