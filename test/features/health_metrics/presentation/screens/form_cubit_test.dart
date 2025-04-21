@@ -23,10 +23,10 @@ void main() {
     mockCaloricService = MockCaloricRequirementService();
     cubit = HealthMetricsFormCubit(
       repository: mockRepo,
-      userId: 'user123',
       caloricRequirementRepository: mockCaloricRepo,
       caloricRequirementService: mockCaloricService,
     );
+    cubit.setUserId('user123');
   });
 
   test('initial state is correct', () {
