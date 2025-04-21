@@ -111,8 +111,8 @@ class _SplashScreenPageState extends State<SplashScreenPage>
       // User is authenticated, navigate to home
       Navigator.of(context).pushReplacementNamed('/');
     } else {
-      // User is not authenticated, navigate to login
-      Navigator.of(context).pushReplacementNamed('/login');
+      // User is not authenticated, navigate to welcome page
+      Navigator.of(context).pushReplacementNamed('/welcome');
     }
   }
 
