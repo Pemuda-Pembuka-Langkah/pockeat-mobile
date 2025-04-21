@@ -1,10 +1,10 @@
 
 import 'package:pockeat/component/navigation.dart';
+import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
 import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
 
 import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
-
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -53,7 +53,13 @@ class _HomePageState extends State<HomePage>
               ),
             ),
           ],
-          body: const OverviewSection(),
+          body: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+            children: [
+              PetHomepageSection(),
+              OverviewSection(),
+            ],
+          )
         ),
       ),
       bottomNavigationBar: const CustomBottomNavBar(),
