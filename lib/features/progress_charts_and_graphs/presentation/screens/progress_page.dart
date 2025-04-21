@@ -10,7 +10,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/s
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/screens/exercise_progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/presentation/screens/analytics_insight_page.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/services/analytics_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/services/analytics_service.dart' as app_analytics;
 import 'package:pockeat/features/progress_charts_and_graphs/analytics_insight/domain/repositories/analytics_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
@@ -18,6 +18,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/services/progress_ta
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/app_bar_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/main_tabs_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/progress_subtabs_widget.dart';
+import 'package:pockeat/core/services/analytics_service.dart';
 
 // coverage:ignore-start
 class ProgressPage extends StatefulWidget {
@@ -42,11 +43,14 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
   late TabConfiguration _tabConfiguration;
   
   bool _isInitialized = false;
+  late AnalyticsService _googleAnalyticsService;
 
   @override
   void initState() {
     super.initState();
     _initializeData();
+    _googleAnalyticsService = GetIt.instance<AnalyticsService>();
+    _googleAnalyticsService.logScreenView(screenName: 'progress_page', screenClass: 'ProgressPage');
   }
   
   Future<void> _initializeData() async {
@@ -76,6 +80,16 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
           );
+          
+          // Track main tab changes for analytics
+          final tabName = mainTabController.index == 0 ? 'progress' : 'insights';
+          _googleAnalyticsService.logEvent(
+            name: 'main_tab_changed',
+            parameters: {
+              'tab_name': tabName,
+              'timestamp': DateTime.now().toIso8601String(),
+            },
+          );
         }
       });
 
@@ -86,6 +100,32 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
           );
+          
+          // Only track progress tab changes when main tab is on progress (index 0)
+          if (mainTabController.index == 0) {
+            String tabName;
+            switch (progressTabController.index) {
+              case 0:
+                tabName = 'weight';
+                break;
+              case 1:
+                tabName = 'nutrition';
+                break;
+              case 2:
+                tabName = 'exercise';
+                break;
+              default:
+                tabName = 'unknown';
+            }
+            
+            _googleAnalyticsService.logEvent(
+              name: 'progress_tab_changed',
+              parameters: {
+                'tab_name': tabName,
+                'timestamp': DateTime.now().toIso8601String(),
+              },
+            );
+          }
         }
       });
       
@@ -179,7 +219,7 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
             ),
             // Insights Tab Content
             AnalyticsInsightPage(
-              service: AnalyticsService(AnalyticsRepositoryImpl()),
+              service: app_analytics.AnalyticsService(AnalyticsRepositoryImpl()),
             ),
           ],
         ),
