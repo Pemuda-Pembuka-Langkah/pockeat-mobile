@@ -8,15 +8,14 @@ class LogHistoryTabWidget extends StatelessWidget {
   final VoidCallback onTap;
   final AppColors colors;
 
-  // ignore: use_super_parameters
   const LogHistoryTabWidget({
-    Key? key,
+    super.key,
     required this.label,
     required this.index,
     required this.isSelected,
     required this.onTap,
     required this.colors,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
