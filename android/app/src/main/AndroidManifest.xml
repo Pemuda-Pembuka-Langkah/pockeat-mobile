@@ -39,7 +39,7 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         
-        <!-- Food Tracking Widget Provider -->
+        <!-- Simple Food Tracking Widget Provider -->
         <receiver
             android:name=".widget.SimpleFoodTrackingWidgetProvider"
             android:exported="true">
@@ -49,6 +49,18 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/simple_food_tracking_widget_info" />
+        </receiver>
+        
+        <!-- Detailed Food Tracking Widget Provider -->
+        <receiver
+            android:name=".widget.DetailedFoodTrackingWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/detailed_food_tracking_widget_info" />
         </receiver>
         
         <!-- Firebase messaging service -->
