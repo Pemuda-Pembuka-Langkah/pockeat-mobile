@@ -24,7 +24,7 @@ class _WelcomePageState extends State<WelcomePage> {
     try {
       await Future.delayed(const Duration(milliseconds: 500)); // Simulate loading
       if (!mounted) return;
-      Navigator.pushNamed(context, routeName);
+      Navigator.of(context).pushNamed(routeName);
     } catch (e) {
       setState(() {
         _errorMessage = 'Something went wrong. Please try again.';
