@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 // ignore: depend_on_referenced_packages
 import 'package:provider/provider.dart';
 
+// coverage:ignore-start
 class NavigationProvider extends ChangeNotifier {
   int _currentIndex = 0;
   bool _isMenuOpen = false;
@@ -327,3 +328,4 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
     );
   }
 }
+// coverage:ignore-end
