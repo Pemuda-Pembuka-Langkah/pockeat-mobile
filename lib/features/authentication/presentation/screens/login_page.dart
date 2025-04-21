@@ -5,6 +5,7 @@ import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
+import 'package:pockeat/core/services/analytics_service.dart';
 
 /// Login page for existing users
 ///
@@ -33,11 +34,14 @@ class _LoginPageState extends State<LoginPage> {
   final Color bgColor = const Color(0xFFF9F9F9);
 
   late LoginService _loginService;
+  late AnalyticsService _analyticsService;
 
   @override
   void initState() {
     super.initState();
     _loginService = GetIt.instance<LoginService>();
+    _analyticsService = GetIt.instance<AnalyticsService>();
+    _analyticsService.logScreenView(screenName: 'login_page', screenClass: 'LoginPage');
   }
 
   @override
@@ -74,6 +78,8 @@ class _LoginPageState extends State<LoginPage> {
 
       // Navigate to home page on successful login
       if (mounted) {
+        // Log successful login event
+        await _analyticsService.logLogin(method: 'email');
         Navigator.pushReplacementNamed(context, '/');
       }
     } catch (e) {
