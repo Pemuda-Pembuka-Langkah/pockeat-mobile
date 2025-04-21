@@ -66,6 +66,7 @@ import 'package:pockeat/features/authentication/domain/model/deep_link_result.da
 import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/edit_profile_page.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
+import 'package:pockeat/core/services/analytics_service.dart';
 
 // Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -190,6 +191,9 @@ void main() async {
   );
 
   await setupDependencies();
+
+  // Initialize Google Analytics
+  await getIt<AnalyticsService>().initialize();
 
   // Initialize notifications
   if (!kIsWeb) {
