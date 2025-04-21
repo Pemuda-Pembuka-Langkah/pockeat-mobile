@@ -118,7 +118,7 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> {
                 ? () async {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setBool('onboardingInProgress', true); // ✅ set flag
-
+                    if(!context.mounted) return;
                     Navigator.pushNamed(context, '/height-weight');
                   }
                 : null,

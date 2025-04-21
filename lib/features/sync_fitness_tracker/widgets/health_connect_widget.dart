@@ -147,131 +147,8 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
     }
   }
 
-  Future<void> _requestAuthorization() async {
-    try {
-      final granted = await _fitnessSync.requestAuthorization();
 
-      if (granted) {
-        setState(() {
-          _isConnected = true;
-        });
 
-        // Try loading data again
-        _loadFitnessData();
-      } else {
-        setState(() {
-          _isConnected = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error requesting authorization: $e');
-      setState(() {
-        _isConnected = false;
-      });
-    }
-  }
-
-  Future<void> _showPermissionsTutorial() async {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Health Connect Permissions'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Please follow these steps in Health Connect:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              _buildInstructionStep(1, 'Tap on "App permissions"'),
-              _buildInstructionStep(2, 'Find and tap on "Pockeat"'),
-              _buildInstructionStep(3, 'Enable ALL permissions:'),
-              Padding(
-                padding: const EdgeInsets.only(left: 40),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('• Steps'),
-                    Text('• Active energy burned'),
-                    Text('• Total calories burned'),
-                  ],
-                ),
-              ),
-              _buildInstructionStep(4, 'Return to Pockeat app'),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'Important: Make sure all toggles are turned ON for Pockeat in Health Connect',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Directly open Health Connect from here
-              _fitnessSync.openHealthConnect(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: widget.primaryColor,
-            ),
-            child: const Text('Open Health Connect'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInstructionStep(int number, String instruction) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: widget.primaryColor,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                '$number',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              instruction,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _showInstallHealthConnectDialog() async {
     await showDialog(
@@ -308,6 +185,7 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
+              // ignore: invalid_use_of_protected_member
               _fitnessSync.openHealthConnectPlayStore();
             },
             style: ElevatedButton.styleFrom(
@@ -356,6 +234,7 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
+              // ignore: invalid_use_of_protected_member
               _fitnessSync.openHealthConnect(context);
             },
             style: ElevatedButton.styleFrom(

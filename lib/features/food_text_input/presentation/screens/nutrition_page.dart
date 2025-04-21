@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/food_text_input/presentation/widgets/bottom_action_bar.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
@@ -9,6 +8,7 @@ import 'package:pockeat/features/food_scan_ai/presentation/widgets/additional_nu
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
+import 'package:pockeat/features/food_text_input/presentation/widgets/text_bottom_action_bar.dart';
 import 'package:pockeat/features/food_text_input/presentation/widgets/food_text_input_analysis_error.dart';
 
 class NutritionPage extends StatefulWidget {

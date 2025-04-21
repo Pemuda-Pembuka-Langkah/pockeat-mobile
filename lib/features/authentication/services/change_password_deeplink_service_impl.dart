@@ -78,16 +78,11 @@ class ChangePasswordDeepLinkServiceImpl
  // coverage:ignore-start
   Future<void> _handleIncomingLink(Uri? uri) async {
     if (uri == null) return;
-
-    try {
       _deepLinkStreamController.add(uri);
 
       if (isChangePasswordLink(uri)) {
-        final success = await handleChangePasswordLink(uri);
+        await handleChangePasswordLink(uri);
       }
-    } catch (e) {
-      // Error handling tetap ada tapi tanpa print
-    }
   }
  // coverage:ignore-end
   @override

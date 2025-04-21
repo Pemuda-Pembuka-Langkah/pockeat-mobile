@@ -31,7 +31,10 @@ class ReviewSubmitPage extends StatelessWidget {
           onPressed: () async {
             final prefs = await SharedPreferences.getInstance();
             final inProgress = prefs.getBool('onboardingInProgress') ?? true;
-
+            
+            // Check if the widget is still mounted before using context
+            if (!context.mounted) return;
+            
             if (inProgress && Navigator.of(context).canPop()) {
               Navigator.of(context).pop(); 
             } else {
@@ -40,7 +43,6 @@ class ReviewSubmitPage extends StatelessWidget {
                 '/', // or whatever your homepage route is
                 (route) => false,
               );
-
             }
           },
         ),
