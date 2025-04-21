@@ -139,12 +139,13 @@ class _OverviewSectionState extends State<OverviewSection> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      children: [
-        Column(
-          children: [
-            SizedBox(
+      child: Column(
+        children: [
+          Column(
+            children: [
+              SizedBox(
               height: 300,
               child: PageView(
                 controller: _pageController,
@@ -197,8 +198,8 @@ class _OverviewSectionState extends State<OverviewSection> {
             ),
           ],
         ),
-
-      ],
+        ],
+      ),
     );
   }
 }
