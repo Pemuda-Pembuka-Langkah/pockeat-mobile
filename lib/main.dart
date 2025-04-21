@@ -7,8 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
+import 'dart:async';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
@@ -20,6 +22,7 @@ import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_input_page.dart';
 import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/core/di/service_locator.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
@@ -34,7 +37,6 @@ import 'package:pockeat/features/food_log_history/presentation/screens/food_deta
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
@@ -66,6 +68,7 @@ import 'package:pockeat/features/authentication/presentation/screens/profile_pag
 import 'package:pockeat/features/authentication/presentation/screens/edit_profile_page.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
+// Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// Initialize Instabug with token from .env file
@@ -74,38 +77,102 @@ Future<bool> _initializeInstabug(String flavor) async {
     // Ambil token dari dotenv sesuai konfigurasi di GitHub workflow
     final token = dotenv.env['INSTABUG_TOKEN'];
     if (token == null || token.isEmpty) {
-      debugPrint('ERROR: INSTABUG_TOKEN tidak ditemukan di dotenv');
       return false;
     }
-    
-    // Log inisialisasi
-    debugPrint('Memulai inisialisasi Instabug dengan token: ${token.substring(0, 3)}...');
-    
+
     // Tentukan level log berdasarkan environment dari dotenv
-    final LogLevel logLevel = flavor.toLowerCase() == 'production' 
-        ? LogLevel.error  // Production gunakan error level saja
-        : LogLevel.debug; // Selain production gunakan debug level
-    
-    debugPrint('Instabug diinisialisasi dengan log level: $logLevel untuk flavor: $flavor');
-    
+    final LogLevel logLevel =
+        flavor.toLowerCase() == 'production' ? LogLevel.error : LogLevel.error;
+
     // Inisialisasi SDK dengan token dari dotenv
     await Instabug.init(
       token: token,
-      invocationEvents: [], // No automatic invocation events - only shown when explicitly called
+      invocationEvents: [],
       debugLogsLevel: logLevel,
     );
-    
+
     return true;
   } catch (e) {
-    // Log error dengan debugPrint dan Instabug
-    final errorMsg = 'FATAL ERROR: Gagal menginisialisasi Instabug: $e';
-    debugPrint(errorMsg);
     return false;
   }
 }
 
-// Note: We initialize Instabug directly in main.dart instead of using BugReportService
-// because initialization needs to happen early in the app lifecycle
+/// Handler untuk deep link results
+void _handleDeepLink(DeepLinkResult result) {
+  switch (result.type) {
+    case DeepLinkType.emailVerification:
+      if (result.success) {
+        final email = result.data?['email'] ?? '';
+        navigatorKey.currentState?.pushReplacementNamed(
+          '/account-activated',
+          arguments: {'email': email},
+        );
+      } else {
+        final error = result.error ?? 'Email verification failed';
+        navigatorKey.currentState?.pushReplacementNamed(
+          '/email-verification-failed',
+          arguments: {'error': error},
+        );
+      }
+      break;
+
+    case DeepLinkType.changePassword:
+      if (result.success) {
+        final oobCode = result.data?['oobCode'] ?? '';
+        navigatorKey.currentState?.pushReplacementNamed(
+          '/change-password',
+          arguments: {'oobCode': oobCode},
+        );
+      } else {
+        final error = result.error ?? 'Password reset failed';
+        navigatorKey.currentState?.pushReplacementNamed(
+          '/change-password-error',
+          arguments: {'error': error},
+        );
+      }
+      break;
+
+    case DeepLinkType.quickLog:
+      // Deep link untuk 'Log Food' dari widget
+      if (result.success) {
+        final widgetName = result.data?['widgetName'] ?? '';
+        // Arahkan ke halaman input makanan
+        navigatorKey.currentState?.pushNamed(
+          '/add-food',
+        );
+        debugPrint('Navigated to food input from widget: $widgetName');
+      }
+      break;
+
+    case DeepLinkType.login:
+      // Deep link untuk 'Login' dari widget
+      if (result.success) {
+        final widgetName = result.data?['widgetName'] ?? '';
+        // Arahkan ke halaman login
+        navigatorKey.currentState?.pushNamed(
+          '/login',
+        );
+        debugPrint('Navigated to login from widget: $widgetName');
+      }
+      break;
+
+    case DeepLinkType.dashboard:
+      // Deep link untuk home dari klik area utama widget
+      if (result.success) {
+        final widgetName = result.data?['widgetName'] ?? '';
+        // Arahkan ke halaman home
+        navigatorKey.currentState?.pushReplacementNamed(
+          '/',
+        );
+        debugPrint('Navigated to home from widget: $widgetName');
+      }
+      break;
+
+    default:
+      debugPrint('Unknown deep link type: ${result.type}');
+      break;
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -127,6 +194,7 @@ void main() async {
 
   // Initialize notifications
   if (!kIsWeb) {
+    await getIt<FoodTrackingClientController>().initialize();
     await getIt<NotificationService>().initialize();
   }
 
@@ -170,7 +238,8 @@ void main() async {
             return HealthMetricsFormCubit(
               userId: user.uid,
               repository: getIt<HealthMetricsRepository>(),
-              caloricRequirementRepository: getIt<CaloricRequirementRepository>(),
+              caloricRequirementRepository:
+                  getIt<CaloricRequirementRepository>(),
               caloricRequirementService: getIt<CaloricRequirementService>(),
             );
           },
@@ -181,15 +250,55 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // Flag untuk mencegah inisialisasi berulang
-  static bool _isDeepLinkServiceInitialized = false;
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
 
-  // Tambahkan NavigatorKey global
-  static final GlobalKey<NavigatorState> navigatorKey =
-      GlobalKey<NavigatorState>();
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  StreamSubscription? _deepLinkSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    // Inisialisasi DeepLinkService di _MyAppState
+    _initializeDeepLinkService();
+  }
+
+  Future<void> _initializeDeepLinkService() async {
+    try {
+      // Inisialisasi DeepLinkService
+      final deepLinkService = getIt<DeepLinkService>();
+      final coldStartResult = await deepLinkService.getColdStartResult();
+
+      // Langsung handle deep link tanpa penundaan
+      if (coldStartResult != null) {
+        _handleDeepLink(coldStartResult);
+      }
+  
+      await deepLinkService.initialize();
+
+      // Setup listener untuk deep link events
+      _deepLinkSubscription =
+          getIt<DeepLinkService>().onDeepLinkResult.listen((result) {
+        // Langsung handle deep link tanpa penundaan
+        _handleDeepLink(result);
+      });
+    } catch (e) {
+      debugPrint('Error initializing deep link service: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _deepLinkSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +308,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: 'Pockeat',
-      // Tambahkan navigatorKey ke MaterialApp
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
@@ -228,62 +336,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
+      // Konfigurasi rute awal berdasarkan kondisi
       initialRoute: '/splash',
-      // Bungkus semua routes dengan Builder untuk inisialisasi DeepLinkService
-      builder: (context, child) {
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          if (!_isDeepLinkServiceInitialized) {
-            try {
-              await getIt<DeepLinkService>().initialize();
-
-              getIt<DeepLinkService>().onDeepLinkResult.listen((result) {
-                switch (result.type) {
-                  case DeepLinkType.emailVerification:
-                    if (result.success) {
-                      final email = result.data?['email'] ?? '';
-                      navigatorKey.currentState?.pushReplacementNamed(
-                        '/account-activated',
-                        arguments: {'email': email},
-                      );
-                    } else {
-                      final error = result.error ?? 'Email verification failed';
-                      navigatorKey.currentState?.pushReplacementNamed(
-                        '/email-verification-failed',
-                        arguments: {'error': error},
-                      );
-                    }
-                    break;
-
-                  case DeepLinkType.changePassword:
-                    if (result.success) {
-                      final oobCode = result.data?['oobCode'] ?? '';
-                      navigatorKey.currentState?.pushReplacementNamed(
-                        '/change-password',
-                        arguments: {'oobCode': oobCode},
-                      );
-                    } else {
-                      final error = result.error ?? 'Password reset failed';
-                      navigatorKey.currentState?.pushReplacementNamed(
-                        '/change-password-error',
-                        arguments: {'error': error},
-                      );
-                    }
-                    break;
-
-                  default:
-                    break;
-                }
-              });
-
-              _isDeepLinkServiceInitialized = true;
-            } catch (e) {
-              // Error handling tanpa print
-            }
-          }
-        });
-
-        return child ?? const SizedBox();
-      },
       routes: {
         '/splash': (context) => const SplashScreenPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
@@ -335,22 +389,20 @@ class MyApp extends StatelessWidget {
             ),
           );
         },
-        '/height-weight': (context) => const AuthWrapper(child: HeightWeightPage()),
-
+        '/height-weight': (context) =>
+            const AuthWrapper(child: HeightWeightPage()),
         '/birthdate': (context) => const AuthWrapper(child: BirthdatePage()),
-
         '/gender': (context) => const AuthWrapper(child: GenderPage()),
-
-        '/activity-level': (context) => const AuthWrapper(child: ActivityLevelPage()),
-
+        '/activity-level': (context) =>
+            const AuthWrapper(child: ActivityLevelPage()),
         '/diet': (context) => const AuthWrapper(child: DietPage()),
-
-        '/desired-weight': (context) => const AuthWrapper(child: DesiredWeightPage()),
-
+        '/desired-weight': (context) =>
+            const AuthWrapper(child: DesiredWeightPage()),
         '/speed': (context) => const AuthWrapper(child: SpeedSelectionPage()),
-
         '/review': (context) => const AuthWrapper(child: ReviewSubmitPage()),
-        '/smart-exercise-log': (context) => AuthWrapper(child: SmartExerciseLogPage(repository: smartExerciseLogRepository)),
+        '/smart-exercise-log': (context) => AuthWrapper(
+            child:
+                SmartExerciseLogPage(repository: smartExerciseLogRepository)),
         '/scan': (context) => AuthWrapper(
               child: ScanFoodPage(
                 cameraController: CameraController(
@@ -373,14 +425,16 @@ class MyApp extends StatelessWidget {
         '/weightlifting-input': (context) =>
             const AuthWrapper(child: WeightliftingPage()),
         '/cardio': (context) => const AuthWrapper(child: CardioInputPage()),
-        '/exercise-history': (context) => const AuthWrapper(child: ExerciseHistoryPage()),
+        '/exercise-history': (context) =>
+            const AuthWrapper(child: ExerciseHistoryPage()),
         '/food-history': (context) => AuthWrapper(
               child: FoodHistoryPage(
                 service: Provider.of<FoodLogHistoryService>(context),
               ),
             ),
         '/exercise-detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
           return AuthWrapper(
             child: ExerciseLogDetailPage(
               exerciseId: args['exerciseId'] as String,
@@ -389,19 +443,24 @@ class MyApp extends StatelessWidget {
           );
         },
         '/food-detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
           return AuthWrapper(
             child: FoodDetailPage(
               foodId: args['foodId'] as String,
-              foodRepository: Provider.of<FoodScanRepository>(context, listen: false),
-              foodTextInputRepository: Provider.of<FoodTextInputRepository>(context, listen: false),
+              foodTrackingController: getIt<FoodTrackingClientController>(),
+              foodRepository:
+                  Provider.of<FoodScanRepository>(context, listen: false),
+              foodTextInputRepository:
+                  Provider.of<FoodTextInputRepository>(context, listen: false),
             ),
           );
         },
         '/analytic': (context) => ProgressPage(
               service: ProgressTabsService(ProgressTabsRepositoryImpl()),
             ),
-        '/notification-settings': (context) => const AuthWrapper(child: NotificationSettingsScreen()),
+        '/notification-settings': (context) =>
+            const AuthWrapper(child: NotificationSettingsScreen()),
         '/edit-profile': (context) {
           final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
           return AuthWrapper(

@@ -23,6 +23,7 @@ class MockFirebaseUser extends Mock implements auth.User {
 }
 
 // Mock untuk DocumentSnapshot
+// ignore: subtype_of_sealed_class
 class MockDocumentSnapshot extends Mock implements DocumentSnapshot {
   final Map<String, dynamic>? _data;
 

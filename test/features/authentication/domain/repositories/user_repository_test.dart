@@ -398,7 +398,7 @@ void main() {
   group('UserRepository Reactive Programming', () {
     test('userStream should delegate to streamRepo', () {
       // Act
-      final stream = userRepository.userStream('test-user-id');
+      userRepository.userStream('test-user-id');
 
       // Assert - verify delegation
       verify(mockStreamRepo.getUserStream('test-user-id')).called(1);
@@ -426,7 +426,7 @@ void main() {
 
     test('currentUserStream should delegate to streamRepo', () {
       // Act
-      final stream = userRepository.currentUserStream();
+      userRepository.currentUserStream();
 
       // Assert - verify delegation
       verify(mockStreamRepo.currentUserStream).called(1);
@@ -476,6 +476,7 @@ void main() {
       when(mockAuthRepo.updateUserProfile(
               displayName: anyNamed('displayName'),
               photoURL: anyNamed('photoURL')))
+          // ignore: avoid_returning_null_for_void
           .thenAnswer((_) async => null);
       when(mockFirestoreRepo.updateUser(any, any))
           .thenThrow(Exception('Firestore error'));
@@ -687,12 +688,6 @@ void main() {
 
     test('updateUserProfile should return true when profile is valid',
         () async {
-      // Arrange - untuk menutup baris 191
-      final updateData = <String, dynamic>{
-        'displayName': 'New Name',
-        'gender': 'Male'
-      };
-
       // Setup mocks
       when(mockAuthRepo.validateUserAccess('test-user-id')).thenReturn(null);
       when(mockAuthRepo.updateUserProfile(
@@ -700,6 +695,7 @@ void main() {
               photoURL: anyNamed('photoURL')))
           .thenAnswer((_) async => null);
       when(mockFirestoreRepo.updateUser('test-user-id', any))
+          // ignore: avoid_returning_null_for_void
           .thenAnswer((_) async => null);
       when(mockFirestoreRepo.getUserById('test-user-id'))
           .thenAnswer((_) async => UserModel(

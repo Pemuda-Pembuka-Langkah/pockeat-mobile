@@ -14,9 +14,9 @@ class WeightProgressPage extends StatefulWidget {
   final WeightService service;
   
   const WeightProgressPage({
-    Key? key,
+    super.key,
     required this.service,
-  }) : super(key: key);
+  });
 
   @override
   State<WeightProgressPage> createState() => _WeightProgressPageState();

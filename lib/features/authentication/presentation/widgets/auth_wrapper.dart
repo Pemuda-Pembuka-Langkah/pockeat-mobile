@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/authentication/domain/model/user_model.dart';
+
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 
@@ -15,10 +15,10 @@ class AuthWrapper extends StatefulWidget {
   final bool requireAuth;
 
   const AuthWrapper({
-    Key? key,
+    super.key,
     required this.child,
     this.requireAuth = true,
-  }) : super(key: key);
+  });
 
   @override
   State<AuthWrapper> createState() => _AuthWrapperState();
@@ -72,6 +72,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     final healthMetricsCheckService = GetIt.instance<HealthMetricsCheckService>();
     final completed = await healthMetricsCheckService.hasCompletedOnboarding(uid);
 
+    // ignore: use_build_context_synchronously
     final currentRoute = ModalRoute.of(context)?.settings.name;
     final isInsideOnboardingFlow = currentRoute?.startsWith('/onboarding') ?? false;
 

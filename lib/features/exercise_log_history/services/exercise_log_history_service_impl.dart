@@ -15,6 +15,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   late final CardioRepository _cardioRepository;
   late final WeightLiftingRepository _weightLiftingRepository;
   final _getIt = GetIt.instance;
+  // ignore: unused_field
   final FirebaseAuth _auth;
 
   ExerciseLogHistoryServiceImpl({FirebaseAuth? auth}) 

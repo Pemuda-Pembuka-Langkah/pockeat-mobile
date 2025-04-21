@@ -176,8 +176,528 @@ void main() {
       // Trigger the event
       await mockService.handleDeepLink(testUri);
     });
+    
+    test('should handle widget quick log link successfully', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=log');
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async => true);
+
+      // Act
+      bool result = await mockService.handleDeepLink(testUri);
+
+      // Assert
+      expect(result, true);
+      verify(mockService.handleDeepLink(testUri)).called(1);
+    });
+
+    test('should emit appropriate DeepLinkResult for widget quick log', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=log');
+      final expectedResult = DeepLinkResult.quickLog(
+        success: true,
+        data: {
+          'widgetName': 'simple_food_tracking_widget',
+          'type': 'log',
+        },
+        originalUri: testUri,
+      );
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+        resultStreamController.add(expectedResult);
+        return true;
+      });
+
+      // Act & Assert
+      expect(
+        mockService.onDeepLinkResult,
+        emits(expectedResult),
+      );
+
+      // Trigger the event
+      await mockService.handleDeepLink(testUri);
+    });
+    
+    test('should handle error in widget quick log link', () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=log');
+      final expectedResult = DeepLinkResult.quickLog(
+        success: false,
+        error: 'Test error',
+        originalUri: testUri,
+      );
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+        resultStreamController.add(expectedResult);
+        return false;
+      });
+
+      // Act & Assert
+      expect(
+        mockService.onDeepLinkResult,
+        emits(expectedResult),
+      );
+
+      // Trigger the event
+      bool result = await mockService.handleDeepLink(testUri);
+      expect(result, false);
+    });
+    
+    test('should handle widget login link successfully', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=login');
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async => true);
+
+      // Act
+      bool result = await mockService.handleDeepLink(testUri);
+
+      // Assert
+      expect(result, true);
+      verify(mockService.handleDeepLink(testUri)).called(1);
+    });
+
+    test('should emit appropriate DeepLinkResult for widget login', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=login');
+      final expectedResult = DeepLinkResult.login(
+        success: true,
+        data: {
+          'widgetName': 'simple_food_tracking_widget',
+        },
+        originalUri: testUri,
+      );
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+        resultStreamController.add(expectedResult);
+        return true;
+      });
+
+      // Act & Assert
+      expect(
+        mockService.onDeepLinkResult,
+        emits(expectedResult),
+      );
+
+      // Trigger the event
+      await mockService.handleDeepLink(testUri);
+    });
+    
+    test('should handle widget dashboard link successfully', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=dashboard');
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async => true);
+
+      // Act
+      bool result = await mockService.handleDeepLink(testUri);
+
+      // Assert
+      expect(result, true);
+      verify(mockService.handleDeepLink(testUri)).called(1);
+    });
+
+    test('should emit appropriate DeepLinkResult for widget dashboard', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=dashboard');
+      final expectedResult = DeepLinkResult.dashboard(
+        success: true,
+        data: {
+          'widgetName': 'simple_food_tracking_widget',
+        },
+        originalUri: testUri,
+      );
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+        resultStreamController.add(expectedResult);
+        return true;
+      });
+
+      // Act & Assert
+      expect(
+        mockService.onDeepLinkResult,
+        emits(expectedResult),
+      );
+
+      // Trigger the event
+      await mockService.handleDeepLink(testUri);
+    });
   });
 
+  group('getColdStartResult', () {
+    test('should return null when no initial link is available', () async {
+      // Arrange
+      when(mockService.getColdStartResult()).thenAnswer((_) async => null);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, isNull);
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return email verification result for email verification link', () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://test.com/verify?oobCode=123&mode=verifyEmail');
+      final expectedResult = DeepLinkResult.emailVerification(
+        success: true,
+        data: {'email': 'test@example.com'},
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return change password result for change password link', () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://test.com/reset?oobCode=123&mode=resetPassword');
+      final expectedResult = DeepLinkResult.changePassword(
+        success: true,
+        data: {'oobCode': '123'},
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return quickLog result for widget quick log link', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=log');
+      final expectedResult = DeepLinkResult.quickLog(
+        success: true,
+        data: {
+          'widgetName': 'simple_food_tracking_widget',
+          'type': 'log',
+        },
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return login result for widget login link', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=login');
+      final expectedResult = DeepLinkResult.login(
+        success: true,
+        data: {
+          'widgetName': 'simple_food_tracking_widget',
+        },
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return dashboard result for widget dashboard link', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=dashboard');
+      final expectedResult = DeepLinkResult.dashboard(
+        success: true,
+        data: {
+          'widgetName': 'simple_food_tracking_widget',
+        },
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return unknown result for unknown link type', () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://test.com/unknown');
+      final expectedResult = DeepLinkResult.unknown(
+        originalUri: testUri,
+        error: 'Tidak ada handler yang sesuai untuk link ini',
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+  });
+
+  group('getColdStartResult', () {
+    // Positive path tests: Berbagai tipe link dihandle dengan benar
+    test('should return null when no initial link is available', () async {
+      // Arrange
+      when(mockService.getColdStartResult()).thenAnswer((_) async => null);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, isNull);
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return email verification result for email verification link', () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://test.com/verify?oobCode=123&mode=verifyEmail');
+      final expectedResult = DeepLinkResult.emailVerification(
+        success: true,
+        data: {'email': 'test@example.com'},
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return change password result for change password link', () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://test.com/reset?oobCode=123&mode=resetPassword');
+      final expectedResult = DeepLinkResult.changePassword(
+        success: true,
+        data: {'oobCode': '123'},
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return quickLog result for widget quick log link', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=log');
+      final expectedResult = DeepLinkResult.quickLog(
+        success: true,
+        data: {
+          'widgetName': 'simple_food_tracking_widget',
+          'type': 'log',
+        },
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return login result for widget login link', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=login');
+      final expectedResult = DeepLinkResult.login(
+        success: true,
+        data: {
+          'widgetName': 'simple_food_tracking_widget',
+        },
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return dashboard result for widget dashboard link', () async {
+      // Arrange
+      final testUri = Uri.parse(
+          'pockeat://group.com.pockeat.widgets?widgetName=simple_food_tracking_widget&&type=dashboard');
+      final expectedResult = DeepLinkResult.dashboard(
+        success: true,
+        data: {
+          'widgetName': 'simple_food_tracking_widget',
+        },
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    // Negative path tests: Error handling cases
+    test('should return unknown result for unknown link type', () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://test.com/unknown');
+      final expectedResult = DeepLinkResult.unknown(
+        originalUri: testUri,
+        error: 'Tidak ada handler yang sesuai untuk link ini',
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return failure result when email verification service fails', () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://test.com/verify?oobCode=123&mode=verifyEmail');
+      final expectedResult = DeepLinkResult.emailVerification(
+        success: false,
+        error: 'Error verifying email',
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      expect(result?.success, isFalse);
+      expect(result?.error, isNotNull);
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should return failure result when password reset service fails', () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://test.com/reset?oobCode=123&mode=resetPassword');
+      final expectedResult = DeepLinkResult.changePassword(
+        success: false,
+        error: 'Error resetting password',
+        originalUri: testUri,
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result, equals(expectedResult));
+      expect(result?.success, isFalse);
+      expect(result?.error, isNotNull);
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    // Edge cases tests
+    test('should throw exception if AppLinks fails', () async {
+      // Arrange
+      when(mockService.getColdStartResult()).thenThrow(
+        DeepLinkException('Error getting cold start result')
+      );
+
+      // Act & Assert
+      expect(
+        () => mockService.getColdStartResult(),
+        throwsA(isA<DeepLinkException>())
+      );
+    });
+
+    test('should handle malformed links', () async {
+      // Arrange - link with invalid parameters
+      final testUri = Uri.parse('pockeat://group.com.pockeat.widgets?invalid=param');
+      final expectedResult = DeepLinkResult.unknown(
+        originalUri: testUri,
+        error: 'Tidak ada handler yang sesuai untuk link ini',
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result?.type, equals(DeepLinkType.unknown));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+
+    test('should handle links with scheme other than pockeat', () async {
+      // Arrange - link with invalid scheme
+      final testUri = Uri.parse('https://example.com?widgetName=test&type=log');
+      final expectedResult = DeepLinkResult.unknown(
+        originalUri: testUri,
+        error: 'Tidak ada handler yang sesuai untuk link ini',
+      );
+
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+
+      // Act
+      final result = await mockService.getColdStartResult();
+
+      // Assert
+      expect(result?.type, equals(DeepLinkType.unknown));
+      verify(mockService.getColdStartResult()).called(1);
+    });
+  });
+  
   group('dispose', () {
     test('should dispose all resources', () async {
       // Arrange

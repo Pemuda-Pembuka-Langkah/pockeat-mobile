@@ -8,12 +8,12 @@ class GoalsCardWidget extends StatelessWidget {
   final Color primaryYellow;
   
   const GoalsCardWidget({
-    Key? key,
+    super.key,
     required this.weightGoal,
     required this.primaryGreen,
     required this.primaryPink,
     required this.primaryYellow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/correction_dialog.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 
 class TextBottomActionBar extends StatelessWidget {
   final bool isLoading;
@@ -100,6 +102,15 @@ class TextBottomActionBar extends StatelessWidget {
 
                           showSnackBarMessage(context, message, backgroundColor: primaryGreen);
 
+                          // Force update home screen widget
+                          try {
+                            final controller = GetIt.I<FoodTrackingClientController>();
+                            await controller.forceUpdate();
+                          } catch (e) {
+                            // Silently log error but continue - don't block navigation
+                            debugPrint('Failed to update home screen widget: $e');
+                          }
+
                           Future.delayed(const Duration(milliseconds: 500), () {
                             if (context.mounted) {
                               Navigator.of(context).popUntil((route) => route.isFirst);
@@ -154,6 +165,7 @@ class TextBottomActionBar extends StatelessWidget {
               }
               return true;
             } catch (e) {
+              // ignore: use_build_context_synchronously
               showSnackBarMessage(context, 'Failed to correct analysis: ${e.toString()}', backgroundColor: Colors.red);
               return false;
             }

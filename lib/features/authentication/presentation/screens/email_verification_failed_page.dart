@@ -4,9 +4,9 @@ class EmailVerificationFailedPage extends StatelessWidget {
   final String error;
 
   const EmailVerificationFailedPage({
-    Key? key,
+    super.key,
     required this.error,
-  }) : super(key: key);
+  });
   // coverage:ignore-line
 
   @override
