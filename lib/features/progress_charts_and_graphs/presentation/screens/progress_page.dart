@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pockeat/features/exercise_log_history/presentation/widgets/recently_exercise_section.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
+import 'package:pockeat/features/food_log_history/presentation/widgets/food_recent_section.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/log_history_subtabs_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/component/navigation.dart';
@@ -23,7 +28,7 @@ import 'package:pockeat/core/services/analytics_service.dart';
 // coverage:ignore-start
 class ProgressPage extends StatefulWidget {
   final ProgressTabsService service;
-  
+
   // ignore: use_super_parameters
   const ProgressPage({
     Key? key,
@@ -34,14 +39,16 @@ class ProgressPage extends StatefulWidget {
   State<ProgressPage> createState() => _ProgressPageState();
 }
 
-class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMixin {
+class _ProgressPageState extends State<ProgressPage>
+    with TickerProviderStateMixin {
   late TabController _mainTabController;
   late TabController _progressTabController;
+  late TabController _logHistoryTabController;
   final ScrollController _scrollController = ScrollController();
-  
+
   late AppColors _appColors;
   late TabConfiguration _tabConfiguration;
-  
+
   bool _isInitialized = false;
   late AnalyticsService _googleAnalyticsService;
 
@@ -51,29 +58,29 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
     _initializeData();
     _googleAnalyticsService = GetIt.instance<AnalyticsService>();
     _googleAnalyticsService.logScreenView(screenName: 'progress_page', screenClass: 'ProgressPage');
+    _googleAnalyticsService.logProgressViewed(category: 'all');
   }
-  
+
   Future<void> _initializeData() async {
     try {
       // Load configurations
       final colors = await widget.service.getAppColors();
       final tabConfig = await widget.service.getTabConfiguration();
-      
+
       // Initialize controllers
-      final mainTabController = TabController(
-        length: tabConfig.mainTabCount, 
-        vsync: this
-      );
-      
-      final progressTabController = TabController(
-        length: tabConfig.progressTabCount, 
-        vsync: this
-      );
-      
+      final mainTabController =
+          TabController(length: tabConfig.mainTabCount, vsync: this);
+
+      final progressTabController =
+          TabController(length: tabConfig.progressTabCount, vsync: this);
+
+      final logHistoryTabController =
+          TabController(length: tabConfig.logHistoryTabCount, vsync: this);
+
       // Set up tab change listeners
       mainTabController.addListener(() {
         setState(() {}); // Rebuild to update visibility
-        
+
         if (!mainTabController.indexIsChanging) {
           _scrollController.animateTo(
             0,
@@ -128,7 +135,7 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
           }
         }
       });
-      
+
       // Set state with loaded data
       if (mounted) {
         setState(() {
@@ -136,17 +143,17 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
           _tabConfiguration = tabConfig;
           _mainTabController = mainTabController;
           _progressTabController = progressTabController;
+          _logHistoryTabController = logHistoryTabController;
           _isInitialized = true;
         });
       }
-      
+
       // Set navigation index
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           Provider.of<NavigationProvider>(context, listen: false).setIndex(1);
         }
       });
-      
     } catch (e) {
       debugPrint('Error initializing progress page: $e');
     }
@@ -157,6 +164,7 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
     if (_isInitialized) {
       _mainTabController.dispose();
       _progressTabController.dispose();
+      _logHistoryTabController.dispose();
     }
     _scrollController.dispose();
     super.dispose();
@@ -164,6 +172,11 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
+    final exerciseLogHistoryRepository =
+        Provider.of<ExerciseLogHistoryService>(context);
+
+    final foodLogHistoryService = Provider.of<FoodLogHistoryService>(context);
+
     if (!_isInitialized) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -197,6 +210,15 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
             colors: _appColors,
             tabConfiguration: _tabConfiguration,
           ),
+
+          // Log History Sub-tabs (only shown when Log History tab is selected)
+          LogHistorySubtabsWidget(
+            mainTabController: _mainTabController,
+            progressTabController: _logHistoryTabController,
+            scrollController: _scrollController,
+            colors: _appColors,
+            tabConfiguration: _tabConfiguration,
+          ),
         ],
         body: TabBarView(
           controller: _mainTabController,
@@ -217,9 +239,17 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
                 ),
               ],
             ),
-            // Insights Tab Content
-            AnalyticsInsightPage(
-              service: app_analytics.AnalyticsService(AnalyticsRepositoryImpl()),
+
+            TabBarView(
+              controller: _logHistoryTabController,
+              children: [
+                FoodRecentSection(
+                  service: foodLogHistoryService,
+                ),
+                RecentlyExerciseSection(
+                  repository: exerciseLogHistoryRepository,
+                ),
+              ],
             ),
           ],
         ),
