@@ -334,8 +334,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       routes: {
         '/splash': (context) => const SplashScreenPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
-        '/': (context) => const AuthWrapper(child: HomePage()),
-        '/welcome': (context) => const WelcomePage(),
+        '/': (context) => const AuthWrapper(
+          child: HomePage(),
+          redirectUrlIfNotLoggedIn: '/welcome',
+        ),
+        '/welcome': (context) {
+            return const AuthWrapper(
+              requireAuth: false,
+              redirectUrlIfLoggedIn: '/',
+              child: WelcomePage(),
+            );
+          }
+          ,
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
         '/profile': (context) => const AuthWrapper(child: ProfilePage()),
