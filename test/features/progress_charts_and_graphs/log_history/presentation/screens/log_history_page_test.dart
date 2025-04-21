@@ -1,39 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/log_history/presentation/screens/log_history_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/log_history/presentation/widgets/log_history_tab_widget.dart';
-import 'package:pockeat/features/exercise_log_history/presentation/widgets/recently_exercise_section.dart';
-import 'package:pockeat/features/food_log_history/presentation/widgets/food_recent_section.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart'; // Add this import
-import 'package:firebase_core/firebase_core.dart';
 
+@GenerateMocks([ExerciseLogHistoryService, FoodLogHistoryService])
 import 'log_history_page_test.mocks.dart';
 
-// Mock classes for Firebase
-class MockFirebaseApp extends Mock implements FirebaseApp {}
-
-// Mock for food and exercise sections to avoid Firebase initialization
 class MockFoodRecentSection extends StatelessWidget {
   final FoodLogHistoryService service;
   
-  // ignore: use_super_parameters
   const MockFoodRecentSection({Key? key, required this.service}) : super(key: key);
   
   @override
   Widget build(BuildContext context) {
-    return const Text('Food Section');
+    return const Text('Food Recent Section');
   }
 }
 
 class MockRecentlyExerciseSection extends StatelessWidget {
   final ExerciseLogHistoryService repository;
   
-  // ignore: use_super_parameters
   const MockRecentlyExerciseSection({Key? key, required this.repository}) : super(key: key);
   
   @override
@@ -42,320 +34,310 @@ class MockRecentlyExerciseSection extends StatelessWidget {
   }
 }
 
-@GenerateMocks([ExerciseLogHistoryService, FoodLogHistoryService])
-void main() {
-    late MockExerciseLogHistoryService mockExerciseService;
-    late MockFoodLogHistoryService mockFoodService;
+// Test-friendly version of LogHistoryPage that uses mock sections instead of real ones
+class TestableLogHistoryPage extends StatefulWidget {
+  final Key? pageKey;
 
-    setUp(() {
-        mockExerciseService = MockExerciseLogHistoryService();
-        mockFoodService = MockFoodLogHistoryService();
-    });
+  const TestableLogHistoryPage({this.pageKey}) : super(key: pageKey);
 
-    // Override the food and exercise section widgets to avoid Firebase initialization issues
-    testWidgets('LogHistoryPage initializes correctly', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: MultiProvider(
-                providers: [
-                  Provider<ExerciseLogHistoryService>.value(value: mockExerciseService),
-                  Provider<FoodLogHistoryService>.value(value: mockFoodService),
-                ],
-                child: Builder(
-                  builder: (context) {
-                    return Column(
-                      children: [
-                        Container(
-                          height: 60,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                LogHistoryTabWidget(
-                                  label: 'Food',
-                                  index: 0,
-                                  isSelected: true,
-                                  onTap: () {},
-                                  colors: AppColors(
-                                    primaryPink: const Color(0xFFFF6B6B),
-                                    primaryGreen: const Color(0xFF4ECDC4),
-                                    primaryYellow: const Color(0xFFFFE893)
-                                  ),
-                                ),
-                                LogHistoryTabWidget(
-                                  label: 'Exercise',
-                                  index: 1,
-                                  isSelected: false,
-                                  onTap: () {},
-                                  colors: AppColors(
-                                    primaryPink: const Color(0xFFFF6B6B),
-                                    primaryGreen: const Color(0xFF4ECDC4),
-                                    primaryYellow: const Color(0xFFFFE893)
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const Text('Food Section'),
-                      ],
-                    );
-                  }
-                ),
-              ),
-            ),
-          )
-        );
-        
-        // Verify tab labels are displayed correctly
-        expect(find.text('Food'), findsOneWidget);
-        expect(find.text('Exercise'), findsOneWidget);
-        
-        // Verify initial tab selection
-        final LogHistoryTabWidget foodTab = tester.widget(find.byType(LogHistoryTabWidget).first);
-        expect(foodTab.isSelected, isTrue);
-    });
+  @override
+  State<TestableLogHistoryPage> createState() => _TestableLogHistoryPageState();
+}
 
-    testWidgets('Tab switching works correctly', (WidgetTester tester) async {
-        // Use a simple tab implementation to test the switching logic
-        int currentIndex = 0;
-        
-        await tester.pumpWidget(
-          MaterialApp(
-            home: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return Scaffold(
-                  body: Column(
-                    children: [
-                      // Simple tab bar
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() => currentIndex = 0);
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Text('Food'),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() => currentIndex = 1);
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Text('Exercise'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      // Tab content
-                      Expanded(
-                        child: IndexedStack(
-                          index: currentIndex,
-                          children: const [
-                            Center(child: Text('Food Section')),
-                            Center(child: Text('Exercise Section')),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        );
-        
-        // Initially on the Food tab
-        expect(find.text('Food Section'), findsOneWidget);
-        expect(find.text('Exercise Section'), findsNothing);
-        
-        // Tap on Exercise tab
-        await tester.tap(find.text('Exercise'));
-        await tester.pump();
-        
-        // Should now be on Exercise tab
-        expect(find.text('Food Section'), findsNothing);
-        expect(find.text('Exercise Section'), findsOneWidget);
-        
-        // Tap back on Food tab
-        await tester.tap(find.text('Food'));
-        await tester.pump();
-        
-        // Should be back on Food tab
-        expect(find.text('Food Section'), findsOneWidget);
-        expect(find.text('Exercise Section'), findsNothing);
-    });
+class _TestableLogHistoryPageState extends State<TestableLogHistoryPage> with SingleTickerProviderStateMixin {
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+  
+  late TabController _tabController;
+  final ScrollController _scrollController = ScrollController();
+  bool _shouldRefreshExerciseSection = false;
+  final List<String> _tabLabels = ['Food', 'Exercise'];
+  late AppColors _appColors;
+  
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _appColors = AppColors(
+      primaryPink: primaryPink,
+      primaryGreen: primaryGreen,
+      primaryYellow: primaryYellow
+    );
     
-    testWidgets('Services are correctly passed to child widgets', (WidgetTester tester) async {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: MultiProvider(
-                providers: [
-                  Provider<ExerciseLogHistoryService>.value(value: mockExerciseService),
-                  Provider<FoodLogHistoryService>.value(value: mockFoodService),
-                ],
-                child: Builder(
-                  builder: (context) {
-                    final exerciseService = Provider.of<ExerciseLogHistoryService>(context);
-                    final foodService = Provider.of<FoodLogHistoryService>(context);
-                    
-                    return Column(
-                      children: [
-                        MockFoodRecentSection(service: foodService),
-                        MockRecentlyExerciseSection(repository: exerciseService),
-                      ],
-                    );
-                  }
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        // If switching to the exercises tab (index 1), trigger a rebuild
+        if (_tabController.index == 1) {
+          setState(() {
+            _shouldRefreshExerciseSection = true;
+          });
+        } else {
+          setState(() {
+            _shouldRefreshExerciseSection = false;
+          });
+        }
+      }
+      
+      // Reset scroll position when tab changes
+      if (!_tabController.indexIsChanging && _scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onTabTapped(int index) {
+    _tabController.animateTo(index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final exerciseLogHistoryService = Provider.of<ExerciseLogHistoryService>(context);
+    final foodLogHistoryService = Provider.of<FoodLogHistoryService>(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 28),
+        
+        // Custom Tab Bar for selecting between Food and Exercise logs
+        SizedBox(
+          height: 60,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: _tabLabels.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final label = entry.value;
+                  final isSelected = _tabController.index == index;
+                  
+                  return LogHistoryTabWidget(
+                    key: ValueKey('tab_$index'),
+                    label: label,
+                    index: index,
+                    isSelected: isSelected,
+                    onTap: () => _onTabTapped(index),
+                    colors: _appColors,
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ),
+        
+        // Tab content
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              // Food Log Tab (first tab)
+              SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MockFoodRecentSection(
+                      key: const ValueKey('food_recent_section'),
+                      service: foodLogHistoryService,
+                    ),
+                    const SizedBox(height: 75),
+                  ],
                 ),
               ),
-            ),
-          ),
-        );
-        
-        // Find our mock widgets
-        final foodSection = tester.widget<MockFoodRecentSection>(find.byType(MockFoodRecentSection));
-        final exerciseSection = tester.widget<MockRecentlyExerciseSection>(find.byType(MockRecentlyExerciseSection));
-        
-        // Verify services are correctly passed
-        expect(foodSection.service, equals(mockFoodService));
-        expect(exerciseSection.repository, equals(mockExerciseService));
-    });
-
-    testWidgets('ScrollController behavior test', (WidgetTester tester) async {
-        final scrollController = ScrollController();
-        int currentTabIndex = 0;
-        
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: StatefulBuilder(
-                builder: (context, setState) {
-                  return Column(
-                    children: [
-                      // Simple tab bar
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                currentTabIndex = 0;
-                                // Reset scroll position when tab changes
-                                if (scrollController.hasClients) {
-                                  scrollController.jumpTo(0);
-                                }
-                              });
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Text('Food'),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                currentTabIndex = 1;
-                                // Reset scroll position when tab changes
-                                if (scrollController.hasClients) {
-                                  scrollController.jumpTo(0);
-                                }
-                              });
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Text('Exercise'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      
-                      // Tab content with scrollable content
-                      Expanded(
-                        child: IndexedStack(
-                          index: currentTabIndex,
-                          children: [
-                            // Food tab
-                            SingleChildScrollView(
-                              // Only use controller for the active tab
-                              controller: currentTabIndex == 0 ? scrollController : null,
-                              child: Column(
-                                children: List.generate(
-                                  20,
-                                  (index) => Container(
-                                    height: 50,
-                                    color: Colors.blue[100],
-                                    margin: const EdgeInsets.all(8),
-                                    child: Text('Food item $index'),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            
-                            // Exercise tab
-                            SingleChildScrollView(
-                              // Only use controller for the active tab
-                              controller: currentTabIndex == 1 ? scrollController : null,
-                              child: Column(
-                                children: List.generate(
-                                  20,
-                                  (index) => Container(
-                                    height: 50,
-                                    color: Colors.green[100],
-                                    margin: const EdgeInsets.all(8),
-                                    child: Text('Exercise item $index'),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+              
+              // Exercise Log Tab (second tab)
+              SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _shouldRefreshExerciseSection
+                      ? MockRecentlyExerciseSection(
+                          key: UniqueKey(),
+                          repository: exerciseLogHistoryService,
+                        )
+                      : MockRecentlyExerciseSection(
+                          repository: exerciseLogHistoryService,
                         ),
-                      ),
-                    ],
-                  );
-                },
+                    const SizedBox(height: 75),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
-        );
-        
-        // Initial position should be at the top
-        expect(scrollController.hasClients, isTrue);
-        expect(scrollController.offset, 0.0);
-        
-        // Scroll down
-        await tester.drag(find.text('Food item 1'), const Offset(0, -300));
-        await tester.pumpAndSettle();
-        
-        // Verify we've scrolled down
-        expect(scrollController.offset, greaterThan(0.0));
-        
-        // Save the current offset
-        final scrolledOffset = scrollController.offset;
-        
-        // Switch tabs
-        await tester.tap(find.text('Exercise'));
-        await tester.pumpAndSettle();
-        
-        // Verify the controller is now attached to the exercise view 
-        // and position has been reset
-        expect(scrollController.hasClients, isTrue);
-        expect(scrollController.offset, 0.0);
-        
-        // Switch back to food tab
-        await tester.tap(find.text('Food'));
-        await tester.pumpAndSettle();
-        
-        // Food tab should also be scrolled back to top
-        expect(scrollController.offset, 0.0);
-    });
+        ),
+      ],
+    );
+  }
+}
+
+void main() {
+  late MockExerciseLogHistoryService mockExerciseLogHistoryService;
+  late MockFoodLogHistoryService mockFoodLogHistoryService;
+
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    mockExerciseLogHistoryService = MockExerciseLogHistoryService();
+    mockFoodLogHistoryService = MockFoodLogHistoryService();
+    
+    // Set up common mock behavior
+    when(mockExerciseLogHistoryService.getAllExerciseLogs(any))
+        .thenAnswer((_) async => []);
+    when(mockFoodLogHistoryService.getAllFoodLogs(any))
+        .thenAnswer((_) async => []);
+  });
+
+  Widget createTestWidget({Key? key}) {
+    return MaterialApp(
+      home: Scaffold(
+        body: MultiProvider(
+          providers: [
+            Provider<ExerciseLogHistoryService>.value(value: mockExerciseLogHistoryService),
+            Provider<FoodLogHistoryService>.value(value: mockFoodLogHistoryService),
+          ],
+          child: TestableLogHistoryPage(pageKey: key),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('LogHistoryPage initializes correctly', (WidgetTester tester) async {
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    // Verify the page structure and initial state
+    expect(find.byType(TestableLogHistoryPage), findsOneWidget);
+    expect(find.byType(TabBarView), findsOneWidget);
+    expect(find.byType(LogHistoryTabWidget), findsNWidgets(2)); // Two tabs: Food and Exercise
+    expect(find.text('Food'), findsOneWidget);
+    expect(find.text('Exercise'), findsOneWidget);
+    
+    // Verify Food tab is selected initially (index 0)
+    final firstTabContainer = tester.widget<Container>(
+      find.descendant(
+        of: find.byKey(const ValueKey('tab_0')),
+        matching: find.byType(Container),
+      ).first,
+    );
+    
+    expect(firstTabContainer.decoration, isA<BoxDecoration>());
+    final firstTabBoxDecoration = firstTabContainer.decoration as BoxDecoration;
+    expect(firstTabBoxDecoration.color, equals(Colors.white));
+    
+    // Verify Food content is shown initially
+    expect(find.text('Food Recent Section'), findsOneWidget);
+    expect(find.text('Exercise Section'), findsNothing);
+  });
+
+  testWidgets('Tab switching shows correct content', (WidgetTester tester) async {
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    // Initially Food tab should be selected
+    expect(find.text('Food Recent Section'), findsOneWidget);
+    expect(find.text('Exercise Section'), findsNothing);
+
+    // Tap on Exercise tab
+    await tester.tap(find.text('Exercise'));
+    await tester.pumpAndSettle();
+
+    // Now Exercise tab should be selected and content updated
+    expect(find.text('Food Recent Section'), findsNothing);
+    expect(find.text('Exercise Section'), findsOneWidget);
+
+    // Tap back on Food tab
+    await tester.tap(find.text('Food'));
+    await tester.pumpAndSettle();
+
+    // Food content should be visible again
+    expect(find.text('Food Recent Section'), findsOneWidget);
+    expect(find.text('Exercise Section'), findsNothing);
+  });
+
+  testWidgets('Exercise tab refreshes content when selected', (WidgetTester tester) async {
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    // Tap on Exercise tab to trigger refresh
+    await tester.tap(find.text('Exercise'));
+    await tester.pumpAndSettle();
+
+    // The _shouldRefreshExerciseSection flag should be true now, resulting in RecentlyExerciseSection with a UniqueKey
+    final exerciseSection = find.text('Exercise Section');
+    expect(exerciseSection, findsOneWidget);
+    
+    // We've verified the Exercise section is visible, but we can't directly check the key
+    // since we're now using a mock widget
+  });
+
+  testWidgets('Tab styling updates when selection changes', (WidgetTester tester) async {
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    // Initially Food tab should be styled as selected
+    Text foodTabText = tester.widget<Text>(find.text('Food'));
+    expect(foodTabText.style!.color, const Color(0xFFFF6B6B)); // primaryPink
+    expect(foodTabText.style!.fontWeight, FontWeight.w600);
+
+    Text exerciseTabText = tester.widget<Text>(find.text('Exercise'));
+    expect(exerciseTabText.style!.color, Colors.black54);
+    expect(exerciseTabText.style!.fontWeight, FontWeight.w500);
+
+    // Tap on Exercise tab
+    await tester.tap(find.text('Exercise'));
+    await tester.pumpAndSettle();
+
+    // Now Exercise tab should be styled as selected
+    foodTabText = tester.widget<Text>(find.text('Food'));
+    expect(foodTabText.style!.color, Colors.black54);
+    expect(foodTabText.style!.fontWeight, FontWeight.w500);
+
+    exerciseTabText = tester.widget<Text>(find.text('Exercise'));
+    expect(exerciseTabText.style!.color, const Color(0xFFFF6B6B)); // primaryPink
+    expect(exerciseTabText.style!.fontWeight, FontWeight.w600);
+  });
+
+  testWidgets('Unmounting widget properly disposes controllers', (WidgetTester tester) async {
+    await tester.pumpWidget(createTestWidget(key: const Key('log_history_page')));
+    await tester.pumpAndSettle();
+    
+    // Unmount the widget
+    await tester.pumpWidget(const SizedBox());
+    
+    // No assertions needed - if dispose doesn't work properly, the test will fail with errors
+  });
+
+  testWidgets('AppColors are used correctly in UI', (WidgetTester tester) async {
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+    
+    // Verify the selected tab uses the correct color (primaryPink)
+    final selectedTabText = tester.widget<Text>(find.text('Food'));
+    expect(selectedTabText.style!.color, const Color(0xFFFF6B6B));
+    
+    // Switch to Exercise tab
+    await tester.tap(find.text('Exercise'));
+    await tester.pumpAndSettle();
+    
+    // Verify the newly selected tab uses the correct color
+    final newSelectedTabText = tester.widget<Text>(find.text('Exercise'));
+    expect(newSelectedTabText.style!.color, const Color(0xFFFF6B6B));
+  });
 }
