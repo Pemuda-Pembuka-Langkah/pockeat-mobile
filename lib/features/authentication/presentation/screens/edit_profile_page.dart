@@ -697,7 +697,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     } catch (e) {
       if (mounted && widget.useScaffold) {
-        // coverage:ignore-start
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Terjadi kesalahan: ${e.toString()}'),
@@ -705,7 +704,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        // coverage:ignore-end
       }
     }
   }
@@ -719,7 +717,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     final nameParts = name.split(' ');
     if (nameParts.length == 1) {
-      // coverage:ignore-line
       return nameParts[0][0].toUpperCase();
     }
 
