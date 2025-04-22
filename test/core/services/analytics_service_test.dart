@@ -48,6 +48,51 @@ void main() {
       expect(observer, isA<FirebaseAnalyticsObserver>());
     });
 
+    // COMPREHENSIVE INITIALIZE TESTS
+    group('initialize', () {
+      test('sets analytics collection enabled', () async {
+        // Execute
+        await analyticsService.initialize();
+        
+        // Verify
+        verify(mockAnalytics.setAnalyticsCollectionEnabled(true)).called(1);
+      });
+      
+      test('sets default event parameters', () async {
+        // Execute
+        await analyticsService.initialize();
+        
+        // Verify correct default parameters are set
+        verify(mockAnalytics.setDefaultEventParameters(any)).called(1);
+      });
+      
+      test('initialize should handle errors gracefully', () async {
+        // Setup
+        when(mockAnalytics.setAnalyticsCollectionEnabled(any))
+            .thenThrow(Exception('Test error'));
+        
+        // Execute & Verify - should not throw exception
+        expect(() async => await analyticsService.initialize(), returnsNormally);
+      });
+      
+      test('stops initialization chain after error', () async {
+        // Setup - first method throws an error
+        when(mockAnalytics.setAnalyticsCollectionEnabled(any))
+            .thenThrow(Exception('Test error'));
+        when(mockAnalytics.setDefaultEventParameters(any))
+            .thenAnswer((_) => Future<void>.value());
+            
+        // Execute
+        await analyticsService.initialize();
+        
+        // Verify first method was called and threw
+        verify(mockAnalytics.setAnalyticsCollectionEnabled(true)).called(1);
+        
+        // Verify second method was NOT called because of the error
+        verifyNever(mockAnalytics.setDefaultEventParameters(any));
+      });
+    });
+
     // COMPREHENSIVE LOGIN TESTS
     group('logLogin', () {
       test('calls Firebase Analytics with correct method when provided', () async {
@@ -75,6 +120,7 @@ void main() {
         expect(() async => await analyticsService.logLogin(), returnsNormally);
       });
     });
+
 
     // COMPREHENSIVE SIGNUP TESTS
     group('logSignUp', () {

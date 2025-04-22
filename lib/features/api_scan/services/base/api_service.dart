@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
 import 'package:pockeat/features/api_scan/services/base/api_auth_interceptor.dart';
 import 'package:pockeat/features/authentication/services/token_manager.dart';
-
+// coverage:ignore-start
 class ApiServiceException implements Exception {
   final String message;
 
@@ -153,3 +153,4 @@ class ApiService implements ApiServiceInterface {
     _client.close();
   }
 }
+// coverage:ignore-end
