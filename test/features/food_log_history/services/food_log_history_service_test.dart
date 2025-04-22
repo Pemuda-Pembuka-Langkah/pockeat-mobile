@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
@@ -6,8 +8,15 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 
-@GenerateMocks([FoodScanRepository])
+@GenerateMocks([FoodScanRepository, FirebaseFirestore])
 import 'food_log_history_service_test.mocks.dart';
+
+class ThrowingFirestore extends Fake implements FirebaseFirestore {
+  @override
+  CollectionReference<Map<String, dynamic>> collection(String path) {
+    throw Exception('Test Firestore failure');
+  }
+}
 
 FoodAnalysisResult createTestFoodAnalysisResult(
     String userId, DateTime timestamp) {
@@ -34,6 +43,7 @@ FoodAnalysisResult createTestFoodAnalysisResult(
 void main() {
   late FoodLogHistoryService service;
   late MockFoodScanRepository mockFoodScanRepository;
+  late FakeFirebaseFirestore fakeFirestore;
 
   final testDate = DateTime(2023, 5, 15);
   final testUserId = 'test-user-id';
@@ -108,8 +118,11 @@ void main() {
 
   setUp(() {
     mockFoodScanRepository = MockFoodScanRepository();
+    fakeFirestore = FakeFirebaseFirestore();
+
     service = FoodLogHistoryServiceImpl(
       foodScanRepository: mockFoodScanRepository,
+      firestore: fakeFirestore, // ← now using fake
     );
   });
 
@@ -216,240 +229,76 @@ void main() {
       expect(result[0].calories, sampleFoodResults[0].nutritionInfo.calories);
       verify(mockFoodScanRepository.getAll(limit: null)).called(1);
     });
+  });
 
-    test('isFoodStreakMaintained should return true when there are logs today',
-        () async {
-      // Arrange
-      final today = DateTime.now();
-      final todayLogs = [
-        FoodAnalysisResult(
-          id: 'food-today',
-          foodName: 'Today Food',
-          foodImageUrl: 'https://example.com/today.jpg',
-          timestamp: today,
-          nutritionInfo: NutritionInfo(
-            calories: 400,
-            protein: 20,
-            carbs: 30,
-            fat: 20,
-            sodium: 400,
-            sugar: 5,
-            fiber: 3,
-          ),
-          ingredients: [Ingredient(name: 'Today Ingredient', servings: 1)],
-          warnings: [],
-          userId: testUserId,
-        ),
-      ];
-
-      when(mockFoodScanRepository.getAnalysisResultsByDate(any))
-          .thenAnswer((_) async => todayLogs);
-
-      // Act
-      final result = await service.isFoodStreakMaintained(testUserId);
-
-      // Assert
-      expect(result, true);
-      verify(mockFoodScanRepository.getAnalysisResultsByDate(any)).called(1);
-    });
-
-    test(
-      'isFoodStreakMaintained should return true when there are logs yesterday but not today',
-      () async {
-        // Arrange
-        final now = DateTime.now();
-        final today = DateTime(now.year, now.month, now.day);
-        final yesterday = today.subtract(const Duration(days: 1));
-
-        final yesterdayLogs = [
-          createTestFoodAnalysisResult(testUserId, yesterday)
-        ];
-
-        // Stub today (normalized) to empty
-        when(
-          mockFoodScanRepository.getAnalysisResultsByDate(
-            argThat(
-              predicate<DateTime>((date) =>
-                  date.year == today.year &&
-                  date.month == today.month &&
-                  date.day == today.day),
-            ),
-          ),
-        ).thenAnswer((_) async => []);
-
-        // Stub yesterday (normalized) to non-empty
-        when(
-          mockFoodScanRepository.getAnalysisResultsByDate(
-            argThat(
-              predicate<DateTime>((date) =>
-                  date.year == yesterday.year &&
-                  date.month == yesterday.month &&
-                  date.day == yesterday.day),
-            ),
-          ),
-        ).thenAnswer((_) async => yesterdayLogs);
-
-        // Act
-        final result = await service.isFoodStreakMaintained(testUserId);
-
-        // Assert
-        expect(result, true);
-        verify(
-          mockFoodScanRepository.getAnalysisResultsByDate(
-            argThat(
-              predicate<DateTime>((date) =>
-                  date.year == today.year &&
-                  date.month == today.month &&
-                  date.day == today.day),
-            ),
-          ),
-        ).called(1);
-        verify(
-          mockFoodScanRepository.getAnalysisResultsByDate(
-            argThat(
-              predicate<DateTime>((date) =>
-                  date.year == yesterday.year &&
-                  date.month == yesterday.month &&
-                  date.day == yesterday.day),
-            ),
-          ),
-        ).called(1);
-      },
-    );
-
-    test(
-        'isFoodStreakMaintained should return false when there are no logs today or yesterday',
-        () async {
-      // Arrange
-      // Empty logs for both today and yesterday
-      when(mockFoodScanRepository.getAnalysisResultsByDate(any))
-          .thenAnswer((_) async => []);
-
-      // Act
-      final result = await service.isFoodStreakMaintained(testUserId);
-
-      // Assert
-      expect(result, false);
-      // Called twice - once for today, once for yesterday
-      verify(mockFoodScanRepository.getAnalysisResultsByDate(any)).called(2);
-    });
-
-    test('isFoodStreakMaintained should return false when an exception occurs',
-        () async {
-      // Arrange
-      when(mockFoodScanRepository.getAnalysisResultsByDate(any))
-          .thenThrow(Exception('Test exception'));
-
-      // Act
-      final result = await service.isFoodStreakMaintained(testUserId);
-
-      // Assert
-      expect(result, false);
-      verify(mockFoodScanRepository.getAnalysisResultsByDate(any)).called(1);
-    });
-
-    test(
-        'getFoodStreakDays should return correct streak count when logs exist for consecutive days',
-        () async {
+  group('getFoodStreakDays (Firestore‑based)', () {
+    test('counts today+yesterday+2 days ago as a 3‑day streak', () async {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final yesterday = today.subtract(const Duration(days: 1));
-      final twoDaysAgo = today.subtract(const Duration(days: 2));
+      final twoDays = today.subtract(const Duration(days: 2));
 
-      // Stub only these three dates to have logs
-      when(mockFoodScanRepository.getAnalysisResultsByDate(any))
-          .thenAnswer((inv) {
-        final dt = inv.positionalArguments[0] as DateTime;
-        final dateOnly = DateTime(dt.year, dt.month, dt.day);
-        if (dateOnly == today ||
-            dateOnly == yesterday ||
-            dateOnly == twoDaysAgo) {
-          return Future.value([createTestFoodAnalysisResult(testUserId, dt)]);
-        }
-        return Future.value([]);
-      });
+      // insert 3 consecutive days
+      for (final date in [today, yesterday, twoDays]) {
+        await fakeFirestore.collection('foodLogs').add({
+          'userId': testUserId,
+          'date': Timestamp.fromDate(date),
+        });
+      }
 
-      final result = await service.getFoodStreakDays(testUserId);
-      expect(result, 3);
-      // today,yesterday,2 days ago, then 3+ days yields empty => 4 calls total
-      verify(mockFoodScanRepository.getAnalysisResultsByDate(any))
-          .called(greaterThanOrEqualTo(4));
+      final streak = await service.getFoodStreakDays(testUserId);
+      expect(streak, 3);
     });
 
-    test(
-        'getFoodStreakDays should start counting from yesterday if no logs today',
-        () async {
+    test('starts from yesterday if there is no log for today', () async {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final yesterday = today.subtract(const Duration(days: 1));
-      final twoDaysAgo = today.subtract(const Duration(days: 2));
+      final twoDays = today.subtract(const Duration(days: 2));
 
-      // Stub so today has no logs, but yesterday & the day before do
-      when(mockFoodScanRepository.getAnalysisResultsByDate(any))
-          .thenAnswer((inv) {
-        final dt = inv.positionalArguments[0] as DateTime;
-        final dateOnly = DateTime(dt.year, dt.month, dt.day);
-        if (dateOnly == today) {
-          return Future.value([]); // no today
-        } else if (dateOnly == yesterday || dateOnly == twoDaysAgo) {
-          return Future.value([createTestFoodAnalysisResult(testUserId, dt)]);
-        }
-        return Future.value([]);
-      });
+      // only yesterday & twoDaysAgo
+      for (final date in [yesterday, twoDays]) {
+        await fakeFirestore.collection('foodLogs').add({
+          'userId': testUserId,
+          'date': Timestamp.fromDate(date),
+        });
+      }
 
-      final result = await service.getFoodStreakDays(testUserId);
-      expect(result, 2);
-      // calls: today (empty), yesterday, 2 days ago, then stops => ≥3 calls
-      verify(mockFoodScanRepository.getAnalysisResultsByDate(any))
-          .called(greaterThanOrEqualTo(3));
+      final streak = await service.getFoodStreakDays(testUserId);
+      expect(streak, 2);
     });
 
-    test('getFoodStreakDays should return 0 when no logs exist', () async {
-      // Arrange
-      // No logs for any day
-      when(mockFoodScanRepository.getAnalysisResultsByDate(any))
-          .thenAnswer((_) async => []);
-
-      // Act
-      final result = await service.getFoodStreakDays(testUserId);
-
-      // Assert
-      expect(result, 0);
-      // Should be called exactly twice (today and yesterday)
-      verify(mockFoodScanRepository.getAnalysisResultsByDate(any)).called(2);
+    test('returns 0 when no logs exist', () async {
+      final streak = await service.getFoodStreakDays(testUserId);
+      expect(streak, 0);
     });
 
-    test('getFoodStreakDays should return 0 when an exception occurs',
-        () async {
-      // Arrange
-      when(mockFoodScanRepository.getAnalysisResultsByDate(any))
-          .thenThrow(Exception('Test exception'));
+    test('caps at 100 days even if more logs exist', () async {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
 
-      // Act
-      final result = await service.getFoodStreakDays(testUserId);
+      // add 101 days
+      for (var i = 0; i <= 100; i++) {
+        await fakeFirestore.collection('foodLogs').add({
+          'userId': testUserId,
+          'date': Timestamp.fromDate(today.subtract(Duration(days: i))),
+        });
+      }
 
-      // Assert
-      expect(result, 0);
-      verify(mockFoodScanRepository.getAnalysisResultsByDate(any)).called(1);
+      final streak = await service.getFoodStreakDays(testUserId);
+      expect(streak, 100);
     });
 
-    test('getFoodStreakDays should respect the max streak limit of 100 days',
-        () async {
-      // Arrange
-      // Return valid logs for any date requested
-      when(mockFoodScanRepository.getAnalysisResultsByDate(any))
-          .thenAnswer((invocation) {
-        final date = invocation.positionalArguments[0] as DateTime;
-        return Future.value([createTestFoodAnalysisResult(testUserId, date)]);
-      });
+    test('returns 0 if Firestore throws', () async {
+      final throwingFs = ThrowingFirestore();
 
-      // Act
-      final result = await service.getFoodStreakDays(testUserId);
+      service = FoodLogHistoryServiceImpl(
+        foodScanRepository: mockFoodScanRepository,
+        firestore: throwingFs,
+      );
 
-      // Assert
-      expect(result, 100); // Should cap at 100 days
-      // Should be called 101 times (today + 100 previous days)
-      verify(mockFoodScanRepository.getAnalysisResultsByDate(any)).called(101);
+      final streak = await service.getFoodStreakDays(testUserId);
+      expect(streak, 0);
     });
   });
 }

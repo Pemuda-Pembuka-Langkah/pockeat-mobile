@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
@@ -5,10 +7,13 @@ import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   final FoodScanRepository _foodScanRepository;
+  final FirebaseFirestore _firestore;
 
   FoodLogHistoryServiceImpl({
     required FoodScanRepository foodScanRepository,
-  }) : _foodScanRepository = foodScanRepository;
+    FirebaseFirestore? firestore,
+  })  : _foodScanRepository = foodScanRepository,
+        _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Future<List<FoodLogHistoryItem>> getAllFoodLogs(String userId, {int? limit}) async {
@@ -106,50 +111,59 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   }
 
   @override
-  Future<bool> isFoodStreakMaintained(String userId) async {
-    try {
-      // Check today
-      final today = DateTime.now();
-      final todayLogs = await getFoodLogsByDate(userId, today);
-      if (todayLogs.isNotEmpty) return true;
-
-      // Check yesterday
-      final yesterday = today.subtract(const Duration(days: 1));
-      final yesterdayLogs = await getFoodLogsByDate(userId, yesterday);
-      return yesterdayLogs.isNotEmpty;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  @override
   Future<int> getFoodStreakDays(String userId) async {
-    try {
-      int streakDays = 0;
-      bool streakContinues = true;
-      DateTime checkDate = DateTime.now();
-
-      // If no logs today yet, start checking from yesterday
-      final todayLogs = await getFoodLogsByDate(userId, checkDate);
-      if (todayLogs.isEmpty) {
-        checkDate = checkDate.subtract(const Duration(days: 1));
-      }
-
-      // Check consecutive days
-      while (streakContinues && streakDays < 100) {
-        final logs = await getFoodLogsByDate(userId, checkDate);
-
-        if (logs.isNotEmpty) {
-          streakDays++;
-          checkDate = checkDate.subtract(const Duration(days: 1));
-        } else {
-          streakContinues = false;
-        }
-      }
-
-      return streakDays;
-    } catch (e) {
+  try {
+    final DateTime today = DateTime.now();
+    final DateTime startDate = today.subtract(const Duration(days: 100)); // Reasonable limit
+    
+    // Single query to get logs within date range
+    final QuerySnapshot querySnapshot = await _firestore
+        .collection('foodLogs')
+        .where('userId', isEqualTo: userId)
+        .where('date', isGreaterThanOrEqualTo: startDate)
+        .where('date', isLessThanOrEqualTo: today)
+        .orderBy('date', descending: true)
+        .get();
+    
+    if (querySnapshot.docs.isEmpty) {
       return 0;
     }
+    
+    // Process logs in memory instead of multiple queries
+    final Map<String, bool> daysWithLogs = {};
+    for (var doc in querySnapshot.docs) {
+      final DateTime date = (doc['date'] as Timestamp).toDate();
+      final String dateKey = '${date.year}-${date.month}-${date.day}';
+      daysWithLogs[dateKey] = true;
+    }
+    
+    // Calculate streak
+    int streakDays = 0;
+    DateTime checkDate = today;
+    
+    // If no logs today, start from yesterday
+    String checkDateKey = '${checkDate.year}-${checkDate.month}-${checkDate.day}';
+    if (!daysWithLogs.containsKey(checkDateKey)) {
+      checkDate = checkDate.subtract(const Duration(days: 1));
+    }
+    
+    // Count consecutive days
+    bool streakContinues = true;
+    while (streakContinues && streakDays < 100) {
+      checkDateKey = '${checkDate.year}-${checkDate.month}-${checkDate.day}';
+      if (daysWithLogs.containsKey(checkDateKey)) {
+        streakDays++;
+        checkDate = checkDate.subtract(const Duration(days: 1));
+      } else {
+        streakContinues = false;
+      }
+    }
+    
+    return streakDays;
+  } catch (e) {
+    debugPrint('Error getting streak days: $e');
+    // Consider returning cached value if available
+    return 0;
   }
+}
 }
