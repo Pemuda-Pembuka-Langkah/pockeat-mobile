@@ -6,4 +6,4 @@
     android:initialLayout="@layout/detailed_food_tracking_widget"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
-    android:previewImage="@drawable/pockeat_simple_tracking_preview_png" />
+    android:previewImage="@drawable/detailed_food_tracking_preview_png" />
