@@ -74,6 +74,9 @@ dependencies:
   firebase_performance: ^0.9.4+7
   firebase_analytics: ^10.10.7
 
+dependency_overrides:
+  analyzer: 7.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
