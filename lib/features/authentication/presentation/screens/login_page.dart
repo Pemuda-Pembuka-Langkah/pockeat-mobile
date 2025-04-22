@@ -80,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         // Log successful login event
         await _analyticsService.logLogin(method: 'email');
+        // ignore: use_build_context_synchronously
         Navigator.pushReplacementNamed(context, '/');
       }
     } catch (e) {

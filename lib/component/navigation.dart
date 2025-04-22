@@ -45,8 +45,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
       BuildContext context, NavigationProvider navigationProvider) {
     // Temukan posisi tombol add saat ini
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-    final size = renderBox?.size;
-    final offset = renderBox?.localToGlobal(Offset.zero);
+    renderBox?.localToGlobal(Offset.zero);
     
     // Perkirakan posisi tombol berdasarkan layar
     final screenWidth = MediaQuery.of(context).size.width;

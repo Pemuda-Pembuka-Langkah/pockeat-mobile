@@ -98,7 +98,7 @@ void main() {
     String uid = 'test-uid',
     String email = 'test@example.com',
     String? displayName = 'Test User',
-    String? photoURL = null,
+    String? photoURL,
     bool emailVerified = true,
     String? gender = 'Male',
     DateTime? birthDate,

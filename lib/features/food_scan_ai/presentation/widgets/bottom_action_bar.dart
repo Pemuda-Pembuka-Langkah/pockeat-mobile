@@ -147,6 +147,9 @@ class BottomActionBar extends StatelessWidget {
                             // Silently log error but continue - don't block navigation
                             debugPrint('Failed to update home screen widget: $e');
                           }
+                          
+                          // Check if widget is still mounted before using context
+                          if (!context.mounted) return;
 
                           // Navigate back to the previous screen
                           Navigator.of(context).pop();

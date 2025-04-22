@@ -49,173 +49,187 @@ class CustomHomeWidgetPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
-            "setAppGroupId" -> {
-                try {
-                    val groupId = call.argument<String>("groupId")
-                    if (groupId != null) {
-                        appGroupId = groupId
-                        result.success(true)
-                    } else {
-                        result.error("INVALID_ARGUMENT", "Group ID cannot be null", null)
-                    }
-                } catch (e: Exception) {
-                    result.error("EXCEPTION", "Error setting app group ID: ${e.message}", null)
+            "setAppGroupId" -> handleSetAppGroupId(call, result)
+            "getWidgetData" -> handleGetWidgetData(call, result)
+            "saveWidgetData" -> handleSaveWidgetData(call, result)
+            "updateWidget" -> handleUpdateWidget(call, result)
+            else -> result.notImplemented()
+        }
+    }
+    
+    private fun handleSetAppGroupId(call: MethodCall, result: Result) {
+        try {
+            val groupId = call.argument<String>("groupId")
+            if (groupId != null) {
+                appGroupId = groupId
+                result.success(true)
+            } else {
+                result.error("INVALID_ARGUMENT", "Group ID cannot be null", null)
+            }
+        } catch (e: Exception) {
+            result.error("EXCEPTION", "Error setting app group ID: ${e.message}", null)
+        }
+    }
+    
+    private fun handleGetWidgetData(call: MethodCall, result: Result) {
+        try {
+            val key = call.argument<String>("key")
+            val groupId = call.argument<String>("appGroupId") ?: appGroupId
+            
+            if (key == null || groupId == null) {
+                result.error("INVALID_ARGUMENT", "Key or app group ID is null", null)
+                return
+            }
+            
+            val prefs = context.getSharedPreferences(groupId, Context.MODE_PRIVATE)
+            Log.d(TAG, "Getting widget data for key: $key from group: $groupId")
+            
+            getValueForKey(key, prefs, result)
+        } catch (e: Exception) {
+            result.error("EXCEPTION", "Error getting widget data: ${e.message}", null)
+        }
+    }
+    
+    private fun getValueForKey(key: String, prefs: SharedPreferences, result: Result) {
+        when (key) {
+            // Nilai numerik (int)
+            KEY_CALORIES_NEEDED, KEY_CURRENT_CALORIES_CONSUMED -> {
+                val value = prefs.getInt(key, 0)
+                Log.d(TAG, "Retrieved INT value for $key: $value")
+                result.success(value)
+            }
+            // Nilai numerik (float/double)
+            KEY_CURRENT_PROTEIN, KEY_CURRENT_CARB, KEY_CURRENT_FAT -> {
+                // Coba ambil sebagai float terlebih dahulu
+                if (prefs.contains(key)) {
+                    val value = prefs.getFloat(key, 0f)
+                    Log.d(TAG, "Retrieved FLOAT value for $key: $value")
+                    result.success(value.toDouble())
+                } else {
+                    Log.d(TAG, "Key $key not found, returning 0.0")
+                    result.success(0.0)
                 }
             }
-            "getWidgetData" -> {
-                try {
-                    val key = call.argument<String>("key")
-                    val groupId = call.argument<String>("appGroupId") ?: appGroupId
-                    
-                    if (key == null || groupId == null) {
-                        result.error("INVALID_ARGUMENT", "Key or app group ID is null", null)
-                        return
-                    }
-                    
-                    val prefs = context.getSharedPreferences(groupId, Context.MODE_PRIVATE)
-                    Log.d(TAG, "Getting widget data for key: $key from group: $groupId")
-                    
-                    // Karena kita sudah tidak menggunakan suffix _type, kita perlu mendeteksi tipe yang tersimpan
-                    // dengan cara yang lebih cerdas berdasarkan key
-                    when (key) {
-                        // Nilai numerik (int)
-                        KEY_CALORIES_NEEDED, KEY_CURRENT_CALORIES_CONSUMED -> {
-                            val value = prefs.getInt(key, 0)
-                            Log.d(TAG, "Retrieved INT value for $key: $value")
-                            result.success(value)
-                        }
-                        // Nilai numerik (float/double)
-                        KEY_CURRENT_PROTEIN, KEY_CURRENT_CARB, KEY_CURRENT_FAT -> {
-                            // Coba ambil sebagai float terlebih dahulu
-                            if (prefs.contains(key)) {
-                                val value = prefs.getFloat(key, 0f)
-                                Log.d(TAG, "Retrieved FLOAT value for $key: $value")
-                                result.success(value.toDouble())
-                            } else {
-                                Log.d(TAG, "Key $key not found, returning 0.0")
-                                result.success(0.0)
-                            }
-                        }
-                        // String values seperti userId
-                        KEY_USER_ID -> {
-                            val value = prefs.getString(key, null)
-                            Log.d(TAG, "Retrieved STRING value for $key: $value")
-                            result.success(value)
-                        }
-                        // Default untuk key yang tidak dikenal - coba baca sebagai String
-                        else -> {
-                            try {
-                                // Coba cek apakah ada nilai int/float untuk key tersebut
-                                if (prefs.contains(key)) {
-                                    // Coba ambil sebagai string terlebih dahulu
-                                    if (prefs.getString(key, null) != null) {
-                                        val value = prefs.getString(key, null)
-                                        Log.d(TAG, "Retrieved default STRING value for unknown key $key: $value")
-                                        result.success(value)
-                                    } else if (prefs.getInt(key, -999) != -999) {
-                                        val value = prefs.getInt(key, 0)
-                                        Log.d(TAG, "Retrieved default INT value for unknown key $key: $value")
-                                        result.success(value)
-                                    } else {
-                                        val value = prefs.getFloat(key, 0f)
-                                        Log.d(TAG, "Retrieved default FLOAT value for unknown key $key: $value")
-                                        result.success(value.toDouble())
-                                    }
-                                } else {
-                                    Log.d(TAG, "Key $key not found, returning null")
-                                    result.success(null)
-                                }
-                            } catch (e: Exception) {
-                                Log.e(TAG, "Error getting value for key $key: ${e.message}")
-                                result.success(null)
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    result.error("EXCEPTION", "Error getting widget data: ${e.message}", null)
+            // String values seperti userId
+            KEY_USER_ID -> {
+                val value = prefs.getString(key, null)
+                Log.d(TAG, "Retrieved STRING value for $key: $value")
+                result.success(value)
+            }
+            // Default untuk key yang tidak dikenal
+            else -> getUnknownKeyValue(key, prefs, result)
+        }
+    }
+    
+    private fun getUnknownKeyValue(key: String, prefs: SharedPreferences, result: Result) {
+        try {
+            if (prefs.contains(key)) {
+                // Coba ambil sebagai string terlebih dahulu
+                if (prefs.getString(key, null) != null) {
+                    val value = prefs.getString(key, null)
+                    Log.d(TAG, "Retrieved default STRING value for unknown key $key: $value")
+                    result.success(value)
+                } else if (prefs.getInt(key, -999) != -999) {
+                    val value = prefs.getInt(key, 0)
+                    Log.d(TAG, "Retrieved default INT value for unknown key $key: $value")
+                    result.success(value)
+                } else {
+                    val value = prefs.getFloat(key, 0f)
+                    Log.d(TAG, "Retrieved default FLOAT value for unknown key $key: $value")
+                    result.success(value.toDouble())
+                }
+            } else {
+                Log.d(TAG, "Key $key not found, returning null")
+                result.success(null)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting value for key $key: ${e.message}")
+            result.success(null)
+        }
+    }
+    
+    private fun handleSaveWidgetData(call: MethodCall, result: Result) {
+        try {
+            val key = call.argument<String>("key")
+            val value = call.argument<Any>("value")
+            val groupId = call.argument<String>("appGroupId") ?: appGroupId
+            
+            if (key == null || groupId == null) {
+                result.error("INVALID_ARGUMENT", "Key or app group ID is null", null)
+                return
+            }
+            
+            val prefs = context.getSharedPreferences(groupId, Context.MODE_PRIVATE)
+            val editor = prefs.edit()
+            
+            // Log untuk debugging
+            Log.d(TAG, "Saving data: key=$key, value=$value, type=${value?.javaClass}")
+            
+            saveValueByType(key, value, editor)
+            
+            editor.apply()
+            result.success(true)
+        } catch (e: Exception) {
+            result.error("EXCEPTION", "Error saving widget data: ${e.message}", null)
+        }
+    }
+    
+    private fun saveValueByType(key: String, value: Any?, editor: SharedPreferences.Editor) {
+        when (value) {
+            is Int -> {
+                editor.putInt(key, value)
+            }
+            is Double -> {
+                // Untuk key kalori, convert double ke int karena SimpleFoodTrackingWidgetProvider mengharapkan int
+                if (key == KEY_CALORIES_NEEDED || key == KEY_CURRENT_CALORIES_CONSUMED) {
+                    editor.putInt(key, value.toInt())
+                } else {
+                    editor.putFloat(key, value.toFloat())
                 }
             }
-            "saveWidgetData" -> {
-                try {
-                    val key = call.argument<String>("key")
-                    val value = call.argument<Any>("value")
-                    val groupId = call.argument<String>("appGroupId") ?: appGroupId
-                    
-                    if (key == null || groupId == null) {
-                        result.error("INVALID_ARGUMENT", "Key or app group ID is null", null)
-                        return
-                    }
-                    
-                    val prefs = context.getSharedPreferences(groupId, Context.MODE_PRIVATE)
-                    val editor = prefs.edit()
-                    
-                    // Log untuk debugging
-                    Log.d(TAG, "Saving data: key=$key, value=$value, type=${value?.javaClass}")
-                    
-                    // Simpan nilai berdasarkan tipe data - tanpa suffix _type
-                    // Fokus pada format yang diharapkan oleh SimpleFoodTrackingWidgetProvider
-                    when (value) {
-                        is Int -> {
-                            editor.putInt(key, value)
-                        }
-                        is Double -> {
-                            // Untuk key kalori, convert double ke int karena SimpleFoodTrackingWidgetProvider mengharapkan int
-                            if (key == KEY_CALORIES_NEEDED || key == KEY_CURRENT_CALORIES_CONSUMED) {
-                                editor.putInt(key, value.toInt())
-                            } else {
-                                editor.putFloat(key, value.toFloat())
-                            }
-                        }
-                        is Boolean -> {
-                            editor.putBoolean(key, value)
-                        }
-                        is String -> {
-                            editor.putString(key, value)
-                        }
-                        null -> {
-                            editor.remove(key)
-                        }
-                        else -> {
-                            // Untuk nilai yang tidak spesifik, coba convert ke Int jika key adalah kalori
-                            if (key == KEY_CALORIES_NEEDED || key == KEY_CURRENT_CALORIES_CONSUMED) {
-                                val intValue = value.toString().toIntOrNull() ?: 0
-                                editor.putInt(key, intValue)
-                            } else {
-                                editor.putString(key, value.toString())
-                            }
-                        }
-                    }
-                    
-                    editor.apply()
-                    result.success(true)
-                } catch (e: Exception) {
-                    result.error("EXCEPTION", "Error saving widget data: ${e.message}", null)
-                }
+            is Boolean -> {
+                editor.putBoolean(key, value)
             }
-            "updateWidget" -> {
-                try {
-                    val name = call.argument<String>("name") ?: ""
-                    val androidName = call.argument<String>("androidName") ?: name
-                    
-                    // Trigger widget update berdasarkan androidName
-                    when (androidName) {
-                        "simple_food_tracking_widget" -> updateSimpleWidget()
-                        "detailed_food_tracking_widget" -> updateDetailedWidget() 
-                        else -> {
-                            // Update semua widget jika tidak ada nama spesifik
-                            updateSimpleWidget()
-                            updateDetailedWidget()
-                        }
-                    }
-                    
-                    result.success(true)
-                } catch (e: Exception) {
-                    result.error("EXCEPTION", "Error updating widget: ${e.message}", null)
-                }
+            is String -> {
+                editor.putString(key, value)
+            }
+            null -> {
+                editor.remove(key)
             }
             else -> {
-                result.notImplemented()
+                handleOtherValueTypes(key, value, editor)
             }
+        }
+    }
+    
+    private fun handleOtherValueTypes(key: String, value: Any, editor: SharedPreferences.Editor) {
+        // Untuk nilai yang tidak spesifik, coba convert ke Int jika key adalah kalori
+        if (key == KEY_CALORIES_NEEDED || key == KEY_CURRENT_CALORIES_CONSUMED) {
+            val intValue = value.toString().toIntOrNull() ?: 0
+            editor.putInt(key, intValue)
+        } else {
+            editor.putString(key, value.toString())
+        }
+    }
+    
+    private fun handleUpdateWidget(call: MethodCall, result: Result) {
+        try {
+            val name = call.argument<String>("name") ?: ""
+            val androidName = call.argument<String>("androidName") ?: name
+            
+            when (androidName) {
+                SIMPLE_WIDGET_NAME -> updateSimpleWidget()
+                DETAILED_WIDGET_NAME -> updateDetailedWidget() 
+                else -> {
+                    // Update semua widget jika tidak ada nama spesifik
+                    updateSimpleWidget()
+                    updateDetailedWidget()
+                }
+            }
+            
+            result.success(true)
+        } catch (e: Exception) {
+            result.error("EXCEPTION", "Error updating widget: ${e.message}", null)
         }
     }
     
