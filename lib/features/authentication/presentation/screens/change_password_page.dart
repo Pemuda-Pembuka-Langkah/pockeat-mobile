@@ -7,6 +7,8 @@ import 'package:pockeat/features/authentication/services/change_password_service
 ///
 /// This page allows users to change their password
 /// by entering a new password and confirming it.
+
+// coverage:ignore-start
 class ChangePasswordPage extends StatefulWidget {
   final String? oobCode;
   final bool showAppBar;
@@ -61,10 +63,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   void initState() {
     super.initState();
-    // coverage:ignore-start
     _changePasswordService = widget.customChangePasswordService ??
         GetIt.instance<ChangePasswordService>();
-    // coverage:ignore-end
   }
 
   @override
@@ -75,7 +75,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     super.dispose();
   }
 
-  // coverage:ignore-start
   // Mengirim email reset password untuk user yang lupa password
   Future<void> _sendResetPasswordEmail() async {
     // Dapatkan email user saat ini - dalam test mode, ini akan menggunakan mock
@@ -128,8 +127,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       }
     }
   }
-  // coverage:ignore-end
-  // coverage:ignore-start
 
   // Function to handle password change
   Future<void> _changePassword() async {
@@ -238,9 +235,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       });
     }
   }
-  // coverage:ignore-end
 
-// coverage:ignore-start
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -10,8 +10,7 @@ import 'package:pockeat/features/authentication/services/profile_service.dart';
 /// Menampilkan form untuk edit:
 /// - Nama pengguna (displayName)
 /// - Foto profil (photoURL)
-/// 
-/// 
+
 // coverage:ignore-start
 class EditProfilePage extends StatefulWidget {
   final UserModel? initialUser;
