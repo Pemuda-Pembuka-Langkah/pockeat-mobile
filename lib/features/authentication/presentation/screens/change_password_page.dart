@@ -236,6 +236,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -437,12 +438,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                               : Icons.visibility,
                         ),
                         onPressed: () {
-                          // coverage:ignore-start
                           setState(() {
                             _isConfirmPasswordVisible =
                                 !_isConfirmPasswordVisible;
                           });
-                          // coverage:ignore-end
                         },
                       ),
                       border: OutlineInputBorder(
