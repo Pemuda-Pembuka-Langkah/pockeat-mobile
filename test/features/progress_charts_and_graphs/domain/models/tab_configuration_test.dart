@@ -33,8 +33,8 @@ void main() {
       const mainTabCount = 4;
       const progressTabCount = 5;
       final progressTabLabels = ['Tab1', 'Tab2', 'Tab3', 'Tab4', 'Tab5'];
-      const logHistoryTabCount = 2;
-      final logHistoryTabLabels = ['Food', 'Exercise'];
+      const logHistoryTabCount = 3;
+      final logHistoryTabLabels = ['Log1', 'Log2', 'Log3'];
 
       // Act
       final tabConfiguration = TabConfiguration(
@@ -74,6 +74,8 @@ void main() {
       expect(tabConfiguration.mainTabCount, equals(mainTabCount));
       expect(tabConfiguration.progressTabCount, equals(progressTabCount));
       expect(tabConfiguration.progressTabLabels, isEmpty);
+      expect(tabConfiguration.logHistoryTabCount, equals(logHistoryTabCount));
+      expect(tabConfiguration.logHistoryTabLabels, isEmpty);
     });
   });
 }

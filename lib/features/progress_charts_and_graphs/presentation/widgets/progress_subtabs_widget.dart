@@ -11,13 +11,13 @@ class ProgressSubtabsWidget extends StatefulWidget {
   final TabConfiguration tabConfiguration;
   
   const ProgressSubtabsWidget({
-    super.key,
+    Key? key,
     required this.mainTabController,
     required this.progressTabController,
     required this.scrollController,
     required this.colors,
     required this.tabConfiguration,
-  });
+  }) : super(key: key);
 
   @override
   State<ProgressSubtabsWidget> createState() => _ProgressSubtabsWidgetState();
