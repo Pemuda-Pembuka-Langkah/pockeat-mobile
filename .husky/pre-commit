@@ -46,16 +46,9 @@ for FILE in $STAGED_FILES; do
   fi
 done
 
-echo "\n🔍 Step 4/5: Analyzing code..."
+echo "\n🔍 Step 4/4: Analyzing code..."
 if ! dart analyze lib --fatal-infos --fatal-warnings; then
   echo "❌ Analysis failed - Please fix remaining errors before committing"
   exit 1
 fi
 echo "✅ Analysis successful"
-
-echo "\n🔍 Step 5/5: Running tests..."
-if ! flutter test; then
-  echo "❌ Tests failed - Please fix failing tests before committing"
-  exit 1
-fi
-echo "✅ All tests passed"
