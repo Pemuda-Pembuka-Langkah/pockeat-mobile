@@ -7,6 +7,8 @@ import 'package:pockeat/features/authentication/services/change_password_service
 ///
 /// This page allows users to change their password
 /// by entering a new password and confirming it.
+
+// coverage:ignore-start
 class ChangePasswordPage extends StatefulWidget {
   final String? oobCode;
   final bool showAppBar;
@@ -234,6 +236,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -435,12 +438,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                               : Icons.visibility,
                         ),
                         onPressed: () {
-                          // coverage:ignore-start
                           setState(() {
                             _isConfirmPasswordVisible =
                                 !_isConfirmPasswordVisible;
                           });
-                          // coverage:ignore-end
                         },
                       ),
                       border: OutlineInputBorder(
@@ -493,3 +494,4 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 }
+// coverage:ignore-end

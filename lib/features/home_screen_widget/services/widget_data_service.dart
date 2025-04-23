@@ -1,7 +1,6 @@
 
 import 'dart:async';
 
-import 'package:pockeat/features/home_screen_widget/domain/constants/widget_event_type.dart';
 
 /// Interface generic untuk layanan data widget home screen
 /// 
