@@ -223,24 +223,4 @@
             android:paddingEnd="16dp" />
     </LinearLayout>
 
-
-        android:gravity="center"
-        android:visibility="gone">
-        
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@android:drawable/ic_dialog_info"
-            android:tint="#4DA6FF" />
-            
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Please login"
-            android:textColor="#333333"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:layout_marginStart="4dp" />
-    </LinearLayout>
-
 </RelativeLayout>
