@@ -94,16 +94,12 @@ dev_dependencies:
 
 # Husky configuration
 husky:
-  pre-commit: dart run lint_staged
-
-# Lint staged configuration
-lint_staged:
-  "**/*.dart":
-    - dart format --set-exit-if-changed
-    - dart analyze --fatal-infos --fatal-warnings
-    - dart run import_sorter:main
-  "test/":
-    - flutter test
+  pre-commit: |
+    echo "Running pre-commit checks on entire codebase..."
+    dart format lib --set-exit-if-changed
+    dart analyze lib --fatal-infos --fatal-warnings
+    dart run import_sorter:main
+    flutter test
 
   # For information on the generic Dart part of this file, see the
   # following page: https://dart.dev/tools/pub/pubspec
