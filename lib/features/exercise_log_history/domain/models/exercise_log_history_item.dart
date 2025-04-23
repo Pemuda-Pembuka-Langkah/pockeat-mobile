@@ -1,6 +1,9 @@
-import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
+// Package imports:
 import 'package:uuid/uuid.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/services/workout_service.dart';
 

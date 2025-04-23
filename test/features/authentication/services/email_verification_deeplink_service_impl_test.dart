@@ -1,12 +1,20 @@
+// Dart imports:
 import 'dart:async';
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:app_links/app_links.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
+import 'email_verification_deeplink_service_impl_test.mocks.dart';
 
 @GenerateMocks([
   FirebaseAuth,
@@ -17,7 +25,6 @@ import 'package:pockeat/features/authentication/services/email_verification_deep
   BuildContext,
   StreamSubscription,
 ])
-import 'email_verification_deeplink_service_impl_test.mocks.dart';
 
 class TestableEmailVerificationDeepLinkServiceImpl
     extends EmailVerificationDeepLinkServiceImpl {

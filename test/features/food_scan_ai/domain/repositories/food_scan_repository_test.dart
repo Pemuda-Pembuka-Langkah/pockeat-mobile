@@ -1,11 +1,14 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
-import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
-import 'package:mockito/annotations.dart';
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'food_scan_repository_test.mocks.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+import 'food_scan_repository_test.mocks.dart';
 
 @GenerateMocks([
   FirebaseFirestore, 

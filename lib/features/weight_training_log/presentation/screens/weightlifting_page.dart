@@ -1,15 +1,20 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
-import 'package:pockeat/features/weight_training_log/services/workout_service.dart';
 import 'package:pockeat/features/weight_training_log/presentation/widgets/body_part_chip.dart';
-import 'package:pockeat/features/weight_training_log/presentation/widgets/exercise_chip.dart';
-import 'package:pockeat/features/weight_training_log/presentation/widgets/exercise_card.dart';
-import 'package:pockeat/features/weight_training_log/presentation/widgets/workout_summary.dart';
 import 'package:pockeat/features/weight_training_log/presentation/widgets/bottom_bar.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pockeat/features/weight_training_log/presentation/widgets/exercise_card.dart';
+import 'package:pockeat/features/weight_training_log/presentation/widgets/exercise_chip.dart';
+import 'package:pockeat/features/weight_training_log/presentation/widgets/workout_summary.dart';
+import 'package:pockeat/features/weight_training_log/services/workout_service.dart';
 
 class WeightliftingPage extends StatefulWidget {
   final WeightLiftingRepository? repository;

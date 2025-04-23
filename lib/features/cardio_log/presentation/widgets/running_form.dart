@@ -1,7 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'distance_selection_widget.dart';
-import 'time_selection_widget.dart';
 import 'personal_data_reminder.dart';
+import 'time_selection_widget.dart';
 
 class RunningForm extends StatefulWidget {
   final Color primaryPink;

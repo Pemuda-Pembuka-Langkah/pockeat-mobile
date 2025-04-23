@@ -1,10 +1,13 @@
 // File: form_cubit.dart
 
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+
+// Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
+import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 
 /// Represents the state of the health metrics onboarding form.
 ///

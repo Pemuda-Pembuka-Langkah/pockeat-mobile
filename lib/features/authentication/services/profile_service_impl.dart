@@ -1,12 +1,18 @@
+// Dart imports:
 import 'dart:io';
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-// ignore: depend_on_referenced_packages
 import 'package:path/path.dart' as path;
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:pockeat/features/authentication/services/profile_service.dart';
+
+// ignore: depend_on_referenced_packages
 
 /// Implementasi [ProfileService] menggunakan Firebase Authentication dan UserRepository
 class ProfileServiceImpl implements ProfileService {

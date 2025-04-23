@@ -1,27 +1,31 @@
 // lib/features/home_screen_widget/services/widget_background_service.dart
 // coverage:ignore-file
 
+// Dart imports:
 import 'dart:async';
 
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
-import 'package:pockeat/features/home_screen_widget/domain/constants/background_service_config.dart';
-import 'package:pockeat/features/home_screen_widget/domain/constants/widget_config.dart';
-import 'package:workmanager/workmanager.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:workmanager/workmanager.dart';
+
+// Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
-import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tracking.dart';
-import 'package:pockeat/features/home_screen_widget/domain/models/detailed_food_tracking.dart';
-import 'package:pockeat/features/home_screen_widget/services/impl/simple_food_tracking_widget_service.dart';
-import 'package:pockeat/features/home_screen_widget/services/impl/detailed_food_tracking_widget_service.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
+import 'package:pockeat/features/home_screen_widget/domain/constants/background_service_config.dart';
+import 'package:pockeat/features/home_screen_widget/domain/constants/widget_config.dart';
+import 'package:pockeat/features/home_screen_widget/domain/models/detailed_food_tracking.dart';
+import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/services/calorie_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/default_calorie_calculation_strategy.dart';
-import 'package:pockeat/features/home_screen_widget/services/nutrient_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/default_nutrient_calculation_strategy.dart';
+import 'package:pockeat/features/home_screen_widget/services/impl/detailed_food_tracking_widget_service.dart';
+import 'package:pockeat/features/home_screen_widget/services/impl/simple_food_tracking_widget_service.dart';
+import 'package:pockeat/features/home_screen_widget/services/nutrient_calculation_strategy.dart';
+import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
 
 /// Class untuk mengatur background service widget updates
 class WidgetBackgroundService {

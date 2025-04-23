@@ -1,4 +1,7 @@
+// Package imports:
 import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/calorie_stats/domain/repositories/calorie_stats_repository.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';

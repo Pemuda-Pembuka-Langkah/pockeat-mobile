@@ -1,11 +1,17 @@
+// Dart imports:
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+// Package imports:
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+
+// Project imports:
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_summary_card.dart';
 
 //coverage:ignore-file

@@ -1,13 +1,18 @@
+// Dart imports:
 import 'dart:io';
+
+// Package imports:
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
-import 'package:timezone/timezone.dart' as tz;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+// Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 
 class NotificationServiceImpl implements NotificationService {
   final FirebaseMessaging _firebaseMessaging = getIt<FirebaseMessaging>();

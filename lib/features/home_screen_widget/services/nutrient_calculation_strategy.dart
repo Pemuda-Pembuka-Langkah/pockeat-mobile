@@ -1,3 +1,4 @@
+// Project imports:
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 
 /// Strategy interface for calculating nutrients from food logs

@@ -1,12 +1,16 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:uuid/uuid.dart';
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:uuid/uuid.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
+import 'food_text_input_service_test.mocks.dart';
 
 @GenerateMocks([
   FoodTextAnalysisService,
@@ -15,7 +19,6 @@ import 'package:pockeat/features/api_scan/models/food_analysis.dart';
   FirebaseAuth,
   User
 ])
-import 'food_text_input_service_test.mocks.dart';
 
 void main() {
   late FoodTextInputService foodTextInputService;

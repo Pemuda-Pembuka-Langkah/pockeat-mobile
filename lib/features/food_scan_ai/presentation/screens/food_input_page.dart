@@ -1,7 +1,12 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
-import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
+
+// Project imports:
+import 'package:pockeat/core/services/analytics_service.dart';
 
 class FoodInputPage extends StatefulWidget {
   const FoodInputPage({super.key});

@@ -1,6 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
+
+// Package imports:
 import 'package:provider/provider.dart';
+
+// ignore: depend_on_referenced_packages
 
 // coverage:ignore-start
 class NavigationProvider extends ChangeNotifier {

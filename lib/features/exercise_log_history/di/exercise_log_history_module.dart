@@ -1,13 +1,16 @@
-import 'package:get_it/get_it.dart';
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
-import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service_impl.dart';
-import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service.dart';
-import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service_impl.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
+import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service_impl.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service_impl.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
 

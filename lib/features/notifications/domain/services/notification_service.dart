@@ -1,6 +1,9 @@
-import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
+// Package imports:
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+// Project imports:
+import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
 
 abstract class NotificationService {
   // Inisialisasi service

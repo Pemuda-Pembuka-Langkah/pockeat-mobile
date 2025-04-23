@@ -1,6 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 void main() {
   group('FoodAnalysisResult Model', () {

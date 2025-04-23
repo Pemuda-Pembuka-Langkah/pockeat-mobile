@@ -1,12 +1,15 @@
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/change_password_service_impl.dart';
+import 'change_password_service_impl_test.mocks.dart';
 
 @GenerateMocks([FirebaseAuth, User],
     customMocks: [MockSpec<UserCredential>(as: #MockUserCred)])
-import 'change_password_service_impl_test.mocks.dart';
 
 void main() {
   late MockFirebaseAuth mockFirebaseAuth;

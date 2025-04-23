@@ -1,7 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:get_it/get_it.dart';
 
+// Package imports:
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 

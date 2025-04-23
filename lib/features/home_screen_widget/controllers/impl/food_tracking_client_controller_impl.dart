@@ -1,6 +1,9 @@
 // lib/features/home_screen_widget/controllers/impl/food_tracking_client_controller_impl.dart
 
+// Dart imports:
 import 'dart:async';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';

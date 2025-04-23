@@ -1,4 +1,6 @@
 // lib/features/homepage/presentation/widgets/streak_counter_widget.dart
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class StreakCounterWidget extends StatelessWidget {

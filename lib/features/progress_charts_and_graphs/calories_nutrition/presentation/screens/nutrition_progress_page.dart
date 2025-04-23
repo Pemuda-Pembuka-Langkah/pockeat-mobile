@@ -1,16 +1,22 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
+
+// Package imports:
 import 'package:logger/logger.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/calorie_data.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/nutrition_stat.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/macro_nutrient.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/micro_nutrient.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/meal.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/services/nutrition_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/micro_nutrient.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/nutrition_stat.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/header_widget.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/progress_overview_widget.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/nutrient_progress_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/meal_patterns_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/nutrient_progress_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/progress_overview_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/services/nutrition_service.dart';
+
+// ignore: depend_on_referenced_packages
 
 // coverage:ignore-start
 final logger = Logger();

@@ -1,10 +1,14 @@
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Project imports:
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
+import 'smart_exercise_log_repository_test.mocks.dart';
 
 // Mock Firebase dependencies with explicit generic types
 @GenerateMocks([], customMocks: [
@@ -30,7 +34,6 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
     as: #MockQueryDocumentSnapshot,
   )
 ])
-import 'smart_exercise_log_repository_test.mocks.dart';
 
 void main() {
   late MockFirebaseFirestore mockFirestore;

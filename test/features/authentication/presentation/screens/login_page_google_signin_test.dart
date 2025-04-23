@@ -1,17 +1,22 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
-import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
-import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'login_page_google_signin_test.mocks.dart';
 
 @GenerateMocks([LoginService, UserCredential, GoogleSignInService, AnalyticsService])
-import 'login_page_google_signin_test.mocks.dart';
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 

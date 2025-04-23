@@ -1,6 +1,10 @@
 // exercise_input_page.dart
-import 'package:flutter/material.dart';
+
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/exercise_input_options/presentation/widgets/exercise_option_card.dart';
 
 class ExerciseInputPage extends StatelessWidget {

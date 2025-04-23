@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class RecommendationsSection extends StatelessWidget {
   final Color primaryYellow;

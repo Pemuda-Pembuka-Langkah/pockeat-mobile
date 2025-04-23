@@ -1,13 +1,16 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service_impl.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+import 'food_log_history_service_test.mocks.dart';
 
 @GenerateMocks([FoodScanRepository])
-import 'food_log_history_service_test.mocks.dart';
 
 void main() {
   late FoodLogHistoryService service;

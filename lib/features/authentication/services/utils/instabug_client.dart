@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:instabug_flutter/instabug_flutter.dart';
 
 /// Wrapper for Instabug that allows mocking in tests

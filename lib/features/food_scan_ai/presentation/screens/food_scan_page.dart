@@ -1,8 +1,15 @@
+// Dart imports:
 import 'dart:math';
+
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/screens/nutrition_page.dart';
+
+// Package imports:
 import 'package:camera/camera.dart';
+
+// Project imports:
+import 'package:pockeat/features/food_scan_ai/presentation/screens/nutrition_page.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_photo_help_widget.dart';
 
 class ScanFoodPage extends StatefulWidget {

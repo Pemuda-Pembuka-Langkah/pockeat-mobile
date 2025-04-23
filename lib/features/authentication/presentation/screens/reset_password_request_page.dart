@@ -1,7 +1,12 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/gestures.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
 
 /// Halaman untuk request reset password

@@ -1,3 +1,4 @@
+// Project imports:
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 
 const double defaultWeight = 75;

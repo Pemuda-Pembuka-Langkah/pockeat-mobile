@@ -1,11 +1,16 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:intl/intl.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_log_history/utils/food_sharing_extension.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
-import 'package:intl/intl.dart';
-import 'package:pockeat/features/food_log_history/utils/food_sharing_extension.dart';
 
 /// A page that displays detailed information about a food item.
 ///

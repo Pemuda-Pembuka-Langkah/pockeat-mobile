@@ -1,7 +1,10 @@
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class FoodTextInputService {
   final FoodTextAnalysisService _foodTextAnalysisService;

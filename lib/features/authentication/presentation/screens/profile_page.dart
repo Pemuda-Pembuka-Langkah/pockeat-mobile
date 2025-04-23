@@ -1,12 +1,17 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
+
+// Project imports:
+import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
+import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
-import 'package:pockeat/features/authentication/services/bug_report_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pockeat/component/navigation.dart';
-import 'package:provider/provider.dart';
 
 /// Halaman profil pengguna
 ///

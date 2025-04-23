@@ -1,4 +1,6 @@
 // lib/features/homepage/presentation/widgets/heart_bar_widget.dart
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class HeartBarWidget extends StatelessWidget {

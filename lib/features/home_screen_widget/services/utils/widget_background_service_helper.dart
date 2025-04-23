@@ -1,3 +1,4 @@
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/services/widget_background_service.dart';
 
 // coverage:ignore-file

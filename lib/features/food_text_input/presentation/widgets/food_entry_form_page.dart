@@ -1,6 +1,9 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
+
+// Project imports:
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
+import 'package:pockeat/features/food_text_input/domain/models/food_entry.dart';
 
 class FoodEntryForm extends StatefulWidget {
   final Function(FoodEntry)? onSaved;

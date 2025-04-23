@@ -1,9 +1,13 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
+import 'weight_lifting_repository_impl_test.mocks.dart';
 
 // Generate mocks for Firebase
 @GenerateMocks([
@@ -16,7 +20,6 @@ import 'package:pockeat/features/weight_training_log/domain/repositories/weight_
   QueryDocumentSnapshot,
 ])
 // This import should be after the annotation
-import 'weight_lifting_repository_impl_test.mocks.dart';
 
 void main() {
   late WeightLiftingRepositoryImpl repository;

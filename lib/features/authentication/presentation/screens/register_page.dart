@@ -1,9 +1,14 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/gestures.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/authentication/services/register_service.dart';
+import 'package:intl/intl.dart';
+
+// Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/authentication/services/register_service.dart';
 
 /// Registration page for new users
 ///

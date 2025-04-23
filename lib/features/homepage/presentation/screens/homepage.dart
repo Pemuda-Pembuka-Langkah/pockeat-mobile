@@ -1,8 +1,11 @@
-import 'package:pockeat/component/navigation.dart';
-import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
-import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
-
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:pockeat/component/navigation.dart';
+import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
+import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
+
 // ignore: depend_on_referenced_packages
 
 class HomePage extends StatefulWidget {

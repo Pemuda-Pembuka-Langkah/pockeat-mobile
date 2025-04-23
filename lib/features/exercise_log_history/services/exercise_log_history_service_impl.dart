@@ -1,13 +1,16 @@
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+
+// Project imports:
+import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
+import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
-import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
-import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
-import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
-import 'package:get_it/get_it.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 
 class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   late final SmartExerciseLogRepository _smartExerciseLogRepository;

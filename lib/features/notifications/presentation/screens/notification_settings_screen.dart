@@ -1,8 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
-import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
+import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});

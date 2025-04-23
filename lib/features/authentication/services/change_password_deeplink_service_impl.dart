@@ -1,11 +1,18 @@
 // ignore_for_file: avoid_print
 
+// Dart imports:
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
-import 'package:app_links/app_links.dart';
-import 'package:meta/meta.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:app_links/app_links.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:meta/meta.dart';
+
+// Project imports:
+import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
 
 /// Exception khusus untuk ChangePasswordDeepLinkService
 class ChangePasswordDeepLinkException implements Exception {

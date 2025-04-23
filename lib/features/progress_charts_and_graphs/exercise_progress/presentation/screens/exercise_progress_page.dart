@@ -1,18 +1,23 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:logger/logger.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/exercise_data.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/workout_stat.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/exercise_type.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/performance_metric.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/workout_item.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/header_widget.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/workout_overview_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/workout_stat.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/exercise_distribution_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/header_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/performance_metric_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/workout_history_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/widgets/workout_overview_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
 
 // ignore: depend_on_referenced_packages
-import 'package:logger/logger.dart';
 
 // coverage:ignore-start
 final logger = Logger();

@@ -1,4 +1,6 @@
 // Exception for errors during saving or retrieving data
+
+// Project imports:
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 abstract class SmartExerciseLogRepository {

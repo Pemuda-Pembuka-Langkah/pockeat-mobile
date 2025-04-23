@@ -1,20 +1,27 @@
-import 'package:flutter/material.dart';
+// Dart imports:
 import 'dart:io';
-import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
-import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/bottom_action_bar.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/additional_nutrients_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:camera/camera.dart';
+
+// Project imports:
+import 'package:pockeat/core/di/service_locator.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/additional_nutrients_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/bottom_action_bar.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
 
 class NutritionPage extends StatefulWidget {
   final String imagePath;

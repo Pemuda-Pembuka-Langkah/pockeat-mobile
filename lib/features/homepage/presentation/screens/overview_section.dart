@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/homepage/presentation/widgets/calories_today_widget.dart';
 import 'package:pockeat/features/sync_fitness_tracker/widgets/health_connect_widget.dart';
 

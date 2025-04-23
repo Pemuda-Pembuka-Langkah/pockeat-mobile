@@ -1,6 +1,9 @@
 // lib/features/health_metrics/caloric_requirement/domain/repositories/caloric_requirement_repository_impl.dart
 
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 import 'caloric_requirement_repository.dart';
 

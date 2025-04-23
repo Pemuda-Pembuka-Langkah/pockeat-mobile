@@ -1,8 +1,13 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
-import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_history_card.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 
 /// A widget that displays a section of recent exercise history items.
 ///

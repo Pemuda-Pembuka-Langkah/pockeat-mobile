@@ -1,22 +1,27 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/log_history/presentation/screens/log_history_page.dart';
-import 'package:provider/provider.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
+
+// Project imports:
 import 'package:pockeat/component/navigation.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/screens/weight_progress_page.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/services/weight_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/repositories/weight_repository_impl.dart';
+import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/screens/nutrition_progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/services/nutrition_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/screens/exercise_progress_page.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/presentation/screens/exercise_progress_page.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/log_history/presentation/screens/log_history_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/app_bar_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/main_tabs_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/progress_subtabs_widget.dart';
-import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/repositories/weight_repository_impl.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/screens/weight_progress_page.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/services/weight_service.dart';
 
 // coverage:ignore-start
 class ProgressPage extends StatefulWidget {

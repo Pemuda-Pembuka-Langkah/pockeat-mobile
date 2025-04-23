@@ -1,7 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
+import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/cycling_detail_widget.dart';
@@ -10,8 +13,8 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/smart
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/swimming_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/weight_lifting_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/exercise_log_history/utils/exercise_sharing_extension.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 
 /// Detail page for exercise logs with widget composition based on type
 class ExerciseLogDetailPage extends StatefulWidget {

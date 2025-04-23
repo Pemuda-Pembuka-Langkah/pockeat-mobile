@@ -1,10 +1,16 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// Flutter imports:
 import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
+import 'google_sign_in_service_impl_test.mocks.dart';
 
 @GenerateMocks([
   FirebaseAuth,
@@ -14,7 +20,6 @@ import 'package:pockeat/features/authentication/services/google_sign_in_service_
   UserCredential,
   User,
 ])
-import 'google_sign_in_service_impl_test.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

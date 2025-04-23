@@ -1,5 +1,6 @@
 // lib/features/home_screen_widget/controllers/food_tracking_client_controller.dart
 
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
 /// Interface controller client untuk food tracking yang berinteraksi dengan UI

@@ -1,14 +1,19 @@
+// Flutter imports:
 import 'package:flutter/services.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/domain/constants/widget_config.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/custom_home_widget_client.dart';
+import 'custom_home_widget_client_test.mocks.dart';
 
 @GenerateMocks([], customMocks: [
   MockSpec<MethodChannel>(onMissingStub: OnMissingStub.returnDefault),
 ])
-import 'custom_home_widget_client_test.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

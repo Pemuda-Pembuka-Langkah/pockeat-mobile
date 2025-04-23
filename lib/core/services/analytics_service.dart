@@ -1,5 +1,8 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
+// Flutter imports:
 import 'package:flutter/foundation.dart';
+
+// Package imports:
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 /// Service for tracking app analytics
 class AnalyticsService {

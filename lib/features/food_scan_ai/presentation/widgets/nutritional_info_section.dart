@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/macro_item.dart';
 
 class NutritionalInfoSection extends StatelessWidget {

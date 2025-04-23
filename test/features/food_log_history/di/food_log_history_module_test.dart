@@ -1,6 +1,9 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/food_log_history/di/food_log_history_module.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';

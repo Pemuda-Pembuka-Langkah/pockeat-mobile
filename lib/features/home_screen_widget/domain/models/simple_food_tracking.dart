@@ -1,3 +1,4 @@
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/domain/constants/food_tracking_keys.dart';
 
 /// Model untuk data tracking makanan yang sederhana

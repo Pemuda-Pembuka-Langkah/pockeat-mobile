@@ -1,12 +1,19 @@
+// Dart imports:
 import 'dart:io';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:image_picker/image_picker.dart';
+
+// Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
-import 'package:pockeat/features/api_scan/services/food/food_image_analysis_service.dart';
-import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
 import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/food_image_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 class AIAnalysisScreen extends StatefulWidget {

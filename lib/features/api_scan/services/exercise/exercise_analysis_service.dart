@@ -1,5 +1,9 @@
 // lib/features/ai_api_scan/services/exercise/exercise_analysis_service.dart
+
+// Dart imports:
 import 'dart:convert';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
 import 'package:pockeat/features/authentication/services/token_manager.dart';

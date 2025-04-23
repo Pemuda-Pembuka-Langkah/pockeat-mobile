@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/services.dart';
+
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/domain/constants/widget_config.dart';
 import 'home_widget_client.dart';
 

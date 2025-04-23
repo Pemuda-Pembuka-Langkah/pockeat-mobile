@@ -1,13 +1,20 @@
+// Dart imports:
 import 'dart:async';
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:app_links/app_links.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
-import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
-import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 
 /// Exception khusus untuk DeepLinkService
 class DeepLinkException implements Exception {

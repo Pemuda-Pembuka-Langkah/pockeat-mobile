@@ -1,3 +1,4 @@
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
 /// Interface dasar untuk semua controller widget food tracking
