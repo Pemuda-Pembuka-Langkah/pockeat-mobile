@@ -92,29 +92,35 @@ class SimpleFoodTrackingWidgetProvider : AppWidgetProvider() {
         val views = RemoteViews(context.packageName, R.layout.simple_food_tracking_widget)
         
         if (isLoggedIn) {
-            // User is logged in, show normal calorie tracking view
-            // Set calorie text
-            views.setTextViewText(R.id.calories_text, "$caloriesConsumed/$caloriesTarget")
+            // User is logged in, show logged in layout and hide login prompt
+            views.setViewVisibility(R.id.logged_in_layout, View.VISIBLE)
+            views.setViewVisibility(R.id.not_logged_in_layout, View.GONE)
             
-            // Set button text
-            views.setTextViewText(R.id.log_food_button, "Log your food")
-            
-            // Hitung persentase kalori yang sudah dikonsumsi (0-100)
+            // Calculate percentage for calorie text
             val percentageConsumed = if (caloriesTarget > 0) {
-                // Min antara 100% dan persentase aktual (agar tidak melebihi 100%)
                 (caloriesConsumed.toFloat() / caloriesTarget.toFloat() * 100).coerceAtMost(100f).toInt()
             } else 0
+            
+            // Set calorie text as percentage
+            views.setTextViewText(R.id.calories_text, "${percentageConsumed}%")
+            
+            // Calculate remaining calories
+            val remainingCalories = (caloriesTarget - caloriesConsumed).coerceAtLeast(0)
+            views.setTextViewText(R.id.remaining_calories_number, remainingCalories.toString())
+            
+            // Set button text
+            views.setTextViewText(R.id.log_food_button, "Log Food")
             
             // Set progress pada progress bar dengan setProgress
             views.setInt(R.id.calories_progress, "setProgress", percentageConsumed)
             Log.d(TAG, "Progress set to $percentageConsumed%")
         } else {
-            // User is NOT logged in, show login prompt
-            views.setTextViewText(R.id.calories_text, "Not logged in")
-            views.setTextViewText(R.id.log_food_button, "Login")
+            // User is NOT logged in, show login prompt and hide logged in layout
+            views.setViewVisibility(R.id.logged_in_layout, View.GONE)
+            views.setViewVisibility(R.id.not_logged_in_layout, View.VISIBLE)
             
-            // Reset progress bar to 0
-            views.setInt(R.id.calories_progress, "setProgress", 0)
+            // Set login button text
+            views.setTextViewText(R.id.login_button, "Login")
         }
         
         // Set up "Log your food" button click
@@ -181,10 +187,9 @@ class SimpleFoodTrackingWidgetProvider : AppWidgetProvider() {
             // Fallback to super basic views in case of error
             try {
                 val views = RemoteViews(context.packageName, R.layout.simple_food_tracking_widget)
-                views.setTextViewText(R.id.calories_text, "0/2000")
-                
-                // Set progress bar default dengan setProgress
-                views.setInt(R.id.calories_progress, "setProgress", 0)
+                views.setViewVisibility(R.id.logged_in_layout, View.GONE)
+                views.setViewVisibility(R.id.not_logged_in_layout, View.VISIBLE)
+                views.setTextViewText(R.id.login_button, "Login")
                 appWidgetManager.updateAppWidget(appWidgetId, views)
                 Log.d(TAG, "Fallback widget updated")
             } catch (fallbackError: Exception) {
