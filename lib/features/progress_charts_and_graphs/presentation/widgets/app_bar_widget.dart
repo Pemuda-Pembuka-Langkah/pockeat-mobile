@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 
 class AppBarWidget extends StatelessWidget {
@@ -7,10 +6,10 @@ class AppBarWidget extends StatelessWidget {
   final VoidCallback onCalendarPressed;
 
   const AppBarWidget({
-    Key? key,
+    super.key,
     required this.colors,
     required this.onCalendarPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

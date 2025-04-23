@@ -50,6 +50,7 @@ import 'package:pockeat/features/authentication/services/profile_service_impl.da
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service_impl.dart';
 import 'package:pockeat/features/authentication/services/utils/instabug_client.dart';
+import 'package:pockeat/core/services/analytics_service.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -196,6 +197,12 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<BugReportService>(
     BugReportServiceImpl(instabugClient: getIt<InstabugClient>()),
   );
+  
+  // Register Analytics Service
+  getIt.registerSingleton<AnalyticsService>(
+    AnalyticsService(),
+  );
+  
   HomeWidgetModule.register();
 }
 // coverage:ignore-end

@@ -9,13 +9,13 @@ class ProgressTabItemWidget extends StatelessWidget {
   final AppColors colors;
 
   const ProgressTabItemWidget({
-    Key? key,
+    super.key,
     required this.label,
     required this.index,
     required this.isSelected,
     required this.onTap,
     required this.colors,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
