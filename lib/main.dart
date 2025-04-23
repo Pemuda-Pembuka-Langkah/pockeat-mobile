@@ -10,7 +10,6 @@ import 'package:instabug_flutter/instabug_flutter.dart';
 import 'dart:async';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
@@ -67,6 +66,7 @@ import 'package:pockeat/features/authentication/domain/model/deep_link_result.da
 import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/edit_profile_page.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
+import 'package:pockeat/core/services/analytics_service.dart';
 
 // Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -191,6 +191,9 @@ void main() async {
   );
 
   await setupDependencies();
+
+  // Initialize Google Analytics
+  await getIt<AnalyticsService>().initialize();
 
   // Initialize notifications
   if (!kIsWeb) {

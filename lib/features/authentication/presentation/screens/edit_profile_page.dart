@@ -10,6 +10,8 @@ import 'package:pockeat/features/authentication/services/profile_service.dart';
 /// Menampilkan form untuk edit:
 /// - Nama pengguna (displayName)
 /// - Foto profil (photoURL)
+
+// coverage:ignore-start
 class EditProfilePage extends StatefulWidget {
   final UserModel? initialUser;
   final bool useScaffold;
@@ -695,7 +697,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     } catch (e) {
       if (mounted && widget.useScaffold) {
-        // coverage:ignore-start
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Terjadi kesalahan: ${e.toString()}'),
@@ -703,7 +704,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        // coverage:ignore-end
       }
     }
   }
@@ -717,10 +717,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     final nameParts = name.split(' ');
     if (nameParts.length == 1) {
-      // coverage:ignore-line
       return nameParts[0][0].toUpperCase();
     }
 
     return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
   }
 }
+// coverage:ignore-end

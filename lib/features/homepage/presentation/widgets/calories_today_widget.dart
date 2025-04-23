@@ -35,7 +35,7 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
   
   void _loadCalorieStats() {
     final calorieService = GetIt.instance<CalorieStatsService>();
-    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final userId = GetIt.instance<FirebaseAuth>().currentUser?.uid ?? '';
     
     // Add cache-busting by forcing recalculation
     setState(() {

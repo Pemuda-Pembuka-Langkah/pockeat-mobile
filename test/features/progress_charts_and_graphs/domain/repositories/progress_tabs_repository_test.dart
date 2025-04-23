@@ -17,8 +17,8 @@ class TestProgressTabsRepository implements ProgressTabsRepository {
       mainTabCount: 2,
       progressTabCount: 3,
       progressTabLabels: ['Weight', 'Nutrition', 'Exercise'],
-      logHistoryTabCount: 2,
-      logHistoryTabLabels: ['Food', 'Exercise'],
+      logHistoryTabCount: 2,                       // Added missing required parameter
+      logHistoryTabLabels: ['Food', 'Exercise'],   // Added missing required parameter
     );
   }
 }
