@@ -41,8 +41,6 @@ import 'package:pockeat/features/authentication/services/change_password_deeplin
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service_impl.dart';
 import 'package:pockeat/features/authentication/services/profile_service.dart';
@@ -177,8 +175,6 @@ Future<void> setupDependencies() async {
   FoodLogHistoryModule.register();
   ExerciseLogHistoryModule.register();
   CalorieStatsModule.register();
-  NutritionModule.register();
-  ExerciseProgressModule.register();
 
   // Register additional services
   getIt.registerSingleton<LogoutService>(

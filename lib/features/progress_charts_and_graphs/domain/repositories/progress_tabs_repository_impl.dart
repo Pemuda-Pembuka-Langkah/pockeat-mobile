@@ -13,8 +13,6 @@ class ProgressTabsRepositoryImpl implements ProgressTabsRepository {
   Future<TabConfiguration> getTabConfiguration() async {
     return TabConfiguration(
       mainTabCount: 2,
-      progressTabCount: 3,
-      progressTabLabels: ['Weight', 'Nutrition', 'Exercise'],
       logHistoryTabCount: 2,
       logHistoryTabLabels: ['Food', 'Exercise'],
     );
