@@ -99,7 +99,10 @@ class DetailedFoodTrackingWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.detailed_food_tracking_widget)
             
             if (isLoggedIn) {
-                // User is logged in, show normal nutrition tracking view
+                // User is logged in, show logged in layout and hide login prompt
+                views.setViewVisibility(R.id.logged_in_layout, View.VISIBLE)
+                views.setViewVisibility(R.id.not_logged_in_layout, View.GONE)
+                
                 // Calculate percentage for calorie text
                 val percentageConsumed = if (caloriesTarget > 0) {
                     (caloriesConsumed.toFloat() / caloriesTarget.toFloat() * 100).coerceAtMost(100f).toInt()
@@ -117,24 +120,18 @@ class DetailedFoodTrackingWidgetProvider : AppWidgetProvider() {
                 views.setTextViewText(R.id.fat_text, "${fat.toInt()}g")
                 
                 // Set button text
-                views.setTextViewText(R.id.log_food_button, "Log your food")
-                
-                // Persentase kalori sudah dihitung sebelumnya untuk teks kalori
+                views.setTextViewText(R.id.log_food_button, "Log Food")
                 
                 // Set progress pada progress bar dengan setProgress
                 views.setInt(R.id.calories_progress, "setProgress", percentageConsumed)
                 Log.d(TAG, "Progress set to $percentageConsumed%")
             } else {
-                // User is NOT logged in, show login prompt
-                views.setTextViewText(R.id.calories_text, "0%")
-                views.setTextViewText(R.id.remaining_calories_number, "0")
-                views.setTextViewText(R.id.protein_text, "0g")
-                views.setTextViewText(R.id.carbs_text, "0g")
-                views.setTextViewText(R.id.fat_text, "0g")
-                views.setTextViewText(R.id.log_food_button, "Login")
+                // User is NOT logged in, show login prompt and hide logged in layout
+                views.setViewVisibility(R.id.logged_in_layout, View.GONE)
+                views.setViewVisibility(R.id.not_logged_in_layout, View.VISIBLE)
                 
-                // Reset progress bar to 0
-                views.setInt(R.id.calories_progress, "setProgress", 0)
+                // Set login button text
+                views.setTextViewText(R.id.login_button, "Login")
             }
             
             // Set up "Log your food" button click
