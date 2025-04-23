@@ -269,39 +269,41 @@ class _PetStorePageState extends State<PetStorePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-  height: 120,
-  width: double.infinity,
-  decoration: BoxDecoration(
-    color: primaryYellow.withOpacity(0.1),
-    borderRadius: const BorderRadius.vertical(
-      top: Radius.circular(16),
-    ),
-  ),
-  child: ClipRRect(
-    borderRadius: const BorderRadius.vertical(
-      top: Radius.circular(16),
-    ),
-    child: item['image'] != null ? Image.asset(
-      item['image'],
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return Center(
-          child: Icon(
-            Icons.image,
-            size: 40,
-            color: primaryYellow,
-          ),
-        );
-      },
-    ) : Center(
-      child: Icon(
-        Icons.image,
-        size: 40,
-        color: primaryYellow,
-      ),
-    ),
-  ),
-),
+                height: 120,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: primaryYellow.withOpacity(0.1),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
+                  child: item['image'] != null
+                      ? Image.asset(
+                          item['image'],
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(
+                              child: Icon(
+                                Icons.image,
+                                size: 40,
+                                color: primaryYellow,
+                              ),
+                            );
+                          },
+                        )
+                      : Center(
+                          child: Icon(
+                            Icons.image,
+                            size: 40,
+                            color: primaryYellow,
+                          ),
+                        ),
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: Column(

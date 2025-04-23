@@ -12,7 +12,8 @@ abstract class ExerciseLogHistoryService {
   /// Mengembalikan [List<ExerciseLogHistoryItem>] berisi semua log olahraga
   /// dari berbagai sumber, diurutkan berdasarkan timestamp (terbaru dulu)
   /// Throws [Exception] jika terjadi error saat pengambilan data
-  Future<List<ExerciseLogHistoryItem>> getAllExerciseLogs(String userId, {int? limit});
+  Future<List<ExerciseLogHistoryItem>> getAllExerciseLogs(String userId,
+      {int? limit});
 
   /// Mengambil history log olahraga berdasarkan tanggal
   ///
@@ -20,7 +21,8 @@ abstract class ExerciseLogHistoryService {
   /// Parameter [date] untuk memfilter hasil
   /// Mengembalikan [List<ExerciseLogHistoryItem>] berisi log pada tanggal tersebut
   /// Throws [Exception] jika terjadi error saat pengambilan data
-  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByDate(String userId, DateTime date);
+  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByDate(
+      String userId, DateTime date);
 
   /// Mengambil history log olahraga berdasarkan bulan dan tahun
   ///
@@ -37,5 +39,6 @@ abstract class ExerciseLogHistoryService {
   /// Parameter [year] untuk memfilter hasil
   /// Mengembalikan [List<ExerciseLogHistoryItem>] berisi log pada tahun tersebut
   /// Throws [Exception] jika terjadi error saat pengambilan data
-  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByYear(String userId, int year);
+  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByYear(
+      String userId, int year);
 }

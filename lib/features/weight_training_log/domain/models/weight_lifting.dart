@@ -37,10 +37,10 @@ class WeightLifting {
   // Create Exercise object from JSON
   factory WeightLifting.fromJson(Map<String, dynamic> json) {
     // Safe conversion for metValue
-    final metValue = json['metValue'] is int 
-        ? (json['metValue'] as int).toDouble() 
+    final metValue = json['metValue'] is int
+        ? (json['metValue'] as int).toDouble()
         : double.parse(json['metValue'].toString());
-        
+
     return WeightLifting(
       id: json['id'],
       name: json['name'],
@@ -67,9 +67,9 @@ class WeightLiftingSet {
     required this.weight,
     required this.reps,
     required this.duration,
-  }) : assert(weight > 0, 'Weight must be greater than 0'),
-       assert(reps > 0, 'Reps must be greater than 0'),
-       assert(duration > 0, 'Duration must be greater than 0');
+  })  : assert(weight > 0, 'Weight must be greater than 0'),
+        assert(reps > 0, 'Reps must be greater than 0'),
+        assert(duration > 0, 'Duration must be greater than 0');
 
   // Convert ExerciseSet object to JSON
   Map<String, dynamic> toJson() {
@@ -82,8 +82,9 @@ class WeightLiftingSet {
 
   // Create ExerciseSet object from JSON
   factory WeightLiftingSet.fromJson(Map<String, dynamic> json) {
-
-    if (json['weight'] == null || json['reps'] == null || json['duration'] == null) {
+    if (json['weight'] == null ||
+        json['reps'] == null ||
+        json['duration'] == null) {
       throw ArgumentError('Missing required fields in ExerciseSet JSON');
     }
 

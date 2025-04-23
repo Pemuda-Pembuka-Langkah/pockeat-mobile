@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
-
 class FoodSummaryCard extends StatelessWidget {
   final FoodAnalysisResult food;
   final GlobalKey cardKey;

@@ -93,6 +93,7 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
       throw WidgetUpdateException('Failed to update detailed widget: $e');
     }
   }
+
 // Membersihkan data saat logout/app reset
   @override
   Future<void> cleanupData() async {

@@ -28,10 +28,7 @@ class DietTagsSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          if (warnings.isEmpty)
-            _buildSafetyTag()
-          else
-            _buildWarningTags(),
+          if (warnings.isEmpty) _buildSafetyTag() else _buildWarningTags(),
         ],
       ),
     );
@@ -80,4 +77,4 @@ class DietTagsSection extends StatelessWidget {
       }).toList(),
     );
   }
-} 
+}

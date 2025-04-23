@@ -11,18 +11,24 @@ double calculateExerciseVolume(WeightLifting exercise) {
 }
 
 double calculateTotalVolume(List<WeightLifting> exercises) {
-  return exercises.fold(0.0, (sum, exercise) => sum + calculateExerciseVolume(exercise));
+  return exercises.fold(
+      0.0, (sum, exercise) => sum + calculateExerciseVolume(exercise));
 }
 
 double calculateEstimatedCalories(List<WeightLifting> exercises) {
-  return exercises.fold(0.0, (sum, exercise) => sum + calculateExerciseCalories(exercise));
+  return exercises.fold(
+      0.0, (sum, exercise) => sum + calculateExerciseCalories(exercise));
 }
 
 double calculateExerciseCalories(WeightLifting exercise) {
-  double totalDurationInHours = exercise.sets.fold(0.0, (sum, set) => sum + set.duration) / 60;
-  double totalWeight = exercise.sets.fold(0.0, (sum, set) => sum + (set.weight * set.reps));
+  double totalDurationInHours =
+      exercise.sets.fold(0.0, (sum, set) => sum + set.duration) / 60;
+  double totalWeight =
+      exercise.sets.fold(0.0, (sum, set) => sum + (set.weight * set.reps));
   double totalReps = exercise.sets.fold(0.0, (sum, set) => sum + set.reps);
-  return exercise.metValue * defaultWeight * (totalDurationInHours + k1 * totalWeight + k2 * totalReps);
+  return exercise.metValue *
+      defaultWeight *
+      (totalDurationInHours + k1 * totalWeight + k2 * totalReps);
 }
 
 int calculateTotalSets(List<WeightLifting> exercises) {
@@ -30,11 +36,16 @@ int calculateTotalSets(List<WeightLifting> exercises) {
 }
 
 int calculateTotalReps(List<WeightLifting> exercises) {
-  return exercises.fold(0, (sum, exercise) =>
-      sum + exercise.sets.fold(0, (setSum, set) => setSum + set.reps));
+  return exercises.fold(
+      0,
+      (sum, exercise) =>
+          sum + exercise.sets.fold(0, (setSum, set) => setSum + set.reps));
 }
 
 double calculateTotalDuration(List<WeightLifting> exercises) {
-  return exercises.fold(0.0, (sum, exercise) =>
-      sum + exercise.sets.fold(0.0, (setSum, set) => setSum + set.duration));
+  return exercises.fold(
+      0.0,
+      (sum, exercise) =>
+          sum +
+          exercise.sets.fold(0.0, (setSum, set) => setSum + set.duration));
 }

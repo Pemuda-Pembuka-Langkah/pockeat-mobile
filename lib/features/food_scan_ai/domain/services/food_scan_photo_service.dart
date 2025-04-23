@@ -6,7 +6,6 @@ import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class FoodScanPhotoService {
   final FoodImageAnalysisService _foodImageAnalysisService =
       getIt<FoodImageAnalysisService>();
@@ -40,10 +39,10 @@ class FoodScanPhotoService {
   Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult) async {
     // Get current user's ID
     final userId = firebaseAuth.currentUser?.uid ?? '';
-    
+
     // Create a new analysis result with userId
     final resultWithUserId = analysisResult.copyWith(userId: userId);
-    
+
     await _foodScanRepository.save(resultWithUserId, resultWithUserId.id);
     return 'Successfully saved food analysis';
   }
@@ -86,10 +85,12 @@ class FoodScanPhotoService {
 
   // correct the nutrition label analysis result
   Future<FoodAnalysisResult> correctNutritionLabelAnalysis(
-      FoodAnalysisResult previousResult, String userComment, double servingSize) async {
+      FoodAnalysisResult previousResult,
+      String userComment,
+      double servingSize) async {
     try {
-      final correctedResult = await _nutritionLabelAnalysisService.correctAnalysis(
-          previousResult, userComment, servingSize);
+      final correctedResult = await _nutritionLabelAnalysisService
+          .correctAnalysis(previousResult, userComment, servingSize);
       return correctedResult;
     } catch (e) {
       throw Exception('Failed to correct food analysis: ${e.toString()}');

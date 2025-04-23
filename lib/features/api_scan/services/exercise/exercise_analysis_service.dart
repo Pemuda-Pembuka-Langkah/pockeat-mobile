@@ -156,7 +156,8 @@ class ExerciseAnalysisService {
       if (!jsonData.containsKey('exercise_type') ||
           !jsonData.containsKey('duration') ||
           !jsonData.containsKey('intensity')) {
-        throw FormatException("Missing required fields in correction response");
+        throw const FormatException(
+            "Missing required fields in correction response");
       }
 
       // Extract values from JSON, defaulting to previous values if not provided
@@ -196,7 +197,7 @@ class ExerciseAnalysisService {
         summary: summary,
         timestamp: DateTime.now(),
         originalInput: previousResult.originalInput,
-        userId: previousResult.userId,  
+        userId: previousResult.userId,
       );
     } catch (e) {
       throw ApiServiceException(

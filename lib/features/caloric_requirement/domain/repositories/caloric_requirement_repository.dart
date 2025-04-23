@@ -6,5 +6,5 @@ abstract class CaloricRequirementRepository {
     required CaloricRequirementModel result,
   });
 
-  Future <CaloricRequirementModel?> getCaloricRequirement(String userId);
+  Future<CaloricRequirementModel?> getCaloricRequirement(String userId);
 }

@@ -60,7 +60,6 @@ class NutritionAppBar extends StatelessWidget {
           ],
         ),
       ),
-
     );
   }
 }

@@ -7,7 +7,7 @@ class MicroNutrient {
   final String target;
   final double progress;
   final Color color;
-  
+
   MicroNutrient({
     required this.nutrient,
     required this.current,

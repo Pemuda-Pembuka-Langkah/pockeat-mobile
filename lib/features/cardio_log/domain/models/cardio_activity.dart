@@ -1,11 +1,7 @@
 import 'package:uuid/uuid.dart';
 
 /// Enum untuk tipe aktivitas kardio
-enum CardioType { 
-  running, 
-  cycling, 
-  swimming 
-}
+enum CardioType { running, cycling, swimming }
 
 /// Model dasar untuk semua aktivitas kardio
 abstract class CardioActivity {
@@ -26,13 +22,12 @@ abstract class CardioActivity {
     required this.endTime,
     required this.caloriesBurned,
     required this.type,
-  }) : 
-    id = id ?? const Uuid().v4(),
-    duration = endTime.difference(startTime);
+  })  : id = id ?? const Uuid().v4(),
+        duration = endTime.difference(startTime);
 
   /// Metode untuk konversi ke Map (untuk penyimpanan)
   Map<String, dynamic> toMap();
 
   /// Metode untuk menghitung kalori yang terbakar
   double calculateCalories();
-} 
+}

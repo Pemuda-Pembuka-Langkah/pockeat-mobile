@@ -99,4 +99,4 @@ class AdditionalNutrientsSection extends StatelessWidget {
       ),
     );
   }
-} 
+}

@@ -5,6 +5,6 @@ class WeightData {
   final int exerciseMinutes;
   final String dominantExercise;
 
-  WeightData(this.label, this.weight, this.caloriesBurned, 
-      this.exerciseMinutes, this.dominantExercise);
+  WeightData(this.label, this.weight, this.caloriesBurned, this.exerciseMinutes,
+      this.dominantExercise);
 }

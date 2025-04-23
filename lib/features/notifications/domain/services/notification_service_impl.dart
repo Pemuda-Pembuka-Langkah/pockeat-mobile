@@ -158,15 +158,14 @@ class NotificationServiceImpl implements NotificationService {
 
   void _onNotificationTapped(NotificationResponse details) {
     // Handle notifikasi tap berdasarkan payload
-    if (details.payload == 'daily_calorie_tracking') {
-    }
+    if (details.payload == 'daily_calorie_tracking') {}
   }
 
   @override
   Future<void> toggleNotification(String channelId, bool enabled) async {
     // Simpan status notifikasi ke SharedPreferences
     await _prefs.setBool('$_prefixNotificationStatus$channelId', enabled);
-    
+
     if (enabled) {
       // Jika diaktifkan, jadwalkan ulang notifikasi
       await _setupNotificationByChannel(channelId);
@@ -192,9 +191,7 @@ class NotificationServiceImpl implements NotificationService {
           payload: 'daily_calorie_tracking',
         );
         await scheduleLocalNotification(
-          calorieReminder, 
-          NotificationChannels.caloriesReminder
-        );
+            calorieReminder, NotificationChannels.caloriesReminder);
         break;
 
       case 'workout_reminder_channel':
@@ -206,9 +203,7 @@ class NotificationServiceImpl implements NotificationService {
           payload: 'daily_workout',
         );
         await scheduleLocalNotification(
-          workoutReminder, 
-          NotificationChannels.workoutReminder
-        );
+            workoutReminder, NotificationChannels.workoutReminder);
         break;
     }
   }
@@ -226,8 +221,10 @@ class NotificationServiceImpl implements NotificationService {
 
   Future<void> _setupDefaultRecurringNotifications() async {
     // Cek status notifikasi sebelum menjadwalkan
-    final isCaloriesEnabled = await isNotificationEnabled('calories_reminder_channel');
-    final isWorkoutEnabled = await isNotificationEnabled('workout_reminder_channel');
+    final isCaloriesEnabled =
+        await isNotificationEnabled('calories_reminder_channel');
+    final isWorkoutEnabled =
+        await isNotificationEnabled('workout_reminder_channel');
 
     if (isCaloriesEnabled) {
       await _setupNotificationByChannel('calories_reminder_channel');

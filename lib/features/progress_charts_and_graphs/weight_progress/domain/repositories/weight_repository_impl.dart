@@ -6,7 +6,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/doma
 
 class WeightRepositoryImpl implements WeightRepository {
   String _selectedPeriod = 'Weekly';
-  
+
   // Mock data for weight progress
   final Map<String, List<WeightData>> _periodData = {
     'Daily': [
@@ -72,7 +72,8 @@ class WeightRepositoryImpl implements WeightRepository {
       remainingWeight: '3.0 kg',
       daysLeft: '35 days left',
       isOnTrack: true,
-      insightMessage: 'Maintaining current activity level, you\'ll reach your goal 5 days ahead of schedule!',
+      insightMessage:
+          'Maintaining current activity level, you\'ll reach your goal 5 days ahead of schedule!',
     );
   }
 

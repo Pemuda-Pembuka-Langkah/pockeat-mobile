@@ -100,11 +100,19 @@ class WorkoutSummary extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSummaryItem('Exercises', exerciseCount.toString(), Icons.fitness_center),
+              _buildSummaryItem(
+                  'Exercises', exerciseCount.toString(), Icons.fitness_center),
               _buildSummaryItem('Sets', totalSets.toString(), Icons.repeat),
-              _buildSummaryItem('Volume', '${totalVolume.toStringAsFixed(1)}\nkg', Icons.bar_chart),
-              _buildSummaryItem('Duration', '${totalDuration.toStringAsFixed(1)}\nminutes', Icons.access_time_rounded),
-              _buildSummaryItem('Estimated\nCalories', '${estimatedCalories.toStringAsFixed(2)}\nkcal', Icons.local_fire_department),
+              _buildSummaryItem('Volume',
+                  '${totalVolume.toStringAsFixed(1)}\nkg', Icons.bar_chart),
+              _buildSummaryItem(
+                  'Duration',
+                  '${totalDuration.toStringAsFixed(1)}\nminutes',
+                  Icons.access_time_rounded),
+              _buildSummaryItem(
+                  'Estimated\nCalories',
+                  '${estimatedCalories.toStringAsFixed(2)}\nkcal',
+                  Icons.local_fire_department),
             ],
           ),
         ],

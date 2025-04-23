@@ -68,7 +68,7 @@ class CyclingFormState extends State<CyclingForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PersonalDataReminder(),
+          const PersonalDataReminder(),
           const SizedBox(height: 16),
           const Text(
             'Cycling Activity Type',

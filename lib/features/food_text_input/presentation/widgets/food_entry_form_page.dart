@@ -107,7 +107,8 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                     decoration: const InputDecoration(
                       contentPadding: EdgeInsets.all(12),
                       border: InputBorder.none,
-                      hintText: 'Example: "Grilled chicken salad with lettuce, tomatoes, and olive oil dressing" or "Bowl of oatmeal with blueberries"',
+                      hintText:
+                          'Example: "Grilled chicken salad with lettuce, tomatoes, and olive oil dressing" or "Bowl of oatmeal with blueberries"',
                       hintStyle: TextStyle(color: Colors.black38),
                     ),
                     onChanged: (_) {
@@ -129,7 +130,8 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
               child: ElevatedButton(
                 onPressed: widget.isAnalyzing
                     ? null
-                    : () => _validateAndSubmit(isCorrection: widget.isCorrection),
+                    : () =>
+                        _validateAndSubmit(isCorrection: widget.isCorrection),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4ECDC4),
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -144,7 +146,8 @@ class _FoodEntryFormState extends State<FoodEntryForm> {
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : Text(

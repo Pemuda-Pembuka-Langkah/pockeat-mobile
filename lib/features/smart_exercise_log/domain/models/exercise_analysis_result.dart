@@ -56,7 +56,6 @@ class ExerciseAnalysisResult {
     );
   }
 
-
   // Konversi ke Map (untuk penyimpanan)
   Map<String, dynamic> toMap() {
     return {
@@ -73,8 +72,8 @@ class ExerciseAnalysisResult {
       'userId': userId, // Add userId to map
     };
   }
-    Map<String, dynamic> toJson() => toMap();
 
+  Map<String, dynamic> toJson() => toMap();
 
   // Copy with method untuk memudahkan update
   ExerciseAnalysisResult copyWith({

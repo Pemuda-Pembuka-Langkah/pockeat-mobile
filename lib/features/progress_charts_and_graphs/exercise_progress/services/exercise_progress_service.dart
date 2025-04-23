@@ -7,37 +7,37 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/do
 
 class ExerciseProgressService {
   final ExerciseProgressRepository repository;
-  
+
   ExerciseProgressService({required this.repository});
-  
+
   Future<List<ExerciseData>> getExerciseData(bool isWeeklyView) {
     return repository.getExerciseData(isWeeklyView);
   }
-  
+
   Future<List<WorkoutStat>> getWorkoutStats() {
     return repository.getWorkoutStats();
   }
-  
+
   Future<List<ExerciseType>> getExerciseTypes() {
     return repository.getExerciseTypes();
   }
-  
+
   Future<List<PerformanceMetric>> getPerformanceMetrics() {
     return repository.getPerformanceMetrics();
   }
-  
+
   Future<List<WorkoutItem>> getWorkoutHistory() {
     return repository.getWorkoutHistory();
   }
-  
+
   Future<bool> getSelectedViewPeriod() {
     return repository.getSelectedViewPeriod();
   }
-  
+
   Future<void> setSelectedViewPeriod(bool isWeeklyView) {
     return repository.setSelectedViewPeriod(isWeeklyView);
   }
-  
+
   Future<String> getCompletionPercentage() {
     return repository.getCompletionPercentage();
   }

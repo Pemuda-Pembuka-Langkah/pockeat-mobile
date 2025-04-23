@@ -28,7 +28,8 @@ class TextBottomActionBar extends StatelessWidget {
     this.onSavingStateChange,
   });
 
-  void showSnackBarMessage(BuildContext context, String message, {Color? backgroundColor}) {
+  void showSnackBarMessage(BuildContext context, String message,
+      {Color? backgroundColor}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -63,7 +64,8 @@ class TextBottomActionBar extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(CupertinoIcons.pencil, color: primaryPink.withOpacity(0.8), size: 18),
+                    Icon(CupertinoIcons.pencil,
+                        color: primaryPink.withOpacity(0.8), size: 18),
                     const SizedBox(width: 6),
                     Text(
                       'Correct Analysis',
@@ -94,31 +96,39 @@ class TextBottomActionBar extends StatelessWidget {
                         onSavingStateChange?.call(true);
 
                         try {
-                          showSnackBarMessage(context, 'Saving food to log...', backgroundColor: Color(0xFF9B6BFF));
+                          showSnackBarMessage(context, 'Saving food to log...',
+                              backgroundColor: const Color(0xFF9B6BFF));
 
-                          final message = await foodTextInputService.saveFoodAnalysis(food!);
+                          final message = await foodTextInputService
+                              .saveFoodAnalysis(food!);
 
                           if (!context.mounted) return;
 
-                          showSnackBarMessage(context, message, backgroundColor: primaryGreen);
+                          showSnackBarMessage(context, message,
+                              backgroundColor: primaryGreen);
 
                           // Force update home screen widget
                           try {
-                            final controller = GetIt.I<FoodTrackingClientController>();
+                            final controller =
+                                GetIt.I<FoodTrackingClientController>();
                             await controller.forceUpdate();
                           } catch (e) {
                             // Silently log error but continue - don't block navigation
-                            debugPrint('Failed to update home screen widget: $e');
+                            debugPrint(
+                                'Failed to update home screen widget: $e');
                           }
 
                           Future.delayed(const Duration(milliseconds: 500), () {
                             if (context.mounted) {
-                              Navigator.of(context).popUntil((route) => route.isFirst);
+                              Navigator.of(context)
+                                  .popUntil((route) => route.isFirst);
                             }
                           });
                         } catch (e) {
                           if (!context.mounted) return;
-                          showSnackBarMessage(context, 'Failed to save: ${e.toString()}', backgroundColor: Colors.red);
+                          showSnackBarMessage(
+                              context, 'Failed to save: ${e.toString()}',
+                              backgroundColor: Colors.red);
                         } finally {
                           onSavingStateChange?.call(false);
                         }
@@ -129,9 +139,12 @@ class TextBottomActionBar extends StatelessWidget {
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(CupertinoIcons.plus, color: Colors.white, size: 20),
+                          Icon(CupertinoIcons.plus,
+                              color: Colors.white, size: 20),
                           SizedBox(width: 6),
-                          Text('Add to Log', style: TextStyle(color: Colors.white, fontSize: 16)),
+                          Text('Add to Log',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16)),
                         ],
                       ),
                     ),
@@ -158,15 +171,19 @@ class TextBottomActionBar extends StatelessWidget {
           onSubmit: (String userComment) async {
             try {
               Navigator.of(context).pop();
-              showSnackBarMessage(context, 'Processing correction...', backgroundColor: Color(0xFFFF6B6B));
-              final correctedResult = await foodTextInputService.correctFoodAnalysis(food!, userComment);
+              showSnackBarMessage(context, 'Processing correction...',
+                  backgroundColor: const Color(0xFFFF6B6B));
+              final correctedResult = await foodTextInputService
+                  .correctFoodAnalysis(food!, userComment);
               if (onAnalysisCorrected != null) {
                 onAnalysisCorrected!(correctedResult);
               }
               return true;
             } catch (e) {
-              // ignore: use_build_context_synchronously
-              showSnackBarMessage(context, 'Failed to correct analysis: ${e.toString()}', backgroundColor: Colors.red);
+              if (!context.mounted) return false;
+              showSnackBarMessage(
+                  context, 'Failed to correct analysis: ${e.toString()}',
+                  backgroundColor: Colors.red);
               return false;
             }
           },

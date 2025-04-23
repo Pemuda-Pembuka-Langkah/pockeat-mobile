@@ -101,10 +101,10 @@ class _ProfilePageState extends State<ProfilePage> {
       if (shouldLogout == true) {
         // Clear user data from bug reporting system before logout
         await _bugReportService.clearUserData();
-        
+
         // Implementasi logout sesuai dengan logout service
         await _logoutService.logout();
-        
+
         if (mounted) {
           Navigator.of(context).pushReplacementNamed('/login');
         }
@@ -522,7 +522,9 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildStatItem(
             icon: Icons.person_outline_rounded,
             label: 'Status',
-            value: _currentUser?.emailVerified == true ? 'Terverifikasi' : 'Belum Terverifikasi',
+            value: _currentUser?.emailVerified == true
+                ? 'Terverifikasi'
+                : 'Belum Terverifikasi',
             color: primaryPink,
           ),
         ],
@@ -656,10 +658,10 @@ class _ProfilePageState extends State<ProfilePage> {
               if (_currentUser != null) {
                 // Set current user data for context in the bug report
                 await _bugReportService.setUserData(_currentUser!);
-                
+
                 // Show the bug reporting UI
                 final result = await _bugReportService.show();
-                
+
                 if (!result && mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -674,7 +676,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Data pengguna tidak tersedia untuk pelaporan bug'),
+                      content: Text(
+                          'Data pengguna tidak tersedia untuk pelaporan bug'),
                       behavior: SnackBarBehavior.floating,
                       backgroundColor: Colors.orange,
                     ),
@@ -784,6 +787,4 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
   }
-
-
 }

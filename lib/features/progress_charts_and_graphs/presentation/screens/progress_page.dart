@@ -21,7 +21,7 @@ import 'package:pockeat/core/services/analytics_service.dart';
 // coverage:ignore-start
 class ProgressPage extends StatefulWidget {
   final ProgressTabsService service;
-  
+
   // ignore: use_super_parameters
   const ProgressPage({
     Key? key,
@@ -32,14 +32,15 @@ class ProgressPage extends StatefulWidget {
   State<ProgressPage> createState() => _ProgressPageState();
 }
 
-class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMixin {
+class _ProgressPageState extends State<ProgressPage>
+    with TickerProviderStateMixin {
   late TabController _mainTabController;
   late TabController _progressTabController;
   final ScrollController _scrollController = ScrollController();
-  
+
   late AppColors _appColors;
   late TabConfiguration _tabConfiguration;
-  
+
   bool _isInitialized = false;
   late AnalyticsService _googleAnalyticsService;
 
@@ -48,40 +49,38 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
     super.initState();
     _initializeData();
     _googleAnalyticsService = GetIt.instance<AnalyticsService>();
-    _googleAnalyticsService.logScreenView(screenName: 'progress_page', screenClass: 'ProgressPage');
+    _googleAnalyticsService.logScreenView(
+        screenName: 'progress_page', screenClass: 'ProgressPage');
     _googleAnalyticsService.logProgressViewed(category: 'all');
   }
-  
+
   Future<void> _initializeData() async {
     try {
       // Load configurations
       final colors = await widget.service.getAppColors();
       final tabConfig = await widget.service.getTabConfiguration();
-      
+
       // Initialize controllers
-      final mainTabController = TabController(
-        length: tabConfig.mainTabCount, 
-        vsync: this
-      );
-      
-      final progressTabController = TabController(
-        length: tabConfig.progressTabCount, 
-        vsync: this
-      );
-      
+      final mainTabController =
+          TabController(length: tabConfig.mainTabCount, vsync: this);
+
+      final progressTabController =
+          TabController(length: tabConfig.progressTabCount, vsync: this);
+
       // Set up tab change listeners
       mainTabController.addListener(() {
         setState(() {}); // Rebuild to update visibility
-        
+
         if (!mainTabController.indexIsChanging) {
           _scrollController.animateTo(
             0,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
           );
-          
+
           // Track main tab changes for analytics
-          final tabName = mainTabController.index == 0 ? 'progress' : 'insights';
+          final tabName =
+              mainTabController.index == 0 ? 'progress' : 'insights';
           _googleAnalyticsService.logEvent(
             name: 'main_tab_changed',
             parameters: {
@@ -99,7 +98,7 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
           );
-          
+
           // Only track progress tab changes when main tab is on progress (index 0)
           if (mainTabController.index == 0) {
             String tabName;
@@ -116,7 +115,7 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
               default:
                 tabName = 'unknown';
             }
-            
+
             _googleAnalyticsService.logEvent(
               name: 'progress_tab_changed',
               parameters: {
@@ -127,7 +126,7 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
           }
         }
       });
-      
+
       // Set state with loaded data
       if (mounted) {
         setState(() {
@@ -138,14 +137,13 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
           _isInitialized = true;
         });
       }
-      
+
       // Set navigation index
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           Provider.of<NavigationProvider>(context, listen: false).setIndex(1);
         }
       });
-      
     } catch (e) {
       debugPrint('Error initializing progress page: $e');
     }

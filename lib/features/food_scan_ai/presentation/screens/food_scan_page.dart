@@ -7,7 +7,7 @@ import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_photo_he
 
 class ScanFoodPage extends StatefulWidget {
   final CameraController cameraController;
-  
+
   const ScanFoodPage({
     super.key,
     required this.cameraController,
@@ -29,15 +29,16 @@ class ScanFoodPageState extends State<ScanFoodPage>
 // Progress colors - lebih vivid untuk progress
   final Color warningYellow =
       const Color(0xFFFFB946); // More orange-ish yellow for progress
-  final Color alertRed = const Color(0xFFFF4949); // Brighter red for initial stage
-  final Color successGreen = const Color(0xFF4CD964); // More vivid green for success
+  final Color alertRed =
+      const Color(0xFFFF4949); // Brighter red for initial stage
+  final Color successGreen =
+      const Color(0xFF4CD964); // More vivid green for success
 
   final double _scanProgress = 0.0;
   late AnimationController _scanLineController;
   String _statusMessage = 'Make sure your food is clearly visible';
   final Color _progressColor = const Color(0xFFFF4949); // Using primaryPink
   int _currentMode = 0; // 0 for food scan, 1 for label scan
-
 
   bool _isCameraReady = false;
 
@@ -95,21 +96,22 @@ class ScanFoodPageState extends State<ScanFoodPage>
         children: [
           // Camera Preview
           Positioned.fill(
-            child: _isCameraReady 
-              ? FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: widget.cameraController.value.previewSize!.height,
-                    height: widget.cameraController.value.previewSize!.width,
-                    child: Center(
-                      child: AspectRatio(
-                        aspectRatio: 1 / widget.cameraController.value.aspectRatio,
-                        child: CameraPreview(widget.cameraController),
+            child: _isCameraReady
+                ? FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: widget.cameraController.value.previewSize!.height,
+                      height: widget.cameraController.value.previewSize!.width,
+                      child: Center(
+                        child: AspectRatio(
+                          aspectRatio:
+                              1 / widget.cameraController.value.aspectRatio,
+                          child: CameraPreview(widget.cameraController),
+                        ),
                       ),
                     ),
-                  ),
-                )
-              : const Center(child: CircularProgressIndicator()),
+                  )
+                : const Center(child: CircularProgressIndicator()),
           ),
 
           // Scanning Animation
@@ -224,7 +226,8 @@ class ScanFoodPageState extends State<ScanFoodPage>
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -250,15 +253,19 @@ class ScanFoodPageState extends State<ScanFoodPage>
                           const SizedBox(width: 8),
                           // Flash Button
                           _buildCircularButton(
-                            widget.cameraController.value.flashMode == FlashMode.off 
-                              ? Icons.flash_off 
-                              : Icons.flash_on,
+                            widget.cameraController.value.flashMode ==
+                                    FlashMode.off
+                                ? Icons.flash_off
+                                : Icons.flash_on,
                             onTap: () {
                               setState(() {
-                                if (widget.cameraController.value.flashMode == FlashMode.off) {
-                                  widget.cameraController.setFlashMode(FlashMode.torch);
+                                if (widget.cameraController.value.flashMode ==
+                                    FlashMode.off) {
+                                  widget.cameraController
+                                      .setFlashMode(FlashMode.torch);
                                 } else {
-                                  widget.cameraController.setFlashMode(FlashMode.off);
+                                  widget.cameraController
+                                      .setFlashMode(FlashMode.off);
                                 }
                               });
                             },
@@ -281,14 +288,15 @@ class ScanFoodPageState extends State<ScanFoodPage>
               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.7),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Status Message
                   Text(
-                    _currentMode == 0 
+                    _currentMode == 0
                         ? 'Make sure your food is clearly visible'
                         : 'Position the nutrition label in the frame',
                     style: const TextStyle(
@@ -299,7 +307,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Camera Button
                   Container(
                     decoration: BoxDecoration(
@@ -316,7 +324,8 @@ class ScanFoodPageState extends State<ScanFoodPage>
                       key: const Key('camera_button'),
                       onTap: () async {
                         try {
-                          final image = await widget.cameraController.takePicture();
+                          final image =
+                              await widget.cameraController.takePicture();
                           if (mounted) {
                             if (_currentMode == 1) {
                               // Jika mode label scan, tampilkan popup untuk serving size
@@ -342,7 +351,9 @@ class ScanFoodPageState extends State<ScanFoodPage>
                           border: Border.all(color: Colors.white, width: 3),
                         ),
                         child: Icon(
-                          _currentMode == 0 ? Icons.camera_alt : Icons.document_scanner,
+                          _currentMode == 0
+                              ? Icons.camera_alt
+                              : Icons.document_scanner,
                           color: Colors.white,
                           size: 36,
                         ),
@@ -366,7 +377,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
         setState(() {
           _currentMode = mode;
           // Update status message based on mode
-          _statusMessage = mode == 0 
+          _statusMessage = mode == 0
               ? 'Make sure your food is clearly visible'
               : 'Position the nutrition label in the frame';
         });
@@ -388,7 +399,8 @@ class ScanFoodPageState extends State<ScanFoodPage>
     );
   }
 
-  Widget _buildCircularButton(IconData icon, {VoidCallback? onTap, String? key}) {
+  Widget _buildCircularButton(IconData icon,
+      {VoidCallback? onTap, String? key}) {
     return GestureDetector(
       key: key != null ? Key(key) : Key('circular_button_$icon'),
       onTap: onTap,
@@ -407,7 +419,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
   // Fungsi untuk menampilkan dialog serving size yang sederhana
   void _showServingSizeDialog(BuildContext context, String imagePath) {
     double servingSize = 1.0;
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -429,7 +441,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
                     style: TextStyle(fontSize: 14),
                   ),
                   const SizedBox(height: 20),
-                  
+
                   // Form input number sederhana
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -438,7 +450,8 @@ class ScanFoodPageState extends State<ScanFoodPage>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: TextField(
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
                         border: InputBorder.none,
@@ -470,7 +483,8 @@ class ScanFoodPageState extends State<ScanFoodPage>
                             // Tampilkan pesan jika input bukan angka
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Mohon masukkan angka yang valid'),
+                                content:
+                                    Text('Mohon masukkan angka yang valid'),
                                 duration: Duration(seconds: 2),
                               ),
                             );
@@ -478,12 +492,13 @@ class ScanFoodPageState extends State<ScanFoodPage>
                           }
                         }
                       },
-                      controller: TextEditingController(text: servingSize.toString()),
+                      controller:
+                          TextEditingController(text: servingSize.toString()),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 12),
-                  
+
                   Text(
                     'Pastikan Anda memasukkan angka yang benar',
                     style: TextStyle(
@@ -509,14 +524,15 @@ class ScanFoodPageState extends State<ScanFoodPage>
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryGreen,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               ),
               child: const Text('Konfirmasi'),
               onPressed: () {
                 Navigator.of(context).pop();
                 _navigateToNutritionPage(
-                  context, 
-                  imagePath, 
+                  context,
+                  imagePath,
                   servingSize: servingSize,
                 );
               },
@@ -528,11 +544,8 @@ class ScanFoodPageState extends State<ScanFoodPage>
   }
 
   // Fungsi untuk navigasi ke NutritionPage
-  void _navigateToNutritionPage(
-    BuildContext context, 
-    String imagePath, 
-    {double servingSize = 1.0}
-  ) {
+  void _navigateToNutritionPage(BuildContext context, String imagePath,
+      {double servingSize = 1.0}) {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

@@ -32,8 +32,7 @@ class _SpeedSelectionPageState extends State<SpeedSelectionPage> {
             final inProgress = prefs.getBool('onboardingInProgress') ?? true;
 
             if (inProgress && Navigator.of(context).canPop()) {
-          
-              Navigator.of(context).pop(); 
+              Navigator.of(context).pop();
             } else {
               Navigator.of(context).popUntil((route) => route.isFirst);
             }

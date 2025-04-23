@@ -67,7 +67,7 @@ class RunningFormState extends State<RunningForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PersonalDataReminder(),
+          const PersonalDataReminder(),
           const SizedBox(height: 16),
           TimeSelectionWidget(
             primaryColor: widget.primaryPink,

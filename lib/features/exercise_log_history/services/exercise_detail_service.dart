@@ -19,7 +19,7 @@ abstract class ExerciseDetailService {
   /// Mengembalikan objek T yang extends CardioActivity
   /// Throws exception jika tipe tidak sesuai
   Future<T?> getCardioActivityDetail<T extends CardioActivity>(String id);
-  
+
   /// Mengambil detail dari aktivitas weight lifting
   ///
   /// [id] adalah ID dari weight lifting exercise yang ingin diambil
@@ -32,15 +32,15 @@ abstract class ExerciseDetailService {
   /// [exerciseItem] adalah item exercise log history yang ingin dicek tipenya
   /// Return String yang merepresentasikan tipe ('running', 'cycling', 'swimming', 'unknown')
   String getCardioTypeFromHistoryItem(ExerciseLogHistoryItem exerciseItem);
-  
+
   /// Mendapatkan tipe aktivitas yang sebenarnya dari sebuah ID aktivitas
-  /// 
+  ///
   /// Method ini akan memeriksa repository yang sesuai untuk menentukan tipe aktivitas yang sebenarnya
   /// [id] adalah ID dari aktivitas
   /// [basicType] adalah tipe dasar (smart_exercise, cardio, atau weightlifting)
   /// Return `Future<String>` yang merepresentasikan tipe sebenarnya ('running', 'cycling', 'swimming', 'smart_exercise', 'weightlifting')
   Future<String> getActualActivityType(String id, String basicType);
-  
+
   /// Menghapus log exercise berdasarkan ID dan tipe aktivitas
   ///
   /// [id] adalah ID dari exercise log yang ingin dihapus

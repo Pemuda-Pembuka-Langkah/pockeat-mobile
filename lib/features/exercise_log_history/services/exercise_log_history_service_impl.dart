@@ -17,7 +17,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   // ignore: unused_field
   final FirebaseAuth _auth;
 
-  ExerciseLogHistoryServiceImpl({FirebaseAuth? auth}) 
+  ExerciseLogHistoryServiceImpl({FirebaseAuth? auth})
       : _auth = auth ?? FirebaseAuth.instance {
     _smartExerciseLogRepository = _getIt<SmartExerciseLogRepository>();
     _cardioRepository = _getIt<CardioRepository>();
@@ -25,10 +25,12 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   }
 
   @override
-  Future<List<ExerciseLogHistoryItem>> getAllExerciseLogs(String userId, {int? limit}) async {
+  Future<List<ExerciseLogHistoryItem>> getAllExerciseLogs(String userId,
+      {int? limit}) async {
     try {
       // Get smart exercise logs
-      final smartExerciseLogs = await _smartExerciseLogRepository.getAnalysisResultsByUser(userId, limit: limit);
+      final smartExerciseLogs = await _smartExerciseLogRepository
+          .getAnalysisResultsByUser(userId, limit: limit);
       final smartExerciseItems = _convertSmartExerciseLogs(smartExerciseLogs);
 
       // Get cardio logs
@@ -36,7 +38,8 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       final cardioItems = _convertCardioLogs(cardioLogs);
 
       // Get weightlifting logs
-      final weightLiftingLogs = await _weightLiftingRepository.getExercisesByUser(userId);
+      final weightLiftingLogs =
+          await _weightLiftingRepository.getExercisesByUser(userId);
       final weightLiftingItems = _convertWeightLiftingLogs(weightLiftingLogs);
 
       // Combine items
@@ -62,22 +65,29 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   }
 
   @override
-  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByDate(String userId, DateTime date) async {
+  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByDate(
+      String userId, DateTime date) async {
     try {
       // Get smart exercise logs for this date and user
-      final smartLogs = await _smartExerciseLogRepository.getAnalysisResultsByDate(date);
-      final filteredSmartLogs = smartLogs.where((log) => log.userId == userId).toList();
+      final smartLogs =
+          await _smartExerciseLogRepository.getAnalysisResultsByDate(date);
+      final filteredSmartLogs =
+          smartLogs.where((log) => log.userId == userId).toList();
       final smartItems = _convertSmartExerciseLogs(filteredSmartLogs);
 
       // Get cardio activities for this date
       final cardioLogs = await _cardioRepository.filterByDate(date);
-      final filteredCardioLogs = cardioLogs.where((log) => log.userId == userId).toList();
+      final filteredCardioLogs =
+          cardioLogs.where((log) => log.userId == userId).toList();
       final cardioItems = _convertCardioLogs(filteredCardioLogs);
 
       // Get weightlifting exercises for this date
-      final weightLiftingLogs = await _weightLiftingRepository.filterByDate(date);
-      final filteredWeightLiftingLogs = weightLiftingLogs.where((log) => log.userId == userId).toList();
-      final weightLiftingItems = _convertWeightLiftingLogs(filteredWeightLiftingLogs);
+      final weightLiftingLogs =
+          await _weightLiftingRepository.filterByDate(date);
+      final filteredWeightLiftingLogs =
+          weightLiftingLogs.where((log) => log.userId == userId).toList();
+      final weightLiftingItems =
+          _convertWeightLiftingLogs(filteredWeightLiftingLogs);
 
       // Combine all logs
       final allLogs = [
@@ -101,19 +111,25 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       String userId, int month, int year) async {
     try {
       // Get smart exercise logs for this month
-      final smartLogs = await _smartExerciseLogRepository.getAnalysisResultsByMonth(month, year);
-      final filteredSmartLogs = smartLogs.where((log) => log.userId == userId).toList();
+      final smartLogs = await _smartExerciseLogRepository
+          .getAnalysisResultsByMonth(month, year);
+      final filteredSmartLogs =
+          smartLogs.where((log) => log.userId == userId).toList();
       final smartItems = _convertSmartExerciseLogs(filteredSmartLogs);
 
       // Get cardio activities for this month
       final cardioLogs = await _cardioRepository.filterByMonth(month, year);
-      final filteredCardioLogs = cardioLogs.where((log) => log.userId == userId).toList();
+      final filteredCardioLogs =
+          cardioLogs.where((log) => log.userId == userId).toList();
       final cardioItems = _convertCardioLogs(filteredCardioLogs);
 
       // Get weightlifting exercises for this month
-      final weightLiftingLogs = await _weightLiftingRepository.filterByMonth(month, year);
-      final filteredWeightLiftingLogs = weightLiftingLogs.where((log) => log.userId == userId).toList();
-      final weightLiftingItems = _convertWeightLiftingLogs(filteredWeightLiftingLogs);
+      final weightLiftingLogs =
+          await _weightLiftingRepository.filterByMonth(month, year);
+      final filteredWeightLiftingLogs =
+          weightLiftingLogs.where((log) => log.userId == userId).toList();
+      final weightLiftingItems =
+          _convertWeightLiftingLogs(filteredWeightLiftingLogs);
 
       // Combine all logs
       final allLogs = [
@@ -133,22 +149,29 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   }
 
   @override
-  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByYear(String userId, int year) async {
+  Future<List<ExerciseLogHistoryItem>> getExerciseLogsByYear(
+      String userId, int year) async {
     try {
       // Get smart exercise logs for this year
-      final smartLogs = await _smartExerciseLogRepository.getAnalysisResultsByYear(year);
-      final filteredSmartLogs = smartLogs.where((log) => log.userId == userId).toList();
+      final smartLogs =
+          await _smartExerciseLogRepository.getAnalysisResultsByYear(year);
+      final filteredSmartLogs =
+          smartLogs.where((log) => log.userId == userId).toList();
       final smartItems = _convertSmartExerciseLogs(filteredSmartLogs);
 
       // Get cardio activities for this year
       final cardioLogs = await _cardioRepository.filterByYear(year);
-      final filteredCardioLogs = cardioLogs.where((log) => log.userId == userId).toList();
+      final filteredCardioLogs =
+          cardioLogs.where((log) => log.userId == userId).toList();
       final cardioItems = _convertCardioLogs(filteredCardioLogs);
 
       // Get weightlifting exercises for this year
-      final weightLiftingLogs = await _weightLiftingRepository.filterByYear(year);
-      final filteredWeightLiftingLogs = weightLiftingLogs.where((log) => log.userId == userId).toList();
-      final weightLiftingItems = _convertWeightLiftingLogs(filteredWeightLiftingLogs);
+      final weightLiftingLogs =
+          await _weightLiftingRepository.filterByYear(year);
+      final filteredWeightLiftingLogs =
+          weightLiftingLogs.where((log) => log.userId == userId).toList();
+      final weightLiftingItems =
+          _convertWeightLiftingLogs(filteredWeightLiftingLogs);
 
       // Combine all logs
       final allLogs = [

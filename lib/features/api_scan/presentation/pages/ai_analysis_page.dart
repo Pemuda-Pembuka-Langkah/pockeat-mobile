@@ -16,26 +16,27 @@ class AIAnalysisScreen extends StatefulWidget {
   State<AIAnalysisScreen> createState() => _AIAnalysisScreenState();
 }
 
-class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerProviderStateMixin {
+class _AIAnalysisScreenState extends State<AIAnalysisScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _textDescriptionController = TextEditingController();
   final _exerciseDescriptionController = TextEditingController();
   final _servingsController = TextEditingController(text: '1.0');
   final _correctionController = TextEditingController();
-  
+
   // States
   bool _isLoading = false;
   FoodAnalysisResult? _foodAnalysisResult;
   ExerciseAnalysisResult? _exerciseResult;
   String? _errorMessage;
   bool _showCorrectionInterface = false;
-  
+
   // Services
   final _foodTextAnalysisService = getIt<FoodTextAnalysisService>();
   final _foodImageAnalysisService = getIt<FoodImageAnalysisService>();
   final _nutritionLabelService = getIt<NutritionLabelAnalysisService>();
   final _exerciseAnalysisService = getIt<ExerciseAnalysisService>();
-  
+
   @override
   void initState() {
     super.initState();
@@ -52,7 +53,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       }
     });
   }
-  
+
   @override
   void dispose() {
     _textDescriptionController.dispose();
@@ -62,7 +63,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
     _tabController.dispose();
     super.dispose();
   }
-  
+
   // Food text analysis
   Future<void> _analyzeFoodByText() async {
     final description = _textDescriptionController.text.trim();
@@ -70,14 +71,14 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       _showError('Please enter a food description');
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
       _foodAnalysisResult = null;
       _errorMessage = null;
       _showCorrectionInterface = false;
     });
-    
+
     try {
       final result = await _foodTextAnalysisService.analyze(description);
       setState(() {
@@ -92,31 +93,32 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
   // Food text correction
   Future<void> _correctFoodTextAnalysis() async {
     if (_foodAnalysisResult == null) return;
-    
+
     final correction = _correctionController.text.trim();
     if (correction.isEmpty) {
       _showError('Please enter correction details');
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
-      final result = await _foodTextAnalysisService.correctAnalysis(_foodAnalysisResult!, correction);
+      final result = await _foodTextAnalysisService.correctAnalysis(
+          _foodAnalysisResult!, correction);
       if (!mounted) return;
-      
+
       setState(() {
         _foodAnalysisResult = result;
         _isLoading = false;
         _showCorrectionInterface = false;
         _correctionController.clear();
       });
-      
+
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Analysis corrected successfully'),
@@ -125,12 +127,12 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       );
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to correct analysis: ${e.toString()}'),
@@ -139,21 +141,21 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       );
     }
   }
-  
+
   // Food image analysis
   Future<void> _analyzeFoodByImage() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.camera);
-    
+
     if (image == null) return;
-    
+
     setState(() {
       _isLoading = true;
       _foodAnalysisResult = null;
       _errorMessage = null;
       _showCorrectionInterface = false;
     });
-    
+
     try {
       final result = await _foodImageAnalysisService.analyze(File(image.path));
       setState(() {
@@ -168,31 +170,32 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
   // Food image correction
   Future<void> _correctFoodImageAnalysis() async {
     if (_foodAnalysisResult == null) return;
-    
+
     final correction = _correctionController.text.trim();
     if (correction.isEmpty) {
       _showError('Please enter correction details');
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
-      final result = await _foodImageAnalysisService.correctAnalysis(_foodAnalysisResult!, correction);
+      final result = await _foodImageAnalysisService.correctAnalysis(
+          _foodAnalysisResult!, correction);
       if (!mounted) return;
-      
+
       setState(() {
         _foodAnalysisResult = result;
         _isLoading = false;
         _showCorrectionInterface = false;
         _correctionController.clear();
       });
-      
+
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Analysis corrected successfully'),
@@ -201,12 +204,12 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       );
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to correct analysis: ${e.toString()}'),
@@ -215,14 +218,14 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       );
     }
   }
-  
+
   // Nutrition label analysis
   Future<void> _analyzeNutritionLabel() async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.camera);
-    
+
     if (image == null) return;
-    
+
     final servingsText = _servingsController.text.trim();
     double servings;
     try {
@@ -231,16 +234,17 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       _showError('Please enter a valid number for servings');
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
       _foodAnalysisResult = null;
       _errorMessage = null;
       _showCorrectionInterface = false;
     });
-    
+
     try {
-      final result = await _nutritionLabelService.analyze(File(image.path), servings);
+      final result =
+          await _nutritionLabelService.analyze(File(image.path), servings);
       setState(() {
         _foodAnalysisResult = result;
         _isLoading = false;
@@ -253,13 +257,13 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
   // Nutrition label correction
   Future<void> _correctNutritionLabelAnalysis() async {
     if (_foodAnalysisResult == null) return;
-    
+
     final correction = _correctionController.text.trim();
     if (correction.isEmpty) {
       _showError('Please enter correction details');
       return;
     }
-    
+
     final servingsText = _servingsController.text.trim();
     double servings;
     try {
@@ -268,29 +272,26 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       _showError('Please enter a valid number for servings');
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
       final result = await _nutritionLabelService.correctAnalysis(
-        _foodAnalysisResult!, 
-        correction, 
-        servings
-      );
+          _foodAnalysisResult!, correction, servings);
       if (!mounted) return;
-      
+
       setState(() {
         _foodAnalysisResult = result;
         _isLoading = false;
         _showCorrectionInterface = false;
         _correctionController.clear();
       });
-      
+
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Analysis corrected successfully'),
@@ -299,12 +300,12 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       );
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to correct analysis: ${e.toString()}'),
@@ -313,7 +314,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       );
     }
   }
-  
+
   // Exercise analysis
   Future<void> _analyzeExercise() async {
     final description = _exerciseDescriptionController.text.trim();
@@ -321,14 +322,14 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       _showError('Please enter an exercise description');
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
       _exerciseResult = null;
       _errorMessage = null;
       _showCorrectionInterface = false;
     });
-    
+
     try {
       final result = await _exerciseAnalysisService.analyze(description);
       setState(() {
@@ -343,31 +344,32 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
   // Exercise correction
   Future<void> _correctExerciseAnalysis() async {
     if (_exerciseResult == null) return;
-    
+
     final correction = _correctionController.text.trim();
     if (correction.isEmpty) {
       _showError('Please enter correction details');
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
-      final result = await _exerciseAnalysisService.correctAnalysis(_exerciseResult!, correction);
+      final result = await _exerciseAnalysisService.correctAnalysis(
+          _exerciseResult!, correction);
       if (!mounted) return;
-      
+
       setState(() {
         _exerciseResult = result;
         _isLoading = false;
         _showCorrectionInterface = false;
         _correctionController.clear();
       });
-      
+
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Analysis corrected successfully'),
@@ -376,12 +378,12 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       );
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to correct analysis: ${e.toString()}'),
@@ -390,13 +392,13 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       );
     }
   }
-  
+
   void _showError(String message) {
     setState(() {
       _errorMessage = message;
       _isLoading = false;
     });
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -413,7 +415,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       }
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -434,20 +436,20 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
         children: [
           // Food Text Analysis Tab
           _buildFoodTextAnalysisTab(),
-          
+
           // Food Image Analysis Tab
           _buildFoodImageAnalysisTab(),
-          
+
           // Nutrition Label Analysis Tab
           _buildNutritionLabelAnalysisTab(),
-          
+
           // Exercise Analysis Tab
           _buildExerciseAnalysisTab(),
         ],
       ),
     );
   }
-  
+
   Widget _buildFoodTextAnalysisTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -492,7 +494,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       ),
     );
   }
-  
+
   Widget _buildFoodImageAnalysisTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -510,8 +512,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
             label: const Text('Take Food Photo'),
           ),
           const SizedBox(height: 24),
-          if (_isLoading)
-            const Center(child: CircularProgressIndicator()),
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
           if (_errorMessage != null)
             Text(
               _errorMessage!,
@@ -533,7 +534,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       ),
     );
   }
-  
+
   Widget _buildNutritionLabelAnalysisTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -560,8 +561,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
             label: const Text('Scan Nutrition Label'),
           ),
           const SizedBox(height: 24),
-          if (_isLoading)
-            const Center(child: CircularProgressIndicator()),
+          if (_isLoading) const Center(child: CircularProgressIndicator()),
           if (_errorMessage != null)
             Text(
               _errorMessage!,
@@ -583,7 +583,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       ),
     );
   }
-  
+
   Widget _buildExerciseAnalysisTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -673,7 +673,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       ],
     );
   }
-  
+
   Widget _buildFoodAnalysisResult(FoodAnalysisResult result) {
     return Card(
       elevation: 4,
@@ -727,7 +727,8 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Row(
                       children: [
-                        const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                        const Icon(Icons.warning_amber_rounded,
+                            color: Colors.orange),
                         const SizedBox(width: 8),
                         Expanded(child: Text(warning)),
                       ],
@@ -739,7 +740,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       ),
     );
   }
-  
+
   Widget _buildNutritionTable(NutritionInfo info) {
     return Table(
       border: TableBorder.all(color: Colors.grey.shade300),
@@ -758,12 +759,10 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       ],
     );
   }
-  
+
   TableRow _buildTableRow(String label, String value, {bool isHeader = false}) {
     return TableRow(
-      decoration: isHeader
-          ? BoxDecoration(color: Colors.grey.shade200)
-          : null,
+      decoration: isHeader ? BoxDecoration(color: Colors.grey.shade200) : null,
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -787,7 +786,7 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
       ],
     );
   }
-  
+
   Widget _buildExerciseAnalysisResult(ExerciseAnalysisResult result) {
     return Card(
       elevation: 4,
@@ -811,14 +810,15 @@ class _AIAnalysisScreenState extends State<AIAnalysisScreen> with SingleTickerPr
             const Divider(),
             _buildExerciseInfoItem('Duration', result.duration),
             _buildExerciseInfoItem('Intensity', result.intensity),
-            _buildExerciseInfoItem('Calories Burned', '${result.estimatedCalories} kcal'),
+            _buildExerciseInfoItem(
+                'Calories Burned', '${result.estimatedCalories} kcal'),
             _buildExerciseInfoItem('MET Value', result.metValue.toString()),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildExerciseInfoItem(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

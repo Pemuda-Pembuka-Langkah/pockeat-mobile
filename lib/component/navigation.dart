@@ -46,11 +46,12 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
     // Temukan posisi tombol add saat ini
     final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
     renderBox?.localToGlobal(Offset.zero);
-    
+
     // Perkirakan posisi tombol berdasarkan layar
     final screenWidth = MediaQuery.of(context).size.width;
-    final buttonRightPosition = screenWidth * 0.04 + 75.0; // Perkiraan jarak tombol dari sisi kanan + ukuran tombol
-    
+    final buttonRightPosition = screenWidth * 0.04 +
+        75.0; // Perkiraan jarak tombol dari sisi kanan + ukuran tombol
+
     _overlayEntry = OverlayEntry(
       builder: (context) => Stack(
         children: [
@@ -83,7 +84,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
               },
             ),
           ),
-          
+
           // Food Button (Utara / Atas relatif terhadap tombol add)
           Positioned(
             bottom: 120, // Lebih tinggi dari tombol add dan exercise
@@ -125,8 +126,8 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
           }
         });
 
-        final addButtonSize = 80.0; // Even larger button size
-        
+        const addButtonSize = 80.0; // Even larger button size
+
         return SizedBox(
           height: 60, // Meningkatkan height agar mencakup seluruh tombol add
           child: Stack(
@@ -191,16 +192,17 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                         ),
                       ),
                       // Ruang kosong diganti dengan tombol "+" yang tidak terlihat (untuk menjaga layout)
-                      Expanded(child: Container()), 
+                      Expanded(child: Container()),
                     ],
                   ),
                 ),
               ),
-              
+
               // Prominent "+ Add" Button positioned at the right side
               Positioned(
                 bottom: 20.0, // Tetap positioned higher agar menonjol
-                right: MediaQuery.of(context).size.width * 0.05, // Sedikit masuk dari tepi kanan
+                right: MediaQuery.of(context).size.width *
+                    0.05, // Sedikit masuk dari tepi kanan
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(

@@ -54,9 +54,9 @@ class NutrientProgressWidget extends StatelessWidget {
             ],
           ),
           child: Column(
-            children: microNutrients.map((nutrient) => 
-              NutrientRowWidget(nutrient: nutrient)
-            ).toList(),
+            children: microNutrients
+                .map((nutrient) => NutrientRowWidget(nutrient: nutrient))
+                .toList(),
           ),
         ),
       ],

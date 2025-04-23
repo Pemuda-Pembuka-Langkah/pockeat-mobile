@@ -53,10 +53,9 @@ class CalorieSummaryCard extends StatelessWidget {
                 ),
               ],
             ),
-
           ],
         ),
       ),
     );
   }
-} 
+}

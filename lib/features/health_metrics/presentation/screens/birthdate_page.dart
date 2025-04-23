@@ -61,10 +61,10 @@ class _BirthdatePageState extends State<BirthdatePage> {
             // ignore: use_build_context_synchronously
             if (inProgress && Navigator.of(context).canPop()) {
               // ignore: use_build_context_synchronously
-              Navigator.of(context).pop(); 
+              Navigator.of(context).pop();
             } else {
               // ignore: use_build_context_synchronously
-              Navigator.of(context).popUntil((route) => route.isFirst); 
+              Navigator.of(context).popUntil((route) => route.isFirst);
             }
           },
         ),

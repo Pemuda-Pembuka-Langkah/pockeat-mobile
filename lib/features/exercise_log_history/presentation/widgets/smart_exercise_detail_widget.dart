@@ -7,12 +7,12 @@ import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analy
 class SmartExerciseDetailWidget extends StatelessWidget {
   final ExerciseAnalysisResult exercise;
   final Color primaryColor = const Color(0xFF9B6BFF); // Smart exercise color
-  
+
   const SmartExerciseDetailWidget({
     super.key,
     required this.exercise,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -35,7 +35,7 @@ class SmartExerciseDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildHeaderCard(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -100,7 +100,8 @@ class SmartExerciseDetailWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        DateFormat('EEEE, dd MMMM yyyy').format(exercise.timestamp),
+                        DateFormat('EEEE, dd MMMM yyyy')
+                            .format(exercise.timestamp),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -119,7 +120,7 @@ class SmartExerciseDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMetricsCard(BuildContext context) {
     return Card(
       elevation: 3,
@@ -159,7 +160,7 @@ class SmartExerciseDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildVerticalDivider() {
     return Container(
       width: 1,
@@ -167,7 +168,7 @@ class SmartExerciseDetailWidget extends StatelessWidget {
       color: Colors.grey.withOpacity(0.2),
     );
   }
-  
+
   Widget _buildMetricItem({
     required IconData icon,
     required String value,
@@ -216,7 +217,7 @@ class SmartExerciseDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildAnalysisDetails(BuildContext context) {
     return Card(
       elevation: 3,
@@ -254,7 +255,8 @@ class SmartExerciseDetailWidget extends StatelessWidget {
             _buildDetailDivider(),
             _buildDetailRow('MET Value', exercise.metValue.toStringAsFixed(1)),
             _buildDetailDivider(),
-            _buildDetailRow('Estimated Calories', '${exercise.estimatedCalories} kcal'),
+            _buildDetailRow(
+                'Estimated Calories', '${exercise.estimatedCalories} kcal'),
             if (exercise.originalInput.isNotEmpty) ...[
               _buildDetailDivider(),
               _buildDetailRow('Original Input', exercise.originalInput),
@@ -264,7 +266,7 @@ class SmartExerciseDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildDetailDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -274,7 +276,7 @@ class SmartExerciseDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildDetailRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -306,7 +308,7 @@ class SmartExerciseDetailWidget extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildSummaryCard(BuildContext context) {
     return Card(
       elevation: 3,

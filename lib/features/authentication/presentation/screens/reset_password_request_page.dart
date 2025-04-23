@@ -21,7 +21,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   bool _isLoading = false;
   String? _errorMessage;
-  
+
   // State untuk menampilkan UI ketika email berhasil dikirim
   bool _isEmailSent = false;
 
@@ -106,9 +106,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
-            child: _isEmailSent 
-              ? _buildSuccessUI() 
-              : _buildRequestForm(),
+            child: _isEmailSent ? _buildSuccessUI() : _buildRequestForm(),
           ),
         ),
       ),
@@ -211,7 +209,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 disabledBackgroundColor: primaryPink.withOpacity(0.5),
               ),
               child: _isLoading
-                  ? CircularProgressIndicator(
+                  ? const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
                   : const Text(

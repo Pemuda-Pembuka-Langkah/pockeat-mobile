@@ -82,7 +82,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
       if (success) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.white),
                 SizedBox(width: 8),
@@ -96,7 +96,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
             ),
           ),
         );
-        
+
         // Force update home screen widget if controller is available
         if (widget.foodTrackingController != null) {
           try {
@@ -106,13 +106,13 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
             debugPrint('Failed to update home screen widget: $e');
           }
         }
-        
+
         // Return true to indicate deletion was successful
         navigator.pop(true);
       } else {
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               children: [
                 Icon(Icons.error, color: Colors.white),
                 SizedBox(width: 8),
@@ -137,8 +137,8 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.error, color: Colors.white),
-              SizedBox(width: 8),
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 8),
               Text('Error: ${e.toString()}'),
             ],
           ),
@@ -165,8 +165,8 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
         title: Row(
           children: [
             Icon(Icons.delete, color: primaryRed),
-            SizedBox(width: 8),
-            Text('Delete Food Entry'),
+            const SizedBox(width: 8),
+            const Text('Delete Food Entry'),
           ],
         ),
         content: const Text(
@@ -268,7 +268,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                             size: 64.0,
                           ),
                           const SizedBox(height: 16.0),
-                          Text(
+                          const Text(
                             'Error loading data',
                             style: TextStyle(
                               fontSize: 18.0,
@@ -280,7 +280,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                           Text(
                             snapshot.error.toString(),
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.black54),
+                            style: const TextStyle(color: Colors.black54),
                           ),
                           const SizedBox(height: 24),
                           ElevatedButton(
@@ -304,7 +304,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.no_food,
                           size: 64,
                           color: Colors.grey,
@@ -363,7 +363,8 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(CupertinoIcons.calendar, size: 16, color: Colors.grey),
+                    const Icon(CupertinoIcons.calendar,
+                        size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
                     Text(
                       _formatDate(food.timestamp),
@@ -649,7 +650,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
           const SizedBox(height: 8),
           Text(
             name,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: Colors.black87,
@@ -657,7 +658,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
           ),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               color: Colors.black54,
             ),
@@ -766,7 +767,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                                 if (ingredient.servings > 0)
                                   Text(
                                     '${ingredient.servings} grams',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.black54,
                                     ),
@@ -818,7 +819,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                 ),
                 child: Row(
                   children: [
-                    Icon(CupertinoIcons.exclamationmark_circle,
+                    const Icon(CupertinoIcons.exclamationmark_circle,
                         color: Colors.amber),
                     const SizedBox(width: 12),
                     Expanded(

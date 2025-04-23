@@ -18,15 +18,16 @@ abstract class FoodLogHistoryService {
   /// Parameter [date] untuk memfilter hasil
   /// Mengembalikan [List<FoodLogHistoryItem>] berisi log pada tanggal tersebut
   /// Throws [Exception] jika terjadi error saat pengambilan data
-  Future<List<FoodLogHistoryItem>> getFoodLogsByDate(String userId, DateTime date);
+  Future<List<FoodLogHistoryItem>> getFoodLogsByDate(
+      String userId, DateTime date);
 
   /// Mengambil history log makanan berdasarkan bulan dan tahun
   ///
   /// Parameter [month] dan [year] untuk memfilter hasil
   /// Mengembalikan [List<FoodLogHistoryItem>] berisi log pada bulan dan tahun tersebut
   /// Throws [Exception] jika terjadi error saat pengambilan data
-  Future<List<FoodLogHistoryItem>> getFoodLogsByMonth(String userId, int month, int year);
-
+  Future<List<FoodLogHistoryItem>> getFoodLogsByMonth(
+      String userId, int month, int year);
 
   /// Mengambil history log makanan berdasarkan tahun
   ///
@@ -34,7 +35,7 @@ abstract class FoodLogHistoryService {
   /// Mengembalikan [List<FoodLogHistoryItem>] berisi log pada tahun tersebut
   /// Throws [Exception] jika terjadi error saat pengambilan data
   Future<List<FoodLogHistoryItem>> getFoodLogsByYear(String userId, int year);
-  
+
   /// Mencari history log makanan berdasarkan query
   ///
   /// Parameter [query] untuk mencari log makanan yang sesuai

@@ -34,9 +34,9 @@ class _HeightWeightPageState extends State<HeightWeightPage> {
             final inProgress = prefs.getBool('onboardingInProgress') ?? true;
 
             if (inProgress && Navigator.of(context).canPop()) {
-              Navigator.of(context).pop(); 
+              Navigator.of(context).pop();
             } else {
-              Navigator.of(context).popUntil((route) => route.isFirst); 
+              Navigator.of(context).popUntil((route) => route.isFirst);
             }
           },
         ),
@@ -134,7 +134,9 @@ class _HeightWeightPageState extends State<HeightWeightPage> {
                         onPressed: () {
                           if (_formKey.currentState?.validate() ?? false) {
                             _formKey.currentState?.save();
-                            context.read<HealthMetricsFormCubit>().setHeightWeight(
+                            context
+                                .read<HealthMetricsFormCubit>()
+                                .setHeightWeight(
                                   height: _height!,
                                   weight: _weight!,
                                 );

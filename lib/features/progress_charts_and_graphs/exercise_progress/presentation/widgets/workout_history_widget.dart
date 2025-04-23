@@ -41,7 +41,9 @@ class WorkoutHistoryWidget extends StatelessWidget {
           const SizedBox(height: 20),
           for (int i = 0; i < workoutHistory.length; i++) ...[
             if (i > 0) const SizedBox(height: 16),
-            WorkoutItemWidget(workoutItem: workoutHistory[i]), // Changed parameter name from 'workout' to 'workoutItem'
+            WorkoutItemWidget(
+                workoutItem: workoutHistory[
+                    i]), // Changed parameter name from 'workout' to 'workoutItem'
           ],
         ],
       ),

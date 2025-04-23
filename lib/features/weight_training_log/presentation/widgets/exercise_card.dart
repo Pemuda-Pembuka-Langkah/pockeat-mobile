@@ -129,7 +129,8 @@ class ExerciseCard extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: primaryGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -148,7 +149,7 @@ class ExerciseCard extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         '${calculateExerciseCalories(exercise).toStringAsFixed(2)} kcal',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.redAccent,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,

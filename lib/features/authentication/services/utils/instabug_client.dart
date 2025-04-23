@@ -8,14 +8,14 @@ class InstabugClient {
     await Instabug.identifyUser(email, name, id);
   }
   // coverage:ignore-end
-  
+
   /// Clear user data from Instabug
   // coverage:ignore-start
   Future<void> logOut() async {
     await Instabug.logOut();
   }
   // coverage:ignore-end
-  
+
   /// Shows the main Instabug reporting menu with all options
   /// (Report a bug, Suggest an improvement, Ask a question)
   // coverage:ignore-start

@@ -9,7 +9,7 @@ class ProgressSubtabsWidget extends StatefulWidget {
   final ScrollController scrollController;
   final AppColors colors;
   final TabConfiguration tabConfiguration;
-  
+
   const ProgressSubtabsWidget({
     super.key,
     required this.mainTabController,
@@ -79,12 +79,16 @@ class _ProgressSubtabsWidgetState extends State<ProgressSubtabsWidget> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
-                children: widget.tabConfiguration.progressTabLabels.asMap().entries.map((entry) {
+                children: widget.tabConfiguration.progressTabLabels
+                    .asMap()
+                    .entries
+                    .map((entry) {
                   final index = entry.key;
                   final label = entry.value;
                   // This will now update correctly when the controller's index changes
-                  final isSelected = widget.progressTabController.index == index;
-                  
+                  final isSelected =
+                      widget.progressTabController.index == index;
+
                   return ProgressTabItemWidget(
                     label: label,
                     index: index,

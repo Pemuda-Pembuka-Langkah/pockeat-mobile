@@ -2,12 +2,13 @@ import 'package:pockeat/features/food_log_history/domain/models/food_log_history
 import '../nutrient_calculation_strategy.dart';
 
 /// Default implementation of nutrient calculation strategy
-class DefaultNutrientCalculationStrategy implements NutrientCalculationStrategy {
-
+class DefaultNutrientCalculationStrategy
+    implements NutrientCalculationStrategy {
   @override
-  double calculateNutrientFromLogs(List<FoodLogHistoryItem> logs, String nutrientType) {
+  double calculateNutrientFromLogs(
+      List<FoodLogHistoryItem> logs, String nutrientType) {
     double total = 0;
-    
+
     for (final log in logs) {
       switch (nutrientType) {
         case 'protein':
@@ -21,7 +22,7 @@ class DefaultNutrientCalculationStrategy implements NutrientCalculationStrategy 
           break;
       }
     }
-    
+
     return total;
   }
 }

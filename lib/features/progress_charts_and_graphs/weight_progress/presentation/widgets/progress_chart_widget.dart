@@ -7,7 +7,7 @@ class ProgressChartWidget extends StatefulWidget {
   final String selectedPeriod;
   final Function(String?) onPeriodChanged;
   final Color primaryPink;
-  
+
   const ProgressChartWidget({
     super.key,
     required this.periodData,
@@ -36,7 +36,7 @@ class _ProgressChartWidgetState extends State<ProgressChartWidget> {
   void didUpdateWidget(ProgressChartWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Update if periodData changes from parent or if selectedPeriod changes
-    if (oldWidget.periodData != widget.periodData || 
+    if (oldWidget.periodData != widget.periodData ||
         oldWidget.selectedPeriod != widget.selectedPeriod) {
       _selectedPeriod = widget.selectedPeriod;
       _updateChartSeries();
@@ -122,7 +122,8 @@ class _ProgressChartWidgetState extends State<ProgressChartWidget> {
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
-                        items: ['Daily', 'Weekly', 'Monthly'].map((String value) {
+                        items:
+                            ['Daily', 'Weekly', 'Monthly'].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(value),

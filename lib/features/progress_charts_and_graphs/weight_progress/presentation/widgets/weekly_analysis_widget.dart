@@ -5,7 +5,7 @@ class WeeklyAnalysisWidget extends StatelessWidget {
   final WeeklyAnalysis weeklyAnalysis;
   final Color primaryGreen;
   final Color primaryPink;
-  
+
   const WeeklyAnalysisWidget({
     super.key,
     required this.weeklyAnalysis,

@@ -282,7 +282,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       if (coldStartResult != null) {
         _handleDeepLink(coldStartResult);
       }
-  
+
       await deepLinkService.initialize();
 
       // Setup listener untuk deep link events
@@ -409,7 +409,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/scan': (context) => AuthWrapper(
               child: ScanFoodPage(
                 cameraController: CameraController(
-                  CameraDescription(
+                  const CameraDescription(
                     name: '0',
                     lensDirection: CameraLensDirection.back,
                     sensorOrientation: 0,

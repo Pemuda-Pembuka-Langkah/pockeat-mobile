@@ -6,7 +6,7 @@ class GoalsCardWidget extends StatelessWidget {
   final Color primaryGreen;
   final Color primaryPink;
   final Color primaryYellow;
-  
+
   const GoalsCardWidget({
     super.key,
     required this.weightGoal,
@@ -64,11 +64,14 @@ class GoalsCardWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildGoalDetail('Starting', weightGoal.startingWeight, weightGoal.startingDate, Icons.history),
+              _buildGoalDetail('Starting', weightGoal.startingWeight,
+                  weightGoal.startingDate, Icons.history),
               Container(height: 40, width: 1, color: Colors.grey[200]),
-              _buildGoalDetail('Target', weightGoal.targetWeight, weightGoal.targetDate, Icons.flag),
+              _buildGoalDetail('Target', weightGoal.targetWeight,
+                  weightGoal.targetDate, Icons.flag),
               Container(height: 40, width: 1, color: Colors.grey[200]),
-              _buildGoalDetail('To Go', weightGoal.remainingWeight, weightGoal.daysLeft, Icons.trending_down),
+              _buildGoalDetail('To Go', weightGoal.remainingWeight,
+                  weightGoal.daysLeft, Icons.trending_down),
             ],
           ),
           const SizedBox(height: 16),
@@ -81,7 +84,8 @@ class GoalsCardWidget extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.tips_and_updates, color: Color(0xFFFFB946), size: 20),
+                const Icon(Icons.tips_and_updates,
+                    color: Color(0xFFFFB946), size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -100,7 +104,8 @@ class GoalsCardWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildGoalDetail(String label, String value, String subtitle, IconData icon) {
+  Widget _buildGoalDetail(
+      String label, String value, String subtitle, IconData icon) {
     return Column(
       children: [
         Container(

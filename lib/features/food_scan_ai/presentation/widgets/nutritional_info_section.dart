@@ -77,4 +77,4 @@ class NutritionalInfoSection extends StatelessWidget {
       ),
     );
   }
-} 
+}

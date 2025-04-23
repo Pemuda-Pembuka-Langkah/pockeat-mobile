@@ -23,7 +23,8 @@ class HealthMetricsRepositoryImpl implements HealthMetricsRepository {
   @override
   Future<HealthMetricsModel?> getHealthMetrics(String userId) async {
     try {
-      final doc = await firestore.collection('health_metrics').doc(userId).get();
+      final doc =
+          await firestore.collection('health_metrics').doc(userId).get();
 
       if (!doc.exists) return null;
 

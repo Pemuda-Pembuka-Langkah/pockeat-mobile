@@ -146,58 +146,58 @@ class _OverviewSectionState extends State<OverviewSection> {
           Column(
             children: [
               SizedBox(
-              height: 300,
-              child: PageView(
-                controller: _pageController,
-                children: [
-                  _buildCaloriesToday(),
-                  _buildFitnessTrackerSection(),
-                ],
+                height: 300,
+                child: PageView(
+                  controller: _pageController,
+                  children: [
+                    _buildCaloriesToday(),
+                    _buildFitnessTrackerSection(),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            _buildPageIndicator(),
-          ],
-        ),
+              const SizedBox(height: 12),
+              _buildPageIndicator(),
+            ],
+          ),
 
-        // Nutrients Grid
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildNutrientCard(
-                title: 'Protein',
-                current: '45',
-                target: '120g',
-                icon: Icons.egg_outlined,
-                iconColor: primaryPink,
-                bgColor: primaryPink.withOpacity(0.1),
+          // Nutrients Grid
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildNutrientCard(
+                  title: 'Protein',
+                  current: '45',
+                  target: '120g',
+                  icon: Icons.egg_outlined,
+                  iconColor: primaryPink,
+                  bgColor: primaryPink.withOpacity(0.1),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildNutrientCard(
-                title: 'Carbs',
-                current: '156',
-                target: '250g',
-                icon: Icons.grain,
-                iconColor: primaryGreen,
-                bgColor: primaryGreen.withOpacity(0.1),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildNutrientCard(
+                  title: 'Carbs',
+                  current: '156',
+                  target: '250g',
+                  icon: Icons.grain,
+                  iconColor: primaryGreen,
+                  bgColor: primaryGreen.withOpacity(0.1),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildNutrientCard(
-                title: 'Fat',
-                current: '25',
-                target: '65g',
-                icon: Icons.water_drop_outlined,
-                iconColor: const Color(0xFFFFB946),
-                bgColor: const Color(0xFFFFB946).withOpacity(0.1),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildNutrientCard(
+                  title: 'Fat',
+                  current: '25',
+                  target: '65g',
+                  icon: Icons.water_drop_outlined,
+                  iconColor: const Color(0xFFFFB946),
+                  bgColor: const Color(0xFFFFB946).withOpacity(0.1),
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ],
       ),
     );

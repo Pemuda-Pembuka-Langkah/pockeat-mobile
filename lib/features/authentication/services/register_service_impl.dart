@@ -17,7 +17,7 @@ class RegisterServiceImpl implements RegisterService {
         // coverage:ignore-start
         _userRepository = userRepository ??
             UserRepositoryImpl(auth: auth, firestore: firestore);
-        // coverage:ignore-end
+  // coverage:ignore-end
 
   /// Validasi email
   bool _isValidEmail(String email) {
@@ -198,4 +198,4 @@ class RegisterServiceImpl implements RegisterService {
       return false;
     }
   }
-}  
+}

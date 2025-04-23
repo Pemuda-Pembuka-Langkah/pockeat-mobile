@@ -6,12 +6,12 @@ import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart
 class SwimmingDetailWidget extends StatelessWidget {
   final SwimmingActivity activity;
   final Color primaryColor = const Color(0xFFFF6B6B); // Cardio color
-  
+
   const SwimmingDetailWidget({
     super.key,
     required this.activity,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -30,7 +30,7 @@ class SwimmingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildHeaderCard(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -114,16 +114,16 @@ class SwimmingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMetricsCard(BuildContext context) {
     // Calculate pace per 100m
-    final pace100m = activity.totalDistance > 0 
-        ? (activity.duration.inSeconds / (activity.totalDistance / 100)) 
+    final pace100m = activity.totalDistance > 0
+        ? (activity.duration.inSeconds / (activity.totalDistance / 100))
         : 0;
     final paceMinutes = (pace100m / 60).floor();
     final paceSeconds = (pace100m % 60).round();
     final paceText = '$paceMinutes:${paceSeconds.toString().padLeft(2, '0')}';
-    
+
     return Card(
       elevation: 3,
       shadowColor: Colors.black26,
@@ -162,7 +162,7 @@ class SwimmingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildVerticalDivider() {
     return Container(
       width: 1,
@@ -170,7 +170,7 @@ class SwimmingDetailWidget extends StatelessWidget {
       color: Colors.grey.withOpacity(0.2),
     );
   }
-  
+
   Widget _buildMetricItem({
     required IconData icon,
     required String value,
@@ -219,15 +219,15 @@ class SwimmingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildDetailsList(BuildContext context) {
     // Calculate pace per 100m
-    final pace100m = activity.totalDistance > 0 
-        ? (activity.duration.inSeconds / (activity.totalDistance / 100)) 
+    final pace100m = activity.totalDistance > 0
+        ? (activity.duration.inSeconds / (activity.totalDistance / 100))
         : 0;
     final paceMinutes = (pace100m / 60).floor();
     final paceSeconds = (pace100m % 60).round();
-    
+
     return Card(
       elevation: 3,
       shadowColor: Colors.black26,
@@ -256,17 +256,21 @@ class SwimmingDetailWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildDetailRow('Date', DateFormat('dd MMM yyyy').format(activity.date)),
+            _buildDetailRow(
+                'Date', DateFormat('dd MMM yyyy').format(activity.date)),
             _buildDetailDivider(),
-            _buildDetailRow('Start Time', DateFormat('HH:mm').format(activity.startTime)),
+            _buildDetailRow(
+                'Start Time', DateFormat('HH:mm').format(activity.startTime)),
             _buildDetailDivider(),
-            _buildDetailRow('End Time', DateFormat('HH:mm').format(activity.endTime)),
+            _buildDetailRow(
+                'End Time', DateFormat('HH:mm').format(activity.endTime)),
             _buildDetailDivider(),
             _buildDetailRow('Distance', '${activity.totalDistance.toInt()} m'),
             _buildDetailDivider(),
             _buildDetailRow('Duration', _formatDuration(activity.duration)),
             _buildDetailDivider(),
-            _buildDetailRow('Pace (100m)', '$paceMinutes:${paceSeconds.toString().padLeft(2, '0')}'),
+            _buildDetailRow('Pace (100m)',
+                '$paceMinutes:${paceSeconds.toString().padLeft(2, '0')}'),
             _buildDetailDivider(),
             _buildDetailRow('Stroke Style', _getStrokeStyle(activity.stroke)),
             _buildDetailDivider(),
@@ -274,13 +278,14 @@ class SwimmingDetailWidget extends StatelessWidget {
             _buildDetailDivider(),
             _buildDetailRow('Laps', activity.laps.toString()),
             _buildDetailDivider(),
-            _buildDetailRow('Calories Burned', '${activity.caloriesBurned.toInt()} kcal'),
+            _buildDetailRow(
+                'Calories Burned', '${activity.caloriesBurned.toInt()} kcal'),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildDetailDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -290,16 +295,16 @@ class SwimmingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   String _getStrokeStyle(String? style) {
     if (style == null || style.isEmpty) {
       return 'Not specified';
     }
-    
+
     // Capitalize first letter
     return style[0].toUpperCase() + style.substring(1).toLowerCase();
   }
-  
+
   Widget _buildDetailRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -331,7 +336,7 @@ class SwimmingDetailWidget extends StatelessWidget {
       ],
     );
   }
-  
+
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final hours = twoDigits(duration.inHours);

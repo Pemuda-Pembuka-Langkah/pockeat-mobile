@@ -56,4 +56,4 @@ class NotificationModel {
       isRead: map['isRead'] ?? false,
     );
   }
-} 
+}

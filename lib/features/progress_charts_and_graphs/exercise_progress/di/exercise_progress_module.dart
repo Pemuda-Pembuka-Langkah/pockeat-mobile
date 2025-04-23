@@ -8,24 +8,21 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/se
 class ExerciseProgressModule {
   static void register() {
     final getIt = GetIt.instance;
-    
+
     // Register repository
     if (!getIt.isRegistered<ExerciseProgressRepository>()) {
       getIt.registerSingleton<ExerciseProgressRepository>(
-        ExerciseProgressRepositoryImpl(
-          exerciseLogHistoryService: getIt<ExerciseLogHistoryService>(),
-          auth: FirebaseAuth.instance,
-        )
-      );
+          ExerciseProgressRepositoryImpl(
+        exerciseLogHistoryService: getIt<ExerciseLogHistoryService>(),
+        auth: FirebaseAuth.instance,
+      ));
     }
-    
+
     // Register service
     if (!getIt.isRegistered<ExerciseProgressService>()) {
-      getIt.registerSingleton<ExerciseProgressService>(
-        ExerciseProgressService(
-          repository: getIt<ExerciseProgressRepository>(),
-        )
-      );
+      getIt.registerSingleton<ExerciseProgressService>(ExerciseProgressService(
+        repository: getIt<ExerciseProgressRepository>(),
+      ));
     }
   }
 }

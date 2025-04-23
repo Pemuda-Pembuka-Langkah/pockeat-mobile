@@ -169,7 +169,7 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<NotificationService>(
     NotificationServiceImpl(),
   );
-  
+
   // Initialize notifications
   await getIt<NotificationService>().initialize();
   // Register feature modules
@@ -197,12 +197,12 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<BugReportService>(
     BugReportServiceImpl(instabugClient: getIt<InstabugClient>()),
   );
-  
+
   // Register Analytics Service
   getIt.registerSingleton<AnalyticsService>(
     AnalyticsService(),
   );
-  
+
   HomeWidgetModule.register();
 }
 // coverage:ignore-end

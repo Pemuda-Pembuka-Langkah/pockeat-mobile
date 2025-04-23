@@ -33,7 +33,7 @@ class FoodAnalysisResult {
     DateTime? timestamp,
     String? id,
     this.isLowConfidence = false, // Default to high confidence
-    this.userId = '', // Add userId parameter with default value  
+    this.userId = '', // Add userId parameter with default value
   })  : timestamp = timestamp ?? DateTime.now(),
         id = id ?? const Uuid().v4();
 
@@ -114,7 +114,7 @@ class FoodAnalysisResult {
       'timestamp': Timestamp.fromDate(timestamp),
       'id': id,
       'is_low_confidence': isLowConfidence,
-      'userId': userId, 
+      'userId': userId,
     };
   }
 

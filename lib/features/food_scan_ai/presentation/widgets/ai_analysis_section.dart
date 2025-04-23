@@ -53,4 +53,4 @@ class AIAnalysisSection extends StatelessWidget {
       ),
     );
   }
-} 
+}

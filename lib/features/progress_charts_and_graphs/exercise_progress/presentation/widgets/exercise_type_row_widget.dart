@@ -14,7 +14,7 @@ class ExerciseTypeRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color color = Color(exerciseType.colorValue);
-    
+
     return Column(
       children: [
         Row(

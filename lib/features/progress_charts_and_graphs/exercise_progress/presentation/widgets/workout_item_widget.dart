@@ -4,13 +4,13 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/do
 // coverage:ignore-start
 class WorkoutItemWidget extends StatelessWidget {
   final WorkoutItem workoutItem;
-  
+
   // ignore: use_super_parameters
   const WorkoutItemWidget({
     Key? key,
     required this.workoutItem,
   }) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -38,13 +38,13 @@ class WorkoutItemWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(15),
             ),
             child: Icon(
-              workoutItem.icon,  // Use the icon from the workout item
+              workoutItem.icon, // Use the icon from the workout item
               color: Color(workoutItem.colorValue),
               size: 24,
             ),
           ),
           const SizedBox(width: 16),
-          
+
           // Workout details
           Expanded(
             child: Column(
@@ -69,13 +69,14 @@ class WorkoutItemWidget extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Type and time
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: Color(workoutItem.colorValue).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),

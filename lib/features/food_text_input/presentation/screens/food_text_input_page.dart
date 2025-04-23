@@ -64,8 +64,9 @@ class FoodTextInputPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   child: FoodEntryForm(
                     onSaved: (FoodEntry foodEntry) {
-                      final foodText = foodEntry.foodDescription; 
-                      final foodTextInputService = getIt<FoodTextInputService>(); 
+                      final foodText = foodEntry.foodDescription;
+                      final foodTextInputService =
+                          getIt<FoodTextInputService>();
 
                       Navigator.push(
                         context,

@@ -48,4 +48,4 @@ class FoodTitleSection extends StatelessWidget {
       ),
     );
   }
-} 
+}

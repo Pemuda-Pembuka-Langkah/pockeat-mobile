@@ -15,17 +15,16 @@ class DailyCalorieStats {
     required this.date,
     required this.caloriesBurned,
     required this.caloriesConsumed,
-  }) : 
-    id = id ?? const Uuid().v4(),
-    netCalories = caloriesConsumed - caloriesBurned;
+  })  : id = id ?? const Uuid().v4(),
+        netCalories = caloriesConsumed - caloriesBurned;
 
   Map<String, dynamic> toMap() => {
-    'userId': userId,
-    'date': Timestamp.fromDate(DateTime(date.year, date.month, date.day)),
-    'caloriesBurned': caloriesBurned,
-    'caloriesConsumed': caloriesConsumed,
-    'netCalories': netCalories,
-  };
+        'userId': userId,
+        'date': Timestamp.fromDate(DateTime(date.year, date.month, date.day)),
+        'caloriesBurned': caloriesBurned,
+        'caloriesConsumed': caloriesConsumed,
+        'netCalories': netCalories,
+      };
 
   factory DailyCalorieStats.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;

@@ -15,6 +15,7 @@ import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tr
 import 'package:pockeat/features/home_screen_widget/services/impl/detailed_food_tracking_widget_service.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/simple_food_tracking_widget_service.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
+
 // coverage:ignore-start
 /// Module untuk dependency injection widget home screen
 class HomeWidgetModule {
@@ -27,14 +28,14 @@ class HomeWidgetModule {
         appGroupId: HomeWidgetConfig.appGroupId.value,
       ),
     );
-    
+
     getIt.registerLazySingleton<WidgetDataService<DetailedFoodTracking>>(
       () => DetailedFoodTrackingWidgetService(
         widgetName: HomeWidgetConfig.detailedWidgetName.value,
         appGroupId: HomeWidgetConfig.appGroupId.value,
       ),
     );
-    
+
     // 2. Register controller-controller spesifik
     getIt.registerLazySingleton<SimpleFoodTrackingController>(
       () => SimpleFoodTrackingController(
@@ -42,14 +43,14 @@ class HomeWidgetModule {
         foodLogHistoryService: getIt<FoodLogHistoryService>(),
       ),
     );
-    
+
     getIt.registerLazySingleton<DetailedFoodTrackingController>(
       () => DetailedFoodTrackingController(
         widgetService: getIt<WidgetDataService<DetailedFoodTracking>>(),
         foodLogHistoryService: getIt<FoodLogHistoryService>(),
       ),
     );
-    
+
     // 3. Register client controller yang mengelola keseluruhan widget
     getIt.registerLazySingleton<FoodTrackingClientController>(
       () => FoodTrackingClientControllerImpl(
@@ -62,17 +63,17 @@ class HomeWidgetModule {
       ),
     );
   }
-  
+
   /// Mendapatkan controller untuk simple food tracking
   static SimpleFoodTrackingController getSimpleController() {
     return getIt<SimpleFoodTrackingController>();
   }
-  
+
   /// Mendapatkan controller untuk detailed food tracking
   static DetailedFoodTrackingController getDetailedController() {
     return getIt<DetailedFoodTrackingController>();
   }
-  
+
   /// Mendapatkan client controller untuk koordinasi semua controller
   static FoodTrackingClientController getClientController() {
     return getIt<FoodTrackingClientController>();

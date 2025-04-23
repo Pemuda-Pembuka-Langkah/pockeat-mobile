@@ -17,7 +17,7 @@ final logger = Logger();
 
 class NutritionProgressPage extends StatefulWidget {
   final NutritionService service;
-  
+
   // ignore: use_super_parameters
   const NutritionProgressPage({
     Key? key,
@@ -32,11 +32,11 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
-  
+
   bool isWeeklyView = true;
   bool isLoading = true;
   bool isChartLoading = false;
-  
+
   // Use direct state variables instead of futures
   List<CalorieData> _calorieData = [];
   List<NutritionStat> _nutritionStats = [];
@@ -54,7 +54,7 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
     setState(() {
       isLoading = true;
     });
-    
+
     try {
       // Load all data in parallel
       final results = await Future.wait([
@@ -64,7 +64,7 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
         widget.service.getMicroNutrients(),
         widget.service.getMeals(),
       ]);
-      
+
       setState(() {
         _calorieData = results[0] as List<CalorieData>;
         _nutritionStats = results[1] as List<NutritionStat>;
@@ -83,17 +83,17 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
 
   void _toggleView(bool weekly) async {
     if (weekly == isWeeklyView) return;
-    
+
     setState(() {
       isWeeklyView = weekly;
       // Only set chart loading to true, don't clear the data
       isChartLoading = true;
     });
-    
+
     try {
       // Only reload the calorie data (chart data)
       final newCalorieData = await widget.service.getCalorieData(weekly);
-      
+
       setState(() {
         _calorieData = newCalorieData;
         isChartLoading = false;
@@ -111,7 +111,7 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     return SingleChildScrollView(
       child: Container(
         padding: const EdgeInsets.all(16),

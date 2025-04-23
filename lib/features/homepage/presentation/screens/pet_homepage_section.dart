@@ -54,7 +54,6 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
           // Streak Counter
           StreakCounterWidget(streakDays: widget.streakDays),
           const SizedBox(height: 16),
-
         ],
       ),
     );

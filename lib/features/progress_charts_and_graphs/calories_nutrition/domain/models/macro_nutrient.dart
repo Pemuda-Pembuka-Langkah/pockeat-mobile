@@ -6,7 +6,7 @@ class MacroNutrient {
   final int percentage;
   final String detail;
   final Color color;
-  
+
   MacroNutrient({
     required this.label,
     required this.percentage,

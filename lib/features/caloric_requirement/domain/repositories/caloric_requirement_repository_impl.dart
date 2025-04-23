@@ -28,7 +28,8 @@ class CaloricRequirementRepositoryImpl implements CaloricRequirementRepository {
   @override
   Future<CaloricRequirementModel?> getCaloricRequirement(String userId) async {
     try {
-      final doc = await firestore.collection('caloric_requirements').doc(userId).get();
+      final doc =
+          await firestore.collection('caloric_requirements').doc(userId).get();
       if (!doc.exists) return null;
 
       return CaloricRequirementModel.fromFirestore(doc);

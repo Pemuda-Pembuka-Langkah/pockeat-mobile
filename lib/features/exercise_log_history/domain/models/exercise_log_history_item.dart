@@ -16,7 +16,8 @@ class ExerciseLogHistoryItem {
   final String subtitle;
   final DateTime timestamp;
   final num caloriesBurned;
-  final String? sourceId; // ID dari data sumber (misalnya ID dari SmartExerciseLog)
+  final String?
+      sourceId; // ID dari data sumber (misalnya ID dari SmartExerciseLog)
   // Konstanta untuk tipe aktivitas umum
   static const String typeSmartExercise = 'smart_exercise';
   static const String typeWeightlifting = 'weightlifting';
@@ -87,7 +88,7 @@ class ExerciseLogHistoryItem {
     // Calculate total duration in minutes
     double totalDurationInMinutes =
         weightLifting.sets.fold(0.0, (sum, set) => sum + set.duration);
-        
+
     // Calculate calories burned using workout service
     int caloriesBurned = calculateExerciseCalories(weightLifting).round();
 
@@ -120,8 +121,9 @@ class ExerciseLogHistoryItem {
 
     // Format durasi dalam format yang lebih user-friendly
     final minutes = cardioLog.duration.inMinutes;
-    final durationText =
-        minutes > 0 ? '$minutes minutes' : '${cardioLog.duration.inSeconds} seconds';
+    final durationText = minutes > 0
+        ? '$minutes minutes'
+        : '${cardioLog.duration.inSeconds} seconds';
 
     return ExerciseLogHistoryItem(
       activityType: typeCardio,

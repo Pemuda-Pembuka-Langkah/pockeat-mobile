@@ -10,6 +10,7 @@ import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repositor
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
+
 // coverage:ignore-start
 class ExerciseLogHistoryModule {
   static void register() {
@@ -50,4 +51,4 @@ class ExerciseLogHistoryModule {
     }
   }
 }
- // coverage:ignore-end
+// coverage:ignore-end

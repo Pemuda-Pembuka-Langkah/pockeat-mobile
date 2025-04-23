@@ -126,7 +126,7 @@ class LoginServiceImpl implements LoginService {
     } catch (e) {
       return null;
     }
-  // coverage:ignore-end
+    // coverage:ignore-end
   }
 
   /// Membersihkan resource ketika service tidak digunakan lagi

@@ -74,6 +74,8 @@ dependencies:
   firebase_performance: ^0.9.4+7
   firebase_analytics: ^10.10.7
 
+  path: any
+  logger: any
 dependency_overrides:
   analyzer: 7.3.0
 
@@ -93,13 +95,9 @@ dev_dependencies:
   build_runner: ^2.3.3
 
 # Husky configuration
+# Kami menggunakan file konfigurasi manual di folder .husky
 husky:
-  pre-commit: |
-    echo "Running pre-commit checks on entire codebase..."
-    dart format lib --set-exit-if-changed
-    dart analyze lib --fatal-infos --fatal-warnings
-    dart run import_sorter:main
-    flutter test
+  skip_hooks: true
 
   # For information on the generic Dart part of this file, see the
   # following page: https://dart.dev/tools/pub/pubspec

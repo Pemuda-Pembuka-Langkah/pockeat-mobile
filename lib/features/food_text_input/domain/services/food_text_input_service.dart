@@ -3,17 +3,15 @@ import 'package:pockeat/features/api_scan/services/food/food_text_analysis_servi
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 class FoodTextInputService {
   final FoodTextAnalysisService _foodTextAnalysisService;
   final FoodTextInputRepository _foodTextInputRepository;
   final FirebaseAuth _auth;
 
   FoodTextInputService(
-    this._foodTextAnalysisService, 
-    this._foodTextInputRepository, 
-    {FirebaseAuth? auth}
-  ) : _auth = auth ?? FirebaseAuth.instance;
+      this._foodTextAnalysisService, this._foodTextInputRepository,
+      {FirebaseAuth? auth})
+      : _auth = auth ?? FirebaseAuth.instance;
 
   /// Analyzes food description and returns the analysis result
   Future<FoodAnalysisResult> analyzeFoodText(String description) async {
@@ -25,16 +23,17 @@ class FoodTextInputService {
   }
 
   /// Saves the food analysis result to the database
-  Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult, {bool isCorrected = false}) async {
+  Future<String> saveFoodAnalysis(FoodAnalysisResult analysisResult,
+      {bool isCorrected = false}) async {
     try {
       final String analysisId = analysisResult.id;
-      
+
       // Get current user's ID
       final userId = _auth.currentUser?.uid ?? '';
-      
+
       // Create a new analysis result with userId
       final resultWithUserId = analysisResult.copyWith(userId: userId);
-      
+
       await _foodTextInputRepository.save(resultWithUserId, analysisId);
       return 'Food analysis saved successfully';
     } catch (e) {
@@ -43,9 +42,11 @@ class FoodTextInputService {
   }
 
   /// Corrects a food analysis result based on user feedback
-  Future<FoodAnalysisResult> correctFoodAnalysis(FoodAnalysisResult previousResult, String userComment) async {
+  Future<FoodAnalysisResult> correctFoodAnalysis(
+      FoodAnalysisResult previousResult, String userComment) async {
     try {
-      return await _foodTextAnalysisService.correctAnalysis(previousResult, userComment);
+      return await _foodTextAnalysisService.correctAnalysis(
+          previousResult, userComment);
     } catch (e) {
       throw Exception('Food analysis correction failed: ${e.toString()}');
     }

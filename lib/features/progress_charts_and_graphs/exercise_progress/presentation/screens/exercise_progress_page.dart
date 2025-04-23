@@ -19,7 +19,7 @@ final logger = Logger();
 
 class ExerciseProgressPage extends StatefulWidget {
   final ExerciseProgressService service;
-  
+
   // ignore: use_super_parameters
   const ExerciseProgressPage({
     Key? key,
@@ -34,11 +34,11 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
-  
+
   // Track the current view directly with a boolean instead of a Future
   bool isWeeklyView = true;
   bool isLoading = true;
-  
+
   // Initialize with empty lists instead of late futures
   List<ExerciseData> _exerciseData = [];
   List<WorkoutStat> _workoutStats = [];
@@ -57,11 +57,11 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
     setState(() {
       isLoading = true;
     });
-    
+
     try {
       // First load the view preference
       isWeeklyView = await widget.service.getSelectedViewPeriod();
-      
+
       // Then load all data in parallel
       final results = await Future.wait([
         widget.service.getExerciseData(isWeeklyView),
@@ -71,7 +71,7 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
         widget.service.getWorkoutHistory(),
         widget.service.getCompletionPercentage(),
       ]);
-      
+
       // Update state with all results
       setState(() {
         _exerciseData = results[0] as List<ExerciseData>;
@@ -92,18 +92,18 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
 
   void _toggleView(bool weekly) async {
     if (weekly == isWeeklyView) return;
-    
+
     setState(() {
       isWeeklyView = weekly;
       // Only show loading indicator for exercise data that's changing
       _exerciseData = [];
     });
-    
+
     try {
       // Only update the view preference and reload exercise data
       await widget.service.setSelectedViewPeriod(weekly);
       final newExerciseData = await widget.service.getExerciseData(weekly);
-      
+
       setState(() {
         _exerciseData = newExerciseData;
       });
@@ -117,7 +117,7 @@ class _ExerciseProgressPageState extends State<ExerciseProgressPage> {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     return SingleChildScrollView(
       child: Container(
         padding: const EdgeInsets.all(16),

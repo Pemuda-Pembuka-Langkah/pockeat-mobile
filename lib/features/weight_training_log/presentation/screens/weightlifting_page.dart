@@ -14,7 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class WeightliftingPage extends StatefulWidget {
   final WeightLiftingRepository? repository;
   final FirebaseAuth? auth;
-  
+
   const WeightliftingPage({super.key, this.repository, this.auth});
 
   @override
@@ -24,13 +24,14 @@ class WeightliftingPage extends StatefulWidget {
 class _WeightliftingPageState extends State<WeightliftingPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryGreen = const Color(0xFF4ECDC4);
-  
+
   // Repository instance
   late final WeightLiftingRepository _exerciseRepository;
   // Auth instance
   late final FirebaseAuth _auth;
-  
-  final Map<String, Map<String, double>> exercisesByCategory = WeightLiftingRepositoryImpl.exercisesByCategory;
+
+  final Map<String, Map<String, double>> exercisesByCategory =
+      WeightLiftingRepositoryImpl.exercisesByCategory;
 
   String selectedBodyPart = 'Upper Body';
   List<WeightLifting> exercises = [];
@@ -40,9 +41,10 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   void initState() {
     super.initState();
     // Initialize repository - use injected repository if available, otherwise create new one
-    _exerciseRepository = widget.repository ?? WeightLiftingRepositoryImpl(
-      firestore: FirebaseFirestore.instance,
-    );
+    _exerciseRepository = widget.repository ??
+        WeightLiftingRepositoryImpl(
+          firestore: FirebaseFirestore.instance,
+        );
     // Initialize auth - use injected auth if available, otherwise use Firebase instance
     _auth = widget.auth ?? FirebaseAuth.instance;
   }
@@ -50,20 +52,18 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   void addExercise(String name) {
     // Check if exercise with this name already exists
     bool isDuplicate = exercises.any((exercise) => exercise.name == name);
-    
+
     if (isDuplicate) {
       // Show a snackbar instead of adding duplicate
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$name is already in your workout'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 2),
-        )
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('$name is already in your workout'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 2),
+      ));
     } else {
       // Get current user ID
       final userId = _auth.currentUser?.uid ?? '';
-      
+
       setState(() {
         exercises.add(WeightLifting(
           name: name,
@@ -75,9 +75,11 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     }
   }
 
-  void addSet(WeightLifting exercise, double weight, int reps, double duration) {
+  void addSet(
+      WeightLifting exercise, double weight, int reps, double duration) {
     setState(() {
-      exercise.sets.add(WeightLiftingSet(weight: weight, reps: reps, duration: duration));
+      exercise.sets.add(
+          WeightLiftingSet(weight: weight, reps: reps, duration: duration));
     });
   }
 
@@ -87,15 +89,13 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     setState(() {
       exercises.remove(exercise);
     });
-    
+
     // Show a snackbar to confirm deletion
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${exercise.name} deleted from your workout'),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 2),
-      )
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('${exercise.name} deleted from your workout'),
+      backgroundColor: Colors.red,
+      duration: const Duration(seconds: 2),
+    ));
   }
 
   void deleteSet(WeightLifting exercise, int setIndex) {
@@ -107,39 +107,37 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   // New method to save workout to repository
   Future<void> saveWorkout() async {
     if (exercises.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No exercises to save'))
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('No exercises to save')));
       return;
     }
 
     // Check if any exercise has no sets
     for (final exercise in exercises) {
       if (exercise.sets.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${exercise.name} has no sets. Add at least one set to each exercise.'),
-            backgroundColor: Colors.red,
-          )
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              '${exercise.name} has no sets. Add at least one set to each exercise.'),
+          backgroundColor: Colors.red,
+        ));
         return;
       }
     }
 
     setState(() => _isSaving = true);
-    
+
     try {
       // Get current user ID
       final userId = _auth.currentUser?.uid;
-      
+
       // Verify user is logged in
       if (userId == null || userId.isEmpty) {
         throw Exception('You must be logged in to save a workout');
       }
-      
+
       // Save each exercise
       List<Future<String>> saveFutures = [];
-      
+
       for (final exercise in exercises) {
         // Add date to exercise JSON before saving
         final exerciseWithDate = WeightLifting(
@@ -150,39 +148,36 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           sets: exercise.sets,
           userId: userId, // Ensure user ID is set on save
         );
-        
+
         // Save exercise to repository
         saveFutures.add(_exerciseRepository.saveExercise(exerciseWithDate));
       }
-      
+
       // Wait for all exercises to be saved
       await Future.wait(saveFutures);
-      
+
       // Show success message
       if (mounted) {
         // Show success SnackBar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Workout saved successfully! Total volume: ${calculateTotalVolume(exercises).toStringAsFixed(1)} kg'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          )
-        );
-        
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              'Workout saved successfully! Total volume: ${calculateTotalVolume(exercises).toStringAsFixed(1)} kg'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ));
+
         // Clear workout after successful save
         clearWorkout();
-        
+
         // Navigate back immediately without waiting for SnackBar to close
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to save workout: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          )
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Failed to save workout: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ));
       }
     } finally {
       if (mounted) {
@@ -196,7 +191,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     final weightController = TextEditingController();
     final repsController = TextEditingController();
     final durationController = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -205,19 +200,20 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildTextField('Weight (kg)', weightController, const Key('weightkgField')),
+            _buildTextField(
+                'Weight (kg)', weightController, const Key('weightkgField')),
             const SizedBox(height: 16),
             _buildTextField('Reps', repsController, const Key('repsField')),
             const SizedBox(height: 16),
-            _buildTextField('Duration (minutes)', durationController, const Key('durationminutesField')),
+            _buildTextField('Duration (minutes)', durationController,
+                const Key('durationminutesField')),
           ],
         ),
         actions: [
           TextButton(
-            key: const Key('cancelButton'),
-            onPressed: () => Navigator.pop(context), 
-            child: const Text('Cancel')
-          ),
+              key: const Key('cancelButton'),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
           ElevatedButton(
             key: const Key('addButton'),
             onPressed: () {
@@ -225,7 +221,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
               final weight = double.tryParse(weightController.text) ?? 0;
               final reps = int.tryParse(repsController.text) ?? 0;
               final duration = double.tryParse(durationController.text) ?? 0;
-              
+
               if (weight > 0 && reps > 0 && duration > 0) {
                 addSet(exercise, weight, reps, duration);
                 Navigator.pop(context);
@@ -233,7 +229,8 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
                 // Show error message if validation fails
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Please enter valid values for weight, reps, and duration'),
+                    content: Text(
+                        'Please enter valid values for weight, reps, and duration'),
                     duration: Duration(seconds: 2),
                   ),
                 );
@@ -246,17 +243,18 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     );
   }
 
-  Text _buildDialogTitle(String text) => Text(text, style: const TextStyle(fontWeight: FontWeight.w600));
+  Text _buildDialogTitle(String text) =>
+      Text(text, style: const TextStyle(fontWeight: FontWeight.w600));
 
-  TextField _buildTextField(String label, TextEditingController controller, Key key) {
+  TextField _buildTextField(
+      String label, TextEditingController controller, Key key) {
     return TextField(
       key: key,
       controller: controller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
-        labelText: label, 
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))
-      ),
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
     );
   }
 
@@ -267,7 +265,10 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       backgroundColor: primaryYellow,
       appBar: _buildAppBar(),
       body: _buildBody(),
-      bottomNavigationBar: exercises.isNotEmpty && calculateTotalVolume(exercises) > 0 ? _buildBottomBar() : null,
+      bottomNavigationBar:
+          exercises.isNotEmpty && calculateTotalVolume(exercises) > 0
+              ? _buildBottomBar()
+              : null,
     );
   }
 
@@ -276,8 +277,11 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       key: const Key('appBar'),
       backgroundColor: primaryYellow,
       elevation: 0,
-      leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
-      title: const Text('Weightlifting', style: TextStyle(fontWeight: FontWeight.w600)),
+      leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context)),
+      title: const Text('Weightlifting',
+          style: TextStyle(fontWeight: FontWeight.w600)),
       actions: [
         Opacity(
           opacity: 0.0,
@@ -304,16 +308,17 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           const SizedBox(height: 24),
           _buildExerciseQuickAdd(),
           const SizedBox(height: 24),
-          if (exercises.isNotEmpty) WorkoutSummary(
-            key: const Key('workoutSummary'),
-            exerciseCount: exercises.length,
-            totalSets: calculateTotalSets(exercises),
-            totalReps: calculateTotalReps(exercises),
-            totalVolume: calculateTotalVolume(exercises),
-            totalDuration: calculateTotalDuration(exercises),
-            estimatedCalories: calculateEstimatedCalories(exercises),
-            primaryGreen: primaryGreen,
-          ),
+          if (exercises.isNotEmpty)
+            WorkoutSummary(
+              key: const Key('workoutSummary'),
+              exerciseCount: exercises.length,
+              totalSets: calculateTotalSets(exercises),
+              totalReps: calculateTotalReps(exercises),
+              totalVolume: calculateTotalVolume(exercises),
+              totalDuration: calculateTotalDuration(exercises),
+              estimatedCalories: calculateEstimatedCalories(exercises),
+              primaryGreen: primaryGreen,
+            ),
           ...exercises.map((exercise) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: ExerciseCard(
@@ -331,23 +336,25 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     );
   }
 
-  Widget _buildSectionTitle(String title) => Text(title, style: const TextStyle(fontWeight: FontWeight.w600));
+  Widget _buildSectionTitle(String title) =>
+      Text(title, style: const TextStyle(fontWeight: FontWeight.w600));
 
   Widget _buildBodyPartChips() {
     return SingleChildScrollView(
       key: const Key('bodyPartChips'),
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: exercisesByCategory.keys.map((category) => Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: BodyPartChip(
-            key: Key('bodyPartChip_$category'),
-            category: category,
-            isSelected: selectedBodyPart == category,
-            onTap: () => setState(() => selectedBodyPart = category),
-            primaryGreen: primaryGreen
-          ),
-        )).toList(),
+        children: exercisesByCategory.keys
+            .map((category) => Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: BodyPartChip(
+                      key: Key('bodyPartChip_$category'),
+                      category: category,
+                      isSelected: selectedBodyPart == category,
+                      onTap: () => setState(() => selectedBodyPart = category),
+                      primaryGreen: primaryGreen),
+                ))
+            .toList(),
       ),
     );
   }
@@ -356,7 +363,10 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     return Container(
       key: const Key('exerciseQuickAdd'),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)]),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -365,12 +375,14 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: (exercisesByCategory[selectedBodyPart]?.keys ?? []).map((exercise) => ExerciseChipWidget(
-                  key: Key('exerciseChip_$exercise'),
-                  exerciseName: exercise,
-                  onTap: () => addExercise(exercise),
-                  primaryGreen: primaryGreen,
-                )).toList(),
+            children: (exercisesByCategory[selectedBodyPart]?.keys ?? [])
+                .map((exercise) => ExerciseChipWidget(
+                      key: Key('exerciseChip_$exercise'),
+                      exerciseName: exercise,
+                      onTap: () => addExercise(exercise),
+                      primaryGreen: primaryGreen,
+                    ))
+                .toList(),
           ),
         ],
       ),
@@ -379,9 +391,9 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
   // Updated to use the saveWorkout method
   Widget _buildBottomBar() => BottomBar(
-    key: const Key('bottomBar'),
-    totalVolume: calculateTotalVolume(exercises), 
-    primaryGreen: primaryGreen, 
-    onSaveWorkout: _isSaving ? null : saveWorkout,
-  );
+        key: const Key('bottomBar'),
+        totalVolume: calculateTotalVolume(exercises),
+        primaryGreen: primaryGreen,
+        onSaveWorkout: _isSaving ? null : saveWorkout,
+      );
 }

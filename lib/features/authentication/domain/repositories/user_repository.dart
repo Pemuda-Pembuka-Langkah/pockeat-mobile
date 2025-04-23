@@ -32,4 +32,3 @@ abstract class UserRepository {
   /// Me-listen perubahan user yang sedang login
   Stream<UserModel?> currentUserStream();
 }
-

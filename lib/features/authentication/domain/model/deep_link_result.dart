@@ -81,7 +81,7 @@ class DeepLinkResult {
       originalUri: originalUri,
     );
   }
-  
+
   /// Factory constructor untuk login dari widget
   factory DeepLinkResult.login({
     required bool success,
@@ -97,7 +97,7 @@ class DeepLinkResult {
       originalUri: originalUri,
     );
   }
-  
+
   /// Factory constructor untuk dashboard/home dari widget
   factory DeepLinkResult.dashboard({
     required bool success,

@@ -119,7 +119,7 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryPink = const Color(0xFFFF6B6B);
+    const Color primaryPink = Color(0xFFFF6B6B);
 
     return Focus(
       focusNode: _focusNode,
@@ -152,7 +152,7 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
                         color: primaryPink.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Show All',
                         style: TextStyle(
                           color: primaryPink,
@@ -226,7 +226,6 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
                           onTap: () =>
                               _navigateToExerciseDetail(exercises[index]),
                           // coverage:ignore-end
-
                         ),
                       ),
                     ),

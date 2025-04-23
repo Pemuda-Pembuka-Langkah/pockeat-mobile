@@ -13,8 +13,6 @@ import 'package:pockeat/features/exercise_log_history/services/exercise_detail_s
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/exercise_log_history/utils/exercise_sharing_extension.dart';
 
-
-
 /// Detail page for exercise logs with widget composition based on type
 class ExerciseLogDetailPage extends StatefulWidget {
   final String exerciseId;
@@ -130,13 +128,13 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.error_outline,
-                        color: const Color(0xFFFF6B6B),
+                        color: Color(0xFFFF6B6B),
                         size: 64.0,
                       ),
                       const SizedBox(height: 16.0),
-                      Text(
+                      const Text(
                         'Error loading data',
                         style: TextStyle(
                           fontSize: 18.0,
@@ -148,14 +146,14 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
                       Text(
                         snapshot.error.toString(),
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.black54),
+                        style: const TextStyle(color: Colors.black54),
                       ),
                     ],
                   ),
                 ),
               );
             } else if (!snapshot.hasData) {
-              return Center(
+              return const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -164,7 +162,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
                       color: Colors.grey,
                       size: 64.0,
                     ),
-                    const SizedBox(height: 16.0),
+                    SizedBox(height: 16.0),
                     Text(
                       'An error occurred while loading exercise data',
                       textAlign: TextAlign.center,
@@ -335,6 +333,7 @@ class _ExerciseLogDetailPageState extends State<ExerciseLogDetailPage> {
       );
     }
   }
+
 // coverage:ignore:start
   void _shareExercise(dynamic exercise) async {
     try {

@@ -17,7 +17,7 @@ class NutritionModule {
         exerciseLogService: getIt<ExerciseLogHistoryService>(),
       ),
     );
-    
+
     // Register service
     getIt.registerLazySingleton<NutritionService>(
       () => NutritionService(getIt<NutritionRepository>()),

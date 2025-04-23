@@ -127,13 +127,14 @@ class _CorrectionDialogState extends State<CorrectionDialog> {
                     ? null
                     : () async {
                         if (_correctionController.text.trim().isEmpty) return;
-                        
+
                         setState(() {
                           _isSubmitting = true;
                         });
-                        
-                        await widget.onSubmit(_correctionController.text.trim());
-                        
+
+                        await widget
+                            .onSubmit(_correctionController.text.trim());
+
                         if (mounted) {
                           // ignore: use_build_context_synchronously
                           Navigator.pop(context);
@@ -144,15 +145,17 @@ class _CorrectionDialogState extends State<CorrectionDialog> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
                 child: _isSubmitting
-                    ? SizedBox(
+                    ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
                     : const Text(
@@ -217,11 +220,13 @@ class _CorrectionDialogState extends State<CorrectionDialog> {
     if (widget.foodAnalysisResult.ingredients.isEmpty) {
       return "None";
     }
-    
+
     if (widget.foodAnalysisResult.ingredients.length <= 2) {
-      return widget.foodAnalysisResult.ingredients.map((i) => i.name).join(", ");
+      return widget.foodAnalysisResult.ingredients
+          .map((i) => i.name)
+          .join(", ");
     }
-    
+
     return "${widget.foodAnalysisResult.ingredients[0].name}, ${widget.foodAnalysisResult.ingredients[1].name}, +${widget.foodAnalysisResult.ingredients.length - 2} more";
   }
 

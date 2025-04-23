@@ -65,30 +65,34 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   Future<void> _checkHealthMetrics(String uid) async {
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    final onboardingInProgress = prefs.getBool('onboardingInProgress') ?? false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final onboardingInProgress =
+          prefs.getBool('onboardingInProgress') ?? false;
 
-    final healthMetricsCheckService = GetIt.instance<HealthMetricsCheckService>();
-    final completed = await healthMetricsCheckService.hasCompletedOnboarding(uid);
+      final healthMetricsCheckService =
+          GetIt.instance<HealthMetricsCheckService>();
+      final completed =
+          await healthMetricsCheckService.hasCompletedOnboarding(uid);
 
-    // ignore: use_build_context_synchronously
-    final currentRoute = ModalRoute.of(context)?.settings.name;
-    final isInsideOnboardingFlow = currentRoute?.startsWith('/onboarding') ?? false;
+      // ignore: use_build_context_synchronously
+      final currentRoute = ModalRoute.of(context)?.settings.name;
+      final isInsideOnboardingFlow =
+          currentRoute?.startsWith('/onboarding') ?? false;
 
-    // 🛑 Jangan redirect kalau user udah dalam onboarding atau lagi ngisi
-    if ((!completed && !onboardingInProgress) && mounted && !isInsideOnboardingFlow) {
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/onboarding/goal',
-        (route) => false,
-      );
-
+      // 🛑 Jangan redirect kalau user udah dalam onboarding atau lagi ngisi
+      if ((!completed && !onboardingInProgress) &&
+          mounted &&
+          !isInsideOnboardingFlow) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/onboarding/goal',
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      debugPrint("Error checking health metrics: $e");
     }
-  } catch (e) {
-    debugPrint("Error checking health metrics: $e");
   }
-}
-
 
   @override
   Widget build(BuildContext context) {

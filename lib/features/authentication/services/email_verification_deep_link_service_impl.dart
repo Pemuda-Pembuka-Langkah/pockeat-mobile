@@ -204,6 +204,6 @@ class EmailVerificationDeepLinkServiceImpl
         originalError: e,
       );
     }
-  // coverage:ignore-end
+    // coverage:ignore-end
   }
 }

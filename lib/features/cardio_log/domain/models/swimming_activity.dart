@@ -67,7 +67,7 @@ class SwimmingActivity extends CardioActivity {
       caloriesBurned: map['caloriesBurned']?.toDouble() ?? 0.0,
     );
   }
-  
+
   /// Metode untuk membuat salinan dengan beberapa perubahan (immutability)
   SwimmingActivity copyWith({
     String? id,
@@ -91,4 +91,4 @@ class SwimmingActivity extends CardioActivity {
       caloriesBurned: caloriesBurned ?? this.caloriesBurned,
     );
   }
-} 
+}

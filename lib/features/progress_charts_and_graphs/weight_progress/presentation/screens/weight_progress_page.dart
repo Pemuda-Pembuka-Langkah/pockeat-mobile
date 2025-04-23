@@ -12,7 +12,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/pres
 
 class WeightProgressPage extends StatefulWidget {
   final WeightService service;
-  
+
   const WeightProgressPage({
     super.key,
     required this.service,
@@ -26,7 +26,7 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
-  
+
   late Future<String> _selectedPeriodFuture;
   late Future<Map<String, List<WeightData>>> _weightDataFuture;
   late Future<WeightStatus> _weightStatusFuture;
@@ -72,7 +72,7 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
+
                 return HeaderWidget(
                   weightStatus: snapshot.data!,
                   primaryPink: primaryPink,
@@ -89,7 +89,7 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
+
                 return CurrentWeightCardWidget(
                   weightStatus: snapshot.data!,
                   primaryGreen: primaryGreen,
@@ -106,7 +106,7 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
+
                 return GoalsCardWidget(
                   weightGoal: snapshot.data!,
                   primaryGreen: primaryGreen,
@@ -125,7 +125,7 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
+
                 return WeeklyAnalysisWidget(
                   weeklyAnalysis: snapshot.data!,
                   primaryGreen: primaryGreen,
@@ -146,10 +146,11 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
-                final weightData = snapshot.data![0] as Map<String, List<WeightData>>;
+
+                final weightData =
+                    snapshot.data![0] as Map<String, List<WeightData>>;
                 final selectedPeriod = snapshot.data![1] as String;
-                
+
                 return ProgressChartWidget(
                   periodData: weightData,
                   selectedPeriod: selectedPeriod,

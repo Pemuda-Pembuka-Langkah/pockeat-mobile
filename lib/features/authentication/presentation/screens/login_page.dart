@@ -41,7 +41,8 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _loginService = GetIt.instance<LoginService>();
     _analyticsService = GetIt.instance<AnalyticsService>();
-    _analyticsService.logScreenView(screenName: 'login_page', screenClass: 'LoginPage');
+    _analyticsService.logScreenView(
+        screenName: 'login_page', screenClass: 'LoginPage');
   }
 
   @override
@@ -305,7 +306,7 @@ class _LoginPageState extends State<LoginPage> {
                 disabledBackgroundColor: primaryPink.withOpacity(0.5),
               ),
               child: _isLoading
-                  ? CircularProgressIndicator(
+                  ? const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
                   : const Text(

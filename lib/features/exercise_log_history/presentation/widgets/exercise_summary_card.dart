@@ -6,7 +6,6 @@ import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
-
 class ExerciseSummaryCard extends StatelessWidget {
   final GlobalKey cardKey;
   final dynamic exercise;
@@ -414,6 +413,4 @@ class ExerciseSummaryCard extends StatelessWidget {
   String _formatTime(DateTime time) {
     return DateFormat('h:mm a').format(time);
   }
-
-
 }

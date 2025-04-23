@@ -44,7 +44,7 @@ class _NutritionPageState extends State<NutritionPage> {
   List<String> _warnings = [];
   List<Ingredient> _ingredients = [];
   late FoodAnalysisResult? food;
-  
+
   // Track if analysis is being corrected
   bool _isCorrectingAnalysis = false;
 
@@ -68,8 +68,8 @@ class _NutritionPageState extends State<NutritionPage> {
       });
 
       final result = widget.isLabelScan
-          ? await widget.foodScanPhotoService
-              .analyzeNutritionLabelPhoto(File(widget.imagePath), widget.servingSize)
+          ? await widget.foodScanPhotoService.analyzeNutritionLabelPhoto(
+              File(widget.imagePath), widget.servingSize)
           : await widget.foodScanPhotoService
               .analyzeFoodPhoto(File(widget.imagePath));
 
@@ -85,7 +85,7 @@ class _NutritionPageState extends State<NutritionPage> {
       });
     }
   }
-  
+
   // Update UI data with analysis result
   void _updateFoodData(FoodAnalysisResult result) {
     _foodName = result.foodName;
@@ -102,18 +102,18 @@ class _NutritionPageState extends State<NutritionPage> {
     _warnings = result.warnings;
     food = result;
   }
-  
+
   // Handle analysis correction
   void _handleAnalysisCorrected(FoodAnalysisResult correctedResult) {
     setState(() {
       _isCorrectingAnalysis = false;
       _updateFoodData(correctedResult);
     });
-    
+
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Analysis corrected successfully!'),
+      const SnackBar(
+        content: Text('Analysis corrected successfully!'),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
       ),
@@ -124,14 +124,16 @@ class _NutritionPageState extends State<NutritionPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => ScanFoodPage(cameraController: CameraController(
-              CameraDescription(
-                name: '0',
-                lensDirection: CameraLensDirection.back,
-                sensorOrientation: 0,
-              ),
-              ResolutionPreset.max,
-            ),),
+        builder: (context) => ScanFoodPage(
+          cameraController: CameraController(
+            const CameraDescription(
+              name: '0',
+              lensDirection: CameraLensDirection.back,
+              sensorOrientation: 0,
+            ),
+            ResolutionPreset.max,
+          ),
+        ),
       ),
     );
   }
@@ -143,7 +145,8 @@ class _NutritionPageState extends State<NutritionPage> {
         body: FoodAnalysisLoading(
           primaryYellow: primaryYellow,
           primaryPink: primaryPink,
-          message: _isCorrectingAnalysis ? 'Correcting Analysis' : 'Analyzing Food',
+          message:
+              _isCorrectingAnalysis ? 'Correcting Analysis' : 'Analyzing Food',
         ),
       );
     }
@@ -176,7 +179,7 @@ class _NutritionPageState extends State<NutritionPage> {
           setState(() {
             _isCorrectingAnalysis = true;
           });
-          
+
           // Process the correction asynchronously and update UI when done
           Future.delayed(Duration.zero, () {
             _handleAnalysisCorrected(correctedResult);
@@ -250,8 +253,8 @@ class _NutritionPageState extends State<NutritionPage> {
                       warningYellow: warningYellow,
                     ),
                     const SizedBox(height: 100),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 50),
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 50),
                       child: SizedBox(),
                     ),
                   ],

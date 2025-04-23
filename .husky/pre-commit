@@ -1,0 +1,42 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Skip commit message check in pre-commit hook
+# We'll add it to prepare-commit-msg or commit-msg hooks instead
+# For now let's focus on code quality checks
+
+# Commit message validation skipped
+echo "Running pre-commit checks on entire codebase..."
+
+echo "\n🔍 Step 1/5: Fixing lints automatically..."
+echo "Applying dart fix to codebase..."
+dart fix --apply lib
+echo "✅ Auto-fixes applied"
+
+echo "\n🔍 Step 2/5: Formatting code..."
+if ! dart format lib; then
+  echo "❌ Formatting failed"
+  exit 1
+fi
+echo "✅ Formatting successful"
+
+echo "\n🔍 Step 3/5: Analyzing code..."
+if ! dart analyze lib --fatal-infos --fatal-warnings; then
+  echo "❌ Analysis failed - Please fix remaining errors before committing"
+  exit 1
+fi
+echo "✅ Analysis successful"
+
+echo "\n🔍 Step 4/5: Sorting imports..."
+if ! dart run import_sorter:main; then
+  echo "❌ Import sorting failed"
+  exit 1
+fi
+echo "✅ Import sorting successful"
+
+echo "\n🔍 Step 5/5: Running tests..."
+if ! flutter test; then
+  echo "❌ Tests failed - Please fix failing tests before committing"
+  exit 1
+fi
+echo "✅ All tests passed"

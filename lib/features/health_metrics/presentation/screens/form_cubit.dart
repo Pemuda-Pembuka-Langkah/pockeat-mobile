@@ -107,7 +107,8 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
   void setGender(String gender) => emit(state.copyWith(gender: gender));
 
   /// Sets the user's physical activity level.
-  void setActivityLevel(String level) => emit(state.copyWith(activityLevel: level));
+  void setActivityLevel(String level) =>
+      emit(state.copyWith(activityLevel: level));
 
   /// Sets the user's dietary preference/type.
   void setDietType(String type) => emit(state.copyWith(dietType: type));
@@ -144,7 +145,8 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
     final now = DateTime.now();
     int age = now.year - state.birthDate!.year;
     if (now.month < state.birthDate!.month ||
-        (now.month == state.birthDate!.month && now.day < state.birthDate!.day)) {
+        (now.month == state.birthDate!.month &&
+            now.day < state.birthDate!.day)) {
       age--;
     }
 
@@ -169,7 +171,7 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
     await repository.saveHealthMetrics(model);
 
     // Analyze and save caloric requirements
-    try{
+    try {
       final caloricResult = caloricRequirementService.analyze(
         userId: userId,
         model: model,

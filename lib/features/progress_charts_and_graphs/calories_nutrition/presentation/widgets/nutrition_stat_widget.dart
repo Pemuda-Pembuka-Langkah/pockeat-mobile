@@ -4,10 +4,10 @@ import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/d
 // coverage:ignore-start
 class NutritionStatWidget extends StatelessWidget {
   final NutritionStat stat;
-  
+
   // ignore: use_super_parameters
   const NutritionStatWidget({
-    Key? key, 
+    Key? key,
     required this.stat,
   }) : super(key: key);
 

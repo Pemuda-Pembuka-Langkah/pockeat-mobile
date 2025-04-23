@@ -79,9 +79,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Future<void> _sendResetPasswordEmail() async {
     // Dapatkan email user saat ini - dalam test mode, ini akan menggunakan mock
     final auth = widget.testMode ? null : FirebaseAuth.instance;
-    final email = widget.testMode
-        ? 'test@example.com'
-        : auth?.currentUser?.email;
+    final email =
+        widget.testMode ? 'test@example.com' : auth?.currentUser?.email;
 
     if (email == null) {
       setState(() {
@@ -116,7 +115,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           // Handle specific error message for our test case
           _errorMessage = 'Email tidak ditemukan. Silakan login ulang.';
         } else {
-          _errorMessage = 'Gagal mengirim email reset password. Silakan coba lagi.';
+          _errorMessage =
+              'Gagal mengirim email reset password. Silakan coba lagi.';
         }
       });
     } finally {
@@ -178,9 +178,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       } else {
         // Mode ubah password biasa (user sudah login)
         final auth = widget.testMode ? null : FirebaseAuth.instance;
-        final email = widget.testMode
-            ? 'test@example.com'
-            : auth?.currentUser?.email;
+        final email =
+            widget.testMode ? 'test@example.com' : auth?.currentUser?.email;
 
         if (email == null) {
           setState(() {
@@ -236,7 +235,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -282,7 +280,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  
+
                   // Success message if shown
                   if (_showSuccessMessage) ...[
                     const SizedBox(height: 15),

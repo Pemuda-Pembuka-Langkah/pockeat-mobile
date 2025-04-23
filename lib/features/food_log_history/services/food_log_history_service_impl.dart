@@ -11,14 +11,16 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   }) : _foodScanRepository = foodScanRepository;
 
   @override
-  Future<List<FoodLogHistoryItem>> getAllFoodLogs(String userId, {int? limit}) async {
+  Future<List<FoodLogHistoryItem>> getAllFoodLogs(String userId,
+      {int? limit}) async {
     try {
       final foodScanResults = await _foodScanRepository.getAll(limit: limit);
-      final filteredResults = foodScanResults.where((result) => result.userId == userId).toList();
+      final filteredResults =
+          foodScanResults.where((result) => result.userId == userId).toList();
       final foodItems = _convertFoodAnalysisResults(filteredResults);
-      
+
       foodItems.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      
+
       if (limit != null && foodItems.length > limit) {
         return foodItems.sublist(0, limit);
       }
@@ -30,11 +32,14 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   }
 
   @override
-  Future<List<FoodLogHistoryItem>> getFoodLogsByDate(String userId, DateTime date) async {
+  Future<List<FoodLogHistoryItem>> getFoodLogsByDate(
+      String userId, DateTime date) async {
     try {
-      final foodScanResults = await _foodScanRepository.getAnalysisResultsByDate(date);
-      final filteredResults = foodScanResults.where((result) => result.userId == userId).toList();
-      
+      final foodScanResults =
+          await _foodScanRepository.getAnalysisResultsByDate(date);
+      final filteredResults =
+          foodScanResults.where((result) => result.userId == userId).toList();
+
       return _convertFoodAnalysisResults(filteredResults);
     } catch (e) {
       throw Exception('Failed to retrieve food logs by date: $e');
@@ -42,11 +47,14 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   }
 
   @override
-  Future<List<FoodLogHistoryItem>> getFoodLogsByMonth(String userId, int month, int year) async {
+  Future<List<FoodLogHistoryItem>> getFoodLogsByMonth(
+      String userId, int month, int year) async {
     try {
-      final foodScanResults = await _foodScanRepository.getAnalysisResultsByMonth(month, year);
-      final filteredResults = foodScanResults.where((result) => result.userId == userId).toList();
-      
+      final foodScanResults =
+          await _foodScanRepository.getAnalysisResultsByMonth(month, year);
+      final filteredResults =
+          foodScanResults.where((result) => result.userId == userId).toList();
+
       return _convertFoodAnalysisResults(filteredResults);
     } catch (e) {
       throw Exception('Failed to retrieve food logs by month: $e');
@@ -54,11 +62,14 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   }
 
   @override
-  Future<List<FoodLogHistoryItem>> getFoodLogsByYear(String userId, int year) async {
+  Future<List<FoodLogHistoryItem>> getFoodLogsByYear(
+      String userId, int year) async {
     try {
-      final foodScanResults = await _foodScanRepository.getAnalysisResultsByYear(year);
-      final filteredResults = foodScanResults.where((result) => result.userId == userId).toList();
-      
+      final foodScanResults =
+          await _foodScanRepository.getAnalysisResultsByYear(year);
+      final filteredResults =
+          foodScanResults.where((result) => result.userId == userId).toList();
+
       return _convertFoodAnalysisResults(filteredResults);
     } catch (e) {
       throw Exception('Failed to retrieve food logs by year: $e');
@@ -66,7 +77,8 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   }
 
   @override
-  Future<List<FoodLogHistoryItem>> searchFoodLogs(String userId, String query) async {
+  Future<List<FoodLogHistoryItem>> searchFoodLogs(
+      String userId, String query) async {
     try {
       final foodItems = await getAllFoodLogs(userId);
       final lowercaseQuery = query.toLowerCase();
@@ -82,26 +94,24 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
 
   List<FoodLogHistoryItem> _convertFoodAnalysisResults(
       List<FoodAnalysisResult> results) {
-    return results
-        .map((result) {
-          // Add 7 hours to the timestamp to convert from UTC to Indonesia time (UTC+7)
-          final localTimestamp = result.timestamp.add(const Duration(hours: 7));
-          
-          // Create a modified result with the adjusted timestamp
-          final adjustedResult = FoodAnalysisResult(
-            foodName: result.foodName,
-            ingredients: result.ingredients,
-            nutritionInfo: result.nutritionInfo,
-            warnings: result.warnings,
-            foodImageUrl: result.foodImageUrl,
-            timestamp: localTimestamp,  // Use the adjusted timestamp
-            id: result.id,
-            isLowConfidence: result.isLowConfidence,
-            userId: result.userId,
-          );
-          
-          return FoodLogHistoryItem.fromFoodAnalysisResult(adjustedResult);
-        })
-        .toList();
+    return results.map((result) {
+      // Add 7 hours to the timestamp to convert from UTC to Indonesia time (UTC+7)
+      final localTimestamp = result.timestamp.add(const Duration(hours: 7));
+
+      // Create a modified result with the adjusted timestamp
+      final adjustedResult = FoodAnalysisResult(
+        foodName: result.foodName,
+        ingredients: result.ingredients,
+        nutritionInfo: result.nutritionInfo,
+        warnings: result.warnings,
+        foodImageUrl: result.foodImageUrl,
+        timestamp: localTimestamp, // Use the adjusted timestamp
+        id: result.id,
+        isLowConfidence: result.isLowConfidence,
+        userId: result.userId,
+      );
+
+      return FoodLogHistoryItem.fromFoodAnalysisResult(adjustedResult);
+    }).toList();
   }
 }

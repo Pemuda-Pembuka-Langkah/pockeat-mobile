@@ -96,7 +96,9 @@ class IngredientsSection extends StatelessWidget {
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
-        children: ingredients.map((ingredient) => _buildIngredientChip(ingredient)).toList(),
+        children: ingredients
+            .map((ingredient) => _buildIngredientChip(ingredient))
+            .toList(),
       ),
     );
   }
@@ -113,7 +115,7 @@ class IngredientsSection extends StatelessWidget {
       ),
       child: Text(
         ingredient.name,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 14,
           color: Colors.black87,
           fontWeight: FontWeight.w500,
@@ -121,4 +123,4 @@ class IngredientsSection extends StatelessWidget {
       ),
     );
   }
-} 
+}

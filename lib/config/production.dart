@@ -33,50 +33,57 @@ class ProductionFirebaseOptions {
   }
 
   static FirebaseOptions get web => FirebaseOptions(
-    apiKey: dotenv.env['PRODUCTION_FIREBASE_WEB_API_KEY'] ?? '',
-    appId: dotenv.env['PRODUCTION_FIREBASE_WEB_APP_ID'] ?? '',
-    messagingSenderId: dotenv.env['PRODUCTION_FIREBASE_MESSAGING_SENDER_ID'] ?? '',
-    projectId: dotenv.env['PRODUCTION_FIREBASE_PROJECT_ID'] ?? '',
-    authDomain: dotenv.env['PRODUCTION_FIREBASE_AUTH_DOMAIN'] ?? '',
-    storageBucket: dotenv.env['PRODUCTION_FIREBASE_STORAGE_BUCKET'] ?? '',
-    measurementId: dotenv.env['PRODUCTION_FIREBASE_WEB_MEASUREMENT_ID'] ?? '',
-  );
+        apiKey: dotenv.env['PRODUCTION_FIREBASE_WEB_API_KEY'] ?? '',
+        appId: dotenv.env['PRODUCTION_FIREBASE_WEB_APP_ID'] ?? '',
+        messagingSenderId:
+            dotenv.env['PRODUCTION_FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+        projectId: dotenv.env['PRODUCTION_FIREBASE_PROJECT_ID'] ?? '',
+        authDomain: dotenv.env['PRODUCTION_FIREBASE_AUTH_DOMAIN'] ?? '',
+        storageBucket: dotenv.env['PRODUCTION_FIREBASE_STORAGE_BUCKET'] ?? '',
+        measurementId:
+            dotenv.env['PRODUCTION_FIREBASE_WEB_MEASUREMENT_ID'] ?? '',
+      );
 
   static FirebaseOptions get android => FirebaseOptions(
-    apiKey: dotenv.env['PRODUCTION_FIREBASE_ANDROID_API_KEY'] ?? '',
-    appId: dotenv.env['PRODUCTION_FIREBASE_ANDROID_APP_ID'] ?? '',
-    messagingSenderId: dotenv.env['PRODUCTION_FIREBASE_MESSAGING_SENDER_ID'] ?? '',
-    projectId: dotenv.env['PRODUCTION_FIREBASE_PROJECT_ID'] ?? '',
-    storageBucket: dotenv.env['PRODUCTION_FIREBASE_STORAGE_BUCKET'] ?? '',
-  );
+        apiKey: dotenv.env['PRODUCTION_FIREBASE_ANDROID_API_KEY'] ?? '',
+        appId: dotenv.env['PRODUCTION_FIREBASE_ANDROID_APP_ID'] ?? '',
+        messagingSenderId:
+            dotenv.env['PRODUCTION_FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+        projectId: dotenv.env['PRODUCTION_FIREBASE_PROJECT_ID'] ?? '',
+        storageBucket: dotenv.env['PRODUCTION_FIREBASE_STORAGE_BUCKET'] ?? '',
+      );
 
   static FirebaseOptions get ios => FirebaseOptions(
-    apiKey: dotenv.env['PRODUCTION_FIREBASE_IOS_API_KEY'] ?? '',
-    appId: dotenv.env['PRODUCTION_FIREBASE_IOS_APP_ID'] ?? '',
-    messagingSenderId: dotenv.env['PRODUCTION_FIREBASE_MESSAGING_SENDER_ID'] ?? '',
-    projectId: dotenv.env['PRODUCTION_FIREBASE_PROJECT_ID'] ?? '',
-    storageBucket: dotenv.env['PRODUCTION_FIREBASE_STORAGE_BUCKET'] ?? '',
-    iosClientId: dotenv.env['PRODUCTION_FIREBASE_IOS_CLIENT_ID'] ?? '',
-    iosBundleId: dotenv.env['PRODUCTION_FIREBASE_IOS_BUNDLE_ID'] ?? '',
-  );
+        apiKey: dotenv.env['PRODUCTION_FIREBASE_IOS_API_KEY'] ?? '',
+        appId: dotenv.env['PRODUCTION_FIREBASE_IOS_APP_ID'] ?? '',
+        messagingSenderId:
+            dotenv.env['PRODUCTION_FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+        projectId: dotenv.env['PRODUCTION_FIREBASE_PROJECT_ID'] ?? '',
+        storageBucket: dotenv.env['PRODUCTION_FIREBASE_STORAGE_BUCKET'] ?? '',
+        iosClientId: dotenv.env['PRODUCTION_FIREBASE_IOS_CLIENT_ID'] ?? '',
+        iosBundleId: dotenv.env['PRODUCTION_FIREBASE_IOS_BUNDLE_ID'] ?? '',
+      );
 
   static FirebaseOptions get macos => FirebaseOptions(
-    apiKey: dotenv.env['PRODUCTION_FIREBASE_MACOS_API_KEY'] ?? '',
-    appId: dotenv.env['PRODUCTION_FIREBASE_MACOS_APP_ID'] ?? '',
-    messagingSenderId: dotenv.env['PRODUCTION_FIREBASE_MESSAGING_SENDER_ID'] ?? '',
-    projectId: dotenv.env['PRODUCTION_FIREBASE_PROJECT_ID'] ?? '',
-    storageBucket: dotenv.env['PRODUCTION_FIREBASE_STORAGE_BUCKET'] ?? '',
-    iosClientId: dotenv.env['PRODUCTION_FIREBASE_MACOS_CLIENT_ID'] ?? '',
-    iosBundleId: dotenv.env['PRODUCTION_FIREBASE_MACOS_BUNDLE_ID'] ?? '',
-  );
+        apiKey: dotenv.env['PRODUCTION_FIREBASE_MACOS_API_KEY'] ?? '',
+        appId: dotenv.env['PRODUCTION_FIREBASE_MACOS_APP_ID'] ?? '',
+        messagingSenderId:
+            dotenv.env['PRODUCTION_FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+        projectId: dotenv.env['PRODUCTION_FIREBASE_PROJECT_ID'] ?? '',
+        storageBucket: dotenv.env['PRODUCTION_FIREBASE_STORAGE_BUCKET'] ?? '',
+        iosClientId: dotenv.env['PRODUCTION_FIREBASE_MACOS_CLIENT_ID'] ?? '',
+        iosBundleId: dotenv.env['PRODUCTION_FIREBASE_MACOS_BUNDLE_ID'] ?? '',
+      );
 
   static FirebaseOptions get windows => FirebaseOptions(
-    apiKey: dotenv.env['PRODUCTION_FIREBASE_WINDOWS_API_KEY'] ?? '',
-    appId: dotenv.env['PRODUCTION_FIREBASE_WINDOWS_APP_ID'] ?? '',
-    messagingSenderId: dotenv.env['PRODUCTION_FIREBASE_MESSAGING_SENDER_ID'] ?? '',
-    projectId: dotenv.env['PRODUCTION_FIREBASE_PROJECT_ID'] ?? '',
-    authDomain: dotenv.env['PRODUCTION_FIREBASE_AUTH_DOMAIN'] ?? '',
-    storageBucket: dotenv.env['PRODUCTION_FIREBASE_STORAGE_BUCKET'] ?? '',
-    measurementId: dotenv.env['PRODUCTION_FIREBASE_WINDOWS_MEASUREMENT_ID'] ?? '',
-  );
+        apiKey: dotenv.env['PRODUCTION_FIREBASE_WINDOWS_API_KEY'] ?? '',
+        appId: dotenv.env['PRODUCTION_FIREBASE_WINDOWS_APP_ID'] ?? '',
+        messagingSenderId:
+            dotenv.env['PRODUCTION_FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+        projectId: dotenv.env['PRODUCTION_FIREBASE_PROJECT_ID'] ?? '',
+        authDomain: dotenv.env['PRODUCTION_FIREBASE_AUTH_DOMAIN'] ?? '',
+        storageBucket: dotenv.env['PRODUCTION_FIREBASE_STORAGE_BUCKET'] ?? '',
+        measurementId:
+            dotenv.env['PRODUCTION_FIREBASE_WINDOWS_MEASUREMENT_ID'] ?? '',
+      );
 }
