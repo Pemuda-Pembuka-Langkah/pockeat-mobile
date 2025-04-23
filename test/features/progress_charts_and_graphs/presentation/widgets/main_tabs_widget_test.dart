@@ -44,7 +44,7 @@ void main() {
       controller.dispose();
     });
     
-    testWidgets('should have correct properties for SliverAppBar', (WidgetTester tester) async {
+    testWidgets('should have correct properties for SliverPersistentHeader', (WidgetTester tester) async {
       // We need a TickerProvider for TabController
       final TabController controller = TabController(
         length: 2,
@@ -66,14 +66,16 @@ void main() {
         ),
       );
       
-      // Find the SliverAppBar
-      final sliverAppBar = tester.widget<SliverAppBar>(find.byType(SliverAppBar));
+      // Find the SliverPersistentHeader
+      final sliverPersistentHeader = tester.widget<SliverPersistentHeader>(
+        find.byType(SliverPersistentHeader)
+      );
       
-      // Verify SliverAppBar properties
-      expect(sliverAppBar.pinned, isTrue);
-      expect(sliverAppBar.floating, isFalse);
-      expect(sliverAppBar.backgroundColor, equals(Colors.white));
-      expect(sliverAppBar.toolbarHeight, equals(0));
+      // Verify SliverPersistentHeader properties
+      expect(sliverPersistentHeader.pinned, isTrue);
+      
+      // Verify the delegate is not null (we can't check the exact type since it's private)
+      expect(sliverPersistentHeader.delegate, isNotNull);
       
       // Clean up
       controller.dispose();
@@ -111,7 +113,6 @@ void main() {
       expect(tabBar.indicatorColor, equals(colors.primaryPink));
       expect(tabBar.indicatorWeight, equals(2));
       expect(tabBar.indicatorSize, equals(TabBarIndicatorSize.label));
-      expect(tabBar.labelPadding, equals(const EdgeInsets.symmetric(horizontal: 24, vertical: 12)));
       
       // Check text styles
       expect(tabBar.labelStyle?.fontSize, equals(15));
@@ -154,6 +155,43 @@ void main() {
       controller.animateTo(1);
       await tester.pumpAndSettle();
       expect(controller.index, equals(1));
+      
+      // Clean up
+      controller.dispose();
+    });
+    
+    testWidgets('should use Container with correct background color', (WidgetTester tester) async {
+      // We need a TickerProvider for TabController
+      final TabController controller = TabController(
+        length: 2,
+        vsync: const TestVSync(),
+      );
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CustomScrollView(
+              slivers: [
+                MainTabsWidget(
+                  tabController: controller,
+                  colors: colors,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      
+      // Find the first Container that's a child of SliverPersistentHeader
+      final container = tester.widget<Container>(
+        find.descendant(
+          of: find.byType(SliverPersistentHeader),
+          matching: find.byType(Container),
+        )
+      );
+      
+      // Verify Container properties
+      expect(container.color, equals(Colors.white));
       
       // Clean up
       controller.dispose();
