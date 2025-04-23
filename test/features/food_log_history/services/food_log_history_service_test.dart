@@ -231,18 +231,46 @@ void main() {
     });
   });
 
-  group('getFoodStreakDays (Firestore‑based)', () {
-    test('counts today+yesterday+2 days ago as a 3‑day streak', () async {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final yesterday = today.subtract(const Duration(days: 1));
-      final twoDays = today.subtract(const Duration(days: 2));
+  group('getFoodStreakDays', () {
+    const testUserId = 'test-user';
+    late FoodLogHistoryServiceImpl service;
+    late FakeFirebaseFirestore fakeFirestore;
 
-      // insert 3 consecutive days
-      for (final date in [today, yesterday, twoDays]) {
-        await fakeFirestore.collection('foodLogs').add({
+    setUp(() {
+      // repository never used by this function
+      final mockRepo = MockFoodScanRepository();
+      fakeFirestore = FakeFirebaseFirestore();
+      service = FoodLogHistoryServiceImpl(
+        foodScanRepository: mockRepo,
+        firestore: fakeFirestore,
+      );
+    });
+
+    test('returns 0 when there are no logs at all', () async {
+      final streak = await service.getFoodStreakDays(testUserId);
+      expect(streak, 0);
+    });
+
+    test('returns 1 when there is a log today only', () async {
+      final today = DateTime.now();
+      await fakeFirestore.collection('food_analysis').add({
+        'userId': testUserId,
+        'date': Timestamp.fromDate(today),
+      });
+
+      final streak = await service.getFoodStreakDays(testUserId);
+      expect(streak, 1);
+    });
+
+    test('counts consecutive days including today', () async {
+      final today = DateTime.now();
+      final yesterday = today.subtract(const Duration(days: 1));
+      final twoAgo = yesterday.subtract(const Duration(days: 1));
+
+      for (var d in [today, yesterday, twoAgo]) {
+        await fakeFirestore.collection('food_analysis').add({
           'userId': testUserId,
-          'date': Timestamp.fromDate(date),
+          'date': Timestamp.fromDate(d),
         });
       }
 
@@ -250,17 +278,16 @@ void main() {
       expect(streak, 3);
     });
 
-    test('starts from yesterday if there is no log for today', () async {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
+    test('skips today if missing and counts back from yesterday', () async {
+      final today = DateTime.now();
       final yesterday = today.subtract(const Duration(days: 1));
-      final twoDays = today.subtract(const Duration(days: 2));
+      final twoAgo = yesterday.subtract(const Duration(days: 1));
 
-      // only yesterday & twoDaysAgo
-      for (final date in [yesterday, twoDays]) {
-        await fakeFirestore.collection('foodLogs').add({
+      // note: no document for “today”
+      for (var d in [yesterday, twoAgo]) {
+        await fakeFirestore.collection('food_analysis').add({
           'userId': testUserId,
-          'date': Timestamp.fromDate(date),
+          'date': Timestamp.fromDate(d),
         });
       }
 
@@ -268,36 +295,32 @@ void main() {
       expect(streak, 2);
     });
 
-    test('returns 0 when no logs exist', () async {
-      final streak = await service.getFoodStreakDays(testUserId);
-      expect(streak, 0);
-    });
+    test('breaks streak when a day is missing in between', () async {
+      final today = DateTime.now();
+      final twoAgo = today.subtract(const Duration(days: 2));
 
-    test('caps at 100 days even if more logs exist', () async {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-
-      // add 101 days
-      for (var i = 0; i <= 100; i++) {
-        await fakeFirestore.collection('foodLogs').add({
+      // logs for today and two days ago, but missing yesterday
+      for (var d in [today, twoAgo]) {
+        await fakeFirestore.collection('food_analysis').add({
           'userId': testUserId,
-          'date': Timestamp.fromDate(today.subtract(Duration(days: i))),
+          'date': Timestamp.fromDate(d),
         });
       }
 
       final streak = await service.getFoodStreakDays(testUserId);
-      expect(streak, 100);
+      // only today counts
+      expect(streak, 1);
     });
 
-    test('returns 0 if Firestore throws', () async {
+    test('returns 0 on Firestore errors', () async {
+      // create a service whose _firestore.collection(...) will throw
       final throwingFs = ThrowingFirestore();
-
-      service = FoodLogHistoryServiceImpl(
-        foodScanRepository: mockFoodScanRepository,
+      final errorService = FoodLogHistoryServiceImpl(
+        foodScanRepository: MockFoodScanRepository(),
         firestore: throwingFs,
       );
 
-      final streak = await service.getFoodStreakDays(testUserId);
+      final streak = await errorService.getFoodStreakDays(testUserId);
       expect(streak, 0);
     });
   });
