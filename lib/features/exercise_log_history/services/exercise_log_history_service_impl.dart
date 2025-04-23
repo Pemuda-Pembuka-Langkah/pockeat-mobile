@@ -8,6 +8,7 @@ import 'package:pockeat/features/weight_training_log/domain/repositories/weight_
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   late final SmartExerciseLogRepository _smartExerciseLogRepository;
