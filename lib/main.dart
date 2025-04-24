@@ -21,6 +21,7 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
+import 'package:pockeat/core/screens/streak_celebration_page.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
@@ -74,6 +75,8 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
+
+// Core imports:
 
 // Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -354,6 +357,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/': (context) => const AuthWrapper(child: HomePage()),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
+        '/streak-celebration': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return StreakCelebrationPage(
+            streak: args?['streak'] as int? ?? 1,
+          );
+        },
         '/profile': (context) => const AuthWrapper(child: ProfilePage()),
         '/change-password': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
