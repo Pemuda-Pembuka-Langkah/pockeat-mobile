@@ -1,10 +1,11 @@
-
 // exercise_input_page.dart
-import 'package:flutter/material.dart';
+
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/exercise_input_options/presentation/widgets/exercise_option_card.dart';
-
-
 
 class ExerciseInputPage extends StatelessWidget {
   // Warna yang lebih kontras tapi tetap cute
@@ -25,10 +26,10 @@ class ExerciseInputPage extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
-        },
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            }
+          },
         ),
         title: const Text(
           'Add Exercise',
@@ -64,9 +65,9 @@ class ExerciseInputPage extends StatelessWidget {
                 color: pinkColor,
                 route: '/cardio',
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Weightlifting Option
               ExerciseOptionCard(
                 icon: CupertinoIcons.arrow_up_circle_fill,
@@ -75,9 +76,9 @@ class ExerciseInputPage extends StatelessWidget {
                 color: greenColor,
                 route: '/weightlifting-input',
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Smart Workout Log Option
               ExerciseOptionCard(
                 icon: CupertinoIcons.text_badge_checkmark,

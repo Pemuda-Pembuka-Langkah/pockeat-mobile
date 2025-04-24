@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class AdditionalNutrientsSection extends StatelessWidget {
@@ -99,4 +100,4 @@ class AdditionalNutrientsSection extends StatelessWidget {
       ),
     );
   }
-} 
+}

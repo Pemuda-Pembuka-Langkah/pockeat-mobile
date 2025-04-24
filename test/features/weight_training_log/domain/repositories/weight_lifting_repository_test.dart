@@ -1,12 +1,15 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+import 'weight_lifting_repository_test.mocks.dart';
 
 // Generate a MockExerciseRepository class
 @GenerateMocks([WeightLiftingRepository])
-import 'weight_lifting_repository_test.mocks.dart';
 
 void main() {
   late MockWeightLiftingRepository mockRepository;

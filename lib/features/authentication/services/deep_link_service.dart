@@ -1,4 +1,7 @@
+// Dart imports:
 import 'dart:async';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
 
 /// Interface untuk menangani deep link

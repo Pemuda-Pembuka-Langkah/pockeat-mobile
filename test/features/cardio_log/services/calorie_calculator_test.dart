@@ -1,4 +1,7 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/user_constants.dart';
 import 'package:pockeat/features/cardio_log/services/calorie_calculator.dart';
 

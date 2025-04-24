@@ -1,3 +1,4 @@
+// Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
@@ -10,8 +11,7 @@ class DefaultCalorieCalculationStrategy implements CalorieCalculationStrategy {
       FoodLogHistoryService foodLogHistoryService, String userId) async {
     final DateTime today = DateTime.now();
     final DateTime startOfDay = DateTime(today.year, today.month, today.day);
-    return (await foodLogHistoryService.getFoodLogsByDate(
-            userId, startOfDay))
+    return (await foodLogHistoryService.getFoodLogsByDate(userId, startOfDay))
         .fold<int>(0, (total, log) => total + log.calories.toInt());
   }
 
@@ -21,10 +21,13 @@ class DefaultCalorieCalculationStrategy implements CalorieCalculationStrategy {
       CaloricRequirementService caloricRequirementService,
       String userId) async {
     int targetCalories = 0;
-    final healthMetrics = await healthMetricsRepository.getHealthMetrics(userId);
-    if(healthMetrics != null) {
-      targetCalories = caloricRequirementService.analyze(userId: userId, 
-      model: healthMetrics).tdee.toInt();
+    final healthMetrics =
+        await healthMetricsRepository.getHealthMetrics(userId);
+    if (healthMetrics != null) {
+      targetCalories = caloricRequirementService
+          .analyze(userId: userId, model: healthMetrics)
+          .tdee
+          .toInt();
     }
     return targetCalories;
   }

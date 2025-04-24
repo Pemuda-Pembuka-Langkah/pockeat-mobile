@@ -1,18 +1,21 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
+import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
-import 'package:pockeat/features/home_screen_widget/services/impl/default_calorie_calculation_strategy.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
-import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
-import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/home_screen_widget/services/impl/default_calorie_calculation_strategy.dart';
+import 'default_calorie_calculation_strategy_test.mocks.dart';
 
 // Generate mocks for all dependencies
 @GenerateMocks(
     [FoodLogHistoryService, HealthMetricsRepository, CaloricRequirementService])
-import 'default_calorie_calculation_strategy_test.mocks.dart';
 
 void main() {
   late DefaultCalorieCalculationStrategy strategy;

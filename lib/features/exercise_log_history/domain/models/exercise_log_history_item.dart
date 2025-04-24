@@ -1,6 +1,9 @@
-import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
+// Package imports:
 import 'package:uuid/uuid.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/services/workout_service.dart';
 
@@ -16,7 +19,8 @@ class ExerciseLogHistoryItem {
   final String subtitle;
   final DateTime timestamp;
   final num caloriesBurned;
-  final String? sourceId; // ID dari data sumber (misalnya ID dari SmartExerciseLog)
+  final String?
+      sourceId; // ID dari data sumber (misalnya ID dari SmartExerciseLog)
   // Konstanta untuk tipe aktivitas umum
   static const String typeSmartExercise = 'smart_exercise';
   static const String typeWeightlifting = 'weightlifting';
@@ -87,7 +91,7 @@ class ExerciseLogHistoryItem {
     // Calculate total duration in minutes
     double totalDurationInMinutes =
         weightLifting.sets.fold(0.0, (sum, set) => sum + set.duration);
-        
+
     // Calculate calories burned using workout service
     int caloriesBurned = calculateExerciseCalories(weightLifting).round();
 
@@ -120,8 +124,9 @@ class ExerciseLogHistoryItem {
 
     // Format durasi dalam format yang lebih user-friendly
     final minutes = cardioLog.duration.inMinutes;
-    final durationText =
-        minutes > 0 ? '$minutes minutes' : '${cardioLog.duration.inSeconds} seconds';
+    final durationText = minutes > 0
+        ? '$minutes minutes'
+        : '${cardioLog.duration.inSeconds} seconds';
 
     return ExerciseLogHistoryItem(
       activityType: typeCardio,

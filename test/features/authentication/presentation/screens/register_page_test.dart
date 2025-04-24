@@ -1,19 +1,24 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
-import 'package:pockeat/features/authentication/services/register_service.dart';
-import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
-import 'package:pockeat/core/services/analytics_service.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+// Package imports:
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
+import 'package:pockeat/features/authentication/services/register_service.dart';
+import 'register_page_test.mocks.dart';
+
 // Generate mock menggunakan mockito
 @GenerateMocks([RegisterService, EmailVerificationDeepLinkService, AnalyticsService])
-import 'register_page_test.mocks.dart';
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {
   String? pushedRoute;

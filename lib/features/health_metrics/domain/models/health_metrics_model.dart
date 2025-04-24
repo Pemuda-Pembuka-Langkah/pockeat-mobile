@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HealthMetricsModel {
@@ -12,7 +13,7 @@ class HealthMetricsModel {
   final String gender; // male or female
 
   // sedentary, light, moderate, active, very active, extra active
-  final String activityLevel; 
+  final String activityLevel;
 
   final String fitnessGoal;
 
@@ -39,18 +40,18 @@ class HealthMetricsModel {
   }
 
   factory HealthMetricsModel.fromFirestore(DocumentSnapshot doc) {
-  final rawData = doc.data();
-  if (rawData == null) throw Exception("Document data is null");
+    final rawData = doc.data();
+    if (rawData == null) throw Exception("Document data is null");
 
-  final data = rawData as Map<String, dynamic>;
-  return HealthMetricsModel(
-    userId: doc.id,
-    height: (data['height'] as num).toDouble(),
-    weight: (data['weight'] as num).toDouble(),
-    age: data['age'] as int,
-    gender: data['gender'] as String,
-    activityLevel: data['activityLevel'] as String,
-    fitnessGoal: data['fitnessGoal'] as String,
-  );
-}
+    final data = rawData as Map<String, dynamic>;
+    return HealthMetricsModel(
+      userId: doc.id,
+      height: (data['height'] as num).toDouble(),
+      weight: (data['weight'] as num).toDouble(),
+      age: data['age'] as int,
+      gender: data['gender'] as String,
+      activityLevel: data['activityLevel'] as String,
+      fitnessGoal: data['fitnessGoal'] as String,
+    );
+  }
 }

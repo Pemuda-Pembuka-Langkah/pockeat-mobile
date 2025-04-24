@@ -1,13 +1,18 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_input_page.dart';
+import 'food_input_page_test.mocks.dart';
 
 @GenerateMocks([AnalyticsService])
-import 'food_input_page_test.mocks.dart';
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 

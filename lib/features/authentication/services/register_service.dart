@@ -1,4 +1,3 @@
-
 /// Hasil dari operasi pendaftaran
 enum RegisterResult {
   success,

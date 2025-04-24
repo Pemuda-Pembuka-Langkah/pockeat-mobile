@@ -1,24 +1,29 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:pockeat/core/services/analytics_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
+import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
+
+// Project imports:
 import 'package:pockeat/component/navigation.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/services/weight_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/services/nutrition_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
+import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/services/nutrition_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/services/exercise_progress_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/services/weight_service.dart';
+import 'progress_page_test.mocks.dart';
 
 @GenerateMocks([ProgressTabsService, AnalyticsService, ExerciseLogHistoryService, FoodLogHistoryService, 
   WeightService, NutritionService, ExerciseProgressService])
-import 'progress_page_test.mocks.dart';
 
 void main() {
   late MockProgressTabsService mockTabsService;

@@ -1,15 +1,21 @@
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
-import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';
+import 'smart_exercise_log_page_test.mocks.dart';
 
 // Generate mocks
 @GenerateMocks([
@@ -18,7 +24,6 @@ import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout
   firebase_auth.FirebaseAuth,
   firebase_auth.User
 ])
-import 'smart_exercise_log_page_test.mocks.dart';
 
 void main() {
   group('SmartExerciseLogPage Widget Tests', () {

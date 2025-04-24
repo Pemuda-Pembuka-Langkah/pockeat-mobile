@@ -1,16 +1,22 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
+
+// Project imports:
 import 'package:pockeat/component/navigation.dart';
+import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
 import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
-import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
-import 'package:get_it/get_it.dart';
-import 'package:mockito/mockito.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
+import 'homepage_test.mocks.dart';
 
 @GenerateNiceMocks([
   MockSpec<NavigatorObserver>(onMissingStub: OnMissingStub.returnDefault),
@@ -18,7 +24,6 @@ import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats
   MockSpec<FirebaseAuth>(),
   MockSpec<User>(),
 ])
-import 'homepage_test.mocks.dart';
 
 void main() async {
   late MockNavigatorObserver mockNavigatorObserver;

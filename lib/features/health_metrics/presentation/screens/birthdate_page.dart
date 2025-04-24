@@ -1,6 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
 import 'form_cubit.dart';
 
 class BirthdatePage extends StatefulWidget {
@@ -61,10 +66,10 @@ class _BirthdatePageState extends State<BirthdatePage> {
             // ignore: use_build_context_synchronously
             if (inProgress && Navigator.of(context).canPop()) {
               // ignore: use_build_context_synchronously
-              Navigator.of(context).pop(); 
+              Navigator.of(context).pop();
             } else {
               // ignore: use_build_context_synchronously
-              Navigator.of(context).popUntil((route) => route.isFirst); 
+              Navigator.of(context).popUntil((route) => route.isFirst);
             }
           },
         ),

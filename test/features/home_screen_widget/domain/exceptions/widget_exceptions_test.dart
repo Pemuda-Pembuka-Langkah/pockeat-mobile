@@ -1,4 +1,7 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 
 void main() {

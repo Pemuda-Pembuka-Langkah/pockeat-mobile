@@ -1,7 +1,11 @@
 // lib/features/homepage/presentation/widgets/pet_homepage_section.dart
+
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
+
+// Project imports:
 import 'package:pockeat/features/homepage/presentation/widgets/heart_bar_widget.dart';
+import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 
 class PetHomepageSection extends StatefulWidget {
@@ -54,7 +58,6 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
           // Streak Counter
           StreakCounterWidget(streakDays: widget.streakDays),
           const SizedBox(height: 16),
-
         ],
       ),
     );

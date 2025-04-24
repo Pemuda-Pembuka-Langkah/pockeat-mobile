@@ -1,11 +1,13 @@
+// Dart imports:
 import 'dart:async';
 
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:pockeat/features/home_screen_widget/services/utils/permission_helper.dart';
-import 'package:pockeat/features/home_screen_widget/services/utils/widget_background_service_helper.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
@@ -14,9 +16,11 @@ import 'package:pockeat/features/health_metrics/domain/service/health_metrics_ch
 import 'package:pockeat/features/home_screen_widget/controllers/impl/detailed_food_tracking_controller.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/impl/food_tracking_client_controller_impl.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/impl/simple_food_tracking_controller.dart';
-
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 import 'package:pockeat/features/home_screen_widget/services/calorie_calculation_strategy.dart';
+import 'package:pockeat/features/home_screen_widget/services/utils/permission_helper.dart';
+import 'package:pockeat/features/home_screen_widget/services/utils/widget_background_service_helper.dart';
+import 'food_tracking_client_controller_test.mocks.dart';
 
 // Mock classes for dependencies
 @GenerateMocks([
@@ -30,7 +34,6 @@ import 'package:pockeat/features/home_screen_widget/services/calorie_calculation
   PermissionHelperInterface,
   WidgetBackgroundServiceHelperInterface,
 ])
-import 'food_tracking_client_controller_test.mocks.dart';
 
 // We'll use the MockWidgetBackgroundServiceHelperInterface instead
 void main() {

@@ -1,13 +1,18 @@
+// Dart imports:
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+// Package imports:
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_summary_card.dart';
 
+// Project imports:
+import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_summary_card.dart';
 
 //coverage:ignore-file
 
@@ -37,12 +42,12 @@ extension ExerciseSharing on BuildContext {
         barrierDismissible: false,
         builder: (context) => WillPopScope(
           onWillPop: () async => false,
-          child: Center(
+          child: const Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
                 Text(
                   'Preparing to share...',
                   style: TextStyle(
@@ -175,6 +180,4 @@ extension ExerciseSharing on BuildContext {
       );
     }
   }
-
-
 }

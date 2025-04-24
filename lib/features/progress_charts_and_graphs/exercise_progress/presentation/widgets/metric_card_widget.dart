@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/performance_metric.dart';
 
 // coverage:ignore-start
@@ -14,7 +17,7 @@ class MetricCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color color = Color(metric.colorValue);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
