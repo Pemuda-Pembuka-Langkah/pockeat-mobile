@@ -10,9 +10,11 @@ import 'package:get_it/get_it.dart';
 // Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
 
+import 'package:lottie/lottie.dart'; // Add this package
+
 /// Splash screen page shown when the app is launched
 ///
-/// This page displays the app name and a loading animation
+/// This page displays the app logo, panda animation, and loading animation
 /// while checking the authentication status of the user.
 class SplashScreenPage extends StatefulWidget {
   const SplashScreenPage({super.key});
@@ -23,20 +25,13 @@ class SplashScreenPage extends StatefulWidget {
 
 class _SplashScreenPageState extends State<SplashScreenPage>
     with SingleTickerProviderStateMixin {
-  // Colors - matching login page
+  // Colors - matching design
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
-  final Color bgColor = const Color(0xFFF9F9F9);
-
-  // Animation controller for the loading animation
-  late AnimationController _animationController;
-  late Animation<double> _animation;
-
-  // Loading dots state
-  bool _isFirstDotActive = true;
-  bool _isSecondDotActive = false;
-  bool _isThirdDotActive = false;
-  Timer? _dotsTimer;
+  final Color bgColor = const Color(0xFFF9F9F9); // Light background
+  final Color logoBlue = const Color(0xFF8FE0D7); // Light blue for "POCK"
+  final Color logoOrange = const Color(0xFFFF6633); // Orange for "EAT"
+  final Color circleColor = const Color(0xFFFF6B6B); // Red circle background
 
   // Store authentication result
   bool? _isAuthenticated;
@@ -45,47 +40,8 @@ class _SplashScreenPageState extends State<SplashScreenPage>
   void initState() {
     super.initState();
 
-    // Initialize animation controller for loading effect
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    );
-
-    _animation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    );
-
-    _animationController.repeat(reverse: true);
-
-    // Initialize dots animation
-    _dotsTimer = Timer.periodic(const Duration(milliseconds: 600), (timer) {
-      setState(() {
-        if (_isFirstDotActive) {
-          _isFirstDotActive = false;
-          _isSecondDotActive = true;
-          _isThirdDotActive = false;
-        } else if (_isSecondDotActive) {
-          _isFirstDotActive = false;
-          _isSecondDotActive = false;
-          _isThirdDotActive = true;
-        } else {
-          _isFirstDotActive = true;
-          _isSecondDotActive = false;
-          _isThirdDotActive = false;
-        }
-      });
-    });
-
     // Check auth immediately but delay navigation
     _checkAuthStatus();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    _dotsTimer?.cancel();
-    super.dispose();
   }
 
   /// Check authentication status immediately
@@ -96,14 +52,14 @@ class _SplashScreenPageState extends State<SplashScreenPage>
       final user = await loginService.getCurrentUser();
       _isAuthenticated = user != null;
 
-      // Delay navigation for 4 seconds to show splash screen
+      // Delay navigation for 5 seconds to show splash screen
       Future.delayed(const Duration(seconds: 5), () {
         _navigateBasedOnAuth();
       });
     } catch (e) {
       _isAuthenticated = false;
 
-      // Delay navigation for 4 seconds to show splash screen
+      // Delay navigation for 5 seconds to show splash screen
       Future.delayed(const Duration(seconds: 5), () {
         _navigateBasedOnAuth();
       });
@@ -125,6 +81,9 @@ class _SplashScreenPageState extends State<SplashScreenPage>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final circleSize = size.width * 0.6; // Adjust size as needed
+
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
@@ -132,66 +91,46 @@ class _SplashScreenPageState extends State<SplashScreenPage>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // App name with animation
-              AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: 1.0 + (_animation.value * 0.1),
-                    child: Text(
-                      'Pockeat',
-                      style: TextStyle(
-                        fontSize: 42,
-                        fontWeight: FontWeight.bold,
-                        color: primaryPink,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  );
-                },
+              // Pockeat Logo
+              Image.asset(
+                'assets/icons/LogoPanjang_PockEat_draft_transparent.png',
+                width: size.width * 0.6,
+                // Or use a custom logo widget if needed
+                // _buildCustomLogo(),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 60), // 30px spacing as per design
 
-              // Subtitle
-              Text(
-                'Your health companion',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                  letterSpacing: 0.5,
-                ),
+              // Red circle and panda
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Red circle background
+                  Container(
+                    width: circleSize,
+                    height: circleSize,
+                    decoration: BoxDecoration(
+                      color: circleColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+
+                  // Panda animation
+                  SizedBox(
+                    width: circleSize * 1, // Slightly smaller than the circle
+                    height: circleSize * 1,
+                    child: Lottie.asset(
+                      'assets/animations/Panda Happy Jump.json',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 40),
-
-              // Interactive loading animation with dots
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildDot(_isFirstDotActive),
-                  const SizedBox(width: 8),
-                  _buildDot(_isSecondDotActive),
-                  const SizedBox(width: 8),
-                  _buildDot(_isThirdDotActive),
-                ],
-              ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // Build a single dot for the loading animation
-  Widget _buildDot(bool isActive) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      height: isActive ? 12 : 8,
-      width: isActive ? 12 : 8,
-      decoration: BoxDecoration(
-        color: isActive ? primaryGreen : primaryPink.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(6),
       ),
     );
   }

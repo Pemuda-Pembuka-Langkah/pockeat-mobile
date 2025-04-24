@@ -6,7 +6,14 @@ import 'package:pockeat/features/homepage/presentation/widgets/calories_today_wi
 import 'package:pockeat/features/sync_fitness_tracker/widgets/health_connect_widget.dart';
 
 class OverviewSection extends StatefulWidget {
-  const OverviewSection({super.key});
+  final bool foodStreakMaintained;
+  final int foodStreakDays;
+
+  const OverviewSection({
+    super.key,
+    this.foodStreakMaintained = true,
+    this.foodStreakDays = 5,
+  });
 
   @override
   State<OverviewSection> createState() => _OverviewSectionState();

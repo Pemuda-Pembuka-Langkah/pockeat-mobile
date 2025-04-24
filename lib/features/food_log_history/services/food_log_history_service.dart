@@ -43,4 +43,12 @@ abstract class FoodLogHistoryService {
   /// Mengembalikan [List<FoodLogHistoryItem>] berisi log yang sesuai dengan query
   /// Throws [Exception] jika terjadi error saat pengambilan data
   Future<List<FoodLogHistoryItem>> searchFoodLogs(String userId, String query);
+
+  /// Menghitung jumlah hari berturut-turut pengguna mencatat makanan
+  ///
+  /// Parameter [userId] untuk mengidentifikasi pengguna
+  /// Mengembalikan [int] jumlah hari streak pengguna
+  /// Mengembalikan 0 jika terjadi error atau tidak ada streak
+  /// Batas maksimum streak yang terdeteksi adalah 100 hari
+  Future<int> getFoodStreakDays(String userId);
 }

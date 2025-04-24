@@ -1,3 +1,9 @@
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
@@ -6,10 +12,13 @@ import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repo
 
 class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   final FoodScanRepository _foodScanRepository;
+  final FirebaseFirestore _firestore;
 
   FoodLogHistoryServiceImpl({
     required FoodScanRepository foodScanRepository,
-  }) : _foodScanRepository = foodScanRepository;
+    FirebaseFirestore? firestore,
+  })  : _foodScanRepository = foodScanRepository,
+        _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
   Future<List<FoodLogHistoryItem>> getAllFoodLogs(String userId,
@@ -114,5 +123,64 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
 
       return FoodLogHistoryItem.fromFoodAnalysisResult(adjustedResult);
     }).toList();
+  }
+
+  @override
+  Future<int> getFoodStreakDays(String userId) async {
+    try {
+      final DateTime today = DateTime.now();
+      final DateTime startDate =
+          today.subtract(const Duration(days: 100)); // Reasonable limit
+
+      // Single query to get logs within date range
+      final QuerySnapshot querySnapshot = await _firestore
+          .collection('food_analysis')
+          .where('userId', isEqualTo: userId)
+          .where('date', isGreaterThanOrEqualTo: startDate)
+          .where('date', isLessThanOrEqualTo: today)
+          .orderBy('date', descending: true)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return 0;
+      }
+
+      // Process logs in memory instead of multiple queries
+      final Map<String, bool> daysWithLogs = {};
+      for (var doc in querySnapshot.docs) {
+        final DateTime date = (doc['date'] as Timestamp).toDate();
+        final String dateKey = '${date.year}-${date.month}-${date.day}';
+        daysWithLogs[dateKey] = true;
+      }
+
+      // Calculate streak
+      int streakDays = 0;
+      DateTime checkDate = today;
+
+      // If no logs today, start from yesterday
+      String checkDateKey =
+          '${checkDate.year}-${checkDate.month}-${checkDate.day}';
+      if (!daysWithLogs.containsKey(checkDateKey)) {
+        checkDate = checkDate.subtract(const Duration(days: 1));
+      }
+
+      // Count consecutive days
+      bool streakContinues = true;
+      while (streakContinues) {
+        checkDateKey = '${checkDate.year}-${checkDate.month}-${checkDate.day}';
+        if (daysWithLogs.containsKey(checkDateKey)) {
+          streakDays++;
+          checkDate = checkDate.subtract(const Duration(days: 1));
+        } else {
+          streakContinues = false;
+        }
+      }
+
+      return streakDays;
+    } catch (e) {
+      debugPrint('Error getting streak days: $e');
+      // Consider returning cached value if available
+      return 0;
+    }
   }
 }
