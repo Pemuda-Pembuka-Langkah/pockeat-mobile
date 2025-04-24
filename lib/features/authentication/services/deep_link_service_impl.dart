@@ -165,6 +165,15 @@ class DeepLinkServiceImpl implements DeepLinkService {
 
     return hasWidgetName && hasType && (type == 'dashboard' || type == 'home');
   }
+  
+  // Method untuk mengecek apakah link ke streak celebration
+  bool _isStreakCelebrationLink(Uri link) {
+    // Cek apakah link memiliki scheme pockeat
+    if (link.scheme != 'pockeat') return false;
+    
+    // Cek apakah path-nya adalah streak-celebration
+    return link.path == 'streak-celebration';
+  }
 
   // coverage:ignore-start
   @override
@@ -282,6 +291,26 @@ class DeepLinkServiceImpl implements DeepLinkService {
         );
       } catch (e) {
         return DeepLinkResult.dashboard(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else if (_isStreakCelebrationLink(uri)) {
+      try {
+        // Mendapatkan streak days dari query parameter
+        final streakDaysStr = uri.queryParameters['streakDays'] ?? '0';
+        final streakDays = int.tryParse(streakDaysStr) ?? 0;
+        
+        return DeepLinkResult.streakCelebration(
+          success: true,
+          data: {
+            'streakDays': streakDays,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.streakCelebration(
           success: false,
           error: e.toString(),
           originalUri: uri,

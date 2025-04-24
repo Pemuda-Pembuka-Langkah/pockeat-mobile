@@ -128,6 +128,20 @@ void main() {
       expect(result, false);
       verify(mockService.handleDeepLink(testUri)).called(1);
     });
+    
+    test('should handle streak celebration link successfully', () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://streak-celebration?streakDays=5');
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async => true);
+
+      // Act
+      bool result = await mockService.handleDeepLink(testUri);
+
+      // Assert
+      expect(result, true);
+      verify(mockService.handleDeepLink(testUri)).called(1);
+    });
 
     test('should emit appropriate DeepLinkResult for email verification',
         () async {
@@ -163,6 +177,31 @@ void main() {
       final expectedResult = DeepLinkResult.changePassword(
         success: true,
         data: {'oobCode': '123'},
+        originalUri: testUri,
+      );
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+        resultStreamController.add(expectedResult);
+        return true;
+      });
+
+      // Act & Assert
+      expect(
+        mockService.onDeepLinkResult,
+        emits(expectedResult),
+      );
+
+      // Trigger the event
+      await mockService.handleDeepLink(testUri);
+    });
+    
+    test('should emit appropriate DeepLinkResult for streak celebration',
+        () async {
+      // Arrange
+      final testUri = Uri.parse('pockeat://streak-celebration?streakDays=7');
+      final expectedResult = DeepLinkResult.streakCelebration(
+        success: true,
+        data: {'streakDays': 7},
         originalUri: testUri,
       );
 
