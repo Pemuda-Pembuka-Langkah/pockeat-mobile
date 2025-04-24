@@ -11,16 +11,16 @@ void main() {
         final message = RegularStreakMessage(3);
         
         expect(message.streak, equals(3));
-        expect(message.title, equals('Streak 3 Hari! 👏'));
-        expect(message.body, equals('Teruskan kebiasaan baikmu hari ini!'));
+        expect(message.title, equals('3 Day Streak! 👏'));
+        expect(message.body, equals('Keep up the good habit today!'));
       });
       
       test('should reflect the correct streak in the title', () {
         final message1 = RegularStreakMessage(1);
         final message5 = RegularStreakMessage(5);
         
-        expect(message1.title, equals('Streak 1 Hari! 👏'));
-        expect(message5.title, equals('Streak 5 Hari! 👏'));
+        expect(message1.title, equals('1 Day Streak! 👏'));
+        expect(message5.title, equals('5 Day Streak! 👏'));
       });
     });
     
@@ -29,16 +29,16 @@ void main() {
         final message = WeeklyStreakMessage(14);
         
         expect(message.streak, equals(14));
-        expect(message.title, equals('Streak 7+ Hari! 🔥'));
-        expect(message.body, contains('14 hari'));
+        expect(message.title, equals('7+ Day Streak! 🔥'));
+        expect(message.body, contains('14 day streak'));
       });
       
       test('should reflect the correct streak in the body', () {
         final message7 = WeeklyStreakMessage(7);
         final message21 = WeeklyStreakMessage(21);
         
-        expect(message7.body, contains('7 hari'));
-        expect(message21.body, contains('21 hari'));
+        expect(message7.body, contains('7 day streak'));
+        expect(message21.body, contains('21 day streak'));
       });
     });
     
@@ -47,8 +47,8 @@ void main() {
         final message = MonthlyStreakMessage(45);
         
         expect(message.streak, equals(45));
-        expect(message.title, equals('Streak 30+ Hari! 🌟'));
-        expect(message.body, contains('45 hari'));
+        expect(message.title, equals('30+ Day Streak! 🌟'));
+        expect(message.body, contains('45 days'));
       });
       
       test('should reflect the correct streak in the body', () {
@@ -65,8 +65,8 @@ void main() {
         final message = CenturyStreakMessage(120);
         
         expect(message.streak, equals(120));
-        expect(message.title, equals('WOW! 100+ Hari Streak! 🏆'));
-        expect(message.body, contains('120 hari'));
+        expect(message.title, equals('WOW! 100+ Day Streak! 🏆'));
+        expect(message.body, contains('120 consecutive days'));
       });
       
       test('should reflect the correct streak in the body', () {
@@ -135,9 +135,20 @@ void main() {
         expect(message365.streak, equals(365));
       });
       
-      test('should throw ArgumentError for negative streak', () {
+      test('should throw ArgumentError when streak is negative', () {
         expect(() => StreakMessageFactory.createMessage(-1), throwsArgumentError);
-        expect(() => StreakMessageFactory.createMessage(-100), throwsArgumentError);
+      });
+      
+      test('error message should be in English', () {
+        try {
+          StreakMessageFactory.createMessage(-5);
+        } catch (e) {
+          expect(e.toString(), contains('Streak must not be negative'));
+        }
+      });
+
+      test('returns correct message type for streak count of 0', () {
+        expect(StreakMessageFactory.createMessage(0), isA<RegularStreakMessage>());
       });
     });
     
