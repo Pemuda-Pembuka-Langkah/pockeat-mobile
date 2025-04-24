@@ -1,9 +1,14 @@
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
@@ -11,9 +16,9 @@ import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_pa
 import 'package:pockeat/features/cardio_log/presentation/widgets/cycling_form.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/running_form.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/swimming_form.dart';
+import 'cardio_input_page_test.mocks.dart';
 
 @GenerateMocks([CardioRepository, FirebaseFirestore])
-import 'cardio_input_page_test.mocks.dart';
 
 // Manual implementation of MockFirebaseAuth
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}

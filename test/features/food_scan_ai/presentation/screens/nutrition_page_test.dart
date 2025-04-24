@@ -1,14 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/screens/nutrition_page.dart';
-import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
+// Dart imports:
 import 'dart:io';
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:mocktail/mocktail.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/screens/nutrition_page.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
 
 class MockFoodScanPhotoService extends Mock implements FoodScanPhotoService {}
 

@@ -1,15 +1,19 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
+// Project imports:
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
+import 'gender_page_test.mocks.dart';
 
 @GenerateMocks([HealthMetricsFormCubit, NavigatorObserver])
-import 'gender_page_test.mocks.dart';
 
 void main() {
   late MockHealthMetricsFormCubit mockCubit;

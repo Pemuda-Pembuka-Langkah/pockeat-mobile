@@ -1,6 +1,10 @@
+// Dart imports:
 import 'dart:async';
 
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
@@ -126,7 +130,7 @@ class LoginServiceImpl implements LoginService {
     } catch (e) {
       return null;
     }
-  // coverage:ignore-end
+    // coverage:ignore-end
   }
 
   /// Membersihkan resource ketika service tidak digunakan lagi

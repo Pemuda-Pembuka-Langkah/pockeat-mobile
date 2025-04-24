@@ -1,12 +1,16 @@
 // This file needs to be updated by build_runner
 
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/domain/constants/food_tracking_keys.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/simple_food_tracking_widget_service.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/home_widget_client.dart';
+import 'simple_food_tracking_widget_service_test.mocks.dart';
 
 @GenerateMocks([
   HomeWidgetInterface
@@ -15,7 +19,6 @@ import 'package:pockeat/features/home_screen_widget/services/utils/home_widget_c
 // Note: Run flutter pub run build_runner build --delete-conflicting-outputs
 // to generate the mock classes
 
-import 'simple_food_tracking_widget_service_test.mocks.dart';
 
 void main() {
   late MockHomeWidgetInterface mockHomeWidget;

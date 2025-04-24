@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
 
 class HealthConnectWidget extends StatefulWidget {
@@ -146,9 +149,6 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
       });
     }
   }
-
-
-
 
   Future<void> _showInstallHealthConnectDialog() async {
     await showDialog(
@@ -412,7 +412,7 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
           : const Icon(Icons.refresh, size: 18),
       label: const Text('Refresh Health Data'),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFFFF6B6B),
+        backgroundColor: const Color(0xFFFF6B6B),
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         shape: RoundedRectangleBorder(

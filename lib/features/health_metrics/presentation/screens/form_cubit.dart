@@ -1,8 +1,13 @@
+// File: form_cubit.dart
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+
+// Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
+import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 
 /// Represents the state of the health metrics onboarding form.
 /// Holds all user-inputted health data needed for analysis and submission.
@@ -98,7 +103,12 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
 
   void setBirthDate(DateTime date) => emit(state.copyWith(birthDate: date));
   void setGender(String gender) => emit(state.copyWith(gender: gender));
-  void setActivityLevel(String level) => emit(state.copyWith(activityLevel: level));
+
+  /// Sets the user's physical activity level.
+  void setActivityLevel(String level) =>
+      emit(state.copyWith(activityLevel: level));
+
+  /// Sets the user's dietary preference/type.
   void setDietType(String type) => emit(state.copyWith(dietType: type));
   void setDesiredWeight(double weight) =>
       emit(state.copyWith(desiredWeight: weight));
@@ -130,7 +140,8 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
     final now = DateTime.now();
     int age = now.year - state.birthDate!.year;
     if (now.month < state.birthDate!.month ||
-        (now.month == state.birthDate!.month && now.day < state.birthDate!.day)) {
+        (now.month == state.birthDate!.month &&
+            now.day < state.birthDate!.day)) {
       age--;
     }
 
@@ -152,6 +163,7 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
 
     await repository.saveHealthMetrics(model);
 
+    // Analyze and save caloric requirements
     try {
       final caloricResult = caloricRequirementService.analyze(
         userId: _userId!,

@@ -1,4 +1,4 @@
-
+// Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
@@ -15,4 +15,3 @@ abstract class CalorieCalculationStrategy {
       CaloricRequirementService caloricRequirementService,
       String userId);
 }
-

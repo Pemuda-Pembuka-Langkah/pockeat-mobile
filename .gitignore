@@ -85,3 +85,4 @@ android/app/.cxx/
 
 # FVM Version Cache
 .fvm/
+lib/firebase_options.dart

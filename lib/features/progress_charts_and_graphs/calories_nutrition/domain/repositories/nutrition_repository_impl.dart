@@ -1,18 +1,23 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/calorie_data.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/nutrition_stat.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/macro_nutrient.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/micro_nutrient.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/meal.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/repositories/nutrition_repository.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
-import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/calorie_data.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/macro_nutrient.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/meal.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/micro_nutrient.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/nutrition_stat.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/repositories/nutrition_repository.dart';
 
 // coverage:ignore-start
 class NutritionRepositoryImpl implements NutritionRepository {
@@ -20,7 +25,7 @@ class NutritionRepositoryImpl implements NutritionRepository {
   final FoodLogHistoryService _foodLogService;
   final ExerciseLogHistoryService _exerciseLogService;
   late final FoodScanRepository _foodScanRepository;
-  
+
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryYellow = const Color(0xFFFFB946);
@@ -37,17 +42,18 @@ class NutritionRepositoryImpl implements NutritionRepository {
   Future<String?> getUserId() async {
     return _auth.currentUser?.uid;
   }
-  
+
   // Helper method to get nutritional info from a FoodLogHistoryItem
   // Now using the sourceId to access the FoodAnalysisResult
   Future<NutritionInfo?> _getNutritionInfo(FoodLogHistoryItem item) async {
     try {
       // Use sourceId if available, otherwise use the item's own id
       String foodId = item.sourceId ?? item.id;
-      
+
       // Fetch the full FoodAnalysisResult using the foodId
-      FoodAnalysisResult? analysisResult = await _foodScanRepository.getById(foodId);
-      
+      FoodAnalysisResult? analysisResult =
+          await _foodScanRepository.getById(foodId);
+
       // Return the nutrition info if available
       return analysisResult?.nutritionInfo;
     } catch (e) {
@@ -55,11 +61,11 @@ class NutritionRepositoryImpl implements NutritionRepository {
       return null;
     }
   }
-  
+
   // Helper method to determine meal time (morning, noon, evening)
   String _determineMealType(DateTime timestamp) {
     final hour = timestamp.hour;
-    
+
     if (hour >= 5 && hour < 11) {
       return 'Breakfast';
     } else if (hour >= 11 && hour < 16) {
@@ -70,7 +76,7 @@ class NutritionRepositoryImpl implements NutritionRepository {
       return 'Snack';
     }
   }
-  
+
   // Helper method to format time
   String _formatTime(DateTime timestamp) {
     return DateFormat('h:mm a').format(timestamp);
@@ -85,54 +91,61 @@ class NutritionRepositoryImpl implements NutritionRepository {
 
     try {
       final now = DateTime.now();
-      
+
       if (isWeeklyView) {
         // Weekly view implementation remains the same
         // Calculate current week's Monday
         final currentWeekday = now.weekday;
-        final monday = DateTime(
-          now.year, 
-          now.month, 
-          now.day - (currentWeekday - 1)
-        );
-        
+        final monday =
+            DateTime(now.year, now.month, now.day - (currentWeekday - 1));
+
         // Create list for days of the week (Mon-Sun)
-        final List<String> dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        final List<String> dayNames = [
+          'Mon',
+          'Tue',
+          'Wed',
+          'Thu',
+          'Fri',
+          'Sat',
+          'Sun'
+        ];
         final Map<String, double> dailyCalories = {};
         for (String day in dayNames) {
           dailyCalories[day] = 0.0;
         }
-        
+
         // Get all logs for the week in one batch
         for (int i = 0; i < 7; i++) {
           final date = monday.add(Duration(days: i));
-          final foodLogs = await _foodLogService.getFoodLogsByDate(userId, date);
-          
+          final foodLogs =
+              await _foodLogService.getFoodLogsByDate(userId, date);
+
           double totalCalories = 0;
           for (var log in foodLogs) {
             totalCalories += log.calories;
           }
-          
+
           final dayName = dayNames[i]; // Monday is index 0
           dailyCalories[dayName] = totalCalories;
         }
-        
-        return dayNames.map((dayName) => 
-          CalorieData(dayName, dailyCalories[dayName] ?? 0)
-        ).toList();
+
+        return dayNames
+            .map((dayName) => CalorieData(dayName, dailyCalories[dayName] ?? 0))
+            .toList();
       } else {
         // OPTIMIZED MONTHLY VIEW - fetch all month data at once
-        
+
         // Get the first and last day of the current month
-        final lastDayOfMonth = DateTime(now.year, now.month + 1, 0); // Last day of month
-        
+        final lastDayOfMonth =
+            DateTime(now.year, now.month + 1, 0); // Last day of month
+
         // Calculate total days in month and divide into 4 weeks
         final daysInMonth = lastDayOfMonth.day;
         final daysPerWeek = (daysInMonth / 4).ceil();
-        
+
         // Create fixed week labels
         final weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-        
+
         // Initialize data map
         final Map<String, double> weeklyCalories = {};
         for (String week in weekLabels) {
@@ -143,47 +156,52 @@ class NutritionRepositoryImpl implements NutritionRepository {
         // We'll assume your FoodLogHistoryService has a method for this
         // If not, we can adapt the code to use multiple day-by-day calls
         try {
-          final foodLogs = await _foodLogService.getFoodLogsByMonth(userId, now.year, now.month);
-          
+          final foodLogs = await _foodLogService.getFoodLogsByMonth(
+              userId, now.year, now.month);
+
           // Group logs by week
           for (var log in foodLogs) {
             final logDay = log.timestamp.day;
-            
+
             // Calculate which week this day belongs to (1-indexed)
             int weekNumber = ((logDay - 1) ~/ daysPerWeek) + 1;
-            
+
             // Ensure week number is valid (1-4)
             weekNumber = weekNumber.clamp(1, 4);
-            
+
             // Add calories to the appropriate week
             final weekLabel = 'Week $weekNumber';
-            weeklyCalories[weekLabel] = (weeklyCalories[weekLabel] ?? 0) + log.calories;
+            weeklyCalories[weekLabel] =
+                (weeklyCalories[weekLabel] ?? 0) + log.calories;
           }
         } catch (e) {
           // Fallback: if getFoodLogsByMonth doesn't exist, fetch by days
           // This is less efficient but will still work
           for (int day = 1; day <= daysInMonth && day <= now.day; day++) {
             final date = DateTime(now.year, now.month, day);
-            final dayLogs = await _foodLogService.getFoodLogsByDate(userId, date);
-            
+            final dayLogs =
+                await _foodLogService.getFoodLogsByDate(userId, date);
+
             if (dayLogs.isNotEmpty) {
               int weekNumber = ((day - 1) ~/ daysPerWeek) + 1;
               weekNumber = weekNumber.clamp(1, 4);
-              
+
               final weekLabel = 'Week $weekNumber';
               double dayTotal = 0;
               for (var log in dayLogs) {
                 dayTotal += log.calories;
               }
-              weeklyCalories[weekLabel] = (weeklyCalories[weekLabel] ?? 0) + dayTotal;
+              weeklyCalories[weekLabel] =
+                  (weeklyCalories[weekLabel] ?? 0) + dayTotal;
             }
           }
         }
-        
+
         // Create the result list in order
-        return weekLabels.map((weekLabel) => 
-          CalorieData(weekLabel, weeklyCalories[weekLabel] ?? 0)
-        ).toList();
+        return weekLabels
+            .map((weekLabel) =>
+                CalorieData(weekLabel, weeklyCalories[weekLabel] ?? 0))
+            .toList();
       }
     } catch (e) {
       debugPrint('Error fetching calorie data: $e');
@@ -226,45 +244,43 @@ class NutritionRepositoryImpl implements NutritionRepository {
     try {
       // Get today's date
       final today = DateTime.now();
-      
+
       final foodLogs = await _foodLogService.getFoodLogsByDate(userId, today);
-      
+
       // Calculate consumed calories with proper type conversion
       int consumedCalories = 0;
       for (var log in foodLogs) {
         consumedCalories += log.calories.round();
       }
-      
-      final exerciseLogs = await _exerciseLogService.getExerciseLogsByDate(userId, today);
-      
+
+      final exerciseLogs =
+          await _exerciseLogService.getExerciseLogsByDate(userId, today);
+
       // Calculate burned calories with proper type conversion
       int burnedCalories = 0;
       for (var log in exerciseLogs) {
         burnedCalories += log.caloriesBurned.round();
       }
-      
+
       // Calculate net calories
       int netCalories = consumedCalories - burnedCalories;
-      
+
       // Format values with commas
       final formatter = NumberFormat('#,###');
-      
+
       return [
         NutritionStat(
-          label: 'Consumed', 
-          value: "${formatter.format(consumedCalories)} kcal", 
-          color: primaryPink
-        ),
+            label: 'Consumed',
+            value: "${formatter.format(consumedCalories)} kcal",
+            color: primaryPink),
         NutritionStat(
-          label: 'Burned', 
-          value: "${formatter.format(burnedCalories)} kcal", 
-          color: primaryGreen
-        ),
+            label: 'Burned',
+            value: "${formatter.format(burnedCalories)} kcal",
+            color: primaryGreen),
         NutritionStat(
-          label: 'Net', 
-          value: "${formatter.format(netCalories)} kcal", 
-          color: netCalories > 0 ? primaryPink : primaryGreen
-        ),
+            label: 'Net',
+            value: "${formatter.format(netCalories)} kcal",
+            color: netCalories > 0 ? primaryPink : primaryGreen),
       ];
     } catch (e) {
       debugPrint('Error fetching nutrition stats: $e');
@@ -290,19 +306,19 @@ class NutritionRepositoryImpl implements NutritionRepository {
     try {
       // Get today's date
       final today = DateTime.now();
-      
+
       final foodLogs = await _foodLogService.getFoodLogsByDate(userId, today);
-      
+
       // Set default goals
       const proteinGoal = 120;
       const carbsGoal = 250;
       const fatGoal = 65;
-      
+
       // Calculate totals from food logs
       double proteinTotal = 0;
       double carbsTotal = 0;
       double fatTotal = 0;
-      
+
       // Process each food log, now using async approach
       for (var log in foodLogs) {
         // Access nutrition info using helper method
@@ -313,12 +329,14 @@ class NutritionRepositoryImpl implements NutritionRepository {
           fatTotal += nutritionInfo.fat;
         }
       }
-      
+
       // Calculate percentages (capped at 100%)
-      int proteinPercentage = (proteinTotal / proteinGoal * 100).round().clamp(0, 100);
-      int carbsPercentage = (carbsTotal / carbsGoal * 100).round().clamp(0, 100);
+      int proteinPercentage =
+          (proteinTotal / proteinGoal * 100).round().clamp(0, 100);
+      int carbsPercentage =
+          (carbsTotal / carbsGoal * 100).round().clamp(0, 100);
       int fatPercentage = (fatTotal / fatGoal * 100).round().clamp(0, 100);
-      
+
       return [
         MacroNutrient(
           label: 'Protein',
@@ -378,19 +396,19 @@ class NutritionRepositoryImpl implements NutritionRepository {
     try {
       // Get today's date
       final today = DateTime.now();
-      
+
       final foodLogs = await _foodLogService.getFoodLogsByDate(userId, today);
-      
+
       // Define goals
       const fiberGoal = 25.0;
       const sugarGoal = 30.0;
       const sodiumGoal = 2300.0;
-      
+
       // Calculate totals
       double fiberTotal = 0;
       double sugarTotal = 0;
       double sodiumTotal = 0;
-      
+
       for (var log in foodLogs) {
         // Access nutrition info using helper method - now async
         final nutritionInfo = await _getNutritionInfo(log);
@@ -400,12 +418,12 @@ class NutritionRepositoryImpl implements NutritionRepository {
           sodiumTotal += nutritionInfo.sodium;
         }
       }
-      
+
       // Calculate progress (capped at 1.0)
       double fiberProgress = (fiberTotal / fiberGoal).clamp(0.0, 1.0);
       double sugarProgress = (sugarTotal / sugarGoal).clamp(0.0, 1.0);
       double sodiumProgress = (sodiumTotal / sodiumGoal).clamp(0.0, 1.0);
-      
+
       return [
         MicroNutrient(
           nutrient: 'Fiber',
@@ -471,13 +489,13 @@ class NutritionRepositoryImpl implements NutritionRepository {
     try {
       // Get today's date
       final today = DateTime.now();
-      
+
       final foodLogs = await _foodLogService.getFoodLogsByDate(userId, today);
-      
+
       if (foodLogs.isEmpty) {
         return _getDefaultMeals();
       }
-      
+
       // Group by meal type
       Map<String, int> mealCalories = {
         'Breakfast': 0,
@@ -485,36 +503,37 @@ class NutritionRepositoryImpl implements NutritionRepository {
         'Dinner': 0,
         'Snack': 0,
       };
-      
+
       Map<String, String> mealTimes = {
         'Breakfast': '7:30 AM',
         'Lunch': '12:30 PM',
         'Dinner': '7:00 PM',
         'Snack': '3:30 PM',
       };
-      
+
       int totalCalories = 0;
-      
+
       for (var log in foodLogs) {
         // Determine meal type based on timestamp instead of accessing a nonexistent property
         final mealType = _determineMealType(log.timestamp);
-        
+
         // Fix type conversion
         final calories = log.calories.round();
-        
+
         // Add calories to the meal type
-        mealCalories.update(mealType, (value) => value + calories, ifAbsent: () => calories);
-        
+        mealCalories.update(mealType, (value) => value + calories,
+            ifAbsent: () => calories);
+
         // Set meal time from the log timestamp
         mealTimes[mealType] = _formatTime(log.timestamp);
-        
+
         // Add to total calories
         totalCalories += calories;
       }
-      
+
       // Build meal list
       List<Meal> meals = [];
-      
+
       // Add colors based on meal type
       Map<String, Color> mealColors = {
         'Breakfast': primaryPink,
@@ -522,7 +541,7 @@ class NutritionRepositoryImpl implements NutritionRepository {
         'Dinner': primaryYellow,
         'Snack': Colors.purple,
       };
-      
+
       // Create meal objects
       mealCalories.forEach((mealType, calories) {
         if (calories > 0) {
@@ -535,7 +554,7 @@ class NutritionRepositoryImpl implements NutritionRepository {
           ));
         }
       });
-      
+
       return meals.isEmpty ? _getDefaultMeals() : meals;
     } catch (e) {
       debugPrint('Error fetching meals: $e');

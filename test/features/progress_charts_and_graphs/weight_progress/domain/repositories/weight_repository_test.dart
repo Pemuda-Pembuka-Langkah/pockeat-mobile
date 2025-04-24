@@ -1,15 +1,18 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weekly_analysis.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_goal.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weekly_analysis.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_status.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/repositories/weight_repository.dart';
+import 'weight_repository_test.mocks.dart';
 
 // Generate mocks for the WeightRepository
 @GenerateMocks([WeightRepository])
-import 'weight_repository_test.mocks.dart';
 
 void main() {
   late MockWeightRepository mockRepository;

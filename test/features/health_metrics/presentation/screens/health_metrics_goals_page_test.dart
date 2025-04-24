@@ -1,17 +1,21 @@
+// Dart imports:
+import 'dart:async';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'dart:async';
-
+// Project imports:
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
-
 import 'health_metrics_goals_page_test.mocks.dart';
 
 @GenerateMocks([HealthMetricsFormCubit])

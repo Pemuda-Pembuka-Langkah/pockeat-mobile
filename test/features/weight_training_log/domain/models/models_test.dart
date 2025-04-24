@@ -1,8 +1,11 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/weight_training_log/domain/models/models.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/user_constanta.dart' as actual_constanta;
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart' as actual_exercise;
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting_factory.dart' as actual_factory;
-import 'package:pockeat/features/weight_training_log/domain/models/user_constanta.dart' as actual_constanta;
 
 void main() {
   group('Models exports', () {

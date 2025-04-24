@@ -1,16 +1,20 @@
+// Dart imports:
 import 'dart:async';
 
+// Package imports:
 import 'package:app_links/app_links.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
-import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
-import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 import 'deep_link_service_impl_test.mocks.dart';
 
 @GenerateMocks([

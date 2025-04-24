@@ -1,7 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'distance_selection_widget.dart';
-import 'time_selection_widget.dart';
 import 'personal_data_reminder.dart';
+import 'time_selection_widget.dart';
 
 class RunningForm extends StatefulWidget {
   final Color primaryPink;
@@ -67,7 +70,7 @@ class RunningFormState extends State<RunningForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PersonalDataReminder(),
+          const PersonalDataReminder(),
           const SizedBox(height: 16),
           TimeSelectionWidget(
             primaryColor: widget.primaryPink,

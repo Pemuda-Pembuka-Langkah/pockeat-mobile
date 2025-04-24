@@ -1,16 +1,22 @@
 // test/features/ai_api_scan/services/base/api_service_test.dart
+
+// Dart imports:
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:convert';
+
+// Package imports:
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
 import 'package:pockeat/features/authentication/services/token_manager.dart';
 import 'api_service_test.mocks.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Generate mocks
 @GenerateMocks([http.Client, ApiServiceInterface])

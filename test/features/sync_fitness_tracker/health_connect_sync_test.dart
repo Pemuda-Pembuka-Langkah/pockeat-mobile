@@ -1,12 +1,17 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:health/health.dart';
+
+// Package imports:
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:health/health.dart';
 import 'package:intl/intl.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+// Project imports:
+import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
 
 // Mock classes
 class MockHealth extends Mock implements Health {}

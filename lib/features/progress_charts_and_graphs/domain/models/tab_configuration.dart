@@ -4,7 +4,7 @@ class TabConfiguration {
   final List<String> progressTabLabels;
   final int logHistoryTabCount;
   final List<String> logHistoryTabLabels;
-  
+
   TabConfiguration({
     required this.mainTabCount,
     required this.progressTabCount,

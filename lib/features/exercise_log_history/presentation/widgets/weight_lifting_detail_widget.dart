@@ -1,6 +1,11 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:intl/intl.dart';
+
+// Project imports:
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/services/workout_service.dart';
 
@@ -8,12 +13,12 @@ import 'package:pockeat/features/weight_training_log/services/workout_service.da
 class WeightLiftingDetailWidget extends StatelessWidget {
   final WeightLifting weightLifting;
   final Color primaryColor = const Color(0xFF4ECDC4); // Weightlifting color
-  
+
   const WeightLiftingDetailWidget({
     super.key,
     required this.weightLifting,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -34,7 +39,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildHeaderCard(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -69,7 +74,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     CupertinoIcons.arrow_up_circle_fill,
                     size: 28,
                     color: Colors.white,
@@ -118,7 +123,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMetricsCard(BuildContext context) {
     return Card(
       elevation: 3,
@@ -158,7 +163,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildVerticalDivider() {
     return Container(
       width: 1,
@@ -166,7 +171,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
       color: Colors.grey.withOpacity(0.2),
     );
   }
-  
+
   Widget _buildMetricItem({
     required IconData icon,
     required String value,
@@ -215,7 +220,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildDetailsList(BuildContext context) {
     return Card(
       elevation: 3,
@@ -245,9 +250,11 @@ class WeightLiftingDetailWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildDetailRow('Date', DateFormat('dd MMM yyyy').format(weightLifting.timestamp)),
+            _buildDetailRow('Date',
+                DateFormat('dd MMM yyyy').format(weightLifting.timestamp)),
             _buildDetailDivider(),
-            _buildDetailRow('Time', DateFormat('HH:mm').format(weightLifting.timestamp)),
+            _buildDetailRow(
+                'Time', DateFormat('HH:mm').format(weightLifting.timestamp)),
             _buildDetailDivider(),
             _buildDetailRow('Body Part', weightLifting.bodyPart),
             _buildDetailDivider(),
@@ -255,19 +262,21 @@ class WeightLiftingDetailWidget extends StatelessWidget {
             _buildDetailDivider(),
             _buildDetailRow('Total Reps', _getTotalReps().toString()),
             _buildDetailDivider(),
-            _buildDetailRow('Total Weight', '${_getTotalWeight().toStringAsFixed(1)} kg'),
+            _buildDetailRow(
+                'Total Weight', '${_getTotalWeight().toStringAsFixed(1)} kg'),
             _buildDetailDivider(),
             _buildDetailRow('MET Value', weightLifting.metValue.toString()),
             _buildDetailDivider(),
             _buildDetailRow('Duration', _formatDuration(_getTotalDuration())),
             _buildDetailDivider(),
-            _buildDetailRow('Calories Burned', '${_calculateCalories().round()} kcal'),
+            _buildDetailRow(
+                'Calories Burned', '${_calculateCalories().round()} kcal'),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildDetailDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -277,7 +286,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildDetailRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -309,7 +318,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildSetsList(BuildContext context) {
     if (weightLifting.sets.isEmpty) {
       return Card(
@@ -340,7 +349,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
         ),
       );
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -368,12 +377,13 @@ class WeightLiftingDetailWidget extends StatelessWidget {
         ...weightLifting.sets.asMap().entries.map((entry) {
           final index = entry.key;
           final set = entry.value;
-          
+
           return Card(
             elevation: 3,
             shadowColor: Colors.black26,
             margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
@@ -392,7 +402,8 @@ class WeightLiftingDetailWidget extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: primaryColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
@@ -419,11 +430,13 @@ class WeightLiftingDetailWidget extends StatelessWidget {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        _buildSetMetric(Icons.fitness_center, '${set.weight} kg', 'Weight'),
+                        _buildSetMetric(
+                            Icons.fitness_center, '${set.weight} kg', 'Weight'),
                         const SizedBox(width: 16),
                         _buildSetMetric(Icons.repeat, '${set.reps}', 'Reps'),
                         const SizedBox(width: 16),
-                        _buildSetMetric(Icons.timer, _formatDuration(set.duration), 'Duration'),
+                        _buildSetMetric(Icons.timer,
+                            _formatDuration(set.duration), 'Duration'),
                       ],
                     ),
                   ],
@@ -435,7 +448,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildSetMetric(IconData icon, String value, String label) {
     return Expanded(
       child: Row(
@@ -475,24 +488,25 @@ class WeightLiftingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   int _getTotalReps() {
     return weightLifting.sets.fold(0, (sum, set) => sum + set.reps);
   }
-  
+
   double _getTotalWeight() {
-    return weightLifting.sets.fold(0.0, (sum, set) => sum + (set.weight * set.reps));
+    return weightLifting.sets
+        .fold(0.0, (sum, set) => sum + (set.weight * set.reps));
   }
-  
+
   double _getTotalDuration() {
     return weightLifting.sets.fold(0.0, (sum, set) => sum + set.duration);
   }
-  
+
   String _formatDuration(double minutes) {
     // The duration is already stored in minutes
     return '${minutes.toStringAsFixed(0)} min';
   }
-  
+
   double _calculateCalories() {
     return calculateExerciseCalories(weightLifting);
   }

@@ -1,6 +1,11 @@
+// Dart imports:
+import 'dart:async';
+
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:async';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 
 /// Repository dasar untuk manajemen Firebase Auth dan Firestore

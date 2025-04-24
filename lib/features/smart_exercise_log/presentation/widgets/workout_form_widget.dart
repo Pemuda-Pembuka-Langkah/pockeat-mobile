@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class WorkoutFormWidget extends StatefulWidget {
@@ -26,18 +27,18 @@ class _WorkoutFormWidgetState extends State<WorkoutFormWidget> {
 
   void _validateAndSubmit() {
     final input = _workoutController.text.trim();
-    
+
     if (input.isEmpty) {
       setState(() {
         _errorMessage = 'Workout description cannot be empty';
       });
       return;
     }
-    
+
     setState(() {
       _errorMessage = null;
     });
-    
+
     widget.onAnalyzePressed(input);
   }
 
@@ -80,7 +81,8 @@ class _WorkoutFormWidgetState extends State<WorkoutFormWidget> {
             controller: _workoutController,
             maxLines: 4,
             decoration: InputDecoration(
-              hintText: 'Example: "Morning run for 30 minutes with medium intensity" or "HIIT workout for 15 minutes"',
+              hintText:
+                  'Example: "Morning run for 30 minutes with medium intensity" or "HIIT workout for 15 minutes"',
               hintStyle: const TextStyle(color: Colors.black38),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),

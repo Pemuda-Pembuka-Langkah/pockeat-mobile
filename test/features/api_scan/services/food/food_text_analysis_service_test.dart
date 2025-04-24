@@ -1,12 +1,16 @@
 // test/features/ai_api_scan/services/food/food_text_analysis_service_test.dart
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
+import '../base/api_service_test.mocks.dart';
 
 // Import the generated mock
-import '../base/api_service_test.mocks.dart';
 
 void main() {
   late MockApiServiceInterface mockApiService;

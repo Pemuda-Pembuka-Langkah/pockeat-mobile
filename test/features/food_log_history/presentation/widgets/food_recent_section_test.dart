@@ -1,14 +1,19 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/presentation/widgets/food_recent_section.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'food_recent_section_test.mocks.dart';
 
 @GenerateMocks([FoodLogHistoryService, FirebaseAuth, User])
-import 'food_recent_section_test.mocks.dart';
 
 void main() {
   late MockFoodLogHistoryService mockService;

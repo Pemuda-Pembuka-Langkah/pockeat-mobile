@@ -1,11 +1,15 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
-import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
-import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
+// Package imports:
+import 'package:intl/intl.dart';
+
+// Project imports:
+import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
+import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
+import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 
 class ExerciseSummaryCard extends StatelessWidget {
   final GlobalKey cardKey;
@@ -414,6 +418,4 @@ class ExerciseSummaryCard extends StatelessWidget {
   String _formatTime(DateTime time) {
     return DateFormat('h:mm a').format(time);
   }
-
-
 }

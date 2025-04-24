@@ -1,4 +1,6 @@
 // exercise_option_card.dart
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class ExerciseOptionCard extends StatelessWidget {

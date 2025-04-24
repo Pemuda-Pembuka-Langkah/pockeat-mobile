@@ -1,7 +1,13 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/gestures.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
+
+// Project imports:
+import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
 
 /// Registration page for new users
@@ -40,6 +46,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final Color bgColor = const Color(0xFFF9F9F9);
 
   late RegisterService _registerService;
+  late AnalyticsService _analyticsService;
   // Gender options list
   final List<String> _genderOptions = ['Male', 'Female', 'Other'];
 
@@ -47,6 +54,9 @@ class _RegisterPageState extends State<RegisterPage> {
   void initState() {
     super.initState();
     _registerService = GetIt.instance<RegisterService>();
+    _analyticsService = GetIt.instance<AnalyticsService>();
+    _analyticsService.logScreenView(
+        screenName: 'register_page', screenClass: 'RegisterPage');
   }
 
   @override
@@ -97,6 +107,9 @@ class _RegisterPageState extends State<RegisterPage> {
       });
 
       if (result == RegisterResult.success) {
+        // Track signup event with analytics
+        await _analyticsService.logSignUp(method: 'email');
+
         setState(() {
           _isRegistrationSuccess = true;
         });
@@ -105,7 +118,7 @@ class _RegisterPageState extends State<RegisterPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
+              content: const Text(
                 'Registration successful! Please verify your email.',
               ),
               backgroundColor: primaryGreen,
@@ -191,13 +204,13 @@ class _RegisterPageState extends State<RegisterPage> {
       if (result && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Verification email has been resent.'),
+            content: const Text('Verification email has been resent.'),
             backgroundColor: primaryGreen,
           ),
         );
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text(
               'Failed to send verification email. Please try again.',
             ),
@@ -212,7 +225,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('An error occurred. Please try again.'),
             backgroundColor: Colors.red,
           ),
@@ -603,7 +616,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 disabledBackgroundColor: primaryPink.withOpacity(0.5),
               ),
               child: _isLoading
-                  ? CircularProgressIndicator(
+                  ? const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
                   : const Text(

@@ -1,17 +1,24 @@
+// Dart imports:
 import 'dart:io';
 import 'dart:typed_data';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/presentation/screens/edit_profile_page.dart';
 import 'package:pockeat/features/authentication/services/profile_service.dart';
-import 'package:image_picker/image_picker.dart';
+import 'edit_profile_page_test.mocks.dart';
 
 @GenerateMocks([ProfileService, File, NavigatorObserver])
-import 'edit_profile_page_test.mocks.dart';
 
 // Class untuk menangkap SnackBar message
 class MockBuildContext extends Mock implements BuildContext {

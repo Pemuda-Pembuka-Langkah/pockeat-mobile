@@ -1,33 +1,37 @@
+// Flutter imports:
 import 'package:flutter/foundation.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/utils/instabug_client.dart';
 
 /// Implementasi [BugReportService] menggunakan Instabug SDK
-/// 
+///
 /// Catatan: Inisialisasi Instabug dilakukan langsung di main.dart
 class BugReportServiceImpl implements BugReportService {
   /// Client for Instabug operations
   final InstabugClient _instabugClient;
-   // coverage:ignore-start
+  // coverage:ignore-start
   /// Konstruktor default
-  BugReportServiceImpl({InstabugClient? instabugClient}) 
+  BugReportServiceImpl({InstabugClient? instabugClient})
       : _instabugClient = instabugClient ?? InstabugClient();
   // coverage:ignore-line
-   // coverage:ignore-end
+  // coverage:ignore-end
   // Metode initialize dipindahkan ke main.dart
-  
+
   // reportError method removed - use InstabugLog.logError(), logInfo(), etc. directly
-  
+
   @override
   Future<bool> setUserData(UserModel user) async {
     try {
       await _instabugClient.identifyUser(
         user.email, // email (first parameter)
-        user.displayName ?? 'User-${user.uid.substring(0, 5)}', // name (second parameter)
+        user.displayName ??
+            'User-${user.uid.substring(0, 5)}', // name (second parameter)
         user.uid, // id (third parameter)
       );
-      
+
       return true;
     } catch (e) {
       // Log error ke console
@@ -36,8 +40,7 @@ class BugReportServiceImpl implements BugReportService {
       return false;
     }
   }
-  
-  
+
   @override
   Future<bool> clearUserData() async {
     try {
@@ -50,7 +53,7 @@ class BugReportServiceImpl implements BugReportService {
       return false;
     }
   }
-  
+
   @override
   Future<bool> show() async {
     try {

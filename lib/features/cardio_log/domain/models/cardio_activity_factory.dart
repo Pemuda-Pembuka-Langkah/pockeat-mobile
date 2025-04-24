@@ -1,6 +1,7 @@
+// Project imports:
 import 'cardio_activity.dart';
-import 'running_activity.dart';
 import 'cycling_activity.dart';
+import 'running_activity.dart';
 import 'swimming_activity.dart';
 
 /// Factory class untuk membuat objek CardioActivity dari berbagai sumber data
@@ -8,22 +9,22 @@ class CardioActivityFactory {
   /// Membuat CardioActivity dari Map (umumnya dari database)
   static CardioActivity fromMap(Map<String, dynamic> map) {
     final String activityType = map['type'] ?? '';
-    
+
     switch (activityType) {
       case 'running':
         return RunningActivity.fromMap(map);
-      
+
       case 'cycling':
         return CyclingActivity.fromMap(map);
-      
+
       case 'swimming':
         return SwimmingActivity.fromMap(map);
-      
+
       default:
         throw ArgumentError('Unknown cardio activity type: $activityType');
     }
   }
-  
+
   /// Membuat CardioActivity dari form data yang dikumpulkan dari UI
   static CardioActivity fromFormData({
     required String userId,
@@ -42,7 +43,7 @@ class CardioActivityFactory {
           endTime: endTime,
           distanceKm: formData['distanceKm'] ?? 0.0,
         );
-      
+
       case CardioType.cycling:
         return CyclingActivity(
           userId: userId,
@@ -52,7 +53,7 @@ class CardioActivityFactory {
           distanceKm: formData['distanceKm'] ?? 0.0,
           cyclingType: _parseCyclingType(formData['cyclingType']),
         );
-      
+
       case CardioType.swimming:
         return SwimmingActivity(
           userId: userId,
@@ -65,7 +66,7 @@ class CardioActivityFactory {
         );
     }
   }
-  
+
   /// Helper method untuk mengkonversi string ke CyclingType
   static CyclingType _parseCyclingType(String? typeString) {
     switch (typeString) {
@@ -79,4 +80,4 @@ class CardioActivityFactory {
         return CyclingType.mountain;
     }
   }
-} 
+}

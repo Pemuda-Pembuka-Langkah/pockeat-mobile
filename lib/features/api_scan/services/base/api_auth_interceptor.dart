@@ -1,6 +1,10 @@
+// Package imports:
 import 'package:http/http.dart' as http;
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/token_manager.dart';
 
+// cove
 class ApiAuthInterceptor {
   final TokenManager _tokenManager;
 

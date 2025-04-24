@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
 
+import 'package:lottie/lottie.dart'; // Add this package
+
+/// Splash screen page shown when the app is launched
+///
+/// This page displays the app logo, panda animation, and loading animation
+/// while checking the authentication status of the user.
 class SplashScreenPage extends StatefulWidget {
   const SplashScreenPage({super.key});
 
@@ -90,6 +100,9 @@ class _SplashScreenPageState extends State<SplashScreenPage>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final circleSize = size.width * 0.6; // Adjust size as needed
+
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(

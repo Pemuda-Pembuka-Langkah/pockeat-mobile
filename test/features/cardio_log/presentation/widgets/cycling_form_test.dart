@@ -1,9 +1,14 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/presentation/widgets/cycling_form.dart';
-import 'package:pockeat/features/cardio_log/presentation/widgets/time_selection_widget.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/distance_selection_widget.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/personal_data_reminder.dart';
+import 'package:pockeat/features/cardio_log/presentation/widgets/time_selection_widget.dart';
 
 void main() {
   late CyclingForm cyclingForm;

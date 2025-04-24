@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_data.dart';
 
 class ProgressChartWidget extends StatefulWidget {
@@ -7,7 +12,7 @@ class ProgressChartWidget extends StatefulWidget {
   final String selectedPeriod;
   final Function(String?) onPeriodChanged;
   final Color primaryPink;
-  
+
   const ProgressChartWidget({
     super.key,
     required this.periodData,
@@ -36,7 +41,7 @@ class _ProgressChartWidgetState extends State<ProgressChartWidget> {
   void didUpdateWidget(ProgressChartWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Update if periodData changes from parent or if selectedPeriod changes
-    if (oldWidget.periodData != widget.periodData || 
+    if (oldWidget.periodData != widget.periodData ||
         oldWidget.selectedPeriod != widget.selectedPeriod) {
       _selectedPeriod = widget.selectedPeriod;
       _updateChartSeries();
@@ -122,7 +127,8 @@ class _ProgressChartWidgetState extends State<ProgressChartWidget> {
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
-                        items: ['Daily', 'Weekly', 'Monthly'].map((String value) {
+                        items:
+                            ['Daily', 'Weekly', 'Monthly'].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(value),
