@@ -55,8 +55,8 @@ void main() {
         final message30 = MonthlyStreakMessage(30);
         final message75 = MonthlyStreakMessage(75);
         
-        expect(message30.body, contains('30 hari'));
-        expect(message75.body, contains('75 hari'));
+        expect(message30.body, contains('30 days'));
+        expect(message75.body, contains('75 days'));
       });
     });
     
@@ -73,8 +73,8 @@ void main() {
         final message100 = CenturyStreakMessage(100);
         final message365 = CenturyStreakMessage(365);
         
-        expect(message100.body, contains('100 hari'));
-        expect(message365.body, contains('365 hari'));
+        expect(message100.body, contains('100 consecutive days'));
+        expect(message365.body, contains('365 consecutive days'));
       });
     });
     
