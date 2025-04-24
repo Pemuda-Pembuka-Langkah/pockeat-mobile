@@ -165,12 +165,12 @@ class DeepLinkServiceImpl implements DeepLinkService {
 
     return hasWidgetName && hasType && (type == 'dashboard' || type == 'home');
   }
-  
+
   // Method untuk mengecek apakah link ke streak celebration
   bool _isStreakCelebrationLink(Uri link) {
     // Cek apakah link memiliki scheme pockeat
     if (link.scheme != 'pockeat') return false;
-    
+
     // Cek apakah path-nya adalah streak-celebration
     return link.path == 'streak-celebration';
   }
@@ -301,7 +301,7 @@ class DeepLinkServiceImpl implements DeepLinkService {
         // Mendapatkan streak days dari query parameter
         final streakDaysStr = uri.queryParameters['streakDays'] ?? '0';
         final streakDays = int.tryParse(streakDaysStr) ?? 0;
-        
+
         return DeepLinkResult.streakCelebration(
           success: true,
           data: {

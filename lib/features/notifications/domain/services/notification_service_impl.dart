@@ -7,21 +7,24 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:pockeat/features/notifications/domain/services/utils/work_manager_client.dart';
 import 'package:workmanager/workmanager.dart';
 
 // Project imports:
-import 'package:pockeat/core/di/service_locator.dart' show getIt, setupDependencies;
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
 import 'package:pockeat/features/notifications/domain/model/streak_message.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/notifications/domain/services/utils/work_manager_client.dart';
+
+// Project imports:
+import 'package:pockeat/core/di/service_locator.dart'
+    show getIt, setupDependencies;
 
 class NotificationServiceImpl implements NotificationService {
   static const String _prefixNotificationStatus = 'notification_status_';
@@ -31,12 +34,12 @@ class NotificationServiceImpl implements NotificationService {
   final FoodLogHistoryService _foodLogHistoryService;
   final LoginService _loginService;
   final WorkManagerClient _workManagerClient;
-  
 
   // Background task identifier for streak calculation
   static const String _streakCalculationTask = 'streak_calculation_task';
   // Default time for streak notification (10:00 AM)
-  static const TimeOfDay _defaultStreakNotificationTime = TimeOfDay(hour: 10, minute: 0);
+  static const TimeOfDay _defaultStreakNotificationTime =
+      TimeOfDay(hour: 10, minute: 0);
 
   NotificationServiceImpl({
     FirebaseMessaging? firebaseMessaging,
@@ -45,12 +48,14 @@ class NotificationServiceImpl implements NotificationService {
     FoodLogHistoryService? foodLogHistoryService,
     LoginService? loginService,
     WorkManagerClient? workManagerClient,
-  }) : _firebaseMessaging = firebaseMessaging ?? getIt<FirebaseMessaging>(),
-       _flutterLocalNotificationsPlugin = flutterLocalNotificationsPlugin ?? getIt<FlutterLocalNotificationsPlugin>(),
-       _prefs = prefs ?? getIt<SharedPreferences>(),
-       _foodLogHistoryService = foodLogHistoryService ?? getIt<FoodLogHistoryService>(),
-       _loginService = loginService ?? getIt<LoginService>(),
-       _workManagerClient = workManagerClient ?? WorkManagerClient() {
+  })  : _firebaseMessaging = firebaseMessaging ?? getIt<FirebaseMessaging>(),
+        _flutterLocalNotificationsPlugin = flutterLocalNotificationsPlugin ??
+            getIt<FlutterLocalNotificationsPlugin>(),
+        _prefs = prefs ?? getIt<SharedPreferences>(),
+        _foodLogHistoryService =
+            foodLogHistoryService ?? getIt<FoodLogHistoryService>(),
+        _loginService = loginService ?? getIt<LoginService>(),
+        _workManagerClient = workManagerClient ?? WorkManagerClient() {
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
   }
@@ -69,7 +74,7 @@ class NotificationServiceImpl implements NotificationService {
     await _createNotificationChannel(NotificationChannels.dailyStreak);
     // Set up handler untuk FCM
     _setupFCMHandlers();
-    
+
     // Initialize WorkManager
     await _initializeWorkManager();
 
@@ -127,7 +132,7 @@ class NotificationServiceImpl implements NotificationService {
   @override
   Future<void> cancelAllNotifications() async {
     await _flutterLocalNotificationsPlugin.cancelAll();
-    
+
     // Cancel all WorkManager tasks
     await _workManagerClient.cancelAll();
   }
@@ -197,19 +202,19 @@ class NotificationServiceImpl implements NotificationService {
     if (details.payload == 'daily_calorie_tracking') {
       // Arahkan ke halaman tracking makanan
       final deepLinkService = getIt<DeepLinkService>();
-      await deepLinkService.handleDeepLink(
-        Uri.parse('pockeat://quick-log')
-      );
+      await deepLinkService.handleDeepLink(Uri.parse('pockeat://quick-log'));
     } else if (details.payload == 'streak_celebration') {
       final userId = (await _loginService.getCurrentUser())?.uid;
       if (userId == null) return;
-      
+
       // Hitung streak terbaru secara real-time saat notifikasi di-tap
-      final currentStreakDays = await _foodLogHistoryService.getFoodStreakDays(userId);
-      
+      final currentStreakDays =
+          await _foodLogHistoryService.getFoodStreakDays(userId);
+
       // Buat URI dengan parameter streak days
-      final streakUri = Uri.parse('pockeat://streak-celebration?streakDays=$currentStreakDays');
-      
+      final streakUri = Uri.parse(
+          'pockeat://streak-celebration?streakDays=$currentStreakDays');
+
       // Gunakan DeepLinkService untuk navigasi ke halaman streak celebration
       final deepLinkService = getIt<DeepLinkService>();
       await deepLinkService.handleDeepLink(streakUri);
@@ -294,7 +299,7 @@ class NotificationServiceImpl implements NotificationService {
       isInDebugMode: false,
     );
   }
-  
+
   Future<void> _setupDefaultRecurringNotifications() async {
     // Cek status notifikasi sebelum menjadwalkan
     final isCaloriesEnabled =
@@ -315,13 +320,13 @@ class NotificationServiceImpl implements NotificationService {
       await _setupNotificationByChannel('daily_streak_channel');
     }
   }
-  
+
   // Schedule the streak notification background task
   Future<void> _scheduleStreakNotification() async {
     // Get user's preferred notification time (or use default)
     final preferredTimeString = _prefs.getString('streak_notification_time');
     TimeOfDay notificationTime = _defaultStreakNotificationTime;
-    
+
     if (preferredTimeString != null) {
       final timeParts = preferredTimeString.split(':');
       if (timeParts.length == 2) {
@@ -332,7 +337,7 @@ class NotificationServiceImpl implements NotificationService {
         }
       }
     }
-    
+
     // Calculate the initial delay to the scheduled time
     final now = DateTime.now();
     final scheduledTime = DateTime(
@@ -343,13 +348,13 @@ class NotificationServiceImpl implements NotificationService {
       notificationTime.minute,
     );
     // If the scheduled time for today has already passed, schedule for tomorrow
-    final initialDelay = scheduledTime.isAfter(now) 
-        ? scheduledTime.difference(now) 
+    final initialDelay = scheduledTime.isAfter(now)
+        ? scheduledTime.difference(now)
         : scheduledTime.add(const Duration(days: 1)).difference(now);
-    
+
     // Cancel any existing tasks
     await _workManagerClient.cancelByUniqueName(_streakCalculationTask);
-    
+
     // Schedule the daily task
     await _workManagerClient.registerPeriodicTask(
       _streakCalculationTask,
@@ -361,30 +366,31 @@ class NotificationServiceImpl implements NotificationService {
       ),
     );
   }
-  
+
   // Show streak notification with real-time streak data
   Future<void> showStreakNotification() async {
     try {
       // First check if streak notifications are enabled
-      final isStreakEnabled = await isNotificationEnabled('daily_streak_channel');
+      final isStreakEnabled =
+          await isNotificationEnabled('daily_streak_channel');
       if (!isStreakEnabled) {
         // Notifications are disabled, don't show anything
         // Consider also canceling future WorkManager tasks here
         await _workManagerClient.cancelByUniqueName(_streakCalculationTask);
         return;
       }
-      
+
       final userId = (await _loginService.getCurrentUser())?.uid;
       if (userId == null) return;
-      
+
       // Calculate streak in real-time when notification is about to be shown
       final streakDays = await _foodLogHistoryService.getFoodStreakDays(userId);
-      
+
       // Only show notification if there's an active streak
       if (streakDays > 0) {
         // Create appropriate message based on streak count
         final streakMessage = StreakMessageFactory.createMessage(streakDays);
-        
+
         // Create and show notification immediately with panda image
         final BigPictureStyleInformation bigPictureStyleInformation =
             BigPictureStyleInformation(
@@ -395,7 +401,7 @@ class NotificationServiceImpl implements NotificationService {
           htmlFormatContent: true,
           htmlFormatContentTitle: true,
         );
-        
+
         await _flutterLocalNotificationsPlugin.show(
           'streak_celebration'.hashCode,
           streakMessage.title,
@@ -427,15 +433,16 @@ void _callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
     // Initialize service locator
     await setupDependencies();
-    
+
     // Get notification service
-    final notificationService = getIt<NotificationService>() as NotificationServiceImpl;
-    
+    final notificationService =
+        getIt<NotificationService>() as NotificationServiceImpl;
+
     if (taskName == NotificationServiceImpl._streakCalculationTask) {
       // Show streak notification with real-time streak data
       await notificationService.showStreakNotification();
     }
-    
+
     return true;
   });
 }
