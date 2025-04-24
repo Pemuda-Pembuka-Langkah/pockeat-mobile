@@ -67,6 +67,16 @@ import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_cl
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
+import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/change_password_error_page.dart';
+import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
+import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
@@ -240,19 +250,11 @@ void main() async {
           create: (_) => getIt<FoodTextInputRepository>(),
         ),
         BlocProvider<HealthMetricsFormCubit>(
-          create: (_) {
-            final user = FirebaseAuth.instance.currentUser;
-            if (user == null) {
-              throw Exception('User must be logged in');
-            }
-            return HealthMetricsFormCubit(
-              userId: user.uid,
-              repository: getIt<HealthMetricsRepository>(),
-              caloricRequirementRepository:
-                  getIt<CaloricRequirementRepository>(),
-              caloricRequirementService: getIt<CaloricRequirementService>(),
-            );
-          },
+          create: (_) => HealthMetricsFormCubit(
+            repository: getIt<HealthMetricsRepository>(),
+            caloricRequirementRepository: getIt<CaloricRequirementRepository>(),
+            caloricRequirementService: getIt<CaloricRequirementService>(),
+          ),
         ),
       ],
       child: const MyApp(),
@@ -351,7 +353,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       routes: {
         '/splash': (context) => const SplashScreenPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
-        '/': (context) => const AuthWrapper(child: HomePage()),
+        '/': (context) => const AuthWrapper(
+          child: HomePage(),
+          redirectUrlIfNotLoggedIn: '/welcome',
+        ),
+        '/welcome': (context) {
+            return const AuthWrapper(
+              requireAuth: false,
+              redirectUrlIfLoggedIn: '/',
+              child: WelcomePage(),
+            );
+          }
+          ,
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
         '/profile': (context) => const AuthWrapper(child: ProfilePage()),
@@ -389,14 +402,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
         },
         '/onboarding/goal': (context) {
-          final user = FirebaseAuth.instance.currentUser;
-          if (user == null) return const LoginPage();
-          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
-          return AuthWrapper(
-            child: BlocProvider.value(
-              value: cubit,
-              child: const HealthMetricsGoalsPage(),
-            ),
+          return BlocProvider.value(
+            value: context.read<HealthMetricsFormCubit>(),
+            child: const HealthMetricsGoalsPage(),
           );
         },
         '/height-weight': (context) =>
