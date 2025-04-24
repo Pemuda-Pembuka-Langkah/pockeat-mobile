@@ -37,7 +37,7 @@ class NotificationServiceImpl implements NotificationService {
     await _initializeLocalNotifications();
 
     // Create notification channel for Android
-    await _createNotificationChannel(NotificationChannels.caloriesReminder);
+    await _createNotificationChannel(NotificationChannels.mealReminder);
     await _createNotificationChannel(NotificationChannels.workoutReminder);
     await _createNotificationChannel(NotificationChannels.subscription);
     await _createNotificationChannel(NotificationChannels.server);
@@ -196,7 +196,7 @@ class NotificationServiceImpl implements NotificationService {
           payload: 'daily_calorie_tracking',
         );
         await scheduleLocalNotification(
-            calorieReminder, NotificationChannels.caloriesReminder);
+            calorieReminder, NotificationChannels.mealReminder);
         break;
 
       case 'workout_reminder_channel':

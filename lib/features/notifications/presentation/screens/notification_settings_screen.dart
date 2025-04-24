@@ -68,7 +68,7 @@ class _NotificationSettingsScreenState
           _reminderTime.minute,
         ),
       ),
-      NotificationChannels.caloriesReminder,
+      NotificationChannels.mealReminder,
     );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -88,7 +88,7 @@ class _NotificationSettingsScreenState
         payload: 'test_notification',
         scheduledTime: DateTime.now().add(const Duration(minutes: 1)),
       ),
-      NotificationChannels.caloriesReminder,
+      NotificationChannels.mealReminder,
     );
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
