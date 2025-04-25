@@ -18,12 +18,16 @@ import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'auth_wrapper_test.mocks.dart';
 
-@GenerateMocks([LoginService, GlobalKey, NavigatorState, HealthMetricsCheckService])
+@GenerateMocks([LoginService, NavigatorState, HealthMetricsCheckService])
+import 'auth_wrapper_test.mocks.dart';
+
+/// Custom mock observer to track navigation during tests
+class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
 void main() {
   late MockLoginService mockLoginService;
   late MockHealthMetricsCheckService mockCheckService;
-  final navigatorKey = GlobalKey<NavigatorState>();
+
   final authenticatedUser = UserModel(
     uid: 'test-user-id',
     email: 'test@example.com',
@@ -33,38 +37,36 @@ void main() {
   );
 
   setUp(() {
+    // Reset shared preferences before each test
+    SharedPreferences.setMockInitialValues({});
+
     mockLoginService = MockLoginService();
     mockCheckService = MockHealthMetricsCheckService();
 
-    // Register mockLoginService in GetIt
+    // Register mock services with GetIt
     final getIt = GetIt.instance;
-    if (getIt.isRegistered<LoginService>()) {
-      getIt.unregister<LoginService>();
-    }
+    if (getIt.isRegistered<LoginService>()) getIt.unregister<LoginService>();
     if (getIt.isRegistered<HealthMetricsCheckService>()) getIt.unregister<HealthMetricsCheckService>();
+
     getIt.registerSingleton<LoginService>(mockLoginService);
     getIt.registerSingleton<HealthMetricsCheckService>(mockCheckService);
   });
 
   tearDown(() {
-    // Clean up GetIt registrations
+    // Clean up GetIt after each test
     final getIt = GetIt.instance;
-    if (getIt.isRegistered<LoginService>()) {
-      getIt.unregister<LoginService>();
-    }
+    if (getIt.isRegistered<LoginService>()) getIt.unregister<LoginService>();
+    if (getIt.isRegistered<HealthMetricsCheckService>()) getIt.unregister<HealthMetricsCheckService>();
   });
 
   group('AuthWrapper', () {
-    testWidgets('should show child when requireAuth is false',
-        (WidgetTester tester) async {
+    testWidgets('should show child when requireAuth is false', (WidgetTester tester) async {
       // Build widget tree
       await tester.pumpWidget(
         MaterialApp(
           home: AuthWrapper(
             requireAuth: false,
-            child: Container(
-              child: const Text('Child Widget'),
-            ),
+            child: const Text('Child Widget'),
           ),
         ),
       );
@@ -74,20 +76,17 @@ void main() {
       verifyNever(mockLoginService.getCurrentUser());
     });
 
-    testWidgets('should check auth when requireAuth is true',
-        (WidgetTester tester) async {
+    testWidgets('should check auth when requireAuth is true', (WidgetTester tester) async {
       // Setup auth check
-      when(mockLoginService.getCurrentUser())
-          .thenAnswer((_) async => authenticatedUser);
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
+      when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => true);
 
       // Build widget tree
       await tester.pumpWidget(
         MaterialApp(
           home: AuthWrapper(
             requireAuth: true,
-            child: Container(
-              child: const Text('Child Widget'),
-            ),
+            child: const Text('Child Widget'),
           ),
         ),
       );
@@ -101,37 +100,7 @@ void main() {
     });
 
     testWidgets(
-        'should show child when requireAuth is true and user is authenticated',
-        (WidgetTester tester) async {
-      // Setup current user
-      when(mockLoginService.getCurrentUser())
-          .thenAnswer((_) async => authenticatedUser);
-
-      // Build widget tree
-      await tester.pumpWidget(
-        MaterialApp(
-          home: AuthWrapper(
-            requireAuth: true,
-            child: Container(
-              child: const Text('Child Widget'),
-            ),
-          ),
-          routes: {
-            '/login': (context) => const Scaffold(body: Text('Login Page')),
-          },
-        ),
-      );
-
-      // Wait for futures to complete
-      await tester.pumpAndSettle();
-
-      // Verify the child is shown and not redirected to login
-      expect(find.text('Child Widget'), findsOneWidget);
-      expect(find.text('Login Page'), findsNothing);
-    });
-
-    testWidgets(
-        'should redirect to login when requireAuth is true and user is not authenticated',
+        'should redirect to /welcome when requireAuth is true and user is not authenticated',
         (WidgetTester tester) async {
       // Setup current user to return null (not authenticated)
       when(mockLoginService.getCurrentUser()).thenAnswer((_) async => null);
@@ -143,12 +112,10 @@ void main() {
           navigatorObservers: [mockObserver],
           home: AuthWrapper(
             requireAuth: true,
-            child: Container(
-              child: const Text('Child Widget'),
-            ),
+            child: const Text('Child Widget'),
           ),
           routes: {
-            '/login': (context) => const Scaffold(body: Text('Login Page')),
+            '/welcome': (context) => const Scaffold(body: Text('Welcome Page')),
           },
         ),
       );
@@ -156,26 +123,22 @@ void main() {
       // Wait for futures to complete and navigation to happen
       await tester.pumpAndSettle();
 
-      // Verify redirect to login page
-      expect(find.text('Login Page'), findsOneWidget);
+      // Verify redirect to welcome page
+      expect(find.text('Welcome Page'), findsOneWidget);
       expect(find.text('Child Widget'), findsNothing);
     });
 
-    testWidgets('should show child while waiting for auth check',
-        (WidgetTester tester) async {
+    testWidgets('should show child while waiting for auth check', (WidgetTester tester) async {
       // Setup auth check to never complete (loading state)
       final completer = Completer<UserModel?>();
-      when(mockLoginService.getCurrentUser())
-          .thenAnswer((_) => completer.future);
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) => completer.future);
 
       // Build widget tree
       await tester.pumpWidget(
         MaterialApp(
           home: AuthWrapper(
             requireAuth: true,
-            child: Container(
-              child: const Text('Child Widget'),
-            ),
+            child: const Text('Child Widget'),
           ),
         ),
       );
@@ -187,23 +150,19 @@ void main() {
       expect(find.text('Child Widget'), findsOneWidget);
     });
 
-    testWidgets('should handle auth check errors gracefully',
-        (WidgetTester tester) async {
+    testWidgets('should handle auth check errors gracefully', (WidgetTester tester) async {
       // Setup auth check to throw an error
-      when(mockLoginService.getCurrentUser())
-          .thenThrow(Exception('Auth check failed'));
+      when(mockLoginService.getCurrentUser()).thenThrow(Exception('Auth check failed'));
 
       // Build widget tree
       await tester.pumpWidget(
         MaterialApp(
           home: AuthWrapper(
             requireAuth: true,
-            child: Container(
-              child: const Text('Child Widget'),
-            ),
+            child: const Text('Child Widget'),
           ),
           routes: {
-            '/login': (context) => const Scaffold(body: Text('Login Page')),
+            '/welcome': (context) => const Scaffold(body: Text('Welcome Page')),
           },
         ),
       );
@@ -211,74 +170,74 @@ void main() {
       // Wait for futures to complete and navigation to happen
       await tester.pumpAndSettle();
 
-      // Verify redirect to login page on error
-      expect(find.text('Login Page'), findsOneWidget);
+      // Verify redirect to welcome page on error
+      expect(find.text('Welcome Page'), findsOneWidget);
+    });
+
+    testWidgets('redirects to onboarding when not completed and not in progress', (tester) async {
+      SharedPreferences.setMockInitialValues({'onboardingInProgress': false});
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
+      when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          routes: {
+            '/onboarding/goal': (_) => const Scaffold(body: Text('Onboarding Page')),
+          },
+          home: AuthWrapper(
+            requireAuth: true,
+            child: const Text('Child Widget'),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Verify user is redirected to onboarding
+      expect(find.text('Onboarding Page'), findsOneWidget);
+    });
+
+    testWidgets('does not redirect if onboarding is in progress', (tester) async {
+      SharedPreferences.setMockInitialValues({'onboardingInProgress': true});
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
+      when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AuthWrapper(
+            requireAuth: true,
+            child: const Text('Child Widget'),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Should still show the child since onboarding is marked as in-progress
+      expect(find.text('Child Widget'), findsOneWidget);
+    });
+
+    testWidgets('does not redirect if already inside onboarding route', (tester) async {
+      SharedPreferences.setMockInitialValues({'onboardingInProgress': false});
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
+      when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          initialRoute: '/onboarding/goal',
+          routes: {
+            '/onboarding/goal': (_) => AuthWrapper(
+                  requireAuth: true,
+                  child: const Text('Inside Onboarding'),
+                ),
+          },
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // User is already on onboarding route, so should not be redirected
+      expect(find.text('Inside Onboarding'), findsOneWidget);
     });
   });
-
-  testWidgets('redirects to onboarding when not completed and not in progress', (tester) async {
-  SharedPreferences.setMockInitialValues({'onboardingInProgress': false});
-  when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
-  when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
-
-  await tester.pumpWidget(
-    MaterialApp(
-      routes: {
-        '/onboarding/goal': (_) => const Scaffold(body: Text('Onboarding Page')),
-      },
-      home: AuthWrapper(
-        requireAuth: true,
-        child: const Text('Child Widget'),
-      ),
-    ),
-  );
-
-  await tester.pumpAndSettle();
-
-  expect(find.text('Onboarding Page'), findsOneWidget);
-});
-
-testWidgets('does not redirect if onboarding is in progress', (tester) async {
-  SharedPreferences.setMockInitialValues({'onboardingInProgress': true});
-  when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
-  when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
-
-  await tester.pumpWidget(
-    MaterialApp(
-      home: AuthWrapper(
-        requireAuth: true,
-        child: const Text('Child Widget'),
-      ),
-    ),
-  );
-
-  await tester.pumpAndSettle();
-
-  expect(find.text('Child Widget'), findsOneWidget);
-});
-
-testWidgets('does not redirect if already inside onboarding route', (tester) async {
-  SharedPreferences.setMockInitialValues({'onboardingInProgress': false});
-  when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
-  when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
-
-  await tester.pumpWidget(
-    MaterialApp(
-      initialRoute: '/onboarding/goal',
-      routes: {
-        '/onboarding/goal': (_) => AuthWrapper(
-              requireAuth: true,
-              child: const Text('Inside Onboarding'),
-            ),
-      },
-    ),
-  );
-
-  await tester.pumpAndSettle();
-
-  expect(find.text('Inside Onboarding'), findsOneWidget);
-});
-
 }
-
-class MockNavigatorObserver extends Mock implements NavigatorObserver {}

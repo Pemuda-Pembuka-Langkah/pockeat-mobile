@@ -18,10 +18,18 @@ class AuthWrapper extends StatefulWidget {
   /// Whether this page requires authentication
   final bool requireAuth;
 
+  /// Where to redirect if user is logged in
+  final String redirectUrlIfLoggedIn;
+
+  /// Where to redirect if user is not logged in
+  final String redirectUrlIfNotLoggedIn;
+
   const AuthWrapper({
     super.key,
     required this.child,
     this.requireAuth = true,
+    this.redirectUrlIfLoggedIn = '/',
+    this.redirectUrlIfNotLoggedIn = '/welcome',
   });
 
   @override
@@ -55,15 +63,22 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       // Redirect ke login jika tidak terautentikasi dan widget masih mounted
       if (user == null && mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+        // User not logged in -> go to redirectUrlIfNotLoggedIn
+        Navigator.of(context).pushNamed(widget.redirectUrlIfNotLoggedIn);
       } else if (user != null && mounted) {
-        // Call the health metrics check when user is authenticated
-        await _checkHealthMetrics(user.uid);
+        // User is logged in
+        if (widget.requireAuth) {
+          // Perform health metrics check only if required
+          await _checkHealthMetrics(user.uid);
+        } else {
+          // If no auth required, but user is logged in → redirect anyway
+          Navigator.of(context).pushReplacementNamed(widget.redirectUrlIfLoggedIn);
+        }
       }
     } catch (e) {
       // Jika terjadi error, asumsikan user tidak terautentikasi
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+        Navigator.of(context).pushNamed(widget.redirectUrlIfNotLoggedIn);
       }
     }
   }
@@ -84,19 +99,18 @@ class _AuthWrapperState extends State<AuthWrapper> {
       final isInsideOnboardingFlow =
           currentRoute?.startsWith('/onboarding') ?? false;
 
-      // 🛑 Jangan redirect kalau user udah dalam onboarding atau lagi ngisi
-      if ((!completed && !onboardingInProgress) &&
-          mounted &&
-          !isInsideOnboardingFlow) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/onboarding/goal',
-          (route) => false,
-        );
-      }
-    } catch (e) {
-      debugPrint("Error checking health metrics: $e");
+    // 🛑 Jangan redirect kalau user udah dalam onboarding atau lagi ngisi
+    if ((!completed && !onboardingInProgress) && mounted && !isInsideOnboardingFlow) {
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/onboarding/goal',
+        (route) => false,
+      );
+
     }
+  } catch (e) {
+    debugPrint("Error checking health metrics: $e");
   }
+}
 
   @override
   Widget build(BuildContext context) {
