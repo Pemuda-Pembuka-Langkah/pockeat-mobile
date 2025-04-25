@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:camera/camera.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -70,18 +68,10 @@ import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_cl
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
-import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
-import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
-import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
-import 'package:pockeat/features/authentication/presentation/screens/change_password_error_page.dart';
-import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
+
 import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
@@ -378,8 +368,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/splash': (context) => const SplashScreenPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
         '/': (context) => const AuthWrapper(
-          child: HomePage(),
           redirectUrlIfNotLoggedIn: '/welcome',
+          child: HomePage(),
         ),
         '/welcome': (context) {
             return const AuthWrapper(

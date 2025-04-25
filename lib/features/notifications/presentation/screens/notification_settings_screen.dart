@@ -6,10 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/core/utils/background_logger.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
-import 'package:pockeat/features/notifications/presentation/screens/debug_logs_screen.dart';
 
 // coverage-ignore:start
 
@@ -301,74 +299,6 @@ class _NotificationSettingsScreenState
                         style: TextStyle(color: Colors.grey[800], fontSize: 13),
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              // Debug section (only shown in dev environment)
-              if (BackgroundLogger.isEnabled) 
-              Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.08),
-                      spreadRadius: 1,
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(left: 20, top: 16, bottom: 8),
-                      child: Text(
-                        'Debug Tools',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ),
-                    Divider(color: Colors.grey.withOpacity(0.2)),
-                    ListTile(
-                      title: const Text(
-                        'Background Logs',
-                        style: TextStyle(fontSize: 15),
-                      ),
-                      subtitle: const Text(
-                        'View logs from background notification tasks',
-                        style: TextStyle(fontSize: 13),
-                      ),
-                      trailing: Icon(
-                        Icons.bug_report,
-                        color: primaryPink,
-                      ),
-                      onTap: () async {
-                        // Create a test log entry
-                        await BackgroundLogger.log(
-                            'Log check initiated from settings screen',
-                            tag: 'DEBUG');
-
-                        // Navigate to debug logs screen
-                        if (context.mounted) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const DebugLogsScreen(),
-                            ),
-                          );
-                        }
-                      },
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 5),
-                    ),
-                    const SizedBox(height: 12),
                   ],
                 ),
               ),

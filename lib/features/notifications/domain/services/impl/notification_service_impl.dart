@@ -13,7 +13,6 @@ import 'package:workmanager/workmanager.dart';
 
 // Project imports:
 import 'package:pockeat/core/di/service_locator.dart' show getIt;
-import 'package:pockeat/core/utils/background_logger.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
@@ -169,8 +168,6 @@ class NotificationServiceImpl implements NotificationService {
       // Hitung streak terbaru secara real-time saat notifikasi di-tap
       final currentStreakDays =
           await _foodLogHistoryService.getFoodStreakDays(userId);
-      await BackgroundLogger.log(" currentStreakDays = $currentStreakDays",
-          tag: "onNotificationTap");
 
       // Use platform channel to launch a native Android intent with the deeplink
       // This will be caught by the OS and redirected to our app, triggering the
@@ -185,9 +182,6 @@ class NotificationServiceImpl implements NotificationService {
       await platformChannel.invokeMethod('launchUri', {
         'uri': deepLinkUri,
       });
-
-      await BackgroundLogger.log("Launched deeplink: $deepLinkUri",
-          tag: "onNotificationTap");
     }
   }
 
