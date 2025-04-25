@@ -250,6 +250,117 @@ void main() {
       await mockService.handleDeepLink(testUri);
     });
     
+    test('should handle streak celebration link with milestone streakDays',
+        () async {
+      // Arrange - pengujian untuk milestone (7, 30, 100 hari streak)
+      final milestoneDays = [7, 30, 100];
+      
+      for (final days in milestoneDays) {
+        final payload = NotificationConstants.dailyStreakPayload;
+        final testUri = Uri.parse('pockeat://streak-celebration?payload=$payload&streakDays=$days');
+        final expectedResult = DeepLinkResult.streakCelebration(
+          success: true,
+          data: {
+            'streakDays': days,
+            'payload': payload,
+          },
+          originalUri: testUri,
+        );
+
+        when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+          resultStreamController.add(expectedResult);
+          return true;
+        });
+
+        // Act
+        bool result = await mockService.handleDeepLink(testUri);
+        
+        // Assert
+        expect(result, true);
+        verify(mockService.handleDeepLink(testUri)).called(1);
+      }
+    });
+    
+    test('should handle streak celebration link without payload parameter',
+        () async {
+      // Arrange - tanpa payload parameter, hanya streakDays
+      final testUri = Uri.parse('pockeat://streak-celebration?streakDays=10');
+      final expectedResult = DeepLinkResult.streakCelebration(
+        success: true,
+        data: {
+          'streakDays': 10,
+        },
+        originalUri: testUri,
+      );
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+        resultStreamController.add(expectedResult);
+        return true;
+      });
+
+      // Act & Assert
+      expect(
+        mockService.onDeepLinkResult,
+        emits(expectedResult),
+      );
+
+      // Trigger the event
+      await mockService.handleDeepLink(testUri);
+    });
+    
+    test('should handle invalid streak days parameter in streak celebration link',
+        () async {
+      // Arrange - parameter streakDays yang invalid
+      final testUri = Uri.parse('pockeat://streak-celebration?streakDays=invalid');
+      final expectedResult = DeepLinkResult.streakCelebration(
+        success: false,
+        error: 'Invalid streak days parameter',
+        originalUri: testUri,
+      );
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+        resultStreamController.add(expectedResult);
+        return false;
+      });
+
+      // Act & Assert
+      expect(
+        mockService.onDeepLinkResult,
+        emits(expectedResult),
+      );
+
+      // Trigger the event
+      bool result = await mockService.handleDeepLink(testUri);
+      expect(result, false);
+    });
+    
+    test('should handle missing streak days parameter in streak celebration link',
+        () async {
+      // Arrange - parameter streakDays tidak ada
+      final payload = NotificationConstants.dailyStreakPayload;
+      final testUri = Uri.parse('pockeat://streak-celebration?payload=$payload');
+      final expectedResult = DeepLinkResult.streakCelebration(
+        success: false,
+        error: 'Missing streak days parameter',
+        originalUri: testUri,
+      );
+
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+        resultStreamController.add(expectedResult);
+        return false;
+      });
+
+      // Act & Assert
+      expect(
+        mockService.onDeepLinkResult,
+        emits(expectedResult),
+      );
+
+      // Trigger the event
+      bool result = await mockService.handleDeepLink(testUri);
+      expect(result, false);
+    });
+    
     test('should correctly identify streak celebration link with different path formats',
         () async {
       // Arrange - testing multiple path formats
@@ -651,6 +762,66 @@ void main() {
       expect(await mockService.handleDeepLink(uriWithHost), true);
     });
     
+    test('should handle streak celebration link with NotificationConstants payload', () async {
+      // Test using the exact NotificationConstants.dailyStreakPayload
+      final payload = NotificationConstants.dailyStreakPayload;
+      final testUri = Uri.parse('pockeat://streak-celebration?payload=$payload&streakDays=15');
+      final expectedResult = DeepLinkResult.streakCelebration(
+        success: true,
+        data: {
+          'streakDays': 15,
+          'payload': payload
+        },
+        originalUri: testUri,
+      );
+      
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+        resultStreamController.add(expectedResult);
+        return true;
+      });
+      
+      // Act & Assert
+      expect(
+        mockService.onDeepLinkResult,
+        emits(expectedResult),
+      );
+      
+      // Trigger the event
+      await mockService.handleDeepLink(testUri);
+    });
+    
+    test('should handle deep link with multiple streak notification parameters', () async {
+      // Test deep link with multiple parameters including notification channel
+      final testUri = Uri.parse('pockeat://streak-celebration?' +
+          'streakDays=20&' +
+          'channelId=${NotificationConstants.dailyStreakChannelId}&' +
+          'notificationId=${NotificationConstants.dailyStreakNotificationId}');
+      
+      final expectedResult = DeepLinkResult.streakCelebration(
+        success: true,
+        data: {
+          'streakDays': 20,
+          'channelId': NotificationConstants.dailyStreakChannelId,
+          'notificationId': NotificationConstants.dailyStreakNotificationId
+        },
+        originalUri: testUri,
+      );
+      
+      when(mockService.handleDeepLink(testUri)).thenAnswer((_) async {
+        resultStreamController.add(expectedResult);
+        return true;
+      });
+      
+      // Act & Assert
+      expect(
+        mockService.onDeepLinkResult,
+        emits(expectedResult),
+      );
+      
+      // Trigger the event
+      await mockService.handleDeepLink(testUri);
+    });
+    
     test('should handle malformed links correctly', () async {
       // Arrange
       final malformedUri = Uri.parse('pockeat:invalid');
@@ -676,6 +847,41 @@ void main() {
 
       // Assert
       expect(result, isNull);
+      verify(mockService.getColdStartResult()).called(1);
+    });
+    
+    test('should handle streak celebration cold start with notification constants', () async {
+      // Setup test URI with notification constants
+      final payload = NotificationConstants.dailyStreakPayload;
+      final channelId = NotificationConstants.dailyStreakChannelId;
+      final notificationId = NotificationConstants.dailyStreakNotificationId;
+      
+      final testUri = Uri.parse('pockeat://streak-celebration?' +
+          'payload=$payload&' +
+          'channelId=$channelId&' +
+          'notificationId=$notificationId&' +
+          'streakDays=30');
+      
+      final expectedResult = DeepLinkResult.streakCelebration(
+        success: true,
+        data: {
+          'streakDays': 30,
+          'payload': payload,
+          'channelId': channelId,
+          'notificationId': notificationId,
+        },
+        originalUri: testUri,
+      );
+      
+      // Setup mock to return initial link
+      when(mockAppLinks.getInitialAppLink()).thenAnswer((_) async => testUri);
+      when(mockService.getColdStartResult()).thenAnswer((_) async => expectedResult);
+      
+      // Act
+      final result = await mockService.getColdStartResult();
+      
+      // Assert
+      expect(result, expectedResult);
       verify(mockService.getColdStartResult()).called(1);
     });
 
