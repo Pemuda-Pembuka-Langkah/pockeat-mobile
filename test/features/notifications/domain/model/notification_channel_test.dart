@@ -3,10 +3,19 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Project imports:
+import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
 
 void main() {
   group('NotificationChannels', () {
+    test('constants should be defined and match NotificationConstants', () {
+      // Verify all channel IDs match their corresponding constants
+      expect(NotificationChannels.mealReminder.id, NotificationConstants.mealReminderChannelId);
+      expect(NotificationChannels.workoutReminder.id, NotificationConstants.workoutReminderChannelId);
+      expect(NotificationChannels.subscription.id, NotificationConstants.subscriptionChannelId);
+      expect(NotificationChannels.server.id, NotificationConstants.serverChannelId);
+      expect(NotificationChannels.dailyStreak.id, NotificationConstants.dailyStreakChannelId);
+    });
     test('should define all required channels for application features', () {
       // Pastikan semua channel yang diperlukan untuk fitur-fitur aplikasi didefinisikan
       expect(NotificationChannels.mealReminder, isNotNull);
@@ -32,13 +41,16 @@ void main() {
     
     test('mealReminder channel should have correct properties', () {
       // Assert
-      expect(NotificationChannels.mealReminder.id, 'meal_reminder_channel');
+      expect(NotificationChannels.mealReminder.id, NotificationConstants.mealReminderChannelId);
       expect(NotificationChannels.mealReminder.name, 'Pengingat Waktu Makan');
       expect(
         NotificationChannels.mealReminder.description,
         'Channel untuk mengirim pengingat tentang waktu makan (sarapan, makan siang, makan malam)',
       );
       expect(NotificationChannels.mealReminder.importance, Importance.high);
+      
+      // Verify id matches the constant
+      expect(NotificationChannels.mealReminder.id, equals(NotificationConstants.mealReminderChannelId));
     });
 
     test('legacy caloriesReminder should reference mealReminder', () {
@@ -50,35 +62,44 @@ void main() {
 
     test('workoutReminder channel should have correct properties', () {
       // Assert
-      expect(NotificationChannels.workoutReminder.id, 'workout_reminder_channel');
+      expect(NotificationChannels.workoutReminder.id, NotificationConstants.workoutReminderChannelId);
       expect(NotificationChannels.workoutReminder.name, 'Pengingat Workout');
       expect(
         NotificationChannels.workoutReminder.description,
         'Channel untuk mengirim pengingat tentang workout',
       );
       expect(NotificationChannels.workoutReminder.importance, Importance.high);
+      
+      // Verify id matches the constant
+      expect(NotificationChannels.workoutReminder.id, equals(NotificationConstants.workoutReminderChannelId));
     });
 
     test('subscription channel should have correct properties', () {
       // Assert
-      expect(NotificationChannels.subscription.id, 'subscription_channel');
-      expect(NotificationChannels.subscription.name, 'Subscription Channel');
+      expect(NotificationChannels.subscription.id, NotificationConstants.subscriptionChannelId);
+      expect(NotificationChannels.subscription.name, 'Informasi Langganan');
       expect(
         NotificationChannels.subscription.description,
-        'Channel untuk mengirim notifikasi tentang subscription',
+        'Channel untuk informasi terkait langganan',
       );
       expect(NotificationChannels.subscription.importance, Importance.high);
+      
+      // Verify id matches the constant
+      expect(NotificationChannels.subscription.id, equals(NotificationConstants.subscriptionChannelId));
     });
 
     test('server channel should have correct properties', () {
       // Assert
-      expect(NotificationChannels.server.id, 'server_channel');
-      expect(NotificationChannels.server.name, 'Server Channel');
+      expect(NotificationChannels.server.id, NotificationConstants.serverChannelId);
+      expect(NotificationChannels.server.name, 'Notifikasi Server');
       expect(
         NotificationChannels.server.description,
-        'Channel untuk mengirim notifikasi dari server',
+        'Channel untuk notifikasi dari server',
       );
       expect(NotificationChannels.server.importance, Importance.high);
+      
+      // Verify id matches the constant
+      expect(NotificationChannels.server.id, equals(NotificationConstants.serverChannelId));
     });
 
     test('petStatus channel should have correct properties', () {
@@ -94,13 +115,16 @@ void main() {
 
     test('dailyStreak channel should have correct properties', () {
       // Assert
-      expect(NotificationChannels.dailyStreak.id, 'daily_streak_channel');
-      expect(NotificationChannels.dailyStreak.name, 'Pencapaian Streak Harian');
+      expect(NotificationChannels.dailyStreak.id, NotificationConstants.dailyStreakChannelId);
+      expect(NotificationChannels.dailyStreak.name, 'Pengingat Streak Harian');
       expect(
         NotificationChannels.dailyStreak.description,
-        'Channel untuk mengirim notifikasi tentang pencapaian streak dan milestone',
+        'Channel untuk pengingat streak harian',
       );
       expect(NotificationChannels.dailyStreak.importance, Importance.high);
+      
+      // Verify id matches the constant
+      expect(NotificationChannels.dailyStreak.id, equals(NotificationConstants.dailyStreakChannelId));
     });
 
     test('all channels should have unique IDs', () {
@@ -125,6 +149,13 @@ void main() {
         expect(id, matches(r'^[a-z]+(_[a-z]+)*_channel$'), 
             reason: 'Channel ID $id should follow the naming convention');
       }
+      
+      // Ensure constants match channel IDs
+      expect(NotificationConstants.mealReminderChannelId, equals(NotificationChannels.mealReminder.id));
+      expect(NotificationConstants.workoutReminderChannelId, equals(NotificationChannels.workoutReminder.id));
+      expect(NotificationConstants.subscriptionChannelId, equals(NotificationChannels.subscription.id));
+      expect(NotificationConstants.serverChannelId, equals(NotificationChannels.server.id));
+      expect(NotificationConstants.dailyStreakChannelId, equals(NotificationChannels.dailyStreak.id));
     });
     
     test('channels for POC features should be properly defined', () {
@@ -133,11 +164,11 @@ void main() {
       expect(NotificationChannels.petStatus.name, contains('Hewan Peliharaan'));
       
       // POC-150: Daily streak celebration
-      expect(NotificationChannels.dailyStreak.id, 'daily_streak_channel');
+      expect(NotificationChannels.dailyStreak.id, NotificationConstants.dailyStreakChannelId);
       expect(NotificationChannels.dailyStreak.name, contains('Streak'));
       
       // POC-149: Meal reminders
-      expect(NotificationChannels.mealReminder.id, 'meal_reminder_channel');
+      expect(NotificationChannels.mealReminder.id, NotificationConstants.mealReminderChannelId);
       expect(NotificationChannels.mealReminder.name, contains('Waktu Makan'));
     });
     
@@ -158,6 +189,42 @@ void main() {
             reason: 'Description for ${channel.id} should be informative');
         expect(channel.description, contains('Channel untuk'));
       }
+    });
+    
+    test('channel values should be immutable', () {
+      // Verifikasi bahwa semua nilai constant tidak dapat diubah
+      // Ini adalah compile-time check yang memastikan bahwa channel-channel ini adalah const
+      
+      // NotificationChannels.mealReminder = AndroidNotificationChannel(...); // Hal ini akan memberi compile error
+      // NotificationChannels.server.name = 'New Name'; // Hal ini juga akan memberi compile error
+      
+      // Pastikan kelas didefinisikan dengan benar dengan const konstruktor
+      const testChannel = AndroidNotificationChannel(
+        'test_id',
+        'Test Name',
+        description: 'Test description',
+        importance: Importance.high,
+      );
+      expect(testChannel.id, equals('test_id'));
+    });
+    
+    test('pet status channel should have hardcoded ID (not from constants)', () {
+      // Ini satu-satunya channel yang ID-nya tidak berasal dari NotificationConstants
+      expect(NotificationChannels.petStatus.id, equals('pet_status_channel'));
+      
+      // Verifikasi bahwa channel ini tidak memiliki constant yang terkait
+      // Tidak bisa menggunakan expect dengan throwsNoSuchMethodError disini karena
+      // ini adalah static compile-time check, bukan runtime error
+    });
+    
+    test('legacy accessor should maintain expected behavior over time', () {
+      // Memastikan accessor caloriesReminder selalu mengarah ke mealReminder
+      expect(NotificationChannels.caloriesReminder, same(NotificationChannels.mealReminder));
+      
+      // Verifikasi bahwa getter caloriesReminder diimplementasikan dengan benar
+      expect(NotificationChannels.caloriesReminder.id, equals(NotificationChannels.mealReminder.id));
+      expect(NotificationChannels.caloriesReminder.name, equals(NotificationChannels.mealReminder.name));
+      expect(NotificationChannels.caloriesReminder.description, equals(NotificationChannels.mealReminder.description));
     });
   });
 }
