@@ -1,43 +1,59 @@
 // Package imports:
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+// Project imports:
+import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
+
+/// Notification channels for the app
+///
+/// Each channel has a specific purpose and importance level
 class NotificationChannels {
+  /// Meal reminder notifications (breakfast, lunch, dinner)
   static const AndroidNotificationChannel mealReminder =
       AndroidNotificationChannel(
-    'meal_reminder_channel',
+    NotificationConstants.mealReminderChannelId,
     'Pengingat Waktu Makan',
     description:
         'Channel untuk mengirim pengingat tentang waktu makan (sarapan, makan siang, makan malam)',
     importance: Importance.high,
   );
 
-  // Legacy name for backward compatibility
-  @Deprecated('Use mealReminder instead')
-  static const AndroidNotificationChannel caloriesReminder = mealReminder;
-
+  /// Workout reminders
   static const AndroidNotificationChannel workoutReminder =
       AndroidNotificationChannel(
-    'workout_reminder_channel',
+    NotificationConstants.workoutReminderChannelId,
     'Pengingat Workout',
     description: 'Channel untuk mengirim pengingat tentang workout',
     importance: Importance.high,
   );
 
+  /// Subscription notifications
   static const AndroidNotificationChannel subscription =
       AndroidNotificationChannel(
-    'subscription_channel',
-    'Subscription Channel',
-    description: 'Channel untuk mengirim notifikasi tentang subscription',
+    NotificationConstants.subscriptionChannelId,
+    'Informasi Langganan',
+    description: 'Channel untuk informasi terkait langganan',
     importance: Importance.high,
   );
 
+  /// Server notifications (from Firebase)
   static const AndroidNotificationChannel server = AndroidNotificationChannel(
-    'server_channel',
-    'Server Channel',
-    description: 'Channel untuk mengirim notifikasi dari server',
+    NotificationConstants.serverChannelId,
+    'Notifikasi Server',
+    description: 'Channel untuk notifikasi dari server',
     importance: Importance.high,
   );
 
+  /// Daily streak notifications
+  static const AndroidNotificationChannel dailyStreak =
+      AndroidNotificationChannel(
+    NotificationConstants.dailyStreakChannelId,
+    'Pengingat Streak Harian',
+    description: 'Channel untuk pengingat streak harian',
+    importance: Importance.high,
+  );
+
+  /// Pet status notifications
   static const AndroidNotificationChannel petStatus =
       AndroidNotificationChannel(
     'pet_status_channel',
@@ -47,12 +63,7 @@ class NotificationChannels {
     importance: Importance.high,
   );
 
-  static const AndroidNotificationChannel dailyStreak =
-      AndroidNotificationChannel(
-    'daily_streak_channel',
-    'Pencapaian Streak Harian',
-    description:
-        'Channel untuk mengirim notifikasi tentang pencapaian streak dan milestone',
-    importance: Importance.high,
-  );
+  /// Legacy name for backward compatibility with tests
+  /// Do not use in new code
+  static AndroidNotificationChannel get caloriesReminder => mealReminder;
 }
