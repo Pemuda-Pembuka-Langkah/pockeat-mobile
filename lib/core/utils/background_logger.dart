@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 // Package imports:
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -17,14 +18,31 @@ import 'package:path_provider/path_provider.dart';
 class BackgroundLogger {
   static const String _logFileName = 'background_logs.txt';
   static final DateFormat _dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
+  static bool? _isEnabled;
+
+  /// Check if logging is enabled based on the environment flavor
+  static bool get isEnabled {
+    if (_isEnabled == null) {
+      final flavor = dotenv.env['FLAVOR'] ?? 'dev';
+      _isEnabled = flavor.toLowerCase() != 'production' && 
+                    flavor.toLowerCase() != 'staging';
+    }
+    return _isEnabled!;
+  }
+
+  /// Set enabled state explicitly (useful for testing or forced override)
+  static void setEnabled(bool enabled) {
+    _isEnabled = enabled;
+  }
 
   /// Log a message to the background log file
   /// Add a tag to identify the source of the log (e.g., 'WORKMANAGER', 'NOTIFICATIONS')
   /// When isTest is true, logging will be skipped to avoid platform dependencies during tests
+  /// Logging is also skipped in production and staging environments
   static Future<void> log(String message,
       {String tag = 'BACKGROUND', bool isTest = false}) async {
-    // Skip actual logging in test mode
-    if (isTest) {
+    // Skip actual logging in test mode or if disabled in production/staging
+    if (isTest || !isEnabled) {
       return Future.value();
     }
     try {

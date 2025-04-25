@@ -1,4 +1,3 @@
-// coverage-ignore:start
 
 // Dart imports:
 import 'dart:io' show Platform;
@@ -332,4 +331,3 @@ class NotificationServiceImpl implements NotificationService {
   }
 }
 
-// coverage-ignore:end

@@ -305,7 +305,8 @@ class _NotificationSettingsScreenState
                 ),
               ),
 
-              // Debug section (hidden in production builds)
+              // Debug section (only shown in dev environment)
+              if (BackgroundLogger.isEnabled) 
               Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
