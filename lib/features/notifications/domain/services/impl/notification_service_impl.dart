@@ -1,7 +1,4 @@
 
-// Dart imports:
-import 'dart:io' show Platform;
-
 // Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,7 +26,6 @@ import 'package:pockeat/features/notifications/domain/services/utils/work_manage
 
 class NotificationServiceImpl implements NotificationService {
   // Using constants from NotificationConstants instead of hardcoded strings
-  final FirebaseMessaging _firebaseMessaging;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
   final SharedPreferences _prefs;
   final FoodLogHistoryService _foodLogHistoryService;
@@ -40,14 +36,12 @@ class NotificationServiceImpl implements NotificationService {
   // Using default time from NotificationConstants
 
   NotificationServiceImpl({
-    FirebaseMessaging? firebaseMessaging,
     FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin,
     SharedPreferences? prefs,
     FoodLogHistoryService? foodLogHistoryService,
     LoginService? loginService,
     WorkManagerClient? workManagerClient,
-  })  : _firebaseMessaging = firebaseMessaging ?? getIt<FirebaseMessaging>(),
-        _flutterLocalNotificationsPlugin = flutterLocalNotificationsPlugin ??
+  })  : _flutterLocalNotificationsPlugin = flutterLocalNotificationsPlugin ??
             getIt<FlutterLocalNotificationsPlugin>(),
         _prefs = prefs ?? getIt<SharedPreferences>(),
         _foodLogHistoryService =
@@ -60,9 +54,8 @@ class NotificationServiceImpl implements NotificationService {
 
   @override
   Future<void> initialize() async {
-    // Request permission untuk notifikasi
-    await _requestPermission();
-    // Inisialisasi local notifications
+    // Inisialisasi local notifications (tanpa request permission)
+    // Permission sudah ditangani oleh PermissionService
     await _initializeLocalNotifications();
     // Create notification channel for Android
     await _createNotificationChannel(NotificationChannels.server);
@@ -148,15 +141,7 @@ class NotificationServiceImpl implements NotificationService {
     );
   }
 
-  Future<void> _requestPermission() async {
-    if (Platform.isAndroid) {
-      await _firebaseMessaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-    }
-  }
+  // Metode _requestPermission dihapus karena permission handling dipindahkan ke PermissionService
 
   Future<void> _createNotificationChannel(
       AndroidNotificationChannel channel) async {

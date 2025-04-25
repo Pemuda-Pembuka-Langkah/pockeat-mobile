@@ -23,6 +23,7 @@ import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/core/screens/streak_celebration_page.dart';
 import 'package:pockeat/core/service/background_service_manager.dart';
+import 'package:pockeat/core/service/permission_service.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
@@ -232,18 +233,19 @@ void main() async {
   // Initialize Google Analytics
   await getIt<AnalyticsService>().initialize();
 
-  // Initialize notifications
-  // Initialize notifications
+  // Initialize permissions and notifications
   if (!kIsWeb) {
+    // Daftarkan PermissionService ke GetIt
+    final permissionService = PermissionService();
+    getIt.registerSingleton(permissionService);
+    
+    // Minta semua permission terlebih dahulu
+    await permissionService.requestAllPermissions();
+    
+    // Setelah permission diperoleh, inisialisasi service lainnya
     await BackgroundServiceManager.initialize();
     await getIt<FoodTrackingClientController>().initialize();
     await getIt<NotificationService>().initialize();
-  }
-
-  // Setup emulator kalau di dev mode
-  if (flavor == 'dev') {
-    await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
-    FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
 
   runApp(

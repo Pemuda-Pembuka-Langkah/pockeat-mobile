@@ -1,13 +1,13 @@
 // core/utils/background_logger.dart
 
 // Dart imports:
-import 'dart:io';
+import 'dart:io' show File, Directory, FileMode;
+import 'dart:async';
 
 // Flutter imports:
 import 'package:flutter/foundation.dart';
 
 // Package imports:
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -18,66 +18,76 @@ import 'package:path_provider/path_provider.dart';
 class BackgroundLogger {
   static const String _logFileName = 'background_logs.txt';
   static final DateFormat _dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
-  static bool? _isEnabled;
-
-  /// Check if logging is enabled based on the environment flavor
-  static bool get isEnabled {
-    if (_isEnabled == null) {
-      final flavor = dotenv.env['FLAVOR'] ?? 'dev';
-      _isEnabled = flavor.toLowerCase() != 'production' && 
-                    flavor.toLowerCase() != 'staging';
+  
+  // File IO operation queue untuk memastikan logging thread-safe dan tidak blocking UI
+  static final _writeQueue = StreamController<_LogOperation>();
+  static bool _queueInitialized = false;
+  
+  // Max file size 1MB, untuk menjaga performa
+  static const int _maxLogFileSizeBytes = 1 * 1024 * 1024; // 1MB
+  
+  /// Apakah logging diaktifkan (hanya di debug mode)
+  static bool get isEnabled => kDebugMode;
+  
+  /// Inisialisasi background queue untuk file operations
+  static void _initQueue() {
+    if (!_queueInitialized) {
+      _queueInitialized = true;
+      _writeQueue.stream.listen((operation) async {
+        try {
+          await operation.execute();
+        } catch (e) {
+          // Silent error in background
+        }
+      });
     }
-    return _isEnabled!;
-  }
-
-  /// Set enabled state explicitly (useful for testing or forced override)
-  static void setEnabled(bool enabled) {
-    _isEnabled = enabled;
   }
 
   /// Log a message to the background log file
   /// Add a tag to identify the source of the log (e.g., 'WORKMANAGER', 'NOTIFICATIONS')
   /// When isTest is true, logging will be skipped to avoid platform dependencies during tests
-  /// Logging is also skipped in production and staging environments
-  static Future<void> log(String message,
-      {String tag = 'BACKGROUND', bool isTest = false}) async {
-    // Skip actual logging in test mode or if disabled in production/staging
-    if (isTest || !isEnabled) {
+  /// Logging hanya aktif di debug mode, kecuali untuk testing
+  static Future<void> log(String message, {String tag = 'BACKGROUND', bool isTest = false}) async {
+    // Skip actual logging in non-debug mode atau jika isTest=true
+    if (!kDebugMode || isTest) {
       return Future.value();
     }
+    
     try {
+      // Pastikan queue initialized
+      _initQueue();
+      
+      // Format message dengan timestamp dan tag
       final timestamp = _dateFormat.format(DateTime.now());
       final formattedMessage = '[$timestamp] [$tag] $message\n';
-
-      final directory = await _getLogDirectory();
-      final file = File('${directory.path}/$_logFileName');
-
-      // Create the file if it doesn't exist
-      if (!await file.exists()) {
-        await file.create(recursive: true);
-      }
-
-      // Limit log file size to prevent it from growing too large
-      await _limitLogFileSize(file);
-
-      // Append the log message
-      await file.writeAsString(formattedMessage, mode: FileMode.append);
+      
+      // Debug print message juga (untuk console)
+      debugPrint('BG_LOG: [$tag] $message');
+      
+      // Non-blocking file write via queue
+      _writeQueue.add(_LogOperation(formattedMessage));
     } catch (e) {
       // Can't do much if logging itself fails
       debugPrint('Error writing to background log: $e');
     }
   }
 
-  /// Get all logs as a single string
+  /// Get all logs as a single string - untuk debug view
   static Future<String> getLogs() async {
+    if (!kDebugMode) {
+      return 'Logs only available in debug mode';
+    }
+    
     try {
-      final directory = await _getLogDirectory();
-      final file = File('${directory.path}/$_logFileName');
+      final directory = await getApplicationDocumentsDirectory();
+      final logDir = Directory('${directory.path}/logs');
+      final file = File('${logDir.path}/$_logFileName');
 
-      if (await file.exists()) {
-        return await file.readAsString();
+      if (!await file.exists()) {
+        return 'No logs found';
       }
-      return 'No logs found';
+
+      return await file.readAsString();
     } catch (e) {
       return 'Error reading logs: $e';
     }
@@ -148,20 +158,43 @@ class BackgroundLogger {
     return logDir;
   }
 
-  /// Limit the log file size to prevent it from growing too large
-  /// If the file exceeds 1MB, this will keep the most recent 75% of the file
-  static Future<void> _limitLogFileSize(File file) async {
-    const int maxSizeBytes = 1024 * 1024; // 1 MB
+}
 
-    final stat = await file.stat();
-    if (stat.size > maxSizeBytes) {
-      final content = await file.readAsString();
-      final keepLength = (content.length * 0.75).toInt();
-      final newContent = content.substring(content.length - keepLength);
+/// Kelas internal untuk operasi logging yang diqueue
+class _LogOperation {
+  final String message;
+  
+  _LogOperation(this.message);
+  
+  Future<void> execute() async {
+    try {
+      // Get app's documents directory
+      final directory = await BackgroundLogger._getLogDirectory();
+      final file = File('${directory.path}/${BackgroundLogger._logFileName}');
 
-      await file.writeAsString(
-          '--- Truncated at ${_dateFormat.format(DateTime.now())} ---\n$newContent',
-          mode: FileMode.write);
+      // Create file if needed
+      if (!await file.exists()) {
+        await file.create(recursive: true);
+      }
+
+      // Limit file size menggunakan konstanta
+      try {
+        if (await file.exists()) {
+          final stats = await file.stat();
+          if (stats.size > BackgroundLogger._maxLogFileSizeBytes) {
+            // Jika terlalu besar, hapus konten lama dan buat header baru
+            await file.writeAsString('--- Log truncated at ${DateTime.now()} ---\n', mode: FileMode.write);
+          }
+        }
+      } catch (e) {
+        // Silent error
+      }
+
+      // Append message
+      await file.writeAsString(message, mode: FileMode.append);
+    } catch (e) {
+      // Silent error - jangan sampai logging mengganggu app
+      debugPrint('Error writing to background log: $e');
     }
   }
 }

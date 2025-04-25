@@ -83,7 +83,7 @@ class NotificationBackgroundDisplayerServiceImpl
       final streakDays = await foodLogHistoryService.getFoodStreakDays(userId);
       await BackgroundLogger.log("User streak days: $streakDays",
           tag: "STREAK_NOTIFICATION", isTest: isTest);
-      if (streakDays < 0) {
+      if (streakDays <= 0) {
         await BackgroundLogger.log("No active streak, skipping notification",
             tag: "STREAK_NOTIFICATION", isTest: isTest);
         return false;

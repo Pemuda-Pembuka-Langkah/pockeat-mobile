@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
@@ -18,7 +17,6 @@ import 'package:pockeat/features/home_screen_widget/controllers/impl/food_tracki
 import 'package:pockeat/features/home_screen_widget/controllers/impl/simple_food_tracking_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 import 'package:pockeat/features/home_screen_widget/services/calorie_calculation_strategy.dart';
-import 'package:pockeat/features/home_screen_widget/services/utils/permission_helper.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/widget_background_service_helper.dart';
 import 'food_tracking_client_controller_test.mocks.dart';
 
@@ -31,7 +29,6 @@ import 'food_tracking_client_controller_test.mocks.dart';
   SimpleFoodTrackingController,
   DetailedFoodTrackingController,
   CalorieCalculationStrategy,
-  PermissionHelperInterface,
   WidgetBackgroundServiceHelperInterface,
 ])
 
@@ -48,11 +45,11 @@ void main() {
   late MockSimpleFoodTrackingController mockSimpleController;
   late MockDetailedFoodTrackingController mockDetailedController;
   late MockCalorieCalculationStrategy mockCalorieCalculationStrategy;
-  late MockPermissionHelperInterface mockPermissionHelper;
+
   late MockWidgetBackgroundServiceHelperInterface mockBackgroundServiceHelper;
 
   // Test user ID
-  final String testUserId = 'test-user-123';
+  const String testUserId = 'test-user-123';
   final testUser = UserModel(
     uid: testUserId,
     displayName: 'Test User',
@@ -70,7 +67,6 @@ void main() {
     mockSimpleController = MockSimpleFoodTrackingController();
     mockDetailedController = MockDetailedFoodTrackingController();
     mockCalorieCalculationStrategy = MockCalorieCalculationStrategy();
-    mockPermissionHelper = MockPermissionHelperInterface();
     mockBackgroundServiceHelper = MockWidgetBackgroundServiceHelperInterface();
 
     controller = FoodTrackingClientControllerImpl(
@@ -81,7 +77,6 @@ void main() {
       simpleController: mockSimpleController,
       detailedController: mockDetailedController,
       calorieCalculationStrategy: mockCalorieCalculationStrategy,
-      permissionHelper: mockPermissionHelper,
       backgroundServiceHelper: mockBackgroundServiceHelper,
     );
 
@@ -96,10 +91,7 @@ void main() {
     when(mockDetailedController.cleanupData()).thenAnswer((_) async => Future.value());
    
 
-    // Setup permission helper mocks
-    when(mockPermissionHelper.requestNotificationPermission()).thenAnswer((_) async => PermissionStatus.granted);
-    when(mockPermissionHelper.requestBatteryOptimizationExemption()).thenAnswer((_) async => PermissionStatus.granted);
-    when(mockPermissionHelper.isBatteryOptimizationExemptionGranted()).thenAnswer((_) async => true);
+
 
     // Setup background service helper mocks
     when(mockBackgroundServiceHelper.registerTasks()).thenAnswer((_) async => Future.value());
@@ -159,30 +151,8 @@ void main() {
       await expectLater(controller.initialize(), throwsA(isA<WidgetInitializationException>()));
     });
     
-    test('should throw WidgetInitializationException if permission request fails', () async {
-      // Arrange
-      reset(mockPermissionHelper); // Reset the mock to remove default behavior
-      when(mockPermissionHelper.requestNotificationPermission()).thenThrow(Exception('Permission denied'));
-      
-      // Make sure other dependencies have valid return values to isolate the issue
-      when(mockPermissionHelper.isBatteryOptimizationExemptionGranted()).thenAnswer((_) async => true);
-      when(mockPermissionHelper.requestBatteryOptimizationExemption()).thenAnswer((_) async => PermissionStatus.granted);
-
-     
-    });
-    
-    test('should throw WidgetInitializationException if background service setup fails', () async {
-      // Arrange
-      reset(mockBackgroundServiceHelper); // Reset the mock to remove default behavior
-      when(mockBackgroundServiceHelper.registerTasks()).thenThrow(Exception('Failed to register tasks'));
-      
-      // Make sure the permission helpers have valid return values to isolate the issue
-      when(mockPermissionHelper.requestNotificationPermission()).thenAnswer((_) async => PermissionStatus.granted);
-      when(mockPermissionHelper.isBatteryOptimizationExemptionGranted()).thenAnswer((_) async => true);
-      when(mockPermissionHelper.requestBatteryOptimizationExemption()).thenAnswer((_) async => PermissionStatus.granted);
-
-      
-    });
+    // Test untuk permission dan background service sudah dihapus karena setelah refactor logic permission
+    // test ini menjadi tidak reliable dan tidak dapat diperbarui dengan mudah
   });
 
   group('FoodTrackingClientController - processUserStatusChange', () {
@@ -560,7 +530,6 @@ void main() {
         simpleController: mockSimpleController,
         detailedController: mockDetailedController,
         calorieCalculationStrategy: null, // Explicitly test with null
-        permissionHelper: mockPermissionHelper,
         backgroundServiceHelper: mockBackgroundServiceHelper,
       );
 
@@ -621,7 +590,6 @@ void main() {
       mockSimpleController = MockSimpleFoodTrackingController();
       mockDetailedController = MockDetailedFoodTrackingController();
       mockCalorieCalculationStrategy = MockCalorieCalculationStrategy();
-      mockPermissionHelper = MockPermissionHelperInterface();
       mockBackgroundServiceHelper = MockWidgetBackgroundServiceHelperInterface();
 
       controller = FoodTrackingClientControllerImpl(
@@ -632,7 +600,6 @@ void main() {
         simpleController: mockSimpleController,
         detailedController: mockDetailedController,
         calorieCalculationStrategy: mockCalorieCalculationStrategy,
-        permissionHelper: mockPermissionHelper,
         backgroundServiceHelper: mockBackgroundServiceHelper,
       );
 
@@ -641,9 +608,6 @@ void main() {
       when(mockLoginService.initialize()).thenAnswer((_) => Stream<UserModel?>.fromIterable([null]));
       when(mockSimpleController.initialize()).thenAnswer((_) async => Future.value());
       when(mockDetailedController.initialize()).thenAnswer((_) async => Future.value());
-      when(mockPermissionHelper.requestNotificationPermission()).thenAnswer((_) async => PermissionStatus.granted);
-      when(mockPermissionHelper.requestBatteryOptimizationExemption()).thenAnswer((_) async => PermissionStatus.granted);
-      when(mockPermissionHelper.isBatteryOptimizationExemptionGranted()).thenAnswer((_) async => true);
       when(mockBackgroundServiceHelper.registerTasks()).thenAnswer((_) async => Future.value());
       when(mockBackgroundServiceHelper.cancelAllTasks()).thenAnswer((_) async => Future.value());
       when(mockSimpleController.updateWidgetData(any, targetCalories: anyNamed('targetCalories'))).thenAnswer((_) async => Future.value());
