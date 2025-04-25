@@ -15,7 +15,7 @@ class PetHomepageSection extends StatefulWidget {
   const PetHomepageSection({
     super.key,
     this.petName = 'Panda',
-    this.petImagePath = 'assets/images/panda_happy.gif',
+    this.petImagePath = 'assets/images/Panda Happy.json',
     this.calorieProgress = 0.65,
     this.currentCalories = 1300,
     this.goalCalories = 2000,

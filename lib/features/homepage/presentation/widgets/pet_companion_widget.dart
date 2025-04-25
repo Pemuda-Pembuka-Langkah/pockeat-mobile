@@ -1,5 +1,6 @@
 // lib/features/homepage/presentation/widgets/pet_companion_widget.dart
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class PetCompanionWidget extends StatelessWidget {
   final String petName;
@@ -8,7 +9,7 @@ class PetCompanionWidget extends StatelessWidget {
   const PetCompanionWidget({
     super.key,
     this.petName = 'Panda',
-    this.petImagePath = 'assets/images/panda_happy.gif',
+    this.petImagePath = 'assets/images/panda_sad.json',
   });
 
   @override
@@ -22,11 +23,11 @@ class PetCompanionWidget extends StatelessWidget {
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(90),
           ),
-          child: Image.asset(
+          child: Lottie.asset(
             petImagePath,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) {
-              // Fallback jika gif tidak ditemukan
+              // Fallback jika file JSON tidak ditemukan
               return Container(
                 height: 180,
                 width: 180,
