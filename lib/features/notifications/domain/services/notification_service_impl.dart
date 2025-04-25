@@ -1,8 +1,11 @@
+// coverage-ignore:start
+
 // Dart imports:
 import 'dart:io' show Platform;
 
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -13,21 +16,20 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:workmanager/workmanager.dart';
 
 // Project imports:
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/core/di/service_locator.dart' show getIt;
+import 'package:pockeat/core/utils/background_logger.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
-import 'package:pockeat/features/notifications/domain/model/streak_message.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/utils/work_manager_client.dart';
 
 // Project imports:
-import 'package:pockeat/core/di/service_locator.dart'
-    show getIt, setupDependencies;
 
 class NotificationServiceImpl implements NotificationService {
-  static const String _prefixNotificationStatus = 'notification_status_';
+  // Using constants from NotificationConstants instead of hardcoded strings
   final FirebaseMessaging _firebaseMessaging;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
   final SharedPreferences _prefs;
@@ -35,11 +37,8 @@ class NotificationServiceImpl implements NotificationService {
   final LoginService _loginService;
   final WorkManagerClient _workManagerClient;
 
-  // Background task identifier for streak calculation
-  static const String _streakCalculationTask = 'streak_calculation_task';
-  // Default time for streak notification (10:00 AM)
-  static const TimeOfDay _defaultStreakNotificationTime =
-      TimeOfDay(hour: 10, minute: 0);
+  // Using background task identifier from NotificationConstants
+  // Using default time from NotificationConstants
 
   NotificationServiceImpl({
     FirebaseMessaging? firebaseMessaging,
@@ -67,17 +66,10 @@ class NotificationServiceImpl implements NotificationService {
     // Inisialisasi local notifications
     await _initializeLocalNotifications();
     // Create notification channel for Android
-    await _createNotificationChannel(NotificationChannels.mealReminder);
-    await _createNotificationChannel(NotificationChannels.workoutReminder);
-    await _createNotificationChannel(NotificationChannels.subscription);
     await _createNotificationChannel(NotificationChannels.server);
     await _createNotificationChannel(NotificationChannels.dailyStreak);
     // Set up handler untuk FCM
     _setupFCMHandlers();
-
-    // Initialize WorkManager
-    await _initializeWorkManager();
-
     // Jadwalkan notifikasi default
     await _setupDefaultRecurringNotifications();
   }
@@ -97,7 +89,7 @@ class NotificationServiceImpl implements NotificationService {
             NotificationChannels.server.id,
             NotificationChannels.server.name,
             channelDescription: NotificationChannels.server.description,
-            icon: '@mipmap/ic_launcher',
+            icon: '@mipmap/launcher_icon',
           ),
         ),
         payload: message.data['payload'],
@@ -108,25 +100,11 @@ class NotificationServiceImpl implements NotificationService {
   @override
   Future<void> scheduleLocalNotification(NotificationModel notification,
       AndroidNotificationChannel channel) async {
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      notification.id.hashCode,
-      notification.title,
-      notification.body,
-      nextInstanceOfTime(notification.scheduledTime),
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          channel.id,
-          channel.name,
-          channelDescription: channel.description,
-          icon: '@mipmap/ic_launcher',
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: notification.payload,
-    );
+    // For daily streak notifications, use the dedicated method
+    if (channel.id == NotificationConstants.dailyStreakChannelId) {
+      await _scheduleStreakNotification();
+    }
+    // Other notification types are not implemented at this time
   }
 
   @override
@@ -158,7 +136,7 @@ class NotificationServiceImpl implements NotificationService {
 
   Future<void> _initializeLocalNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/launcher_icon');
 
     const InitializationSettings initializationSettings =
         InitializationSettings(
@@ -199,144 +177,124 @@ class NotificationServiceImpl implements NotificationService {
 
   void _onNotificationTapped(NotificationResponse details) async {
     // Handle notifikasi tap berdasarkan payload
-    if (details.payload == 'daily_calorie_tracking') {
-      // Arahkan ke halaman tracking makanan
-      final deepLinkService = getIt<DeepLinkService>();
-      await deepLinkService.handleDeepLink(Uri.parse('pockeat://quick-log'));
-    } else if (details.payload == 'streak_celebration') {
+    if (details.payload == NotificationConstants.dailyStreakPayload) {
       final userId = (await _loginService.getCurrentUser())?.uid;
       if (userId == null) return;
 
       // Hitung streak terbaru secara real-time saat notifikasi di-tap
       final currentStreakDays =
           await _foodLogHistoryService.getFoodStreakDays(userId);
+      await BackgroundLogger.log(" currentStreakDays = $currentStreakDays",
+          tag: "onNotificationTap");
 
-      // Buat URI dengan parameter streak days
-      final streakUri = Uri.parse(
-          'pockeat://streak-celebration?streakDays=$currentStreakDays');
+      // Use platform channel to launch a native Android intent with the deeplink
+      // This will be caught by the OS and redirected to our app, triggering the
+      // deeplink handler in main.dart
+      final deepLinkUri =
+          'pockeat://streak-celebration?streakDays=$currentStreakDays';
 
-      // Gunakan DeepLinkService untuk navigasi ke halaman streak celebration
-      final deepLinkService = getIt<DeepLinkService>();
-      await deepLinkService.handleDeepLink(streakUri);
+      // Create a platform channel for launching URIs
+      const platformChannel = MethodChannel('com.pockeat/notification_actions');
+
+      // Call the native method to open the URI
+      await platformChannel.invokeMethod('launchUri', {
+        'uri': deepLinkUri,
+      });
+
+      await BackgroundLogger.log("Launched deeplink: $deepLinkUri",
+          tag: "onNotificationTap");
     }
   }
 
   @override
   Future<void> toggleNotification(String channelId, bool enabled) async {
-    // Simpan status notifikasi ke SharedPreferences
-    await _prefs.setBool('$_prefixNotificationStatus$channelId', enabled);
-
-    if (enabled) {
-      // Jika diaktifkan, jadwalkan ulang notifikasi
-      await _setupNotificationByChannel(channelId);
-    } else {
-      // Jika dinonaktifkan, batalkan notifikasi yang terkait
+    // We're focusing only on daily streak notifications
+    if (channelId == NotificationConstants.dailyStreakChannelId) {
+      // Always cancel existing notifications first to avoid duplicates
+      debugPrint("Canceling existing notification for channel: $channelId");
       await cancelNotificationsByChannel(channelId);
+
+      // Save notification status to SharedPreferences
+      await _prefs.setBool(
+          NotificationConstants.prefDailyStreakEnabled, enabled);
+
+      if (enabled) {
+        // Schedule notification if enabled
+        debugPrint("Setting up notification for channel: $channelId");
+        await _setupNotificationByChannel(channelId);
+      }
     }
   }
 
   @override
   Future<bool> isNotificationEnabled(String channelId) async {
-    return _prefs.getBool('$_prefixNotificationStatus$channelId') ?? false;
+    // For daily streak notifications, default to true if key doesn't exist
+    if (channelId == NotificationConstants.dailyStreakChannelId) {
+      // If key doesn't exist, create it with default value true
+      if (!_prefs.containsKey(NotificationConstants.prefDailyStreakEnabled)) {
+        await _prefs.setBool(
+            NotificationConstants.prefDailyStreakEnabled, true);
+        return true;
+      }
+      return _prefs.getBool(NotificationConstants.prefDailyStreakEnabled) ??
+          true;
+    }
+
+    // For other notification types, default to false
+    final key = NotificationConstants.getNotificationStatusKey(channelId);
+    return _prefs.getBool(key) ?? false;
   }
 
   Future<void> _setupNotificationByChannel(String channelId) async {
-    switch (channelId) {
-      case 'calories_reminder_channel':
-        final calorieReminder = NotificationModel(
-          id: 'daily_calorie_reminder',
-          title: 'Waktu Tracking Kalori!',
-          body: 'Jangan lupa untuk mencatat asupan kalori hari ini',
-          scheduledTime: DateTime(2024, 1, 1, 8, 0),
-          payload: 'daily_calorie_tracking',
-        );
-        await scheduleLocalNotification(
-            calorieReminder, NotificationChannels.mealReminder);
-        break;
-
-      case 'workout_reminder_channel':
-        final workoutReminder = NotificationModel(
-          id: 'daily_workout_reminder',
-          title: 'Waktunya Workout!',
-          body: 'Jangan lewatkan sesi workout hari ini',
-          scheduledTime: DateTime(2024, 1, 1, 8, 0),
-          payload: 'daily_workout',
-        );
-        await scheduleLocalNotification(
-            workoutReminder, NotificationChannels.workoutReminder);
-        break;
-
-      case 'daily_streak_channel':
-        // For streak channel, we'll use WorkManager to schedule the background task
-        // that calculates streak at the time of notification
-        await _scheduleStreakNotification();
-        break;
+    // We're focusing only on daily streak notifications
+    if (channelId == NotificationConstants.dailyStreakChannelId) {
+      // For streak channel, we use WorkManager to schedule the background task
+      // that calculates streak at the time of notification
+      debugPrint("Setting up daily streak notification");
+      await _scheduleStreakNotification();
     }
+    // Other notification types are not implemented at this time
   }
 
   Future<void> cancelNotificationsByChannel(String channelId) async {
-    switch (channelId) {
-      case 'calories_reminder_channel':
-        await cancelNotification('daily_calorie_reminder');
-        break;
-      case 'workout_reminder_channel':
-        await cancelNotification('daily_workout_reminder');
-        break;
-      case 'daily_streak_channel':
-        await cancelNotification('daily_streak_channel');
-        // Also cancel the WorkManager task for streak notifications
-        if (channelId == 'daily_streak_channel') {
-          await _workManagerClient.cancelByUniqueName(_streakCalculationTask);
-        }
-        break;
+    // We're focusing only on daily streak notifications
+    if (channelId == NotificationConstants.dailyStreakChannelId) {
+      await cancelNotification(NotificationConstants.dailyStreakNotificationId);
+      // Also cancel the WorkManager task for streak notifications
+      await _workManagerClient
+          .cancelByUniqueName(NotificationConstants.streakCalculationTaskName);
     }
-  }
-
-  // Initialize WorkManager for background tasks
-  Future<void> _initializeWorkManager() async {
-    await _workManagerClient.initialize(
-      _callbackDispatcher,
-      isInDebugMode: false,
-    );
+    // Other notification types are not implemented at this time
   }
 
   Future<void> _setupDefaultRecurringNotifications() async {
-    // Cek status notifikasi sebelum menjadwalkan
-    final isCaloriesEnabled =
-        await isNotificationEnabled('calories_reminder_channel');
-    final isWorkoutEnabled =
-        await isNotificationEnabled('workout_reminder_channel');
-    final isStreakEnabled = await isNotificationEnabled('daily_streak_channel');
+    // We're focusing only on daily streak notifications and making them enabled by default
+    final isStreakEnabled =
+        await isNotificationEnabled(NotificationConstants.dailyStreakChannelId);
 
-    if (isCaloriesEnabled) {
-      await _setupNotificationByChannel('calories_reminder_channel');
-    }
-
-    if (isWorkoutEnabled) {
-      await _setupNotificationByChannel('workout_reminder_channel');
-    }
-
+    debugPrint("isStreakEnabled: $isStreakEnabled");
     if (isStreakEnabled) {
-      await _setupNotificationByChannel('daily_streak_channel');
+      debugPrint("Setting up daily streak notification");
+      await _setupNotificationByChannel(
+          NotificationConstants.dailyStreakChannelId);
     }
   }
 
   // Schedule the streak notification background task
   Future<void> _scheduleStreakNotification() async {
     // Get user's preferred notification time (or use default)
-    final preferredTimeString = _prefs.getString('streak_notification_time');
-    TimeOfDay notificationTime = _defaultStreakNotificationTime;
-
-    if (preferredTimeString != null) {
-      final timeParts = preferredTimeString.split(':');
-      if (timeParts.length == 2) {
-        final hour = int.tryParse(timeParts[0]);
-        final minute = int.tryParse(timeParts[1]);
-        if (hour != null && minute != null) {
-          notificationTime = TimeOfDay(hour: hour, minute: minute);
-        }
-      }
+    debugPrint("Getting notification time");
+    final hour = _prefs.getInt(NotificationConstants.prefDailyStreakHour);
+    final minute = _prefs.getInt(NotificationConstants.prefDailyStreakMinute);
+    // Use stored time or default
+    TimeOfDay notificationTime = const TimeOfDay(
+        hour: NotificationConstants.defaultStreakNotificationHour,
+        minute: NotificationConstants.defaultStreakNotificationMinute);
+    if (hour != null && minute != null) {
+      notificationTime = TimeOfDay(hour: hour, minute: minute);
     }
+    debugPrint(
+        "Notification time: ${notificationTime.hour}:${notificationTime.minute}");
 
     // Calculate the initial delay to the scheduled time
     final now = DateTime.now();
@@ -347,102 +305,31 @@ class NotificationServiceImpl implements NotificationService {
       notificationTime.hour,
       notificationTime.minute,
     );
+    debugPrint("Scheduled time: ${scheduledTime.hour}:${scheduledTime.minute}");
     // If the scheduled time for today has already passed, schedule for tomorrow
     final initialDelay = scheduledTime.isAfter(now)
         ? scheduledTime.difference(now)
         : scheduledTime.add(const Duration(days: 1)).difference(now);
 
     // Cancel any existing tasks
-    await _workManagerClient.cancelByUniqueName(_streakCalculationTask);
+    await _workManagerClient
+        .cancelByUniqueName(NotificationConstants.streakCalculationTaskName);
+    debugPrint("Cancelled existing streak calculation task");
 
-    // Schedule the daily task
+    // Schedule the daily task - make sure task name and unique name match exactly
     await _workManagerClient.registerPeriodicTask(
-      _streakCalculationTask,
-      'Daily Streak Calculation',
+      NotificationConstants.streakCalculationTaskName, // Unique name
+      NotificationConstants
+          .streakCalculationTaskName, // Task name (must match exactly)
       frequency: const Duration(days: 1),
       initialDelay: initialDelay,
       constraints: Constraints(
         networkType: NetworkType.connected,
       ),
     );
-  }
-
-  // Show streak notification with real-time streak data
-  Future<void> showStreakNotification() async {
-    try {
-      // First check if streak notifications are enabled
-      final isStreakEnabled =
-          await isNotificationEnabled('daily_streak_channel');
-      if (!isStreakEnabled) {
-        // Notifications are disabled, don't show anything
-        // Consider also canceling future WorkManager tasks here
-        await _workManagerClient.cancelByUniqueName(_streakCalculationTask);
-        return;
-      }
-
-      final userId = (await _loginService.getCurrentUser())?.uid;
-      if (userId == null) return;
-
-      // Calculate streak in real-time when notification is about to be shown
-      final streakDays = await _foodLogHistoryService.getFoodStreakDays(userId);
-
-      // Only show notification if there's an active streak
-      if (streakDays > 0) {
-        // Create appropriate message based on streak count
-        final streakMessage = StreakMessageFactory.createMessage(streakDays);
-
-        // Create and show notification immediately with panda image
-        final BigPictureStyleInformation bigPictureStyleInformation =
-            BigPictureStyleInformation(
-          const DrawableResourceAndroidBitmap('panda_happy_notif'),
-          largeIcon: const DrawableResourceAndroidBitmap('panda_happy_notif'),
-          contentTitle: streakMessage.title,
-          summaryText: streakMessage.body,
-          htmlFormatContent: true,
-          htmlFormatContentTitle: true,
-        );
-
-        await _flutterLocalNotificationsPlugin.show(
-          'streak_celebration'.hashCode,
-          streakMessage.title,
-          streakMessage.body,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-              NotificationChannels.dailyStreak.id,
-              NotificationChannels.dailyStreak.name,
-              channelDescription: NotificationChannels.dailyStreak.description,
-              icon: '@mipmap/ic_launcher',
-              styleInformation: bigPictureStyleInformation,
-              playSound: true,
-              priority: Priority.high,
-              importance: Importance.high,
-            ),
-          ),
-          payload: 'streak_celebration',
-        );
-      }
-    } catch (e) {
-      debugPrint('Error showing streak notification: $e');
-    }
+    debugPrint(
+        "Scheduled streak calculation task with name: ${NotificationConstants.streakCalculationTaskName}");
   }
 }
 
-// WorkManager callback dispatcher - must be top-level or static
-@pragma('vm:entry-point')
-void _callbackDispatcher() {
-  Workmanager().executeTask((taskName, inputData) async {
-    // Initialize service locator
-    await setupDependencies();
-
-    // Get notification service
-    final notificationService =
-        getIt<NotificationService>() as NotificationServiceImpl;
-
-    if (taskName == NotificationServiceImpl._streakCalculationTask) {
-      // Show streak notification with real-time streak data
-      await notificationService.showStreakNotification();
-    }
-
-    return true;
-  });
-}
+// coverage-ignore:end

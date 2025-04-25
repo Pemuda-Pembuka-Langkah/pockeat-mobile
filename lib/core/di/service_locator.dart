@@ -170,19 +170,17 @@ Future<void> setupDependencies() async {
     FlutterLocalNotificationsPlugin(),
   );
 
-  getIt.registerSingleton<NotificationService>(
-    NotificationServiceImpl(),
-  );
-
-  // Initialize notifications
-  await getIt<NotificationService>().initialize();
-  // Register feature modules
-  // Make sure to register these modules after all their dependencies
+  // Register feature modules first (before services that depend on them)
   FoodLogHistoryModule.register();
   ExerciseLogHistoryModule.register();
   CalorieStatsModule.register();
   NutritionModule.register();
   ExerciseProgressModule.register();
+
+  // Now register NotificationService which depends on FoodLogHistoryService
+  getIt.registerSingleton<NotificationService>(
+    NotificationServiceImpl(),
+  );
 
   // Register additional services
   getIt.registerSingleton<LogoutService>(

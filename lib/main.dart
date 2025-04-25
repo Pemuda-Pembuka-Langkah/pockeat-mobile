@@ -22,6 +22,7 @@ import 'package:pockeat/config/staging.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/core/screens/streak_celebration_page.dart';
+import 'package:pockeat/core/service/background_service_manager.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
@@ -178,6 +179,22 @@ void _handleDeepLink(DeepLinkResult result) {
       }
       break;
 
+    case DeepLinkType.streakCelebration:
+      // Deep link untuk streak celebration notification
+      if (result.success) {
+        final streakDays = result.data?['streakDays'] ?? 0;
+        // Navigate to streak page or show streak celebration
+        debugPrint(
+            'Streak celebration link handled with streak days: $streakDays');
+
+        // Navigate to home screen to show the streak dialog
+        navigatorKey.currentState?.pushReplacementNamed(
+          '/streak-celebration',
+          arguments: {'showStreakCelebration': true, 'streakDays': streakDays},
+        );
+      }
+      break;
+
     default:
       debugPrint('Unknown deep link type: ${result.type}');
       break;
@@ -206,7 +223,9 @@ void main() async {
   await getIt<AnalyticsService>().initialize();
 
   // Initialize notifications
+  // Initialize notifications
   if (!kIsWeb) {
+    await BackgroundServiceManager.initialize();
     await getIt<FoodTrackingClientController>().initialize();
     await getIt<NotificationService>().initialize();
   }
@@ -361,7 +380,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>?;
           return StreakCelebrationPage(
-            streak: args?['streak'] as int? ?? 1,
+            streak: args?['streakDays'] as int? ?? 0,
           );
         },
         '/profile': (context) => const AuthWrapper(child: ProfilePage()),

@@ -655,6 +655,15 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
           _buildDivider(),
           _buildActionTile(
+            title: 'Pengaturan Notifikasi',
+            subtitle: 'Kelola pengaturan notifikasi aplikasi',
+            icon: Icons.notifications_outlined,
+            onTap: () {
+              Navigator.of(context).pushNamed('/notification-settings');
+            },
+          ),
+          _buildDivider(),
+          _buildActionTile(
             title: 'Laporkan Bug',
             subtitle: 'Bantu kami meningkatkan aplikasi',
             icon: Icons.bug_report_outlined,

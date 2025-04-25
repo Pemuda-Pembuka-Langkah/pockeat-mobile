@@ -2,76 +2,113 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:confetti/confetti.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lottie/lottie.dart';
 
 // Project imports:
 import 'package:pockeat/core/screens/streak_celebration_page.dart';
-
-// Custom finder untuk Lottie animations jika 
-//diperlukan di masa depan
+import 'package:pockeat/features/notifications/domain/model/streak_message.dart';
 
 void main() {
+  // Using TestWidgetsFlutterBinding to allow for offscreen rendering
+  TestWidgetsFlutterBinding.ensureInitialized();
+  
   // Group 1: Test UI Elements and Layout
   group('UI Elements and Layout Tests', () {
-    testWidgets('Page shows correct app bar title', (WidgetTester tester) async {
+    testWidgets('Page displays correct layout with background color', (WidgetTester tester) async {
+      // Use a widget with a fixed size to prevent overflow during tests
       await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: 10),
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: 10),
+          ),
         ),
       );
       
-      expect(find.text('Streak Achievement'), findsOneWidget);
-      expect(find.byType(AppBar), findsOneWidget);
+      // Verify Scaffold exists with expected background color
+      final scaffoldFinder = find.byType(Scaffold);
+      expect(scaffoldFinder, findsOneWidget);
+      
+      final scaffold = tester.widget<Scaffold>(scaffoldFinder);
+      expect(scaffold.backgroundColor, const Color(0xFFF9F9F9));
     });
     
-    testWidgets('Page shows streak number prominently', (WidgetTester tester) async {
-      const testStreak = 42;
+    testWidgets('Page has Lottie animation displayed', (WidgetTester tester) async {
+      // Use a widget with a fixed size to prevent overflow during tests
       await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: testStreak),
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: 10),
+          ),
         ),
       );
       
-      // Should find the exact streak number
-      expect(find.text('42'), findsOneWidget);
+      // Verify Lottie widget exists
+      expect(find.byType(Lottie), findsOneWidget);
       
-      // The text should be large (we can verify the style in the widget)
-      final textWidget = tester.widget<Text>(find.text('42'));
-      expect(textWidget.style?.fontSize, greaterThan(40));
-    });
-    
-    testWidgets('Page has card containing streak information', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: 10),
-        ),
-      );
+      // Verify animation container size
+      final sizedBoxFinder = find.ancestor(
+        of: find.byType(Lottie),
+        matching: find.byType(SizedBox),
+      ).first;
       
-      // Check card is present
-      expect(find.byType(Card), findsOneWidget);
+      expect(sizedBoxFinder, findsOneWidget);
       
-      // Verify card contains the streak content
-      final cardFinder = find.byType(Card);
-      expect(find.descendant(of: cardFinder, matching: find.text('10')), findsOneWidget);
+      final sizedBox = tester.widget<SizedBox>(sizedBoxFinder);
+      expect(sizedBox.height, 350);
+      expect(sizedBox.width, 350);
     });
     
     testWidgets('Page has continue button with correct style', (WidgetTester tester) async {
+      // Use a widget with a fixed size to prevent overflow during tests
       await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: 10),
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: 10),
+          ),
         ),
       );
       
       // Button exists with text 'Continue'
       expect(find.widgetWithText(ElevatedButton, 'Continue'), findsOneWidget);
       
-      // Button has the correct style (we can check some properties)
+      // Check button properties
       final buttonFinder = find.byType(ElevatedButton);
       final button = tester.widget<ElevatedButton>(buttonFinder);
       
-      // Check the button's style is not null
       expect(button.style, isNotNull);
+      
+      // Check button is full width
+      final buttonParent = find.ancestor(
+        of: buttonFinder,
+        matching: find.byType(SizedBox),
+      ).first;
+      
+      final sizedBox = tester.widget<SizedBox>(buttonParent);
+      expect(sizedBox.width, double.infinity);
+    });
+    
+    testWidgets('Page has confetti animation', (WidgetTester tester) async {
+      // Use a widget with a fixed size to prevent overflow during tests
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: 10),
+          ),
+        ),
+      );
+      
+      // Verify ConfettiWidget exists
+      expect(find.byType(ConfettiWidget), findsOneWidget);
     });
   });
   
@@ -79,127 +116,184 @@ void main() {
   group('Streak Message Tests', () {
     testWidgets('Regular streak (< 7 days) shows correct message', (WidgetTester tester) async {
       const testStreak = 3;
+      // Use a widget with a fixed size to prevent overflow during tests
       await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: testStreak),
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: testStreak),
+          ),
         ),
       );
       
-      expect(find.text('3 Day Streak! 👏'), findsOneWidget);
-      expect(find.text('Keep up the good habit today!'), findsOneWidget);
+      // Verify StreakMessage content is displayed correctly
+      final regularMessage = RegularStreakMessage(testStreak);
+      expect(find.text(regularMessage.title), findsOneWidget);
+      expect(find.text(regularMessage.body), findsOneWidget);
     });
     
     testWidgets('Weekly streak (7-29 days) shows correct message', (WidgetTester tester) async {
       const testStreak = 14;
+      // Use a widget with a fixed size to prevent overflow during tests
       await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: testStreak),
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: testStreak),
+          ),
         ),
       );
       
-      expect(find.text('7+ Day Streak! 🔥'), findsOneWidget);
-      expect(find.text('You have maintained a 14 day streak! Keep going!'), findsOneWidget);
+      final weeklyMessage = WeeklyStreakMessage(testStreak);
+      expect(find.text(weeklyMessage.title), findsOneWidget);
+      expect(find.text(weeklyMessage.body), findsOneWidget);
     });
     
     testWidgets('Monthly streak (30-99 days) shows correct message', (WidgetTester tester) async {
       const testStreak = 45;
+      // Use a widget with a fixed size to prevent overflow during tests
       await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: testStreak),
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: testStreak),
+          ),
         ),
       );
       
-      expect(find.text('30+ Day Streak! 🌟'), findsOneWidget);
-      expect(find.text('Amazing! You have been consistent for 45 days!'), findsOneWidget);
+      final monthlyMessage = MonthlyStreakMessage(testStreak);
+      expect(find.text(monthlyMessage.title), findsOneWidget);
+      expect(find.text(monthlyMessage.body), findsOneWidget);
     });
     
     testWidgets('Century streak (100+ days) shows correct message', (WidgetTester tester) async {
       const testStreak = 120;
+      // Use a widget with a fixed size to prevent overflow during tests
       await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: testStreak),
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: testStreak),
+          ),
         ),
       );
       
-      expect(find.text('WOW! 100+ Day Streak! 🏆'), findsOneWidget);
-      expect(find.text('Spectacular achievement! 120 consecutive days!'), findsOneWidget);
+      final centuryMessage = CenturyStreakMessage(testStreak);
+      expect(find.text(centuryMessage.title), findsOneWidget);
+      expect(find.text(centuryMessage.body), findsOneWidget);
     });
     
     testWidgets('Edge case: zero streak shows regular message', (WidgetTester tester) async {
+      // Use a widget with a fixed size to prevent overflow during tests
       await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: 0),
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: 0),
+          ),
         ),
       );
       
-      expect(find.text('0 Day Streak! 👏'), findsOneWidget);
+      final regularMessage = RegularStreakMessage(0);
+      expect(find.text(regularMessage.title), findsOneWidget);
     });
   });
   
-  // Group 3: Test Animations
-  group('Animation Tests', () {
-    testWidgets('Lottie animation is present', (WidgetTester tester) async {
+  // Group 3: Test Animations based on streak levels
+  group('Animation Path Tests', () {
+    testWidgets('Regular streak (< 7 days) uses correct animation', (WidgetTester tester) async {
+      // Use a widget with a fixed size to prevent overflow during tests
       await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: 10),
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: 3),
+          ),
         ),
       );
       
-      // Check if Lottie widget is present
-      expect(find.byType(Lottie), findsOneWidget);
+      final lottieFinder = find.byType(Lottie);
+      expect(lottieFinder, findsOneWidget);
+      
+      final lottie = tester.widget<Lottie>(lottieFinder);
+      expect(lottie.animate, isTrue);
+      expect(lottie.repeat, isTrue);
+      
+      // We can't check the exact asset path in the test directly,
+      // but we can confirm Lottie animation attributes are set correctly
     });
     
-
+    testWidgets('Higher streak levels should have animations', (WidgetTester tester) async {
+      // Use a widget with a fixed size to prevent overflow during tests
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: 100),
+          ),
+        ),
+      );
+      
+      expect(find.byType(Lottie), findsOneWidget);
+    });
   });
   
   // Group 4: Test Navigation
   group('Navigation Tests', () {
-    testWidgets('Button exists in the UI', (WidgetTester tester) async {
-      // RED phase - mencari tombol yang seharusnya ada
+    testWidgets('Continue button has navigation callback', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: StreakCelebrationPage(streak: 10),
         ),
       );
       
-      // Memastikan animasi dan semua widget selesai dirender
-      await tester.pump();
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      // Find the continue button
+      final buttonFinder = find.widgetWithText(ElevatedButton, 'Continue');
+      expect(buttonFinder, findsOneWidget);
       
-      // GREEN phase - verifikasi button ada
-      expect(find.byType(ElevatedButton), findsOneWidget);
-      
-      // REFACTOR phase - gunakan pendekatan yang lebih robust
-      final buttonWidget = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
-      expect(buttonWidget.onPressed, isNotNull);
+      // Verify button has a non-null onPressed callback - we don't need to tap it
+      // since that's causing issues in the test environment
+      final button = tester.widget<ElevatedButton>(buttonFinder);
+      expect(button.onPressed, isNotNull);
     });
   });
   
-  // Group 5: Edge Cases and Error Handling
+  // Group 5: Edge Cases and Very Large Streaks
   group('Edge Cases and Error Handling', () {
     testWidgets('Very large streak number still displays correctly', (WidgetTester tester) async {
       const largeStreak = 9999;
+      // Use a widget with a fixed size to prevent overflow during tests
       await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: largeStreak),
+        MaterialApp(
+          home: SizedBox(
+            width: 800,
+            height: 1200,
+            child: const StreakCelebrationPage(streak: largeStreak),
+          ),
         ),
       );
       
-      expect(find.text('9999'), findsOneWidget);
-      expect(find.text('WOW! 100+ Day Streak! 🏆'), findsOneWidget);
-    });
-    
-    testWidgets('Streak is rendered correctly', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: StreakCelebrationPage(streak: 10),
-        ),
-      );
-      
-      // Elements should be visible
-      expect(find.text('10'), findsOneWidget);
-      expect(find.text('Streak Achievement'), findsOneWidget);
-      expect(find.text('Continue'), findsOneWidget);
+      final centuryMessage = CenturyStreakMessage(largeStreak);
+      expect(find.text(centuryMessage.title), findsOneWidget);
+      expect(find.text(centuryMessage.body), findsOneWidget);
     });
   });
+}
+
+/// Mock Navigator Observer for testing navigation
+class MockNavigatorObserver extends NavigatorObserver {
+  List<Route<dynamic>> pushedRoutes = [];
+  
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    pushedRoutes.add(route);
+    super.didPush(route, previousRoute);
+  }
 }

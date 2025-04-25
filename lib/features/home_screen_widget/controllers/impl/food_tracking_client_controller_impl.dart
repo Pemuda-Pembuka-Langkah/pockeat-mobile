@@ -234,17 +234,8 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   /// Setup background service untuk widget updates
   Future<void> _setupBackgroundService() async {
     try {
-      // Request notification permission (diperlukan untuk beberapa background tasks)
       await _requestPermissions();
-
-      // Initialize workmanager
-      await _backgroundServiceHelper.initialize();
-
-      // Register periodic task (minimal 15 menit sesuai batasan Android)
-      await _backgroundServiceHelper.registerPeriodicTask();
-
-      // Register midnight task untuk update jam 00:00
-      await _backgroundServiceHelper.registerMidnightTask();
+      await _backgroundServiceHelper.registerTasks();
     } catch (e) {
       throw WidgetTimerSetupException('Failed to setup background service: $e');
     }
