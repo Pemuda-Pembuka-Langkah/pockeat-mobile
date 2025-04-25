@@ -1,6 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
 import 'form_cubit.dart';
 
 class SpeedSelectionPage extends StatefulWidget {
@@ -30,7 +37,7 @@ class _SpeedSelectionPageState extends State<SpeedSelectionPage> {
             final inProgress = prefs.getBool('onboardingInProgress') ?? true;
 
             if (inProgress && Navigator.of(context).canPop()) {
-              Navigator.of(context).pop(); 
+              Navigator.of(context).pop();
             } else {
               Navigator.of(context).popUntil((route) => route.isFirst);
             }

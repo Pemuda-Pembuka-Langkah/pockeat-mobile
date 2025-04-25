@@ -1,13 +1,15 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
-import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
-import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
-import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
+import 'package:mockito/mockito.dart';
 
+// Project imports:
+import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
+import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
+import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 import 'form_cubit_test.mocks.dart';
 
 @GenerateMocks([HealthMetricsRepositoryImpl, CaloricRequirementRepository, CaloricRequirementService])
@@ -23,10 +25,10 @@ void main() {
     mockCaloricService = MockCaloricRequirementService();
     cubit = HealthMetricsFormCubit(
       repository: mockRepo,
-      userId: 'user123',
       caloricRequirementRepository: mockCaloricRepo,
       caloricRequirementService: mockCaloricService,
     );
+    cubit.setUserId('user123');
   });
 
   test('initial state is correct', () {

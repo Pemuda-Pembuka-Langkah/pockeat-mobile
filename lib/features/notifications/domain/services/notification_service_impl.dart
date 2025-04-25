@@ -1,13 +1,18 @@
+// Dart imports:
 import 'dart:io';
+
+// Package imports:
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
-import 'package:timezone/timezone.dart' as tz;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+// Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 
 class NotificationServiceImpl implements NotificationService {
   final FirebaseMessaging _firebaseMessaging = getIt<FirebaseMessaging>();
@@ -158,16 +163,14 @@ class NotificationServiceImpl implements NotificationService {
 
   void _onNotificationTapped(NotificationResponse details) {
     // Handle notifikasi tap berdasarkan payload
-    if (details.payload == 'daily_calorie_tracking') {
-      // TODO: Implementasi navigasi ke halaman tracking kalori
-    }
+    if (details.payload == 'daily_calorie_tracking') {}
   }
 
   @override
   Future<void> toggleNotification(String channelId, bool enabled) async {
     // Simpan status notifikasi ke SharedPreferences
     await _prefs.setBool('$_prefixNotificationStatus$channelId', enabled);
-    
+
     if (enabled) {
       // Jika diaktifkan, jadwalkan ulang notifikasi
       await _setupNotificationByChannel(channelId);
@@ -193,9 +196,7 @@ class NotificationServiceImpl implements NotificationService {
           payload: 'daily_calorie_tracking',
         );
         await scheduleLocalNotification(
-          calorieReminder, 
-          NotificationChannels.caloriesReminder
-        );
+            calorieReminder, NotificationChannels.caloriesReminder);
         break;
 
       case 'workout_reminder_channel':
@@ -207,9 +208,7 @@ class NotificationServiceImpl implements NotificationService {
           payload: 'daily_workout',
         );
         await scheduleLocalNotification(
-          workoutReminder, 
-          NotificationChannels.workoutReminder
-        );
+            workoutReminder, NotificationChannels.workoutReminder);
         break;
     }
   }
@@ -227,8 +226,10 @@ class NotificationServiceImpl implements NotificationService {
 
   Future<void> _setupDefaultRecurringNotifications() async {
     // Cek status notifikasi sebelum menjadwalkan
-    final isCaloriesEnabled = await isNotificationEnabled('calories_reminder_channel');
-    final isWorkoutEnabled = await isNotificationEnabled('workout_reminder_channel');
+    final isCaloriesEnabled =
+        await isNotificationEnabled('calories_reminder_channel');
+    final isWorkoutEnabled =
+        await isNotificationEnabled('workout_reminder_channel');
 
     if (isCaloriesEnabled) {
       await _setupNotificationByChannel('calories_reminder_channel');

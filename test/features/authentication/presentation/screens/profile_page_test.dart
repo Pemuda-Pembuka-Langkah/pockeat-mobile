@@ -1,17 +1,25 @@
+// Dart imports:
+import 'dart:async';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:async';
+
+// Project imports:
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
+import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
-import 'package:pockeat/features/authentication/services/bug_report_service.dart';
+import 'profile_page_test.mocks.dart';
 
 @GenerateNiceMocks([
   MockSpec<LoginService>(),
@@ -22,7 +30,6 @@ import 'package:pockeat/features/authentication/services/bug_report_service.dart
   MockSpec<User>(),
   MockSpec<UserInfo>()
 ])
-import 'profile_page_test.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -98,7 +105,7 @@ void main() {
     String uid = 'test-uid',
     String email = 'test@example.com',
     String? displayName = 'Test User',
-    String? photoURL = null,
+    String? photoURL,
     bool emailVerified = true,
     String? gender = 'Male',
     DateTime? birthDate,

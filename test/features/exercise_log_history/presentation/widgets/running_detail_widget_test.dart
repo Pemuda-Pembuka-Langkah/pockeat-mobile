@@ -1,6 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/running_detail_widget.dart';
 

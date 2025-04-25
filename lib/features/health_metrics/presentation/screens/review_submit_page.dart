@@ -1,6 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
 import 'form_cubit.dart';
 
 class ReviewSubmitPage extends StatelessWidget {
@@ -10,14 +15,14 @@ class ReviewSubmitPage extends StatelessWidget {
   final Color primaryPink = const Color(0xFFFF6B6B);
 
   String formatActivityLevel(String? level) {
-  if (level == null) return "-";
-  return level
-      .replaceAll("_", " ")                
-      .split(' ')                          
-      .map((word) =>                       
-          word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : "")
-      .join(' ');
-}
+    if (level == null) return "-";
+    return level
+        .replaceAll("_", " ")
+        .split(' ')
+        .map((word) =>
+            word.isNotEmpty ? word[0].toUpperCase() + word.substring(1) : "")
+        .join(' ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,15 +37,17 @@ class ReviewSubmitPage extends StatelessWidget {
             final prefs = await SharedPreferences.getInstance();
             final inProgress = prefs.getBool('onboardingInProgress') ?? true;
 
+            // Check if the widget is still mounted before using context
+            if (!context.mounted) return;
+
             if (inProgress && Navigator.of(context).canPop()) {
-              Navigator.of(context).pop(); 
+              Navigator.of(context).pop();
             } else {
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/', // or whatever your homepage route is
                 (route) => false,
               );
-
             }
           },
         ),
@@ -100,14 +107,31 @@ class ReviewSubmitPage extends StatelessWidget {
                     child: ListView(
                       children: [
                         _buildItem("Goals", goalsDisplay),
-                        _buildItem("Height", state.height != null ? "${state.height} cm" : "-"),
-                        _buildItem("Weight", state.weight != null ? "${state.weight} kg" : "-"),
-                        _buildItem("Birth Date", state.birthDate?.toLocal().toString().split(" ")[0] ?? "-"),
+                        _buildItem("Height",
+                            state.height != null ? "${state.height} cm" : "-"),
+                        _buildItem("Weight",
+                            state.weight != null ? "${state.weight} kg" : "-"),
+                        _buildItem(
+                            "Birth Date",
+                            state.birthDate
+                                    ?.toLocal()
+                                    .toString()
+                                    .split(" ")[0] ??
+                                "-"),
                         _buildItem("Gender", state.gender ?? "-"),
-                        _buildItem("Activity Level", formatActivityLevel(state.activityLevel)),
+                        _buildItem("Activity Level",
+                            formatActivityLevel(state.activityLevel)),
                         _buildItem("Diet Type", state.dietType ?? "-"),
-                        _buildItem("Desired Weight", state.desiredWeight != null ? "${state.desiredWeight} kg" : "-"),
-                        _buildItem("Weekly Goal", state.weeklyGoal != null ? "${state.weeklyGoal!.toStringAsFixed(1)} kg/week" : "-"),
+                        _buildItem(
+                            "Desired Weight",
+                            state.desiredWeight != null
+                                ? "${state.desiredWeight} kg"
+                                : "-"),
+                        _buildItem(
+                            "Weekly Goal",
+                            state.weeklyGoal != null
+                                ? "${state.weeklyGoal!.toStringAsFixed(1)} kg/week"
+                                : "-"),
                       ],
                     ),
                   ),
@@ -155,7 +179,6 @@ class ReviewSubmitPage extends StatelessWidget {
                       }
                     }
                   },
-
                   child: const Center(child: Text("Submit")),
                 ),
               ],

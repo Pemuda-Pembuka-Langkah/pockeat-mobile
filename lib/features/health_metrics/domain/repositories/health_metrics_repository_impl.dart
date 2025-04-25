@@ -1,4 +1,7 @@
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Project imports:
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 
@@ -23,7 +26,8 @@ class HealthMetricsRepositoryImpl implements HealthMetricsRepository {
   @override
   Future<HealthMetricsModel?> getHealthMetrics(String userId) async {
     try {
-      final doc = await firestore.collection('health_metrics').doc(userId).get();
+      final doc =
+          await firestore.collection('health_metrics').doc(userId).get();
 
       if (!doc.exists) return null;
 

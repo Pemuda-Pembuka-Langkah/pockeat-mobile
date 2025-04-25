@@ -1,22 +1,25 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weekly_analysis.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_goal.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weekly_analysis.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_status.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/services/weight_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/header_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/current_weight_card_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/goals_card_widget.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/weekly_analysis_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/header_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/progress_chart_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/weekly_analysis_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/services/weight_service.dart';
 
 class WeightProgressPage extends StatefulWidget {
   final WeightService service;
-  
+
   const WeightProgressPage({
-    Key? key,
+    super.key,
     required this.service,
-  }) : super(key: key);
+  });
 
   @override
   State<WeightProgressPage> createState() => _WeightProgressPageState();
@@ -26,7 +29,7 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
-  
+
   late Future<String> _selectedPeriodFuture;
   late Future<Map<String, List<WeightData>>> _weightDataFuture;
   late Future<WeightStatus> _weightStatusFuture;
@@ -72,7 +75,7 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
+
                 return HeaderWidget(
                   weightStatus: snapshot.data!,
                   primaryPink: primaryPink,
@@ -89,7 +92,7 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
+
                 return CurrentWeightCardWidget(
                   weightStatus: snapshot.data!,
                   primaryGreen: primaryGreen,
@@ -106,7 +109,7 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
+
                 return GoalsCardWidget(
                   weightGoal: snapshot.data!,
                   primaryGreen: primaryGreen,
@@ -125,7 +128,7 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
+
                 return WeeklyAnalysisWidget(
                   weeklyAnalysis: snapshot.data!,
                   primaryGreen: primaryGreen,
@@ -146,10 +149,11 @@ class _WeightProgressPageState extends State<WeightProgressPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-                
-                final weightData = snapshot.data![0] as Map<String, List<WeightData>>;
+
+                final weightData =
+                    snapshot.data![0] as Map<String, List<WeightData>>;
                 final selectedPeriod = snapshot.data![1] as String;
-                
+
                 return ProgressChartWidget(
                   periodData: weightData,
                   selectedPeriod: selectedPeriod,

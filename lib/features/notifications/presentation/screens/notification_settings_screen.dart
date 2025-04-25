@@ -1,25 +1,30 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
-import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
+import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
-  const NotificationSettingsScreen({Key? key}) : super(key: key);
+  const NotificationSettingsScreen({super.key});
 
   @override
-  State<NotificationSettingsScreen> createState() => _NotificationSettingsScreenState();
+  State<NotificationSettingsScreen> createState() =>
+      _NotificationSettingsScreenState();
 }
 
-class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
+class _NotificationSettingsScreenState
+    extends State<NotificationSettingsScreen> {
   final NotificationService _notificationService = getIt<NotificationService>();
   bool _isReminderEnabled = false;
-  TimeOfDay _reminderTime = const TimeOfDay(hour: 19, minute: 0); // Default: 19:00
+  TimeOfDay _reminderTime =
+      const TimeOfDay(hour: 19, minute: 0); // Default: 19:00
 
   @override
   void initState() {
     super.initState();
-    // TODO: Load saved settings
   }
 
   Future<void> _selectTime(BuildContext context) async {
@@ -65,12 +70,14 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       ),
       NotificationChannels.caloriesReminder,
     );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Pengingat kalori harian telah diatur'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pengingat kalori harian telah diatur'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<void> _scheduleOneMinuteNotification() async {
@@ -83,13 +90,14 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       ),
       NotificationChannels.caloriesReminder,
     );
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Notifikasi akan muncul dalam 1 menit'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Notifikasi akan muncul dalam 1 menit'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   String _formatTimeOfDay(TimeOfDay tod) {
@@ -232,4 +240,4 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       ),
     );
   }
-} 
+}

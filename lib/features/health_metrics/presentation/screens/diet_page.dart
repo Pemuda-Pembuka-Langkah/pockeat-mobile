@@ -1,6 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
 import 'form_cubit.dart';
 
 class DietPage extends StatefulWidget {
@@ -14,7 +21,8 @@ class _DietPageState extends State<DietPage> {
   final List<Map<String, String>> _options = [
     {
       'title': 'No specific diet',
-      'description': 'You eat a general diet without any specific restrictions.',
+      'description':
+          'You eat a general diet without any specific restrictions.',
     },
     {
       'title': 'Vegetarian',
@@ -42,7 +50,6 @@ class _DietPageState extends State<DietPage> {
     },
   ];
 
-
   String? _selected;
 
   final Color primaryYellow = const Color(0xFFFFE893);
@@ -62,9 +69,9 @@ class _DietPageState extends State<DietPage> {
             final inProgress = prefs.getBool('onboardingInProgress') ?? true;
 
             if (inProgress && Navigator.of(context).canPop()) {
-              Navigator.of(context).pop(); 
+              Navigator.of(context).pop();
             } else {
-              Navigator.of(context).popUntil((route) => route.isFirst); 
+              Navigator.of(context).popUntil((route) => route.isFirst);
             }
           },
         ),
@@ -119,11 +126,14 @@ class _DietPageState extends State<DietPage> {
                         title: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(option['title']!, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            Text(option['title']!,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600)),
                             const SizedBox(height: 4),
                             Text(
                               option['description']!,
-                              style: const TextStyle(fontSize: 13, color: Colors.black54),
+                              style: const TextStyle(
+                                  fontSize: 13, color: Colors.black54),
                             ),
                           ],
                         ),

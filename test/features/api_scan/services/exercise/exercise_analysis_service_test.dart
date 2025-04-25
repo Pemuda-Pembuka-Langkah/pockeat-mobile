@@ -1,14 +1,19 @@
 // test/features/ai_api_scan/services/exercise/exercise_analysis_service_test.dart
+
+// Dart imports:
+import 'dart:convert';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
-import 'dart:convert';
+import '../base/api_service_test.mocks.dart';
 
 // Import the generated mock
-import '../base/api_service_test.mocks.dart';
 
 void main() {
   late MockApiServiceInterface mockApiService;

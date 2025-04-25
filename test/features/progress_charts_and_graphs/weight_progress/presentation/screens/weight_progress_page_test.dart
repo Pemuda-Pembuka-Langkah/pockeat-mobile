@@ -1,21 +1,26 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weekly_analysis.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_goal.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weekly_analysis.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_status.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/screens/weight_progress_page.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/header_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/current_weight_card_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/goals_card_widget.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/weekly_analysis_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/header_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/progress_chart_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/weekly_analysis_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/services/weight_service.dart';
+import 'weight_progress_page_test.mocks.dart';
 
 @GenerateMocks([WeightService])
-import 'weight_progress_page_test.mocks.dart';
 
 void main() {
   late MockWeightService mockService;

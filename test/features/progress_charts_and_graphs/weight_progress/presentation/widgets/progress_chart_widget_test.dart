@@ -1,6 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/presentation/widgets/progress_chart_widget.dart';
 

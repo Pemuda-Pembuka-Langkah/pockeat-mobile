@@ -1,5 +1,8 @@
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
@@ -17,7 +20,7 @@ class RegisterServiceImpl implements RegisterService {
         // coverage:ignore-start
         _userRepository = userRepository ??
             UserRepositoryImpl(auth: auth, firestore: firestore);
-        // coverage:ignore-end
+  // coverage:ignore-end
 
   /// Validasi email
   bool _isValidEmail(String email) {
@@ -198,4 +201,4 @@ class RegisterServiceImpl implements RegisterService {
       return false;
     }
   }
-}  
+}

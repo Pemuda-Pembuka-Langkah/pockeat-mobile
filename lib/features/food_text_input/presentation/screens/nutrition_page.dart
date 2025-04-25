@@ -1,21 +1,25 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/food_text_input/presentation/widgets/bottom_action_bar.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/additional_nutrients_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
+import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
 import 'package:pockeat/features/food_text_input/presentation/widgets/food_text_input_analysis_error.dart';
+import 'package:pockeat/features/food_text_input/presentation/widgets/text_bottom_action_bar.dart';
 
 class NutritionPage extends StatefulWidget {
   final String foodText;
   final FoodTextInputService foodTextInputService;
 
-  const NutritionPage({super.key, required this.foodText, required this.foodTextInputService});
+  const NutritionPage(
+      {super.key, required this.foodText, required this.foodTextInputService});
 
   @override
   _NutritionPageState createState() => _NutritionPageState();
@@ -45,7 +49,8 @@ class _NutritionPageState extends State<NutritionPage> {
         _hasError = false;
       });
 
-      final result = await widget.foodTextInputService.analyzeFoodText(widget.foodText);
+      final result =
+          await widget.foodTextInputService.analyzeFoodText(widget.foodText);
 
       setState(() {
         _updateFoodData(result);
@@ -82,10 +87,10 @@ class _NutritionPageState extends State<NutritionPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
+      return const Scaffold(
         body: FoodAnalysisLoading(
-          primaryYellow: const Color(0xFFFFE893),
-          primaryPink: const Color(0xFFFF6B6B),
+          primaryYellow: Color(0xFFFFE893),
+          primaryPink: Color(0xFFFF6B6B),
           message: 'Analyzing Food',
         ),
       );
@@ -113,11 +118,11 @@ class _NutritionPageState extends State<NutritionPage> {
           children: [
             CustomScrollView(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               slivers: [
-                SliverAppBar(
-                  backgroundColor: const Color(0xFFFFE893),
-                  title: const Text(
+                const SliverAppBar(
+                  backgroundColor: Color(0xFFFFE893),
+                  title: Text(
                     'Nutrition Analysis',
                     style: TextStyle(
                       color: Colors.black87,
@@ -181,23 +186,22 @@ class _NutritionPageState extends State<NutritionPage> {
               ],
             ),
             TextBottomActionBar(
-              isLoading: _isLoading || _isSaving,
-              food: food,
-              foodTextInputService: widget.foodTextInputService,
-              primaryYellow: const Color(0xFFFFE893),
-              primaryPink: const Color(0xFFFF6B6B),
-              primaryGreen: const Color(0xFF4ECDC4),
-              onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
-                setState(() {
-                  _updateFoodData(correctedResult, isCorrection: true);  
-                });
-              },
-              onSavingStateChange: (bool saving){
-                setState(() {
-                  _isSaving = saving;
-                });
-              }
-            ),
+                isLoading: _isLoading || _isSaving,
+                food: food,
+                foodTextInputService: widget.foodTextInputService,
+                primaryYellow: const Color(0xFFFFE893),
+                primaryPink: const Color(0xFFFF6B6B),
+                primaryGreen: const Color(0xFF4ECDC4),
+                onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
+                  setState(() {
+                    _updateFoodData(correctedResult, isCorrection: true);
+                  });
+                },
+                onSavingStateChange: (bool saving) {
+                  setState(() {
+                    _isSaving = saving;
+                  });
+                }),
           ],
         ),
       ),

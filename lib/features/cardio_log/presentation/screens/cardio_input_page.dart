@@ -1,13 +1,18 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
+import '../../domain/models/models.dart';
+import '../../domain/repositories/cardio_repository.dart';
+import '../../domain/repositories/cardio_repository_impl.dart';
 import '../../services/calorie_calculator.dart';
 import '../widgets/cycling_form.dart';
 import '../widgets/running_form.dart';
 import '../widgets/swimming_form.dart';
-import '../../domain/models/models.dart';
-import '../../domain/repositories/cardio_repository.dart';
-import '../../domain/repositories/cardio_repository_impl.dart';
 
 // Using CardioType from model for consistency
 // enum CardioType { running, cycling, swimming }

@@ -1,8 +1,15 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
-import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/correction_dialog.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 
 class BottomActionBar extends StatelessWidget {
   final bool isLoading;
@@ -115,8 +122,8 @@ class BottomActionBar extends StatelessWidget {
                         );
 
                         try {
-                          final message = await foodScanPhotoService
-                              .saveFoodAnalysis(food!);
+                          // Simpan food log dan abaikan pesan spesifik dari service
+                          await foodScanPhotoService.saveFoodAnalysis(food!);
 
                           if (!context.mounted) return;
 
@@ -124,19 +131,35 @@ class BottomActionBar extends StatelessWidget {
                           Navigator.of(context).pop();
 
                           // Show success message using the helper method
-                          showSnackBarMessage(context, message,
-                              backgroundColor: primaryGreen);
+                          const successMessage = 'Added to food log';
+                          showSnackBarMessage(context, successMessage,
+                              backgroundColor: Colors.green);
 
-                          // For test visibility, also add the text to the widget tree
+                          // For test visibility
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(message),
-                              backgroundColor: primaryGreen,
-                              duration: const Duration(seconds: 2),
+                            const SnackBar(
+                              content: Text(successMessage),
+                              backgroundColor: Colors.green,
+                              duration: Duration(seconds: 2),
                             ),
                           );
 
-                          Navigator.pop(context);
+                          // Force update home screen widget
+                          try {
+                            final controller =
+                                GetIt.I<FoodTrackingClientController>();
+                            await controller.forceUpdate();
+                          } catch (e) {
+                            // Silently log error but continue - don't block navigation
+                            debugPrint(
+                                'Failed to update home screen widget: $e');
+                          }
+
+                          // Check if widget is still mounted before using context
+                          if (!context.mounted) return;
+
+                          // Navigate back to the previous screen
+                          Navigator.of(context).pop();
                         } catch (e) {
                           if (!context.mounted) return;
 
@@ -203,16 +226,16 @@ class BottomActionBar extends StatelessWidget {
               Navigator.of(context).pop();
 
               // Show a processing message
-              final processingMessage = 'Processing correction...';
+              const processingMessage = 'Processing correction...';
               if (context.mounted) {
                 showSnackBarMessage(context, processingMessage,
                     backgroundColor: Colors.blue);
 
                 // For test visibility
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
+                  const SnackBar(
                     content: Text(processingMessage),
-                    duration: const Duration(seconds: 1),
+                    duration: Duration(seconds: 1),
                   ),
                 );
               }

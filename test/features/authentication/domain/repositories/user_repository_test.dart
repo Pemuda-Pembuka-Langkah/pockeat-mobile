@@ -1,18 +1,22 @@
+// Dart imports:
 import 'dart:async';
 
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_auth_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_firestore_repository.dart';
+import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_stream_repository.dart';
+import 'user_repository_test.mocks.dart';
 
 // Import file mock yang akan digenerate
-import 'user_repository_test.mocks.dart';
 
 // Anotasi untuk menghasilkan mocks secara otomatis
 @GenerateMocks([
@@ -398,7 +402,7 @@ void main() {
   group('UserRepository Reactive Programming', () {
     test('userStream should delegate to streamRepo', () {
       // Act
-      final stream = userRepository.userStream('test-user-id');
+      userRepository.userStream('test-user-id');
 
       // Assert - verify delegation
       verify(mockStreamRepo.getUserStream('test-user-id')).called(1);
@@ -426,7 +430,7 @@ void main() {
 
     test('currentUserStream should delegate to streamRepo', () {
       // Act
-      final stream = userRepository.currentUserStream();
+      userRepository.currentUserStream();
 
       // Assert - verify delegation
       verify(mockStreamRepo.currentUserStream).called(1);
@@ -476,6 +480,7 @@ void main() {
       when(mockAuthRepo.updateUserProfile(
               displayName: anyNamed('displayName'),
               photoURL: anyNamed('photoURL')))
+          // ignore: avoid_returning_null_for_void
           .thenAnswer((_) async => null);
       when(mockFirestoreRepo.updateUser(any, any))
           .thenThrow(Exception('Firestore error'));
@@ -687,12 +692,6 @@ void main() {
 
     test('updateUserProfile should return true when profile is valid',
         () async {
-      // Arrange - untuk menutup baris 191
-      final updateData = <String, dynamic>{
-        'displayName': 'New Name',
-        'gender': 'Male'
-      };
-
       // Setup mocks
       when(mockAuthRepo.validateUserAccess('test-user-id')).thenReturn(null);
       when(mockAuthRepo.updateUserProfile(
@@ -700,6 +699,7 @@ void main() {
               photoURL: anyNamed('photoURL')))
           .thenAnswer((_) async => null);
       when(mockFirestoreRepo.updateUser('test-user-id', any))
+          // ignore: avoid_returning_null_for_void
           .thenAnswer((_) async => null);
       when(mockFirestoreRepo.getUserById('test-user-id'))
           .thenAnswer((_) async => UserModel(

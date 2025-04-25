@@ -1,31 +1,51 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:get_it/get_it.dart';
-
-@GenerateMocks([LoginService, UserCredential])
 import 'login_page_test.mocks.dart';
+
+@GenerateMocks([LoginService, UserCredential, AnalyticsService])
 
 void main() {
   late MockLoginService mockLoginService;
   late MockUserCredential mockUserCredential;
+  late MockAnalyticsService mockAnalyticsService;
 
   setUp(() {
     mockLoginService = MockLoginService();
     mockUserCredential = MockUserCredential();
+    mockAnalyticsService = MockAnalyticsService();
 
-    // Register mockLoginService in GetIt
+    // Register mocks in GetIt
     final getIt = GetIt.instance;
     if (getIt.isRegistered<LoginService>()) {
       getIt.unregister<LoginService>();
     }
     getIt.registerSingleton<LoginService>(mockLoginService);
+    
+    // Register analytics service mock
+    if (getIt.isRegistered<AnalyticsService>()) {
+      getIt.unregister<AnalyticsService>();
+    }
+    getIt.registerSingleton<AnalyticsService>(mockAnalyticsService);
+    
+    // Set up default responses for analytics service
+    when(mockAnalyticsService.logLogin(method: anyNamed('method')))
+        .thenAnswer((_) => Future.value());
+    when(mockAnalyticsService.logScreenView(screenName: anyNamed('screenName'), screenClass: anyNamed('screenClass')))
+        .thenAnswer((_) => Future.value());
   });
 
   tearDown(() {
@@ -33,6 +53,9 @@ void main() {
     final getIt = GetIt.instance;
     if (getIt.isRegistered<LoginService>()) {
       getIt.unregister<LoginService>();
+    }
+    if (getIt.isRegistered<AnalyticsService>()) {
+      getIt.unregister<AnalyticsService>();
     }
   });
 

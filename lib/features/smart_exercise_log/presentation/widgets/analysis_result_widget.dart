@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 class AnalysisResultWidget extends StatelessWidget {
@@ -254,7 +257,7 @@ class AnalysisResultWidget extends StatelessWidget {
 
   void _showCorrectionDialog(BuildContext context) {
     final TextEditingController commentController = TextEditingController();
-    final primaryPurple = const Color(0xFF9B6BFF);
+    const primaryPurple = Color(0xFF9B6BFF);
 
     showDialog(
       context: context,
@@ -265,11 +268,11 @@ class AnalysisResultWidget extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: Row(
+        title: const Row(
           children: [
             Icon(Icons.edit_note, color: primaryPurple),
-            const SizedBox(width: 12),
-            const Text(
+            SizedBox(width: 12),
+            Text(
               'Correct Analysis',
               style: TextStyle(
                 fontSize: 20,
@@ -308,7 +311,8 @@ class AnalysisResultWidget extends StatelessWidget {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: primaryPurple, width: 2),
+                    borderSide:
+                        const BorderSide(color: primaryPurple, width: 2),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),

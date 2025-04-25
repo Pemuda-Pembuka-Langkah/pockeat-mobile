@@ -1,12 +1,33 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
-class FoodInputPage extends StatelessWidget {
+// Package imports:
+import 'package:get_it/get_it.dart';
+
+// Project imports:
+import 'package:pockeat/core/services/analytics_service.dart';
+
+class FoodInputPage extends StatefulWidget {
+  const FoodInputPage({super.key});
+
+  @override
+  State<FoodInputPage> createState() => _FoodInputPageState();
+}
+
+class _FoodInputPageState extends State<FoodInputPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
+  late final AnalyticsService _analyticsService;
 
-  const FoodInputPage({super.key});
+  @override
+  void initState() {
+    super.initState();
+    _analyticsService = GetIt.instance<AnalyticsService>();
+    _analyticsService.logScreenView(
+        screenName: 'food_input_page', screenClass: 'FoodInputPage');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +54,12 @@ class FoodInputPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // add button to go to notification settings
 
-                const Text(
+                Text(
                   'How would you like to\nadd your food?',
                   style: TextStyle(
                     fontSize: 24,
@@ -101,8 +122,37 @@ class FoodInputPage extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap:
-              route != null ? () => Navigator.pushNamed(context, route) : onTap,
+          onTap: route != null
+              ? () {
+                  // Track navigation event based on route
+                  if (route == '/scan') {
+                    _analyticsService.logEvent(
+                      name: 'food_input_method_selected',
+                      parameters: {
+                        'method': 'scan',
+                        'timestamp': DateTime.now().toIso8601String(),
+                      },
+                    );
+                  } else if (route == '/food-text-input') {
+                    _analyticsService.logEvent(
+                      name: 'food_input_method_selected',
+                      parameters: {
+                        'method': 'text',
+                        'timestamp': DateTime.now().toIso8601String(),
+                      },
+                    );
+                  } else if (route == '/notification-settings') {
+                    _analyticsService.logEvent(
+                      name: 'view_notification_settings',
+                      parameters: {
+                        'source': 'food_input_page',
+                        'timestamp': DateTime.now().toIso8601String(),
+                      },
+                    );
+                  }
+                  Navigator.pushNamed(context, route);
+                }
+              : onTap,
           borderRadius: BorderRadius.circular(16),
           child: Ink(
             decoration: BoxDecoration(

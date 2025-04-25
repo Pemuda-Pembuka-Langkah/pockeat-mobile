@@ -1,13 +1,20 @@
+// ignore_for_file: avoid_returning_null_for_void
+
+// Flutter imports:
 import 'package:flutter/foundation.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service_impl.dart';
 import 'package:pockeat/features/authentication/services/utils/instabug_client.dart';
+import 'bug_report_service_impl_test.mocks.dart';
 
 // Import the generated mock file
-import 'bug_report_service_impl_test.mocks.dart';
 
 // Generate mocks for the InstabugClient
 @GenerateMocks([

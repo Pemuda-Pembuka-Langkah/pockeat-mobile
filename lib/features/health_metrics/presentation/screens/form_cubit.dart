@@ -1,14 +1,15 @@
 // File: form_cubit.dart
 
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+
+// Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
-import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
+import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 
 /// Represents the state of the health metrics onboarding form.
-///
 /// Holds all user-inputted health data needed for analysis and submission.
 class HealthMetricsFormState {
   final List<String> selectedGoals;
@@ -35,7 +36,6 @@ class HealthMetricsFormState {
     this.weeklyGoal,
   });
 
-  /// Returns a new instance of the state with updated values.
   HealthMetricsFormState copyWith({
     List<String>? selectedGoals,
     String? otherGoalReason,
@@ -64,23 +64,25 @@ class HealthMetricsFormState {
 }
 
 /// A Cubit that manages the state of the health metrics form.
-///
-/// This class handles user interactions, form updates, validation,
-/// and submission including calculating caloric requirements and saving data.
+/// This class handles user interactions, form updates, and final submission.
 class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
   final HealthMetricsRepository repository;
   final CaloricRequirementRepository caloricRequirementRepository;
   final CaloricRequirementService caloricRequirementService;
-  final String userId;
+
+  String? _userId;
 
   HealthMetricsFormCubit({
     required this.repository,
     required this.caloricRequirementRepository,
     required this.caloricRequirementService,
-    required this.userId,
   }) : super(HealthMetricsFormState());
 
-  /// Toggles a fitness goal in the state (adds/removes it from the list).
+  /// Set user ID when available (after registration or login).
+  void setUserId(String userId) {
+    _userId = userId;
+  }
+
   void toggleGoal(String goal) {
     final updatedGoals = List<String>.from(state.selectedGoals);
     if (updatedGoals.contains(goal)) {
@@ -91,41 +93,34 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
     emit(state.copyWith(selectedGoals: updatedGoals));
   }
 
-  /// Sets the optional reason if the user selects "Other" as a goal.
   void setOtherGoalReason(String reason) {
     emit(state.copyWith(otherGoalReason: reason));
   }
 
-  /// Sets the user's height and weight in the state.
   void setHeightWeight({required double height, required double weight}) {
     emit(state.copyWith(height: height, weight: weight));
   }
 
-  /// Sets the user's birth date.
   void setBirthDate(DateTime date) => emit(state.copyWith(birthDate: date));
-
-  /// Sets the user's gender.
   void setGender(String gender) => emit(state.copyWith(gender: gender));
 
   /// Sets the user's physical activity level.
-  void setActivityLevel(String level) => emit(state.copyWith(activityLevel: level));
+  void setActivityLevel(String level) =>
+      emit(state.copyWith(activityLevel: level));
 
   /// Sets the user's dietary preference/type.
   void setDietType(String type) => emit(state.copyWith(dietType: type));
-
-  /// Sets the user's target or desired weight.
   void setDesiredWeight(double weight) =>
       emit(state.copyWith(desiredWeight: weight));
-
-  /// Sets the user's weekly weight change goal.
   void setWeeklyGoal(double weeklyGoal) =>
       emit(state.copyWith(weeklyGoal: weeklyGoal));
 
-  /// Validates the form, calculates caloric requirements,
-  /// and saves both health metrics and caloric results to Firestore.
-  ///
-  /// Throws an exception if required fields are missing or invalid.
+  /// Submit final data to backend. Only call after user ID is set.
   Future<void> submit() async {
+    if (_userId == null) {
+      throw Exception("User ID not set. Cannot submit.");
+    }
+
     // Validate required fields
     if (state.height == null ||
         state.weight == null ||
@@ -145,19 +140,19 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
     final now = DateTime.now();
     int age = now.year - state.birthDate!.year;
     if (now.month < state.birthDate!.month ||
-        (now.month == state.birthDate!.month && now.day < state.birthDate!.day)) {
+        (now.month == state.birthDate!.month &&
+            now.day < state.birthDate!.day)) {
       age--;
     }
 
-    // Prepare goals, including custom reason if "Other" is selected
+    // Prepare goals, including custom reason
     final allGoals = List<String>.from(state.selectedGoals);
     if (allGoals.contains("Other") && state.otherGoalReason != null) {
       allGoals[allGoals.indexOf("Other")] = "Other: ${state.otherGoalReason}";
     }
 
-    // Create the HealthMetricsModel to save
     final model = HealthMetricsModel(
-      userId: userId,
+      userId: _userId!,
       height: state.height!,
       weight: state.weight!,
       age: age,
@@ -166,18 +161,17 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
       fitnessGoal: allGoals.join(", "),
     );
 
-    // Save to Firestore
     await repository.saveHealthMetrics(model);
 
     // Analyze and save caloric requirements
-    try{
+    try {
       final caloricResult = caloricRequirementService.analyze(
-        userId: userId,
+        userId: _userId!,
         model: model,
       );
 
       await caloricRequirementRepository.saveCaloricRequirement(
-        userId: userId,
+        userId: _userId!,
         result: caloricResult,
       );
     } catch (e) {

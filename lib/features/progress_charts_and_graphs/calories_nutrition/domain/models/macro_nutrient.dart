@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // coverage:ignore-start
@@ -6,7 +7,7 @@ class MacroNutrient {
   final int percentage;
   final String detail;
   final Color color;
-  
+
   MacroNutrient({
     required this.label,
     required this.percentage,

@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 
 class GoogleSignInButton extends StatelessWidget {
@@ -24,7 +29,7 @@ class GoogleSignInButton extends StatelessWidget {
         onPressed: () async {
           try {
             final service = googleAuthService ?? GetIt.I<GoogleSignInService>();
-            final userCredential = await service.signInWithGoogle();
+            await service.signInWithGoogle();
 
             // Navigate to home page on successful login
             if (context.mounted) {
