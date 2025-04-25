@@ -168,11 +168,38 @@ class DeepLinkServiceImpl implements DeepLinkService {
 
   // Method untuk mengecek apakah link ke streak celebration
   bool _isStreakCelebrationLink(Uri link) {
-    // Cek apakah link memiliki scheme pockeat
-    if (link.scheme != 'pockeat') return false;
+    debugPrint('Checking streak celebration link: ${link.toString()}');
 
-    // Cek apakah path-nya adalah streak-celebration
-    return link.path == 'streak-celebration';
+    // Cek apakah link memiliki scheme pockeat
+    if (link.scheme != 'pockeat') {
+      debugPrint(
+          'Not a streak celebration link: scheme is not "pockeat" but "${link.scheme}"');
+      return false;
+    }
+
+    // For debugging purposes, log all parts of the URI
+    debugPrint(
+        'URI details: scheme=${link.scheme}, host=${link.host}, path="${link.path}"');
+
+    // Cek path atau host untuk menentukan apakah ini streak celebration link
+    if (link.path == 'streak-celebration') {
+      debugPrint('Matched streak celebration: path="streak-celebration"');
+      return true;
+    }
+
+    if (link.path == '/streak-celebration') {
+      debugPrint('Matched streak celebration: path="/streak-celebration"');
+      return true;
+    }
+
+    if (link.host == 'streak-celebration') {
+      debugPrint('Matched streak celebration: host="streak-celebration"');
+      return true;
+    }
+
+    // If none of the above conditions matched
+    debugPrint('Not a streak celebration link: no path or host match');
+    return false;
   }
 
   // coverage:ignore-start

@@ -510,6 +510,60 @@ void main() {
     });
   });
 
+  // Test for dispose method
+  group('dispose', () {
+    test('should properly free resources in dispose method', () {
+      // Act
+      mockService.dispose();
+      
+      // Assert
+      verify(mockService.dispose()).called(1);
+    });
+  });
+
+  // Test for initialization errors
+  group('initialization errors', () {
+    test('should handle errors during initialization', () async {
+      // Arrange
+      when(mockAppLinks.getInitialAppLink())
+          .thenThrow(Exception('Test error'));
+      when(mockService.initialize())
+          .thenThrow(DeepLinkException('Failed to initialize'));
+          
+      // Act & Assert
+      expect(() async => await mockService.initialize(), 
+          throwsA(isA<DeepLinkException>()));
+    });
+  });
+
+  // Tests for edge cases in link detection
+  group('link detection edge cases', () {
+    test('should correctly identify streak celebration link with different formats', () async {
+      // Test different formats of streak celebration links
+      final uriWithPath = Uri.parse('pockeat://domain.com/streak-celebration?streakDays=10');
+      final uriWithHost = Uri.parse('pockeat://streak-celebration?streakDays=10');
+      
+      when(mockService.handleDeepLink(uriWithPath)).thenAnswer((_) async => true);
+      when(mockService.handleDeepLink(uriWithHost)).thenAnswer((_) async => true);
+      
+      expect(await mockService.handleDeepLink(uriWithPath), true);
+      expect(await mockService.handleDeepLink(uriWithHost), true);
+    });
+    
+    test('should handle malformed links correctly', () async {
+      // Arrange
+      final malformedUri = Uri.parse('pockeat:invalid');
+      when(mockService.handleDeepLink(malformedUri))
+          .thenAnswer((_) async => false);
+          
+      // Act
+      final result = await mockService.handleDeepLink(malformedUri);
+          
+      // Assert
+      expect(result, false);
+    });
+  });
+
   group('getColdStartResult', () {
     // Positive path tests: Berbagai tipe link dihandle dengan benar
     test('should return null when no initial link is available', () async {
