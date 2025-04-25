@@ -1,6 +1,7 @@
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,7 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Project imports:
 import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
-import 'package:pockeat/core/utils/background_logger.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
@@ -25,16 +25,11 @@ import 'package:pockeat/features/home_screen_widget/services/impl/simple_food_tr
 // coverage:ignore-start
 /// Service for setting up dependencies needed by background tasks
 class BackgroundDependencyService {
-  static const String _tag = "BACKGROUND_DEPS";
-
   /// Setup all required dependencies for background tasks
   static Future<Map<String, dynamic>> setupDependencies() async {
     final services = <String, dynamic>{};
 
     try {
-      await BackgroundLogger.log("Setting up background service dependencies",
-          tag: _tag);
-
       // Initialize environment and Firebase
       await _setupEnvironment(services);
 
@@ -44,13 +39,9 @@ class BackgroundDependencyService {
       // Setup widget dependencies
       await setupWidgetDependencies(services);
 
-      await BackgroundLogger.log(
-          "Background dependencies setup complete with ${services.length} services",
-          tag: _tag);
       return services;
     } catch (e) {
-      await BackgroundLogger.log("Error setting up background dependencies: $e",
-          tag: _tag);
+      debugPrint('Error setting up background dependencies: $e');
       return services;
     }
   }
@@ -62,11 +53,8 @@ class BackgroundDependencyService {
     try {
       await dotenv.load();
       flavor = dotenv.env['FLAVOR'] ?? 'staging';
-      await BackgroundLogger.log("Loaded flavor: $flavor", tag: _tag);
     } catch (dotenvError) {
-      await BackgroundLogger.log(
-          "Could not load .env: $dotenvError, using default flavor",
-          tag: _tag);
+      debugPrint('Could not load .env: $dotenvError, using default flavor');
     }
 
     // Initialize Firebase with flavor-specific options
@@ -78,12 +66,8 @@ class BackgroundDependencyService {
                 ? StagingFirebaseOptions.currentPlatform
                 : StagingFirebaseOptions.currentPlatform,
       );
-      await BackgroundLogger.log(
-          "Firebase initialized successfully with flavor: $flavor",
-          tag: _tag);
     } catch (e) {
-      await BackgroundLogger.log("Failed to initialize Firebase: $e",
-          tag: _tag);
+      debugPrint('Failed to initialize Firebase: $e');
       // Continue anyway, we'll try to work with what we have
     }
   }
@@ -92,8 +76,6 @@ class BackgroundDependencyService {
   static Future<void> setupNotificationDependencies(
       Map<String, dynamic> services) async {
     try {
-      await BackgroundLogger.log("Setting up notification dependencies",
-          tag: _tag);
 
       // Set up the bare minimum services needed for the notification task
       final prefs = await SharedPreferences.getInstance();
@@ -123,13 +105,8 @@ class BackgroundDependencyService {
       // Flutter local notifications plugin
       services['flutterLocalNotificationsPlugin'] =
           FlutterLocalNotificationsPlugin();
-
-      await BackgroundLogger.log("Notification dependencies setup complete",
-          tag: _tag);
     } catch (e) {
-      await BackgroundLogger.log(
-          "Failed to setup notification dependencies: $e",
-          tag: _tag);
+      debugPrint('Failed to setup notification dependencies: $e');
     }
   }
 
@@ -137,7 +114,6 @@ class BackgroundDependencyService {
   static Future<void> setupWidgetDependencies(
       Map<String, dynamic> services) async {
     try {
-      await BackgroundLogger.log("Setting up widget dependencies", tag: _tag);
 
       // Widget services for home screen widgets
       services['simpleWidgetService'] = SimpleFoodTrackingWidgetService(
@@ -162,15 +138,11 @@ class BackgroundDependencyService {
         services['healthMetricsRepository'] = HealthMetricsRepositoryImpl();
         services['healthMetricsCheckService'] = HealthMetricsCheckService();
       } catch (e) {
-        await BackgroundLogger.log("Failed to get some GetIt services: $e",
-            tag: _tag);
+        debugPrint('Failed to get some GetIt services: $e');
       }
 
-      await BackgroundLogger.log("Widget dependencies setup complete",
-          tag: _tag);
     } catch (e) {
-      await BackgroundLogger.log("Failed to setup widget dependencies: $e",
-          tag: _tag);
+      debugPrint('Failed to setup widget dependencies: $e');
     }
   }
 }
