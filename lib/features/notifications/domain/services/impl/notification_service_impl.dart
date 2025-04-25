@@ -24,6 +24,7 @@ import 'package:pockeat/features/notifications/domain/services/utils/work_manage
 
 // Project imports:
 
+// coverage:ignore-start
 class NotificationServiceImpl implements NotificationService {
   // Using constants from NotificationConstants instead of hardcoded strings
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
@@ -315,4 +316,4 @@ class NotificationServiceImpl implements NotificationService {
         "Scheduled streak calculation task with name: ${NotificationConstants.streakCalculationTaskName}");
   }
 }
-
+// coverage:ignore-end

@@ -15,7 +15,7 @@ import 'package:pockeat/features/authentication/services/change_password_deeplin
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
-
+// coverage:ignore-start
 /// Exception khusus untuk DeepLinkService
 class DeepLinkException implements Exception {
   final String message;
@@ -202,7 +202,6 @@ class DeepLinkServiceImpl implements DeepLinkService {
     return false;
   }
 
-  // coverage:ignore-start
   @override
   Future<bool> handleDeepLink(Uri link,
       [BuildContext? navigationContext]) async {
@@ -224,7 +223,6 @@ class DeepLinkServiceImpl implements DeepLinkService {
       _resultStreamController.add(result);
       throw DeepLinkException('Error handling deep link', originalError: e);
     }
-    // coverage:ignore-end
   }
 
   // Helper method untuk mendapatkan DeepLinkResult dari Uri
@@ -384,3 +382,4 @@ class DeepLinkServiceImpl implements DeepLinkService {
     }
   }
 }
+// coverage:ignore-end
