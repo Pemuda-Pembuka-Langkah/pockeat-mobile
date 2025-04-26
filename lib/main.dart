@@ -4,11 +4,13 @@ import 'dart:async';
 // Flutter imports:
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +24,7 @@ import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/core/screens/streak_celebration_page.dart';
 import 'package:pockeat/core/service/background_service_manager.dart';
 import 'package:pockeat/core/service/permission_service.dart';
+import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
@@ -37,6 +40,7 @@ import 'package:pockeat/features/authentication/presentation/screens/register_pa
 import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
@@ -207,6 +211,10 @@ void main() async {
   await dotenv.load(fileName: '.env');
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
 
+  // Inisialisasi required services
+  await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp();
+
   // Initialize Instabug
   await _initializeInstabug(flavor);
 
@@ -228,10 +236,10 @@ void main() async {
     // Daftarkan PermissionService ke GetIt
     final permissionService = PermissionService();
     getIt.registerSingleton(permissionService);
-    
+
     // Minta semua permission terlebih dahulu
     await permissionService.requestAllPermissions();
-    
+
     // Setelah permission diperoleh, inisialisasi service lainnya
     await BackgroundServiceManager.initialize();
     await getIt<FoodTrackingClientController>().initialize();
@@ -293,6 +301,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     // Inisialisasi DeepLinkService di _MyAppState
     _initializeDeepLinkService();
+
+    // Cek notifikasi di initState untuk menangani cold start dari notifikasi
+    _checkNotificationLaunch();
   }
 
   Future<void> _initializeDeepLinkService() async {
@@ -318,6 +329,64 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       debugPrint('Error initializing deep link service: $e');
     }
   }
+
+  /// Cek apakah aplikasi dibuka dari notifikasi dan navigasi ke halaman yang sesuai
+  Future<void> _checkNotificationLaunch() async {
+    try {
+      // Periksa apakah aplikasi dibuka dari notifikasi
+      final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+          await getIt<FlutterLocalNotificationsPlugin>()
+              .getNotificationAppLaunchDetails();
+
+      // Jika aplikasi dibuka dari notifikasi, handle sesuai payload
+      if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+        final payload =
+            notificationAppLaunchDetails!.notificationResponse?.payload;
+        debugPrint('App launched from notification with payload: $payload');
+
+        if (payload == NotificationConstants.dailyStreakPayload) {
+          // Untuk streak notification, navigate dengan deeplink
+          try {
+            final loginService = getIt<LoginService>();
+            final foodLogHistoryService = getIt<FoodLogHistoryService>();
+            final userId = (await loginService.getCurrentUser())?.uid;
+
+            // Default streak adalah 0 jika user belum login
+            int streakDays = 0;
+
+            if (userId != null) {
+              // Jika user sudah login, hitung streak aktual
+              streakDays =
+                  await foodLogHistoryService.getFoodStreakDays(userId);
+              debugPrint('Loaded streak days for notification: $streakDays');
+            }
+
+            // Navigasi langsung ke streak celebration page menggunakan navigatorKey
+            navigatorKey.currentState?.pushNamed(
+              '/streak-celebration',
+              arguments:  {'showStreakCelebration': true, 'streakDays': streakDays}
+            );
+          } catch (e) {
+            debugPrint('Error handling streak notification: $e');
+          }
+        } else if (payload == NotificationConstants.mealReminderPayload) {
+          // Untuk meal notification, navigate dengan deeplink
+          try {
+            navigatorKey.currentState?.pushNamed(
+              '/add-food',
+              arguments: {'type': 'log'},
+            );
+          } catch (e) {
+            debugPrint('Error handling meal notification: $e');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error checking notification launch: $e');
+    }
+  }
+
+
 
   @override
   void dispose() {
@@ -368,17 +437,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/splash': (context) => const SplashScreenPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
         '/': (context) => const AuthWrapper(
-          redirectUrlIfNotLoggedIn: '/welcome',
-          child: HomePage(),
-        ),
+              redirectUrlIfNotLoggedIn: '/welcome',
+              child: HomePage(),
+            ),
         '/welcome': (context) {
-            return const AuthWrapper(
-              requireAuth: false,
-              redirectUrlIfLoggedIn: '/',
-              child: WelcomePage(),
-            );
-          }
-          ,
+          return const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: WelcomePage(),
+          );
+        },
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
         '/streak-celebration': (context) {
