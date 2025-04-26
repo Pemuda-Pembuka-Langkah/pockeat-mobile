@@ -349,58 +349,42 @@ void main() {
       });
 
       test('should handle non-consecutive days correctly', () async {
-        // Arrange - setup mock
-        final mockFirestore = MockFirebaseFirestore();
-        final mockCollectionReference = MockCollectionReference<Map<String, dynamic>>();
-        final mockQuery = MockQuery<Map<String, dynamic>>();
-        final mockQuerySnapshot = MockQuerySnapshot<Map<String, dynamic>>();
-        final mockDocs = [
-          MockQueryDocumentSnapshot<Map<String, dynamic>>(),
-          MockQueryDocumentSnapshot<Map<String, dynamic>>(),
-          MockQueryDocumentSnapshot<Map<String, dynamic>>(),
-        ];
+        // Arrange - setup fake firestore instead of mocks
+        final fakeFirestore = FakeFirebaseFirestore();
         
         // Setup tanggal untuk test
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
         final yesterday = today.subtract(const Duration(days: 1));
-        final threeDaysAgo = today.subtract(const Duration(days: 3)); // Notice the gap
+        final threeDaysAgo = today.subtract(const Duration(days: 3)); // Notice the gap (day 2 missing)
         
-        // Setup mocks
-        when(mockFirestore.collection('food_analysis')).thenReturn(mockCollectionReference);
-        when(mockCollectionReference.where('userId', isEqualTo: testUserId)).thenReturn(mockQuery);
-        final startDate = DateTime.now().subtract(const Duration(days: 100));
-        when(mockQuery.where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))).thenReturn(mockQuery);
-        when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
-        when(mockQuerySnapshot.docs).thenReturn(mockDocs);
-        
-        // Setup document data
-        when(mockDocs[0].data()).thenReturn({
+        // Add test data to fake firestore
+        await fakeFirestore.collection('food_analysis').add({
           'userId': testUserId,
           'timestamp': Timestamp.fromDate(today),
           'food_name': 'Today Food',
         });
         
-        when(mockDocs[1].data()).thenReturn({
+        await fakeFirestore.collection('food_analysis').add({
           'userId': testUserId,
           'timestamp': Timestamp.fromDate(yesterday),
           'food_name': 'Yesterday Food',
         });
         
-        when(mockDocs[2].data()).thenReturn({
+        await fakeFirestore.collection('food_analysis').add({
           'userId': testUserId,
           'timestamp': Timestamp.fromDate(threeDaysAgo),
           'food_name': 'Three Days Ago Food',
         });
         
-        // Create service with mock
-        final mockService = FoodLogHistoryServiceImpl(
+        // Create service with fake firestore
+        final foodLogService = FoodLogHistoryServiceImpl(
           foodScanRepository: mockFoodScanRepository,
-          firestore: mockFirestore,
+          firestore: fakeFirestore,
         );
 
         // Act
-        final result = await mockService.getFoodStreakDays(testUserId);
+        final result = await foodLogService.getFoodStreakDays(testUserId);
 
         // Assert
         expect(result, 2); // Mendapatkan 2 hari berturut-turut (hari ini dan kemarin)
