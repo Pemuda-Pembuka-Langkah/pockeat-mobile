@@ -131,6 +131,9 @@ jobs:
       - name: Build Release APK
         run: flutter build apk --release
 
+      - name: Build Release AAB
+        run: flutter build appbundle --release
+
       # Analisis tambahan untuk memastikan kualitas
       - name: Run Flutter Analyze for CI Failure
         run: flutter analyze --no-fatal-warnings --no-fatal-infos
@@ -163,12 +166,14 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
           name: Release ${{ steps.get_version.outputs.VERSION }}
           body: ${{ steps.extract_changelog.outputs.CHANGELOG }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Upload to Firebase App Distribution
+      # Upload APK to Firebase App Distribution
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
