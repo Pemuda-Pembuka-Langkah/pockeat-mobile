@@ -1,4 +1,68 @@
 # Changelog
+## v1.3.0
+**Release Date: April 26, 2025**
+
+### Features
+- **Meal Reminder Notifications** - Implementasi sistem notifikasi untuk pengingat waktu makan (breakfast, lunch, dan dinner)
+  - Konfigurasi waktu reminder terpisah untuk breakfast, lunch, dan dinner
+  - Sistem validasi waktu reminder berdasarkan jenis meal
+  - Customizable message berdasarkan jenis makanan
+- **Pet Companion System** - Integrasi pet companion pada homepage dengan mood changes dan heart bar
+  - Implementasi sistem heart bar yang menunjukkan kondisi pet berdasarkan streak
+  - Animasi berbeda untuk setiap status streak (menggunakan Lottie animation)
+  - Pet service untuk mengelola interaksi dan status pet
+- **Daily Streak Enhancement** - Peningkatan sistem streak harian dengan notifikasi dan UI feedback
+  - Streak celebration page yang menampilkan animasi dan prestasi streak
+  - Factory pattern untuk berbagai streak messages berdasarkan jumlah hari
+  - Notifikasi pengingat harian untuk mempertahankan streak
+- **Google Analytics Integration** - Implementasi analitik untuk tracking user behavior
+  - Event tracking untuk login, registrasi, food input, dan progress page
+  - Performance monitoring untuk fitur-fitur utama
+  - Reporting untuk user engagement metrics
+- **Home Screen Widget** - Widget Android untuk tracking makanan dari home screen
+  - Simple Food Tracking Widget yang menampilkan status kalori harian
+  - Detailed Food Tracking Widget dengan informasi makronutrien
+  - Deep linking dari widget ke aplikasi utama
+- **Welcome Page** - Implementasi halaman welcome baru untuk meningkatkan user onboarding
+  - UI yang lebih intuitif untuk pengguna baru
+  - Flow navigasi yang lebih baik untuk login dan register
+- **Splash Screen & App Icon** - Custom splash screen dengan logo Pockeat dan animasi panda
+  - Optimasi loading time pada startup
+  - Konfigurasi app icon yang konsisten di semua perangkat
+
+### Improvements
+- **UI/UX Enhancements**
+  - Perbaikan bug pada tampilan kamera saat food scan
+  - Reorganisasi tampilan homepage dengan pet section di bagian atas
+  - Perubahan tata letak tab history pada Progress Page
+  - Implementasi subtab untuk food dan exercise di history page
+  - Peningkatan UI pada notification settings
+- **Performance Optimization**
+  - Peningkatan efisiensi dalam perhitungan food logging streak
+  - Optimasi rendering dengan addPostFrameCallback
+  - Pengurangan resource penggunaan dengan asset management yang lebih baik
+- **Code Quality**
+  - Implementasi Husky untuk pre-commit hooks (TDD support)
+  - Perbaikan berbagai lint issues untuk meningkatkan maintainability
+  - Perubahan struktur kode untuk mendukung clean architecture
+
+### Technical
+- **Background Processing**
+  - Migrasi background service ke WorkManager untuk pengelolaan task lebih efisien
+  - Unifikasi dispatcher antara notification handler dan app widget handler
+  - Implementasi periodic task scheduling untuk streak notification
+- **Notification System Refactoring**
+  - Centralisasi notification constants untuk maintainability yang lebih baik
+  - Implementasi notification background displayer service untuk berbagai jenis notifikasi
+  - Refactoring channel management untuk modularitas yang lebih baik
+- **Integration Improvements**
+  - Peningkatan integrasi deeplink untuk handling notification actions
+  - Implementasi method channel untuk komunikasi antara native dan Flutter
+  - Perbaikan Firebase AppCheck untuk keamanan API
+- **Testing & Stability**
+  - Peningkatan test coverage untuk semua fitur baru
+  - Fix issue yang menyebabkan codecov tidak berjalan dengan benar
+  - Perbaikan compatibility issues dengan dependency resolution
 ## v1.2.1
 **Release Date: April 11, 2025**
 
