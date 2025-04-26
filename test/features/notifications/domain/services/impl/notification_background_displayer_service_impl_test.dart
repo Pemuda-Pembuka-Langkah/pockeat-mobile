@@ -10,7 +10,6 @@ import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
-import 'package:pockeat/features/notifications/domain/model/meal_reminder_message.dart';
 import 'package:pockeat/features/notifications/domain/model/streak_message.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/notification_background_displayer_service_impl.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_background_displayer_service.dart';
