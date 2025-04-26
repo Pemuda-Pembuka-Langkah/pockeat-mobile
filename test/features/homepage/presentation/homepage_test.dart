@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:provider/provider.dart';
 
 // Project imports:
@@ -280,6 +281,104 @@ void main() async {
 
       // Modal akan tertutup setelah tap (jika kamu menutup modal di onTap)
       expect(find.text('Change Background'), findsNothing);
+    });
+
+    testWidgets('saveBackground should update SharedPreferences',
+        (WidgetTester tester) async {
+      // Siapkan mock untuk test
+      String? savedBackgroundValue;
+      when(mockSharedPreferences.setString(any, any)).thenAnswer((invocation) {
+        savedBackgroundValue = invocation.positionalArguments[1] as String;
+        return Future.value(true);
+      });
+
+      // Render widget PetCompanionWidget
+      await tester.pumpWidget(createTestWidget());
+
+      // Tunggu widget selesai dirender
+      await tester.pump();
+
+      // Ambil state widget
+      final state = tester.state(find.byType(PetCompanionWidget)) as dynamic;
+
+      // Panggil saveBackground dengan beach background
+      await state.saveBackground('assets/images/beach.jpg');
+
+      // Verifikasi bahwa prefs.setString dipanggil dengan parameter yang benar
+      verify(mockSharedPreferences.setString(
+              'backgroundImage', 'assets/images/beach.jpg'))
+          .called(1);
+
+      // Verifikasi nilai yang tersimpan
+      expect(savedBackgroundValue, 'assets/images/beach.jpg');
+
+      // versi gym
+      await state.saveBackground('assets/images/gym.jpg');
+      verify(mockSharedPreferences.setString(
+              'backgroundImage', 'assets/images/gym.jpg'))
+          .called(1);
+
+      expect(savedBackgroundValue, 'assets/images/gym.jpg');
+
+      // versi kitchen
+      await state.saveBackground('assets/images/kitchen.jpg');
+      verify(mockSharedPreferences.setString(
+              'backgroundImage', 'assets/images/kitchen.jpg'))
+          .called(1);
+
+      expect(savedBackgroundValue, 'assets/images/kitchen.jpg');
+    });
+
+    testWidgets('onTap all background options should work correctly',
+        (WidgetTester tester) async {
+      // Render PetCompanionWidget
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: PetCompanionWidget(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Test onTap untuk gambar gym
+      await tester.tap(find.byKey(const Key('open-modal-btn')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.byKey(const Key('bg-gym')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final stateGym = tester.state(find.byType(PetCompanionWidget)) as dynamic;
+      expect(stateGym.backgroundImage, 'assets/images/gym.jpg');
+      verify(mockSharedPreferences.setString(
+              'backgroundImage', 'assets/images/gym.jpg'))
+          .called(1);
+
+      // Test onTap untuk gambar kitchen
+      await tester.tap(find.byKey(const Key('bg-kitchen')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final stateKitchen =
+          tester.state(find.byType(PetCompanionWidget)) as dynamic;
+      expect(stateKitchen.backgroundImage, 'assets/images/kitchen.jpg');
+      verify(mockSharedPreferences.setString(
+              'backgroundImage', 'assets/images/kitchen.jpg'))
+          .called(1);
+
+      // test onTap untuk gambar beach
+      await tester.tap(find.byKey(const Key('bg-beach')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final stateBeach =
+          tester.state(find.byType(PetCompanionWidget)) as dynamic;
+      expect(stateBeach.backgroundImage, 'assets/images/beach.jpg');
+      verify(mockSharedPreferences.setString(
+              'backgroundImage', 'assets/images/beach.jpg'))
+          .called(1);
     });
   });
 }

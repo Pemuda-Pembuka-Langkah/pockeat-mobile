@@ -38,7 +38,7 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
   }
 
   Future<void> saveBackground(String? path) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = GetIt.instance<SharedPreferences>();
     if (path != null) {
       await prefs.setString('backgroundImage', path);
     } else {
