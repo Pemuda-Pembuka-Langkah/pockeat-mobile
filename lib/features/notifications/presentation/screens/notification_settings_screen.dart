@@ -329,15 +329,24 @@ class _NotificationSettingsScreenState
   Future<void> _selectMealReminderTime(BuildContext context, String mealType) async {
     // Get current time based on meal type
     TimeOfDay initialTime;
+    // Define time range constraints for each meal type
+    int? minHour, maxHour;
+    
     switch (mealType) {
       case NotificationConstants.breakfast:
         initialTime = _breakfastTime;
+        minHour = 5; // 5:00 AM
+        maxHour = 10; // 10:59 AM
         break;
       case NotificationConstants.lunch:
         initialTime = _lunchTime;
+        minHour = 11; // 11:00 AM
+        maxHour = 15; // 3:59 PM
         break;
       case NotificationConstants.dinner:
         initialTime = _dinnerTime;
+        minHour = 16; // 4:00 PM
+        maxHour = 23; // 11:59 PM
         break;
       default:
         initialTime = const TimeOfDay(hour: 12, minute: 0);
@@ -370,16 +379,53 @@ class _NotificationSettingsScreenState
       String mealName;
       switch (mealType) {
         case NotificationConstants.breakfast:
-          mealName = 'sarapan';
+          mealName = 'breakfast';
           break;
         case NotificationConstants.lunch:
-          mealName = 'makan siang';
+          mealName = 'lunch';
           break;
         case NotificationConstants.dinner:
-          mealName = 'makan malam';
+          mealName = 'dinner';
           break;
         default:
-          mealName = 'makan';
+          mealName = 'meal';
+      }
+      
+      // Validate time range
+      if (minHour != null && maxHour != null) {
+        if (picked.hour < minHour || picked.hour > maxHour) {
+          // Time is outside the valid range for this meal type
+          if (mounted) {
+            String timeRangeText;
+            switch (mealType) {
+              case NotificationConstants.breakfast:
+                timeRangeText = '5:00 AM - 10:59 AM';
+                break;
+              case NotificationConstants.lunch:
+                timeRangeText = '11:00 AM - 3:59 PM';
+                break;
+              case NotificationConstants.dinner:
+                timeRangeText = '4:00 PM - 11:59 PM';
+                break;
+              default:
+                timeRangeText = 'appropriate hours';
+            }
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('$mealName reminders should be set during $timeRangeText'),
+                backgroundColor: Colors.orange,
+                behavior: SnackBarBehavior.floating,
+                action: SnackBarAction(
+                  label: 'OK',
+                  textColor: Colors.white,
+                  onPressed: () {},
+                ),
+              ),
+            );
+            return;
+          }
+        }
       }
       
       // Get preference keys for the meal type
@@ -766,6 +812,7 @@ class _NotificationSettingsScreenState
                   ],
                 ),
               ),
+              // End of info card
             ],
           ),
         ),

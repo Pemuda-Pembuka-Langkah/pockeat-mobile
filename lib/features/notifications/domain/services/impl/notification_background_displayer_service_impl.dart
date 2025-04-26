@@ -9,6 +9,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
+
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
@@ -34,11 +37,16 @@ class NotificationBackgroundDisplayerServiceImpl
       final notifications = services['flutterLocalNotificationsPlugin']
           as FlutterLocalNotificationsPlugin;
 
+
+
       // Check if notifications are enabled (both master toggle and individual toggle)
       final isMasterEnabled =
           prefs.getBool(NotificationConstants.prefMealReminderMasterEnabled) ?? true;
       
+
+      
       if (!isMasterEnabled) {
+
         return false;
       }
       
@@ -46,12 +54,16 @@ class NotificationBackgroundDisplayerServiceImpl
       final prefKey = NotificationConstants.getMealTypeEnabledKey(mealType);
       final isMealTypeEnabled = prefs.getBool(prefKey) ?? true;
       
+
+      
       if (!isMealTypeEnabled) {
+
         return false;
       }
       
       // Create appropriate meal reminder message
       final reminderMessage = MealReminderMessageFactory.createMessage(mealType);
+
 
       // Initialize local notifications if needed
       const AndroidInitializationSettings initializationSettingsAndroid =
@@ -60,11 +72,13 @@ class NotificationBackgroundDisplayerServiceImpl
           InitializationSettings(android: initializationSettingsAndroid);
       await notifications.initialize(initializationSettings);
 
+
       // Create meal reminder notification channel if needed
       await notifications
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>()
           ?.createNotificationChannel(NotificationChannels.mealReminder);
+
       
       // Show the notification
       await notifications.show(
@@ -85,6 +99,7 @@ class NotificationBackgroundDisplayerServiceImpl
         payload: NotificationConstants.mealReminderPayload,
       );
       
+
       return true;
     } catch (e) {
       debugPrint('Error showing meal reminder notification: $e');
