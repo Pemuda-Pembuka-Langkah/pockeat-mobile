@@ -55,7 +55,7 @@ class NotificationBackgroundDisplayerServiceImpl
 
       // Calculate streak
       final streakDays = await foodLogHistoryService.getFoodStreakDays(userId);
-      if (streakDays <= 0) {
+      if (streakDays < 0) {
         return false;
       }
 

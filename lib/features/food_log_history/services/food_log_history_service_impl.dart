@@ -1,8 +1,8 @@
 // Flutter imports:
-import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
@@ -132,47 +132,73 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
       final DateTime startDate =
           today.subtract(const Duration(days: 100)); // Reasonable limit
 
-      // Single query to get logs within date range
+      debugPrint('Fetching streak data for userId: $userId');
+      debugPrint('Date range: ${startDate.toIso8601String()} to ${today.toIso8601String()}');
+      
+      // PERBAIKAN: Ubah field date menjadi timestamp, sesuai dengan yang digunakan di repository
+      // Sederhanakan query dengan mengurangi jumlah filter
       final QuerySnapshot querySnapshot = await _firestore
           .collection('food_analysis')
           .where('userId', isEqualTo: userId)
-          .where('date', isGreaterThanOrEqualTo: startDate)
-          .where('date', isLessThanOrEqualTo: today)
-          .orderBy('date', descending: true)
+          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
           .get();
+          
+      debugPrint('QuerySnapshot: ${querySnapshot.docs.length} documents');
 
       if (querySnapshot.docs.isEmpty) {
+        debugPrint('No documents found, streak days: 0');
         return 0;
       }
 
-      // Process logs in memory instead of multiple queries
+      // Map untuk tracking tanggal yang memiliki log
       final Map<String, bool> daysWithLogs = {};
+      
+      // Debug info
+      debugPrint('Processing documents...');
+      
+      // Iterasi melalui hasil query
       for (var doc in querySnapshot.docs) {
-        final DateTime date = (doc['date'] as Timestamp).toDate();
-        final String dateKey = '${date.year}-${date.month}-${date.day}';
+        final data = doc.data() as Map<String, dynamic>;
+        
+        // Pastikan field yang diakses ada dan dalam format yang benar
+        Timestamp? timestampData;
+        if (data['timestamp'] is Timestamp) {
+          timestampData = data['timestamp'] as Timestamp;
+        } else {
+          debugPrint('Invalid timestamp format in document: ${doc.id}');
+          continue;
+        }
+        
+        final date = timestampData.toDate();
+        final dateKey = '${date.year}-${date.month}-${date.day}';
         daysWithLogs[dateKey] = true;
+        debugPrint('Found log for date: $dateKey');
       }
-
-      // Calculate streak
+      
+      // Hitung streak
       int streakDays = 0;
       DateTime checkDate = today;
 
-      // If no logs today, start from yesterday
-      String checkDateKey =
-          '${checkDate.year}-${checkDate.month}-${checkDate.day}';
+      // Jika tidak ada log hari ini, mulai dari kemarin
+      String checkDateKey = '${checkDate.year}-${checkDate.month}-${checkDate.day}';
       if (!daysWithLogs.containsKey(checkDateKey)) {
         checkDate = checkDate.subtract(const Duration(days: 1));
+        debugPrint('No log for today, checking yesterday');
       }
 
-      // Count consecutive days
+      // Hitung hari berturut-turut
       bool streakContinues = true;
       while (streakContinues) {
         checkDateKey = '${checkDate.year}-${checkDate.month}-${checkDate.day}';
+        debugPrint('Checking streak for date: $checkDateKey');
+        
         if (daysWithLogs.containsKey(checkDateKey)) {
           streakDays++;
+          debugPrint('Streak day found: $streakDays');
           checkDate = checkDate.subtract(const Duration(days: 1));
         } else {
           streakContinues = false;
+          debugPrint('Streak ended, final count: $streakDays');
         }
       }
 
