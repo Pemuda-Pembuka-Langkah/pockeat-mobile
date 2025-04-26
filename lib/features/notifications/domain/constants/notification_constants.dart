@@ -75,6 +75,7 @@ class NotificationConstants {
   static const int defaultDinnerMinute = 0;
   
   // Background task identifiers for meal reminders
+  static const String mealReminderTaskName = 'meal_reminder_task'; // Generic task name
   static const String breakfastReminderTaskName = 'breakfast_reminder_task';
   static const String lunchReminderTaskName = 'lunch_reminder_task';
   static const String dinnerReminderTaskName = 'dinner_reminder_task';

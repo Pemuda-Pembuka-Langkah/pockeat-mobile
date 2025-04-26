@@ -33,6 +33,17 @@ void callbackDispatcher() {
               NotificationBackgroundDisplayerServiceImpl();
           await notificationDisplayer.showStreakNotification(services);
           break;
+          
+        // Add handlers for meal reminder tasks
+        case NotificationConstants.mealReminderTaskName: // Use constant instead of hardcoded string
+          final NotificationBackgroundDisplayerService notificationDisplayer =
+              NotificationBackgroundDisplayerServiceImpl();
+          // Get the meal type from inputData
+          final mealType = inputData?['meal_type'] as String?;
+          if (mealType != null) {
+            await notificationDisplayer.showMealReminderNotification(services, mealType);
+          }
+          break;
 
         case BackgroundServiceConfig.PERIODIC_UPDATE_TASK_ID:
           // Delegate to the widget service's callback handler

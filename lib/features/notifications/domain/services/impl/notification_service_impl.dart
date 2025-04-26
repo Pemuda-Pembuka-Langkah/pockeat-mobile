@@ -528,7 +528,7 @@ class NotificationServiceImpl implements NotificationService {
     // Register the daily task with WorkManager
     await _workManagerClient.registerPeriodicTask(
       taskName, // Unique name
-      'mealReminderTask', // Task name
+      NotificationConstants.mealReminderTaskName, // Task name
       frequency: const Duration(days: 1),
       initialDelay: initialDelay,
       inputData: {
