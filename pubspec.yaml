@@ -49,6 +49,7 @@ dependencies:
   provider: ^6.1.1
   google_generative_ai: ^0.4.6
   mocktail: ^1.0.4
+  lottie: ^2.7.0
   image_picker: ^1.1.2
   intl: ^0.20.2
   font_awesome_flutter: ^10.8.0
@@ -73,11 +74,11 @@ dependencies:
   workmanager: ^0.5.2
   firebase_performance: ^0.9.4+7
   firebase_analytics: ^10.10.7
-  lottie: ^3.3.1
   flutter_launcher_icons: ^0.14.3 
 
   path: any
   logger: any
+  confetti: ^0.8.0
 dependency_overrides:
   analyzer: 7.3.0
 

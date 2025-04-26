@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:camera/camera.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -21,6 +19,9 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
+import 'package:pockeat/core/screens/streak_celebration_page.dart';
+import 'package:pockeat/core/service/background_service_manager.dart';
+import 'package:pockeat/core/service/permission_service.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
@@ -67,23 +68,17 @@ import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_cl
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
-import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
-import 'package:pockeat/features/authentication/services/deep_link_service.dart';
-import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
-import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
-import 'package:pockeat/features/authentication/presentation/screens/change_password_error_page.dart';
-import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
+
 import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
+
+// Core imports:
 
 // Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -185,6 +180,22 @@ void _handleDeepLink(DeepLinkResult result) {
       }
       break;
 
+    case DeepLinkType.streakCelebration:
+      // Deep link untuk streak celebration notification
+      if (result.success) {
+        final streakDays = result.data?['streakDays'] ?? 0;
+        // Navigate to streak page or show streak celebration
+        debugPrint(
+            'Streak celebration link handled with streak days: $streakDays');
+
+        // Navigate to home screen to show the streak dialog
+        navigatorKey.currentState?.pushReplacementNamed(
+          '/streak-celebration',
+          arguments: {'showStreakCelebration': true, 'streakDays': streakDays},
+        );
+      }
+      break;
+
     default:
       debugPrint('Unknown deep link type: ${result.type}');
       break;
@@ -212,16 +223,19 @@ void main() async {
   // Initialize Google Analytics
   await getIt<AnalyticsService>().initialize();
 
-  // Initialize notifications
+  // Initialize permissions and notifications
   if (!kIsWeb) {
+    // Daftarkan PermissionService ke GetIt
+    final permissionService = PermissionService();
+    getIt.registerSingleton(permissionService);
+    
+    // Minta semua permission terlebih dahulu
+    await permissionService.requestAllPermissions();
+    
+    // Setelah permission diperoleh, inisialisasi service lainnya
+    await BackgroundServiceManager.initialize();
     await getIt<FoodTrackingClientController>().initialize();
     await getIt<NotificationService>().initialize();
-  }
-
-  // Setup emulator kalau di dev mode
-  if (flavor == 'dev') {
-    await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
-    FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
 
   runApp(
@@ -354,8 +368,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/splash': (context) => const SplashScreenPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
         '/': (context) => const AuthWrapper(
-          child: HomePage(),
           redirectUrlIfNotLoggedIn: '/welcome',
+          child: HomePage(),
         ),
         '/welcome': (context) {
             return const AuthWrapper(
@@ -367,6 +381,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ,
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
+        '/streak-celebration': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return StreakCelebrationPage(
+            streak: args?['streakDays'] as int? ?? 0,
+          );
+        },
         '/profile': (context) => const AuthWrapper(child: ProfilePage()),
         '/change-password': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
