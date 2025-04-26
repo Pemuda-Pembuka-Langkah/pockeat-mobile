@@ -11,7 +11,9 @@ class NotificationConstants {
   static const String subscriptionChannelId = 'subscription_channel';
   static const String serverChannelId = 'server_channel';
   static const String dailyStreakChannelId = 'daily_streak_channel';
-
+  static const String breakfast = 'breakfast';
+  static const String lunch = 'lunch';
+  static const String dinner = 'dinner';
   // Notification IDs
   static const String dailyStreakNotificationId = 'daily_streak';
   static const String mealReminderNotificationId = 'meal_reminder';
