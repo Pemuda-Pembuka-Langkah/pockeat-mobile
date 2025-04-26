@@ -16,6 +16,8 @@ import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.da
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
 import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'homepage_test.mocks.dart';
 
 @GenerateNiceMocks([
@@ -23,22 +25,26 @@ import 'homepage_test.mocks.dart';
   MockSpec<CalorieStatsService>(),
   MockSpec<FirebaseAuth>(),
   MockSpec<User>(),
+  MockSpec<PetService>(),
+  MockSpec<FoodLogHistoryService>(),
 ])
-
 void main() async {
   late MockNavigatorObserver mockNavigatorObserver;
   late MockCalorieStatsService mockCalorieStatsService;
   late MockFirebaseAuth mockFirebaseAuth;
   late MockUser mockUser;
+  late MockPetService mockPetService;
+  late MockFoodLogHistoryService mockFoodLogHistoryService;
 
   setUp(() {
     mockNavigatorObserver = MockNavigatorObserver();
     mockCalorieStatsService = MockCalorieStatsService();
     mockFirebaseAuth = MockFirebaseAuth();
     mockUser = MockUser();
-
+    mockPetService = MockPetService();
+    mockFoodLogHistoryService = MockFoodLogHistoryService();
     final getIt = GetIt.instance;
-    
+
     if (getIt.isRegistered<FirebaseAuth>()) {
       getIt.unregister<FirebaseAuth>();
     }
@@ -51,18 +57,33 @@ void main() async {
       getIt.unregister<CalorieStatsService>();
     }
 
+    if (getIt.isRegistered<PetService>()) {
+      getIt.unregister<PetService>();
+    }
+
+    if (getIt.isRegistered<FoodLogHistoryService>()) {
+      getIt.unregister<FoodLogHistoryService>();
+    }
+
     getIt.registerSingleton<FirebaseAuth>(mockFirebaseAuth);
     getIt.registerSingleton<User>(mockUser);
     getIt.registerSingleton<CalorieStatsService>(mockCalorieStatsService);
+    getIt.registerSingleton<PetService>(mockPetService);
+    getIt.registerSingleton<FoodLogHistoryService>(mockFoodLogHistoryService);
 
     when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
     when(mockUser.uid).thenReturn('test-uid');
-    when(mockCalorieStatsService.calculateStatsForDate(any, any)).thenAnswer((_) async => DailyCalorieStats(
-      caloriesConsumed: 100,
-      caloriesBurned: 100,
-      userId: 'test-uid',
-      date: DateTime.now(),
-    ));
+    when(mockCalorieStatsService.calculateStatsForDate(any, any))
+        .thenAnswer((_) async => DailyCalorieStats(
+              caloriesConsumed: 100,
+              caloriesBurned: 100,
+              userId: 'test-uid',
+              date: DateTime.now(),
+            ));
+    when(mockFoodLogHistoryService.getFoodStreakDays(any))
+        .thenAnswer((_) async => 1);
+    when(mockPetService.getPetMood(any)).thenAnswer((_) async => 'happy');
+    when(mockPetService.getPetHeart(any)).thenAnswer((_) async => 4);
   });
 
   // Widget helper untuk membungkus test dengan Provider
@@ -81,12 +102,13 @@ void main() async {
   }
 
   group('HomePage Widget Tests', () {
-    testWidgets('HomePage should render correctly', (WidgetTester tester) async {
+    testWidgets('HomePage should render correctly',
+        (WidgetTester tester) async {
       // Arrange
       await tester.pumpWidget(createTestWidget());
 
-      // Tunggu widget selesai dirender
-      await tester.pumpAndSettle();
+      // Tunggu semua Future selesai
+      await tester.pump();
 
       // Assert
       expect(find.text('Pockeat'), findsOneWidget);
@@ -97,12 +119,13 @@ void main() async {
       expect(find.byType(CustomBottomNavBar), findsOneWidget);
     });
 
-    testWidgets('HomePage should have SliverAppBar with correct properties', (WidgetTester tester) async {
+    testWidgets('HomePage should have SliverAppBar with correct properties',
+        (WidgetTester tester) async {
       // Arrange
       await tester.pumpWidget(createTestWidget());
 
       // Tunggu widget selesai dirender
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Assert
       final SliverAppBar appBar = tester.widget(find.byType(SliverAppBar));
@@ -113,25 +136,29 @@ void main() async {
       expect(appBar.toolbarHeight, 60);
     });
 
-    testWidgets('HomePage should display PetHomepageSection and OverviewSection in ListView', 
+    testWidgets(
+        'HomePage should display PetHomepageSection and OverviewSection in ListView',
         (WidgetTester tester) async {
       // Arrange
       await tester.pumpWidget(createTestWidget());
 
       // Tunggu widget selesai dirender
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Assert
       final ListView listView = tester.widget(find.byType(ListView));
-      expect(listView.padding, const EdgeInsets.symmetric(horizontal: 0, vertical: 20));
-      
+      expect(listView.padding,
+          const EdgeInsets.symmetric(horizontal: 0, vertical: 20));
+
       // Check if both sections are children of ListView
-      final List<Widget> listViewChildren = tester.widgetList<Widget>(find.descendant(
-        of: find.byType(ListView),
-        matching: find.byWidgetPredicate((widget) => 
-          widget is PetHomepageSection || widget is OverviewSection),
-      )).toList();
-      
+      final List<Widget> listViewChildren = tester
+          .widgetList<Widget>(find.descendant(
+            of: find.byType(ListView),
+            matching: find.byWidgetPredicate((widget) =>
+                widget is PetHomepageSection || widget is OverviewSection),
+          ))
+          .toList();
+
       expect(listViewChildren.length, 2);
       expect(listViewChildren[0] is PetHomepageSection, true);
       expect(listViewChildren[1] is OverviewSection, true);

@@ -4,16 +4,10 @@
 import 'package:flutter/material.dart';
 
 class HeartBarWidget extends StatelessWidget {
-  final double progress;
-  final int currentCalories;
-  final int goalCalories;
+  final int heart;
+  static const int maxHeart = 4;
 
-  const HeartBarWidget({
-    super.key,
-    required this.progress,
-    required this.currentCalories,
-    required this.goalCalories,
-  });
+  const HeartBarWidget({super.key, required this.heart});
 
   @override
   Widget build(BuildContext context) {
@@ -34,15 +28,9 @@ class HeartBarWidget extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildHeart(progress >= 0.25),
-              const SizedBox(width: 8),
-              _buildHeart(progress >= 0.5),
-              const SizedBox(width: 8),
-              _buildHeart(progress >= 0.75),
-              const SizedBox(width: 8),
-              _buildHeart(progress >= 1.0),
-            ],
+            children: List.generate(maxHeart, (index) {
+              return _buildHeart(index < heart);
+            }),
           ),
         ],
       ),
