@@ -1,5 +1,8 @@
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+// Package imports:
 import 'package:uuid/uuid.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 /// Model untuk item history log makanan
 ///

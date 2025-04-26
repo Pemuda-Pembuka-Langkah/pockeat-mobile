@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/models/exercise_type.dart';
 
 // coverage:ignore-start
@@ -14,7 +17,7 @@ class ExerciseTypeRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color color = Color(exerciseType.colorValue);
-    
+
     return Column(
       children: [
         Row(

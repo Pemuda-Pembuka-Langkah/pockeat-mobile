@@ -10,6 +10,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import com.pockeat.R
 import com.pockeat.MainActivity
@@ -99,9 +100,20 @@ class DetailedFoodTrackingWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.detailed_food_tracking_widget)
             
             if (isLoggedIn) {
-                // User is logged in, show normal nutrition tracking view
-                // Set calorie text
-                views.setTextViewText(R.id.calories_text, "$caloriesConsumed/$caloriesTarget")
+                // User is logged in, show logged in layout and hide login prompt
+                views.setViewVisibility(R.id.logged_in_layout, View.VISIBLE)
+                views.setViewVisibility(R.id.not_logged_in_layout, View.GONE)
+                
+                // Calculate percentage for calorie text
+                val percentageConsumed = if (caloriesTarget > 0) {
+                    (caloriesConsumed.toFloat() / caloriesTarget.toFloat() * 100).coerceAtMost(100f).toInt()
+                } else 0
+                // Set calorie text as percentage
+                views.setTextViewText(R.id.calories_text, "${percentageConsumed}%")
+                
+                // Calculate remaining calories
+                val remainingCalories = (caloriesTarget - caloriesConsumed).coerceAtLeast(0)
+                views.setTextViewText(R.id.remaining_calories_number, remainingCalories.toString())
                 
                 // Set macronutrient texts
                 views.setTextViewText(R.id.protein_text, "${protein.toInt()}g")
@@ -109,27 +121,18 @@ class DetailedFoodTrackingWidgetProvider : AppWidgetProvider() {
                 views.setTextViewText(R.id.fat_text, "${fat.toInt()}g")
                 
                 // Set button text
-                views.setTextViewText(R.id.log_food_button, "Log your food")
-                
-                // Hitung persentase kalori yang sudah dikonsumsi (0-100)
-                val percentageConsumed = if (caloriesTarget > 0) {
-                    // Min antara 100% dan persentase aktual (agar tidak melebihi 100%)
-                    (caloriesConsumed.toFloat() / caloriesTarget.toFloat() * 100).coerceAtMost(100f).toInt()
-                } else 0
+                views.setTextViewText(R.id.log_food_button, "Log Food")
                 
                 // Set progress pada progress bar dengan setProgress
                 views.setInt(R.id.calories_progress, "setProgress", percentageConsumed)
                 Log.d(TAG, "Progress set to $percentageConsumed%")
             } else {
-                // User is NOT logged in, show login prompt
-                views.setTextViewText(R.id.calories_text, "Not logged in")
-                views.setTextViewText(R.id.protein_text, "0g")
-                views.setTextViewText(R.id.carbs_text, "0g")
-                views.setTextViewText(R.id.fat_text, "0g")
-                views.setTextViewText(R.id.log_food_button, "Login")
+                // User is NOT logged in, show login prompt and hide logged in layout
+                views.setViewVisibility(R.id.logged_in_layout, View.GONE)
+                views.setViewVisibility(R.id.not_logged_in_layout, View.VISIBLE)
                 
-                // Reset progress bar to 0
-                views.setInt(R.id.calories_progress, "setProgress", 0)
+                // Set login button text
+                views.setTextViewText(R.id.login_button, "Login")
             }
             
             // Set up "Log your food" button click
@@ -196,7 +199,8 @@ class DetailedFoodTrackingWidgetProvider : AppWidgetProvider() {
             // Fallback to super basic views in case of error
             try {
                 val views = RemoteViews(context.packageName, R.layout.detailed_food_tracking_widget)
-                views.setTextViewText(R.id.calories_text, "0/2000")
+                views.setTextViewText(R.id.calories_text, "0%")
+                views.setTextViewText(R.id.remaining_calories_number, "0")
                 views.setTextViewText(R.id.protein_text, "0g")
                 views.setTextViewText(R.id.carbs_text, "0g")
                 views.setTextViewText(R.id.fat_text, "0g")

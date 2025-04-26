@@ -2,22 +2,22 @@
 enum FoodTrackingKey {
   /// Total kalori yang dibutuhkan per hari
   caloriesNeeded,
-  
+
   /// Total kalori yang sudah dikonsumsi
   currentCaloriesConsumed,
-  
+
   /// Total protein yang sudah dikonsumsi (gram)
   currentProtein,
-  
+
   /// Total karbohidrat yang sudah dikonsumsi (gram)
   currentCarb,
-  
+
   /// Total lemak yang sudah dikonsumsi (gram)
   currentFat,
-  
+
   /// ID pengguna yang digunakan untuk identifikasi
   userId;
-  
+
   /// Mengembalikan string value dari enum
   String get value => toString().split('.').last;
 }

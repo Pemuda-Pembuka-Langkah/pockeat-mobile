@@ -1,6 +1,9 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/services/utils/permission_helper.dart';
 
 // Since Permission is a static class, we need to use a different approach for mocking

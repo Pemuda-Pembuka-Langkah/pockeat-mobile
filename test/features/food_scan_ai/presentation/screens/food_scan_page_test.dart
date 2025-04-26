@@ -1,16 +1,23 @@
+// Dart imports:
+import 'dart:io';
+
+// Flutter imports:
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:camera/camera.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/nutrition_page.dart';
-import 'package:camera/camera.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_photo_help_widget.dart';
-import 'dart:io';
 
 class MockCameraController extends Mock implements CameraController {
   final _cameraValue = CameraValue(

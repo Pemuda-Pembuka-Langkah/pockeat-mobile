@@ -1,7 +1,12 @@
+// Dart imports:
 import 'dart:convert';
+
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FoodAnalysisParser {
   static FoodAnalysisResult parse(String jsonText) {

@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/calorie_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/nutrition_stat.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/nutrition_stat_widget.dart';
@@ -65,7 +70,8 @@ class ProgressOverviewWidget extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: primaryGreen.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -91,9 +97,9 @@ class ProgressOverviewWidget extends StatelessWidget {
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: nutritionStats.map((stat) => 
-              NutritionStatWidget(stat: stat)
-            ).toList(),
+            children: nutritionStats
+                .map((stat) => NutritionStatWidget(stat: stat))
+                .toList(),
           ),
           const SizedBox(height: 20),
           SizedBox(
@@ -103,10 +109,10 @@ class ProgressOverviewWidget extends StatelessWidget {
                 : SfCartesianChart(
                     margin: EdgeInsets.zero,
                     // Remove legend completely
-                    legend: Legend(isVisible: false),
-                    primaryXAxis: CategoryAxis(
-                      majorGridLines: const MajorGridLines(width: 0),
-                      labelStyle: const TextStyle(
+                    legend: const Legend(isVisible: false),
+                    primaryXAxis: const CategoryAxis(
+                      majorGridLines: MajorGridLines(width: 0),
+                      labelStyle: TextStyle(
                         color: Colors.black54,
                         fontSize: 12,
                       ),
@@ -126,10 +132,9 @@ class ProgressOverviewWidget extends StatelessWidget {
                       ),
                     ),
                     tooltipBehavior: TooltipBehavior(
-                      enable: true,
-                      header: '',
-                      format: 'point.x: point.y kcal'
-                    ),
+                        enable: true,
+                        header: '',
+                        format: 'point.x: point.y kcal'),
                     series: <CartesianSeries>[
                       ColumnSeries<CalorieData, String>(
                         color: primaryPink,
@@ -137,7 +142,8 @@ class ProgressOverviewWidget extends StatelessWidget {
                         dataSource: calorieData,
                         xValueMapper: (CalorieData data, _) => data.label,
                         yValueMapper: (CalorieData data, _) => data.calories,
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(4)),
                         // Add data labels for better readability
                         dataLabelSettings: const DataLabelSettings(
                           isVisible: true,
@@ -159,18 +165,18 @@ class ProgressOverviewWidget extends StatelessWidget {
   // Helper method to calculate maximum Y value for the chart
   double _getChartMaximum() {
     if (calorieData.isEmpty) return 3000;
-    
+
     double maxY = 0;
     for (var data in calorieData) {
       if (data.calories > maxY) {
         maxY = data.calories;
       }
     }
-    
+
     // Add 20% padding and round to nearest 500
     return (((maxY * 1.2) / 500).ceil() * 500).toDouble();
   }
-  
+
   // Helper method to calculate Y-axis interval
   double _getYAxisInterval() {
     final max = _getChartMaximum();

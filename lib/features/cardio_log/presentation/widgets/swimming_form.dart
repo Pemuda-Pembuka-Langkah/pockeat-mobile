@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'personal_data_reminder.dart';
 import 'time_selection_widget.dart';
 
@@ -68,7 +71,7 @@ class SwimmingFormState extends State<SwimmingForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PersonalDataReminder(),
+          const PersonalDataReminder(),
           const SizedBox(height: 16),
           TimeSelectionWidget(
             primaryColor: widget.primaryPink,

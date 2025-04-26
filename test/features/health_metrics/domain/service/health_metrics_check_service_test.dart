@@ -1,8 +1,12 @@
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
+import 'health_metrics_check_service_test.mocks.dart';
 
 @GenerateMocks([
   FirebaseFirestore,
@@ -10,7 +14,6 @@ import 'package:pockeat/features/health_metrics/domain/service/health_metrics_ch
   DocumentReference,
   DocumentSnapshot,
 ])
-import 'health_metrics_check_service_test.mocks.dart';
 
 void main() {
   late MockFirebaseFirestore mockFirestore;

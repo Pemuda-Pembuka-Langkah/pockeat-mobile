@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class FoodTitleSection extends StatelessWidget {
@@ -48,4 +49,4 @@ class FoodTitleSection extends StatelessWidget {
       ),
     );
   }
-} 
+}

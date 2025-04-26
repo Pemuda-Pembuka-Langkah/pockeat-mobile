@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 
 /// Manages authentication tokens in a centralized way

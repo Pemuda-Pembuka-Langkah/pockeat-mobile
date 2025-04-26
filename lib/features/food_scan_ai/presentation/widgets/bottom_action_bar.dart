@@ -1,8 +1,13 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/correction_dialog.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 
@@ -126,28 +131,30 @@ class BottomActionBar extends StatelessWidget {
                           Navigator.of(context).pop();
 
                           // Show success message using the helper method
-                          final successMessage = 'Added to food log';
+                          const successMessage = 'Added to food log';
                           showSnackBarMessage(context, successMessage,
                               backgroundColor: Colors.green);
 
                           // For test visibility
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
+                            const SnackBar(
                               content: Text(successMessage),
                               backgroundColor: Colors.green,
-                              duration: const Duration(seconds: 2),
+                              duration: Duration(seconds: 2),
                             ),
                           );
 
                           // Force update home screen widget
                           try {
-                            final controller = GetIt.I<FoodTrackingClientController>();
+                            final controller =
+                                GetIt.I<FoodTrackingClientController>();
                             await controller.forceUpdate();
                           } catch (e) {
                             // Silently log error but continue - don't block navigation
-                            debugPrint('Failed to update home screen widget: $e');
+                            debugPrint(
+                                'Failed to update home screen widget: $e');
                           }
-                          
+
                           // Check if widget is still mounted before using context
                           if (!context.mounted) return;
 
@@ -219,16 +226,16 @@ class BottomActionBar extends StatelessWidget {
               Navigator.of(context).pop();
 
               // Show a processing message
-              final processingMessage = 'Processing correction...';
+              const processingMessage = 'Processing correction...';
               if (context.mounted) {
                 showSnackBarMessage(context, processingMessage,
                     backgroundColor: Colors.blue);
 
                 // For test visibility
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
+                  const SnackBar(
                     content: Text(processingMessage),
-                    duration: const Duration(seconds: 1),
+                    duration: Duration(seconds: 1),
                   ),
                 );
               }

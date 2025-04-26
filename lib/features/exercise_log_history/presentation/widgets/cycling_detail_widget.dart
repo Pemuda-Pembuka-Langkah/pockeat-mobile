@@ -1,17 +1,22 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:intl/intl.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
 
 /// Widget to display cycling activity details
 class CyclingDetailWidget extends StatelessWidget {
   final CyclingActivity activity;
   final Color primaryColor = const Color(0xFFFF6B6B); // Cardio color
-  
+
   const CyclingDetailWidget({
     super.key,
     required this.activity,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -30,7 +35,7 @@ class CyclingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildHeaderCard(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -114,12 +119,12 @@ class CyclingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMetricsCard(BuildContext context) {
-    final speed = activity.distanceKm > 0 
-        ? (activity.distanceKm / (activity.duration.inSeconds / 3600)) 
+    final speed = activity.distanceKm > 0
+        ? (activity.distanceKm / (activity.duration.inSeconds / 3600))
         : 0;
-    
+
     return Card(
       elevation: 3,
       shadowColor: Colors.black26,
@@ -158,7 +163,7 @@ class CyclingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildVerticalDivider() {
     return Container(
       width: 1,
@@ -166,7 +171,7 @@ class CyclingDetailWidget extends StatelessWidget {
       color: Colors.grey.withOpacity(0.2),
     );
   }
-  
+
   Widget _buildMetricItem({
     required IconData icon,
     required String value,
@@ -215,12 +220,12 @@ class CyclingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildDetailsList(BuildContext context) {
-    final speed = activity.distanceKm > 0 
-        ? (activity.distanceKm / (activity.duration.inSeconds / 3600)) 
+    final speed = activity.distanceKm > 0
+        ? (activity.distanceKm / (activity.duration.inSeconds / 3600))
         : 0;
-    
+
     return Card(
       elevation: 3,
       shadowColor: Colors.black26,
@@ -249,27 +254,34 @@ class CyclingDetailWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildDetailRow('Date', DateFormat('dd MMM yyyy').format(activity.date)),
+            _buildDetailRow(
+                'Date', DateFormat('dd MMM yyyy').format(activity.date)),
             _buildDetailDivider(),
-            _buildDetailRow('Start Time', DateFormat('HH:mm').format(activity.startTime)),
+            _buildDetailRow(
+                'Start Time', DateFormat('HH:mm').format(activity.startTime)),
             _buildDetailDivider(),
-            _buildDetailRow('End Time', DateFormat('HH:mm').format(activity.endTime)),
+            _buildDetailRow(
+                'End Time', DateFormat('HH:mm').format(activity.endTime)),
             _buildDetailDivider(),
-            _buildDetailRow('Distance', '${activity.distanceKm.toStringAsFixed(1)} km'),
+            _buildDetailRow(
+                'Distance', '${activity.distanceKm.toStringAsFixed(1)} km'),
             _buildDetailDivider(),
             _buildDetailRow('Duration', _formatDuration(activity.duration)),
             _buildDetailDivider(),
-            _buildDetailRow('Average Speed', '${speed.toStringAsFixed(1)} km/h'),
+            _buildDetailRow(
+                'Average Speed', '${speed.toStringAsFixed(1)} km/h'),
             _buildDetailDivider(),
-            _buildDetailRow('Cycling Type', _getCyclingTypeString(activity.cyclingType)),
+            _buildDetailRow(
+                'Cycling Type', _getCyclingTypeString(activity.cyclingType)),
             _buildDetailDivider(),
-            _buildDetailRow('Calories Burned', '${activity.caloriesBurned.toInt()} kcal'),
+            _buildDetailRow(
+                'Calories Burned', '${activity.caloriesBurned.toInt()} kcal'),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildDetailDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -279,7 +291,7 @@ class CyclingDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildDetailRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -311,7 +323,7 @@ class CyclingDetailWidget extends StatelessWidget {
       ],
     );
   }
-  
+
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final hours = twoDigits(duration.inHours);
@@ -319,7 +331,7 @@ class CyclingDetailWidget extends StatelessWidget {
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     return hours == '00' ? '$minutes:$seconds min' : '$hours:$minutes:$seconds';
   }
-  
+
   String _getCyclingTypeString(CyclingType type) {
     switch (type) {
       case CyclingType.mountain:

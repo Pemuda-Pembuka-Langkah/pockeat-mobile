@@ -1,12 +1,9 @@
+// Project imports:
 import '../../services/calorie_calculator.dart';
 import 'cardio_activity.dart';
 
 /// Enum untuk tipe aktivitas bersepeda
-enum CyclingType { 
-  mountain, 
-  commute, 
-  stationary 
-}
+enum CyclingType { mountain, commute, stationary }
 
 /// Model untuk aktivitas bersepeda
 class CyclingActivity extends CardioActivity {
@@ -84,7 +81,7 @@ class CyclingActivity extends CardioActivity {
       caloriesBurned: map['caloriesBurned']?.toDouble() ?? 0.0,
     );
   }
-  
+
   /// Metode untuk membuat salinan dengan beberapa perubahan (immutability)
   CyclingActivity copyWith({
     String? id,
@@ -106,4 +103,4 @@ class CyclingActivity extends CardioActivity {
       caloriesBurned: caloriesBurned ?? this.caloriesBurned,
     );
   }
-} 
+}

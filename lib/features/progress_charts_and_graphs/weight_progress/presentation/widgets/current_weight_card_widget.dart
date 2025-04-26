@@ -1,10 +1,13 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_status.dart';
 
 class CurrentWeightCardWidget extends StatelessWidget {
   final WeightStatus weightStatus;
   final Color primaryGreen;
-  
+
   const CurrentWeightCardWidget({
     super.key,
     required this.weightStatus,
@@ -87,7 +90,7 @@ class CurrentWeightCardWidget extends StatelessWidget {
 
   Widget _buildProgressBarWithMetrics(BuildContext context) {
     final progressPercent = (weightStatus.progressToGoal * 100).toInt();
-    
+
     return Column(
       children: [
         Row(

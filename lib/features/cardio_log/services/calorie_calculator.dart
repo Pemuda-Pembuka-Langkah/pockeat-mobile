@@ -1,5 +1,7 @@
+// Flutter imports:
 import 'package:flutter/foundation.dart';
 
+// Project imports:
 import '../domain/models/user_constants.dart';
 
 class CalorieCalculator {

@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class CalorieSummaryCard extends StatelessWidget {
@@ -53,10 +54,9 @@ class CalorieSummaryCard extends StatelessWidget {
                 ),
               ],
             ),
-
           ],
         ),
       ),
     );
   }
-} 
+}

@@ -1,6 +1,9 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 
 void main() {
   group('FoodLogHistoryItem', () {

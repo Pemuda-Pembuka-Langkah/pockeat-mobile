@@ -1,12 +1,15 @@
+// Package imports:
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+
+// Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
+import 'analytics_service_test.mocks.dart';
 
 // Use build_runner to generate mocks
 @GenerateMocks([FirebaseAnalytics])
-import 'analytics_service_test.mocks.dart';
 
 void main() {
   group('AnalyticsService Tests', () {

@@ -1,10 +1,16 @@
+// Dart imports:
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
+
+// Package imports:
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
+import 'package:http/http.dart' as http;
+
+// Project imports:
 import 'package:pockeat/features/api_scan/services/base/api_auth_interceptor.dart';
+import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
 import 'package:pockeat/features/authentication/services/token_manager.dart';
+
 // coverage:ignore-start
 class ApiServiceException implements Exception {
   final String message;

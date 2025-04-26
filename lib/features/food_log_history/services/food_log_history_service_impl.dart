@@ -1,9 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   final FoodScanRepository _foodScanRepository;

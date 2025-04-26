@@ -1,23 +1,29 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
+
+// Package imports:
 import 'package:logger/logger.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/calorie_data.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/nutrition_stat.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/macro_nutrient.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/micro_nutrient.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/meal.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/services/nutrition_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/micro_nutrient.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/nutrition_stat.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/header_widget.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/progress_overview_widget.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/nutrient_progress_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/meal_patterns_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/nutrient_progress_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/progress_overview_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/services/nutrition_service.dart';
+
+// ignore: depend_on_referenced_packages
 
 // coverage:ignore-start
 final logger = Logger();
 
 class NutritionProgressPage extends StatefulWidget {
   final NutritionService service;
-  
+
   // ignore: use_super_parameters
   const NutritionProgressPage({
     Key? key,
@@ -32,11 +38,11 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
-  
+
   bool isWeeklyView = true;
   bool isLoading = true;
   bool isChartLoading = false;
-  
+
   // Use direct state variables instead of futures
   List<CalorieData> _calorieData = [];
   List<NutritionStat> _nutritionStats = [];
@@ -54,7 +60,7 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
     setState(() {
       isLoading = true;
     });
-    
+
     try {
       // Load all data in parallel
       final results = await Future.wait([
@@ -64,7 +70,7 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
         widget.service.getMicroNutrients(),
         widget.service.getMeals(),
       ]);
-      
+
       setState(() {
         _calorieData = results[0] as List<CalorieData>;
         _nutritionStats = results[1] as List<NutritionStat>;
@@ -83,17 +89,17 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
 
   void _toggleView(bool weekly) async {
     if (weekly == isWeeklyView) return;
-    
+
     setState(() {
       isWeeklyView = weekly;
       // Only set chart loading to true, don't clear the data
       isChartLoading = true;
     });
-    
+
     try {
       // Only reload the calorie data (chart data)
       final newCalorieData = await widget.service.getCalorieData(weekly);
-      
+
       setState(() {
         _calorieData = newCalorieData;
         isChartLoading = false;
@@ -111,7 +117,7 @@ class _NutritionProgressPageState extends State<NutritionProgressPage> {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     return SingleChildScrollView(
       child: Container(
         padding: const EdgeInsets.all(16),

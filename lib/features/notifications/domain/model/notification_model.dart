@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:uuid/uuid.dart';
 
 class NotificationModel {
@@ -56,4 +57,4 @@ class NotificationModel {
       isRead: map['isRead'] ?? false,
     );
   }
-} 
+}

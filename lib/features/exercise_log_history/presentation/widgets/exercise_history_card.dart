@@ -1,5 +1,8 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 
 /// A reusable widget that displays an exercise history item in a card format.
@@ -53,7 +56,7 @@ class ExerciseHistoryCard extends StatelessWidget {
   Widget _buildEnhancedSubtitle() {
     // Break down subtitle into parts that might need highlighting
     final parts = exercise.subtitle.split('•');
-    
+
     if (parts.length <= 1) {
       // If there are no bullet points, just return the plain subtitle
       return Text(
@@ -67,7 +70,7 @@ class ExerciseHistoryCard extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       );
     }
-    
+
     // Build a rich subtitle with highlighted metrics
     return RichText(
       maxLines: 2,
@@ -82,31 +85,31 @@ class ExerciseHistoryCard extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build rich text spans for subtitle highlighting
   List<TextSpan> _buildRichTextSpans(List<String> parts) {
     final List<TextSpan> spans = [];
-    
+
     // Add the first part without a bullet
     if (parts[0].isNotEmpty) {
       spans.add(TextSpan(text: parts[0].trim()));
     }
-    
+
     // Add the remaining parts with bullet points and highlighted values
     for (int i = 1; i < parts.length; i++) {
       if (parts[i].isEmpty) continue;
-      
+
       // Add bullet point
       spans.add(const TextSpan(text: ' • '));
-      
+
       final String part = parts[i].trim();
-      
+
       // Check if this part contains a colon (key-value pair)
       if (part.contains(':')) {
         final keyValue = part.split(':');
         final key = keyValue[0].trim();
         final value = keyValue.length > 1 ? keyValue[1].trim() : '';
-        
+
         spans.add(TextSpan(text: '$key: '));
         spans.add(TextSpan(
           text: value,
@@ -120,7 +123,7 @@ class ExerciseHistoryCard extends StatelessWidget {
         spans.add(TextSpan(text: part));
       }
     }
-    
+
     return spans;
   }
 

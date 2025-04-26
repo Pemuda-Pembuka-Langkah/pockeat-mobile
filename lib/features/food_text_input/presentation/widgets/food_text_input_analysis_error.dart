@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class FoodTextInputAnalysisError extends StatelessWidget {
   final Color primaryPink;
@@ -41,7 +42,7 @@ class FoodTextInputAnalysisError extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Title
               const Text(
                 "Oops! We Couldn't Detect Your Food",
@@ -53,7 +54,7 @@ class FoodTextInputAnalysisError extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              
+
               // Tips for better text input
               Container(
                 padding: const EdgeInsets.all(16),
@@ -78,16 +79,18 @@ class FoodTextInputAnalysisError extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildTipItem('Use common food names (e.g., "grilled chicken salad")'),
-                    _buildTipItem('Include ingredients if possible (e.g., "oatmeal with honey and banana")'),
+                    _buildTipItem(
+                        'Use common food names (e.g., "grilled chicken salad")'),
+                    _buildTipItem(
+                        'Include ingredients if possible (e.g., "oatmeal with honey and banana")'),
                     _buildTipItem('Avoid brand names or slang words'),
                     _buildTipItem('Check for typos before submitting'),
                   ],
                 ),
               ),
-              
+
               const Spacer(),
-              
+
               // Action buttons
               Row(
                 children: [

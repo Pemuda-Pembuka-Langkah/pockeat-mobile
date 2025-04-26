@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 
 class GoogleSignInButton extends StatelessWidget {

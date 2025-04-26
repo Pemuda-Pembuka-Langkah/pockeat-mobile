@@ -1,6 +1,9 @@
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+
+// Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 
 // Mock class using mocktail

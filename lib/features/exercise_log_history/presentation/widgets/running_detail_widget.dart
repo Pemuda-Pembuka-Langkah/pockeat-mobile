@@ -1,17 +1,22 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:intl/intl.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 
 /// Widget to display running activity details
 class RunningDetailWidget extends StatelessWidget {
   final RunningActivity activity;
   final Color primaryColor = const Color(0xFFFF6B6B); // Cardio color
-  
+
   const RunningDetailWidget({
     super.key,
     required this.activity,
   });
-  
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -30,7 +35,7 @@ class RunningDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildHeaderCard(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -114,7 +119,7 @@ class RunningDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMetricsCard(BuildContext context) {
     return Card(
       elevation: 3,
@@ -154,7 +159,7 @@ class RunningDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildVerticalDivider() {
     return Container(
       width: 1,
@@ -162,7 +167,7 @@ class RunningDetailWidget extends StatelessWidget {
       color: Colors.grey.withOpacity(0.2),
     );
   }
-  
+
   Widget _buildMetricItem({
     required IconData icon,
     required String value,
@@ -211,10 +216,10 @@ class RunningDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildDetailsList(BuildContext context) {
     final pace = _calculatePace(activity.duration, activity.distanceKm);
-    
+
     return Card(
       elevation: 3,
       shadowColor: Colors.black26,
@@ -243,23 +248,27 @@ class RunningDetailWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildDetailRow('Date', DateFormat('dd MMM yyyy').format(activity.date)),
+            _buildDetailRow(
+                'Date', DateFormat('dd MMM yyyy').format(activity.date)),
             _buildDetailDivider(),
-            _buildDetailRow('Time', DateFormat('HH:mm').format(activity.startTime)),
+            _buildDetailRow(
+                'Time', DateFormat('HH:mm').format(activity.startTime)),
             _buildDetailDivider(),
-            _buildDetailRow('Distance', '${activity.distanceKm.toStringAsFixed(1)} km'),
+            _buildDetailRow(
+                'Distance', '${activity.distanceKm.toStringAsFixed(1)} km'),
             _buildDetailDivider(),
             _buildDetailRow('Duration', _formatDuration(activity.duration)),
             _buildDetailDivider(),
             _buildDetailRow('Pace', pace),
             _buildDetailDivider(),
-            _buildDetailRow('Calories Burned', '${activity.caloriesBurned.round()} kcal'),
+            _buildDetailRow(
+                'Calories Burned', '${activity.caloriesBurned.round()} kcal'),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildDetailDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -269,7 +278,7 @@ class RunningDetailWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildDetailRow(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -301,7 +310,7 @@ class RunningDetailWidget extends StatelessWidget {
       ],
     );
   }
-  
+
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final hours = twoDigits(duration.inHours);
@@ -309,27 +318,27 @@ class RunningDetailWidget extends StatelessWidget {
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     return hours == '00' ? '$minutes:$seconds min' : '$hours:$minutes:$seconds';
   }
-  
+
   String _formatDurationShort(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
-    
+
     if (hours > 0) {
       return '${hours}h ${minutes}m';
     } else {
       return '$minutes:${twoDigits(seconds)}';
     }
   }
-  
+
   String _calculatePace(Duration duration, double distanceKm) {
     if (distanceKm <= 0) return '0:00 /km';
-    
+
     final paceInSeconds = duration.inSeconds / distanceKm;
     final paceMinutes = (paceInSeconds / 60).floor();
     final paceSeconds = (paceInSeconds % 60).round();
-    
+
     return '$paceMinutes:${paceSeconds.toString().padLeft(2, '0')} /km';
   }
 }

@@ -1,56 +1,60 @@
 // lib/core/di/service_locator.dart
-import 'package:get_it/get_it.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
+import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
 import 'package:pockeat/features/api_scan/services/food/food_image_analysis_service.dart';
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
-import 'package:pockeat/features/authentication/services/token_manager.dart';
-import 'package:pockeat/features/calorie_stats/di/calorie_stats_module.dart';
-import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
-import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
-import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
-import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
-import 'package:pockeat/features/food_log_history/di/food_log_history_module.dart';
-import 'package:pockeat/features/exercise_log_history/di/exercise_log_history_module.dart';
-import 'package:pockeat/features/authentication/services/register_service.dart';
-import 'package:pockeat/features/authentication/services/register_service_impl.dart';
-import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
-import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:pockeat/features/authentication/services/login_service_impl.dart';
-import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
-import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
-import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
-import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
-import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
-import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository_impl.dart';
-import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pockeat/features/authentication/services/change_password_service.dart';
-import 'package:pockeat/features/authentication/services/change_password_service_impl.dart';
+import 'package:pockeat/features/authentication/services/bug_report_service.dart';
+import 'package:pockeat/features/authentication/services/bug_report_service_impl.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
+import 'package:pockeat/features/authentication/services/change_password_service.dart';
+import 'package:pockeat/features/authentication/services/change_password_service_impl.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service_impl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
+import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
+import 'package:pockeat/features/authentication/services/google_sign_in_service_impl.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/authentication/services/login_service_impl.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service_impl.dart';
 import 'package:pockeat/features/authentication/services/profile_service.dart';
 import 'package:pockeat/features/authentication/services/profile_service_impl.dart';
-import 'package:pockeat/features/authentication/services/bug_report_service.dart';
-import 'package:pockeat/features/authentication/services/bug_report_service_impl.dart';
+import 'package:pockeat/features/authentication/services/register_service.dart';
+import 'package:pockeat/features/authentication/services/register_service_impl.dart';
+import 'package:pockeat/features/authentication/services/token_manager.dart';
 import 'package:pockeat/features/authentication/services/utils/instabug_client.dart';
-import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository_impl.dart';
+import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
+import 'package:pockeat/features/calorie_stats/di/calorie_stats_module.dart';
+import 'package:pockeat/features/exercise_log_history/di/exercise_log_history_module.dart';
+import 'package:pockeat/features/food_log_history/di/food_log_history_module.dart';
+import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
+import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
+import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
+import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -169,7 +173,7 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<NotificationService>(
     NotificationServiceImpl(),
   );
-  
+
   // Initialize notifications
   await getIt<NotificationService>().initialize();
   // Register feature modules
@@ -197,12 +201,12 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<BugReportService>(
     BugReportServiceImpl(instabugClient: getIt<InstabugClient>()),
   );
-  
+
   // Register Analytics Service
   getIt.registerSingleton<AnalyticsService>(
     AnalyticsService(),
   );
-  
+
   HomeWidgetModule.register();
 }
 // coverage:ignore-end

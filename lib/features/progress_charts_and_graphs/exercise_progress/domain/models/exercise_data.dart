@@ -2,9 +2,9 @@
 class ExerciseData {
   final dynamic date; // Can be String or DateTime
   final double value;
-  
+
   ExerciseData(this.date, this.value);
-  
+
   // Helper to get formatted label based on date
   String get label {
     if (date is String) {
