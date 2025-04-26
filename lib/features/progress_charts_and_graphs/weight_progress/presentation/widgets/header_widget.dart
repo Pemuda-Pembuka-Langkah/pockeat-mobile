@@ -1,15 +1,18 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weight_status.dart';
 
 class HeaderWidget extends StatelessWidget {
   final WeightStatus weightStatus;
   final Color primaryPink;
-  
+
   const HeaderWidget({
-    Key? key,
+    super.key,
     required this.weightStatus,
     required this.primaryPink,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +25,7 @@ class HeaderWidget extends StatelessWidget {
             Row(
               children: [
                 const Text(
-                  'Weight Progress', 
+                  'Weight Progress',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -70,7 +73,7 @@ class HeaderWidget extends StatelessWidget {
 
   Widget _buildBMIIndicator(double bmi, String category) {
     Color color;
-    
+
     if (category == 'Underweight') {
       color = const Color(0xFFFFB946);
     } else if (category == 'Healthy') {

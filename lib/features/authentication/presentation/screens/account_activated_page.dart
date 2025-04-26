@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class AccountActivatedPage extends StatelessWidget {
@@ -5,16 +6,16 @@ class AccountActivatedPage extends StatelessWidget {
   final VoidCallback? onHomeTap;
 
   const AccountActivatedPage({
-    Key? key,
+    super.key,
     required this.email,
     this.onHomeTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     // Warna yang sama dengan RegisterPage untuk konsistensi
-    final Color primaryGreen = const Color(0xFF4ECDC4);
-    final Color bgColor = const Color(0xFFF9F9F9);
+    const Color primaryGreen = Color(0xFF4ECDC4);
+    const Color bgColor = Color(0xFFF9F9F9);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -27,7 +28,7 @@ class AccountActivatedPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Icon sukses
-                Icon(
+                const Icon(
                   Icons.check_circle_outline,
                   size: 100,
                   color: primaryGreen,
@@ -36,7 +37,7 @@ class AccountActivatedPage extends StatelessWidget {
                 const SizedBox(height: 30),
 
                 // Title
-                Text(
+                const Text(
                   'Account Successfully Activated!',
                   style: TextStyle(
                     fontSize: 28,
@@ -70,6 +71,7 @@ class AccountActivatedPage extends StatelessWidget {
                         onHomeTap!();
                       } else {
                         // Navigasi default ke home page
+                        // coverage:ignore-line
                         Navigator.of(context).pushReplacementNamed('/');
                       }
                     },

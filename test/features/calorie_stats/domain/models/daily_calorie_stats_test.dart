@@ -1,10 +1,12 @@
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:mockito/annotations.dart';
-import 'daily_calorie_stats_test.mocks.dart';
+import 'package:mockito/mockito.dart';
 
+// Project imports:
+import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
+import 'daily_calorie_stats_test.mocks.dart';
 
 @GenerateMocks([DocumentSnapshot])
 void main() {

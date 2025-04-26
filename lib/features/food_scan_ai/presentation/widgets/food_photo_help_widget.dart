@@ -1,13 +1,14 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class FoodPhotoHelpWidget extends StatelessWidget {
   final Color primaryColor;
-  
+
   const FoodPhotoHelpWidget({
-    Key? key,
+    super.key,
     required this.primaryColor,
-  }) : super(key: key);
-  
+  });
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -62,7 +63,8 @@ class FoodPhotoHelpWidget extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30.0),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0, vertical: 12.0),
               ),
               child: const Text(
                 'Got it!',
@@ -77,7 +79,7 @@ class FoodPhotoHelpWidget extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildTipItem(IconData icon, String title, String description) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),

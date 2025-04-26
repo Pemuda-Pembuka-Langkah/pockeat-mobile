@@ -1,10 +1,16 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/gestures.dart';
-import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+
+// Project imports:
+import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
 
 /// Login page for existing users
 ///
@@ -33,11 +39,15 @@ class _LoginPageState extends State<LoginPage> {
   final Color bgColor = const Color(0xFFF9F9F9);
 
   late LoginService _loginService;
+  late AnalyticsService _analyticsService;
 
   @override
   void initState() {
     super.initState();
     _loginService = GetIt.instance<LoginService>();
+    _analyticsService = GetIt.instance<AnalyticsService>();
+    _analyticsService.logScreenView(
+        screenName: 'login_page', screenClass: 'LoginPage');
   }
 
   @override
@@ -74,6 +84,9 @@ class _LoginPageState extends State<LoginPage> {
 
       // Navigate to home page on successful login
       if (mounted) {
+        // Log successful login event
+        await _analyticsService.logLogin(method: 'email');
+        // ignore: use_build_context_synchronously
         Navigator.pushReplacementNamed(context, '/');
       }
     } catch (e) {
@@ -117,10 +130,12 @@ class _LoginPageState extends State<LoginPage> {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
+        // coverage:ignore-start
         if (didPop) return;
         // Jika user menekan tombol back, keluar dari aplikasi
         // daripada kembali ke halaman utama yang memerlukan auth
         SystemNavigator.pop();
+        // coverage:ignore-end
       },
       child: Scaffold(
         backgroundColor: bgColor,
@@ -296,7 +311,7 @@ class _LoginPageState extends State<LoginPage> {
                 disabledBackgroundColor: primaryPink.withOpacity(0.5),
               ),
               child: _isLoading
-                  ? CircularProgressIndicator(
+                  ? const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
                   : const Text(
@@ -366,6 +381,7 @@ class _LoginPageState extends State<LoginPage> {
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         // Navigate to registration page
+                        // coverage:ignore-line
                         Navigator.pushReplacementNamed(context, '/register');
                       },
                   ),

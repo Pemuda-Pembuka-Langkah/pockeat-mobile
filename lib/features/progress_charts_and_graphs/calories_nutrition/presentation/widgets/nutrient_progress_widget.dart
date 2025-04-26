@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/macro_nutrient.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/domain/models/micro_nutrient.dart';
 import 'macro_card_widget.dart';
@@ -54,9 +57,9 @@ class NutrientProgressWidget extends StatelessWidget {
             ],
           ),
           child: Column(
-            children: microNutrients.map((nutrient) => 
-              NutrientRowWidget(nutrient: nutrient)
-            ).toList(),
+            children: microNutrients
+                .map((nutrient) => NutrientRowWidget(nutrient: nutrient))
+                .toList(),
           ),
         ),
       ],

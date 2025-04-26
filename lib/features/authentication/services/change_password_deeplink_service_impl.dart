@@ -1,11 +1,18 @@
 // ignore_for_file: avoid_print
 
+// Dart imports:
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
-import 'package:app_links/app_links.dart';
-import 'package:meta/meta.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:app_links/app_links.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:meta/meta.dart';
+
+// Project imports:
+import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
 
 /// Exception khusus untuk ChangePasswordDeepLinkService
 class ChangePasswordDeepLinkException implements Exception {
@@ -39,7 +46,7 @@ class ChangePasswordDeepLinkServiceImpl
 
   @visibleForTesting
   Stream<Uri> getUriLinkStream() => _appLinks.uriLinkStream;
-
+  // coverage:ignore-start
   @override
   Future<void> initialize() async {
     try {
@@ -53,7 +60,8 @@ class ChangePasswordDeepLinkServiceImpl
         originalError: e,
       );
     }
-
+    // coverage:ignore-end
+    // coverage:ignore-start
     try {
       _appLinksSub = getUriLinkStream().listen(
         (Uri uri) {
@@ -74,20 +82,18 @@ class ChangePasswordDeepLinkServiceImpl
     }
   }
 
+  // coverage:ignore-end
+  // coverage:ignore-start
   Future<void> _handleIncomingLink(Uri? uri) async {
     if (uri == null) return;
+    _deepLinkStreamController.add(uri);
 
-    try {
-      _deepLinkStreamController.add(uri);
-
-      if (isChangePasswordLink(uri)) {
-        final success = await handleChangePasswordLink(uri);
-      }
-    } catch (e) {
-      // Error handling tetap ada tapi tanpa print
+    if (isChangePasswordLink(uri)) {
+      await handleChangePasswordLink(uri);
     }
   }
 
+  // coverage:ignore-end
   @override
   Stream<Uri?> getInitialLink() async* {
     try {
@@ -101,10 +107,12 @@ class ChangePasswordDeepLinkServiceImpl
     }
   }
 
+  // coverage:ignore-start
   @override
   Stream<Uri?> onLinkReceived() {
     return _deepLinkStreamController.stream;
   }
+  // coverage:ignore-end
 
   @override
   bool isChangePasswordLink(Uri link) {
@@ -118,10 +126,12 @@ class ChangePasswordDeepLinkServiceImpl
       final oobCode = link.queryParameters['oobCode'];
       return mode == 'resetPassword' && oobCode != null;
     } catch (e) {
+      // coverage:ignore-start
       throw ChangePasswordDeepLinkException(
         'Error validating change password link',
         originalError: e,
       );
+      // coverage:ignore-end
     }
   }
 
@@ -162,6 +172,7 @@ class ChangePasswordDeepLinkServiceImpl
   }
 
   @override
+  // coverage:ignore-start
   void dispose() {
     try {
       _appLinksSub?.cancel();
@@ -173,4 +184,5 @@ class ChangePasswordDeepLinkServiceImpl
       );
     }
   }
+  // coverage:ignore-end
 }

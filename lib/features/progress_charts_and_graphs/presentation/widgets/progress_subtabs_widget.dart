@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/progress_tab_item_widget.dart';
@@ -9,15 +12,15 @@ class ProgressSubtabsWidget extends StatefulWidget {
   final ScrollController scrollController;
   final AppColors colors;
   final TabConfiguration tabConfiguration;
-  
+
   const ProgressSubtabsWidget({
-    Key? key,
+    super.key,
     required this.mainTabController,
     required this.progressTabController,
     required this.scrollController,
     required this.colors,
     required this.tabConfiguration,
-  }) : super(key: key);
+  });
 
   @override
   State<ProgressSubtabsWidget> createState() => _ProgressSubtabsWidgetState();
@@ -79,12 +82,16 @@ class _ProgressSubtabsWidgetState extends State<ProgressSubtabsWidget> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
-                children: widget.tabConfiguration.progressTabLabels.asMap().entries.map((entry) {
+                children: widget.tabConfiguration.progressTabLabels
+                    .asMap()
+                    .entries
+                    .map((entry) {
                   final index = entry.key;
                   final label = entry.value;
                   // This will now update correctly when the controller's index changes
-                  final isSelected = widget.progressTabController.index == index;
-                  
+                  final isSelected =
+                      widget.progressTabController.index == index;
+
                   return ProgressTabItemWidget(
                     label: label,
                     index: index,

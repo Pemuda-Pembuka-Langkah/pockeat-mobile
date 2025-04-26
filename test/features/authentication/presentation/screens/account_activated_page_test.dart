@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
 
 void main() {
@@ -127,7 +132,7 @@ void main() {
 
       // Cek warna tombol
       final MaterialStateProperty<Color?>? bgColorProp =
-          style?.backgroundColor as MaterialStateProperty<Color?>?;
+          style?.backgroundColor;
       expect(bgColorProp?.resolve({}), equals(expectedGreenColor));
     });
 

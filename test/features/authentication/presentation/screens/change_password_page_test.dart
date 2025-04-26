@@ -1,11 +1,17 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/presentation/screens/change_password_page.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
+import 'change_password_page_test.mocks.dart';
 
 @GenerateMocks([
   ChangePasswordService,
@@ -16,7 +22,6 @@ import 'package:pockeat/features/authentication/services/change_password_service
   MockSpec<FirebaseAuthException>(
       as: #MockFirebaseAuthException, fallbackGenerators: {})
 ])
-import 'change_password_page_test.mocks.dart';
 
 // Navigasi sederhana untuk test
 abstract class SimpleNavigator {

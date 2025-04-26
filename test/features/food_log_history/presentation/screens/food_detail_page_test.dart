@@ -1,23 +1,32 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/presentation/screens/food_detail_page.dart';
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
-
-@GenerateMocks([FoodScanRepository, FoodTextInputRepository])
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
+import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 import 'food_detail_page_test.mocks.dart';
+
+@GenerateMocks([FoodScanRepository, FoodTextInputRepository, FoodTrackingClientController])
 
 void main() {
   late MockFoodScanRepository mockRepository;
   late MockFoodTextInputRepository mockTextInputRepository;
+  late MockFoodTrackingClientController mockFoodTrackingController;
 
   setUp(() {
     mockRepository = MockFoodScanRepository();
     mockTextInputRepository = MockFoodTextInputRepository();
+    mockFoodTrackingController = MockFoodTrackingClientController();
   });
 
   final testFood = FoodLogHistoryItem(
@@ -53,12 +62,13 @@ void main() {
     warnings: ['Contains allergens: eggs'],
   );
 
-  Widget createFoodDetailPage() {
+  Widget createFoodDetailPage({bool withTrackingController = false}) {
     return MaterialApp(
       home: FoodDetailPage(
         foodId: testFood.sourceId!,
         foodRepository: mockRepository,
-        foodTextInputRepository: mockTextInputRepository, // Added missing parameter
+        foodTextInputRepository: mockTextInputRepository,
+        foodTrackingController: withTrackingController ? mockFoodTrackingController : null,
       ),
     );
   }
@@ -137,15 +147,7 @@ void main() {
           .thenAnswer((_) async => true);
 
       // Act
-      await tester.pumpWidget(
-        MaterialApp(
-          home: FoodDetailPage(
-            foodId: testFood.sourceId!,
-            foodRepository: mockRepository,
-            foodTextInputRepository: mockTextInputRepository, // Added missing parameter
-          ),
-        ),
-      );
+      await tester.pumpWidget(createFoodDetailPage());
       await tester.pumpAndSettle();
 
       // Find and tap the delete button
@@ -176,7 +178,7 @@ void main() {
           home: FoodDetailPage(
             foodId: 'food1',
             foodRepository: mockRepository,
-            foodTextInputRepository: mockTextInputRepository, // Added missing parameter
+            foodTextInputRepository: mockTextInputRepository,
           ),
         ),
       );
@@ -193,6 +195,100 @@ void main() {
 
       // Verify error message is shown
       expect(find.text('Error: Exception: Delete error'), findsOneWidget);
+    });
+
+    testWidgets('should delete food and update home screen widget',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockRepository.getById(testFood.sourceId!))
+          .thenAnswer((_) async => testFoodAnalysis);
+      when(mockRepository.deleteById(testFood.sourceId!))
+          .thenAnswer((_) async => true);
+      when(mockFoodTrackingController.forceUpdate())
+          .thenAnswer((_) async {});
+
+      // Act
+      await tester.pumpWidget(createFoodDetailPage(withTrackingController: true));
+      await tester.pumpAndSettle();
+
+      // Find and tap the delete button
+      final deleteButton = find.byIcon(Icons.delete_outline);
+      await tester.tap(deleteButton);
+      await tester.pumpAndSettle();
+
+      // Find and tap the confirm button in the dialog
+      final confirmButton = find.widgetWithText(ElevatedButton, 'Delete');
+      await tester.tap(confirmButton);
+      await tester.pumpAndSettle();
+
+      // Verify the repository method was called
+      verify(mockRepository.deleteById(testFood.sourceId!)).called(1);
+      
+      // Verify the widget controller was updated
+      verify(mockFoodTrackingController.forceUpdate()).called(1);
+    });
+
+    testWidgets('should handle widget update error when deleting food',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockRepository.getById(testFood.sourceId!))
+          .thenAnswer((_) async => testFoodAnalysis);
+      when(mockRepository.deleteById(testFood.sourceId!))
+          .thenAnswer((_) async => true);
+      when(mockFoodTrackingController.forceUpdate())
+          .thenThrow(WidgetUpdateException('Failed to update widget'));
+
+      // Act
+      await tester.pumpWidget(createFoodDetailPage(withTrackingController: true));
+      await tester.pumpAndSettle();
+
+      // Find and tap the delete button
+      final deleteButton = find.byIcon(Icons.delete_outline);
+      await tester.tap(deleteButton);
+      await tester.pumpAndSettle();
+
+      // Find and tap the confirm button in the dialog
+      final confirmButton = find.widgetWithText(ElevatedButton, 'Delete');
+      await tester.tap(confirmButton);
+      await tester.pumpAndSettle();
+
+      // Verify the repository method was called
+      verify(mockRepository.deleteById(testFood.sourceId!)).called(1);
+      
+      // Verify the widget controller was called
+      verify(mockFoodTrackingController.forceUpdate()).called(1);
+      
+      // Navigation should still happen despite widget update error
+      expect(find.byType(FoodDetailPage), findsNothing);
+    });
+    
+    testWidgets('should show error message when deletion fails',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockRepository.getById(testFood.sourceId!))
+          .thenAnswer((_) async => testFoodAnalysis);
+      when(mockRepository.deleteById(testFood.sourceId!))
+          .thenAnswer((_) async => false); // Deletion fails
+
+      // Act
+      await tester.pumpWidget(createFoodDetailPage());
+      await tester.pumpAndSettle();
+
+      // Find and tap the delete button
+      final deleteButton = find.byIcon(Icons.delete_outline);
+      await tester.tap(deleteButton);
+      await tester.pumpAndSettle();
+
+      // Find and tap the confirm button in the dialog
+      final confirmButton = find.widgetWithText(ElevatedButton, 'Delete');
+      await tester.tap(confirmButton);
+      await tester.pumpAndSettle();
+
+      // Verify error message is shown
+      expect(find.text('Failed to delete food entry'), findsOneWidget);
+
+      // Verify isLoading is set back to false
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
     testWidgets('should show empty state message when ingredients are empty',

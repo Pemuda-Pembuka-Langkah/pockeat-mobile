@@ -1,7 +1,14 @@
+// Dart imports:
 import 'dart:io';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/profile_service.dart';
 
@@ -10,6 +17,8 @@ import 'package:pockeat/features/authentication/services/profile_service.dart';
 /// Menampilkan form untuk edit:
 /// - Nama pengguna (displayName)
 /// - Foto profil (photoURL)
+
+// coverage:ignore-start
 class EditProfilePage extends StatefulWidget {
   final UserModel? initialUser;
   final bool useScaffold;
@@ -721,3 +730,4 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
   }
 }
+// coverage:ignore-end

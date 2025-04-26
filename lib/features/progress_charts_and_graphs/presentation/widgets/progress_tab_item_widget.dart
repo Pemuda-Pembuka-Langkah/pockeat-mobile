@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 
 class ProgressTabItemWidget extends StatelessWidget {
@@ -9,13 +12,13 @@ class ProgressTabItemWidget extends StatelessWidget {
   final AppColors colors;
 
   const ProgressTabItemWidget({
-    Key? key,
+    super.key,
     required this.label,
     required this.index,
     required this.isSelected,
     required this.onTap,
     required this.colors,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

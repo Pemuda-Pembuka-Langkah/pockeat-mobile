@@ -1,6 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
 import 'form_cubit.dart';
 
 class HealthMetricsGoalsPage extends StatefulWidget {
@@ -16,8 +21,7 @@ class HealthMetricsGoalsPage extends StatefulWidget {
   ];
 
   @override
-  State<HealthMetricsGoalsPage> createState() =>
-      _HealthMetricsGoalsPageState();
+  State<HealthMetricsGoalsPage> createState() => _HealthMetricsGoalsPageState();
 }
 
 class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> {
@@ -94,8 +98,9 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> {
                                   labelText: 'Please specify',
                                   border: OutlineInputBorder(),
                                 ),
-                                onChanged: (value) =>
-                                    context.read<HealthMetricsFormCubit>().setOtherGoalReason(value),
+                                onChanged: (value) => context
+                                    .read<HealthMetricsFormCubit>()
+                                    .setOtherGoalReason(value),
                               ),
                             ),
                         ],
@@ -114,14 +119,16 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> {
                     ),
                   ),
                   onPressed: state.selectedGoals.isNotEmpty &&
-                    (!isOtherSelected || (state.otherGoalReason?.isNotEmpty ?? false))
-                ? () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool('onboardingInProgress', true); // ✅ set flag
-
-                    Navigator.pushNamed(context, '/height-weight');
-                  }
-                : null,
+                          (!isOtherSelected ||
+                              (state.otherGoalReason?.isNotEmpty ?? false))
+                      ? () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool(
+                              'onboardingInProgress', true); // ✅ set flag
+                          if (!context.mounted) return;
+                          Navigator.pushNamed(context, '/height-weight');
+                        }
+                      : null,
                   child: const Center(child: Text("Next")),
                 ),
               ],
@@ -139,7 +146,7 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> {
     required bool disabled,
   }) {
     final cubit = context.read<HealthMetricsFormCubit>();
-    final Color primaryPink = const Color(0xFFFF6B6B);
+    const Color primaryPink = Color(0xFFFF6B6B);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),

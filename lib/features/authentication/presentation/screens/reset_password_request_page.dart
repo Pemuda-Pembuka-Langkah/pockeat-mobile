@@ -1,7 +1,12 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/gestures.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
 
 /// Halaman untuk request reset password
@@ -21,7 +26,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   bool _isLoading = false;
   String? _errorMessage;
-  
+
   // State untuk menampilkan UI ketika email berhasil dikirim
   bool _isEmailSent = false;
 
@@ -106,9 +111,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
-            child: _isEmailSent 
-              ? _buildSuccessUI() 
-              : _buildRequestForm(),
+            child: _isEmailSent ? _buildSuccessUI() : _buildRequestForm(),
           ),
         ),
       ),
@@ -211,7 +214,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 disabledBackgroundColor: primaryPink.withOpacity(0.5),
               ),
               child: _isLoading
-                  ? CircularProgressIndicator(
+                  ? const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
                   : const Text(
@@ -242,6 +245,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
+                        // coverage:ignore-line
                         Navigator.pop(context);
                       },
                   ),

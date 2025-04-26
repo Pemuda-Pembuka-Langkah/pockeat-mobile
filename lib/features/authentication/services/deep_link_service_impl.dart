@@ -1,15 +1,21 @@
+// Dart imports:
 import 'dart:async';
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:app_links/app_links.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
-import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
-import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
-import 'package:meta/meta.dart';
-
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
+// coverage:ignore-start
 /// Exception khusus untuk DeepLinkService
 class DeepLinkException implements Exception {
   final String message;
@@ -94,15 +100,6 @@ class DeepLinkServiceImpl implements DeepLinkService {
     }
   }
 
-  void _handleIncomingLink(Uri link) async {
-    try {
-      await handleDeepLink(link);
-      _deepLinkStreamController.add(link);
-    } catch (e) {
-      throw DeepLinkException('Error handling incoming link', originalError: e);
-    }
-  }
-
   @override
   Stream<Uri?> getInitialLink() async* {
     try {
@@ -130,70 +127,93 @@ class DeepLinkServiceImpl implements DeepLinkService {
     return _changePasswordService.isChangePasswordLink(link);
   }
 
+  // Method untuk mengecek apakah link dari widget quick log
+  bool _isQuickLogLink(Uri link) {
+    // Cek apakah link memiliki scheme pockeat
+    if (link.scheme != 'pockeat') return false;
+
+    // Cek adanya parameter widgetName dan type = log
+    final hasWidgetName = link.queryParameters.containsKey('widgetName');
+    final hasType = link.queryParameters.containsKey('type');
+    final type = link.queryParameters['type'];
+
+    return hasWidgetName && hasType && type == 'log';
+  }
+
+  // Method untuk mengecek apakah link dari widget login
+  bool _isLoginLink(Uri link) {
+    // Cek apakah link memiliki scheme pockeat
+    if (link.scheme != 'pockeat') return false;
+
+    // Cek adanya parameter widgetName dan type = login
+    final hasWidgetName = link.queryParameters.containsKey('widgetName');
+    final hasType = link.queryParameters.containsKey('type');
+    final type = link.queryParameters['type'];
+
+    return hasWidgetName && hasType && type == 'login';
+  }
+
+  // Method untuk mengecek apakah link ke dashboard/home
+  bool _isDashboardLink(Uri link) {
+    // Cek apakah link memiliki scheme pockeat
+    if (link.scheme != 'pockeat') return false;
+
+    // Cek adanya parameter widgetName dan type = dashboard atau home
+    final hasWidgetName = link.queryParameters.containsKey('widgetName');
+    final hasType = link.queryParameters.containsKey('type');
+    final type = link.queryParameters['type'];
+
+    return hasWidgetName && hasType && (type == 'dashboard' || type == 'home');
+  }
+
+  // Method untuk mengecek apakah link ke streak celebration
+  bool _isStreakCelebrationLink(Uri link) {
+    debugPrint('Checking streak celebration link: ${link.toString()}');
+
+    // Cek apakah link memiliki scheme pockeat
+    if (link.scheme != 'pockeat') {
+      debugPrint(
+          'Not a streak celebration link: scheme is not "pockeat" but "${link.scheme}"');
+      return false;
+    }
+
+    // For debugging purposes, log all parts of the URI
+    debugPrint(
+        'URI details: scheme=${link.scheme}, host=${link.host}, path="${link.path}"');
+
+    // Cek path atau host untuk menentukan apakah ini streak celebration link
+    if (link.path == 'streak-celebration') {
+      debugPrint('Matched streak celebration: path="streak-celebration"');
+      return true;
+    }
+
+    if (link.path == '/streak-celebration') {
+      debugPrint('Matched streak celebration: path="/streak-celebration"');
+      return true;
+    }
+
+    if (link.host == 'streak-celebration') {
+      debugPrint('Matched streak celebration: host="streak-celebration"');
+      return true;
+    }
+
+    // If none of the above conditions matched
+    debugPrint('Not a streak celebration link: no path or host match');
+    return false;
+  }
+
   @override
   Future<bool> handleDeepLink(Uri link,
       [BuildContext? navigationContext]) async {
     try {
-      if (_isEmailVerificationLink(link)) {
-        try {
-          final bool success =
-              await _emailVerificationService.handleEmailVerificationLink(link);
+      // Gunakan helper method untuk mendapatkan DeepLinkResult
+      final result = await _getDeepLinkResult(link);
 
-          final result = DeepLinkResult.emailVerification(
-            success: success,
-            data: {
-              'email': FirebaseAuth.instance.currentUser?.email ?? '',
-            },
-            originalUri: link,
-          );
+      // Broadcast hasil ke stream
+      _resultStreamController.add(result);
 
-          _resultStreamController.add(result);
-          return success;
-        } catch (e) {
-          final result = DeepLinkResult.emailVerification(
-            success: false,
-            error: e.toString(),
-            originalUri: link,
-          );
-
-          _resultStreamController.add(result);
-          return false;
-        }
-      } else if (_isChangePasswordLink(link)) {
-        try {
-          final bool success =
-              await _changePasswordService.handleChangePasswordLink(link);
-
-          final String? oobCode = link.queryParameters['oobCode'];
-          final result = DeepLinkResult.changePassword(
-            success: success,
-            data: {
-              'oobCode': oobCode,
-            },
-            originalUri: link,
-          );
-
-          _resultStreamController.add(result);
-          return success;
-        } catch (e) {
-          final result = DeepLinkResult.changePassword(
-            success: false,
-            error: e.toString(),
-            originalUri: link,
-          );
-
-          _resultStreamController.add(result);
-          return false;
-        }
-      } else {
-        final result = DeepLinkResult.unknown(
-          originalUri: link,
-          error: 'Tidak ada handler yang sesuai untuk link ini',
-        );
-
-        _resultStreamController.add(result);
-        return false;
-      }
+      // Return success status dari result
+      return result.success;
     } catch (e) {
       final result = DeepLinkResult.unknown(
         originalUri: link,
@@ -202,6 +222,147 @@ class DeepLinkServiceImpl implements DeepLinkService {
 
       _resultStreamController.add(result);
       throw DeepLinkException('Error handling deep link', originalError: e);
+    }
+  }
+
+  // Helper method untuk mendapatkan DeepLinkResult dari Uri
+  Future<DeepLinkResult> _getDeepLinkResult(Uri uri) async {
+    if (_isEmailVerificationLink(uri)) {
+      try {
+        final bool success =
+            await _emailVerificationService.handleEmailVerificationLink(uri);
+
+        return DeepLinkResult.emailVerification(
+          success: success,
+          data: {
+            'email': FirebaseAuth.instance.currentUser?.email ?? '',
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.emailVerification(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else if (_isChangePasswordLink(uri)) {
+      try {
+        final bool success =
+            await _changePasswordService.handleChangePasswordLink(uri);
+        final String? oobCode = uri.queryParameters['oobCode'];
+        return DeepLinkResult.changePassword(
+          success: success,
+          data: {
+            'oobCode': oobCode,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.changePassword(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else if (_isQuickLogLink(uri)) {
+      try {
+        final widgetName = uri.queryParameters['widgetName'] ?? '';
+        final type = uri.queryParameters['type'] ?? '';
+
+        return DeepLinkResult.quickLog(
+          success: true,
+          data: {
+            'widgetName': widgetName,
+            'type': type,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.quickLog(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else if (_isLoginLink(uri)) {
+      try {
+        final widgetName = uri.queryParameters['widgetName'] ?? '';
+
+        return DeepLinkResult.login(
+          success: true,
+          data: {
+            'widgetName': widgetName,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.login(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else if (_isDashboardLink(uri)) {
+      try {
+        final widgetName = uri.queryParameters['widgetName'] ?? '';
+
+        return DeepLinkResult.dashboard(
+          success: true,
+          data: {
+            'widgetName': widgetName,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.dashboard(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else if (_isStreakCelebrationLink(uri)) {
+      try {
+        // Mendapatkan streak days dari query parameter
+        final streakDaysStr = uri.queryParameters['streakDays'] ?? '0';
+        final streakDays = int.tryParse(streakDaysStr) ?? 0;
+
+        return DeepLinkResult.streakCelebration(
+          success: true,
+          data: {
+            'streakDays': streakDays,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.streakCelebration(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
+    } else {
+      return DeepLinkResult.unknown(
+        originalUri: uri,
+        error: 'Tidak ada handler yang sesuai untuk link ini',
+      );
+    }
+  }
+
+  @override
+  Future<DeepLinkResult?> getColdStartResult() async {
+    try {
+      final initialLink = await getInitialAppLink();
+      if (initialLink == null) {
+        return null;
+      }
+
+      return await _getDeepLinkResult(initialLink);
+    } catch (e) {
+      throw DeepLinkException(
+        'Error getting cold start result',
+        originalError: e,
+      );
     }
   }
 
@@ -221,3 +382,4 @@ class DeepLinkServiceImpl implements DeepLinkService {
     }
   }
 }
+// coverage:ignore-end

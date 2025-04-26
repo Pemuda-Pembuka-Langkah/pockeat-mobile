@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/presentation/widgets/toggle_button_widget.dart';
 
 // coverage:ignore-start
@@ -52,13 +55,15 @@ class HeaderWidget extends StatelessWidget {
                 text: 'Weekly',
                 isSelected: isWeeklyView,
                 onTap: () => onToggleView(true),
-                selectedColor: primaryColor, // Changed from primaryColor to selectedColor
+                selectedColor:
+                    primaryColor, // Changed from primaryColor to selectedColor
               ),
               ToggleButtonWidget(
                 text: 'Monthly',
                 isSelected: !isWeeklyView,
                 onTap: () => onToggleView(false),
-                selectedColor: primaryColor, // Changed from primaryColor to selectedColor
+                selectedColor:
+                    primaryColor, // Changed from primaryColor to selectedColor
               ),
             ],
           ),

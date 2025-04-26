@@ -1,7 +1,11 @@
 // lib/pockeat/features/ai_api_scan/models/food_analysis.dart
+
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:uuid/uuid.dart';
+
+// Project imports:
+import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 
 class FoodAnalysisResult {
   final String foodName;
@@ -33,7 +37,7 @@ class FoodAnalysisResult {
     DateTime? timestamp,
     String? id,
     this.isLowConfidence = false, // Default to high confidence
-    this.userId = '', // Add userId parameter with default value  
+    this.userId = '', // Add userId parameter with default value
   })  : timestamp = timestamp ?? DateTime.now(),
         id = id ?? const Uuid().v4();
 
@@ -114,7 +118,7 @@ class FoodAnalysisResult {
       'timestamp': Timestamp.fromDate(timestamp),
       'id': id,
       'is_low_confidence': isLowConfidence,
-      'userId': userId, 
+      'userId': userId,
     };
   }
 

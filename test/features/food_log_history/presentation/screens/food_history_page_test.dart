@@ -1,15 +1,20 @@
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/presentation/screens/food_history_page.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'food_history_page_test.mocks.dart';
 
 @GenerateMocks(
     [FoodLogHistoryService, firebase_auth.FirebaseAuth, firebase_auth.User])
-import 'food_history_page_test.mocks.dart';
 
 void main() {
   late MockFoodLogHistoryService mockService;
@@ -195,6 +200,143 @@ void main() {
 
       // Assert - pesan yang benar adalah 'No food logs found'
       expect(find.text('No food logs found'), findsOneWidget);
+    });
+    
+    testWidgets('should show error state when loading fails',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockService.getAllFoodLogs(any, limit: anyNamed('limit')))
+          .thenThrow(Exception('Network error'));
+
+      // Act
+      await tester.pumpWidget(createFoodHistoryPage());
+      await tester.pumpAndSettle();
+
+      // Assert - verify error message is shown
+      expect(find.text('Error loading foods'), findsOneWidget);
+      expect(find.widgetWithText(ElevatedButton, 'Retry'), findsOneWidget);
+    });
+    
+    testWidgets('should reload foods when retry button is pressed',
+        (WidgetTester tester) async {
+      // Arrange - first call throws error, second call succeeds
+      when(mockService.getAllFoodLogs(any, limit: anyNamed('limit')))
+          .thenAnswer((_) => Future.error(Exception('Network error')));
+
+      // Act - Initial load fails
+      await tester.pumpWidget(createFoodHistoryPage());
+      await tester.pumpAndSettle();
+      
+      // Verify error state
+      expect(find.text('Error loading foods'), findsOneWidget);
+      
+      // Now change the mock to return success on next call
+      when(mockService.getAllFoodLogs(any, limit: anyNamed('limit')))
+          .thenAnswer((_) async => testFoods);
+          
+      // Tap the retry button
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Retry'));
+      await tester.pumpAndSettle();
+      
+      // Verify foods loaded successfully after retry
+      expect(find.text('Chicken Salad'), findsOneWidget);
+      expect(find.text('Pasta'), findsOneWidget);
+      expect(find.text('Error loading foods'), findsNothing);
+    });
+    
+    testWidgets('should display filter chip for date selection',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockService.getAllFoodLogs(any, limit: anyNamed('limit')))
+          .thenAnswer((_) async => testFoods);
+
+      // Act - load page
+      await tester.pumpWidget(createFoodHistoryPage());
+      await tester.pumpAndSettle();
+      
+      // Initially all foods should be shown
+      expect(find.text('Chicken Salad'), findsOneWidget);
+      expect(find.text('Pasta'), findsOneWidget);
+      expect(find.text('Burger'), findsOneWidget);
+      
+      // Verify filter chip is present
+      expect(find.text('By Date').first, findsOneWidget);
+      
+      // Test that the chip is tappable
+      await tester.tap(find.text('By Date').first);
+      await tester.pumpAndSettle();
+      
+      // Verify the filter is in an active state (implementation would typically show 
+      // a date picker or change the chip appearance)
+      // We can't fully mock the date picker interaction in this test
+      
+      // Verify foods are still visible since no date was actually selected
+      expect(find.text('Chicken Salad'), findsOneWidget);
+    });
+    
+    testWidgets('should display filter chip for month selection',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockService.getAllFoodLogs(any, limit: anyNamed('limit')))
+          .thenAnswer((_) async => testFoods);
+          
+      // Act - load page
+      await tester.pumpWidget(createFoodHistoryPage());
+      await tester.pumpAndSettle();
+      
+      // Initially all foods should be shown
+      expect(find.text('Chicken Salad'), findsOneWidget);
+      expect(find.text('Pasta'), findsOneWidget);
+      expect(find.text('Burger'), findsOneWidget);
+      
+      // Verify filter chip is present
+      expect(find.text('By Month').first, findsOneWidget);
+      
+      // Test that the chip is tappable
+      await tester.tap(find.text('By Month').first);
+      await tester.pumpAndSettle();
+      
+      // Verify the filter is in an active state
+      // We can't fully mock the month picker interaction in this test
+      
+      // Verify foods are still visible since no month was actually selected
+      expect(find.text('Chicken Salad'), findsOneWidget);
+      expect(find.text('Pasta'), findsOneWidget);
+    });
+    
+    testWidgets('should show search field and allow filtering',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockService.getAllFoodLogs(any, limit: anyNamed('limit')))
+          .thenAnswer((_) async => testFoods);
+
+      // Act - load page
+      await tester.pumpWidget(createFoodHistoryPage());
+      await tester.pumpAndSettle();
+      
+      // Verify search field exists
+      expect(find.byType(TextField), findsOneWidget);
+      
+      // Verify initially all items are visible
+      expect(find.text('Chicken Salad'), findsOneWidget);
+      expect(find.text('Pasta'), findsOneWidget);
+      expect(find.text('Burger'), findsOneWidget);
+      
+      // Enter search query that should match only one item
+      await tester.enterText(find.byType(TextField), 'Chicken');
+      await tester.pumpAndSettle();
+      
+      // Verify items are filtered correctly
+      expect(find.text('Chicken Salad'), findsOneWidget);
+      
+      // Now clear the text field by entering empty text
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pumpAndSettle();
+      
+      // Verify all items are visible again
+      expect(find.text('Chicken Salad'), findsOneWidget);
+      expect(find.text('Pasta'), findsOneWidget);
+      expect(find.text('Burger'), findsOneWidget);
     });
   });
 }

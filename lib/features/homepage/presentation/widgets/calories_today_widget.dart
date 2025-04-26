@@ -1,12 +1,17 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 
 class CaloriesTodayWidget extends StatefulWidget {
   final int targetCalories;
-  
+
   const CaloriesTodayWidget({
     super.key,
     this.targetCalories = 2000,
@@ -19,7 +24,7 @@ class CaloriesTodayWidget extends StatefulWidget {
 class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
   final Color primaryPink = const Color(0xFFFF6B6B);
   late Future<DailyCalorieStats> _statsFuture;
-  
+
   @override
   void initState() {
     super.initState();
@@ -32,17 +37,18 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
     // Refresh when dependencies change
     _loadCalorieStats();
   }
-  
+
   void _loadCalorieStats() {
     final calorieService = GetIt.instance<CalorieStatsService>();
-    final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    
+    final userId = GetIt.instance<FirebaseAuth>().currentUser?.uid ?? '';
+
     // Add cache-busting by forcing recalculation
     setState(() {
-      _statsFuture = calorieService.calculateStatsForDate(userId, DateTime.now());
+      _statsFuture =
+          calorieService.calculateStatsForDate(userId, DateTime.now());
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DailyCalorieStats>(
@@ -52,21 +58,21 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
         int caloriesConsumed = 0;
         double completionPercentage = 0.0;
         int remainingCalories = widget.targetCalories;
-        
+
         // If we have data, calculate actual values
-        if (snapshot.connectionState == ConnectionState.done && 
-            snapshot.hasData && 
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData &&
             !snapshot.hasError) {
           caloriesConsumed = snapshot.data!.caloriesConsumed;
           remainingCalories = widget.targetCalories - caloriesConsumed;
           completionPercentage = caloriesConsumed / widget.targetCalories;
-          
+
           // Ensure values are within reasonable bounds
           if (remainingCalories < 0) remainingCalories = 0;
           if (completionPercentage > 1.0) completionPercentage = 1.0;
           if (completionPercentage < 0.0) completionPercentage = 0.0;
         }
-        
+
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -81,7 +87,8 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
             ],
           ),
           child: snapshot.connectionState == ConnectionState.waiting
-              ? const Center(child: CircularProgressIndicator(color: Colors.white))
+              ? const Center(
+                  child: CircularProgressIndicator(color: Colors.white))
               : Column(
                   children: [
                     Row(
@@ -120,8 +127,8 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
                               child: CircularProgressIndicator(
                                 value: completionPercentage,
                                 backgroundColor: Colors.white.withOpacity(0.2),
-                                valueColor:
-                                    const AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Colors.white),
                                 strokeWidth: 12,
                               ),
                             ),

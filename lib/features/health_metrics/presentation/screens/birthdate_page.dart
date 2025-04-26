@@ -1,6 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Project imports:
 import 'form_cubit.dart';
 
 class BirthdatePage extends StatefulWidget {
@@ -58,10 +63,13 @@ class _BirthdatePageState extends State<BirthdatePage> {
             final prefs = await SharedPreferences.getInstance();
             final inProgress = prefs.getBool('onboardingInProgress') ?? true;
 
+            // ignore: use_build_context_synchronously
             if (inProgress && Navigator.of(context).canPop()) {
-              Navigator.of(context).pop(); 
+              // ignore: use_build_context_synchronously
+              Navigator.of(context).pop();
             } else {
-              Navigator.of(context).popUntil((route) => route.isFirst); 
+              // ignore: use_build_context_synchronously
+              Navigator.of(context).popUntil((route) => route.isFirst);
             }
           },
         ),

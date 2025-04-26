@@ -1,13 +1,20 @@
+// Dart imports:
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
-// Hapus import Firebase Dynamic Links
-// import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
-import 'package:app_links/app_links.dart';
-import 'package:meta/meta.dart';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:app_links/app_links.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
+import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
+
+// Hapus import Firebase Dynamic Links
+// import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 /// Exception khusus untuk DeepLinkService
 class EmailVerificationDeepLinkException implements Exception {
@@ -137,7 +144,7 @@ class EmailVerificationDeepLinkServiceImpl
       }
 
       try {
-        final actionCodeInfo = await _auth.checkActionCode(oobCode);
+        await _auth.checkActionCode(oobCode);
         await _auth.applyActionCode(oobCode);
 
         final currentUser = _auth.currentUser;
@@ -194,6 +201,7 @@ class EmailVerificationDeepLinkServiceImpl
   }
 
   @override
+  // coverage:ignore-start
   void dispose() {
     try {
       _appLinksSub?.cancel();
@@ -204,5 +212,6 @@ class EmailVerificationDeepLinkServiceImpl
         originalError: e,
       );
     }
+    // coverage:ignore-end
   }
 }

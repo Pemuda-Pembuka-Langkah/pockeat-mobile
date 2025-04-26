@@ -1,15 +1,20 @@
+// Dart imports:
 import 'dart:io';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:uuid/uuid.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/food/food_image_analysis_service.dart';
+import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
-import 'package:uuid/uuid.dart';
-import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 // Mock classes
 class MockFoodImageAnalysisService extends Mock

@@ -1,5 +1,8 @@
-import 'package:get_it/get_it.dart';
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/repositories/exercise_progress_repository.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/domain/repositories/exercise_progress_repository_impl.dart';
@@ -8,24 +11,21 @@ import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/se
 class ExerciseProgressModule {
   static void register() {
     final getIt = GetIt.instance;
-    
+
     // Register repository
     if (!getIt.isRegistered<ExerciseProgressRepository>()) {
       getIt.registerSingleton<ExerciseProgressRepository>(
-        ExerciseProgressRepositoryImpl(
-          exerciseLogHistoryService: getIt<ExerciseLogHistoryService>(),
-          auth: FirebaseAuth.instance,
-        )
-      );
+          ExerciseProgressRepositoryImpl(
+        exerciseLogHistoryService: getIt<ExerciseLogHistoryService>(),
+        auth: FirebaseAuth.instance,
+      ));
     }
-    
+
     // Register service
     if (!getIt.isRegistered<ExerciseProgressService>()) {
-      getIt.registerSingleton<ExerciseProgressService>(
-        ExerciseProgressService(
-          repository: getIt<ExerciseProgressRepository>(),
-        )
-      );
+      getIt.registerSingleton<ExerciseProgressService>(ExerciseProgressService(
+        repository: getIt<ExerciseProgressRepository>(),
+      ));
     }
   }
 }

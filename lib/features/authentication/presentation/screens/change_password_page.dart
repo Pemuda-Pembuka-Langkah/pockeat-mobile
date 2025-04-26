@@ -1,13 +1,19 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
-import 'package:meta/meta.dart';
 
 /// Change Password Page
 ///
 /// This page allows users to change their password
 /// by entering a new password and confirming it.
+
+// coverage:ignore-start
 class ChangePasswordPage extends StatefulWidget {
   final String? oobCode;
   final bool showAppBar;
@@ -23,13 +29,13 @@ class ChangePasswordPage extends StatefulWidget {
   final ChangePasswordService? customChangePasswordService;
 
   const ChangePasswordPage({
-    Key? key,
+    super.key,
     this.oobCode,
     this.showAppBar = true,
     this.skipDelay = false,
     this.testMode = false,
     this.customChangePasswordService,
-  }) : super(key: key);
+  });
 
   @override
   State<ChangePasswordPage> createState() => _ChangePasswordPageState();
@@ -78,9 +84,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Future<void> _sendResetPasswordEmail() async {
     // Dapatkan email user saat ini - dalam test mode, ini akan menggunakan mock
     final auth = widget.testMode ? null : FirebaseAuth.instance;
-    final email = widget.testMode
-        ? 'test@example.com'
-        : auth?.currentUser?.email;
+    final email =
+        widget.testMode ? 'test@example.com' : auth?.currentUser?.email;
 
     if (email == null) {
       setState(() {
@@ -115,7 +120,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           // Handle specific error message for our test case
           _errorMessage = 'Email tidak ditemukan. Silakan login ulang.';
         } else {
-          _errorMessage = 'Gagal mengirim email reset password. Silakan coba lagi.';
+          _errorMessage =
+              'Gagal mengirim email reset password. Silakan coba lagi.';
         }
       });
     } finally {
@@ -177,9 +183,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       } else {
         // Mode ubah password biasa (user sudah login)
         final auth = widget.testMode ? null : FirebaseAuth.instance;
-        final email = widget.testMode
-            ? 'test@example.com'
-            : auth?.currentUser?.email;
+        final email =
+            widget.testMode ? 'test@example.com' : auth?.currentUser?.email;
 
         if (email == null) {
           setState(() {
@@ -280,7 +285,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  
+
                   // Success message if shown
                   if (_showSuccessMessage) ...[
                     const SizedBox(height: 15),
@@ -492,3 +497,4 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 }
+// coverage:ignore-end

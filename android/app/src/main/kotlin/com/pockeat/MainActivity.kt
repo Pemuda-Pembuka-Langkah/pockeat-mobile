@@ -5,12 +5,50 @@ import io.flutter.plugin.common.MethodChannel
 import android.content.Intent
 import android.provider.Settings
 import android.net.Uri
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import com.pockeat.widget.CustomHomeWidgetPlugin
 
 class MainActivity: FlutterFragmentActivity() {
     private val CHANNEL = "com.pockeat/health_connect"
+    private val WIDGET_CHANNEL = "com.pockeat/custom_home_widget"
+    
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+    
+    // Deep link handling sudah ditangani otomatis oleh AppLinks plugin
     
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        
+        // Daftarkan CustomHomeWidgetPlugin untuk widget kita
+        // Plugin ini sudah menangani semua interaksi widget <-> Flutter
+        flutterEngine.plugins.add(CustomHomeWidgetPlugin())
+        
+        // Notification actions channel untuk handling deeplinks dari notifikasi
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.pockeat/notification_actions").setMethodCallHandler { call, result ->
+            when(call.method) {
+                "launchUri" -> {
+                    try {
+                        val uriString = call.argument<String>("uri")
+                        if (uriString != null) {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uriString))
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            startActivity(intent)
+                            result.success(true)
+                        } else {
+                            result.error("NULL_URI", "URI cannot be null", null)
+                        }
+                    } catch (e: Exception) {
+                        result.error("LAUNCH_ERROR", e.message, null)
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
         
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {

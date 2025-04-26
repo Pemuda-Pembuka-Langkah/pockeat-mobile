@@ -1,6 +1,11 @@
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/food_log_history/di/food_log_history_module.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
@@ -26,7 +31,7 @@ void main() {
       // Register mocks
       mockFoodScanRepository = MockFoodScanRepository();
       mockFoodTextInputRepository = MockFoodTextInputRepository();
-
+      sl.registerSingleton<FirebaseFirestore>(FakeFirebaseFirestore());
       sl.registerSingleton<FoodScanRepository>(mockFoodScanRepository);
       sl.registerSingleton<FoodTextInputRepository>(mockFoodTextInputRepository);
     });

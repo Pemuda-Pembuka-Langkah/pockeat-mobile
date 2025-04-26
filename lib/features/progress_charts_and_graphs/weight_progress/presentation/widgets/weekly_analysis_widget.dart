@@ -1,17 +1,20 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/weight_progress/domain/models/weekly_analysis.dart';
 
 class WeeklyAnalysisWidget extends StatelessWidget {
   final WeeklyAnalysis weeklyAnalysis;
   final Color primaryGreen;
   final Color primaryPink;
-  
+
   const WeeklyAnalysisWidget({
-    Key? key,
+    super.key,
     required this.weeklyAnalysis,
     required this.primaryGreen,
     required this.primaryPink,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
