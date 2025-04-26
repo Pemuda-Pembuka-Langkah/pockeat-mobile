@@ -186,8 +186,9 @@ class NotificationServiceImpl implements NotificationService {
     }
     // Handle meal reminder notification tap
     else if (details.payload == NotificationConstants.mealReminderPayload) {
-      // Create a deeplink that will navigate to the food log entry screen
-      const deepLinkUri = 'pockeat://food-log-entry';
+      // Create a deeplink that will navigate to the food log entry screen using quickLog format
+      // Format must match _isQuickLogLink method in DeepLinkServiceImpl
+      const deepLinkUri = 'pockeat://?widgetName=mealReminder&type=log';
       
       // Create a platform channel for launching URIs
       const platformChannel = MethodChannel('com.pockeat/notification_actions');
