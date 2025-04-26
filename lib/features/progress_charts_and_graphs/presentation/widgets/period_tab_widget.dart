@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 
-class LogHistoryTabWidget extends StatelessWidget {
-  final String label;
-  final int index;
+class PeriodTabWidget extends StatelessWidget {
+  final String title;
   final bool isSelected;
+  final Color selectedColor;
   final VoidCallback onTap;
-  final AppColors colors;
 
-  const LogHistoryTabWidget({
+  const PeriodTabWidget({
     super.key,
-    required this.label,
-    required this.index,
-    required this.isSelected,
+    required this.title,
+    this.isSelected = false,
+    required this.selectedColor,
     required this.onTap,
-    required this.colors,
   });
 
   @override
@@ -38,10 +35,10 @@ class LogHistoryTabWidget extends StatelessWidget {
                 : null,
           ),
           child: Text(
-            label,
+            title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isSelected ? colors.primaryPink : Colors.black54,
+              color: isSelected ? selectedColor : Colors.black54,
               fontSize: 13,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
             ),
