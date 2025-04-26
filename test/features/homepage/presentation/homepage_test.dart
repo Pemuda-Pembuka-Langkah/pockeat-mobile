@@ -1,4 +1,3 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -13,12 +12,13 @@ import 'package:provider/provider.dart';
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
 import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'homepage_test.mocks.dart';
+import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 
 @GenerateNiceMocks([
   MockSpec<NavigatorObserver>(onMissingStub: OnMissingStub.returnDefault),
@@ -48,11 +48,9 @@ void main() async {
     if (getIt.isRegistered<FirebaseAuth>()) {
       getIt.unregister<FirebaseAuth>();
     }
-
     if (getIt.isRegistered<User>()) {
       getIt.unregister<User>();
     }
-
     if (getIt.isRegistered<CalorieStatsService>()) {
       getIt.unregister<CalorieStatsService>();
     }
@@ -65,12 +63,13 @@ void main() async {
       getIt.unregister<FoodLogHistoryService>();
     }
 
+    // Register mock services
     getIt.registerSingleton<FirebaseAuth>(mockFirebaseAuth);
-    getIt.registerSingleton<User>(mockUser);
     getIt.registerSingleton<CalorieStatsService>(mockCalorieStatsService);
     getIt.registerSingleton<PetService>(mockPetService);
     getIt.registerSingleton<FoodLogHistoryService>(mockFoodLogHistoryService);
 
+    // Setup default mock behaviors
     when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
     when(mockUser.uid).thenReturn('test-uid');
     when(mockCalorieStatsService.calculateStatsForDate(any, any))
@@ -112,8 +111,6 @@ void main() async {
 
       // Assert
       expect(find.text('Pockeat'), findsOneWidget);
-      expect(find.byType(NestedScrollView), findsOneWidget);
-      expect(find.byType(ListView), findsOneWidget);
       expect(find.byType(PetHomepageSection), findsOneWidget);
       expect(find.byType(OverviewSection), findsOneWidget);
       expect(find.byType(CustomBottomNavBar), findsOneWidget);
@@ -122,6 +119,10 @@ void main() async {
     testWidgets('HomePage should have SliverAppBar with correct properties',
         (WidgetTester tester) async {
       // Arrange
+      when(mockFoodLogHistoryService.getFoodStreakDays(any))
+          .thenAnswer((_) async => 5);
+
+      // Act - build widget
       await tester.pumpWidget(createTestWidget());
 
       // Tunggu widget selesai dirender
@@ -162,6 +163,69 @@ void main() async {
       expect(listViewChildren.length, 2);
       expect(listViewChildren[0] is PetHomepageSection, true);
       expect(listViewChildren[1] is OverviewSection, true);
+    });
+
+    testWidgets(
+        'HomePage should display PetHomepageSection with correct streak days',
+        (WidgetTester tester) async {
+      // Arrange - set a specific streak value
+      const testStreakDays = 7;
+      when(mockFoodLogHistoryService.getFoodStreakDays(any))
+          .thenAnswer((_) async => testStreakDays);
+
+      // Act
+      await tester.pumpWidget(createTestWidget());
+
+      // Wait for async operations to complete
+      await tester.pump();
+
+      // Assert - verify pet section exists with correct streak value
+      expect(find.byType(PetHomepageSection), findsOneWidget);
+
+      // Verify the PetHomepageSection received the correct streak days
+      final petSection =
+          tester.widget<StreakCounterWidget>(find.byType(StreakCounterWidget));
+      expect(petSection.streakDays, testStreakDays);
+    });
+
+    testWidgets('HomePage should call getFoodStreakDays with correct user ID',
+        (WidgetTester tester) async {
+      // Arrange
+      const testUserId = 'test-uid';
+      when(mockFoodLogHistoryService.getFoodStreakDays(any))
+          .thenAnswer((_) async => 5);
+
+      // Act - build widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pump();
+
+      // Verify service was called with correct user ID
+      verify(mockFoodLogHistoryService.getFoodStreakDays(testUserId)).called(1);
+    });
+
+    testWidgets('HomePage should handle case when user is null',
+        (WidgetTester tester) async {
+      // Arrange - simulate no logged in user
+      when(mockFirebaseAuth.currentUser).thenReturn(null);
+      when(mockFoodLogHistoryService.getFoodStreakDays(''))
+          .thenAnswer((_) async => throw Exception('Test error'));
+      // Act
+      await tester.pumpWidget(createTestWidget());
+      await tester.pump();
+
+      // Assert - should still render but with default values
+      expect(find.byType(PetHomepageSection), findsOneWidget);
+
+      // Verify display error text
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Text &&
+              widget.data != null &&
+              widget.data!.startsWith('Error'),
+        ),
+        findsOneWidget,
+      );
     });
   });
 }

@@ -78,6 +78,7 @@ dependencies:
 
   path: any
   logger: any
+  confetti: ^0.8.0
 dependency_overrides:
   analyzer: 7.3.0
 

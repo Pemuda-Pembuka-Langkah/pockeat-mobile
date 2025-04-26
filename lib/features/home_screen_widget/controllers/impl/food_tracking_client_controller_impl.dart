@@ -14,7 +14,6 @@ import 'package:pockeat/features/home_screen_widget/controllers/impl/detailed_fo
 import 'package:pockeat/features/home_screen_widget/controllers/impl/simple_food_tracking_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/default_calorie_calculation_strategy.dart';
-import 'package:pockeat/features/home_screen_widget/services/utils/permission_helper.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/widget_background_service_helper.dart';
 import '../../services/calorie_calculation_strategy.dart';
 
@@ -23,7 +22,6 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   final LoginService _loginService;
   final CaloricRequirementService _caloricRequirementService;
   final HealthMetricsRepository _healthMetricsRepository;
-  final PermissionHelperInterface _permissionHelper;
   final WidgetBackgroundServiceHelperInterface _backgroundServiceHelper;
 
   // Specific controllers
@@ -49,14 +47,12 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
     required SimpleFoodTrackingController simpleController,
     required DetailedFoodTrackingController detailedController,
     CalorieCalculationStrategy? calorieCalculationStrategy,
-    PermissionHelperInterface? permissionHelper,
     WidgetBackgroundServiceHelperInterface? backgroundServiceHelper,
   })  : _loginService = loginService,
         _caloricRequirementService = caloricRequirementService,
         _healthMetricsRepository = healthMetricsRepository,
         _simpleController = simpleController,
         _detailedController = detailedController,
-        _permissionHelper = permissionHelper ?? PermissionHelper(),
         _backgroundServiceHelper =
             backgroundServiceHelper ?? WidgetBackgroundServiceHelper(),
         _calorieCalculationStrategy =
@@ -234,31 +230,11 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   /// Setup background service untuk widget updates
   Future<void> _setupBackgroundService() async {
     try {
-      // Request notification permission (diperlukan untuk beberapa background tasks)
-      await _requestPermissions();
-
-      // Initialize workmanager
-      await _backgroundServiceHelper.initialize();
-
-      // Register periodic task (minimal 15 menit sesuai batasan Android)
-      await _backgroundServiceHelper.registerPeriodicTask();
-
-      // Register midnight task untuk update jam 00:00
-      await _backgroundServiceHelper.registerMidnightTask();
+      // Permission sudah ditangani oleh PermissionService, langsung register tasks
+      await _backgroundServiceHelper.registerTasks();
     } catch (e) {
       throw WidgetTimerSetupException('Failed to setup background service: $e');
     }
   }
-
-  /// Request permissions yang diperlukan
-  Future<void> _requestPermissions() async {
-    // Notification permission
-    await _permissionHelper.requestNotificationPermission();
-
-    // Battery optimization exemption (untuk background process)
-    if (await _permissionHelper.isBatteryOptimizationExemptionGranted() ==
-        false) {
-      await _permissionHelper.requestBatteryOptimizationExemption();
-    }
-  }
+  // Metode _requestPermissions() dihapus karena permission handling dipindahkan ke PermissionService
 }
