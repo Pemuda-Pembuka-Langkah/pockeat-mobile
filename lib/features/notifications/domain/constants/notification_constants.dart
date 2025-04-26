@@ -21,6 +21,24 @@ class NotificationConstants {
 
   // SharedPreferences Keys
   static const String prefNotificationStatusPrefix = 'notification_status_';
+  
+  // Meal reminder notification preference keys
+  static const String prefMealReminderMasterEnabled = 
+      '$prefNotificationStatusPrefix$mealReminderChannelId';
+  static const String prefMealTypePrefix = 'meal_reminder_';
+  
+  // Helper method to get meal type enabled preference key
+  static String getMealTypeEnabledKey(String mealType) =>
+      '$prefNotificationStatusPrefix$prefMealTypePrefix${mealType}_enabled';
+      
+  // Individual meal reminder enabled keys
+  static final String prefBreakfastEnabled = getMealTypeEnabledKey(breakfast);
+  static final String prefLunchEnabled = getMealTypeEnabledKey(lunch);
+  static final String prefDinnerEnabled = getMealTypeEnabledKey(dinner);
+  
+  // Helper method to get meal type preference key
+  static String getMealTypeKey(String mealType) =>
+      '$prefMealTypePrefix$mealType';
 
   // Helper method to get notification status preference key for a channel
   static String getNotificationStatusKey(String channelId) =>
@@ -45,6 +63,21 @@ class NotificationConstants {
   // Default notification times
   static const int defaultStreakNotificationHour = 10;
   static const int defaultStreakNotificationMinute = 0;
+  
+  // Default meal reminder times
+  static const int defaultBreakfastHour = 7;
+  static const int defaultBreakfastMinute = 0;
+  
+  static const int defaultLunchHour = 12;
+  static const int defaultLunchMinute = 0;
+  
+  static const int defaultDinnerHour = 18;
+  static const int defaultDinnerMinute = 0;
+  
+  // Background task identifiers for meal reminders
+  static const String breakfastReminderTaskName = 'breakfast_reminder_task';
+  static const String lunchReminderTaskName = 'lunch_reminder_task';
+  static const String dinnerReminderTaskName = 'dinner_reminder_task';
 }
 
 // coverage:ignore-end

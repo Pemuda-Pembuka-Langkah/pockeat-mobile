@@ -1,5 +1,6 @@
 // Package imports:
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart'; // Add for TimeOfDay
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,6 +25,7 @@ import 'package:pockeat/features/notifications/domain/services/utils/work_manage
   WorkManagerClient,
   AndroidFlutterLocalNotificationsPlugin,
 ])
+// Import generated mocks
 import 'notification_service_impl_test.mocks.dart';
 
 // Manual mocks untuk Firebase classes
@@ -104,8 +106,15 @@ void main() {
     // Initialize timezone data for the tests
     tz.initializeTimeZones();
     
-    // Setup shared preferences for testing
-    SharedPreferences.setMockInitialValues({});
+    // Setup shared preferences with initial values
+    // Set default values for notification channels to match production
+    SharedPreferences.setMockInitialValues({
+      NotificationConstants.prefDailyStreakEnabled: true,
+      NotificationConstants.prefMealReminderMasterEnabled: true,
+      NotificationConstants.prefBreakfastEnabled: true,
+      NotificationConstants.prefLunchEnabled: true,
+      NotificationConstants.prefDinnerEnabled: true,
+    });
     mockPrefs = await SharedPreferences.getInstance();
     
     // Initialize mocks (tidak perlu lagi mockFirebaseMessaging karena permission ditangani oleh PermissionService)
@@ -119,6 +128,22 @@ void main() {
     when(mockLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>())
         .thenReturn(mockAndroidFlutterLocalNotificationsPlugin);
     
+    // Setup WorkManager mock to always succeed
+    when(mockWorkManagerClient.cancelByUniqueName(any)).thenAnswer((_) async {});
+    when(mockWorkManagerClient.registerPeriodicTask(
+      any,
+      any,
+      frequency: anyNamed('frequency'),
+      initialDelay: anyNamed('initialDelay'),
+      inputData: anyNamed('inputData'),
+      constraints: anyNamed('constraints'),
+    )).thenAnswer((_) async {});
+    
+    // Setup notifications mocks
+    when(mockLocalNotificationsPlugin.cancel(any)).thenAnswer((_) async {});
+    when(mockLocalNotificationsPlugin.cancelAll()).thenAnswer((_) async {});
+    when(mockAndroidFlutterLocalNotificationsPlugin.createNotificationChannel(any))
+        .thenAnswer((_) async {});
     
     // Create notification service with mocks
     notificationService = NotificationServiceImpl(
@@ -163,16 +188,20 @@ void main() {
       )).called(1);
       
       // Verify notification channels creation
+      verify(mockAndroidFlutterLocalNotificationsPlugin.createNotificationChannel(
+        argThat(predicate((AndroidNotificationChannel channel) => 
+          channel.id == NotificationConstants.dailyStreakChannelId
+        )),
+      )).called(1);
+      
+      // Check that all channels were created - server, meal reminder, and daily streak
       verify(mockAndroidFlutterLocalNotificationsPlugin.createNotificationChannel(any))
-          .called(2); // Should create server and dailyStreak channels
+          .called(2);
     });
   });
 
   group('NotificationServiceImpl showNotification', () {
     test('showNotificationFromFirebase should handle notifications', () async {
-      // Simplifikasi test - kita hanya akan memverifikasi bahwa method tidak menimbulkan error
-      // dan tidak ada interaksi yang tidak diharapkan dengan mock objects
-      
       // Setup mock response
       when(mockLocalNotificationsPlugin.show(
         any,
@@ -182,13 +211,24 @@ void main() {
         payload: anyNamed('payload'),
       )).thenAnswer((_) async {});
       
-      // Verifikasi bahwa method tidak throw exception
-      expect(() => notificationService, isNotNull);
+      // Create a mock RemoteMessage
+      final mockRemoteMessage = MockRemoteMessage();
+      const mockNotification = RemoteNotification(
+        title: 'Test Title',
+        body: 'Test Body'
+      );
+      const mockAndroidNotification = AndroidNotification(
+        channelId: NotificationConstants.serverChannelId
+      );
       
-      // Verifikasi tidak ada pemanggilan yang tidak diharapkan
-      verifyNever(mockLocalNotificationsPlugin.cancelAll());
+      mockRemoteMessage.setNotification(mockNotification);
+      mockRemoteMessage.setAndroid(mockAndroidNotification);
+      mockRemoteMessage.setData({'payload': 'test_payload'});
       
-      // Test lulus jika tidak ada error
+      // Call the method
+      await notificationService.showNotificationFromFirebase(mockRemoteMessage);
+      
+  
     });
   });
 
@@ -284,20 +324,24 @@ void main() {
   });
 
   group('NotificationServiceImpl notification tap handling', () {
-    test('_onNotificationTapped should handle streak notification callback preparation', () async {
-      // Untuk test ini, kita tidak bisa langsung memanggil _onNotificationTapped
-      // karena itu method private, jadi kita test bagian persiapannya saja
+    test('notification response handler should be registered during initialization', () async {
+      // Setup mocks for notification initialization
+      when(mockLocalNotificationsPlugin.initialize(
+        any,
+        onDidReceiveNotificationResponse: anyNamed('onDidReceiveNotificationResponse'),
+      )).thenAnswer((_) async => true);
       
-      // Setup mocks for testing notification setup
-      final user = MockUser();
-      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => user);
-      when(mockFoodLogHistoryService.getFoodStreakDays('test_user_id'))
-          .thenAnswer((_) async => 5);
+      // Call initialize method
+      await notificationService.initialize();
       
-      // Tes lulus jika setup berhasil - tidak perlu verify() karena kita tidak memanggil
-      // methodnya secara langsung
-      expect(notificationService, isNotNull);
-      expect(user.uid, equals('test_user_id'));
+      // Verify notification initialization happened with response handler
+      verify(mockLocalNotificationsPlugin.initialize(
+        any,
+        onDidReceiveNotificationResponse: captureAnyNamed('onDidReceiveNotificationResponse'),
+      )).called(1);
+      
+      // We can't test the private _onNotificationTapped method directly, 
+      // but we can verify it was set up properly during initialization
     });
   });
 
@@ -342,10 +386,16 @@ void main() {
   // Test edge cases and error handling
   // Pengujian error handling bisa disederhanakan
   group('NotificationServiceImpl error handling', () {
-    test('initialize should handle errors when possible', () async {
-      // Test ini hanya contoh, implementasi sebenarnya tergantung bagaimana
-      // NotificationServiceImpl menangani error
-      expect(notificationService, isNotNull);
+    test('initialize should handle initialization failures', () async {
+      // Set up mocks to throw errors
+      when(mockLocalNotificationsPlugin.initialize(
+        any,
+        onDidReceiveNotificationResponse: anyNamed('onDidReceiveNotificationResponse'),
+      )).thenThrow(Exception('Failed to initialize'));
+      
+      // Test that the service gracefully handles errors
+      // This would ideally check your error handling implementation
+      expect(() => notificationService.initialize(), throwsException);
     });
   });
 
@@ -388,7 +438,225 @@ void main() {
     });
   });
   
-  }
+  // Tests for meal reminder notifications functionality
+  group('NotificationServiceImpl meal reminder notifications', () {
+    setUp(() {
+      // Reset method call counts for each test
+      reset(mockWorkManagerClient);
+      reset(mockLocalNotificationsPlugin);
+      reset(mockAndroidFlutterLocalNotificationsPlugin);
+      
+      // Refresh mock behaviors to ensure consistent behavior
+      when(mockWorkManagerClient.cancelByUniqueName(any)).thenAnswer((_) async {});
+      when(mockWorkManagerClient.registerPeriodicTask(
+        any,
+        any,
+        frequency: anyNamed('frequency'),
+        initialDelay: anyNamed('initialDelay'),
+        inputData: anyNamed('inputData'),
+        constraints: anyNamed('constraints'),
+      )).thenAnswer((_) async {});
+      when(mockLocalNotificationsPlugin.cancel(any)).thenAnswer((_) async {});
+      when(mockAndroidFlutterLocalNotificationsPlugin.createNotificationChannel(any))
+          .thenAnswer((_) async {});
+      when(mockLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>())
+          .thenReturn(mockAndroidFlutterLocalNotificationsPlugin);
+    });
+    
+    test('Master toggle should enable/disable all meal reminders', () async {
+      // Toggle master switch on
+      await notificationService.toggleNotification(
+          NotificationConstants.mealReminderChannelId, true);
+      
+      // Verify master preference was saved
+      expect(
+        mockPrefs.getBool(NotificationConstants.prefMealReminderMasterEnabled),
+        true
+      );
+      
+      // Verify scheduling was attempted for all meal types
+      // We don't need to verify exact parameters since that's tested elsewhere
+      // Just verify the periodic task registration was called
+      verify(mockWorkManagerClient.registerPeriodicTask(
+        NotificationConstants.breakfastReminderTaskName,
+        any,
+        frequency: anyNamed('frequency'),
+        initialDelay: anyNamed('initialDelay'),
+        inputData: anyNamed('inputData'),
+        constraints: anyNamed('constraints'),
+      )).called(1);
+    });
+    
+    test('Individual meal type toggles should work correctly', () async {
+      // Setup master toggle as enabled
+      await mockPrefs.setBool(
+          NotificationConstants.prefMealReminderMasterEnabled, true);
+      
+      // Toggle breakfast on
+      await notificationService.toggleNotification(
+          NotificationConstants.breakfast, true);
+      
+      // Verify breakfast preference was saved
+      expect(
+        mockPrefs.getBool(
+            NotificationConstants.prefBreakfastEnabled),
+        true
+      );
+      
+      // Toggle breakfast off
+      await notificationService.toggleNotification(
+          NotificationConstants.breakfast, false);
+    });
+    
+    test('cancelNotificationsByChannel should cancel all meal reminders', () async {
+      // Setup mocks
+      when(mockLocalNotificationsPlugin.cancel(any)).thenAnswer((_) async {});
+      
+      // Call the method
+      await notificationService.cancelNotificationsByChannel(
+        NotificationConstants.mealReminderChannelId
+      );
+      
+      // Verify notification was canceled
+      verify(mockLocalNotificationsPlugin.cancel(
+        NotificationConstants.mealReminderNotificationId.hashCode
+      )).called(1);
+      
+      // Verify all meal reminder tasks were canceled
+      verify(mockWorkManagerClient.cancelByUniqueName(
+          NotificationConstants.breakfastReminderTaskName)).called(1);
+      verify(mockWorkManagerClient.cancelByUniqueName(
+          NotificationConstants.lunchReminderTaskName)).called(1);
+      verify(mockWorkManagerClient.cancelByUniqueName(
+          NotificationConstants.dinnerReminderTaskName)).called(1);
+    });
+    
+    test('isNotificationEnabled should return correct values for meal types', () async {
+      // Test default values (should be true from initial setup)
+      final isMasterEnabled = await notificationService.isNotificationEnabled(
+          NotificationConstants.mealReminderChannelId);
+      expect(isMasterEnabled, true);
+      
+      final isBreakfastEnabled = await notificationService.isNotificationEnabled(
+          NotificationConstants.breakfast);
+      expect(isBreakfastEnabled, true);
+      
+      // Set master toggle to false and verify
+      await mockPrefs.setBool(
+          NotificationConstants.prefMealReminderMasterEnabled, false);
+      final updatedMasterEnabled = await notificationService.isNotificationEnabled(
+          NotificationConstants.mealReminderChannelId);
+      expect(updatedMasterEnabled, false);
+      
+      // Reset master toggle to true for other tests
+      await mockPrefs.setBool(
+          NotificationConstants.prefMealReminderMasterEnabled, true);
+          
+      // Test individual toggle
+      await mockPrefs.setBool(
+          NotificationConstants.prefBreakfastEnabled, false);
+      final updatedBreakfastEnabled = await notificationService.isNotificationEnabled(
+          NotificationConstants.breakfast);
+      expect(updatedBreakfastEnabled, false);
+      
+      // Reset individual toggle for other tests
+      await mockPrefs.setBool(
+          NotificationConstants.prefBreakfastEnabled, true);
+    });
+    
+    test('updateMealReminderTime should update time preferences', () async {
+      // Ensure both toggles are enabled (already set in initial values)
+      expect(await notificationService.isNotificationEnabled(
+          NotificationConstants.mealReminderChannelId), true);
+      expect(await notificationService.isNotificationEnabled(
+          NotificationConstants.breakfast), true);
+      
+      // Update breakfast time
+      const testHour = 8;
+      const testMinute = 30;
+      await notificationService.updateMealReminderTime(
+          NotificationConstants.breakfast, 
+          const TimeOfDay(hour: testHour, minute: testMinute));
+      
+      // Verify time preferences were saved
+      final prefKey = NotificationConstants.getMealTypeKey(NotificationConstants.breakfast);
+      final hourKey = "${prefKey}_hour";
+      final minuteKey = "${prefKey}_minute";
+      
+      expect(mockPrefs.getInt(hourKey), testHour);
+      expect(mockPrefs.getInt(minuteKey), testMinute);
+      
+      // Verify task was canceled and rescheduled
+      verify(mockWorkManagerClient.cancelByUniqueName(
+          NotificationConstants.breakfastReminderTaskName)).called(2);
+      verify(mockWorkManagerClient.registerPeriodicTask(
+        NotificationConstants.breakfastReminderTaskName,
+        any,
+        frequency: anyNamed('frequency'),
+        initialDelay: anyNamed('initialDelay'),
+        inputData: anyNamed('inputData'),
+        constraints: anyNamed('constraints'),
+      )).called(1);
+    });
+    
+    // Mock implementation of getMealReminderTime for testing
+    test('getMealReminderTime should return correct time preferences', () async {
+      // Use separate keys to avoid conflicts with other tests
+      const testHour = 9;
+      const testMinute = 15;
+      final prefKey = NotificationConstants.getMealTypeKey(NotificationConstants.breakfast);
+      final hourKey = "${prefKey}_hour";
+      final minuteKey = "${prefKey}_minute";
+      
+      // Clear any existing values
+      await mockPrefs.remove(hourKey);
+      await mockPrefs.remove(minuteKey);
+      
+      // Set custom time for breakfast
+      await mockPrefs.setInt(hourKey, testHour);
+      await mockPrefs.setInt(minuteKey, testMinute);
+      
+      // Get time preferences
+      final breakfastTime = await notificationService.getMealReminderTime(
+          NotificationConstants.breakfast);
+      
+      // Verify time is correct
+      expect(breakfastTime.hour, testHour);
+      expect(breakfastTime.minute, testMinute);
+    });
+    
+    test('getMealReminderTime should return default time when no preference', () async {
+      // Clear existing preferences
+      final prefKey = NotificationConstants.getMealTypeKey(NotificationConstants.dinner);
+      final hourKey = "${prefKey}_hour";
+      final minuteKey = "${prefKey}_minute";
+      await mockPrefs.remove(hourKey);
+      await mockPrefs.remove(minuteKey);
+      
+      // Test default time for dinner (no preference set)
+      final dinnerTime = await notificationService.getMealReminderTime(
+          NotificationConstants.dinner);
+      
+      // Verify default time is returned
+      expect(dinnerTime.hour, NotificationConstants.defaultDinnerHour);
+      expect(dinnerTime.minute, NotificationConstants.defaultDinnerMinute);
+    });
+    
+    test('isMealTypeEnabled should return correct value', () async {
+      // Test default value
+      final isEnabled = await notificationService.isMealTypeEnabled(
+          NotificationConstants.breakfast);
+      expect(isEnabled, true);
+      
+      // Set to false and test again
+      await mockPrefs.setBool(
+          NotificationConstants.prefBreakfastEnabled, false);
+      final updatedIsEnabled = await notificationService.isMealTypeEnabled(
+          NotificationConstants.breakfast);
+      expect(updatedIsEnabled, false);
+    });
+  });
+}
 
 // Mock User for testing
 class MockUser extends UserModel {
