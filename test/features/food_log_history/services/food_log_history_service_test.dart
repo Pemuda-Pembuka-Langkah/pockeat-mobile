@@ -403,7 +403,7 @@ void main() {
         final result = await mockService.getFoodStreakDays(testUserId);
 
         // Assert
-        expect(result, 0); // Only 2 consecutive days (today and yesterday)
+        expect(result, 2); // Mendapatkan 2 hari berturut-turut (hari ini dan kemarin)
       });
 
       test('should handle errors gracefully', () async {

@@ -79,6 +79,14 @@ class NotificationConstants {
   static const String breakfastReminderTaskName = 'breakfast_reminder_task';
   static const String lunchReminderTaskName = 'lunch_reminder_task';
   static const String dinnerReminderTaskName = 'dinner_reminder_task';
+  
+  // Intent storing keys for notification navigation
+  static const String storedIntentTypeKey = 'stored_notification_intent_type';
+  static const String storedIntentDataKey = 'stored_notification_intent_data';
+  
+  // Intent types
+  static const String intentTypeStreakCelebration = 'streak_celebration';
+  static const String intentTypeMealReminder = 'meal_reminder';
 }
 
 // coverage:ignore-end

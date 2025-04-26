@@ -21,6 +21,9 @@ import 'package:pockeat/features/notifications/domain/model/notification_model.d
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/utils/work_manager_client.dart';
 
+
+
+
 // Project imports:
 
 // coverage:ignore-start
@@ -28,8 +31,8 @@ class NotificationServiceImpl implements NotificationService {
   // Using constants from NotificationConstants instead of hardcoded strings
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
   final SharedPreferences _prefs;
-  final FoodLogHistoryService _foodLogHistoryService;
   final LoginService _loginService;
+  final FoodLogHistoryService _foodLogHistoryService;
   final WorkManagerClient _workManagerClient;
 
   // Using background task identifier from NotificationConstants
@@ -44,9 +47,8 @@ class NotificationServiceImpl implements NotificationService {
   })  : _flutterLocalNotificationsPlugin = flutterLocalNotificationsPlugin ??
             getIt<FlutterLocalNotificationsPlugin>(),
         _prefs = prefs ?? getIt<SharedPreferences>(),
-        _foodLogHistoryService =
-            foodLogHistoryService ?? getIt<FoodLogHistoryService>(),
         _loginService = loginService ?? getIt<LoginService>(),
+        _foodLogHistoryService = foodLogHistoryService ?? getIt<FoodLogHistoryService>(),
         _workManagerClient = workManagerClient ?? WorkManagerClient() {
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Asia/Jakarta'));
@@ -138,7 +140,7 @@ class NotificationServiceImpl implements NotificationService {
 
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse: _onNotificationTapped,
+      onDidReceiveNotificationResponse: _onNotificationTapped
     );
   }
 
