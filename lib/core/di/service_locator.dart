@@ -55,6 +55,8 @@ import 'package:pockeat/features/notifications/domain/services/notification_serv
 import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -205,6 +207,10 @@ Future<void> setupDependencies() async {
   // Register Analytics Service
   getIt.registerSingleton<AnalyticsService>(
     AnalyticsService(),
+  );
+
+  getIt.registerSingleton<PetService>(
+    PetServiceImpl(),
   );
 
   HomeWidgetModule.register();
