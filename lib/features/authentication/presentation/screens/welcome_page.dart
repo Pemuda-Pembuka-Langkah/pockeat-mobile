@@ -82,7 +82,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton(
-                    onPressed: () => _navigateTo('/onboarding/goal'),
+                    onPressed: () => _navigateTo('/height-weight'),
                     style: OutlinedButton.styleFrom(
                       minimumSize: Size(size.width * 0.7, 48),
                       side: BorderSide(color: primaryPink),
