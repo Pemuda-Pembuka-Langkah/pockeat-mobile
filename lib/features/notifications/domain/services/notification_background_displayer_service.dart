@@ -1,6 +1,9 @@
 // Dart imports:
 import 'dart:async';
 
+// Project imports:
+import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
+
 /// Abstract interface for displaying notifications in background tasks
 abstract class NotificationBackgroundDisplayerService {
   /// Shows a streak notification in the background
@@ -15,6 +18,9 @@ abstract class NotificationBackgroundDisplayerService {
       Map<String, dynamic> services, String mealType);
 
   /// Menampilkan notifikasi pet sadness saat user tidak aktif
-  /// Melakukan pengecekan durasi inaktivitas pengguna secara internal
-  Future<bool> showPetSadnessNotification(Map<String, dynamic> services);
+  /// Melakukan pengecekan durasi inaktivitas pengguna
+  /// [services] - Required services for background tasks (shared prefs, notifications, etc.)
+  /// [userActivityService] - Optional UserActivityService for testability
+  Future<bool> showPetSadnessNotification(
+      Map<String, dynamic> services, {UserActivityService? userActivityService});
 }

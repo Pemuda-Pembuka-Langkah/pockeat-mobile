@@ -100,7 +100,7 @@ class NotificationConstants {
 
   // User activity tracking
   static const String lastAppOpenTimeKey = 'last_app_open_time';
-  static const Duration inactivityThreshold = Duration(minutes: 3);
+  static const Duration inactivityThreshold = Duration(hours: 24);
 
   // Pet sadness levels based on inactivity duration
   static const Duration slightlySadThreshold = Duration(hours: 24);

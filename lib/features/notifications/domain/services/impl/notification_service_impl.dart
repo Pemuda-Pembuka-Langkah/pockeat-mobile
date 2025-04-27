@@ -340,7 +340,7 @@ class NotificationServiceImpl implements NotificationService {
 
     // For other notification types, default to false
     final key = NotificationConstants.getNotificationStatusKey(channelId);
-    return _prefs.getBool(key) ?? false;
+    return _prefs.getBool(key) ?? true;
   }
 
   Future<void> _setupNotificationByChannel(String channelId) async {
@@ -668,7 +668,7 @@ class NotificationServiceImpl implements NotificationService {
     await _workManagerClient
         .cancelByUniqueName(NotificationConstants.petSadnessCheckTaskName);
 
-    debugPrint("Scheduling pet sadness check task for 2 AM");
+    debugPrint("Scheduling pet sadness check task for 13:00");
 
     // Set scheduled time to 2 AM
     final now = DateTime.now();
@@ -676,8 +676,8 @@ class NotificationServiceImpl implements NotificationService {
       now.year,
       now.month,
       now.day,
-      2, // 2 AM
-      23, // 0 minutes
+      13, 
+      0, 
     );
 
     // If 2 AM today has already passed, schedule for tomorrow at 2 AM
@@ -703,7 +703,7 @@ class NotificationServiceImpl implements NotificationService {
     );
 
     debugPrint(
-        "Pet sadness check task scheduled for 2 AM, repeating every 24 hours");
+        "Pet sadness check task scheduled for 1 PM, repeating every 24 hours");
   }
 }
 // coverage:ignore-end

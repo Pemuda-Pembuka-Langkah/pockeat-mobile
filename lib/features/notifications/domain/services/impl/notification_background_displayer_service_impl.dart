@@ -31,18 +31,23 @@ class NotificationBackgroundDisplayerServiceImpl
   NotificationBackgroundDisplayerServiceImpl({this.isTest = false});
 
   @override
-  Future<bool> showPetSadnessNotification(Map<String, dynamic> services) async {
+  Future<bool> showPetSadnessNotification(
+      Map<String, dynamic> services, {UserActivityService? userActivityService}) async {
     try {
-      // First check if user has been inactive for the threshold duration
-      final UserActivityService userActivityService = UserActivityServiceImpl();
+      // Use provided userActivityService or create a new one
+      // coverage:ignore-start
+      final activityService = userActivityService ?? UserActivityServiceImpl(
+        prefs: services['sharedPreferences'] as SharedPreferences,
+      );
+      // coverage:ignore-end
       final inactivityDuration =
-          await userActivityService.getInactiveDuration();
+          await activityService.getInactiveDuration();
 
       debugPrint(
           'Checking pet sadness: User inactive for ${inactivityDuration.inHours} hours');
 
-      // Only show notification if user has been inactive for threshold or longer
-      if (inactivityDuration < NotificationConstants.inactivityThreshold) {
+      // Only show notification if user has been inactive for longer than threshold
+      if (inactivityDuration <= NotificationConstants.inactivityThreshold) {
         debugPrint(
             'User not inactive long enough for pet sadness notification');
         return false;
