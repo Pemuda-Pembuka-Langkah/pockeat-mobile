@@ -24,6 +24,9 @@ class CaloriesChart extends StatelessWidget {
     // Check if data is empty
     final bool hasNoData = calorieData.isEmpty;
     
+    // Calculate average calories per day (only for days with logs)
+    final String averageCalories = _calculateAverageCalories();
+    
     // Calculate proportional data
     final List<Map<String, dynamic>> proportionalData = hasNoData ? [] : _calculateProportionalData();
     
@@ -38,34 +41,64 @@ class CaloriesChart extends StatelessWidget {
           ),
         ),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            isLoading 
-              ? const SizedBox(
-                  height: 28, 
-                  width: 80,
-                  child: Center(
-                    child: SizedBox(
-                      height: 16, 
-                      width: 16, 
-                      child: CircularProgressIndicator(strokeWidth: 2)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                isLoading 
+                  ? const SizedBox(
+                      height: 28, 
+                      width: 80,
+                      child: Center(
+                        child: SizedBox(
+                          height: 16, 
+                          width: 16, 
+                          child: CircularProgressIndicator(strokeWidth: 2)
+                        )
+                      ),
                     )
-                  ),
-                )
-              : Text(
-                  hasNoData ? '0' : formattedCalories,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+                  : Text(
+                      hasNoData ? '0' : formattedCalories,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                const SizedBox(width: 4),
+                Text(
+                  'kcal',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[400],
                   ),
                 ),
-            const SizedBox(width: 4),
-            Text(
-              'kcal',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[400],
-              ),
+              ],
             ),
+            if (!hasNoData && !isLoading)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.restaurant, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      'avg $averageCalories kcal/day',
+                      style: TextStyle(
+                        color: Colors.grey[800],
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
         const SizedBox(height: 16),
@@ -244,6 +277,29 @@ class CaloriesChart extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  String _calculateAverageCalories() {
+    if (calorieData.isEmpty) return '0';
+    
+    // Count days with actual calorie logs
+    int daysWithLogs = 0;
+    double totalCaloriesForAverage = 0;
+    
+    for (var data in calorieData) {
+      final dailyCalories = data.calories > 0 ? data.calories : _calculateCaloriesFromMacros(data);
+      
+      if (dailyCalories > 0) {
+        daysWithLogs++;
+        totalCaloriesForAverage += dailyCalories;
+      }
+    }
+    
+    if (daysWithLogs == 0) return '0';
+    
+    final average = totalCaloriesForAverage / daysWithLogs;
+    final numberFormat = NumberFormat('#,###');
+    return numberFormat.format(average.round());
   }
 
   List<Map<String, dynamic>> _calculateProportionalData() {
