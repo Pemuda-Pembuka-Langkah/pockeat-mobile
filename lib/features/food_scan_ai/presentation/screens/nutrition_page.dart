@@ -120,9 +120,16 @@ class _NutritionPageState extends State<NutritionPage> {
 
   // Handle analysis correction
   void _handleAnalysisCorrected(FoodAnalysisResult correctedResult) {
+    // Ensure state update is synchronous and complete
     setState(() {
       _isCorrectingAnalysis = false;
-      _updateFoodData(correctedResult);
+      food = correctedResult; // Update the food object first
+      _updateFoodData(correctedResult); // Then update all the derived data
+
+      // Force update of health score section data
+      _nutritionData['healthScore'] = correctedResult.healthScore;
+      _nutritionData['healthScoreCategory'] =
+          correctedResult.getHealthScoreCategory();
     });
 
     // Show success message

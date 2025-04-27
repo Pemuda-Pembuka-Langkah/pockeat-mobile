@@ -104,6 +104,17 @@ class _FoodInputPageState extends State<FoodInputPage> {
               route: '/nutrition-database',
             ),
             const SizedBox(height: 16),
+
+            // Saved Meals Option
+            _buildInputOption(
+              context: context,
+              icon: CupertinoIcons.bookmark_fill,
+              title: 'Saved Meals',
+              subtitle: 'Choose from your previously saved meals',
+              color: Colors.amber,
+              route: '/saved-meals',
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -148,6 +159,14 @@ class _FoodInputPageState extends State<FoodInputPage> {
                       name: 'food_input_method_selected',
                       parameters: {
                         'method': 'database',
+                        'timestamp': DateTime.now().toIso8601String(),
+                      },
+                    );
+                  } else if (route == '/saved-meals') {
+                    _analyticsService.logEvent(
+                      name: 'food_input_method_selected',
+                      parameters: {
+                        'method': 'saved_meals',
                         'timestamp': DateTime.now().toIso8601String(),
                       },
                     );

@@ -48,7 +48,7 @@ class NutritionLabelAnalysisService {
       String userComment, double servings) async {
     try {
       final responseData = await _apiService.postJsonRequest(
-        '/food/correct/nutrition-label',
+        '/food/correct/text',
         {
           'previous_result': previousResult.toJson(),
           'user_comment': userComment,

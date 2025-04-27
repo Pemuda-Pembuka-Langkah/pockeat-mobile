@@ -47,7 +47,7 @@ class FoodImageAnalysisService {
       FoodAnalysisResult previousResult, String userComment) async {
     try {
       final responseData = await _apiService.postJsonRequest(
-        '/food/image/correct',
+        '/food/correct/text',
         {
           'previous_result': previousResult.toJson(),
           'user_comment': userComment,

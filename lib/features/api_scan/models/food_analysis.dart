@@ -204,7 +204,8 @@ class FoodAnalysisResult {
       'nutrition_info': nutritionInfo.toJson(),
       'warnings': warnings,
       'food_image_url': foodImageUrl,
-      'timestamp': Timestamp.fromDate(timestamp),
+      'timestamp': timestamp
+          .toIso8601String(), // Use ISO string format instead of Timestamp object
       'id': id,
       'userId': userId,
       'additional_information': additionalInformation,
@@ -356,6 +357,35 @@ class NutritionInfo {
       'nutrition_density': nutritionDensity,
       'vitamins_and_minerals': vitaminsAndMinerals,
     };
+  }
+
+  // Add a copyWith method to create a new instance with modified values
+  NutritionInfo copyWith({
+    double? calories,
+    double? protein,
+    double? carbs,
+    double? fat,
+    double? saturatedFat,
+    double? sodium,
+    double? fiber,
+    double? sugar,
+    double? cholesterol,
+    double? nutritionDensity,
+    Map<String, double>? vitaminsAndMinerals,
+  }) {
+    return NutritionInfo(
+      calories: calories ?? this.calories,
+      protein: protein ?? this.protein,
+      carbs: carbs ?? this.carbs,
+      fat: fat ?? this.fat,
+      saturatedFat: saturatedFat ?? this.saturatedFat,
+      sodium: sodium ?? this.sodium,
+      fiber: fiber ?? this.fiber,
+      sugar: sugar ?? this.sugar,
+      cholesterol: cholesterol ?? this.cholesterol,
+      nutritionDensity: nutritionDensity ?? this.nutritionDensity,
+      vitaminsAndMinerals: vitaminsAndMinerals ?? this.vitaminsAndMinerals,
+    );
   }
 
   static double _parseDouble(dynamic value) {

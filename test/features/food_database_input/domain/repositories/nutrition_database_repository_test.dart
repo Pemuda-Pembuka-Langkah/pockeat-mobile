@@ -47,7 +47,6 @@ void main() {
 
     repository = NutritionDatabaseRepository(
       firestore: mockFirestore,
-      auth: mockAuth,
     );
   });
 

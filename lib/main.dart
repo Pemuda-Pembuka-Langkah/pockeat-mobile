@@ -14,6 +14,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
 import 'package:pockeat/features/food_database_input/presentation/food_database_page.dart';
+import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+import 'package:pockeat/features/saved_meals/presentation/screens/saved_meal_detail_page.dart';
+import 'package:pockeat/features/saved_meals/presentation/screens/saved_meals_page.dart';
 import 'package:provider/provider.dart';
 
 // Project imports:
@@ -247,6 +250,9 @@ void main() async {
         ),
         Provider<FoodTextInputRepository>(
           create: (_) => getIt<FoodTextInputRepository>(),
+        ),
+        Provider<SavedMealService>(
+          create: (_) => getIt<SavedMealService>(),
         ),
         BlocProvider<HealthMetricsFormCubit>(
           create: (_) {
@@ -509,6 +515,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
           return AuthWrapper(
             child: EditProfilePage(initialUser: user),
+          );
+        },
+        '/saved-meals': (context) => AuthWrapper(
+              child: SavedMealsPage(
+                savedMealService: getIt<SavedMealService>(),
+              ),
+            ),
+        '/saved-meal-detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
+          return AuthWrapper(
+            child: SavedMealDetailPage(
+              savedMealId: args['savedMealId'] as String,
+              savedMealService: getIt<SavedMealService>(),
+            ),
           );
         },
       },
