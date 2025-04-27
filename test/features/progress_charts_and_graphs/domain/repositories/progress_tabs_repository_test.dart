@@ -1,10 +1,5 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
-
-// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-
-// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository.dart';
@@ -20,10 +15,8 @@ class TestProgressTabsRepository implements ProgressTabsRepository {
   Future<TabConfiguration> getTabConfiguration() async {
     return TabConfiguration(
       mainTabCount: 2,
-      progressTabCount: 3,
-      progressTabLabels: ['Weight', 'Nutrition', 'Exercise'],
-      logHistoryTabCount: 2,                       // Added missing required parameter
-      logHistoryTabLabels: ['Food', 'Exercise'],   // Added missing required parameter
+      logHistoryTabCount: 2,
+      logHistoryTabLabels: ['Food', 'Exercise'],
     );
   }
 }
@@ -65,8 +58,8 @@ void main() {
       final config = await result;
       expect(config, isA<TabConfiguration>());
       expect(config.mainTabCount, isA<int>());
-      expect(config.progressTabCount, isA<int>());
-      expect(config.progressTabLabels, isA<List<String>>());
+      expect(config.logHistoryTabCount, isA<int>());
+      expect(config.logHistoryTabLabels, isA<List<String>>());
     });
 
     test('getAppColors should resolve to a valid AppColors object', () async {
@@ -85,8 +78,8 @@ void main() {
       
       // Assert
       expect(config.mainTabCount, 2);
-      expect(config.progressTabCount, 3);
-      expect(config.progressTabLabels, ['Weight', 'Nutrition', 'Exercise']);
+      expect(config.logHistoryTabCount, 2);
+      expect(config.logHistoryTabLabels, ['Food', 'Exercise']);
     });
   });
 }

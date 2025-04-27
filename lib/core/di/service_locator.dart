@@ -57,8 +57,6 @@ import 'package:pockeat/features/notifications/domain/services/notification_serv
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -183,8 +181,6 @@ Future<void> setupDependencies() async {
   FoodLogHistoryModule.register();
   ExerciseLogHistoryModule.register();
   CalorieStatsModule.register();
-  NutritionModule.register();
-  ExerciseProgressModule.register();
 
   // Now register NotificationService which depends on FoodLogHistoryService and UserActivityService
   getIt.registerSingleton<NotificationService>(

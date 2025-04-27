@@ -82,6 +82,7 @@ import 'package:pockeat/features/weight_training_log/domain/repositories/weight_
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
 
 // Core imports:
+import 'package:pockeat/features/progress_charts_and_graphs/di/progress_module.dart';
 
 // Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -226,6 +227,7 @@ void main() async {
   );
 
   await setupDependencies();
+  ProgressModule.register(); // <-- Add this line
 
   // Initialize Google Analytics
   await getIt<AnalyticsService>().initialize();
