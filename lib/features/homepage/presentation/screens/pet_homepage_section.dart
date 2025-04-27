@@ -1,8 +1,14 @@
 // lib/features/homepage/presentation/screens/pet_homepage_section.dart
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
+import 'package:get_it/get_it.dart';
+
+// Project imports:
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/heart_bar_widget.dart';
+import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';

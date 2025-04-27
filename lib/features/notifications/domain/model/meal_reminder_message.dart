@@ -23,7 +23,8 @@ class BreakfastReminderMessage implements MealReminderMessage {
   String get title => 'Time for Breakfast! 🍳';
 
   @override
-  String get body => 'Start your day with energy! Don\'t forget to have a healthy breakfast.';
+  String get body =>
+      'Start your day with energy! Don\'t forget to have a healthy breakfast.';
 
   @override
   String get mealType => NotificationConstants.breakfast;
@@ -71,16 +72,16 @@ class MealReminderMessageFactory {
         throw ArgumentError('Invalid meal type: $mealType');
     }
   }
-  
+
   /// Helper method to create a notification message based on time of day
-  /// 
+  ///
   /// This is useful when wanting to show a notification immediately
   /// [dateTime] Optional parameter to specify a time (for testing), defaults to current time
   static MealReminderMessage createCurrentMealMessage([DateTime? dateTime]) {
     // Determine the meal type based on time of day
     final time = dateTime ?? DateTime.now();
     final hour = time.hour;
-    
+
     // 5-10 AM: Breakfast, 11 AM-3 PM: Lunch, 4-9 PM: Dinner
     if (hour >= 5 && hour < 11) {
       return BreakfastReminderMessage();
