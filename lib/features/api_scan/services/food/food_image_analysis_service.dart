@@ -53,6 +53,7 @@ class FoodImageAnalysisService {
           'user_comment': userComment,
         },
       );
+      print('Response data: $responseData');
 
       // Even if there's an error field, return a FoodAnalysisResult
       // The fromJson method or caller can handle the error appropriately

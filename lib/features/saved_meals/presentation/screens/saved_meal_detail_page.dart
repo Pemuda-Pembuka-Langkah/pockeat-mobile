@@ -111,7 +111,7 @@ class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
     }
   }
 
-  // AI Correction Dialog
+  // Method to show AI correction dialog
   void _showAICorrectionDialog() {
     if (_savedMeal == null) return;
 
@@ -454,189 +454,139 @@ class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        body: FoodAnalysisLoading(
-          primaryYellow: primaryYellow,
-          primaryPink: primaryPink,
-          message: 'Loading Meal Details',
-        ),
-      );
-    }
-
-    if (_hasError) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Error'),
-          backgroundColor: primaryPink,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 72,
-                color: primaryPink,
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Failed to load meal details',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Please try again later',
-                style: TextStyle(
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _loadMealDetails,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryGreen,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
-                child: const Text('Try Again'),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  'Go Back',
-                  style: TextStyle(color: primaryGreen),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: _buildMealDetailsContent(),
-    );
-  }
-
-  Widget _buildMealDetailsContent() {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (scrollNotification) {
-        if (scrollNotification is ScrollUpdateNotification) {
-          setState(() {
-            _isScrolledToTop = scrollNotification.metrics.pixels < 100;
-          });
-        }
-        return true;
-      },
-      child: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            backgroundColor: primaryYellow,
-            title: Text(
-              _savedMeal?.name ?? 'Saved Meal Details',
-              style: const TextStyle(
-                color: Colors.black87,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black87),
-              onPressed: () => Navigator.pop(context),
-            ),
-            actions: [
-              // Add AI correction button in the app bar
-              IconButton(
-                icon: Icon(
-                  Icons.auto_fix_high,
-                  color: Colors.black87,
-                ),
-                onPressed: _showAICorrectionDialog,
-                tooltip: 'AI Correction',
-              ),
-            ],
-            floating: true,
-            pinned: true,
-            elevation: _isScrolledToTop ? 0 : 4,
+      appBar: AppBar(
+        title: const Text('Saved Meal Detail'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: _showAICorrectionDialog,
           ),
-          SliverToBoxAdapter(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
-              ),
-              child: Container(
-                color: Colors.white,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    FoodTitleSection(
-                      isLoading: _isLoading,
-                      foodName: _foodName,
-                      primaryGreen: primaryGreen,
-                      healthScore: _nutritionData['healthScore'] as double?,
-                      healthCategory:
-                          _nutritionData['healthScoreCategory'] as String?,
-                    ),
-                    CalorieSummaryCard(
-                      isLoading: _isLoading,
-                      calories: _calories,
-                      primaryYellow: primaryYellow,
-                      primaryPink: primaryPink,
-                    ),
-                    HealthScoreSection(
-                      isLoading: _isLoading,
-                      nutritionData: _nutritionData,
-                      primaryGreen: primaryGreen,
-                      primaryPink: primaryPink,
-                    ),
-                    NutritionalInfoSection(
-                      isLoading: _isLoading,
-                      nutritionData: _nutritionData,
-                      primaryPink: primaryPink,
-                      primaryGreen: primaryGreen,
-                      warningYellow: warningYellow,
-                    ),
-                    AdditionalNutrientsSection(
-                      isLoading: _isLoading,
-                      nutritionData: _nutritionData,
-                      calories: _calories,
-                      primaryYellow: primaryYellow,
-                    ),
-                    IngredientsSection(
-                      ingredients: _ingredients,
-                      primaryGreen: primaryGreen,
-                      isLoading: _isLoading,
-                    ),
-                    VitaminsAndMineralsSection(
-                      isLoading: _isLoading,
-                      food: food,
-                      primaryColor: primaryGreen,
-                    ),
-                    DietTagsSection(
-                      warnings: _warnings,
-                      primaryGreen: primaryGreen,
-                      warningYellow: warningYellow,
-                    ),
-                    const SizedBox(height: 100),
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 50),
-                      child: SizedBox(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: _showDeleteConfirmationDialog,
+            tooltip: 'Delete meal',
           ),
         ],
       ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  FoodTitleSection(
+                    isLoading: _isLoading,
+                    foodName: _foodName,
+                    primaryGreen: primaryGreen,
+                    healthScore: _nutritionData['healthScore'] as double?,
+                    healthCategory:
+                        _nutritionData['healthScoreCategory'] as String?,
+                  ),
+                  CalorieSummaryCard(
+                    isLoading: _isLoading,
+                    calories: _calories,
+                    primaryYellow: primaryYellow,
+                    primaryPink: primaryPink,
+                  ),
+                  HealthScoreSection(
+                    isLoading: _isLoading,
+                    nutritionData: _nutritionData,
+                    primaryGreen: primaryGreen,
+                    primaryPink: primaryPink,
+                  ),
+                  NutritionalInfoSection(
+                    isLoading: _isLoading,
+                    nutritionData: _nutritionData,
+                    primaryPink: primaryPink,
+                    primaryGreen: primaryGreen,
+                    warningYellow: warningYellow,
+                  ),
+                  AdditionalNutrientsSection(
+                    isLoading: _isLoading,
+                    nutritionData: _nutritionData,
+                    calories: _calories,
+                    primaryYellow: primaryYellow,
+                  ),
+                  IngredientsSection(
+                    ingredients: _ingredients,
+                    primaryGreen: primaryGreen,
+                    isLoading: _isLoading,
+                  ),
+                  VitaminsAndMineralsSection(
+                    isLoading: _isLoading,
+                    food: food,
+                    primaryColor: primaryGreen,
+                  ),
+                  DietTagsSection(
+                    warnings: _warnings,
+                    primaryGreen: primaryGreen,
+                    warningYellow: warningYellow,
+                  ),
+                  const SizedBox(height: 100),
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 50),
+                    child: SizedBox(),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  // Method to show delete confirmation dialog
+  void _showDeleteConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Saved Meal'),
+          content: const Text(
+              'Are you sure you want to delete this meal? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close the dialog
+                setState(() {
+                  _isLoading = true;
+                });
+
+                try {
+                  await widget.savedMealService.deleteSavedMeal(widget.savedMealId);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Meal deleted successfully'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    Navigator.of(context)
+                        .pop(); // Return to the previous screen
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to delete meal: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

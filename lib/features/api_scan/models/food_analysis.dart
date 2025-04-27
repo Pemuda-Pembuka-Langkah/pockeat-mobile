@@ -123,7 +123,9 @@ class FoodAnalysisResult {
 
   factory FoodAnalysisResult.fromJson(Map<String, dynamic> json, {String? id}) {
     // Check if response contains error field
-    if (json.containsKey('error')) {
+    if (json.containsKey('error') &&
+        json['error'] != null &&
+        json['error'] != 'null') {
       String errorMessage = json['error'] is String
           ? json['error']
           : json['error'] is Map
@@ -178,10 +180,15 @@ class FoodAnalysisResult {
       parsedTimestamp = DateTime.now();
     }
 
-    // Get health score from JSON or calculate it
-    double? healthScore = json['health_score'] != null
-        ? NutritionInfo._parseDouble(json['health_score'])
-        : null; // Will be calculated in the constructor if null
+    // Get health score from JSON or calculate it based on nutrition data
+    double healthScore;
+    if (json['health_score'] != null) {
+      healthScore = NutritionInfo._parseDouble(json['health_score']);
+    } else {
+      // Calculate the health score directly if not provided in JSON
+      // This ensures we always have a valid health score even if API doesn't provide one
+      healthScore = _calculateHealthScore(nutritionInfo);
+    }
 
     return FoodAnalysisResult(
       foodName: json['food_name'] ?? '',

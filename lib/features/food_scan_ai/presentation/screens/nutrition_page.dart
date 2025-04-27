@@ -120,16 +120,41 @@ class _NutritionPageState extends State<NutritionPage> {
 
   // Handle analysis correction
   void _handleAnalysisCorrected(FoodAnalysisResult correctedResult) {
+    // Debug prints to see correction response data
+    print('=========== CORRECTION RESPONSE ===========');
+    print('Food Name: ${correctedResult.foodName}');
+    print('Calories: ${correctedResult.nutritionInfo.calories}');
+    print('Health Score: ${correctedResult.healthScore}');
+    print('Vitamins: ${correctedResult.nutritionInfo.vitaminsAndMinerals}');
+    print('========================================');
+
+    // Calculate health score if not provided by API response
+    double calculatedHealthScore = correctedResult.healthScore ?? 5.0;
+    String healthCategory = "Fair"; // Default medium category
+
+    // Use healthScore to determine category if available
+    if (correctedResult.healthScore != null) {
+      if (calculatedHealthScore >= 8)
+        healthCategory = "Excellent";
+      else if (calculatedHealthScore >= 6)
+        healthCategory = "Good";
+      else if (calculatedHealthScore >= 4)
+        healthCategory = "Fair";
+      else if (calculatedHealthScore >= 2)
+        healthCategory = "Poor";
+      else
+        healthCategory = "Very Poor";
+    }
+
     // Ensure state update is synchronous and complete
     setState(() {
       _isCorrectingAnalysis = false;
       food = correctedResult; // Update the food object first
       _updateFoodData(correctedResult); // Then update all the derived data
 
-      // Force update of health score section data
-      _nutritionData['healthScore'] = correctedResult.healthScore;
-      _nutritionData['healthScoreCategory'] =
-          correctedResult.getHealthScoreCategory();
+      // Force update of health score section data with calculated values
+      _nutritionData['healthScore'] = calculatedHealthScore;
+      _nutritionData['healthScoreCategory'] = healthCategory;
     });
 
     // Show success message
