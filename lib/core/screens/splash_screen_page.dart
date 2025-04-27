@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -6,7 +7,7 @@ import 'package:get_it/get_it.dart';
 // Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
 
-import 'package:lottie/lottie.dart'; // Add this package
+// Add this package
 
 /// Splash screen page shown when the app is launched
 ///
@@ -28,7 +29,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
   // Satu AnimationController untuk mengelola semua animasi
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
-  late Animation<int> _dotIndicator; 
+  late Animation<int> _dotIndicator;
 
   @override
   void initState() {
@@ -59,7 +60,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
     // Mulai animasi setelah widget dibangun
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.repeat();
-      
+
       // Mulai proses navigasi ke halaman berikutnya
       _checkAuthAndNavigate();
     });
@@ -71,10 +72,10 @@ class _SplashScreenPageState extends State<SplashScreenPage>
     try {
       // Mulai cek auth bersamaan dengan animasi berjalan
       final userFuture = loginService.getCurrentUser();
-      
+
       // Beri waktu minimal untuk animasi splash
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Ambil hasil login
       final user = await userFuture;
 
@@ -83,11 +84,13 @@ class _SplashScreenPageState extends State<SplashScreenPage>
       if (user != null) {
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       } else {
-        Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/welcome', (route) => false);
       }
     } catch (e) {
       if (mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/welcome', (route) => false);
       }
     }
   }
@@ -100,9 +103,6 @@ class _SplashScreenPageState extends State<SplashScreenPage>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final circleSize = size.width * 0.6; // Adjust size as needed
-
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
@@ -130,7 +130,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // Subtitle
               Text(
                 'Your health companion',
@@ -141,7 +141,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                 ),
               ),
               const SizedBox(height: 40),
-              
+
               // Dot indicator animation
               AnimatedBuilder(
                 animation: _dotIndicator,

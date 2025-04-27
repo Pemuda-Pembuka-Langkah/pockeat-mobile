@@ -72,7 +72,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
           await _checkHealthMetrics(user.uid);
         } else {
           // If no auth required, but user is logged in → redirect anyway
-          Navigator.of(context).pushReplacementNamed(widget.redirectUrlIfLoggedIn);
+          Navigator.of(context)
+              .pushReplacementNamed(widget.redirectUrlIfLoggedIn);
         }
       }
     } catch (e) {
@@ -99,18 +100,19 @@ class _AuthWrapperState extends State<AuthWrapper> {
       final isInsideOnboardingFlow =
           currentRoute?.startsWith('/onboarding') ?? false;
 
-    // 🛑 Jangan redirect kalau user udah dalam onboarding atau lagi ngisi
-    if ((!completed && !onboardingInProgress) && mounted && !isInsideOnboardingFlow) {
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/onboarding/goal',
-        (route) => false,
-      );
-
+      // 🛑 Jangan redirect kalau user udah dalam onboarding atau lagi ngisi
+      if ((!completed && !onboardingInProgress) &&
+          mounted &&
+          !isInsideOnboardingFlow) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/onboarding/goal',
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      debugPrint("Error checking health metrics: $e");
     }
-  } catch (e) {
-    debugPrint("Error checking health metrics: $e");
   }
-}
 
   @override
   Widget build(BuildContext context) {

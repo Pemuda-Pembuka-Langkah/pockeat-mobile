@@ -29,13 +29,13 @@ class _NotificationSettingsScreenState
   TimeOfDay _dailyStreakTime = const TimeOfDay(
       hour: NotificationConstants.defaultStreakNotificationHour,
       minute: NotificationConstants.defaultStreakNotificationMinute);
-      
+
   // Meal reminder state variables
   bool _isMealReminderEnabled = false;
   bool _isBreakfastEnabled = false;
   bool _isLunchEnabled = false;
   bool _isDinnerEnabled = false;
-  
+
   TimeOfDay _breakfastTime = const TimeOfDay(
       hour: NotificationConstants.defaultBreakfastHour,
       minute: NotificationConstants.defaultBreakfastMinute);
@@ -66,54 +66,56 @@ class _NotificationSettingsScreenState
         .isNotificationEnabled(NotificationConstants.dailyStreakChannelId);
 
     // Get saved time or use default from constants
-    final int streakHour = _prefs.getInt(NotificationConstants.prefDailyStreakHour) ??
-        NotificationConstants.defaultStreakNotificationHour;
+    final int streakHour =
+        _prefs.getInt(NotificationConstants.prefDailyStreakHour) ??
+            NotificationConstants.defaultStreakNotificationHour;
     final int streakMinute =
         _prefs.getInt(NotificationConstants.prefDailyStreakMinute) ??
             NotificationConstants.defaultStreakNotificationMinute;
-    
+
     // Load meal reminder settings
     final bool isMealReminderEnabled = await _notificationService
         .isNotificationEnabled(NotificationConstants.mealReminderChannelId);
-    
+
     final bool isBreakfastEnabled = await _notificationService
         .isNotificationEnabled(NotificationConstants.breakfast);
-    
+
     final bool isLunchEnabled = await _notificationService
         .isNotificationEnabled(NotificationConstants.lunch);
-    
+
     final bool isDinnerEnabled = await _notificationService
         .isNotificationEnabled(NotificationConstants.dinner);
-    
+
     // Get saved meal reminder times
-    final breakfastTime = await _getMealReminderTime(NotificationConstants.breakfast);
+    final breakfastTime =
+        await _getMealReminderTime(NotificationConstants.breakfast);
     final lunchTime = await _getMealReminderTime(NotificationConstants.lunch);
     final dinnerTime = await _getMealReminderTime(NotificationConstants.dinner);
 
     setState(() {
       _isDailyStreakEnabled = isStreakEnabled;
       _dailyStreakTime = TimeOfDay(hour: streakHour, minute: streakMinute);
-      
+
       _isMealReminderEnabled = isMealReminderEnabled;
       _isBreakfastEnabled = isBreakfastEnabled;
       _isLunchEnabled = isLunchEnabled;
       _isDinnerEnabled = isDinnerEnabled;
-      
+
       _breakfastTime = breakfastTime;
       _lunchTime = lunchTime;
       _dinnerTime = dinnerTime;
     });
   }
-  
+
   /// Helper method to get meal reminder time
   Future<TimeOfDay> _getMealReminderTime(String mealType) async {
     final prefKey = NotificationConstants.getMealTypeKey(mealType);
     final hourKey = "${prefKey}_hour";
     final minuteKey = "${prefKey}_minute";
-    
+
     int? hour = _prefs.getInt(hourKey);
     int? minute = _prefs.getInt(minuteKey);
-    
+
     switch (mealType) {
       case NotificationConstants.breakfast:
         return TimeOfDay(
@@ -170,7 +172,7 @@ class _NotificationSettingsScreenState
       }
     }
   }
-  
+
   /// Toggle master meal reminder notification
   Future<void> _toggleMealReminderNotification(bool value) async {
     try {
@@ -206,7 +208,7 @@ class _NotificationSettingsScreenState
       }
     }
   }
-  
+
   /// Toggle individual meal type notification
   Future<void> _toggleMealTypeNotification(String mealType, bool value) async {
     try {
@@ -242,7 +244,7 @@ class _NotificationSettingsScreenState
           default:
             mealName = 'meal';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(value
@@ -315,8 +317,8 @@ class _NotificationSettingsScreenState
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text('Notification time changed to ${_formatTimeOfDay(picked)}'),
+            content: Text(
+                'Notification time changed to ${_formatTimeOfDay(picked)}'),
             backgroundColor: primaryGreen,
             behavior: SnackBarBehavior.floating,
           ),
@@ -324,14 +326,15 @@ class _NotificationSettingsScreenState
       }
     }
   }
-  
+
   /// Select time for meal reminder notification
-  Future<void> _selectMealReminderTime(BuildContext context, String mealType) async {
+  Future<void> _selectMealReminderTime(
+      BuildContext context, String mealType) async {
     // Get current time based on meal type
     TimeOfDay initialTime;
     // Define time range constraints for each meal type
     int? minHour, maxHour;
-    
+
     switch (mealType) {
       case NotificationConstants.breakfast:
         initialTime = _breakfastTime;
@@ -351,7 +354,7 @@ class _NotificationSettingsScreenState
       default:
         initialTime = const TimeOfDay(hour: 12, minute: 0);
     }
-    
+
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -390,7 +393,7 @@ class _NotificationSettingsScreenState
         default:
           mealName = 'meal';
       }
-      
+
       // Validate time range
       if (minHour != null && maxHour != null) {
         if (picked.hour < minHour || picked.hour > maxHour) {
@@ -410,10 +413,14 @@ class _NotificationSettingsScreenState
               default:
                 timeRangeText = 'appropriate hours';
             }
-            
+
+            if (!context.mounted) {
+              return;
+            }
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('$mealName reminders should be set during $timeRangeText'),
+                content: Text(
+                    '$mealName reminders should be set during $timeRangeText'),
                 backgroundColor: Colors.orange,
                 behavior: SnackBarBehavior.floating,
                 action: SnackBarAction(
@@ -427,12 +434,12 @@ class _NotificationSettingsScreenState
           }
         }
       }
-      
+
       // Get preference keys for the meal type
       final prefKey = NotificationConstants.getMealTypeKey(mealType);
       final hourKey = "${prefKey}_hour";
       final minuteKey = "${prefKey}_minute";
-      
+
       // Save to SharedPreferences
       await _prefs.setInt(hourKey, picked.hour);
       await _prefs.setInt(minuteKey, picked.minute);
@@ -451,9 +458,10 @@ class _NotificationSettingsScreenState
             break;
         }
       });
-      
+
       // Re-schedule notification if this meal type is enabled
-      final mealEnabled = await _notificationService.isNotificationEnabled(mealType);
+      final mealEnabled =
+          await _notificationService.isNotificationEnabled(mealType);
       if (mealEnabled) {
         // Toggle off and back on to trigger rescheduling
         await _notificationService.toggleNotification(mealType, false);
@@ -464,7 +472,8 @@ class _NotificationSettingsScreenState
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('$mealName reminder time changed to ${_formatTimeOfDay(picked)}'),
+            content: Text(
+                '$mealName reminder time changed to ${_formatTimeOfDay(picked)}'),
             backgroundColor: primaryGreen,
             behavior: SnackBarBehavior.floating,
           ),
@@ -633,7 +642,7 @@ class _NotificationSettingsScreenState
                       ),
                     ),
                     Divider(color: Colors.grey.withOpacity(0.2)),
-                    
+
                     // Master Toggle for Meal Reminders
                     SwitchListTile(
                       title: const Text(
@@ -650,12 +659,13 @@ class _NotificationSettingsScreenState
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 5),
                     ),
-                    
+
                     Divider(color: Colors.grey.withOpacity(0.2)),
-                    
+
                     // Breakfast settings
                     Padding(
-                      padding: const EdgeInsets.only(left: 20, top: 8, bottom: 4),
+                      padding:
+                          const EdgeInsets.only(left: 20, top: 8, bottom: 4),
                       child: Text(
                         'Individual Settings',
                         style: TextStyle(
@@ -665,7 +675,7 @@ class _NotificationSettingsScreenState
                         ),
                       ),
                     ),
-                    
+
                     // Breakfast Toggle and Time
                     SwitchListTile(
                       title: const Text(
@@ -675,21 +685,21 @@ class _NotificationSettingsScreenState
                       subtitle: Text(
                         'Time: ${_formatTimeOfDay(_breakfastTime)}',
                         style: TextStyle(
-                          fontSize: 13, 
-                          color: _isMealReminderEnabled && _isBreakfastEnabled 
-                            ? Colors.grey[600] 
-                            : Colors.grey[400]
-                        ),
+                            fontSize: 13,
+                            color: _isMealReminderEnabled && _isBreakfastEnabled
+                                ? Colors.grey[600]
+                                : Colors.grey[400]),
                       ),
                       value: _isBreakfastEnabled,
                       onChanged: _isMealReminderEnabled
-                        ? (value) => _toggleMealTypeNotification(NotificationConstants.breakfast, value)
-                        : null,
+                          ? (value) => _toggleMealTypeNotification(
+                              NotificationConstants.breakfast, value)
+                          : null,
                       activeColor: primaryPink,
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 5),
                     ),
-                    
+
                     // Time setting button for breakfast
                     if (_isMealReminderEnabled && _isBreakfastEnabled)
                       ListTile(
@@ -701,11 +711,12 @@ class _NotificationSettingsScreenState
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 25, vertical: 0),
                         dense: true,
-                        onTap: () => _selectMealReminderTime(context, NotificationConstants.breakfast),
+                        onTap: () => _selectMealReminderTime(
+                            context, NotificationConstants.breakfast),
                       ),
-                      
+
                     Divider(color: Colors.grey.withOpacity(0.2)),
-                    
+
                     // Lunch Toggle and Time
                     SwitchListTile(
                       title: const Text(
@@ -715,21 +726,21 @@ class _NotificationSettingsScreenState
                       subtitle: Text(
                         'Time: ${_formatTimeOfDay(_lunchTime)}',
                         style: TextStyle(
-                          fontSize: 13, 
-                          color: _isMealReminderEnabled && _isLunchEnabled 
-                            ? Colors.grey[600] 
-                            : Colors.grey[400]
-                        ),
+                            fontSize: 13,
+                            color: _isMealReminderEnabled && _isLunchEnabled
+                                ? Colors.grey[600]
+                                : Colors.grey[400]),
                       ),
                       value: _isLunchEnabled,
                       onChanged: _isMealReminderEnabled
-                        ? (value) => _toggleMealTypeNotification(NotificationConstants.lunch, value)
-                        : null,
+                          ? (value) => _toggleMealTypeNotification(
+                              NotificationConstants.lunch, value)
+                          : null,
                       activeColor: primaryPink,
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 5),
                     ),
-                    
+
                     // Time setting button for lunch
                     if (_isMealReminderEnabled && _isLunchEnabled)
                       ListTile(
@@ -741,11 +752,12 @@ class _NotificationSettingsScreenState
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 25, vertical: 0),
                         dense: true,
-                        onTap: () => _selectMealReminderTime(context, NotificationConstants.lunch),
+                        onTap: () => _selectMealReminderTime(
+                            context, NotificationConstants.lunch),
                       ),
-                      
+
                     Divider(color: Colors.grey.withOpacity(0.2)),
-                    
+
                     // Dinner Toggle and Time
                     SwitchListTile(
                       title: const Text(
@@ -755,21 +767,21 @@ class _NotificationSettingsScreenState
                       subtitle: Text(
                         'Time: ${_formatTimeOfDay(_dinnerTime)}',
                         style: TextStyle(
-                          fontSize: 13, 
-                          color: _isMealReminderEnabled && _isDinnerEnabled 
-                            ? Colors.grey[600] 
-                            : Colors.grey[400]
-                        ),
+                            fontSize: 13,
+                            color: _isMealReminderEnabled && _isDinnerEnabled
+                                ? Colors.grey[600]
+                                : Colors.grey[400]),
                       ),
                       value: _isDinnerEnabled,
                       onChanged: _isMealReminderEnabled
-                        ? (value) => _toggleMealTypeNotification(NotificationConstants.dinner, value)
-                        : null,
+                          ? (value) => _toggleMealTypeNotification(
+                              NotificationConstants.dinner, value)
+                          : null,
                       activeColor: primaryPink,
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 5),
                     ),
-                    
+
                     // Time setting button for dinner
                     if (_isMealReminderEnabled && _isDinnerEnabled)
                       ListTile(
@@ -781,14 +793,15 @@ class _NotificationSettingsScreenState
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 25, vertical: 0),
                         dense: true,
-                        onTap: () => _selectMealReminderTime(context, NotificationConstants.dinner),
+                        onTap: () => _selectMealReminderTime(
+                            context, NotificationConstants.dinner),
                       ),
-                    
+
                     const SizedBox(height: 12),
                   ],
                 ),
               ),
-              
+
               // Info Card
               Container(
                 margin: const EdgeInsets.only(bottom: 16),

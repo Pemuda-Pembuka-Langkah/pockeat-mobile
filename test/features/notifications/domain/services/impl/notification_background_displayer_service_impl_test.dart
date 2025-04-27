@@ -5,14 +5,22 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Dart imports:
+import 'dart:async';
+
+
+
 // Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
+
 import 'package:pockeat/features/notifications/domain/model/streak_message.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/notification_background_displayer_service_impl.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_background_displayer_service.dart';
+import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
+
 import 'notification_background_displayer_service_impl_test.mocks.dart';
 
 @GenerateMocks([
@@ -21,10 +29,7 @@ import 'notification_background_displayer_service_impl_test.mocks.dart';
   FlutterLocalNotificationsPlugin,
   AndroidFlutterLocalNotificationsPlugin,
   SharedPreferences,
-  InitializationSettings,
-  AndroidInitializationSettings,
-  NotificationDetails,
-  AndroidNotificationDetails,
+  UserActivityService,
 ])
 // Tidak perlu lagi membuat mock untuk BackgroundLogger karena sudah menggunakan isTest
 
@@ -38,6 +43,7 @@ void main() {
   late MockAndroidFlutterLocalNotificationsPlugin mockAndroidNotifications;
   late MockSharedPreferences mockPrefs;
   late Map<String, dynamic> serviceMap;
+  late MockUserActivityService mockUserActivityService;
 
   setUp(() {
     // Setup original mocks
@@ -46,18 +52,21 @@ void main() {
     mockNotifications = MockFlutterLocalNotificationsPlugin();
     mockAndroidNotifications = MockAndroidFlutterLocalNotificationsPlugin();
     mockPrefs = MockSharedPreferences();
+    mockUserActivityService = MockUserActivityService();
 
     // Membuat service dengan parameter isTest=true agar BackgroundLogger tidak mencoba akses filesystem
     service = NotificationBackgroundDisplayerServiceImpl(isTest: true);
 
     // We need to use a different approach since BackgroundLogger.log is static
     // Let's just run the test as is and add more tests incrementally
-
+    
+    // Setup service map containing all required dependencies
     serviceMap = {
       'sharedPreferences': mockPrefs,
       'loginService': mockLoginService,
       'foodLogHistoryService': mockFoodLogHistoryService,
       'flutterLocalNotificationsPlugin': mockNotifications,
+      'userActivityService': mockUserActivityService,
     };
 
     // Setup mock for Android platform-specific implementation
@@ -76,6 +85,202 @@ void main() {
     when(mockNotifications.show(any, any, any, any,
             payload: anyNamed('payload')))
         .thenAnswer((_) async {});
+        
+    // By default, set pet sadness notifications to enabled
+    when(mockPrefs.getBool(NotificationConstants.prefPetSadnessEnabled))
+        .thenReturn(true);
+  });
+
+  group('showPetSadnessNotification', () {
+    test('should return false when user is not inactive long enough', () async {
+      // Arrange
+      // Mock short inactivity duration (1 minute)
+      when(mockUserActivityService.getInactiveDuration())
+          .thenAnswer((_) async => const Duration(minutes: 1));
+      
+      // Act
+      final result = await service.showPetSadnessNotification(serviceMap, userActivityService: mockUserActivityService);
+      
+      // Assert
+      expect(result, false);
+      verifyNever(mockNotifications.show(any, any, any, any));
+    });
+
+    test('should return false when user is inactive exactly at threshold', () async {
+      // Arrange
+      // Mock inactivity exactly at threshold
+      when(mockUserActivityService.getInactiveDuration())
+          .thenAnswer((_) async => NotificationConstants.inactivityThreshold);
+      
+      // Act
+      final result = await service.showPetSadnessNotification(serviceMap, userActivityService: mockUserActivityService);
+      
+      // Assert
+      expect(result, false);
+      verifyNever(mockNotifications.show(any, any, any, any));
+    });
+    
+    test('should return false when notifications are disabled', () async {
+      // Arrange
+      // Mock inactivity of 25 hours
+      when(mockUserActivityService.getInactiveDuration())
+          .thenAnswer((_) async => const Duration(hours: 25));
+      
+      // Set notifications to be disabled
+      when(mockPrefs.getBool(NotificationConstants.prefPetSadnessEnabled))
+          .thenReturn(false);
+      
+      // Act
+      final result = await service.showPetSadnessNotification(serviceMap, userActivityService: mockUserActivityService);
+      
+      // Assert
+      expect(result, false);
+      verify(mockPrefs.getBool(NotificationConstants.prefPetSadnessEnabled)).called(1);
+      verifyNever(mockNotifications.show(any, any, any, any));
+    });
+    
+    test('should show notification for slightly sad panda (24-48h)', () async {
+      // Arrange
+      // Mock inactivity of 30 hours (slightly sad range)
+      when(mockUserActivityService.getInactiveDuration())
+          .thenAnswer((_) async => const Duration(hours: 30));
+      
+      // Enable notifications
+      when(mockPrefs.getBool(NotificationConstants.prefPetSadnessEnabled))
+          .thenReturn(true);
+      
+      // Act
+      final result = await service.showPetSadnessNotification(serviceMap, userActivityService: mockUserActivityService);
+      
+      // Assert
+      expect(result, true);
+      verify(mockUserActivityService.getInactiveDuration()).called(1);
+      verify(mockPrefs.getBool(NotificationConstants.prefPetSadnessEnabled)).called(1);
+      verify(mockNotifications.initialize(any)).called(1);
+      verify(mockAndroidNotifications.createNotificationChannel(any)).called(1);
+      
+      // Verify notification was shown with correct title and payload
+      verify(mockNotifications.show(
+        NotificationConstants.petSadnessNotificationId.hashCode,
+        'Your Panda Misses You \ud83d\ude22',  // Title for slightly sad
+        any,
+        any,
+        payload: NotificationConstants.petSadnessPayload,
+      )).called(1);
+    });
+    
+    test('should show notification for very sad panda (48-72h)', () async {
+      // Arrange
+      // Mock inactivity of 60 hours (very sad range)
+      when(mockUserActivityService.getInactiveDuration())
+          .thenAnswer((_) async => const Duration(hours: 60));
+      
+      // Enable notifications
+      when(mockPrefs.getBool(NotificationConstants.prefPetSadnessEnabled))
+          .thenReturn(true);
+      
+      // Act
+      final result = await service.showPetSadnessNotification(serviceMap, userActivityService: mockUserActivityService);
+      
+      // Assert
+      expect(result, true);
+      verify(mockNotifications.show(
+        NotificationConstants.petSadnessNotificationId.hashCode,
+        'Your Panda Is Very Sad \ud83d\ude2d',  // Title for very sad
+        any,
+        any,
+        payload: NotificationConstants.petSadnessPayload,
+      )).called(1);
+    });
+    
+    test('should show notification for extremely sad panda (72h+)', () async {
+      // Arrange
+      // Mock inactivity of 80 hours (extremely sad range)
+      when(mockUserActivityService.getInactiveDuration())
+          .thenAnswer((_) async => const Duration(hours: 80));
+      
+      // Enable notifications
+      when(mockPrefs.getBool(NotificationConstants.prefPetSadnessEnabled))
+          .thenReturn(true);
+      
+      // Act
+      final result = await service.showPetSadnessNotification(serviceMap, userActivityService: mockUserActivityService);
+      
+      // Assert
+      expect(result, true);
+      verify(mockUserActivityService.getInactiveDuration()).called(1);
+      
+      // Verify notification was shown with correct title and payload for extremely sad
+      verify(mockNotifications.show(
+        NotificationConstants.petSadnessNotificationId.hashCode,
+        'URGENT: Your Panda Is Crying \ud83d\udc94',  // Title for extremely sad
+        any,
+        any,
+        payload: NotificationConstants.petSadnessPayload,
+      )).called(1);
+    });
+    
+    test('should handle errors from UserActivityService', () async {
+      // Arrange
+      // Force an error by returning null for the last activity time
+      when(mockUserActivityService.getInactiveDuration())
+          .thenThrow(Exception('Failed to get inactivity duration'));
+      
+      // Act
+      final result = await service.showPetSadnessNotification(serviceMap, userActivityService: mockUserActivityService);
+      
+      // Assert
+      expect(result, false);
+      verifyNever(mockNotifications.show(any, any, any, any));
+    });
+
+    test('should handle errors from SharedPreferences', () async {
+      // Arrange
+      // Set up inactive duration
+      when(mockUserActivityService.getInactiveDuration())
+          .thenAnswer((_) async => const Duration(hours: 25));
+      
+      when(mockPrefs.getBool(NotificationConstants.prefPetSadnessEnabled))
+          .thenThrow(Exception('SharedPreferences error'));
+      
+      // Act
+      final result = await service.showPetSadnessNotification(serviceMap, userActivityService: mockUserActivityService);
+      
+      // Assert
+      expect(result, false);
+      verifyNever(mockNotifications.show(any, any, any, any));
+    });
+
+    test('should show fallback notification when styled notification fails', () async {
+      // Arrange
+      // Set up inactive duration for slightly sad range
+      when(mockUserActivityService.getInactiveDuration())
+          .thenAnswer((_) async => const Duration(hours: 30));
+      
+      when(mockPrefs.getBool(NotificationConstants.prefPetSadnessEnabled))
+          .thenReturn(true);
+      
+      // Make the first show() call throw an exception, but allow the second (fallback) to succeed
+      var callCount = 0;
+      when(mockNotifications.show(any, any, any, any, payload: anyNamed('payload')))
+          .thenAnswer((invocation) {
+            callCount++;
+            if (callCount == 1) {
+              throw Exception('Error showing styled notification');
+            }
+            return Future.value();
+          });
+      
+      // Act
+      final result = await service.showPetSadnessNotification(serviceMap, userActivityService: mockUserActivityService);
+      
+      // Assert
+      expect(result, true);
+      verify(mockUserActivityService.getInactiveDuration()).called(1);
+      
+      // Verify that two show attempts were made (first fails, second succeeds)
+      verify(mockNotifications.show(any, any, any, any, payload: anyNamed('payload'))).called(2);
+    });
   });
 
   group('showMealReminderNotification', () {
@@ -450,9 +655,7 @@ void main() {
         final payload = invocation.namedArguments[const Symbol('payload')];
         expect(payload, equals(NotificationConstants.dailyStreakPayload));
 
-        final notificationDetails =
-            invocation.positionalArguments[3] as NotificationDetails;
-        // Since notificationDetails is a mock, we can't directly verify its android property
+        // We don't need to verify the notification details structure here
         // In a real test, we would verify the channel ID matches NotificationChannels.dailyStreak.id
       });
 

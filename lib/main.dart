@@ -4,14 +4,13 @@ import 'dart:async';
 // Flutter imports:
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +23,6 @@ import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/core/screens/streak_celebration_page.dart';
 import 'package:pockeat/core/service/background_service_manager.dart';
 import 'package:pockeat/core/service/permission_service.dart';
-import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
@@ -38,6 +36,7 @@ import 'package:pockeat/features/authentication/presentation/screens/login_page.
 import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
@@ -70,12 +69,12 @@ import 'package:pockeat/features/health_metrics/presentation/screens/review_subm
 import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
+import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
-
-import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
@@ -306,6 +305,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     // Cek notifikasi di initState untuk menangani cold start dari notifikasi
     _checkNotificationLaunch();
+
+    // Track app open saat aplikasi pertama kali dibuka
+    _trackAppOpen();
+  }
+
+  // Track app open menggunakan UserActivityService
+  Future<void> _trackAppOpen() async {
+    try {
+      final userActivityService = getIt<UserActivityService>();
+      await userActivityService.trackAppOpen();
+      debugPrint('Tracked app open at startup');
+    } catch (e) {
+      debugPrint('Error tracking app open: $e');
+    }
   }
 
   Future<void> _initializeDeepLinkService() async {
@@ -364,12 +377,28 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             }
 
             // Navigasi langsung ke streak celebration page menggunakan navigatorKey
-            navigatorKey.currentState?.pushNamed(
-              '/streak-celebration',
-              arguments:  {'showStreakCelebration': true, 'streakDays': streakDays}
-            );
+            navigatorKey.currentState?.pushNamed('/streak-celebration',
+                arguments: {
+                  'showStreakCelebration': true,
+                  'streakDays': streakDays
+                });
           } catch (e) {
             debugPrint('Error handling streak notification: $e');
+          }
+        }
+        // Handle pet sadness notification (cold start via notification)
+        else if (payload == NotificationConstants.petSadnessPayload) {
+          debugPrint('App launched from pet sadness notification');
+
+          try {
+            // Track app open untuk reset inactiveDuration
+            await _trackAppOpen();
+
+            // Langsung navigasi ke halaman utama/dashboard menggunakan navigatorKey
+            navigatorKey.currentState?.pushReplacementNamed('/');
+            debugPrint('Navigated to dashboard from pet sadness notification');
+          } catch (e) {
+            debugPrint('Error handling pet sadness notification: $e');
           }
         } else if (payload == NotificationConstants.mealReminderPayload) {
           // Untuk meal notification, navigate dengan deeplink
@@ -388,13 +417,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
-
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _deepLinkSubscription?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Track when app is resumed from background
+      _trackAppOpen();
+      debugPrint('App resumed from background, tracked activity');
+    }
   }
 
   @override
@@ -512,40 +548,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),
-        '/scan': (context) => FutureBuilder<List<CameraDescription>>(
-          future: availableCameras(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              }
-              
-              if (snapshot.data?.isEmpty ?? true) {
-                return const Center(
-                  child: Text('Tidak ada kamera yang tersedia'),
-                );
-              }
-
-              return AuthWrapper(
-                child: ScanFoodPage(
-                  cameraController: CameraController(
-                    snapshot.data![0], // Menggunakan kamera pertama (belakang)
-                    ResolutionPreset.max,
-                    enableAudio: false,
-                    imageFormatGroup: ImageFormatGroup.jpeg,
+        '/scan': (context) => AuthWrapper(
+              child: ScanFoodPage(
+                cameraController: CameraController(
+                  const CameraDescription(
+                    name: '0',
+                    lensDirection: CameraLensDirection.back,
+                    sensorOrientation: 0,
                   ),
+                  ResolutionPreset.max,
                 ),
-              );
-            }
-            
-            // Tampilkan loading selama menunggu kamera
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
-        ),
+              ),
+            ),
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
         '/food-text-input': (context) =>
             const AuthWrapper(child: FoodTextInputPage()),
