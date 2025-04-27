@@ -16,7 +16,6 @@ import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
-import 'package:pockeat/features/notifications/domain/model/notification_model.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/notifications/domain/services/utils/work_manager_client.dart';
@@ -66,6 +65,7 @@ class NotificationServiceImpl implements NotificationService {
     await _createNotificationChannel(NotificationChannels.mealReminder);
     await _createNotificationChannel(NotificationChannels.dailyStreak);
     await _createNotificationChannel(NotificationChannels.petSadness);
+    await _createNotificationChannel(NotificationChannels.petStatus);
     // Set up handler untuk FCM
     _setupFCMHandlers();
     // Jadwalkan notifikasi default
@@ -98,15 +98,7 @@ class NotificationServiceImpl implements NotificationService {
     }
   }
 
-  @override
-  Future<void> scheduleLocalNotification(NotificationModel notification,
-      AndroidNotificationChannel channel) async {
-    // For daily streak notifications, use the dedicated method
-    if (channel.id == NotificationConstants.dailyStreakChannelId) {
-      await _scheduleStreakNotification();
-    }
-    // Other notification types are not implemented at this time
-  }
+  // Schedule methods are now called directly from _setupNotificationByChannel
 
   @override
   Future<void> cancelAllNotifications() async {
@@ -168,7 +160,23 @@ class NotificationServiceImpl implements NotificationService {
 
   void _onNotificationTapped(NotificationResponse details) async {
     // Handle notifikasi tap berdasarkan payload
-    if (details.payload == NotificationConstants.dailyStreakPayload) {
+    if (details.payload == NotificationConstants.petStatusPayload) {
+      // Navigate to the dashboard with focus on main tab when pet status notification is tapped
+      // Using the same behavior as pet sadness notification
+      const deepLinkUri = 'pockeat://?type=dashboard&widgetName=main';
+      
+      // Create a platform channel for launching URIs
+      const platformChannel = MethodChannel('com.pockeat/notification_actions');
+      
+      // Call the native method to open the URI
+      await platformChannel.invokeMethod('launchUri', {
+        'uri': deepLinkUri,
+      });
+      
+      // Track app open when user opens the notification
+      await _userActivityService.trackAppOpen();
+    }
+    else if (details.payload == NotificationConstants.dailyStreakPayload) {
       final userId = (await _loginService.getCurrentUser())?.uid;
       if (userId == null) return;
 
@@ -225,8 +233,24 @@ class NotificationServiceImpl implements NotificationService {
 
   @override
   Future<void> toggleNotification(String channelId, bool enabled) async {
+    // Handle pet status notifications
+    if (channelId == NotificationConstants.petStatusChannelId) {
+      // Always cancel existing notifications first to avoid duplicates
+      debugPrint("Canceling existing notification for channel: $channelId");
+      await cancelNotificationsByChannel(channelId);
+
+      // Save notification status to SharedPreferences
+      await _prefs.setBool(
+          NotificationConstants.prefPetStatusEnabled, enabled);
+
+      if (enabled) {
+        // Schedule notification if enabled
+        debugPrint("Setting up notification for channel: $channelId");
+        await _setupNotificationByChannel(channelId);
+      }
+    }
     // Handle daily streak notifications
-    if (channelId == NotificationConstants.dailyStreakChannelId) {
+    else if (channelId == NotificationConstants.dailyStreakChannelId) {
       // Always cancel existing notifications first to avoid duplicates
       debugPrint("Canceling existing notification for channel: $channelId");
       await cancelNotificationsByChannel(channelId);
@@ -300,8 +324,19 @@ class NotificationServiceImpl implements NotificationService {
 
   @override
   Future<bool> isNotificationEnabled(String channelId) async {
+    // For pet status notifications, default to true if key doesn't exist
+    if (channelId == NotificationConstants.petStatusChannelId) {
+      // If key doesn't exist, create it with default value true
+      if (!_prefs.containsKey(NotificationConstants.prefPetStatusEnabled)) {
+        await _prefs.setBool(
+            NotificationConstants.prefPetStatusEnabled, true);
+        return true;
+      }
+      return _prefs.getBool(NotificationConstants.prefPetStatusEnabled) ??
+          true;
+    }
     // For daily streak notifications, default to true if key doesn't exist
-    if (channelId == NotificationConstants.dailyStreakChannelId) {
+    else if (channelId == NotificationConstants.dailyStreakChannelId) {
       // If key doesn't exist, create it with default value true
       if (!_prefs.containsKey(NotificationConstants.prefDailyStreakEnabled)) {
         await _prefs.setBool(
@@ -344,8 +379,15 @@ class NotificationServiceImpl implements NotificationService {
   }
 
   Future<void> _setupNotificationByChannel(String channelId) async {
+    // Handle pet status notifications
+    if (channelId == NotificationConstants.petStatusChannelId) {
+      // For pet status channel, we use WorkManager to schedule the background task
+      // that gets pet status at the time of notification
+      debugPrint("Setting up pet status notification");
+      await _schedulePetStatusNotification();
+    }
     // Handle daily streak notifications
-    if (channelId == NotificationConstants.dailyStreakChannelId) {
+    else if (channelId == NotificationConstants.dailyStreakChannelId) {
       // For streak channel, we use WorkManager to schedule the background task
       // that calculates streak at the time of notification
       debugPrint("Setting up daily streak notification");
@@ -365,8 +407,15 @@ class NotificationServiceImpl implements NotificationService {
   }
 
   Future<void> cancelNotificationsByChannel(String channelId) async {
+    // Handle pet status notifications
+    if (channelId == NotificationConstants.petStatusChannelId) {
+      await cancelNotification(NotificationConstants.petStatusNotificationId);
+      // Also cancel the WorkManager task for pet status notifications
+      await _workManagerClient
+          .cancelByUniqueName(NotificationConstants.petStatusUpdateTaskName);
+    }
     // Handle daily streak notifications
-    if (channelId == NotificationConstants.dailyStreakChannelId) {
+    else if (channelId == NotificationConstants.dailyStreakChannelId) {
       await cancelNotification(NotificationConstants.dailyStreakNotificationId);
       // Also cancel the WorkManager task for streak notifications
       await _workManagerClient
@@ -395,6 +444,17 @@ class NotificationServiceImpl implements NotificationService {
   }
 
   Future<void> _setupDefaultRecurringNotifications() async {
+    // Set up pet status notifications if enabled
+    final isPetStatusEnabled =
+        await isNotificationEnabled(NotificationConstants.petStatusChannelId);
+
+    debugPrint("isPetStatusEnabled: $isPetStatusEnabled");
+    if (isPetStatusEnabled) {
+      debugPrint("Setting up pet status notification");
+      await _setupNotificationByChannel(
+          NotificationConstants.petStatusChannelId);
+    }
+    
     // Set up daily streak notifications if enabled
     final isStreakEnabled =
         await isNotificationEnabled(NotificationConstants.dailyStreakChannelId);
@@ -662,6 +722,87 @@ class NotificationServiceImpl implements NotificationService {
     }
   }
 
+  // Schedule pet status notification
+  Future<void> _schedulePetStatusNotification() async {
+    // Get user's preferred notification time (or use default)
+    debugPrint("Getting pet status notification time");
+    final hour = _prefs.getInt(NotificationConstants.prefPetStatusHour);
+    final minute = _prefs.getInt(NotificationConstants.prefPetStatusMinute);
+    // Use stored time or default
+    TimeOfDay notificationTime = const TimeOfDay(
+        hour: NotificationConstants.defaultPetStatusNotificationHour,
+        minute: NotificationConstants.defaultPetStatusNotificationMinute);
+    if (hour != null && minute != null) {
+      notificationTime = TimeOfDay(hour: hour, minute: minute);
+    }
+    debugPrint(
+        "Pet status notification time: ${notificationTime.hour}:${notificationTime.minute}");
+
+    // Calculate the initial delay to the scheduled time
+    final now = DateTime.now();
+    final scheduledTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      notificationTime.hour,
+      notificationTime.minute,
+    );
+    debugPrint("Scheduled time: ${scheduledTime.hour}:${scheduledTime.minute}");
+    // If the scheduled time for today has already passed, schedule for tomorrow
+    final initialDelay = scheduledTime.isAfter(now)
+        ? scheduledTime.difference(now)
+        : scheduledTime.add(const Duration(days: 1)).difference(now);
+
+    // Cancel any existing tasks
+    await _workManagerClient
+        .cancelByUniqueName(NotificationConstants.petStatusUpdateTaskName);
+    debugPrint("Cancelled existing pet status update task");
+
+    // Schedule the daily task - make sure task name and unique name match exactly
+    await _workManagerClient.registerPeriodicTask(
+      NotificationConstants.petStatusUpdateTaskName, // Unique name
+      NotificationConstants
+          .petStatusUpdateTaskName, // Task name (must match exactly)
+      frequency: const Duration(days: 1),
+      initialDelay: initialDelay,
+      constraints: Constraints(
+        networkType: NetworkType.not_required,
+      ),
+    );
+    debugPrint(
+        "Scheduled pet status task with name: ${NotificationConstants.petStatusUpdateTaskName}");
+  }
+
+  /// Update pet status notification time
+  Future<void> updatePetStatusNotificationTime(TimeOfDay time) async {
+    // Save the new notification time
+    await _prefs.setInt(NotificationConstants.prefPetStatusHour, time.hour);
+    await _prefs.setInt(NotificationConstants.prefPetStatusMinute, time.minute);
+
+    // Only reschedule if notifications are enabled
+    final isPetStatusEnabled = await isNotificationEnabled(
+        NotificationConstants.petStatusChannelId);
+
+    if (isPetStatusEnabled) {
+      // Cancel existing notification
+      await _workManagerClient
+          .cancelByUniqueName(NotificationConstants.petStatusUpdateTaskName);
+
+      // Reschedule with new time
+      await _schedulePetStatusNotification();
+    }
+  }
+
+  /// Get the current pet status notification time
+  Future<TimeOfDay> getPetStatusNotificationTime() async {
+    final hour = _prefs.getInt(NotificationConstants.prefPetStatusHour);
+    final minute = _prefs.getInt(NotificationConstants.prefPetStatusMinute);
+
+    return TimeOfDay(
+        hour: hour ?? NotificationConstants.defaultPetStatusNotificationHour,
+        minute: minute ?? NotificationConstants.defaultPetStatusNotificationMinute);
+  }
+  
   /// Schedule a periodic task to check for user inactivity and show pet sadness notifications
   Future<void> _schedulePetSadnessCheck() async {
     // Cancel any existing task first to avoid duplicates

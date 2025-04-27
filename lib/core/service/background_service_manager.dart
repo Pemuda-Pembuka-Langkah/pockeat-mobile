@@ -28,6 +28,13 @@ void callbackDispatcher() {
 
       // Handle tasks using a switch statement
       switch (taskName) {
+        case NotificationConstants.petStatusUpdateTaskName:
+          final NotificationBackgroundDisplayerService notificationDisplayer =
+              NotificationBackgroundDisplayerServiceImpl();
+          await notificationDisplayer.showPetStatusNotification(services);
+
+          break;
+            
         case NotificationConstants.streakCalculationTaskName:
           final NotificationBackgroundDisplayerService notificationDisplayer =
               NotificationBackgroundDisplayerServiceImpl();

@@ -30,6 +30,12 @@ class _NotificationSettingsScreenState
       hour: NotificationConstants.defaultStreakNotificationHour,
       minute: NotificationConstants.defaultStreakNotificationMinute);
 
+  // Pet status notification variables
+  bool _isPetStatusEnabled = false;
+  TimeOfDay _petStatusTime = const TimeOfDay(
+      hour: NotificationConstants.defaultPetStatusNotificationHour,
+      minute: NotificationConstants.defaultPetStatusNotificationMinute);
+
   // Meal reminder state variables
   bool _isMealReminderEnabled = false;
   bool _isBreakfastEnabled = false;
@@ -73,6 +79,18 @@ class _NotificationSettingsScreenState
         _prefs.getInt(NotificationConstants.prefDailyStreakMinute) ??
             NotificationConstants.defaultStreakNotificationMinute;
 
+    // Check if pet status notification is enabled
+    final bool isPetStatusEnabled = await _notificationService
+        .isNotificationEnabled(NotificationConstants.petStatusChannelId);
+
+    // Get saved pet status time or use default from constants
+    final int petStatusHour =
+        _prefs.getInt(NotificationConstants.prefPetStatusHour) ??
+            NotificationConstants.defaultPetStatusNotificationHour;
+    final int petStatusMinute =
+        _prefs.getInt(NotificationConstants.prefPetStatusMinute) ??
+            NotificationConstants.defaultPetStatusNotificationMinute;
+
     // Load meal reminder settings
     final bool isMealReminderEnabled = await _notificationService
         .isNotificationEnabled(NotificationConstants.mealReminderChannelId);
@@ -95,6 +113,9 @@ class _NotificationSettingsScreenState
     setState(() {
       _isDailyStreakEnabled = isStreakEnabled;
       _dailyStreakTime = TimeOfDay(hour: streakHour, minute: streakMinute);
+
+      _isPetStatusEnabled = isPetStatusEnabled;
+      _petStatusTime = TimeOfDay(hour: petStatusHour, minute: petStatusMinute);
 
       _isMealReminderEnabled = isMealReminderEnabled;
       _isBreakfastEnabled = isBreakfastEnabled;
@@ -154,6 +175,42 @@ class _NotificationSettingsScreenState
             content: Text(value
                 ? 'Daily streak notification has been enabled'
                 : 'Daily streak notification has been disabled'),
+            backgroundColor: value ? primaryGreen : Colors.grey,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Gagal ${value ? 'mengaktifkan' : 'menonaktifkan'} notifikasi: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Toggle pet status notification
+  Future<void> _togglePetStatusNotification(bool value) async {
+    try {
+      // Toggle notification in service - business logic handled in service
+      await _notificationService.toggleNotification(
+          NotificationConstants.petStatusChannelId, value);
+
+      setState(() {
+        _isPetStatusEnabled = value;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value
+                ? 'Pet status notification has been enabled'
+                : 'Pet status notification has been disabled'),
             backgroundColor: value ? primaryGreen : Colors.grey,
             behavior: SnackBarBehavior.floating,
           ),
@@ -319,6 +376,64 @@ class _NotificationSettingsScreenState
           SnackBar(
             content: Text(
                 'Notification time changed to ${_formatTimeOfDay(picked)}'),
+            backgroundColor: primaryGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Select time for pet status notification
+  Future<void> _selectPetStatusTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _petStatusTime,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: primaryPink,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: primaryPink,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _petStatusTime) {
+      // Save new time to preferences
+      await _prefs.setInt(
+          NotificationConstants.prefPetStatusHour, picked.hour);
+      await _prefs.setInt(
+          NotificationConstants.prefPetStatusMinute, picked.minute);
+
+      setState(() {
+        _petStatusTime = picked;
+      });
+
+      // Re-schedule notification if enabled
+      if (_isPetStatusEnabled) {
+        // Toggle off and back on to trigger rescheduling
+        await _notificationService.toggleNotification(
+            NotificationConstants.petStatusChannelId, false);
+        await _notificationService.toggleNotification(
+            NotificationConstants.petStatusChannelId, true);
+      }
+
+      if (mounted) {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Pet status notification time changed to ${_formatTimeOfDay(picked)}'),
             backgroundColor: primaryGreen,
             behavior: SnackBarBehavior.floating,
           ),
@@ -597,6 +712,83 @@ class _NotificationSettingsScreenState
                       ),
                       onTap: _isDailyStreakEnabled
                           ? () => _selectDailyStreakTime(context)
+                          : null,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 5),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
+              ),
+              // Pet Status Notification Card
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.08),
+                      spreadRadius: 1,
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 20, top: 16, bottom: 8),
+                      child: Text(
+                        'Pet Status Notification',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                    ),
+                    Divider(color: Colors.grey.withOpacity(0.2)),
+                    SwitchListTile(
+                      title: const Text(
+                        'Enable Pet Status Notification',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      subtitle: Text(
+                        'Get updates about your pet mood',
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      ),
+                      value: _isPetStatusEnabled,
+                      onChanged: _togglePetStatusNotification,
+                      activeColor: primaryPink,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 5),
+                    ),
+                    Divider(color: Colors.grey.withOpacity(0.2)),
+                    ListTile(
+                      enabled: _isPetStatusEnabled,
+                      title: const Text(
+                        'Notification Time',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      subtitle: Text(
+                        'Set at ${_formatTimeOfDay(_petStatusTime)}',
+                        style: TextStyle(
+                            fontSize: 13,
+                            color: _isPetStatusEnabled
+                                ? Colors.grey[600]
+                                : Colors.grey[400]),
+                      ),
+                      trailing: Icon(
+                        Icons.access_time,
+                        color: _isPetStatusEnabled
+                            ? primaryPink
+                            : Colors.grey[400],
+                      ),
+                      onTap: _isPetStatusEnabled
+                          ? () => _selectPetStatusTime(context)
                           : null,
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 5),

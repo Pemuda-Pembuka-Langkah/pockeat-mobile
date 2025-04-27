@@ -400,6 +400,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           } catch (e) {
             debugPrint('Error handling pet sadness notification: $e');
           }
+        }
+        // Handle pet status notification (cold start via notification)
+        else if (payload == NotificationConstants.petStatusPayload) {
+          debugPrint('App launched from pet status notification');
+
+          try {
+            // Track app open
+            await _trackAppOpen();
+
+            // Navigate to the main dashboard screen
+            navigatorKey.currentState?.pushReplacementNamed('/');
+            debugPrint('Navigated to dashboard from pet status notification');
+          } catch (e) {
+            debugPrint('Error handling pet status notification: $e');
+          }
         } else if (payload == NotificationConstants.mealReminderPayload) {
           // Untuk meal notification, navigate dengan deeplink
           try {
