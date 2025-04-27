@@ -332,6 +332,18 @@ void main() {
       // Should render without errors
       expect(find.text('Total Calories'), findsOneWidget);
     });
+    
+    // Add test for empty data visualization
+    testWidgets('shows empty state message when no data is available', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createRealWidgetUnderTest(data: emptyData));
+      await tester.pumpAndSettle();
+      
+      // Should show "No food logs" message
+      expect(find.text("No food logs for this week"), findsOneWidget);
+      expect(find.text("Your nutrition data will appear here once you log meals"), findsOneWidget);
+      expect(find.byIcon(Icons.info_outline), findsOneWidget);
+    });
   });
 
   group('CaloriesChart helper methods', () {
@@ -524,6 +536,24 @@ void main() {
       await tester.pumpAndSettle();
       
       expect(find.byType(SfCartesianChart), findsOneWidget);
+    });
+    
+    // Test empty chart rendering
+    testWidgets('renders empty chart with correct properties when no data', 
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createRealWidgetUnderTest(data: emptyData));
+      await tester.pumpAndSettle();
+      
+      final chart = tester.widget<SfCartesianChart>(find.byType(SfCartesianChart));
+      
+      // Check Y-axis properties for empty chart
+      final yAxis = chart.primaryYAxis as NumericAxis;
+      expect(yAxis.minimum, 0);
+      expect(yAxis.maximum, 500);
+      expect(yAxis.interval, 100);
+      
+      // Check that no series are rendered
+      expect(chart.series.isEmpty, true);
     });
   });
 
