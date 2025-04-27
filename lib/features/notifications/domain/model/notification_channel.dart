@@ -66,10 +66,10 @@ class NotificationChannels {
   /// Pet status notifications
   static const AndroidNotificationChannel petStatus =
       AndroidNotificationChannel(
-    'pet_status_channel',
-    'Status Hewan Peliharaan',
+    NotificationConstants.petStatusChannelId,
+    'Pet Status Updates',
     description:
-        'Channel untuk mengirim notifikasi tentang status hewan peliharaan',
+        'Channel for sending notifications about your pet\'s status and mood',
     importance: Importance.high,
   );
 

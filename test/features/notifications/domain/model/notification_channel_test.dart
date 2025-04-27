@@ -16,6 +16,7 @@ void main() {
       expect(NotificationChannels.server.id, NotificationConstants.serverChannelId);
       expect(NotificationChannels.dailyStreak.id, NotificationConstants.dailyStreakChannelId);
       expect(NotificationChannels.petSadness.id, NotificationConstants.petSadnessChannelId);
+      expect(NotificationChannels.petStatus.id, NotificationConstants.petStatusChannelId);
     });
     test('should define all required channels for application features', () {
       // Pastikan semua channel yang diperlukan untuk fitur-fitur aplikasi didefinisikan
@@ -107,13 +108,16 @@ void main() {
 
     test('petStatus channel should have correct properties', () {
       // Assert
-      expect(NotificationChannels.petStatus.id, 'pet_status_channel');
-      expect(NotificationChannels.petStatus.name, 'Status Hewan Peliharaan');
+      expect(NotificationChannels.petStatus.id, NotificationConstants.petStatusChannelId);
+      expect(NotificationChannels.petStatus.name, 'Pet Status Updates');
       expect(
         NotificationChannels.petStatus.description,
-        'Channel untuk mengirim notifikasi tentang status hewan peliharaan',
+        'Channel for sending notifications about your pet\'s status and mood',
       );
       expect(NotificationChannels.petStatus.importance, Importance.high);
+      
+      // Verify id matches the constant
+      expect(NotificationChannels.petStatus.id, equals(NotificationConstants.petStatusChannelId));
     });
 
     test('petSadness channel should have correct properties', () {
@@ -175,12 +179,13 @@ void main() {
       expect(NotificationConstants.serverChannelId, equals(NotificationChannels.server.id));
       expect(NotificationConstants.dailyStreakChannelId, equals(NotificationChannels.dailyStreak.id));
       expect(NotificationConstants.petSadnessChannelId, equals(NotificationChannels.petSadness.id));
+      expect(NotificationConstants.petStatusChannelId, equals(NotificationChannels.petStatus.id));
     });
     
     test('channels for POC features should be properly defined', () {
       // POC-152: Pet status indicators
-      expect(NotificationChannels.petStatus.id, 'pet_status_channel');
-      expect(NotificationChannels.petStatus.name, contains('Hewan Peliharaan'));
+      expect(NotificationChannels.petStatus.id, NotificationConstants.petStatusChannelId);
+      expect(NotificationChannels.petStatus.name, contains('Pet Status'));
       
       // Pet sadness alerts
       expect(NotificationChannels.petSadness.id, NotificationConstants.petSadnessChannelId);
@@ -212,10 +217,12 @@ void main() {
         expect(channel.description!.length, greaterThan(10), 
             reason: 'Description for ${channel.id} should be informative');
         
-        // More flexible pattern check - either contains 'Channel untuk' or 'Notifikasi'
+        // More flexible pattern check - accommodates both Indonesian and English formats
         expect(
           channel.description!.contains('Channel untuk') || 
-          channel.description!.contains('Notifikasi'),
+          channel.description!.contains('Notifikasi') ||
+          channel.description!.contains('Channel for') ||
+          channel.description!.contains('Notification'),
           isTrue,
           reason: 'Description for ${channel.id} should follow standard format'
         );
