@@ -1,14 +1,18 @@
 // Flutter imports:
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Package imports:
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 // Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 
 /// Registration page for new users
 ///
@@ -109,6 +113,14 @@ class _RegisterPageState extends State<RegisterPage> {
       if (result == RegisterResult.success) {
         // Track signup event with analytics
         await _analyticsService.logSignUp(method: 'email');
+
+        // New addition: Save user's onboarding form data after signup
+        final uid = GetIt.instance<FirebaseAuth>().currentUser?.uid;
+        if (uid != null && context.mounted) {
+          final formCubit = context.read<HealthMetricsFormCubit>();
+          formCubit.setUserId(uid);
+          await formCubit.submit(); // Save onboarding form data
+        }
 
         setState(() {
           _isRegistrationSuccess = true;
