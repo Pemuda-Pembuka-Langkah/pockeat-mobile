@@ -150,7 +150,7 @@ class ActivityLevelPage extends StatelessWidget {
                             // Mark onboarding as in progress and navigate
                             final prefs = await SharedPreferences.getInstance();
                             await prefs.setBool('onboardingInProgress', true);
-                            Navigator.pushNamed(context, '/diet');
+                            Navigator.pushNamed(context, '/speed');
                           }
                         : null, // Disabled if no selection
                     child: const Center(child: Text("Next")),
