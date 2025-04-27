@@ -8,9 +8,9 @@ import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_co
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/app_bar_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/main_tabs_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/weight_progress_widget.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 
-// coverage:ignore-start
 class ProgressPage extends StatefulWidget {
   final ProgressTabsService service;
   
@@ -24,78 +24,13 @@ class ProgressPage extends StatefulWidget {
   State<ProgressPage> createState() => _ProgressPageState();
 }
 
-// Unified progress insights widget instead of having three tabs
+// Unified progress insights widget replaced with the WeightProgressWidget
 class UnifiedInsightsWidget extends StatelessWidget {
   const UnifiedInsightsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Progress Insights',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 24),
-            
-            // Placeholder for the unified insights content
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.construction,
-                    size: 64,
-                    color: Colors.amber,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Unified Progress Insights',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'This section is being redesigned to show all your progress metrics in one place',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // You can add mock UI elements here to represent the future design
-                  // For example, progress indicators, charts, etc.
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    return const WeightProgressWidget();
   }
 }
 
@@ -226,4 +161,3 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
     );
   }
 }
-// coverage:ignore-end
