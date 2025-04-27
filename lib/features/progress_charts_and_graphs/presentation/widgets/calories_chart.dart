@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
 import 'package:intl/intl.dart';
+import 'dart:math' as math;
 
 class CaloriesChart extends StatelessWidget {
   final List<CalorieData> calorieData;
@@ -20,8 +21,11 @@ class CaloriesChart extends StatelessWidget {
     final numberFormat = NumberFormat('#,###');
     final formattedCalories = numberFormat.format(totalCalories.round());
     
+    // Check if data is empty
+    final bool hasNoData = calorieData.isEmpty;
+    
     // Calculate proportional data
-    final proportionalData = _calculateProportionalData();
+    final List<Map<String, dynamic>> proportionalData = hasNoData ? [] : _calculateProportionalData();
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,7 +52,7 @@ class CaloriesChart extends StatelessWidget {
                   ),
                 )
               : Text(
-                  formattedCalories,
+                  hasNoData ? '0' : formattedCalories,
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -69,143 +73,175 @@ class CaloriesChart extends StatelessWidget {
           height: 180,
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
-              : SfCartesianChart(
-                  primaryXAxis: CategoryAxis(
-                    majorGridLines: const MajorGridLines(width: 0),
-                    axisLine: const AxisLine(width: 0),
-                  ),
-                  primaryYAxis: NumericAxis(
-                    majorGridLines: MajorGridLines(
-                      width: 1,
-                      color: Colors.grey[200],
-                      dashArray: const [5, 5],
-                    ),
-                    axisLine: const AxisLine(width: 0),
-                    minimum: 0,
-                    // Dynamic maximum based on highest calorie day rounded up to nearest 100
-                    maximum: _calculateYAxisMaximum(),
-                    // Set interval to evenly divide the axis into 5 parts (showing 6 values including 0 and max)
-                    interval: _calculateYAxisMaximum() / 5,
-                    // Show label for maximum value
-                    maximumLabelWidth: 50,
-                    labelFormat: '{value}',
-                    decimalPlaces: 0,
-                  ),
+              : Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Always show the chart (empty if no data)
+                    SfCartesianChart(
+                      primaryXAxis: CategoryAxis(
+                        majorGridLines: const MajorGridLines(width: 0),
+                        axisLine: const AxisLine(width: 0),
+                      ),
+                      primaryYAxis: NumericAxis(
+                        majorGridLines: MajorGridLines(
+                          width: 1,
+                          color: Colors.grey[200],
+                          dashArray: const [5, 5],
+                        ),
+                        axisLine: const AxisLine(width: 0),
+                        minimum: 0,
+                        // Use either calculated max or default 500 for empty data
+                        maximum: hasNoData ? 500 : _calculateYAxisMaximum(),
+                        // Set interval
+                        interval: hasNoData ? 100 : _calculateYAxisMaximum() / 5,
+                        maximumLabelWidth: 50,
+                        labelFormat: '{value}',
+                        decimalPlaces: 0,
+                      ),
 // coverage:ignore-start
-                  series: <CartesianSeries>[
-                    StackedColumnSeries<Map<String, dynamic>, String>(
-                      dataSource: proportionalData,
-                      xValueMapper: (Map<String, dynamic> data, _) => data['day'],
-                      yValueMapper: (Map<String, dynamic> data, _) => data['carbsCalories'],
-                      color: Colors.amber,
-                      name: 'Carbs',
-                      // Add this field to store the gram value for tooltip display
-                      dataLabelMapper: (Map<String, dynamic> data, _) => data['carbs'].toString(),
-                    ),
-                    StackedColumnSeries<Map<String, dynamic>, String>(
-                      dataSource: proportionalData,
-                      xValueMapper: (Map<String, dynamic> data, _) => data['day'],
-                      yValueMapper: (Map<String, dynamic> data, _) => data['proteinCalories'],
-                      color: const Color(0xFF2196F3),
-                      name: 'Protein',
-                      // Add this field to store the gram value for tooltip display
-                      dataLabelMapper: (Map<String, dynamic> data, _) => data['protein'].toString(),
-                    ),
-                    StackedColumnSeries<Map<String, dynamic>, String>(
-                      dataSource: proportionalData,
-                      xValueMapper: (Map<String, dynamic> data, _) => data['day'],
-                      yValueMapper: (Map<String, dynamic> data, _) => data['fatCalories'],
-                      color: const Color(0xFFE57373),
-                      name: 'Fats',
-                      // Add this field to store the gram value for tooltip display
-                      dataLabelMapper: (Map<String, dynamic> data, _) => data['fats'].toString(),
-                    ),
-                  ],
-                  tooltipBehavior: TooltipBehavior(
-                    enable: true,
-                    // Use a custom builder instead of format
-                    builder: (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
-                      // Get the corresponding macronutrient data
-                      final macroData = proportionalData[pointIndex];
-                      String value = '';
-                      String macroType = '';
-                      
-                      // Select the right macronutrient based on series index
-                      if (seriesIndex == 0) {
-                        value = macroData['carbs'];
-                        macroType = 'Carbs';
-                      } else if (seriesIndex == 1) {
-                        value = macroData['protein'];
-                        macroType = 'Protein';
-                      } else if (seriesIndex == 2) {
-                        value = macroData['fats'];
-                        macroType = 'Fats';
-                      }
-                      
-                      // Convert abbreviated day to full name
-                      final String fullDayName = _getFullDayName(macroData['day']);
-                      
-                      // Create improved tooltip with centered text
-                      return Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(8),
+                      series: hasNoData ? <CartesianSeries>[] : <CartesianSeries>[
+                        StackedColumnSeries<Map<String, dynamic>, String>(
+                          dataSource: proportionalData,
+                          xValueMapper: (Map<String, dynamic> data, _) => data['day'],
+                          yValueMapper: (Map<String, dynamic> data, _) => data['carbsCalories'],
+                          color: Colors.amber,
+                          name: 'Carbs',
+                          dataLabelMapper: (Map<String, dynamic> data, _) => data['carbs'].toString(),
                         ),
-                        // Remove the fixed width constraints to let it adjust to content
-                        child: IntrinsicWidth(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Day name - bold, centered, underlined
-                              Container(
-                                alignment: Alignment.center,
-                                margin: const EdgeInsets.only(bottom: 8),
-                                decoration: const BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(color: Colors.white, width: 1)
-                                  )
-                                ),
-                                padding: const EdgeInsets.only(bottom: 4),
-                                child: Text(
-                                  fullDayName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                        StackedColumnSeries<Map<String, dynamic>, String>(
+                          dataSource: proportionalData,
+                          xValueMapper: (Map<String, dynamic> data, _) => data['day'],
+                          yValueMapper: (Map<String, dynamic> data, _) => data['proteinCalories'],
+                          color: const Color(0xFF2196F3),
+                          name: 'Protein',
+                          dataLabelMapper: (Map<String, dynamic> data, _) => data['protein'].toString(),
+                        ),
+                        StackedColumnSeries<Map<String, dynamic>, String>(
+                          dataSource: proportionalData,
+                          xValueMapper: (Map<String, dynamic> data, _) => data['day'],
+                          yValueMapper: (Map<String, dynamic> data, _) => data['fatCalories'],
+                          color: const Color(0xFFE57373),
+                          name: 'Fats',
+                          dataLabelMapper: (Map<String, dynamic> data, _) => data['fats'].toString(),
+                        ),
+                      ],
+                      tooltipBehavior: TooltipBehavior(
+                        enable: true && !hasNoData,
+                        builder: (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
+                          final macroData = proportionalData[pointIndex];
+                          String value = '';
+                          String macroType = '';
+                          
+                          if (seriesIndex == 0) {
+                            value = macroData['carbs'];
+                            macroType = 'Carbs';
+                          } else if (seriesIndex == 1) {
+                            value = macroData['protein'];
+                            macroType = 'Protein';
+                          } else if (seriesIndex == 2) {
+                            value = macroData['fats'];
+                            macroType = 'Fats';
+                          }
+                          
+                          final String fullDayName = _getFullDayName(macroData['day']);
+                          
+                          return Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.8),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: IntrinsicWidth(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    alignment: Alignment.center,
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    decoration: const BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(color: Colors.white, width: 1)
+                                      )
+                                    ),
+                                    padding: const EdgeInsets.only(bottom: 4),
+                                    child: Text(
+                                      fullDayName,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
+                                  Text(
+                                    '$macroType: $value g',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
-                              // Macronutrient value - centered
-                              Text(
-                                '$macroType: $value g',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    
+                    // Show "No food logs" message if data is empty
+                    if (hasNoData)
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey[300]!),
                         ),
-                      );
-                    },
-                  ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.info_outline, 
+                              size: 30,
+                              color: Colors.grey[600],
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              "No food logs for this week",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            Text(
+                              "Your nutrition data will appear here once you log meals",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
         ),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            _buildColorIndicator(Colors.amber, 'Carbs'),
-            const SizedBox(width: 16),
-            _buildColorIndicator(const Color(0xFF2196F3), 'Protein'),
-            const SizedBox(width: 16),
-            _buildColorIndicator(const Color(0xFFE57373), 'Fats'),
-          ],
-        ),
-
+        if (!hasNoData)
+          Row(
+            children: [
+              _buildColorIndicator(Colors.amber, 'Carbs'),
+              const SizedBox(width: 16),
+              _buildColorIndicator(const Color(0xFF2196F3), 'Protein'),
+              const SizedBox(width: 16),
+              _buildColorIndicator(const Color(0xFFE57373), 'Fats'),
+            ],
+          ),
       ],
     );
   }
@@ -269,7 +305,8 @@ class CaloriesChart extends StatelessWidget {
     
     // Round up to the nearest 100 for better visualization
     // e.g., if max calories is 1243, round up to 1300
-    return ((maxDailyCalories / 100).ceil() * 100).toDouble();
+    // Ensure minimum is 500 for better visualization when values are very small
+    return math.max(500, ((maxDailyCalories / 100).ceil() * 100)).toDouble();
   }
 
   Widget _buildColorIndicator(Color color, String label) {
