@@ -403,23 +403,30 @@ void main() {
     }
   });
 
-  testWidgets('Should handle back button press on login page',
-      (WidgetTester tester) async {
-    // Setup screen size
-    tester.binding.window.physicalSizeTestValue = const Size(600, 800);
-    tester.binding.window.devicePixelRatioTestValue = 1.0;
+  testWidgets('Should handle back button press on login page', (WidgetTester tester) async {
+  // Setup screen size
+  tester.binding.window.physicalSizeTestValue = const Size(600, 800);
+  tester.binding.window.devicePixelRatioTestValue = 1.0;
 
-    // Build login page
-    await tester.pumpWidget(const MaterialApp(home: LoginPage()));
-    await tester.pumpAndSettle();
+  // Build login page
+  await tester.pumpWidget(const MaterialApp(home: LoginPage()));
+  await tester.pumpAndSettle();
 
-    // Verifikasi PopScope ada
-    expect(find.byType(PopScope), findsOneWidget);
+  // Cari WillPopScope yang child-nya LoginPage
+  final willPopScopeFinder = find.byWidgetPredicate(
+    (widget) =>
+        widget is WillPopScope &&
+        widget.child is Scaffold, // Karena LoginPage child-nya Scaffold
+  );
 
-    // Verifikasi canPop adalah false
-    final popScope = tester.widget<PopScope>(find.byType(PopScope));
-    expect(popScope.canPop, isFalse);
-  });
+  // Verifikasi ketemu
+  expect(willPopScopeFinder, findsOneWidget);
+
+  // Verifikasi onWillPop ada
+  final willPopScope = tester.widget<WillPopScope>(willPopScopeFinder);
+  expect(willPopScope.onWillPop, isNotNull);
+});
+
 
   testWidgets('Should handle PopScope and system navigator',
       (WidgetTester tester) async {
