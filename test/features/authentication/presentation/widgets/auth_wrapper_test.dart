@@ -176,27 +176,45 @@ void main() {
       expect(find.text('Welcome Page'), findsOneWidget);
     });
 
-    testWidgets('redirects to onboarding when not completed and not in progress', (tester) async {
+    testWidgets('redirects to /height-weight if onboarding not completed and not inside onboarding route', (tester) async {
       SharedPreferences.setMockInitialValues({'onboardingInProgress': false});
+
+      final mockLoginService = MockLoginService();
+      final mockCheckService = MockHealthMetricsCheckService();
+      final getIt = GetIt.instance;
+
+      if (getIt.isRegistered<LoginService>()) getIt.unregister<LoginService>();
+      if (getIt.isRegistered<HealthMetricsCheckService>()) getIt.unregister<HealthMetricsCheckService>();
+
+      getIt.registerSingleton<LoginService>(mockLoginService);
+      getIt.registerSingleton<HealthMetricsCheckService>(mockCheckService);
+
       when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
-      when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
+      when(mockCheckService.hasCompletedOnboarding('test-user-id')).thenAnswer((_) async => false);
+
 
       await tester.pumpWidget(
         MaterialApp(
+          initialRoute: '/',
           routes: {
-            '/onboarding/goal': (_) => const Scaffold(body: Text('Onboarding Page')),
+            '/': (_) => AuthWrapper(
+                  requireAuth: true,
+                  child: const Scaffold(
+                    body: Text('Home Page'),
+                  ),
+                ),
+            '/height-weight': (_) => const Scaffold(
+                  body: Text('Height Weight Page'),
+                ),
           },
-          home: AuthWrapper(
-            requireAuth: true,
-            child: const Text('Child Widget'),
-          ),
         ),
       );
 
       await tester.pumpAndSettle();
 
-      // Verify user is redirected to onboarding
-      expect(find.text('Onboarding Page'), findsOneWidget);
+      // ✅ User should be redirected to /height-weight
+      expect(find.text('Height Weight Page'), findsOneWidget);
+      expect(find.text('Home Page'), findsNothing);
     });
 
     testWidgets('does not redirect if onboarding is in progress', (tester) async {
