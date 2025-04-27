@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 
 void main() {
   group('WelcomePage', () {
@@ -47,25 +48,26 @@ void main() {
     });
 
     testWidgets('tapping Get Started navigates to onboarding', (WidgetTester tester) async {
-      final mockObserver = _MockNavigatorObserver();
+  final mockObserver = _MockNavigatorObserver();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: const WelcomePage(),
-          navigatorObservers: [mockObserver],
-          routes: {
-            '/onboarding/goal': (_) => const Scaffold(body: Text('Onboarding Page')),
-          },
-        ),
-      );
+  await tester.pumpWidget(
+    MaterialApp(
+      home: const WelcomePage(),
+      navigatorObservers: [mockObserver],
+      routes: {
+        '/height-weight': (_) => const HeightWeightPage(), // correct destination page
+      },
+    ),
+  );
 
-      await tester.tap(find.text('Get Started'));
-      await tester.pump(); // triggers loading state
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+  await tester.tap(find.text('Get Started'));
+  await tester.pump(); // triggers loading state
+  await tester.pump(const Duration(milliseconds: 500));
+  await tester.pumpAndSettle();
 
-      expect(find.text('Onboarding Page'), findsOneWidget);
-    });
+  expect(find.text('Enter your height and weight'), findsOneWidget); // <- THIS
+});
+
 
     testWidgets('shows error message when navigation throws', (WidgetTester tester) async {
       // Wrap in a try/catch to simulate failure inside `_navigateTo`
