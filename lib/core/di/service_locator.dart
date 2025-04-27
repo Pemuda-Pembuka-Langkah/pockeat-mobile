@@ -49,6 +49,7 @@ import 'package:pockeat/features/authentication/services/bug_report_service.dart
 import 'package:pockeat/features/authentication/services/bug_report_service_impl.dart';
 import 'package:pockeat/features/authentication/services/utils/instabug_client.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/di/progress_charts_module.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -200,5 +201,8 @@ Future<void> setupDependencies() async {
   );
   
   HomeWidgetModule.register();
+
+  // Register the progress charts module
+  ProgressChartsModule.register();
 }
 // coverage:ignore-end
