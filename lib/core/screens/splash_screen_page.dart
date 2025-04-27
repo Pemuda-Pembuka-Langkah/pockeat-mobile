@@ -62,13 +62,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
   void _navigateBasedOnAuth() {
     if (!mounted) return;
 
-    if (_isAuthenticated == true) {
-      // User is authenticated, navigate to home
-      Navigator.of(context).pushReplacementNamed('/');
-    } else {
-      // User is not authenticated, navigate to login
-      Navigator.of(context).pushReplacementNamed('/login');
-    }
+    Navigator.of(context).pushReplacementNamed('/');
   }
 
   @override
