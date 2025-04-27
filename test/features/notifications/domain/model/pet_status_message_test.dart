@@ -33,6 +33,10 @@ void main() {
 
       // Assert
       expect(message.title, 'Panda is Very Happy! 🐼💖');
+      // Check for heart level indicators - 4 filled hearts (❤️❤️❤️❤️)
+      expect(message.body, contains('❤️❤️❤️❤️'));
+      // Should not contain any empty hearts
+      expect(message.body, isNot(contains('🤍')));
       expect(message.body, contains('You\'ve been eating well!'));
       expect(message.body, contains('75.0%'));
       expect(message.body, contains('500 calories'));
@@ -50,6 +54,9 @@ void main() {
 
       // Assert
       expect(message.title, 'Panda is Happy! 🐼😊');
+      // Check for heart level indicators - 3 filled hearts, 1 empty heart (❤️❤️❤️🤍)
+      expect(message.body, contains('❤️❤️❤️'));
+      expect(message.body, contains('🤍'));
       expect(message.body, contains('You\'ve logged your food today'));
       expect(message.body, contains('50.0%'));
       expect(message.body, contains('1000 more calories'));
@@ -67,6 +74,10 @@ void main() {
 
       // Assert
       expect(message.title, 'Panda is Quite Happy 🐼');
+      // Check for heart level indicators - 2 filled hearts, 2 empty hearts (❤️❤️🤍🤍)
+      expect(message.body, contains('❤️❤️'));
+      // Should have exactly 2 empty hearts
+      expect(message.body, contains('🤍🤍'));
       expect(message.body, contains('You\'ve started logging your food'));
       expect(message.body, contains('25.0%'));
       expect(message.body, contains('1500 more calories'));
@@ -84,6 +95,10 @@ void main() {
 
       // Assert
       expect(message.title, 'Panda Needs More Food 🐼');
+      // Check for heart level indicators - 1 filled heart, 3 empty hearts (❤️🤍🤍🤍)
+      expect(message.body, contains('❤️'));
+      // Should have exactly 3 empty hearts
+      expect(message.body, contains('🤍🤍🤍'));
       expect(message.body, contains('You\'ve logged some food'));
       expect(message.body, contains('10.0%'));
       expect(message.body, contains('1800 more calories'));
@@ -103,6 +118,9 @@ void main() {
 
       // Assert
       expect(message.title, 'Panda is a Bit Sad 😕');
+      // Check for heart level indicators - 2 filled hearts, 2 empty hearts (❤️❤️🤍🤍)
+      expect(message.body, contains('❤️❤️'));
+      expect(message.body, contains('🤍🤍'));
       expect(message.body, contains('You haven\'t logged any food today'));
       expect(message.body, contains('500 calories out of your 2000 target'));
       expect(message.imageAsset, 'pet_sad');
@@ -119,6 +137,9 @@ void main() {
 
       // Assert
       expect(message.title, 'Panda is Sad 😢');
+      // Check for heart level indicators - 1 filled heart, 3 empty hearts (❤️🤍🤍🤍)
+      expect(message.body, contains('❤️'));
+      expect(message.body, contains('🤍🤍🤍'));
       expect(message.body, contains('You haven\'t logged any food today and only have'));
       expect(message.body, contains('200 calories out of your 2000 target'));
       expect(message.imageAsset, 'pet_sad');
@@ -135,6 +156,9 @@ void main() {
 
       // Assert
       expect(message.title, 'Panda is Very Sad 😭');
+      // Check for heart level indicators - 0 filled hearts, 4 empty hearts (🤍🤍🤍🤍)
+      expect(message.body, isNot(contains('❤️')));
+      expect(message.body, contains('🤍🤍🤍🤍'));
       expect(message.body, contains('Panda is hungry!'));
       expect(message.body, contains('no calorie intake yet'));
       expect(message.body, contains('daily calorie target: 2000'));
