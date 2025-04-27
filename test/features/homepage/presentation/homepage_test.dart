@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -16,9 +17,9 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
 import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
+import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'homepage_test.mocks.dart';
-import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 
 @GenerateNiceMocks([
   MockSpec<NavigatorObserver>(onMissingStub: OnMissingStub.returnDefault),

@@ -1,5 +1,9 @@
 // lib/features/homepage/presentation/widgets/pet_companion_widget.dart
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:lottie/lottie.dart';
 
 class PetCompanionWidget extends StatelessWidget {
