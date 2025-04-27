@@ -51,12 +51,14 @@ import 'package:pockeat/features/health_metrics/domain/repositories/health_metri
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/notification_service_impl.dart';
+import 'package:pockeat/features/notifications/domain/services/impl/user_activity_service_impl.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
-import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
-import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -172,6 +174,11 @@ Future<void> setupDependencies() async {
     FlutterLocalNotificationsPlugin(),
   );
 
+  // Register UserActivityService to track app usage (must be before NotificationService)
+  getIt.registerSingleton<UserActivityService>(
+    UserActivityServiceImpl(),
+  );
+
   // Register feature modules first (before services that depend on them)
   FoodLogHistoryModule.register();
   ExerciseLogHistoryModule.register();
@@ -179,7 +186,7 @@ Future<void> setupDependencies() async {
   NutritionModule.register();
   ExerciseProgressModule.register();
 
-  // Now register NotificationService which depends on FoodLogHistoryService
+  // Now register NotificationService which depends on FoodLogHistoryService and UserActivityService
   getIt.registerSingleton<NotificationService>(
     NotificationServiceImpl(),
   );
