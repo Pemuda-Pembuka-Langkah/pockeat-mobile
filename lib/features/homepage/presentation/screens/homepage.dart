@@ -6,8 +6,6 @@ import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
 import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
 
-// ignore: depend_on_referenced_packages
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 

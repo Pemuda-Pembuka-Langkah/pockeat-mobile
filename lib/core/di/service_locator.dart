@@ -52,9 +52,9 @@ import 'package:pockeat/features/health_metrics/domain/repositories/health_metri
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_service_impl.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
+import 'package:pockeat/features/notifications/domain/services/impl/notification_service_impl.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -170,19 +170,15 @@ Future<void> setupDependencies() async {
     FlutterLocalNotificationsPlugin(),
   );
 
-  getIt.registerSingleton<NotificationService>(
-    NotificationServiceImpl(),
-  );
-
-  // Initialize notifications
-  await getIt<NotificationService>().initialize();
-  // Register feature modules
-  // Make sure to register these modules after all their dependencies
+  // Register feature modules first (before services that depend on them)
   FoodLogHistoryModule.register();
   ExerciseLogHistoryModule.register();
   CalorieStatsModule.register();
-  NutritionModule.register();
-  ExerciseProgressModule.register();
+
+  // Now register NotificationService which depends on FoodLogHistoryService
+  getIt.registerSingleton<NotificationService>(
+    NotificationServiceImpl(),
+  );
 
   // Register additional services
   getIt.registerSingleton<LogoutService>(
@@ -205,6 +201,10 @@ Future<void> setupDependencies() async {
   // Register Analytics Service
   getIt.registerSingleton<AnalyticsService>(
     AnalyticsService(),
+  );
+
+  getIt.registerSingleton<PetService>(
+    PetServiceImpl(),
   );
 
   HomeWidgetModule.register();
