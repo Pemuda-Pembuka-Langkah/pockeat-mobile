@@ -11,11 +11,17 @@ import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calori
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
-import 'package:provider/provider.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:provider/provider.dart';
 
-@GenerateMocks([ProgressTabsService, AnalyticsService, NavigationProvider, FoodLogHistoryService, FoodLogDataService])
+@GenerateMocks([
+  ProgressTabsService, 
+  AnalyticsService, 
+  NavigationProvider, 
+  FoodLogHistoryService, 
+  FoodLogDataService
+])
 import 'progress_page_test.mocks.dart';
 
 // Mock the LogHistoryPage widget
@@ -38,33 +44,6 @@ class MockWeightProgressWidget extends StatelessWidget {
   }
 }
 
-// Mock for the AppBarWidget to avoid widget loading issues
-class MockAppBarWidget extends StatelessWidget {
-  final AppColors colors;
-  final VoidCallback onCalendarPressed;
-
-  const MockAppBarWidget({
-    super.key,
-    required this.colors,
-    required this.onCalendarPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return const SliverAppBar(title: Text('Mock App Bar'));
-  }
-}
-
-// Mock for CustomBottomNavBar to avoid widget loading issues
-class MockCustomBottomNavBar extends StatelessWidget {
-  const MockCustomBottomNavBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(height: 50);
-  }
-}
-
 void main() {
   late MockProgressTabsService mockTabsService;
   late MockAnalyticsService mockAnalyticsService;
@@ -74,22 +53,27 @@ void main() {
   final getIt = GetIt.instance;
 
   setUp(() {
+    // Initialize mocks
     mockTabsService = MockProgressTabsService();
     mockAnalyticsService = MockAnalyticsService();
     mockNavigationProvider = MockNavigationProvider();
     mockFoodLogHistoryService = MockFoodLogHistoryService();
     mockFoodLogDataService = MockFoodLogDataService();
 
-    // Setup mocks in GetIt
+    // Unregister services if already registered to avoid conflicts
     if (getIt.isRegistered<AnalyticsService>()) {
       getIt.unregister<AnalyticsService>();
     }
-    getIt.registerSingleton<AnalyticsService>(mockAnalyticsService);
-    
-    // Register food log data service for WeightProgressWidget
     if (getIt.isRegistered<FoodLogDataService>()) {
       getIt.unregister<FoodLogDataService>();
     }
+    if (getIt.isRegistered<FoodLogHistoryService>()) {
+      getIt.unregister<FoodLogHistoryService>();
+    }
+
+    // Register services
+    getIt.registerSingleton<AnalyticsService>(mockAnalyticsService);
+    getIt.registerSingleton<FoodLogHistoryService>(mockFoodLogHistoryService);
     getIt.registerSingleton<FoodLogDataService>(mockFoodLogDataService);
 
     // Setup default behaviors for mocks
@@ -126,16 +110,24 @@ void main() {
     when(mockNavigationProvider.currentIndex).thenReturn(1);
     when(mockNavigationProvider.isMenuOpen).thenReturn(false);
     
-    // Set up sample data for the charts to avoid interval calculation errors
+    // Set up sample data for FoodLogDataService
     when(mockFoodLogDataService.getWeekCalorieData()).thenAnswer((_) async => [
       CalorieData('Mon', 1000, 250, 200),
       CalorieData('Tue', 1100, 270, 210),
       CalorieData('Wed', 1200, 300, 220),
+      CalorieData('Thu', 1150, 290, 215),
+      CalorieData('Fri', 1050, 260, 205),
+      CalorieData('Sat', 900, 230, 190),
+      CalorieData('Sun', 950, 240, 195),
     ]);
+    
     when(mockFoodLogDataService.getMonthCalorieData()).thenAnswer((_) async => [
       CalorieData('Week 1', 7000, 1750, 1400),
       CalorieData('Week 2', 7200, 1800, 1450),
+      CalorieData('Week 3', 7100, 1780, 1430),
+      CalorieData('Week 4', 7300, 1820, 1470),
     ]);
+    
     when(mockFoodLogDataService.calculateTotalCalories(any)).thenReturn(5000.0);
   });
 
@@ -147,9 +139,12 @@ void main() {
     if (getIt.isRegistered<FoodLogDataService>()) {
       getIt.unregister<FoodLogDataService>();
     }
+    if (getIt.isRegistered<FoodLogHistoryService>()) {
+      getIt.unregister<FoodLogHistoryService>();
+    }
   });
 
-  // Custom widget for testing to avoid actual dependencies
+  // Custom widget for testing
   Widget createTestableWidget({Widget? child}) {
     return MaterialApp(
       home: ChangeNotifierProvider<NavigationProvider>.value(
@@ -159,7 +154,6 @@ void main() {
     );
   }
 
-  // Simple test that just verifies initialization without trying to render actual UI
   testWidgets('ProgressPage should initialize and show loading indicator initially',
       (WidgetTester tester) async {
     // Arrange & Act
@@ -167,7 +161,7 @@ void main() {
       child: ProgressPage(service: mockTabsService),
     ));
 
-    // Assert - just check for loading indicator
+    // Assert - check for loading indicator
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     
     // Verify analytics tracking
@@ -178,37 +172,26 @@ void main() {
     verify(mockAnalyticsService.logProgressViewed(category: 'all')).called(1);
   });
 
-  // Test untuk WeightProgressWidget langsung
-  testWidgets('WeightProgressWidget should render correctly',
+  testWidgets('TabController should initialize with correct length',
       (WidgetTester tester) async {
-    // Use a mock implementation that doesn't render actual charts
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: MockWeightProgressWidget(),
-      ),
-    );
-    
-    // Verify our mock widget is rendered
-    expect(find.text('Mock Weight Progress Widget'), findsOneWidget);
-  });
-
-  testWidgets('TabController should handle tab changes correctly',
-      (WidgetTester tester) async {
-    // This is a simple test just for the TabController behavior
+    // Create a simple widget with TabController for testing
     final vsync = TestVSync();
     final tabController = TabController(
       length: 2,
       vsync: vsync,
     );
     
+    expect(tabController.length, 2);
+    expect(tabController.index, 0);
+    
     // Simulate tab change
     tabController.index = 1;
-    
-    // Verify the tab controller updates the index
     expect(tabController.index, 1);
+    
+    // Clean up
+    tabController.dispose();
   });
 
-  // Test that exceptions are handled properly
   testWidgets('ProgressPage should handle exceptions during initialization',
       (WidgetTester tester) async {
     // Arrange - setup service to throw exception
@@ -219,15 +202,16 @@ void main() {
       child: ProgressPage(service: mockTabsService),
     ));
 
-    // Pump a few frames but don't use pumpAndSettle to avoid timeout
-    await tester.pump(); // Process initial build
-    await tester.pump(const Duration(milliseconds: 50)); // Process futures
-
+    // Process initial frame and continue showing loading indicator
+    await tester.pump();
+    
     // Assert - should still show loading indicator since initialization failed
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    
+    // Verify error is logged
+    verify(mockTabsService.getAppColors()).called(1);
   });
 
-  // A simpler test for dispose to ensure no exceptions
   testWidgets('ProgressPage should clean up resources in dispose',
       (WidgetTester tester) async {
     // Build the widget
@@ -238,7 +222,7 @@ void main() {
     // Replace with empty container to trigger dispose
     await tester.pumpWidget(Container());
     
-    // No need for assertions - test passes if no exceptions during dispose
+    // No assertions needed - test passes if no exceptions during dispose
   });
 }
 

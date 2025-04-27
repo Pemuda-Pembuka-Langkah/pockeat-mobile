@@ -30,6 +30,7 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
   final ScrollController _scrollController = ScrollController();
   
   late AppColors _appColors;
+  // ignore: unused_field
   late TabConfiguration _tabConfiguration;
   
   bool _isInitialized = false;

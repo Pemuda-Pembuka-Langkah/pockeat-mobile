@@ -8,9 +8,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/calories_chart.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/bmi_section.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/core/di/service_locator.dart';
-import 'package:provider/provider.dart';
 
 class WeightProgressWidget extends StatefulWidget {
   const WeightProgressWidget({super.key});
@@ -20,23 +18,24 @@ class WeightProgressWidget extends StatefulWidget {
 }
 
 class _WeightProgressWidgetState extends State<WeightProgressWidget> {
-  String selectedPeriod = '1 Week';
-  String selectedWeek = 'This week';
+  // UI constants
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryBlue = const Color(0xFF3498DB);
   final Color primaryOrange = const Color(0xFFFF9800);
   
-  // Services
-  late FoodLogDataService _foodLogDataService;
-  
-  // States
+  // State variables
+  String selectedPeriod = '1 Week';
+  String selectedWeek = 'This week';
   bool _isLoadingCalorieData = true;
   List<CalorieData> _calorieData = [];
   double _totalCalories = 0;
+  
+  // Service instance
+  late final FoodLogDataService _foodLogDataService;
 
-  // Data untuk tampilan Goal Progress Chart
+  // Sample weight data for charts
   final List<WeightData> weekData = [
     WeightData('Sun', 0),
     WeightData('Mon', 0),
@@ -54,38 +53,11 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     WeightData('Week 4', 78.0),
   ];
 
-// coverage:ignore-start
   @override
   void initState() {
     super.initState();
-    _initializeFoodLogService();
+    _foodLogDataService = getIt<FoodLogDataService>();
     _loadCalorieData();
-  }
-  
-  void _initializeFoodLogService() {
-    try {
-      // Try to get the service from the global service locator
-      _foodLogDataService = getIt<FoodLogDataService>();
-    } catch (e) {
-      debugPrint('Error getting FoodLogDataService: $e');
-      // If not available in service locator, get from Provider
-      try {
-        _foodLogDataService = FoodLogDataService(
-          foodLogService: Provider.of<FoodLogHistoryService>(context, listen: false),
-        );
-      } catch (e) {
-        debugPrint('Error creating FoodLogDataService: $e');
-        // Create a mock service for development/testing
-        _foodLogDataService = _createMockFoodLogDataService();
-      }
-    }
-  }
-  
-  FoodLogDataService _createMockFoodLogDataService() {
-    // This creates a mock service for development and testing
-    return FoodLogDataService(
-      foodLogService: Provider.of<FoodLogHistoryService>(context, listen: false),
-    );
   }
   
   Future<void> _loadCalorieData() async {
@@ -100,7 +72,6 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
           ? await _foodLogDataService.getMonthCalorieData()
           : await _foodLogDataService.getWeekCalorieData();
       
-      // Get direct calorie total from log data
       final totalCalories = _foodLogDataService.calculateTotalCalories(calorieData);
       
       if (mounted) {
@@ -164,7 +135,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
                 setState(() {
                   selectedPeriod = period;
                 });
-                _loadCalorieData(); // Reload data when period changes
+                _loadCalorieData();
               },
               primaryColor: primaryPink,
             ),
@@ -181,7 +152,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
                   setState(() {
                     selectedWeek = week;
                   });
-                  _loadCalorieData(); // Reload data when week changes
+                  _loadCalorieData();
                 },
                 primaryColor: primaryPink,
               ),
@@ -197,13 +168,11 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
       ),
     );
   }
-// coverage:ignore-end
 
   Widget _buildCurrentWeightIndicators() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Weight Goal Section
         Expanded(
           child: CircularIndicatorWidget(
             label: "Weight Goal",
@@ -213,8 +182,6 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
           ),
         ),
         const SizedBox(width: 16),
-        
-        // Current Weight Section
         Expanded(
           child: CircularIndicatorWidget(
             label: "Current Weight",
