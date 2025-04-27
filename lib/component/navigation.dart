@@ -125,7 +125,7 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
           }
         });
 
-        final addButtonSize = 80.0; // Even larger button size
+        const addButtonSize = 80.0; // Even larger button size
         
         return SizedBox(
           height: 60, // Meningkatkan height agar mencakup seluruh tombol add

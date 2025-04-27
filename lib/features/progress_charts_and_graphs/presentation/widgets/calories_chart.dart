@@ -112,8 +112,8 @@ class CaloriesChart extends StatelessWidget {
                     // Always show the chart (empty if no data)
                     SfCartesianChart(
                       primaryXAxis: const CategoryAxis(
-                        majorGridLines: const MajorGridLines(width: 0),
-                        axisLine: const AxisLine(width: 0),
+                        majorGridLines: MajorGridLines(width: 0),
+                        axisLine: AxisLine(width: 0),
                       ),
                       primaryYAxis: NumericAxis(
                         majorGridLines: MajorGridLines(

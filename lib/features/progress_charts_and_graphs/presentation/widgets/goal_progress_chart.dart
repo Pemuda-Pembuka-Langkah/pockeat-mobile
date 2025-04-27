@@ -55,8 +55,8 @@ class GoalProgressChart extends StatelessWidget {
           height: 200,
           child: SfCartesianChart(
             primaryXAxis: const CategoryAxis(
-              majorGridLines: const MajorGridLines(width: 0),
-              axisLine: const AxisLine(width: 0),
+              majorGridLines: MajorGridLines(width: 0),
+              axisLine: AxisLine(width: 0),
             ),
             primaryYAxis: NumericAxis(
               minimum: 73,
