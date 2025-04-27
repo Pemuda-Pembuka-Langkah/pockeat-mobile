@@ -36,7 +36,8 @@ class ApiService implements ApiServiceInterface {
   // Updated factory constructor that accepts LoginService
   factory ApiService.fromEnv({TokenManager? tokenManager}) {
     final baseUrl = dotenv.env['API_BASE_URL'] ??
-        'http://192.168.1.10:8080/api'; //LOCALHOST API
+        'http://192.168.1.7:8080/api'; //LOCALHOST API
+    print('API_BASE_URL: $baseUrl');
     return ApiService(baseUrl: baseUrl, tokenManager: tokenManager);
   }
 

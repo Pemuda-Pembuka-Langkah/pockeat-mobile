@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/food_database_input/services/food_database_module.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
@@ -183,6 +184,10 @@ Future<void> setupDependencies() async {
   CalorieStatsModule.register();
   NutritionModule.register();
   ExerciseProgressModule.register();
+
+  // Register Supabase nutrition database module
+  NutritionDatabaseModule.register();
+
 
   // Register additional services
   getIt.registerSingleton<LogoutService>(

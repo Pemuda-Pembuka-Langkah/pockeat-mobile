@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_log_history/utils/food_sharing_extension.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/vitamins_and_minerals_section.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 
@@ -625,6 +626,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
           ),
         ),
         const SizedBox(height: 24),
+        
       ],
     );
   }
@@ -771,7 +773,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                                 ),
                                 if (ingredient.servings > 0)
                                   Text(
-                                    '${ingredient.servings} grams',
+                                    '${ingredient.servings} kcal',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.black54,
@@ -787,6 +789,13 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                 ),
         ),
         const SizedBox(height: 24),
+
+                // Vitamins and Minerals Section
+                VitaminsAndMineralsSection(
+                  isLoading: false,
+                  food: food,
+                  primaryColor: primaryBlue,
+                ),
       ],
     );
   }

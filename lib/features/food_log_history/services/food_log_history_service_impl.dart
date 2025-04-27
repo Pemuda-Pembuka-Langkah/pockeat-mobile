@@ -117,7 +117,6 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
         foodImageUrl: result.foodImageUrl,
         timestamp: localTimestamp, // Use the adjusted timestamp
         id: result.id,
-        isLowConfidence: result.isLowConfidence,
         userId: result.userId,
       );
 

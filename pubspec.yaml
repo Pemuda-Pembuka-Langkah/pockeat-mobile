@@ -74,7 +74,8 @@ dependencies:
   firebase_performance: ^0.9.4+7
   firebase_analytics: ^10.10.7
   lottie: ^3.3.1
-  flutter_launcher_icons: ^0.14.3 
+  flutter_launcher_icons: ^0.14.3
+  supabase_flutter: ^2.8.4
 
   path: any
   logger: any

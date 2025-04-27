@@ -83,25 +83,27 @@ class _FoodInputPageState extends State<FoodInputPage> {
             ),
             const SizedBox(height: 16),
 
-            // Manual Input Option
+            // Manual Text Input Option
             _buildInputOption(
               context: context,
               icon: CupertinoIcons.text_justify,
-              title: 'Input Manually',
-              subtitle: 'Search or prompt food details',
+              title: 'Explain your meal',
+              subtitle: 'Generate your meal\'s data with our AI',
               color: primaryPink,
               route: '/food-text-input',
             ),
             const SizedBox(height: 16),
 
+            // Database Option
             _buildInputOption(
               context: context,
-              icon: CupertinoIcons.bell,
-              title: 'Notification Settings',
-              subtitle: 'Set your notification preferences',
-              color: primaryGreen,
-              route: '/notification-settings',
+              icon: CupertinoIcons.table,
+              title: 'Create Your Own Meal',
+              subtitle: 'Choose ingredients from our nutrition database',
+              color: Colors.blue,
+              route: '/nutrition-database',
             ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -141,11 +143,11 @@ class _FoodInputPageState extends State<FoodInputPage> {
                         'timestamp': DateTime.now().toIso8601String(),
                       },
                     );
-                  } else if (route == '/notification-settings') {
+                  } else if (route == '/nutrition-database') {
                     _analyticsService.logEvent(
-                      name: 'view_notification_settings',
+                      name: 'food_input_method_selected',
                       parameters: {
-                        'source': 'food_input_page',
+                        'method': 'database',
                         'timestamp': DateTime.now().toIso8601String(),
                       },
                     );

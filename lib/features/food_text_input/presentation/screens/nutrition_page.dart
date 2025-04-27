@@ -8,8 +8,10 @@ import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summa
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/health_score_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/vitamins_and_minerals_section.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
 import 'package:pockeat/features/food_text_input/presentation/widgets/food_text_input_analysis_error.dart';
 import 'package:pockeat/features/food_text_input/presentation/widgets/text_bottom_action_bar.dart';
@@ -26,15 +28,22 @@ class NutritionPage extends StatefulWidget {
 }
 
 class _NutritionPageState extends State<NutritionPage> {
+  bool _isScrolledToTop = true;
   bool _isLoading = true;
   bool _hasError = false;
   bool _isSaving = false;
   String _foodName = 'Analyzing...';
-  int _calories = 0;
+  double _calories = 0; // Changed from int to double
   Map<String, dynamic> _nutritionData = {};
   List<String> _warnings = [];
   List<Ingredient> _ingredients = [];
   late FoodAnalysisResult? food;
+
+  // Theme colors
+  final Color primaryYellow = const Color(0xFFFFE893);
+  final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
+  final Color warningYellow = const Color(0xFFF4D03F);
 
   @override
   void initState() {
@@ -66,14 +75,19 @@ class _NutritionPageState extends State<NutritionPage> {
 
   void _updateFoodData(FoodAnalysisResult result, {bool isCorrection = false}) {
     _foodName = result.foodName;
-    _calories = result.nutritionInfo.calories.toInt();
+    _calories = result.nutritionInfo.calories;
     _nutritionData = {
-      'protein': result.nutritionInfo.protein.toInt(),
-      'carbs': result.nutritionInfo.carbs.toInt(),
-      'fat': result.nutritionInfo.fat.toInt(),
-      'fiber': result.nutritionInfo.fiber.toInt(),
-      'sugar': result.nutritionInfo.sugar.toInt(),
-      'sodium': result.nutritionInfo.sodium.toInt(),
+      'protein': result.nutritionInfo.protein,
+      'carbs': result.nutritionInfo.carbs,
+      'fat': result.nutritionInfo.fat,
+      'fiber': result.nutritionInfo.fiber,
+      'sugar': result.nutritionInfo.sugar,
+      'sodium': result.nutritionInfo.sodium,
+      'saturatedFat': result.nutritionInfo.saturatedFat,
+      'cholesterol': result.nutritionInfo.cholesterol,
+      'nutritionDensity': result.nutritionInfo.nutritionDensity,
+      'healthScore': result.healthScore,
+      'healthScoreCategory': result.getHealthScoreCategory(),
     };
     _ingredients = result.ingredients;
     _warnings = result.warnings;
@@ -87,10 +101,10 @@ class _NutritionPageState extends State<NutritionPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
+      return Scaffold(
         body: FoodAnalysisLoading(
-          primaryYellow: Color(0xFFFFE893),
-          primaryPink: Color(0xFFFF6B6B),
+          primaryYellow: primaryYellow,
+          primaryPink: primaryPink,
           message: 'Analyzing Food',
         ),
       );
@@ -99,8 +113,8 @@ class _NutritionPageState extends State<NutritionPage> {
     if (_hasError) {
       return Scaffold(
         body: FoodTextInputAnalysisError(
-          primaryPink: const Color(0xFFFF6B6B),
-          primaryYellow: const Color(0xFFFFE893),
+          primaryPink: primaryPink,
+          primaryYellow: primaryYellow,
           onRetry: _analyzeFoodText,
           onBack: () {
             Navigator.pop(context);
@@ -112,98 +126,124 @@ class _NutritionPageState extends State<NutritionPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomScrollView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              slivers: [
-                const SliverAppBar(
-                  backgroundColor: Color(0xFFFFE893),
-                  title: Text(
-                    'Nutrition Analysis',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  floating: true,
-                  pinned: true,
-                ),
-                SliverToBoxAdapter(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                    child: Container(
-                      color: Colors.white,
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          FoodTitleSection(
-                            isLoading: _isLoading,
-                            foodName: _foodName,
-                            primaryGreen: const Color(0xFF4ECDC4),
-                          ),
-                          CalorieSummaryCard(
-                            isLoading: _isLoading,
-                            calories: _calories,
-                            primaryYellow: const Color(0xFFFFE893),
-                            primaryPink: const Color(0xFFFF6B6B),
-                          ),
-                          NutritionalInfoSection(
-                            isLoading: _isLoading,
-                            nutritionData: _nutritionData,
-                            primaryPink: const Color(0xFFFF6B6B),
-                            primaryGreen: const Color(0xFF4ECDC4),
-                            warningYellow: const Color(0xFFF4D03F),
-                          ),
-                          AdditionalNutrientsSection(
-                            isLoading: _isLoading,
-                            nutritionData: _nutritionData,
-                            calories: _calories,
-                            primaryYellow: const Color(0xFFFFE893),
-                          ),
-                          IngredientsSection(
-                            ingredients: _ingredients,
-                            primaryGreen: const Color(0xFF4ECDC4),
-                            isLoading: _isLoading,
-                          ),
-                          DietTagsSection(
-                            warnings: _warnings,
-                            primaryGreen: const Color(0xFF4ECDC4),
-                            warningYellow: const Color(0xFFF4D03F),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+      body: _buildAnalysisResultContent(),
+      bottomSheet: TextBottomActionBar(
+          isLoading: _isLoading || _isSaving,
+          food: food,
+          foodTextInputService: widget.foodTextInputService,
+          primaryYellow: primaryYellow,
+          primaryPink: primaryPink,
+          primaryGreen: primaryGreen,
+          onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
+            setState(() {
+              _updateFoodData(correctedResult, isCorrection: true);
+            });
+          },
+          onSavingStateChange: (bool saving) {
+            setState(() {
+              _isSaving = saving;
+            });
+          }),
+    );
+  }
+
+  Widget _buildAnalysisResultContent() {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollNotification) {
+        if (scrollNotification is ScrollUpdateNotification) {
+          setState(() {
+            _isScrolledToTop = scrollNotification.metrics.pixels < 100;
+          });
+        }
+        return true;
+      },
+      child: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            backgroundColor: primaryYellow,
+            title: const Text(
+              'Nutrition Analysis',
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            TextBottomActionBar(
-                isLoading: _isLoading || _isSaving,
-                food: food,
-                foodTextInputService: widget.foodTextInputService,
-                primaryYellow: const Color(0xFFFFE893),
-                primaryPink: const Color(0xFFFF6B6B),
-                primaryGreen: const Color(0xFF4ECDC4),
-                onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
-                  setState(() {
-                    _updateFoodData(correctedResult, isCorrection: true);
-                  });
-                },
-                onSavingStateChange: (bool saving) {
-                  setState(() {
-                    _isSaving = saving;
-                  });
-                }),
-          ],
-        ),
+            floating: true,
+            pinned: true,
+            elevation: _isScrolledToTop ? 0 : 4,
+          ),
+          SliverToBoxAdapter(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
+              child: Container(
+                color: Colors.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FoodTitleSection(
+                      isLoading: _isLoading,
+                      foodName: _foodName,
+                      primaryGreen: primaryGreen,
+                      healthScore: _nutritionData['healthScore'] as double?,
+                      healthCategory:
+                          _nutritionData['healthScoreCategory'] as String?,
+                    ),
+                    CalorieSummaryCard(
+                      isLoading: _isLoading,
+                      calories: _calories,
+                      primaryYellow: primaryYellow,
+                      primaryPink: primaryPink,
+                    ),
+                    // Add Health Score Section
+                    HealthScoreSection(
+                      isLoading: _isLoading,
+                      nutritionData: _nutritionData,
+                      primaryGreen: primaryGreen,
+                      primaryPink: primaryPink,
+                    ),
+                    NutritionalInfoSection(
+                      isLoading: _isLoading,
+                      nutritionData: _nutritionData,
+                      primaryPink: primaryPink,
+                      primaryGreen: primaryGreen,
+                      warningYellow: warningYellow,
+                    ),
+                    AdditionalNutrientsSection(
+                      isLoading: _isLoading,
+                      nutritionData: _nutritionData,
+                      calories: _calories,
+                      primaryYellow: primaryYellow,
+                    ),
+                    IngredientsSection(
+                      ingredients: _ingredients,
+                      primaryGreen: primaryGreen,
+                      isLoading: _isLoading,
+                    ),
+                    VitaminsAndMineralsSection(
+                      isLoading: _isLoading,
+                      food: food,
+                      primaryColor: primaryGreen,
+                    ),
+                    // Vitamins and Minerals Section
+                    DietTagsSection(
+                      warnings: _warnings,
+                      primaryGreen: primaryGreen,
+                      warningYellow: warningYellow,
+                    ),
+                    const SizedBox(height: 100),
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 50),
+                      child: SizedBox(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

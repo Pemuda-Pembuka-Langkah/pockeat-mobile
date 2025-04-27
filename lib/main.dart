@@ -13,6 +13,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
+import 'package:pockeat/features/food_database_input/presentation/food_database_page.dart';
 import 'package:provider/provider.dart';
 
 // Project imports:
@@ -74,6 +75,7 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -188,6 +190,13 @@ void main() async {
 
   // Initialize Instabug
   await _initializeInstabug(flavor);
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+    debug: flavor != 'production',
+  );
 
   await Firebase.initializeApp(
     options: flavor == 'production'
@@ -413,17 +422,40 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),
-        '/scan': (context) => AuthWrapper(
-              child: ScanFoodPage(
-                cameraController: CameraController(
-                  const CameraDescription(
-                    name: '0',
-                    lensDirection: CameraLensDirection.back,
-                    sensorOrientation: 0,
-                  ),
-                  ResolutionPreset.max,
-                ),
-              ),
+        '/scan': (context) => FutureBuilder<List<CameraDescription>>(
+              future: availableCameras(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
+
+                  if (snapshot.data?.isEmpty ?? true) {
+                    return const Center(
+                      child: Text('Tidak ada kamera yang tersedia'),
+                    );
+                  }
+
+                  return AuthWrapper(
+                    child: ScanFoodPage(
+                      cameraController: CameraController(
+                        snapshot
+                            .data![0], // Menggunakan kamera pertama (belakang)
+                        ResolutionPreset.max,
+                        enableAudio: false,
+                        imageFormatGroup: ImageFormatGroup.jpeg,
+                      ),
+                    ),
+                  );
+                }
+
+                // Tampilkan loading selama menunggu kamera
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
             ),
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
         '/food-text-input': (context) =>
@@ -466,6 +498,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           );
         },
+        '/nutrition-database': (context) =>
+            const AuthWrapper(child: NutritionDatabasePage()),
         '/analytic': (context) => ProgressPage(
               service: ProgressTabsService(ProgressTabsRepositoryImpl()),
             ),
