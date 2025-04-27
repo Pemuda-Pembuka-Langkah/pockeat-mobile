@@ -53,7 +53,6 @@ import 'package:pockeat/features/health_metrics/domain/service/health_metrics_ch
 import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/notification_service_impl.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/di/progress_charts_module.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 

@@ -78,6 +78,130 @@ void main() {
         .thenAnswer((_) async {});
   });
 
+  group('showMealReminderNotification', () {
+    test('should show notification when master and individual toggles are enabled', () async {
+      // Arrange
+      when(mockPrefs.getBool(NotificationConstants.prefMealReminderMasterEnabled))
+          .thenReturn(true);
+      when(mockPrefs.getBool(NotificationConstants.prefBreakfastEnabled))
+          .thenReturn(true);
+
+      // Act
+      final result = await service.showMealReminderNotification(serviceMap, NotificationConstants.breakfast);
+
+      // Assert
+      expect(result, true);
+
+      // Verify all method calls
+      verify(mockPrefs.getBool(NotificationConstants.prefMealReminderMasterEnabled)).called(1);
+      verify(mockPrefs.getBool(NotificationConstants.prefBreakfastEnabled)).called(1);
+      verify(mockNotifications.initialize(any)).called(1);
+      verify(mockAndroidNotifications.createNotificationChannel(any)).called(1);
+      verify(mockNotifications.show(
+        NotificationConstants.mealReminderNotificationId.hashCode,
+        any,
+        any,
+        any,
+        payload: NotificationConstants.mealReminderPayload,
+      )).called(1);
+    });
+
+    test('should show notification for lunch meal type', () async {
+      // Arrange
+      when(mockPrefs.getBool(NotificationConstants.prefMealReminderMasterEnabled))
+          .thenReturn(true);
+      when(mockPrefs.getBool(NotificationConstants.prefLunchEnabled))
+          .thenReturn(true);
+
+      // Act
+      final result = await service.showMealReminderNotification(serviceMap, NotificationConstants.lunch);
+
+      // Assert
+      expect(result, true);
+
+      // Verify message was created for lunch
+      verify(mockNotifications.show(
+        NotificationConstants.mealReminderNotificationId.hashCode,
+        any, // We don't test exact title/body as it comes from MealReminderMessageFactory
+        any,
+        any,
+        payload: NotificationConstants.mealReminderPayload,
+      )).called(1);
+    });
+    
+    test('should show notification for dinner meal type', () async {
+      // Arrange
+      when(mockPrefs.getBool(NotificationConstants.prefMealReminderMasterEnabled))
+          .thenReturn(true);
+      when(mockPrefs.getBool(NotificationConstants.prefDinnerEnabled))
+          .thenReturn(true);
+
+      // Act
+      final result = await service.showMealReminderNotification(serviceMap, NotificationConstants.dinner);
+
+      // Assert
+      expect(result, true);
+
+      // Verify message was created for dinner
+      verify(mockNotifications.show(
+        NotificationConstants.mealReminderNotificationId.hashCode,
+        any,
+        any,
+        any,
+        payload: NotificationConstants.mealReminderPayload,
+      )).called(1);
+    });
+
+    test('should return false when master toggle is disabled', () async {
+      // Arrange
+      when(mockPrefs.getBool(NotificationConstants.prefMealReminderMasterEnabled))
+          .thenReturn(false);
+
+      // Act
+      final result = await service.showMealReminderNotification(serviceMap, NotificationConstants.breakfast);
+
+      // Assert
+      expect(result, false);
+
+      // Verify only necessary calls were made
+      verify(mockPrefs.getBool(NotificationConstants.prefMealReminderMasterEnabled)).called(1);
+      verifyNever(mockPrefs.getBool(NotificationConstants.prefBreakfastEnabled));
+      verifyNever(mockNotifications.show(any, any, any, any));
+    });
+
+    test('should return false when individual meal toggle is disabled', () async {
+      // Arrange
+      when(mockPrefs.getBool(NotificationConstants.prefMealReminderMasterEnabled))
+          .thenReturn(true);
+      when(mockPrefs.getBool(NotificationConstants.prefBreakfastEnabled))
+          .thenReturn(false);
+
+      // Act
+      final result = await service.showMealReminderNotification(serviceMap, NotificationConstants.breakfast);
+
+      // Assert
+      expect(result, false);
+
+      // Verify only necessary calls were made
+      verify(mockPrefs.getBool(NotificationConstants.prefMealReminderMasterEnabled)).called(1);
+      verify(mockPrefs.getBool(NotificationConstants.prefBreakfastEnabled)).called(1);
+      verifyNever(mockNotifications.show(any, any, any, any));
+    });
+
+    test('should handle errors gracefully', () async {
+      // Arrange - setup to throw an exception
+      when(mockPrefs.getBool(NotificationConstants.prefMealReminderMasterEnabled))
+          .thenThrow(Exception('Test exception'));
+
+      // Act
+      final result = await service.showMealReminderNotification(serviceMap, NotificationConstants.breakfast);
+
+      // Assert
+      expect(result, false);
+      verifyNever(mockNotifications.show(any, any, any, any));
+    });
+  });
+
   group('showStreakNotification', () {
     // Main success scenario
     test('should show notification when all conditions are met', () async {

@@ -10,6 +10,7 @@ import 'package:workmanager/workmanager.dart';
 
 // Project imports:
 import 'package:pockeat/core/service/background_dependency_service.dart';
+
 import 'package:pockeat/features/home_screen_widget/domain/constants/background_service_config.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/widget_updater_service_impl.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_updater_service.dart';
@@ -25,33 +26,73 @@ void callbackDispatcher() {
     try {
       // Setup all dependencies needed for background tasks
       final services = await BackgroundServiceManager.setupDependencies();
+      
+
 
       // Handle tasks using a switch statement
       switch (taskName) {
         case NotificationConstants.streakCalculationTaskName:
+
           final NotificationBackgroundDisplayerService notificationDisplayer =
               NotificationBackgroundDisplayerServiceImpl();
           await notificationDisplayer.showStreakNotification(services);
+
+          break;
+          
+        // Add handlers for meal reminder tasks
+        case NotificationConstants.mealReminderTaskName: // Generic meal reminder task
+        case NotificationConstants.breakfastReminderTaskName: // Breakfast specific
+        case NotificationConstants.lunchReminderTaskName: // Lunch specific
+        case NotificationConstants.dinnerReminderTaskName: // Dinner specific
+          // Determine meal type directly from the task name
+          String? mealType;
+          
+          if (taskName == NotificationConstants.breakfastReminderTaskName) {
+            mealType = NotificationConstants.breakfast;
+          } else if (taskName == NotificationConstants.lunchReminderTaskName) {
+            mealType = NotificationConstants.lunch;
+          } else if (taskName == NotificationConstants.dinnerReminderTaskName) {
+            mealType = NotificationConstants.dinner;
+          }
+          
+
+          
+          final NotificationBackgroundDisplayerService notificationDisplayer =
+              NotificationBackgroundDisplayerServiceImpl();
+
+          if (mealType != null) {
+            await notificationDisplayer.showMealReminderNotification(services, mealType);
+
+          } else {
+
+          }
           break;
 
         case BackgroundServiceConfig.PERIODIC_UPDATE_TASK_ID:
+
           // Delegate to the widget service's callback handler
           await BackgroundServiceManager._updateWidgets(services);
+
           break;
 
         case BackgroundServiceConfig.MIDNIGHT_UPDATE_TASK_ID:
+
           // Delegate to the widget service's callback handler
           await BackgroundServiceManager._updateWidgets(services);
           await WidgetBackgroundService.registerMidnightTask();
+
           break;
 
         default:
+
           break;
       }
 
+
       return true;
-    } catch (e) {
-      debugPrint('Error in callback dispatcher: $e');
+    } catch (e, stackTrace) {
+
+      debugPrint('Error in callback dispatcher: $e\nStack trace: $stackTrace');
       return false;
     }
   });

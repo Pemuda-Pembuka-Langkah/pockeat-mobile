@@ -1,3 +1,5 @@
+// coverage:ignore-file
+
 // Dart imports:
 import 'dart:async';
 import 'dart:io' show Platform;

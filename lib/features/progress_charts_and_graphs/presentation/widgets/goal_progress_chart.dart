@@ -54,9 +54,9 @@ class GoalProgressChart extends StatelessWidget {
         SizedBox(
           height: 200,
           child: SfCartesianChart(
-            primaryXAxis: CategoryAxis(
-              majorGridLines: const MajorGridLines(width: 0),
-              axisLine: const AxisLine(width: 0),
+            primaryXAxis: const CategoryAxis(
+              majorGridLines: MajorGridLines(width: 0),
+              axisLine: AxisLine(width: 0),
             ),
             primaryYAxis: NumericAxis(
               minimum: 73,
@@ -75,7 +75,7 @@ class GoalProgressChart extends StatelessWidget {
                 yValueMapper: (WeightData data, _) => data.weight > 0 ? data.weight : null,
                 color: Colors.black,
                 width: 2,
-                emptyPointSettings: EmptyPointSettings(
+                emptyPointSettings: const EmptyPointSettings(
                   mode: EmptyPointMode.gap,
                 ),
                 markerSettings: const MarkerSettings(
