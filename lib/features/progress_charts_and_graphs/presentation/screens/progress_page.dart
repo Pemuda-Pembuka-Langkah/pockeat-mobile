@@ -25,16 +25,6 @@ class ProgressPage extends StatefulWidget {
 }
 
 // coverage:ignore-start
-// Unified progress insights widget replaced with the WeightProgressWidget
-class UnifiedInsightsWidget extends StatelessWidget {
-  const UnifiedInsightsWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const WeightProgressWidget();
-  }
-}
-
 class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMixin {
   late TabController _mainTabController;
   final ScrollController _scrollController = ScrollController();
@@ -133,15 +123,13 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
       body: NestedScrollView(
         controller: _scrollController,
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          // App Bar
+          // App Bar dan Main Tabs tetap sama
           AppBarWidget(
             colors: _appColors,
             onCalendarPressed: () {
               // Calendar action - kept empty as in original
             },
           ),
-
-          // Main Tabs (Insights & Log History)
           MainTabsWidget(
             tabController: _mainTabController,
             colors: _appColors,
@@ -150,10 +138,10 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
         body: TabBarView(
           controller: _mainTabController,
           children: const [
-            // Insights Tab - Now a single unified page without subtabs
-            UnifiedInsightsWidget(),
+            // Gunakan WeightProgressWidget langsung
+            WeightProgressWidget(),
             
-            // Log History Tab - Keeping this functionality intact
+            // Log History Tab - tetap sama
             LogHistoryPage(),
           ],
         ),

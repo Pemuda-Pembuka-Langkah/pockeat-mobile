@@ -38,16 +38,6 @@ class MockWeightProgressWidget extends StatelessWidget {
   }
 }
 
-// Mock the UnifiedInsightsWidget to avoid rendering real chart components
-class TestUnifiedInsightsWidget extends StatelessWidget {
-  const TestUnifiedInsightsWidget({super.key});
-  
-  @override
-  Widget build(BuildContext context) {
-    return const MockWeightProgressWidget();
-  }
-}
-
 // Mock for the AppBarWidget to avoid widget loading issues
 class MockAppBarWidget extends StatelessWidget {
   final AppColors colors;
@@ -188,24 +178,18 @@ void main() {
     verify(mockAnalyticsService.logProgressViewed(category: 'all')).called(1);
   });
 
-  // Updated test for UnifiedInsightsWidget that now uses MockWeightProgressWidget
-  testWidgets('UnifiedInsightsWidget should render WeightProgressWidget',
+  // Test untuk WeightProgressWidget langsung
+  testWidgets('WeightProgressWidget should render correctly',
       (WidgetTester tester) async {
     // Use a mock implementation that doesn't render actual charts
     await tester.pumpWidget(
       const MaterialApp(
-        home: TestUnifiedInsightsWidget(),
+        home: MockWeightProgressWidget(),
       ),
     );
     
     // Verify our mock widget is rendered
     expect(find.text('Mock Weight Progress Widget'), findsOneWidget);
-    
-    // Verify that the actual UnifiedInsightsWidget does use the WeightProgressWidget
-    // This is what we really care about testing, not the chart rendering
-    const unifiedInsightsWidget = UnifiedInsightsWidget();
-    final type = unifiedInsightsWidget.runtimeType.toString();
-    expect(type, 'UnifiedInsightsWidget');
   });
 
   testWidgets('TabController should handle tab changes correctly',
