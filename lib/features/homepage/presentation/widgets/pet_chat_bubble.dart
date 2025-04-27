@@ -1,7 +1,7 @@
 // lib/features/homepage/presentation/widgets/pet_chat_bubble.dart
 import 'package:flutter/material.dart';
 import 'dart:async';
-// coverage-ignore:start
+// coverage:ignore-start
 enum ChatBubbleType {
   reminder,
   almostFinished,
@@ -162,4 +162,4 @@ class _PetChatBubbleState extends State<PetChatBubble>
     );
   }
 }
-// coverage-ignore:end
+// coverage:ignore-end

@@ -7,7 +7,7 @@ import 'dart:math';
 import 'pet_chat_bubble.dart';
 import 'dart:async';
 
-// coverage-ignore:start
+// coverage:ignore-start
 class PetCompanionWidget extends StatefulWidget {
   final String petName;
   final String petImagePath;
@@ -390,4 +390,4 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
     );
   }
 }
-// coverage-ignore:end
+// coverage:ignore-end
