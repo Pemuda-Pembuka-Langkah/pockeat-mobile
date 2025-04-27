@@ -70,7 +70,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
           final isInsideOnboardingFlow = currentRoute?.startsWith('/onboarding') ?? false;
 
           if ((!completed && !onboardingInProgress) && !isInsideOnboardingFlow) {
-            _redirect('/onboarding/goal', removeUntil: true);
+            _redirect('/height-weight', removeUntil: true);
           } else {
             setState(() {
               _isAuthenticated = true;
