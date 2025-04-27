@@ -101,7 +101,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
           : await _foodLogDataService.getWeekCalorieData();
       
       // Get direct calorie total from log data
-      final totalCalories = await _foodLogDataService.calculateTotalCalories(calorieData);
+      final totalCalories = _foodLogDataService.calculateTotalCalories(calorieData);
       
       if (mounted) {
         setState(() {
