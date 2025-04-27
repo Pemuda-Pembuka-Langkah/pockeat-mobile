@@ -64,6 +64,13 @@ import 'package:pockeat/features/health_metrics/presentation/screens/health_metr
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/rollover_calories_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/thank_you_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/used_other_apps_page.dart';
+
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
@@ -207,6 +214,10 @@ void main() async {
   await dotenv.load(fileName: '.env');
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
 
+  // Inisialisasi required services
+  await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp();
+
   // Initialize Instabug
   await _initializeInstabug(flavor);
 
@@ -263,6 +274,8 @@ void main() async {
         Provider<FoodTextInputRepository>(
           create: (_) => getIt<FoodTextInputRepository>(),
         ),
+        Provider<CaloricRequirementService>(create: (_) => getIt<CaloricRequirementService>()),
+
         BlocProvider<HealthMetricsFormCubit>(
           create: (_) => HealthMetricsFormCubit(
             repository: getIt<HealthMetricsRepository>(),
@@ -371,14 +384,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           redirectUrlIfNotLoggedIn: '/welcome',
           child: HomePage(),
         ),
-        '/welcome': (context) {
-            return const AuthWrapper(
-              requireAuth: false,
-              redirectUrlIfLoggedIn: '/',
-              child: WelcomePage(),
-            );
-          }
-          ,
+        // '/welcome': (context) {
+        //     return const AuthWrapper(
+        //       requireAuth: false,
+        //       redirectUrlIfLoggedIn: '/',
+        //       child: WelcomePage(),
+        //     );
+        //   }
+        //   ,
+        '/welcome': (context) => const WelcomePage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
         '/streak-celebration': (context) {
@@ -428,17 +442,78 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             child: const HealthMetricsGoalsPage(),
           );
         },
-        '/height-weight': (context) =>
-            const AuthWrapper(child: HeightWeightPage()),
-        '/birthdate': (context) => const AuthWrapper(child: BirthdatePage()),
-        '/gender': (context) => const AuthWrapper(child: GenderPage()),
+        '/height-weight': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: HeightWeightPage()
+          ),
+        '/birthdate': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: BirthdatePage()
+          ),
+        '/gender': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: GenderPage()
+          ),
         '/activity-level': (context) =>
-            const AuthWrapper(child: ActivityLevelPage()),
-        '/diet': (context) => const AuthWrapper(child: DietPage()),
+            const AuthWrapper(
+              requireAuth: false,
+              redirectUrlIfLoggedIn: '/',
+              child: ActivityLevelPage()
+              ),
+        '/diet': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: DietPage()
+          ),
         '/desired-weight': (context) =>
-            const AuthWrapper(child: DesiredWeightPage()),
-        '/speed': (context) => const AuthWrapper(child: SpeedSelectionPage()),
-        '/review': (context) => const AuthWrapper(child: ReviewSubmitPage()),
+            const AuthWrapper(
+              requireAuth: false,
+              redirectUrlIfLoggedIn: '/',
+              child: DesiredWeightPage()
+              ),
+        '/speed': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: SpeedSelectionPage()
+          ),
+        '/goal-obstacle': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: GoalObstaclePage()
+          ),
+        '/add-calories-back': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: AddCaloriesBackPage()
+          ),
+        '/heard-about': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: HeardAboutPage()
+          ),
+        '/rollover-calories': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: RolloverCaloriesPage()
+          ),
+        '/thank-you': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: ThankYouPage()
+          ),
+        '/used-other-apps': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: UsedOtherAppsPage()
+          ),
+          '/review': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: ReviewSubmitPage(),
+          ),
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),
@@ -517,9 +592,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           );
         },
-        '/analytic': (context) => ProgressPage(
-              service: ProgressTabsService(ProgressTabsRepositoryImpl()),
-            ),
+        // '/analytic': (context) => ProgressPage(
+        //       service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+        //     ),
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
         '/edit-profile': (context) {
