@@ -11,10 +11,8 @@ import 'package:pockeat/features/homepage/presentation/widgets/heart_bar_widget.
 import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
-import 'package:get_it/get_it.dart';
 
 class PetHomepageSection extends StatefulWidget {
   final String petName;
