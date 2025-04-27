@@ -1,4 +1,3 @@
-// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository.dart';
@@ -14,8 +13,6 @@ class ProgressTabsRepositoryImpl implements ProgressTabsRepository {
   Future<TabConfiguration> getTabConfiguration() async {
     return TabConfiguration(
       mainTabCount: 2,
-      progressTabCount: 3,
-      progressTabLabels: ['Weight', 'Nutrition', 'Exercise'],
       logHistoryTabCount: 2,
       logHistoryTabLabels: ['Food', 'Exercise'],
     );
