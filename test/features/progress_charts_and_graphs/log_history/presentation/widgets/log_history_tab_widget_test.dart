@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/log_history/presentation/widgets/log_history_tab_widget.dart';
 

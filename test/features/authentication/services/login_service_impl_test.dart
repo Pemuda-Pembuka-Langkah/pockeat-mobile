@@ -1,17 +1,23 @@
+// Dart imports:
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
+import 'login_service_impl_test.mocks.dart';
 
 @GenerateMocks(
     [FirebaseAuth, UserCredential, UserRepository, NavigatorObserver, User])
-import 'login_service_impl_test.mocks.dart';
 
 void main() {
   late MockFirebaseAuth mockFirebaseAuth;

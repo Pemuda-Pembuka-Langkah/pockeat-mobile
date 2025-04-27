@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background gray layer (always 100%) -->
+    <item>
+        <shape android:shape="ring"
+            android:useLevel="false"
+            android:thicknessRatio="12"
+            android:innerRadiusRatio="3.5">
+            <solid android:color="#DDDDDD" />
+        </shape>
+    </item>
+    
+    <!-- Yellow progress layer (changes with percentage) -->
+    <item>
+        <shape android:shape="ring"
+            android:useLevel="true"
+            android:thicknessRatio="12"
+            android:innerRadiusRatio="3.5">
+            <solid android:color="#FFE893" />
+        </shape>
+    </item>
+</layer-list>

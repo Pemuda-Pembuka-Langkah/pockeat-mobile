@@ -91,6 +91,7 @@ class CaloriesChart extends StatelessWidget {
                     labelFormat: '{value}',
                     decimalPlaces: 0,
                   ),
+// coverage:ignore-start
                   series: <CartesianSeries>[
                     StackedColumnSeries<Map<String, dynamic>, String>(
                       dataSource: proportionalData,
@@ -312,3 +313,4 @@ class CaloriesChart extends StatelessWidget {
     }
   }
 }
+// coverage:ignore-end

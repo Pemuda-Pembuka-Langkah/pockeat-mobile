@@ -1,5 +1,9 @@
 // lib/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart
+
+// Dart imports:
 import 'dart:io';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';

@@ -1,11 +1,16 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/gestures.dart';
-import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
 
 /// Login page for existing users
 ///
@@ -41,7 +46,8 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _loginService = GetIt.instance<LoginService>();
     _analyticsService = GetIt.instance<AnalyticsService>();
-    _analyticsService.logScreenView(screenName: 'login_page', screenClass: 'LoginPage');
+    _analyticsService.logScreenView(
+        screenName: 'login_page', screenClass: 'LoginPage');
   }
 
   @override
@@ -305,7 +311,7 @@ class _LoginPageState extends State<LoginPage> {
                 disabledBackgroundColor: primaryPink.withOpacity(0.5),
               ),
               child: _isLoading
-                  ? CircularProgressIndicator(
+                  ? const CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     )
                   : const Text(

@@ -1,9 +1,19 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/homepage/presentation/widgets/calories_today_widget.dart';
 import 'package:pockeat/features/sync_fitness_tracker/widgets/health_connect_widget.dart';
 
 class OverviewSection extends StatefulWidget {
-  const OverviewSection({super.key});
+  final bool foodStreakMaintained;
+  final int foodStreakDays;
+
+  const OverviewSection({
+    super.key,
+    this.foodStreakMaintained = true,
+    this.foodStreakDays = 5,
+  });
 
   @override
   State<OverviewSection> createState() => _OverviewSectionState();
@@ -146,58 +156,58 @@ class _OverviewSectionState extends State<OverviewSection> {
           Column(
             children: [
               SizedBox(
-              height: 300,
-              child: PageView(
-                controller: _pageController,
-                children: [
-                  _buildCaloriesToday(),
-                  _buildFitnessTrackerSection(),
-                ],
+                height: 300,
+                child: PageView(
+                  controller: _pageController,
+                  children: [
+                    _buildCaloriesToday(),
+                    _buildFitnessTrackerSection(),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            _buildPageIndicator(),
-          ],
-        ),
+              const SizedBox(height: 12),
+              _buildPageIndicator(),
+            ],
+          ),
 
-        // Nutrients Grid
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildNutrientCard(
-                title: 'Protein',
-                current: '45',
-                target: '120g',
-                icon: Icons.egg_outlined,
-                iconColor: primaryPink,
-                bgColor: primaryPink.withOpacity(0.1),
+          // Nutrients Grid
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildNutrientCard(
+                  title: 'Protein',
+                  current: '45',
+                  target: '120g',
+                  icon: Icons.egg_outlined,
+                  iconColor: primaryPink,
+                  bgColor: primaryPink.withOpacity(0.1),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildNutrientCard(
-                title: 'Carbs',
-                current: '156',
-                target: '250g',
-                icon: Icons.grain,
-                iconColor: primaryGreen,
-                bgColor: primaryGreen.withOpacity(0.1),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildNutrientCard(
+                  title: 'Carbs',
+                  current: '156',
+                  target: '250g',
+                  icon: Icons.grain,
+                  iconColor: primaryGreen,
+                  bgColor: primaryGreen.withOpacity(0.1),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildNutrientCard(
-                title: 'Fat',
-                current: '25',
-                target: '65g',
-                icon: Icons.water_drop_outlined,
-                iconColor: const Color(0xFFFFB946),
-                bgColor: const Color(0xFFFFB946).withOpacity(0.1),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildNutrientCard(
+                  title: 'Fat',
+                  current: '25',
+                  target: '65g',
+                  icon: Icons.water_drop_outlined,
+                  iconColor: const Color(0xFFFFB946),
+                  bgColor: const Color(0xFFFFB946).withOpacity(0.1),
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ],
       ),
     );

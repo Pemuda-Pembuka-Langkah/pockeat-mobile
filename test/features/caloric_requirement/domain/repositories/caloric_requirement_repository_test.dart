@@ -1,10 +1,12 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository_impl.dart';
-
 import 'caloric_requirement_repository_test.mocks.dart';
 
 @GenerateMocks([

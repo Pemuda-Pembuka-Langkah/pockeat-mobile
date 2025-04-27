@@ -1,15 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+// Dart imports:
 import 'dart:async';
 
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'birthdate_page_test.mocks.dart';
 
 @GenerateMocks([HealthMetricsFormCubit, NavigatorObserver])
-import 'birthdate_page_test.mocks.dart';
 
 void main() {
   late MockHealthMetricsFormCubit mockCubit;

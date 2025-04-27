@@ -1,8 +1,13 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/presentation/widgets/food_history_card.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 /// A widget that displays a section of recent food logs
 ///
@@ -30,7 +35,8 @@ class FoodRecentSection extends StatefulWidget {
   State<FoodRecentSection> createState() => _FoodRecentSectionState();
 }
 
-class _FoodRecentSectionState extends State<FoodRecentSection> with WidgetsBindingObserver {
+class _FoodRecentSectionState extends State<FoodRecentSection>
+    with WidgetsBindingObserver {
   late Future<List<FoodLogHistoryItem>> _foodsFuture;
   final _focusNode = FocusNode();
 
@@ -38,13 +44,13 @@ class _FoodRecentSectionState extends State<FoodRecentSection> with WidgetsBindi
   void initState() {
     super.initState();
     _loadFoods();
-    
+
     // Register as an observer to detect app lifecycle changes
     WidgetsBinding.instance.addObserver(this);
-    
+
     // Listen to focus changes to detect when we return to this widget
     _focusNode.addListener(_onFocusChange);
-    
+
     // Request focus to ensure we get focus events
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
@@ -78,14 +84,16 @@ class _FoodRecentSectionState extends State<FoodRecentSection> with WidgetsBindi
   @override
   void didUpdateWidget(FoodRecentSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.service != widget.service || oldWidget.limit != widget.limit) {
+    if (oldWidget.service != widget.service ||
+        oldWidget.limit != widget.limit) {
       _loadFoods();
     }
   }
 
   void _loadFoods() {
     // Get current user's ID
-    final userId = (widget.auth ?? FirebaseAuth.instance).currentUser?.uid ?? '';
+    final userId =
+        (widget.auth ?? FirebaseAuth.instance).currentUser?.uid ?? '';
 
     setState(() {
       _foodsFuture = widget.service.getAllFoodLogs(userId, limit: widget.limit);
@@ -113,17 +121,19 @@ class _FoodRecentSectionState extends State<FoodRecentSection> with WidgetsBindi
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryGreen = const Color(0xFF4CAF50);
+    const Color primaryGreen = Color(0xFF4CAF50);
 
     return Focus(
       focusNode: _focusNode,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 16), // Add consistent bottom padding
+        padding:
+            const EdgeInsets.only(bottom: 16), // Add consistent bottom padding
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16), // Added bottom padding
+              padding: const EdgeInsets.fromLTRB(
+                  16, 16, 16, 16), // Added bottom padding
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -138,12 +148,13 @@ class _FoodRecentSectionState extends State<FoodRecentSection> with WidgetsBindi
                   GestureDetector(
                     onTap: _navigateToAllFoods,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Fixed padding
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6), // Fixed padding
                       decoration: BoxDecoration(
                         color: primaryGreen.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Show All',
                         style: TextStyle(
                           color: primaryGreen,
@@ -161,14 +172,17 @@ class _FoodRecentSectionState extends State<FoodRecentSection> with WidgetsBindi
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16), // Consistent vertical padding
+                    padding: EdgeInsets.symmetric(
+                        vertical: 16), // Consistent vertical padding
                     child: Center(
                       child: CircularProgressIndicator(),
                     ),
                   );
                 } else if (snapshot.hasError) {
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Consistent with other paddings
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16), // Consistent with other paddings
                     child: Center(
                       child: Text(
                         'Error loading foods: ${snapshot.error}',
@@ -181,7 +195,9 @@ class _FoodRecentSectionState extends State<FoodRecentSection> with WidgetsBindi
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Consistent with other paddings
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16), // Consistent with other paddings
                     child: Center(
                       child: Text(
                         'No food history yet',
@@ -195,14 +211,17 @@ class _FoodRecentSectionState extends State<FoodRecentSection> with WidgetsBindi
                 } else {
                   final foods = snapshot.data!;
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16), // Consistent horizontal padding
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16), // Consistent horizontal padding
                     child: ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.zero, // No additional padding in ListView
+                      padding:
+                          EdgeInsets.zero, // No additional padding in ListView
                       itemCount: foods.length,
                       itemBuilder: (context, index) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8), // Consistent spacing between cards
+                        padding: const EdgeInsets.only(
+                            bottom: 8), // Consistent spacing between cards
                         child: FoodHistoryCard(
                           food: foods[index],
                           onTap: () => _navigateToFoodDetail(foods[index]),

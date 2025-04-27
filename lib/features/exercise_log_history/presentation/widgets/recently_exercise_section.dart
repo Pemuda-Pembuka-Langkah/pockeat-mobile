@@ -1,8 +1,13 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
-import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_history_card.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 
 /// A widget that displays a section of recent exercise history items.
 ///
@@ -119,7 +124,7 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryPink = const Color(0xFFFF6B6B);
+    const Color primaryPink = Color(0xFFFF6B6B);
 
     return Focus(
       focusNode: _focusNode,
@@ -152,7 +157,7 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
                         color: primaryPink.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Show All',
                         style: TextStyle(
                           color: primaryPink,
@@ -226,7 +231,6 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
                           onTap: () =>
                               _navigateToExerciseDetail(exercises[index]),
                           // coverage:ignore-end
-
                         ),
                       ),
                     ),

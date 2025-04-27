@@ -1,10 +1,17 @@
+// Dart imports:
 import 'dart:async';
+
+// Flutter imports:
+import 'package:flutter/widgets.dart';
+
+// Package imports:
 import 'package:app_links/app_links.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
 import 'change_password_deeplink_service_test.mocks.dart';

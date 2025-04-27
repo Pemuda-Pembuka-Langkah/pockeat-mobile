@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class EmailVerificationFailedPage extends StatelessWidget {
@@ -12,8 +13,8 @@ class EmailVerificationFailedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Warna yang sama dengan halaman lain untuk konsistensi
-    final Color primaryPink = const Color(0xFFFF6B6B);
-    final Color bgColor = const Color(0xFFF9F9F9);
+    const Color primaryPink = Color(0xFFFF6B6B);
+    const Color bgColor = Color(0xFFF9F9F9);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -93,12 +94,12 @@ class EmailVerificationFailedPage extends StatelessWidget {
                       Navigator.of(context).pushReplacementNamed('/register');
                     },
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: primaryPink),
+                      side: const BorderSide(color: primaryPink),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       'CREATE NEW ACCOUNT',
                       style: TextStyle(
                         fontSize: 16,

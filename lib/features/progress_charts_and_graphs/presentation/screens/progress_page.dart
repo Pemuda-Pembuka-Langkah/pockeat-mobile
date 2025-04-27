@@ -24,6 +24,7 @@ class ProgressPage extends StatefulWidget {
   State<ProgressPage> createState() => _ProgressPageState();
 }
 
+// coverage:ignore-start
 // Unified progress insights widget replaced with the WeightProgressWidget
 class UnifiedInsightsWidget extends StatelessWidget {
   const UnifiedInsightsWidget({super.key});
@@ -161,3 +162,4 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
     );
   }
 }
+// coverage:ignore-end

@@ -1,9 +1,9 @@
 /// Base exception untuk feature home screen widget
 class HomeScreenWidgetException implements Exception {
   final String message;
-  
+
   HomeScreenWidgetException(this.message);
-  
+
   @override
   String toString() => 'HomeScreenWidgetException: $message';
 }
@@ -26,8 +26,8 @@ class WidgetUpdateException extends HomeScreenWidgetException {
 /// Exception ketika gagal mengambil health metrics
 class HealthMetricsNotFoundException extends HomeScreenWidgetException {
   final String userId;
-  
-  HealthMetricsNotFoundException(this.userId) 
+
+  HealthMetricsNotFoundException(this.userId)
       : super('Health metrics not found for user: $userId');
 }
 
@@ -45,5 +45,3 @@ class WidgetCleanupException extends HomeScreenWidgetException {
 class WidgetInitializationException extends HomeScreenWidgetException {
   WidgetInitializationException(super.message);
 }
-
-

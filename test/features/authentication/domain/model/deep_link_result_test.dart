@@ -1,4 +1,7 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
 
 void main() {
@@ -165,6 +168,64 @@ void main() {
       
       // Assert
       expect(result.error, 'Unknown deep link type');
+    });
+    
+    test('should create streak celebration result with factory constructor', () {
+      // Arrange
+      final testUri = Uri.parse('pockeat://streak-celebration?streakDays=7');
+      
+      // Act
+      final result = DeepLinkResult.streakCelebration(
+        success: true,
+        data: {'streakDays': '7'},
+        error: null,
+        originalUri: testUri,
+      );
+      
+      // Assert
+      expect(result.type, DeepLinkType.streakCelebration);
+      expect(result.success, true);
+      expect(result.data, {'streakDays': '7'});
+      expect(result.error, null);
+      expect(result.originalUri, testUri);
+    });
+    
+    test('streakCelebration should contain streak days in data', () {
+      // Arrange
+      final testUri = Uri.parse('pockeat://streak-celebration?streakDays=30');
+      
+      // Act
+      final result = DeepLinkResult.streakCelebration(
+        success: true,
+        data: {'streakDays': '30'},
+        error: null,
+        originalUri: testUri,
+      );
+      
+      // Assert
+      expect(result.data?.containsKey('streakDays'), true);
+      expect(result.data?['streakDays'], '30');
+    });
+    
+    test('streakCelebration should handle error state', () {
+      // Arrange
+      final testUri = Uri.parse('pockeat://streak-celebration');
+      final errorMessage = 'Failed to retrieve streak data';
+      
+      // Act
+      final result = DeepLinkResult.streakCelebration(
+        success: false,
+        data: null,
+        error: errorMessage,
+        originalUri: testUri,
+      );
+      
+      // Assert
+      expect(result.type, DeepLinkType.streakCelebration);
+      expect(result.success, false);
+      expect(result.data, null);
+      expect(result.error, errorMessage);
+      expect(result.originalUri, testUri);
     });
   });
 }

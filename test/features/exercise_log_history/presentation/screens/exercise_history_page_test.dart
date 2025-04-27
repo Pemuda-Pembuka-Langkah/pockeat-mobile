@@ -1,20 +1,25 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:get_it/get_it.dart';
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_history_page.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
-import 'package:intl/intl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
+import 'exercise_history_page_test.mocks.dart';
 
 // Generate mock classes
 @GenerateMocks([ExerciseLogHistoryService, FirebaseAuth, User, CardioRepository, WeightLiftingRepository, SmartExerciseLogRepository])
-import 'exercise_history_page_test.mocks.dart';
 
 void main() {
   

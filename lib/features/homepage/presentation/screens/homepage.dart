@@ -1,10 +1,10 @@
-
-import 'package:pockeat/component/navigation.dart';
-import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
-import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
-
+// Flutter imports:
 import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
+
+// Project imports:
+import 'package:pockeat/component/navigation.dart';
+import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
+import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,7 +15,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-
   final ScrollController _scrollController = ScrollController();
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
@@ -25,47 +24,42 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: DefaultTabController(
         length: 3,
         child: NestedScrollView(
-          controller: _scrollController,
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverAppBar(
-              pinned: true,
-              floating: false,
-              backgroundColor: primaryYellow,
-              elevation: 0,
-              toolbarHeight: 60,
-              title: Row(
-                children: [
-                  const Text(
-                    'Pockeat',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+            controller: _scrollController,
+            headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                  SliverAppBar(
+                    pinned: true,
+                    floating: false,
+                    backgroundColor: primaryYellow,
+                    elevation: 0,
+                    toolbarHeight: 60,
+                    title: const Row(
+                      children: [
+                        Text(
+                          'Pockeat',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
-            ),
-          ],
-          body: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
-            children: [
-              PetHomepageSection(),
-              OverviewSection(),
-            ],
-          )
-        ),
+            body: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+              children: const [
+                PetHomepageSection(),
+                OverviewSection(),
+              ],
+            )),
       ),
       bottomNavigationBar: const CustomBottomNavBar(),
     );
   }
 }
-
-
-

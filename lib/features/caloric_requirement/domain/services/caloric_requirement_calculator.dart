@@ -35,7 +35,6 @@ class CaloricRequirementCalculator {
     }
   }
 
-
   /// Calculates Total Daily Energy Expenditure (TDEE)
   static double calculateTDEE(double bmr, String activityLevel) {
     return bmr * activityMultiplier(activityLevel);

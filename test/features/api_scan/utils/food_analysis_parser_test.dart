@@ -1,4 +1,7 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/api_scan/utils/food_analysis_parser.dart';
 

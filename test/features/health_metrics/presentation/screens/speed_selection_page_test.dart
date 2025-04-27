@@ -1,12 +1,15 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+// Project imports:
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
-
+import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
 import 'speed_selection_page_test.mocks.dart';
 
 @GenerateMocks([HealthMetricsFormCubit])

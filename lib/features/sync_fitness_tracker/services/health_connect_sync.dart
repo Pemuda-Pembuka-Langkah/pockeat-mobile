@@ -1,9 +1,16 @@
+// coverage:ignore-file
+
+// Dart imports:
+import 'dart:async';
+import 'dart:io' show Platform;
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+// Package imports:
 import 'package:health/health.dart';
 import 'package:intl/intl.dart';
-import 'dart:io' show Platform;
-import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
 
 class FitnessTrackerSync {

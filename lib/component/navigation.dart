@@ -127,14 +127,13 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
 
         final addButtonSize = 80.0; // Even larger button size
         
-        return Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.bottomCenter,
-          children: [
-            // Bottom Nav Bar (as first child in stack to be behind)
-            SizedBox(
-              height: 60, // Appropriate height for nav bar
-              child: Positioned(
+        return SizedBox(
+          height: 60, // Meningkatkan height agar mencakup seluruh tombol add
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Base Nav Bar
+              Positioned(
                 left: 0,
                 right: 0,
                 bottom: 0,
@@ -174,7 +173,8 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           onPressed: () {
                             navigationProvider.closeMenu();
                             navigationProvider.setIndex(1);
-                            Navigator.pushReplacementNamed(context, '/analytic');
+                            Navigator.pushReplacementNamed(
+                                context, '/analytic');
                           },
                         ),
                       ),
@@ -190,59 +190,59 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           },
                         ),
                       ),
-                      // Spacer to maintain layout
+                      // Ruang kosong diganti dengan tombol "+" yang tidak terlihat (untuk menjaga layout)
                       Expanded(child: Container()), 
                     ],
                   ),
                 ),
               ),
-            ),
-            
-            // Add Button as completely separate widget (second child in stack to be in front)
-            Positioned(
-              bottom: 20.0, // Position above nav bar
-              right: MediaQuery.of(context).size.width * 0.062,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    navigationProvider.toggleMenu();
-                  },
-                  customBorder: const CircleBorder(),
-                  child: Container(
-                    width: addButtonSize,
-                    height: addButtonSize,
-                    decoration: BoxDecoration(
-                      color: navigationProvider.isMenuOpen
-                          ? primaryGreen
-                          : primaryPink,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: (navigationProvider.isMenuOpen
-                                  ? primaryGreen
-                                  : primaryPink)
-                              .withOpacity(0.3),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 4),
+              
+              // Prominent "+ Add" Button positioned at the right side
+              Positioned(
+                bottom: 20.0, // Tetap positioned higher agar menonjol
+                right: MediaQuery.of(context).size.width * 0.05, // Sedikit masuk dari tepi kanan
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      navigationProvider.toggleMenu();
+                    },
+                    customBorder: const CircleBorder(),
+                    child: Container(
+                      width: addButtonSize,
+                      height: addButtonSize,
+                      decoration: BoxDecoration(
+                        color: navigationProvider.isMenuOpen
+                            ? primaryGreen
+                            : primaryPink,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: (navigationProvider.isMenuOpen
+                                    ? primaryGreen
+                                    : primaryPink)
+                                .withOpacity(0.3),
+                            blurRadius: 10,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: AnimatedRotation(
+                        duration: const Duration(milliseconds: 200),
+                        turns: navigationProvider.isMenuOpen ? 0.125 : 0,
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 36, // Ukuran ikon tetap sama
                         ),
-                      ],
-                    ),
-                    child: AnimatedRotation(
-                      duration: const Duration(milliseconds: 200),
-                      turns: navigationProvider.isMenuOpen ? 0.125 : 0,
-                      child: const Icon(
-                        Icons.add,
-                        color: Colors.white,
-                        size: 36,
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

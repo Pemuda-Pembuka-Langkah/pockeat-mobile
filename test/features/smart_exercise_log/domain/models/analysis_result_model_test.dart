@@ -1,4 +1,7 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 void main() {

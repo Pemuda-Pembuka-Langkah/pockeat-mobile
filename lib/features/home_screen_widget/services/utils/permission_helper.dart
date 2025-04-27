@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:permission_handler/permission_handler.dart';
 
 // coverage:ignore-file
@@ -5,10 +6,10 @@ import 'package:permission_handler/permission_handler.dart';
 abstract class PermissionHelperInterface {
   /// Request notification permission
   Future<PermissionStatus> requestNotificationPermission();
-  
+
   /// Request battery optimization exemption
   Future<PermissionStatus> requestBatteryOptimizationExemption();
-  
+
   /// Check if battery optimization exemption is granted
   Future<bool> isBatteryOptimizationExemptionGranted();
 }
@@ -19,12 +20,12 @@ class PermissionHelper implements PermissionHelperInterface {
   Future<PermissionStatus> requestNotificationPermission() async {
     return await Permission.notification.request();
   }
-  
+
   @override
   Future<PermissionStatus> requestBatteryOptimizationExemption() async {
     return await Permission.ignoreBatteryOptimizations.request();
   }
-  
+
   @override
   Future<bool> isBatteryOptimizationExemptionGranted() async {
     return await Permission.ignoreBatteryOptimizations.isGranted;

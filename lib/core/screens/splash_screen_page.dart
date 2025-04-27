@@ -1,11 +1,16 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
+
+import 'package:lottie/lottie.dart'; // Add this package
 
 /// Splash screen page shown when the app is launched
 ///
-/// This page displays the app name and a loading animation
+/// This page displays the app logo, panda animation, and loading animation
 /// while checking the authentication status of the user.
 class SplashScreenPage extends StatefulWidget {
   const SplashScreenPage({super.key});
@@ -16,108 +21,88 @@ class SplashScreenPage extends StatefulWidget {
 
 class _SplashScreenPageState extends State<SplashScreenPage>
     with SingleTickerProviderStateMixin {
-  // Colors - matching login page
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color bgColor = const Color(0xFFF9F9F9);
 
-  // Animation controller for the loading animation
+  // Satu AnimationController untuk mengelola semua animasi
   late AnimationController _animationController;
-  late Animation<double> _animation;
-
-  // Loading dots state
-  bool _isFirstDotActive = true;
-  bool _isSecondDotActive = false;
-  bool _isThirdDotActive = false;
-  Timer? _dotsTimer;
-
-  // Store authentication result
-  bool? _isAuthenticated;
+  late Animation<double> _scaleAnimation;
+  late Animation<int> _dotIndicator; 
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize animation controller for loading effect
+    // Inisialisasi dan setup AnimationController
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1800),
       vsync: this,
     );
 
-    _animation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
+    // Scale animation untuk teks
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
     );
 
-    _animationController.repeat(reverse: true);
+    // Animation untuk dot indicator (0, 1, 2)
+    _dotIndicator = IntTween(begin: 0, end: 2).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.linear,
+      ),
+    );
 
-    // Initialize dots animation
-    _dotsTimer = Timer.periodic(const Duration(milliseconds: 600), (timer) {
-      setState(() {
-        if (_isFirstDotActive) {
-          _isFirstDotActive = false;
-          _isSecondDotActive = true;
-          _isThirdDotActive = false;
-        } else if (_isSecondDotActive) {
-          _isFirstDotActive = false;
-          _isSecondDotActive = false;
-          _isThirdDotActive = true;
-        } else {
-          _isFirstDotActive = true;
-          _isSecondDotActive = false;
-          _isThirdDotActive = false;
-        }
-      });
+    // Mulai animasi setelah widget dibangun
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _animationController.repeat();
+      
+      // Mulai proses navigasi ke halaman berikutnya
+      _checkAuthAndNavigate();
     });
+  }
 
-    // Check auth immediately but delay navigation
-    _checkAuthStatus();
+  Future<void> _checkAuthAndNavigate() async {
+    final loginService = GetIt.instance<LoginService>();
+
+    try {
+      // Mulai cek auth bersamaan dengan animasi berjalan
+      final userFuture = loginService.getCurrentUser();
+      
+      // Beri waktu minimal untuk animasi splash
+      await Future.delayed(const Duration(seconds: 2));
+      
+      // Ambil hasil login
+      final user = await userFuture;
+
+      if (!mounted) return;
+
+      if (user != null) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      } else {
+        Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
+      }
+    }
   }
 
   @override
   void dispose() {
     _animationController.dispose();
-    _dotsTimer?.cancel();
     super.dispose();
-  }
-
-  /// Check authentication status immediately
-  Future<void> _checkAuthStatus() async {
-    final loginService = GetIt.instance<LoginService>();
-
-    try {
-      final user = await loginService.getCurrentUser();
-      _isAuthenticated = user != null;
-
-      // Delay navigation for 4 seconds to show splash screen
-      Future.delayed(const Duration(seconds: 5), () {
-        _navigateBasedOnAuth();
-      });
-    } catch (e) {
-      _isAuthenticated = false;
-
-      // Delay navigation for 4 seconds to show splash screen
-      Future.delayed(const Duration(seconds: 5), () {
-        _navigateBasedOnAuth();
-      });
-    }
-  }
-
-  /// Navigate based on stored authentication result
-  void _navigateBasedOnAuth() {
-    if (!mounted) return;
-
-    if (_isAuthenticated == true) {
-      // User is authenticated, navigate to home
-      Navigator.of(context).pushReplacementNamed('/');
-    } else {
-      // User is not authenticated, navigate to login
-      Navigator.of(context).pushReplacementNamed('/login');
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final circleSize = size.width * 0.6; // Adjust size as needed
+
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
@@ -125,27 +110,27 @@ class _SplashScreenPageState extends State<SplashScreenPage>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // App name with animation
+              // Logo animasi
               AnimatedBuilder(
-                animation: _animation,
+                animation: _scaleAnimation,
                 builder: (context, child) {
                   return Transform.scale(
-                    scale: 1.0 + (_animation.value * 0.1),
-                    child: Text(
-                      'Pockeat',
-                      style: TextStyle(
-                        fontSize: 42,
-                        fontWeight: FontWeight.bold,
-                        color: primaryPink,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
+                    scale: _scaleAnimation.value,
+                    child: child,
                   );
                 },
+                child: Text(
+                  'Pockeat',
+                  style: TextStyle(
+                    fontSize: 42,
+                    fontWeight: FontWeight.bold,
+                    color: primaryPink,
+                    letterSpacing: 1.2,
+                  ),
+                ),
               ),
-
               const SizedBox(height: 12),
-
+              
               // Subtitle
               Text(
                 'Your health companion',
@@ -155,19 +140,23 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                   letterSpacing: 0.5,
                 ),
               ),
-
               const SizedBox(height: 40),
-
-              // Interactive loading animation with dots
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildDot(_isFirstDotActive),
-                  const SizedBox(width: 8),
-                  _buildDot(_isSecondDotActive),
-                  const SizedBox(width: 8),
-                  _buildDot(_isThirdDotActive),
-                ],
+              
+              // Dot indicator animation
+              AnimatedBuilder(
+                animation: _dotIndicator,
+                builder: (context, child) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildDot(_dotIndicator.value == 0),
+                      const SizedBox(width: 8),
+                      _buildDot(_dotIndicator.value == 1),
+                      const SizedBox(width: 8),
+                      _buildDot(_dotIndicator.value == 2),
+                    ],
+                  );
+                },
               ),
             ],
           ),

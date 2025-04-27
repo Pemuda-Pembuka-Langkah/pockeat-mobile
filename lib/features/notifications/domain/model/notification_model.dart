@@ -1,3 +1,4 @@
+// Package imports:
 import 'package:uuid/uuid.dart';
 
 class NotificationModel {
@@ -7,6 +8,7 @@ class NotificationModel {
   final String? payload;
   final DateTime scheduledTime;
   final bool isRead;
+  final String? imageUrl;
 
   NotificationModel({
     String? id,
@@ -15,6 +17,7 @@ class NotificationModel {
     this.payload,
     required this.scheduledTime,
     this.isRead = false,
+    this.imageUrl,
   }) : id = id ?? const Uuid().v4();
 
   NotificationModel copyWith({
@@ -24,6 +27,7 @@ class NotificationModel {
     String? payload,
     DateTime? scheduledTime,
     bool? isRead,
+    String? imageUrl,
   }) {
     return NotificationModel(
       id: id ?? this.id,
@@ -32,6 +36,7 @@ class NotificationModel {
       payload: payload ?? this.payload,
       scheduledTime: scheduledTime ?? this.scheduledTime,
       isRead: isRead ?? this.isRead,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
@@ -43,6 +48,7 @@ class NotificationModel {
       'payload': payload,
       'scheduledTime': scheduledTime.millisecondsSinceEpoch,
       'isRead': isRead,
+      'imageUrl': imageUrl,
     };
   }
 
@@ -54,6 +60,7 @@ class NotificationModel {
       payload: map['payload'],
       scheduledTime: DateTime.fromMillisecondsSinceEpoch(map['scheduledTime']),
       isRead: map['isRead'] ?? false,
+      imageUrl: map['imageUrl'],
     );
   }
-} 
+}

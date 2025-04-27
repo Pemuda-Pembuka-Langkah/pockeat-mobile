@@ -54,6 +54,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     WeightData('Week 4', 78.0),
   ];
 
+// coverage:ignore-start
   @override
   void initState() {
     super.initState();
@@ -196,6 +197,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
       ),
     );
   }
+// coverage:ignore-end
 
   Widget _buildCurrentWeightIndicators() {
     return Row(

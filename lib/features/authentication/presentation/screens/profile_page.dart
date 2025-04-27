@@ -1,12 +1,17 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
+
+// Project imports:
+import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
+import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
-import 'package:pockeat/features/authentication/services/bug_report_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pockeat/component/navigation.dart';
-import 'package:provider/provider.dart';
 
 /// Halaman profil pengguna
 ///
@@ -101,10 +106,10 @@ class _ProfilePageState extends State<ProfilePage> {
       if (shouldLogout == true) {
         // Clear user data from bug reporting system before logout
         await _bugReportService.clearUserData();
-        
+
         // Implementasi logout sesuai dengan logout service
         await _logoutService.logout();
-        
+
         if (mounted) {
           Navigator.of(context).pushReplacementNamed('/login');
         }
@@ -522,7 +527,9 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildStatItem(
             icon: Icons.person_outline_rounded,
             label: 'Status',
-            value: _currentUser?.emailVerified == true ? 'Terverifikasi' : 'Belum Terverifikasi',
+            value: _currentUser?.emailVerified == true
+                ? 'Terverifikasi'
+                : 'Belum Terverifikasi',
             color: primaryPink,
           ),
         ],
@@ -648,6 +655,15 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
           _buildDivider(),
           _buildActionTile(
+            title: 'Pengaturan Notifikasi',
+            subtitle: 'Kelola pengaturan notifikasi aplikasi',
+            icon: Icons.notifications_outlined,
+            onTap: () {
+              Navigator.of(context).pushNamed('/notification-settings');
+            },
+          ),
+          _buildDivider(),
+          _buildActionTile(
             title: 'Laporkan Bug',
             subtitle: 'Bantu kami meningkatkan aplikasi',
             icon: Icons.bug_report_outlined,
@@ -656,10 +672,10 @@ class _ProfilePageState extends State<ProfilePage> {
               if (_currentUser != null) {
                 // Set current user data for context in the bug report
                 await _bugReportService.setUserData(_currentUser!);
-                
+
                 // Show the bug reporting UI
                 final result = await _bugReportService.show();
-                
+
                 if (!result && mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -674,7 +690,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Data pengguna tidak tersedia untuk pelaporan bug'),
+                      content: Text(
+                          'Data pengguna tidak tersedia untuk pelaporan bug'),
                       behavior: SnackBarBehavior.floating,
                       backgroundColor: Colors.orange,
                     ),
@@ -784,6 +801,4 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
   }
-
-
 }

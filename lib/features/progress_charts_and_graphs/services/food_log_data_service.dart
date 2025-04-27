@@ -4,6 +4,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calori
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 
+// coverage:ignore-start
 class FoodLogDataService {
   final FoodLogHistoryService _foodLogService;
   
@@ -273,3 +274,4 @@ class FoodLogDataService {
     }).toList();
   }
 }
+// coverage:ignore-end

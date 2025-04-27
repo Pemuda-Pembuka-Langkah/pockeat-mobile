@@ -1,17 +1,22 @@
+// Dart imports:
 import 'dart:async';
+
+// Package imports:
 import 'package:app_links/app_links.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
+import 'change_password_deeplink_service_impl_test.mocks.dart';
 
 @GenerateNiceMocks([
   MockSpec<FirebaseAuth>(),
   MockSpec<AppLinks>(),
   MockSpec<StreamSubscription<Uri>>(),
 ])
-import 'change_password_deeplink_service_impl_test.mocks.dart';
 
 class TestableChangePasswordDeepLinkServiceImpl extends ChangePasswordDeepLinkServiceImpl {
   TestableChangePasswordDeepLinkServiceImpl({

@@ -1,7 +1,13 @@
 // exercise_input_page_test.dart
-import 'package:flutter/material.dart';
+
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/exercise_input_options/presentation/screens/exercise_input_page.dart';
 
 void main() {

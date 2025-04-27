@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class TimeSelectionWidget extends StatelessWidget {
@@ -28,7 +29,7 @@ class TimeSelectionWidget extends StatelessWidget {
         onEndTimeChanged(selectedStartTime.add(const Duration(minutes: 1)));
       });
     }
-      // coverage:ignore-end
+    // coverage:ignore-end
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

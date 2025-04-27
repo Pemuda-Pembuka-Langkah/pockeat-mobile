@@ -1,13 +1,19 @@
 // test/features/ai_api_scan/services/food/nutrition_label_analysis_service_test.dart
+
+// Dart imports:
 import 'dart:io';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
+import '../base/api_service_test.mocks.dart';
 
 // Import the generated mock
-import '../base/api_service_test.mocks.dart';
 
 // Mock File
 class MockFile extends Mock implements File {}

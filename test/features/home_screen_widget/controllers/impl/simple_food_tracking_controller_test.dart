@@ -1,6 +1,9 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/impl/simple_food_tracking_controller.dart';
@@ -8,6 +11,7 @@ import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exc
 import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/services/calorie_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
+import 'simple_food_tracking_controller_test.mocks.dart';
 
 // Generate mocks for all dependencies
 @GenerateMocks([
@@ -15,7 +19,6 @@ import 'package:pockeat/features/home_screen_widget/services/widget_data_service
   FoodLogHistoryService,
   CalorieCalculationStrategy
 ])
-import 'simple_food_tracking_controller_test.mocks.dart';
 
 void main() {
   // Initialize the binding
