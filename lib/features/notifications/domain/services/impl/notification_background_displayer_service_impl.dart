@@ -10,12 +10,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/home_screen_widget/services/calorie_calculation_strategy.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/model/meal_reminder_message.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
 import 'package:pockeat/features/notifications/domain/model/pet_sadness_message.dart';
+import 'package:pockeat/features/notifications/domain/model/pet_status_message.dart';
 import 'package:pockeat/features/notifications/domain/model/streak_message.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/user_activity_service_impl.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_background_displayer_service.dart';
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
@@ -225,6 +230,149 @@ class NotificationBackgroundDisplayerServiceImpl
     }
   }
 
+  @override
+  Future<bool> showPetStatusNotification(Map<String, dynamic> services) async {
+    try {
+      final prefs = services['sharedPreferences'] as SharedPreferences;
+      final notifications = services['flutterLocalNotificationsPlugin']
+          as FlutterLocalNotificationsPlugin;
+      final loginService = services['loginService'] as LoginService;
+
+      // Check if pet status notifications are enabled
+      final isEnabled =
+          prefs.getBool(NotificationConstants.prefPetStatusEnabled) ?? true;
+      if (!isEnabled) {
+        debugPrint('Pet status notifications are disabled');
+        return false;
+      }
+
+      // Get current user ID
+      final userId = (await loginService.getCurrentUser())?.uid;
+      if (userId == null) {
+        debugPrint('No user logged in, skipping pet status notification');
+        return false;
+      }
+
+      // Get pet service from services
+      final PetService petService = services['petService'] as PetService;
+
+      // Get current pet mood and heart level
+      final String mood = await petService.getPetMood(userId);
+      final int heartLevel = await petService.getPetHeart(userId);
+      
+      // Calculate consumed calories using proper strategy
+      int currentCalories = 0;
+      int targetCalories = 0;
+      try {
+        // Calculate consumed calories
+        final calorieStrategy =
+            services['calorieCalculationStrategy'] as CalorieCalculationStrategy;
+        final foodLogService =
+            services['foodLogHistoryService'] as FoodLogHistoryService;
+
+        // Use strategy to calculate total calories
+        currentCalories = await calorieStrategy.calculateTodayTotalCalories(
+            foodLogService, userId);
+            
+        // Calculate target calories
+        final healthMetricsRepository =
+            services['healthMetricsRepository'] as HealthMetricsRepository;
+        final caloricRequirementService =
+            services['caloricRequirementService'] as CaloricRequirementService;
+
+        // Use strategy to calculate target calories
+        targetCalories = await calorieStrategy.calculateTargetCalories(
+            healthMetricsRepository, caloricRequirementService, userId);
+            
+      } catch (e) {
+        debugPrint('Error calculating calories: $e');
+        // Fallback to use heart level to estimate calories as before
+        targetCalories = 2000; // Default target calories
+        currentCalories = (heartLevel / 4 * targetCalories).round();
+      }
+
+      // Create status message
+      final statusMessage = PetStatusMessageFactory.createMessage(
+        mood: mood,
+        heartLevel: heartLevel,
+        currentCalories: currentCalories,
+        requiredCalories: targetCalories,
+      );
+
+      debugPrint('Creating pet status notification: ${statusMessage.title}');
+
+      // Initialize local notifications if needed
+      const AndroidInitializationSettings initializationSettingsAndroid =
+          AndroidInitializationSettings('@mipmap/launcher_icon');
+      const InitializationSettings initializationSettings =
+          InitializationSettings(android: initializationSettingsAndroid);
+      await notifications.initialize(initializationSettings);
+
+      // Create pet status notification channel if needed
+      await notifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(NotificationChannels.petStatus);
+
+      // Show a styled notification with pet image
+      try {
+        final bigPictureStyle = BigPictureStyleInformation(
+          DrawableResourceAndroidBitmap(statusMessage.imageAsset),
+          largeIcon: DrawableResourceAndroidBitmap(statusMessage.imageAsset),
+          contentTitle: statusMessage.title,
+          htmlFormatContentTitle: true,
+          summaryText: statusMessage.body,
+          htmlFormatSummaryText: true,
+        );
+
+        await notifications.show(
+          NotificationConstants.petStatusNotificationId.hashCode,
+          statusMessage.title,
+          statusMessage.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              NotificationChannels.petStatus.id,
+              NotificationChannels.petStatus.name,
+              channelDescription: NotificationChannels.petStatus.description,
+              icon: '@mipmap/launcher_icon',
+              largeIcon: DrawableResourceAndroidBitmap(statusMessage.imageAsset),
+              styleInformation: bigPictureStyle,
+              playSound: true,
+              priority: Priority.high,
+              importance: Importance.high,
+              color: const Color(0xFFFF6B6B), // Pockeat pink color
+            ),
+          ),
+          payload: NotificationConstants.petStatusPayload,
+        );
+      } catch (e) {
+        debugPrint('Error showing styled notification: $e');
+        // Fallback to simple notification
+        await notifications.show(
+          NotificationConstants.petStatusNotificationId.hashCode,
+          statusMessage.title,
+          statusMessage.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              NotificationChannels.petStatus.id,
+              NotificationChannels.petStatus.name,
+              channelDescription: NotificationChannels.petStatus.description,
+              icon: '@mipmap/launcher_icon',
+              priority: Priority.high,
+              importance: Importance.high,
+            ),
+          ),
+          payload: NotificationConstants.petStatusPayload,
+        );
+      }
+
+      return true;
+    } catch (e) {
+      debugPrint('Error showing pet status notification: $e');
+      return false;
+    }
+  }
+  
   @override
   Future<bool> showStreakNotification(Map<String, dynamic> services) async {
     try {

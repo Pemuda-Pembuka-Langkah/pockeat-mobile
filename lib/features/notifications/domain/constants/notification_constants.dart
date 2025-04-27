@@ -79,6 +79,12 @@ class NotificationConstants {
   // Default notification times
   static const int defaultStreakNotificationHour = 10;
   static const int defaultStreakNotificationMinute = 0;
+  
+  // Default pet status notification time (8:00 PM)
+  static const int defaultPetStatusNotificationHour = 20;
+  static const int defaultPetStatusNotificationMinute = 0;
+  static const String prefPetStatusHour = 'pet_status_notification_hour';
+  static const String prefPetStatusMinute = 'pet_status_notification_minute';
 
   // Default meal reminder times
   static const int defaultBreakfastHour = 7;

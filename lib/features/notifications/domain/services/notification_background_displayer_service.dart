@@ -23,4 +23,9 @@ abstract class NotificationBackgroundDisplayerService {
   /// [userActivityService] - Optional UserActivityService for testability
   Future<bool> showPetSadnessNotification(
       Map<String, dynamic> services, {UserActivityService? userActivityService});
+      
+  /// Shows a pet status notification displaying the current mood and health of the pet
+  /// [services] - Required services for background tasks (shared prefs, notifications, etc.)
+  /// Returns true if notification was shown, false otherwise
+  Future<bool> showPetStatusNotification(Map<String, dynamic> services);
 }

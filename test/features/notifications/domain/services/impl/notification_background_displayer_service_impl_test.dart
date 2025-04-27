@@ -5,21 +5,20 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Dart imports:
-import 'dart:async';
-
-
-
 // Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/home_screen_widget/services/calorie_calculation_strategy.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
-
+import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
 import 'package:pockeat/features/notifications/domain/model/streak_message.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/notification_background_displayer_service_impl.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_background_displayer_service.dart';
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 
 import 'notification_background_displayer_service_impl_test.mocks.dart';
 
@@ -30,6 +29,10 @@ import 'notification_background_displayer_service_impl_test.mocks.dart';
   AndroidFlutterLocalNotificationsPlugin,
   SharedPreferences,
   UserActivityService,
+  PetService,
+  CalorieCalculationStrategy,
+  HealthMetricsRepository,
+  CaloricRequirementService,
 ])
 // Tidak perlu lagi membuat mock untuk BackgroundLogger karena sudah menggunakan isTest
 
@@ -44,6 +47,10 @@ void main() {
   late MockSharedPreferences mockPrefs;
   late Map<String, dynamic> serviceMap;
   late MockUserActivityService mockUserActivityService;
+  late MockPetService mockPetService;
+  late MockCalorieCalculationStrategy mockCalorieStrategy;
+  late MockHealthMetricsRepository mockHealthMetricsRepository;
+  late MockCaloricRequirementService mockCaloricRequirementService;
 
   setUp(() {
     // Setup original mocks
@@ -53,6 +60,10 @@ void main() {
     mockAndroidNotifications = MockAndroidFlutterLocalNotificationsPlugin();
     mockPrefs = MockSharedPreferences();
     mockUserActivityService = MockUserActivityService();
+    mockPetService = MockPetService();
+    mockCalorieStrategy = MockCalorieCalculationStrategy();
+    mockHealthMetricsRepository = MockHealthMetricsRepository();
+    mockCaloricRequirementService = MockCaloricRequirementService();
 
     // Membuat service dengan parameter isTest=true agar BackgroundLogger tidak mencoba akses filesystem
     service = NotificationBackgroundDisplayerServiceImpl(isTest: true);
@@ -67,6 +78,10 @@ void main() {
       'foodLogHistoryService': mockFoodLogHistoryService,
       'flutterLocalNotificationsPlugin': mockNotifications,
       'userActivityService': mockUserActivityService,
+      'petService': mockPetService,
+      'calorieCalculationStrategy': mockCalorieStrategy,
+      'healthMetricsRepository': mockHealthMetricsRepository,
+      'caloricRequirementService': mockCaloricRequirementService,
     };
 
     // Setup mock for Android platform-specific implementation
@@ -404,6 +419,157 @@ void main() {
       // Assert
       expect(result, false);
       verifyNever(mockNotifications.show(any, any, any, any));
+    });
+  });
+
+  group('showPetStatusNotification', () {
+    const testUserId = 'test-user-123';
+    
+    setUp(() {
+      // Default setup for pet status notifications
+      when(mockPrefs.getBool(NotificationConstants.prefPetStatusEnabled))
+          .thenReturn(true);
+      
+      // Mock current user
+      when(mockLoginService.getCurrentUser())
+          .thenAnswer((_) async =>  UserModel(uid: testUserId, email: 'test@example.com', emailVerified: true, createdAt: DateTime.now()));
+      
+      // Mock pet mood and heart level
+      when(mockPetService.getPetMood(testUserId))
+          .thenAnswer((_) async => 'happy');
+      when(mockPetService.getPetHeart(testUserId))
+          .thenAnswer((_) async => 3);
+      
+      // Mock calorie calculations
+      when(mockCalorieStrategy.calculateTodayTotalCalories(
+          mockFoodLogHistoryService, testUserId))
+          .thenAnswer((_) async => 1500);
+      when(mockCalorieStrategy.calculateTargetCalories(
+          mockHealthMetricsRepository, mockCaloricRequirementService, testUserId))
+          .thenAnswer((_) async => 2000);
+    });
+    
+    test('should return false when notifications are disabled', () async {
+      // Arrange
+      when(mockPrefs.getBool(NotificationConstants.prefPetStatusEnabled))
+          .thenReturn(false);
+      
+      // Act
+      final result = await service.showPetStatusNotification(serviceMap);
+      
+      // Assert
+      expect(result, false);
+      verify(mockPrefs.getBool(NotificationConstants.prefPetStatusEnabled)).called(1);
+      verifyNever(mockNotifications.show(any, any, any, any));
+    });
+    
+    test('should return false when no user is logged in', () async {
+      // Arrange
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => null);
+      
+      // Act
+      final result = await service.showPetStatusNotification(serviceMap);
+      
+      // Assert
+      expect(result, false);
+      verify(mockLoginService.getCurrentUser()).called(1);
+      verifyNever(mockNotifications.show(any, any, any, any));
+    });
+    
+    test('should show notification with happy mood and medium heart level', () async {
+      // Arrange
+      when(mockPetService.getPetMood(testUserId))
+          .thenAnswer((_) async => 'happy');
+      when(mockPetService.getPetHeart(testUserId))
+          .thenAnswer((_) async => 3);
+      
+      // Act
+      final result = await service.showPetStatusNotification(serviceMap);
+      
+      // Assert
+      expect(result, true);
+      verify(mockPetService.getPetMood(testUserId)).called(1);
+      verify(mockPetService.getPetHeart(testUserId)).called(1);
+      verify(mockCalorieStrategy.calculateTodayTotalCalories(
+          mockFoodLogHistoryService, testUserId)).called(1);
+      verify(mockCalorieStrategy.calculateTargetCalories(
+          mockHealthMetricsRepository, mockCaloricRequirementService, testUserId)).called(1);
+      
+      // Verify the notification was shown
+      verify(mockNotifications.initialize(any)).called(1);
+      verify(mockAndroidNotifications.createNotificationChannel(NotificationChannels.petStatus)).called(1);
+      verify(mockNotifications.show(
+        NotificationConstants.petStatusNotificationId.hashCode,
+        any,
+        any,
+        any,
+        payload: NotificationConstants.petStatusPayload,
+      )).called(1);
+    });
+    
+    test('should show notification with sad mood and low heart level', () async {
+      // Arrange
+      when(mockPetService.getPetMood(testUserId))
+          .thenAnswer((_) async => 'sad');
+      when(mockPetService.getPetHeart(testUserId))
+          .thenAnswer((_) async => 1);
+      when(mockCalorieStrategy.calculateTodayTotalCalories(
+          mockFoodLogHistoryService, testUserId))
+          .thenAnswer((_) async => 400);
+      
+      // Act
+      final result = await service.showPetStatusNotification(serviceMap);
+      
+      // Assert
+      expect(result, true);
+      
+      // Just verify that a notification was shown with the correct ID
+      verify(mockNotifications.show(
+        NotificationConstants.petStatusNotificationId.hashCode,
+        any,
+        any,
+        any,
+        payload: NotificationConstants.petStatusPayload,
+      )).called(1);
+    });
+    
+    test('should handle exception in calorie calculation and use fallback', () async {
+      // Arrange
+      when(mockCalorieStrategy.calculateTodayTotalCalories(any, any))
+          .thenThrow(Exception('Test error'));
+      
+      // Act
+      final result = await service.showPetStatusNotification(serviceMap);
+      
+      // Assert
+      expect(result, true);
+      verify(mockCalorieStrategy.calculateTodayTotalCalories(any, any)).called(1);
+      verify(mockPetService.getPetHeart(testUserId)).called(1); // Called for fallback calculation
+      // Check notification was shown successfully
+      verify(mockNotifications.show(
+        NotificationConstants.petStatusNotificationId.hashCode,
+        any,
+        any,
+        any,
+        payload: NotificationConstants.petStatusPayload,
+      )).called(1);
+    });
+    
+    test('should handle exception in notification styling and use simple notification', () async {
+      // Arrange
+      when(mockNotifications.show(
+        NotificationConstants.petStatusNotificationId.hashCode,
+        any,
+        any,
+        any,
+        payload: anyNamed('payload'),
+      )).thenThrow(Exception('Test styling error'));
+      
+      // Act
+      final result = await service.showPetStatusNotification(serviceMap);
+      
+      // Assert
+      expect(result, false); // Returns false on error
     });
   });
 

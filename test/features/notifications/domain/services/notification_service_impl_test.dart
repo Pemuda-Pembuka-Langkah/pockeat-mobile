@@ -215,7 +215,7 @@ void main() {
       
       // Check that all channels were created - server, meal reminder, and daily streak
       verify(mockAndroidFlutterLocalNotificationsPlugin.createNotificationChannel(any))
-          .called(2);
+          .called(3);
     });
   });
 
