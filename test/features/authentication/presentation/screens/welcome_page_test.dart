@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 

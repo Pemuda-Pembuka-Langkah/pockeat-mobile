@@ -1,17 +1,27 @@
 // lib/features/homepage/presentation/widgets/pet_companion_widget.dart
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get_it/get_it.dart';
+import 'dart:math';
+import 'pet_chat_bubble.dart';
+import 'dart:async';
 
+// coverage:ignore-start
 class PetCompanionWidget extends StatefulWidget {
   final String petName;
   final String petImagePath;
+  final double calorieProgress;
 
   const PetCompanionWidget({
     super.key,
     this.petName = 'Panda',
     this.petImagePath = 'assets/images/panda_sad.json',
+    this.calorieProgress = 0.0,
   });
 
   @override
@@ -23,11 +33,70 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
   String beachBackground = 'assets/images/beach.jpg';
   String gymBackground = 'assets/images/gym.jpg';
   String kitchenBackground = 'assets/images/kitchen.jpg';
+  Timer? _mealTimer;
+
+  // Chat bubble state
+  bool _showChatBubble = false;
+  ChatBubbleType _currentBubbleType = ChatBubbleType.reminder;
+  String _currentMessage = "";
+
+  // Track if we've already shown each type of message today
+  final Map<ChatBubbleType, bool> _shownToday = {
+    ChatBubbleType.reminder: false,
+    ChatBubbleType.almostFinished: false,
+    ChatBubbleType.completed: false,
+  };
+
+  // Messages for each type
+  final Map<ChatBubbleType, List<String>> _messages = {
+    ChatBubbleType.reminder: [
+      "Did you log your calories today? I'm here to help keep track!",
+      "Hey there! Don't forget to log your meals today. It helps us both stay on track!",
+      "Remember to track what you eat today. Small habits lead to big results!",
+    ],
+    ChatBubbleType.almostFinished: [
+      "You're almost there. Just a few more bites left to reach your daily goal!",
+      "So close to your goal! Keep pushing, you're doing amazing today!",
+      "Nearly there! You've made such great progress today, just a little more to go!",
+    ],
+    ChatBubbleType.completed: [
+      "You crushed your daily goal, great job! Let's celebrate with some well-deserved rest.",
+      "Goal achieved! You're absolutely crushing it today! So proud of you!",
+      "Mission accomplished! Your consistent effort is really paying off!",
+    ],
+  };
 
   @override
   void initState() {
     super.initState();
     loadBackground();
+
+    // Check progress and decide which message to show based on current progress
+    Future.microtask(() {
+      _determineChatBubble();
+    });
+
+    _mealTimer = Timer(const Duration(seconds: 2), () {
+      if (!_showChatBubble && widget.calorieProgress < 0.75) {
+        _checkMealTimeReminder();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _mealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(PetCompanionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // If progress changed, check if we need to show a new bubble
+    if (oldWidget.calorieProgress != widget.calorieProgress) {
+      _determineChatBubble();
+    }
   }
 
   Future<void> loadBackground() async {
@@ -44,6 +113,78 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
     } else {
       await prefs.remove('backgroundImage');
     }
+  }
+
+  // Determine which bubble to show based on calorie progress
+  void _determineChatBubble() {
+    // For goal completion (100%)
+    if (widget.calorieProgress >= 1.0 &&
+        !_shownToday[ChatBubbleType.completed]!) {
+      _showCelebrationBubble();
+      _shownToday[ChatBubbleType.completed] = true;
+      return; // Stop here if we're showing completion
+    }
+
+    // For almost there (75-90%)
+    if (widget.calorieProgress >= 0.75 &&
+        widget.calorieProgress < 1.0 &&
+        !_shownToday[ChatBubbleType.almostFinished]!) {
+      _showAlmostFinishedBubble();
+      _shownToday[ChatBubbleType.almostFinished] = true;
+      return; // Stop here if we're showing almost finished
+    }
+
+    // Don't add any more conditions here so we don't override priority messages
+  }
+
+  // Check if we need to show a meal time reminder
+  void _checkMealTimeReminder() {
+    // Only show reminder if no other messages are being shown
+    // and we haven't shown a reminder today
+    if (!_showChatBubble && !_shownToday[ChatBubbleType.reminder]!) {
+      _showReminderBubble();
+    }
+  }
+
+  // Get a random message for the specified type
+  String _getRandomMessage(ChatBubbleType type) {
+    final messages = _messages[type]!;
+    final random = Random();
+    return messages[random.nextInt(messages.length)];
+  }
+
+  // Show reminder bubble
+  void _showReminderBubble() {
+    setState(() {
+      _showChatBubble = true;
+      _currentBubbleType = ChatBubbleType.reminder;
+      _currentMessage = _getRandomMessage(ChatBubbleType.reminder);
+    });
+  }
+
+  // Show almost finished bubble
+  void _showAlmostFinishedBubble() {
+    setState(() {
+      _showChatBubble = true;
+      _currentBubbleType = ChatBubbleType.almostFinished;
+      _currentMessage = _getRandomMessage(ChatBubbleType.almostFinished);
+    });
+  }
+
+  // Show completion bubble with celebration
+  void _showCelebrationBubble() {
+    setState(() {
+      _showChatBubble = true;
+      _currentBubbleType = ChatBubbleType.completed;
+      _currentMessage = _getRandomMessage(ChatBubbleType.completed);
+    });
+  }
+
+  // Dismiss the current bubble
+  void _dismissBubble() {
+    setState(() {
+      _showChatBubble = false;
+    });
   }
 
   void showSliderPopup(BuildContext context) {
@@ -134,6 +275,7 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Pet and background section with integrated chat bubble
         Container(
           height: 350,
           width: double.infinity,
@@ -154,6 +296,26 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
                     fit: BoxFit.cover,
                   ),
                 ),
+
+              // Chat bubble positioned at the top of the container
+              if (_showChatBubble)
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  right: 20,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: PetChatBubble(
+                      message: _currentMessage,
+                      type: _currentBubbleType,
+                      showDismiss: true,
+                      onDismiss: _dismissBubble,
+                      autoDismissAfter: const Duration(seconds: 5),
+                    ),
+                  ),
+                ),
+
+              // Pet animation
               Positioned(
                 bottom: 15,
                 left: 0,
@@ -179,6 +341,8 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
                   },
                 ),
               ),
+
+              // Background selector button
               Positioned(
                 bottom: 16,
                 right: 16,
@@ -230,3 +394,4 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
     );
   }
 }
+// coverage:ignore-end

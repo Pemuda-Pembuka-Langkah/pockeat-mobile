@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class WelcomePage extends StatefulWidget {
@@ -22,7 +23,8 @@ class _WelcomePageState extends State<WelcomePage> {
     });
 
     try {
-      await Future.delayed(const Duration(milliseconds: 500)); // Simulate loading
+      await Future.delayed(
+          const Duration(milliseconds: 500)); // Simulate loading
       if (!mounted) return;
       Navigator.of(context).pushNamed(routeName);
     } catch (e) {

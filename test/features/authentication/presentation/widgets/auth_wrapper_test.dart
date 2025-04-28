@@ -17,9 +17,9 @@ import 'package:pockeat/features/authentication/presentation/widgets/auth_wrappe
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'auth_wrapper_test.mocks.dart';
+import 'auth_wrapper_test.mocks.dart';
 
 @GenerateMocks([LoginService, NavigatorState, HealthMetricsCheckService])
-import 'auth_wrapper_test.mocks.dart';
 
 /// Custom mock observer to track navigation during tests
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
