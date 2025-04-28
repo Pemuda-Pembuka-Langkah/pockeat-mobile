@@ -20,7 +20,6 @@ import 'package:pockeat/features/home_screen_widget/services/widget_updater_serv
 // coverage:ignore-start
 /// Implementation of WidgetUpdaterService that handles widget updates
 class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
-
   @override
   Future<void> updateWidgets(Map<String, dynamic> services) async {
     try {
@@ -35,7 +34,6 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
           as WidgetDataService<SimpleFoodTracking>;
       final detailedWidgetService = services['detailedWidgetService']
           as WidgetDataService<DetailedFoodTracking>;
-
 
       // 1. Calculate total calories consumed today
       final int totalCalories =
@@ -71,7 +69,6 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
       final carbs =
           nutrientStrategy.calculateNutrientFromLogs(todayLogs, 'carbs');
       final fat = nutrientStrategy.calculateNutrientFromLogs(todayLogs, 'fat');
-
 
       await detailedWidgetService.updateData(DetailedFoodTracking(
         userId: userId,

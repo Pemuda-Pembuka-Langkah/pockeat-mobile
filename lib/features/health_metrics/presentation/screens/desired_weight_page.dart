@@ -115,16 +115,8 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            _formKey.currentState?.save();
-                            context
-                                .read<HealthMetricsFormCubit>()
-                                .setDesiredWeight(_desiredWeight!);
-                            Navigator.pushNamed(context, '/speed');
-                          }
-                        },
-                        child: const Text("Next"),
+                        onPressed: _handleNextPressed,
+                        child: const Center(child: Text("Next")),
                       ),
                     ],
                   ),
@@ -135,5 +127,40 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> {
         ),
       ),
     );
+  }
+
+  void _handleNextPressed() {
+    if (_formKey.currentState?.validate() ?? false) {
+      _formKey.currentState?.save();
+
+      final cubit = context.read<HealthMetricsFormCubit>();
+      final currentWeight = cubit.state.weight;
+
+      if (currentWeight == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Current weight not available. Please go back.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Save desired weight
+      cubit.setDesiredWeight(_desiredWeight!);
+
+      // Set goal automatically based on comparison
+      String goal;
+      if (_desiredWeight! < currentWeight) {
+        goal = 'Lose Weight';
+      } else if (_desiredWeight! > currentWeight) {
+        goal = 'Gain Weight';
+      } else {
+        goal = 'Maintain Weight';
+      }
+      cubit.toggleGoal(goal);
+
+      Navigator.pushNamed(context, '/goal-obstacle'); // your next page
+    }
   }
 }

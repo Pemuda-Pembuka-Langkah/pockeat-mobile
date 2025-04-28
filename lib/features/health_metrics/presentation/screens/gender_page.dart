@@ -108,7 +108,7 @@ class GenderPage extends StatelessWidget {
                           final prefs = await SharedPreferences.getInstance();
                           await prefs.setBool('onboardingInProgress', true);
 
-                          Navigator.pushNamed(context, '/activity-level');
+                          Navigator.pushNamed(context, '/desired-weight');
                         }
                       : null,
                   child: const Center(child: Text("Next")),

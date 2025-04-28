@@ -12,16 +12,9 @@ import 'package:pockeat/features/health_metrics/domain/service/health_metrics_ch
 /// A wrapper widget that handles authentication state
 /// and redirects users to the appropriate screens
 class AuthWrapper extends StatefulWidget {
-  /// The child widget to display when the user is authenticated
   final Widget child;
-
-  /// Whether this page requires authentication
   final bool requireAuth;
-
-  /// Where to redirect if user is logged in
   final String redirectUrlIfLoggedIn;
-
-  /// Where to redirect if user is not logged in
   final String redirectUrlIfNotLoggedIn;
 
   const AuthWrapper({
@@ -38,83 +31,89 @@ class AuthWrapper extends StatefulWidget {
 
 class _AuthWrapperState extends State<AuthWrapper> {
   late final LoginService _loginService;
-  bool _didInitAuth = false;
+  bool _isChecking = true;
+  bool _isAuthenticated = false;
 
   @override
   void initState() {
     super.initState();
     _loginService = GetIt.instance<LoginService>();
 
-    // Cek auth hanya jika diperlukan
-    if (widget.requireAuth) {
-      // Jangan langsung navigasi di initState, gunakan scheduleFuture
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _checkAuth();
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuth();
+    });
   }
 
   Future<void> _checkAuth() async {
-    if (_didInitAuth) return; // Cegah pengecekan berulang
-    _didInitAuth = true;
-
     try {
       final user = await _loginService.getCurrentUser();
+      final prefs = await SharedPreferences.getInstance();
+      final onboardingInProgress = prefs.getBool('onboardingInProgress') ?? false;
 
-      // Redirect ke login jika tidak terautentikasi dan widget masih mounted
-      if (user == null && mounted) {
-        // User not logged in -> go to redirectUrlIfNotLoggedIn
-        Navigator.of(context).pushNamed(widget.redirectUrlIfNotLoggedIn);
-      } else if (user != null && mounted) {
-        // User is logged in
+      if (user == null) {
+        // Tidak login
         if (widget.requireAuth) {
-          // Perform health metrics check only if required
-          await _checkHealthMetrics(user.uid);
+          _redirect(widget.redirectUrlIfNotLoggedIn, replace: true);
         } else {
-          // If no auth required, but user is logged in → redirect anyway
-          Navigator.of(context).pushReplacementNamed(widget.redirectUrlIfLoggedIn);
+          setState(() {
+            _isAuthenticated = false;
+            _isChecking = false;
+          });
+        }
+      } else {
+        // Login
+        if (widget.requireAuth) {
+          final healthMetricsCheckService = GetIt.instance<HealthMetricsCheckService>();
+          final completed = await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
+
+          final currentRoute = ModalRoute.of(context)?.settings.name;
+          final isInsideOnboardingFlow = currentRoute?.startsWith('/onboarding') ?? false;
+
+          if ((!completed && !onboardingInProgress) && !isInsideOnboardingFlow) {
+            _redirect('/height-weight', removeUntil: true);
+          } else {
+            setState(() {
+              _isAuthenticated = true;
+              _isChecking = false;
+            });
+          }
+        } else {
+          _redirect(widget.redirectUrlIfLoggedIn, replace: true);
         }
       }
     } catch (e) {
-      // Jika terjadi error, asumsikan user tidak terautentikasi
-      if (mounted) {
-        Navigator.of(context).pushNamed(widget.redirectUrlIfNotLoggedIn);
+      debugPrint('Error during auth check: $e');
+      if (widget.requireAuth) {
+        _redirect(widget.redirectUrlIfNotLoggedIn, replace: true);
+      } else {
+        setState(() {
+          _isAuthenticated = false;
+          _isChecking = false;
+        });
       }
     }
   }
 
-  Future<void> _checkHealthMetrics(String uid) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final onboardingInProgress =
-          prefs.getBool('onboardingInProgress') ?? false;
-
-      final healthMetricsCheckService =
-          GetIt.instance<HealthMetricsCheckService>();
-      final completed =
-          await healthMetricsCheckService.hasCompletedOnboarding(uid);
-
-      // ignore: use_build_context_synchronously
-      final currentRoute = ModalRoute.of(context)?.settings.name;
-      final isInsideOnboardingFlow =
-          currentRoute?.startsWith('/onboarding') ?? false;
-
-    // 🛑 Jangan redirect kalau user udah dalam onboarding atau lagi ngisi
-    if ((!completed && !onboardingInProgress) && mounted && !isInsideOnboardingFlow) {
-      Navigator.of(context).pushNamedAndRemoveUntil(
-        '/onboarding/goal',
-        (route) => false,
-      );
-
+  void _redirect(String route, {bool removeUntil = false, bool replace = false}) {
+    if (!mounted) return;
+    if (removeUntil) {
+      Navigator.of(context).pushNamedAndRemoveUntil(route, (route) => false);
+    } else if (replace) {
+      Navigator.of(context).pushReplacementNamed(route);
+    } else {
+      Navigator.of(context).pushNamed(route);
     }
-  } catch (e) {
-    debugPrint("Error checking health metrics: $e");
   }
-}
 
   @override
   Widget build(BuildContext context) {
-    // Selalu render child tanpa kondisi
+    if (_isChecking) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
     return widget.child;
   }
 }
