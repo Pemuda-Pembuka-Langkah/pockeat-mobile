@@ -84,6 +84,14 @@ class MealDetailsTab extends StatelessWidget {
       );
     }
 
+    // Handle the navigation to food history
+    void handleSaveMeal() {
+      onSaveMeal();
+      // After successful meal logging, navigate to food history page
+      // First pop the current page and then navigate to food history
+      Navigator.of(context).popAndPushNamed('/food-history');
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -415,9 +423,20 @@ class MealDetailsTab extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: onSaveMeal,
-                  icon: const Icon(Icons.save),
-                  label: const Text('Log Your Meal'),
+                  onPressed: isLoading
+                      ? null
+                      : handleSaveMeal, // Use the new handler instead of onSaveMeal
+                  icon: isLoading
+                      ? SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.save),
+                  label: Text(isLoading ? 'Saving...' : 'Log Meal'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryGreen,
                     foregroundColor: Colors.white,

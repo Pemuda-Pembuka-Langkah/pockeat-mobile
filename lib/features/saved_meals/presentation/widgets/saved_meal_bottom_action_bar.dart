@@ -625,6 +625,17 @@ class SavedMealBottomActionBar extends StatelessWidget {
           ),
         ),
       );
+
+      // Navigate to food history page after successful logging
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (context.mounted) {
+          // Pop current screen
+          Navigator.of(context).pop();
+
+          // Push to food history page
+          Navigator.of(context).pushNamed('/food-history');
+        }
+      });
     } catch (e) {
       // Close the loading dialog if it's still showing
       if (context.mounted && Navigator.of(context).canPop()) {
