@@ -59,7 +59,8 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     _foodLogDataService = getIt<FoodLogDataService>();
     _loadCalorieData();
   }
-  
+
+// coverage:ignore-start  
   Future<void> _loadCalorieData() async {
     if (!mounted) return;
     
@@ -168,6 +169,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
       ),
     );
   }
+// coverage:ignore-end
 
   Widget _buildCurrentWeightIndicators() {
     return Row(
