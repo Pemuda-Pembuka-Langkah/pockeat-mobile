@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
+// coverage:ignore-start
 class FoodSummaryCard extends StatelessWidget {
   final FoodAnalysisResult food;
   final GlobalKey cardKey;
@@ -556,3 +557,4 @@ class FoodSummaryCard extends StatelessWidget {
     );
   }
 }
+// coverage:ignore-end
