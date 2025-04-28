@@ -1,7 +1,7 @@
 // Flutter imports:
+//coverage:ignore-file
 import 'package:flutter/material.dart';
 
-//coverage:ignore-file
 
 // Project imports:
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';

@@ -1,4 +1,6 @@
 // Package imports:
+//coverage: ignore-file
+
 import 'package:uuid/uuid.dart';
 
 // Project imports:

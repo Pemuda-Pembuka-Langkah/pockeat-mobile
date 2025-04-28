@@ -1,4 +1,5 @@
 // Flutter imports:
+//coverage:ignore-file
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -16,7 +17,6 @@ import 'package:pockeat/features/food_text_input/domain/services/food_text_input
 import 'package:pockeat/features/food_text_input/presentation/widgets/food_text_input_analysis_error.dart';
 import 'package:pockeat/features/food_text_input/presentation/widgets/text_bottom_action_bar.dart';
 
-//coverage:ignore-file
 
 class NutritionPage extends StatefulWidget {
   final String foodText;

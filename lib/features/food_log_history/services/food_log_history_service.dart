@@ -1,8 +1,9 @@
 // Project imports:
+//coverage: ignore-file
+
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 
 //coverage: ignore-file
-
 /// Interface untuk service Food Log History
 ///
 /// Service ini bertanggung jawab untuk mengambil dan mengelola history log makanan

@@ -1,4 +1,5 @@
 // lib/pockeat/features/ai_api_scan/models/food_analysis.dart
+//coverage: ignore-file
 
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,7 +8,7 @@ import 'package:uuid/uuid.dart';
 // Project imports:
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 
-//coverage: ignore-file
+
 class FoodAnalysisResult {
   final String foodName;
   final List<Ingredient> ingredients;

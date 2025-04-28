@@ -1,3 +1,5 @@
+//coverage: ignore-file
+
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
@@ -6,7 +8,7 @@ import 'package:pockeat/features/food_database_input/presentation/widgets/search
 import 'package:pockeat/features/food_database_input/presentation/widgets/selected_foods_tab.dart';
 import 'package:pockeat/features/food_database_input/presentation/widgets/meal_details_tab.dart';
 
-//coverage: ignore-file
+
 class NutritionDatabasePage extends StatefulWidget {
   const NutritionDatabasePage({Key? key}) : super(key: key);
 

@@ -1,3 +1,5 @@
+//coverage: ignore-file
+
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,7 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/features/food_database_input/services/base/supabase.dart'; // Using your existing SupabaseService
 import 'package:pockeat/features/food_database_input/services/food/food_database_service.dart';
 
-//coverage: ignore-file
+
 class NutritionDatabaseModule {
   static void register() {
     final getIt = GetIt.instance;

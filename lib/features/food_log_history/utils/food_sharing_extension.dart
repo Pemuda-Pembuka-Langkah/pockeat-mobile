@@ -1,4 +1,5 @@
 // Dart imports:
+//coverage:ignore-file
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -15,7 +16,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_log_history/presentation/widgets/food_summary_card.dart';
 
-//coverage:ignore-file
+
 
 extension FoodSharing on BuildContext {
   /// Saves image bytes to a temporary file

@@ -1,8 +1,9 @@
 // Dart imports:
+//coverage: ignore-file
+
 import 'dart:convert';
 import 'dart:io';
 
-//coverage: ignore-file
 
 // Package imports:
 import 'package:flutter_dotenv/flutter_dotenv.dart';

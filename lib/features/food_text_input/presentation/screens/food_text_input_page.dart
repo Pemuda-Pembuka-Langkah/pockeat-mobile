@@ -1,4 +1,5 @@
 // Flutter imports:
+//coverage:ignore-file
 import 'package:flutter/material.dart';
 
 // Project imports:

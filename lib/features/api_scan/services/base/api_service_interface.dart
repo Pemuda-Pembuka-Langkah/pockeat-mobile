@@ -1,8 +1,9 @@
 // lib/features/ai_api_scan/services/base/api_service_interface.dart
+//coverage: ignore-file
 
 // Dart imports:
 import 'dart:io';
-//coverage: ignore-file
+
 abstract class ApiServiceInterface {
   /// Performs a POST request with a JSON body
   ///
