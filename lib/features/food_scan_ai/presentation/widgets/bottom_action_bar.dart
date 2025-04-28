@@ -251,6 +251,7 @@ class BottomActionBar extends StatelessWidget {
                       userComment,
                     );
 
+              // Make sure we have the updated result before calling the callback
               if (onAnalysisCorrected != null) {
                 onAnalysisCorrected!(correctedResult);
               }

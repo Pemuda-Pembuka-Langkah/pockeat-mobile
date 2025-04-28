@@ -123,10 +123,14 @@ class TextBottomActionBar extends StatelessWidget {
                                 'Failed to update home screen widget: $e');
                           }
 
+                          // Navigate to food history page after successful save
                           Future.delayed(const Duration(milliseconds: 500), () {
                             if (context.mounted) {
+                              // Pop to the root route first
                               Navigator.of(context)
                                   .popUntil((route) => route.isFirst);
+                              // Then navigate to food history page
+                              Navigator.of(context).pushNamed('/food-history');
                             }
                           });
                         } catch (e) {

@@ -1,0 +1,131 @@
+name: Staging CI
+
+on:
+  push:
+    branches: [hotfix]
+  pull_request:
+    branches: [hotfix]
+
+jobs:
+  test:
+    name: Tests & Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.27.4"
+          channel: "stable"
+          cache: true
+
+      - name: Create .env file
+        run: |
+          echo "FLAVOR=staging" > .env
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "STAGING_FIREBASE_PROJECT_ID=${{ secrets.STAGING_FIREBASE_PROJECT_ID }}" >> .env
+          echo "STAGING_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.STAGING_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "STAGING_FIREBASE_STORAGE_BUCKET=${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_APP_ID=${{ secrets.STAGING_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_API_KEY=${{ secrets.STAGING_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_APP_ID=${{ secrets.STAGING_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_IOS_API_KEY=${{ secrets.STAGING_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_BUNDLE_ID=${{ secrets.STAGING_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "INSTABUG_TOKEN=${{ secrets.STAGING_INSTABUG_TOKEN }}" >> .env
+
+      - name: Get dependencies
+        run: flutter pub get
+
+
+
+      - name: Check Functions Folder
+        id: check_functions
+        run: |
+          if [ -d "functions" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node.js
+        if: steps.check_functions.outputs.exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Test Firebase Functions
+        if: steps.check_functions.outputs.exists == 'true'
+        working-directory: functions
+        run: |
+          npm install
+          npm test
+
+  build:
+    name: Build Staging APK
+    needs: test
+    if: ${{ success() }} # Memastikan build hanya dijalankan jika test sukses
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.27.4"
+          channel: "stable"
+          cache: true
+
+      - name: Create .env file
+        run: |
+          echo "FLAVOR=staging" > .env
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "STAGING_FIREBASE_PROJECT_ID=${{ secrets.STAGING_FIREBASE_PROJECT_ID }}" >> .env
+          echo "STAGING_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.STAGING_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "STAGING_FIREBASE_STORAGE_BUCKET=${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_APP_ID=${{ secrets.STAGING_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_API_KEY=${{ secrets.STAGING_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_APP_ID=${{ secrets.STAGING_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_IOS_API_KEY=${{ secrets.STAGING_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_BUNDLE_ID=${{ secrets.STAGING_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "INSTABUG_TOKEN=${{ secrets.STAGING_INSTABUG_TOKEN }}" >> .env
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      # Setup Google Services JSON
+      - name: Setup Google Services JSON
+        run: |
+          echo '${{ secrets.STAGING_GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
+
+      # Setup keystore
+      - name: Setup keystore
+        run: |
+          echo "${{ secrets.STAGING_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          echo "storeFile=keystore.jks" > android/key.properties 
+          echo "storePassword=${{ secrets.STAGING_KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=upload" >> android/key.properties
+          echo "keyPassword=${{ secrets.STAGING_KEYSTORE_PASSWORD }}" >> android/key.properties
+
+      - name: Build Staging APK
+        run: flutter build apk --release
+
+      - name: Upload Staging APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-staging
+          path: build/app/outputs/flutter-apk/app-release.apk
