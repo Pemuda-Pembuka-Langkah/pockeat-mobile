@@ -7,11 +7,10 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:camera/camera.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
 import 'package:pockeat/features/food_database_input/presentation/food_database_page.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
@@ -25,6 +24,9 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/core/screens/splash_screen_page.dart';
+import 'package:pockeat/core/screens/streak_celebration_page.dart';
+import 'package:pockeat/core/service/background_service_manager.dart';
+import 'package:pockeat/core/service/permission_service.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
@@ -38,8 +40,10 @@ import 'package:pockeat/features/authentication/presentation/screens/login_page.
 import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
@@ -67,9 +71,18 @@ import 'package:pockeat/features/health_metrics/presentation/screens/health_metr
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/rollover_calories_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/thank_you_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/used_other_apps_page.dart';
+
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
+import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
@@ -79,6 +92,9 @@ import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_e
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+// Core imports:
+import 'package:pockeat/features/progress_charts_and_graphs/di/progress_module.dart';
 
 // Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -180,6 +196,22 @@ void _handleDeepLink(DeepLinkResult result) {
       }
       break;
 
+    case DeepLinkType.streakCelebration:
+      // Deep link untuk streak celebration notification
+      if (result.success) {
+        final streakDays = result.data?['streakDays'] ?? 0;
+        // Navigate to streak page or show streak celebration
+        debugPrint(
+            'Streak celebration link handled with streak days: $streakDays');
+
+        // Navigate to home screen to show the streak dialog
+        navigatorKey.currentState?.pushReplacementNamed(
+          '/streak-celebration',
+          arguments: {'showStreakCelebration': true, 'streakDays': streakDays},
+        );
+      }
+      break;
+
     default:
       debugPrint('Unknown deep link type: ${result.type}');
       break;
@@ -190,6 +222,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
+
+  // Inisialisasi required services
+  await dotenv.load(fileName: ".env");
+  await Firebase.initializeApp();
 
   // Initialize Instabug
   await _initializeInstabug(flavor);
@@ -210,20 +246,24 @@ void main() async {
   );
 
   await setupDependencies();
+  ProgressModule.register(); // <-- Add this line
 
   // Initialize Google Analytics
   await getIt<AnalyticsService>().initialize();
 
-  // Initialize notifications
+  // Initialize permissions and notifications
   if (!kIsWeb) {
+    // Daftarkan PermissionService ke GetIt
+    final permissionService = PermissionService();
+    getIt.registerSingleton(permissionService);
+
+    // Minta semua permission terlebih dahulu
+    await permissionService.requestAllPermissions();
+
+    // Setelah permission diperoleh, inisialisasi service lainnya
+    await BackgroundServiceManager.initialize();
     await getIt<FoodTrackingClientController>().initialize();
     await getIt<NotificationService>().initialize();
-  }
-
-  // Setup emulator kalau di dev mode
-  if (flavor == 'dev') {
-    await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
-    FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
   }
 
   runApp(
@@ -254,20 +294,14 @@ void main() async {
         Provider<SavedMealService>(
           create: (_) => getIt<SavedMealService>(),
         ),
+        Provider<CaloricRequirementService>(create: (_) => getIt<CaloricRequirementService>()),
+
         BlocProvider<HealthMetricsFormCubit>(
-          create: (_) {
-            final user = FirebaseAuth.instance.currentUser;
-            if (user == null) {
-              throw Exception('User must be logged in');
-            }
-            return HealthMetricsFormCubit(
-              userId: user.uid,
-              repository: getIt<HealthMetricsRepository>(),
-              caloricRequirementRepository:
-                  getIt<CaloricRequirementRepository>(),
-              caloricRequirementService: getIt<CaloricRequirementService>(),
-            );
-          },
+          create: (_) => HealthMetricsFormCubit(
+            repository: getIt<HealthMetricsRepository>(),
+            caloricRequirementRepository: getIt<CaloricRequirementRepository>(),
+            caloricRequirementService: getIt<CaloricRequirementService>(),
+          ),
         ),
       ],
       child: const MyApp(),
@@ -292,6 +326,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     // Inisialisasi DeepLinkService di _MyAppState
     _initializeDeepLinkService();
+
+    // Cek notifikasi di initState untuk menangani cold start dari notifikasi
+    _checkNotificationLaunch();
+
+    // Track app open saat aplikasi pertama kali dibuka
+    _trackAppOpen();
+  }
+
+  // Track app open menggunakan UserActivityService
+  Future<void> _trackAppOpen() async {
+    try {
+      final userActivityService = getIt<UserActivityService>();
+      await userActivityService.trackAppOpen();
+      debugPrint('Tracked app open at startup');
+    } catch (e) {
+      debugPrint('Error tracking app open: $e');
+    }
   }
 
   Future<void> _initializeDeepLinkService() async {
@@ -318,11 +369,107 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
+  /// Cek apakah aplikasi dibuka dari notifikasi dan navigasi ke halaman yang sesuai
+  Future<void> _checkNotificationLaunch() async {
+    try {
+      // Periksa apakah aplikasi dibuka dari notifikasi
+      final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+          await getIt<FlutterLocalNotificationsPlugin>()
+              .getNotificationAppLaunchDetails();
+
+      // Jika aplikasi dibuka dari notifikasi, handle sesuai payload
+      if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+        final payload =
+            notificationAppLaunchDetails!.notificationResponse?.payload;
+        debugPrint('App launched from notification with payload: $payload');
+
+        if (payload == NotificationConstants.dailyStreakPayload) {
+          // Untuk streak notification, navigate dengan deeplink
+          try {
+            final loginService = getIt<LoginService>();
+            final foodLogHistoryService = getIt<FoodLogHistoryService>();
+            final userId = (await loginService.getCurrentUser())?.uid;
+
+            // Default streak adalah 0 jika user belum login
+            int streakDays = 0;
+
+            if (userId != null) {
+              // Jika user sudah login, hitung streak aktual
+              streakDays =
+                  await foodLogHistoryService.getFoodStreakDays(userId);
+              debugPrint('Loaded streak days for notification: $streakDays');
+            }
+
+            // Navigasi langsung ke streak celebration page menggunakan navigatorKey
+            navigatorKey.currentState?.pushNamed('/streak-celebration',
+                arguments: {
+                  'showStreakCelebration': true,
+                  'streakDays': streakDays
+                });
+          } catch (e) {
+            debugPrint('Error handling streak notification: $e');
+          }
+        }
+        // Handle pet sadness notification (cold start via notification)
+        else if (payload == NotificationConstants.petSadnessPayload) {
+          debugPrint('App launched from pet sadness notification');
+
+          try {
+            // Track app open untuk reset inactiveDuration
+            await _trackAppOpen();
+
+            // Langsung navigasi ke halaman utama/dashboard menggunakan navigatorKey
+            navigatorKey.currentState?.pushReplacementNamed('/');
+            debugPrint('Navigated to dashboard from pet sadness notification');
+          } catch (e) {
+            debugPrint('Error handling pet sadness notification: $e');
+          }
+        }
+        // Handle pet status notification (cold start via notification)
+        else if (payload == NotificationConstants.petStatusPayload) {
+          debugPrint('App launched from pet status notification');
+
+          try {
+            // Track app open
+            await _trackAppOpen();
+
+            // Navigate to the main dashboard screen
+            navigatorKey.currentState?.pushReplacementNamed('/');
+            debugPrint('Navigated to dashboard from pet status notification');
+          } catch (e) {
+            debugPrint('Error handling pet status notification: $e');
+          }
+        } else if (payload == NotificationConstants.mealReminderPayload) {
+          // Untuk meal notification, navigate dengan deeplink
+          try {
+            navigatorKey.currentState?.pushNamed(
+              '/add-food',
+              arguments: {'type': 'log'},
+            );
+          } catch (e) {
+            debugPrint('Error handling meal notification: $e');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error checking notification launch: $e');
+    }
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _deepLinkSubscription?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Track when app is resumed from background
+      _trackAppOpen();
+      debugPrint('App resumed from background, tracked activity');
+    }
   }
 
   @override
@@ -366,9 +513,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       routes: {
         '/splash': (context) => const SplashScreenPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
-        '/': (context) => const AuthWrapper(child: HomePage()),
+        '/': (context) => const AuthWrapper(
+          redirectUrlIfNotLoggedIn: '/welcome',
+          child: HomePage(),
+        ),
+        '/welcome': (context) => const WelcomePage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
+        '/streak-celebration': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return StreakCelebrationPage(
+            streak: args?['streakDays'] as int? ?? 0,
+          );
+        },
         '/profile': (context) => const AuthWrapper(child: ProfilePage()),
         '/change-password': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
@@ -404,27 +562,83 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
         },
         '/onboarding/goal': (context) {
-          final user = FirebaseAuth.instance.currentUser;
-          if (user == null) return const LoginPage();
-          final cubit = BlocProvider.of<HealthMetricsFormCubit>(context);
-          return AuthWrapper(
-            child: BlocProvider.value(
-              value: cubit,
-              child: const HealthMetricsGoalsPage(),
-            ),
+          return BlocProvider.value(
+            value: context.read<HealthMetricsFormCubit>(),
+            child: const HealthMetricsGoalsPage(),
           );
         },
-        '/height-weight': (context) =>
-            const AuthWrapper(child: HeightWeightPage()),
-        '/birthdate': (context) => const AuthWrapper(child: BirthdatePage()),
-        '/gender': (context) => const AuthWrapper(child: GenderPage()),
+        '/height-weight': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: HeightWeightPage()
+          ),
+        '/birthdate': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: BirthdatePage()
+          ),
+        '/gender': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: GenderPage()
+          ),
         '/activity-level': (context) =>
-            const AuthWrapper(child: ActivityLevelPage()),
-        '/diet': (context) => const AuthWrapper(child: DietPage()),
+            const AuthWrapper(
+              requireAuth: false,
+              redirectUrlIfLoggedIn: '/',
+              child: ActivityLevelPage()
+              ),
+        '/diet': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: DietPage()
+          ),
         '/desired-weight': (context) =>
-            const AuthWrapper(child: DesiredWeightPage()),
-        '/speed': (context) => const AuthWrapper(child: SpeedSelectionPage()),
-        '/review': (context) => const AuthWrapper(child: ReviewSubmitPage()),
+            const AuthWrapper(
+              requireAuth: false,
+              redirectUrlIfLoggedIn: '/',
+              child: DesiredWeightPage()
+              ),
+        '/speed': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: SpeedSelectionPage()
+          ),
+        '/goal-obstacle': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: GoalObstaclePage()
+          ),
+        '/add-calories-back': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: AddCaloriesBackPage()
+          ),
+        '/heard-about': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: HeardAboutPage()
+          ),
+        '/rollover-calories': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: RolloverCaloriesPage()
+          ),
+        '/thank-you': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: ThankYouPage()
+          ),
+        '/used-other-apps': (context) => const AuthWrapper(
+          requireAuth: false,
+          redirectUrlIfLoggedIn: '/',
+          child: UsedOtherAppsPage()
+          ),
+          '/review': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: ReviewSubmitPage(),
+          ),
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),

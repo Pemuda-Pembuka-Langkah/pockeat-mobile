@@ -5,6 +5,7 @@ enum DeepLinkType {
   quickLog,
   login,
   dashboard,
+  streakCelebration,
   unknown,
 }
 
@@ -107,6 +108,22 @@ class DeepLinkResult {
   }) {
     return DeepLinkResult(
       type: DeepLinkType.dashboard,
+      success: success,
+      data: data,
+      error: error,
+      originalUri: originalUri,
+    );
+  }
+
+  /// Factory constructor untuk streak celebration
+  factory DeepLinkResult.streakCelebration({
+    required bool success,
+    Map<String, dynamic>? data,
+    String? error,
+    Uri? originalUri,
+  }) {
+    return DeepLinkResult(
+      type: DeepLinkType.streakCelebration,
       success: success,
       data: data,
       error: error,

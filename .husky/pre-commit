@@ -10,23 +10,19 @@ if [ -z "$STAGED_FILES" ]; then
   exit 0
 fi
 
-# Save current changes to stash
-echo "\n📦 Stashing unstaged changes..."
-HAS_UNSTAGED=$(git diff --name-only)
-if [ -n "$HAS_UNSTAGED" ]; then
-  git stash push --keep-index --include-untracked
-  STASHED=$?
-fi
+# Create a temporary directory to store file copies
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TEMP_DIR"' EXIT
 
-trap cleanup EXIT
-
-cleanup() {
-  # Restore changes from stash if we stashed anything
-  if [ -n "$HAS_UNSTAGED" ] && [ "$STASHED" -eq 0 ]; then
-    echo "\n📦 Restoring stashed changes..."
-    git stash pop -q
+# Save a copy of staged files before any modifications
+echo "\n📦 Creating safe copies of staged files..."
+for FILE in $STAGED_FILES; do
+  if [ -f "$FILE" ]; then
+    DIR=$(dirname "$TEMP_DIR/$FILE")
+    mkdir -p "$DIR"
+    git show ":$FILE" > "$TEMP_DIR/$FILE"
   fi
-}
+done
 
 echo "\n🔍 Step 1/5: Fixing lints automatically..."
 echo "Applying dart fix to codebase..."
@@ -38,11 +34,15 @@ dart format lib
 echo "\n🔍 Step 3/5: Sorting imports..."
 dart run import_sorter:main
 
-# Stage the changes made by the tools
+# Stage only the files that were originally staged, using our saved copies
 echo "\n📥 Updating staged files..."
 for FILE in $STAGED_FILES; do
   if [ -f "$FILE" ]; then
-    git add "$FILE"
+    # Check if the file was modified by linting tools
+    if ! cmp -s "$TEMP_DIR/$FILE" "$FILE"; then
+      echo "  Updated: $FILE"
+      git add "$FILE"
+    fi
   fi
 done
 

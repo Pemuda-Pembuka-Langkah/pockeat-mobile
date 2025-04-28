@@ -69,6 +69,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
     try {
       // Tambahkan log untuk debugging
       await widget.cameraController.initialize();
+
       if (mounted) {
         setState(() {
           _isCameraReady = true;
