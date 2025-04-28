@@ -116,10 +116,7 @@ class TestFoodLogDataService extends FoodLogDataService {
     for (var log in logs) {
       // Adjust timestamp for GMT+7
       final adjustedTime = log.timestamp.add(const Duration(hours: 7));
-      
-      // Get the correct day index
-      final dayIndex = adjustedTime.weekday % 7;
-      final dayOfWeek = dayNames[dayIndex];
+      final dayOfWeek = dayNames[adjustedTime.weekday % 7];
       
       // Extract values
       final protein = log.protein?.toDouble() ?? 0;
@@ -201,14 +198,10 @@ class TestFoodLogDataService extends FoodLogDataService {
   List<FoodLogHistoryItem> filterLogsForSpecificWeek(
       List<FoodLogHistoryItem> logs, DateTime startDate, DateTime endDate) {
     return logs.where((log) {
-      // Apply the same timezone adjustment as in the process method
-      final adjustedLog = log.timestamp.add(const Duration(hours: 7));
-      final adjustedStart = startDate.add(const Duration(hours: 7));
-      final adjustedEnd = endDate.add(const Duration(hours: 7));
-      
-      return (adjustedLog.isAtSameMomentAs(adjustedStart) || 
-              adjustedLog.isAfter(adjustedStart)) && 
-             adjustedLog.isBefore(adjustedEnd);
+      // The problem is likely here - we need to make sure we're correctly filtering by date range
+      // Make sure timestamps are properly compared, allowing for exact start date
+      return (log.timestamp.isAtSameMomentAs(startDate) || log.timestamp.isAfter(startDate)) && 
+             log.timestamp.isBefore(endDate);
     }).toList();
   }
   
@@ -221,14 +214,8 @@ class TestFoodLogDataService extends FoodLogDataService {
     );
     
     return logs.where((log) {
-      // Apply consistent timezone adjustment
-      final adjustedLog = log.timestamp.add(const Duration(hours: 7));
-      final adjustedStart = firstDayOfMonth.add(const Duration(hours: 7));
-      final adjustedEnd = lastDayOfMonth.add(const Duration(hours: 7));
-      
-      return (adjustedLog.isAtSameMomentAs(adjustedStart) ||
-              adjustedLog.isAfter(adjustedStart)) && 
-             adjustedLog.isBefore(adjustedEnd);
+      return log.timestamp.isAfter(firstDayOfMonth) && 
+             log.timestamp.isBefore(lastDayOfMonth);
     }).toList();
   }
   
@@ -297,12 +284,12 @@ void main() {
         expect(result, isA<List<CalorieData>>());
         expect(result.length, 7); // 7 days in a week
         
-        // Verify Sunday has the expected values - Updated to match the actual value
+        // Verify Sunday has the expected values
         final sundayData = result.firstWhere((data) => data.day == 'Sun');
-        expect(sundayData.protein, 26.0); // Updated expected value
-        expect(sundayData.carbs, 42.0); // Updated expected value
-        expect(sundayData.fats, 13.0); // Updated expected value
-        expect(sundayData.calories, 380.0); // Updated expected value
+        expect(sundayData.protein, 20.0);
+        expect(sundayData.carbs, 30.0);
+        expect(sundayData.fats, 10.0);
+        expect(sundayData.calories, 300.0);
         
         // Verify the service called the history service
         verify(mockFoodLogService.getAllFoodLogs('test-user-id', limit: 100)).called(1);
@@ -341,19 +328,19 @@ void main() {
         // Test for current week (weeksAgo = 0)
         final currentWeekResult = await foodLogDataService.getWeekCalorieData(weeksAgo: 0);
         expect(currentWeekResult.length, 7);
-        expect(currentWeekResult.firstWhere((data) => data.day == 'Sun').calories, 380.0); // Updated expected value
+        expect(currentWeekResult.firstWhere((data) => data.day == 'Sun').calories, 300.0);
         
         // Test for 1 week ago (weeksAgo = 1)
         final oneWeekAgoResult = await foodLogDataService.getWeekCalorieData(weeksAgo: 1);
         expect(oneWeekAgoResult.length, 7);
         // Values should be doubled for week 1 based on our mock data
-        expect(oneWeekAgoResult.firstWhere((data) => data.day == 'Sun').calories, 600.0); // Updated expected value to match actual
+        expect(oneWeekAgoResult.firstWhere((data) => data.day == 'Sun').calories, 600.0);
         
         // Test for 2 weeks ago (weeksAgo = 2)
         final twoWeeksAgoResult = await foodLogDataService.getWeekCalorieData(weeksAgo: 2);
         expect(twoWeeksAgoResult.length, 7);
         // Values should be tripled for week 2 based on our mock data
-        expect(twoWeeksAgoResult.firstWhere((data) => data.day == 'Sun').calories, 900.0); // Updated expected value to match actual
+        expect(twoWeeksAgoResult.firstWhere((data) => data.day == 'Sun').calories, 900.0);
         
         // Verify the service called the history service 3 times
         verify(mockFoodLogService.getAllFoodLogs('test-user-id', limit: 100)).called(3);
@@ -485,7 +472,7 @@ void main() {
 // Helper methods to create mock data
 List<FoodLogHistoryItem> _createMockFoodLogs(DateTime startOfWeek) {
   return [
-    _createMockFoodLogItem(startOfWeek, 20.0, 30.0, 10.0, 300.0), // Sunday
+    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 0)), 20.0, 30.0, 10.0, 300.0), // Sunday
     _createMockFoodLogItem(startOfWeek.add(const Duration(days: 1)), 25.0, 35.0, 12.0, 350.0), // Monday
     _createMockFoodLogItem(startOfWeek.add(const Duration(days: 2)), 30.0, 40.0, 15.0, 400.0), // Tuesday
     _createMockFoodLogItem(startOfWeek.add(const Duration(days: 3)), 22.0, 33.0, 11.0, 320.0), // Wednesday
@@ -499,7 +486,7 @@ List<FoodLogHistoryItem> _createMockFoodLogs(DateTime startOfWeek) {
 List<FoodLogHistoryItem> _createMockFoodLogsForPastWeek(DateTime startOfWeek, int multiplier) {
   return [
     _createMockFoodLogItem(
-        startOfWeek, 
+        startOfWeek.add(const Duration(days: 0)), 
         20.0 * multiplier, 
         30.0 * multiplier, 
         10.0 * multiplier, 
