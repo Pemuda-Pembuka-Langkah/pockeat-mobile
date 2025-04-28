@@ -1,5 +1,9 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 
 /// Widget untuk menampilkan item makanan dalam history log
@@ -13,6 +17,7 @@ class FoodHistoryCard extends StatelessWidget {
   // Colors
   final Color primaryGreen = const Color(0xFF4CAF50);
   final Color primaryOrange = const Color(0xFFFF9800);
+  final Color primaryRed = const Color(0xFFE53935);
 
   const FoodHistoryCard({
     super.key,
@@ -24,7 +29,7 @@ class FoodHistoryCard extends StatelessWidget {
   Widget _buildEnhancedSubtitle() {
     // Break down subtitle into parts that might need highlighting
     final parts = food.subtitle.split('•');
-    
+
     if (parts.length <= 1) {
       // If there are no bullet points, just return the plain subtitle
       return Text(
@@ -38,7 +43,7 @@ class FoodHistoryCard extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
       );
     }
-    
+
     // Build a rich subtitle with highlighted metrics
     return RichText(
       maxLines: 2,
@@ -53,31 +58,31 @@ class FoodHistoryCard extends StatelessWidget {
       ),
     );
   }
-  
+
   /// Build rich text spans for subtitle highlighting
   List<TextSpan> _buildRichTextSpans(List<String> parts) {
     final List<TextSpan> spans = [];
-    
+
     // Add the first part without a bullet
     if (parts[0].isNotEmpty) {
       spans.add(TextSpan(text: parts[0].trim()));
     }
-    
+
     // Add the remaining parts with bullet points and highlighted values
     for (int i = 1; i < parts.length; i++) {
       if (parts[i].isEmpty) continue;
-      
+
       // Add bullet point
       spans.add(const TextSpan(text: ' • '));
-      
+
       final String part = parts[i].trim();
-      
+
       // Check if this part contains a colon (key-value pair)
       if (part.contains(':')) {
         final keyValue = part.split(':');
         final key = keyValue[0].trim();
         final value = keyValue.length > 1 ? keyValue[1].trim() : '';
-        
+
         spans.add(TextSpan(text: '$key: '));
         spans.add(TextSpan(
           text: value,
@@ -91,14 +96,14 @@ class FoodHistoryCard extends StatelessWidget {
         spans.add(TextSpan(text: part));
       }
     }
-    
+
     return spans;
   }
 
   String _getTimeAgo(DateTime timestamp) {
     final now = DateTime.now();
     final difference = now.difference(timestamp);
-    
+
     if (difference.inDays > 365) {
       return '${(difference.inDays / 365).floor()}y ago';
     } else if (difference.inDays > 30) {
@@ -111,6 +116,17 @@ class FoodHistoryCard extends StatelessWidget {
       return '${difference.inMinutes}m ago';
     } else {
       return 'Just now';
+    }
+  }
+
+  /// Get color based on health score
+  Color _getHealthScoreColor(double healthScore) {
+    if (healthScore >= 7) {
+      return primaryGreen;
+    } else if (healthScore >= 4) {
+      return primaryOrange;
+    } else {
+      return primaryRed;
     }
   }
 
@@ -144,13 +160,13 @@ class FoodHistoryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  CupertinoIcons.cart_fill,
+                  Icons.restaurant,
                   color: primaryGreen,
                   size: 20,
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Food Information
               Expanded(
                 child: Column(
@@ -186,11 +202,13 @@ class FoodHistoryCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     _buildEnhancedSubtitle(),
                     const SizedBox(height: 8),
-                    // Calories badge
+                    // Calories and health score badges
                     Row(
                       children: [
+                        // Calories badge
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: primaryOrange.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
@@ -215,6 +233,39 @@ class FoodHistoryCard extends StatelessWidget {
                             ],
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        // Health score badge
+                        if (food.healthScore != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _getHealthScoreColor(food.healthScore!)
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.favorite,
+                                  color:
+                                      _getHealthScoreColor(food.healthScore!),
+                                  size: 12,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Health: ${food.healthScore!.toStringAsFixed(1)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        _getHealthScoreColor(food.healthScore!),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ],

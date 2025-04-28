@@ -1,12 +1,18 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/running_detail_widget.dart';
 
 void main() {
   final testActivity = RunningActivity(
     id: 'run-1',
+    userId: "test-user-id",
     date: DateTime(2025, 3, 1),
     startTime: DateTime(2025, 3, 1, 8, 0),
     endTime: DateTime(2025, 3, 1, 8, 30),

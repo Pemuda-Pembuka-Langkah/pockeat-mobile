@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class PersonalDataReminder extends StatelessWidget {
@@ -20,10 +21,10 @@ class PersonalDataReminder extends StatelessWidget {
           ),
         ],
       ),
-      child: Stack(
+      child: const Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+            padding: EdgeInsets.fromLTRB(20, 24, 20, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -32,11 +33,11 @@ class PersonalDataReminder extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.info_outline,
-                      color: const Color(0xFFFF6B6B),
+                      color: Color(0xFFFF6B6B),
                       size: 24,
                     ),
-                    const SizedBox(width: 12),
-                    const Expanded(
+                    SizedBox(width: 12),
+                    Expanded(
                       child: Text(
                         'Calculation of the number of calories burned is based on your personal data (height, weight, gender).',
                         style: TextStyle(
@@ -47,33 +48,6 @@ class PersonalDataReminder extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // No functionality - to be implemented later
-                    },
-                    style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF6B6B),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                    ),
-                    child: const Text(
-                      'Update Data',
-                      style: TextStyle(
-                        fontSize: 14, 
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),

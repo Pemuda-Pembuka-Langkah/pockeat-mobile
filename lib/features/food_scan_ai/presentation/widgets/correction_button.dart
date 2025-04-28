@@ -1,5 +1,5 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
 
 class CorrectionButton extends StatelessWidget {
   final bool isLoading;
@@ -8,12 +8,12 @@ class CorrectionButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const CorrectionButton({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.primaryYellow,
     required this.primaryPink,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

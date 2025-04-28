@@ -1,3 +1,4 @@
+// Project imports:
 import '../../services/calorie_calculator.dart';
 import 'cardio_activity.dart';
 
@@ -7,6 +8,7 @@ class RunningActivity extends CardioActivity {
 
   RunningActivity({
     super.id,
+    required super.userId,
     required super.date,
     required super.startTime,
     required super.endTime,
@@ -29,6 +31,7 @@ class RunningActivity extends CardioActivity {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'userId': userId,
       'date': date.millisecondsSinceEpoch,
       'startTime': startTime.millisecondsSinceEpoch,
       'endTime': endTime.millisecondsSinceEpoch,
@@ -43,6 +46,7 @@ class RunningActivity extends CardioActivity {
   factory RunningActivity.fromMap(Map<String, dynamic> map) {
     return RunningActivity(
       id: map['id'],
+      userId: map['userId'] ?? 'unknown-user-id',
       date: DateTime.fromMillisecondsSinceEpoch(map['date']),
       startTime: DateTime.fromMillisecondsSinceEpoch(map['startTime']),
       endTime: DateTime.fromMillisecondsSinceEpoch(map['endTime']),
@@ -50,7 +54,7 @@ class RunningActivity extends CardioActivity {
       caloriesBurned: map['caloriesBurned']?.toDouble() ?? 0.0,
     );
   }
-  
+
   /// Metode untuk membuat salinan dengan beberapa perubahan (immutability)
   RunningActivity copyWith({
     String? id,
@@ -62,6 +66,7 @@ class RunningActivity extends CardioActivity {
   }) {
     return RunningActivity(
       id: id ?? this.id,
+      userId: userId,
       date: date ?? this.date,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
@@ -69,4 +74,4 @@ class RunningActivity extends CardioActivity {
       caloriesBurned: caloriesBurned ?? this.caloriesBurned,
     );
   }
-} 
+}

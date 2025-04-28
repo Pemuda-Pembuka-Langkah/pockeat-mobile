@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class AIAnalysisSection extends StatelessWidget {
   final Color primaryGreen;
 
   const AIAnalysisSection({
-    Key? key,
+    super.key,
     required this.primaryGreen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,4 +54,4 @@ class AIAnalysisSection extends StatelessWidget {
       ),
     );
   }
-} 
+}

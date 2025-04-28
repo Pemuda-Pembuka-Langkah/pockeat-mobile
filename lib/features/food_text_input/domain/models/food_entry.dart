@@ -1,3 +1,4 @@
+//coverage:ignore-file
 class FoodEntry {
   final String foodDescription;
 

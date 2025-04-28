@@ -1,27 +1,44 @@
-import 'package:flutter/material.dart';
+// Dart imports:
+//coverage:ignore-file
 import 'dart:io';
-import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
-import 'package:pockeat/features/ai_api_scan/models/food_analysis.dart';
-import 'package:pockeat/core/di/service_locator.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/bottom_action_bar.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/additional_nutrients_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:camera/camera.dart';
+
+
+// Project imports:
+import 'package:pockeat/core/di/service_locator.dart';
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/additional_nutrients_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/bottom_action_bar.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/health_score_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/vitamins_and_minerals_section.dart';
 
 class NutritionPage extends StatefulWidget {
   final String imagePath;
+  final bool isLabelScan;
   final FoodScanPhotoService foodScanPhotoService;
+  final double servingSize;
 
-  NutritionPage({super.key, required this.imagePath})
-      : foodScanPhotoService = getIt<FoodScanPhotoService>();
+  NutritionPage({
+    super.key,
+    required this.imagePath,
+    this.isLabelScan = false,
+    this.servingSize = 1.0,
+  }) : foodScanPhotoService = getIt<FoodScanPhotoService>();
 
   @override
   _NutritionPageState createState() => _NutritionPageState();
@@ -33,12 +50,12 @@ class _NutritionPageState extends State<NutritionPage> {
   bool _hasError = false;
   String _errorMessage = '';
   String _foodName = 'Analyzing...';
-  int _calories = 0;
+  double _calories = 0; // Changed from int to double
   Map<String, dynamic> _nutritionData = {};
   List<String> _warnings = [];
   List<Ingredient> _ingredients = [];
   late FoodAnalysisResult? food;
-  
+
   // Track if analysis is being corrected
   bool _isCorrectingAnalysis = false;
 
@@ -61,8 +78,11 @@ class _NutritionPageState extends State<NutritionPage> {
         _hasError = false;
       });
 
-      final result = await widget.foodScanPhotoService
-          .analyzeFoodPhoto(File(widget.imagePath));
+      final result = widget.isLabelScan
+          ? await widget.foodScanPhotoService.analyzeNutritionLabelPhoto(
+              File(widget.imagePath), widget.servingSize)
+          : await widget.foodScanPhotoService
+              .analyzeFoodPhoto(File(widget.imagePath));
 
       setState(() {
         _updateFoodData(result);
@@ -76,35 +96,73 @@ class _NutritionPageState extends State<NutritionPage> {
       });
     }
   }
-  
+
   // Update UI data with analysis result
   void _updateFoodData(FoodAnalysisResult result) {
     _foodName = result.foodName;
-    _calories = result.nutritionInfo.calories.toInt();
+    _calories =
+        result.nutritionInfo.calories; // Use calories directly as double
     _nutritionData = {
-      'protein': result.nutritionInfo.protein.toInt(),
-      'carbs': result.nutritionInfo.carbs.toInt(),
-      'fat': result.nutritionInfo.fat.toInt(),
-      'fiber': result.nutritionInfo.fiber.toInt(),
-      'sugar': result.nutritionInfo.sugar.toInt(),
-      'sodium': result.nutritionInfo.sodium.toInt(),
+      'protein': result.nutritionInfo.protein,
+      'carbs': result.nutritionInfo.carbs,
+      'fat': result.nutritionInfo.fat,
+      'fiber': result.nutritionInfo.fiber,
+      'sugar': result.nutritionInfo.sugar,
+      'sodium': result.nutritionInfo.sodium,
+      'saturatedFat': result.nutritionInfo.saturatedFat,
+      'cholesterol': result.nutritionInfo.cholesterol,
+      'nutritionDensity': result.nutritionInfo.nutritionDensity,
+      'healthScore': result.healthScore,
+      'healthScoreCategory': result.getHealthScoreCategory(),
     };
     _ingredients = result.ingredients;
     _warnings = result.warnings;
     food = result;
   }
-  
+
   // Handle analysis correction
   void _handleAnalysisCorrected(FoodAnalysisResult correctedResult) {
+    // Debug prints to see correction response data
+    print('=========== CORRECTION RESPONSE ===========');
+    print('Food Name: ${correctedResult.foodName}');
+    print('Calories: ${correctedResult.nutritionInfo.calories}');
+    print('Health Score: ${correctedResult.healthScore}');
+    print('Vitamins: ${correctedResult.nutritionInfo.vitaminsAndMinerals}');
+    print('========================================');
+
+    // Calculate health score if not provided by API response
+    double calculatedHealthScore = correctedResult.healthScore ?? 5.0;
+    String healthCategory = "Fair"; // Default medium category
+
+    // Use healthScore to determine category if available
+    if (correctedResult.healthScore != null) {
+      if (calculatedHealthScore >= 8)
+        healthCategory = "Excellent";
+      else if (calculatedHealthScore >= 6)
+        healthCategory = "Good";
+      else if (calculatedHealthScore >= 4)
+        healthCategory = "Fair";
+      else if (calculatedHealthScore >= 2)
+        healthCategory = "Poor";
+      else
+        healthCategory = "Very Poor";
+    }
+
+    // Ensure state update is synchronous and complete
     setState(() {
       _isCorrectingAnalysis = false;
-      _updateFoodData(correctedResult);
+      food = correctedResult; // Update the food object first
+      _updateFoodData(correctedResult); // Then update all the derived data
+
+      // Force update of health score section data with calculated values
+      _nutritionData['healthScore'] = calculatedHealthScore;
+      _nutritionData['healthScoreCategory'] = healthCategory;
     });
-    
+
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Analysis corrected successfully!'),
+      const SnackBar(
+        content: Text('Analysis corrected successfully!'),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
       ),
@@ -115,14 +173,16 @@ class _NutritionPageState extends State<NutritionPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => ScanFoodPage(cameraController: CameraController(
-              CameraDescription(
-                name: '0',
-                lensDirection: CameraLensDirection.back,
-                sensorOrientation: 0,
-              ),
-              ResolutionPreset.max,
-            ),),
+        builder: (context) => ScanFoodPage(
+          cameraController: CameraController(
+            const CameraDescription(
+              name: '0',
+              lensDirection: CameraLensDirection.back,
+              sensorOrientation: 0,
+            ),
+            ResolutionPreset.max,
+          ),
+        ),
       ),
     );
   }
@@ -134,7 +194,8 @@ class _NutritionPageState extends State<NutritionPage> {
         body: FoodAnalysisLoading(
           primaryYellow: primaryYellow,
           primaryPink: primaryPink,
-          message: _isCorrectingAnalysis ? 'Correcting Analysis' : 'Analyzing Food',
+          message:
+              _isCorrectingAnalysis ? 'Correcting Analysis' : 'Analyzing Food',
         ),
       );
     }
@@ -161,11 +222,13 @@ class _NutritionPageState extends State<NutritionPage> {
         primaryYellow: primaryYellow,
         primaryPink: primaryPink,
         primaryGreen: primaryGreen,
+        isLabelScan: widget.isLabelScan,
+        servingSize: widget.servingSize,
         onAnalysisCorrected: (correctedResult) {
           setState(() {
             _isCorrectingAnalysis = true;
           });
-          
+
           // Process the correction asynchronously and update UI when done
           Future.delayed(Duration.zero, () {
             _handleAnalysisCorrected(correctedResult);
@@ -208,11 +271,21 @@ class _NutritionPageState extends State<NutritionPage> {
                       isLoading: _isLoading,
                       foodName: _foodName,
                       primaryGreen: primaryGreen,
+                      healthScore: _nutritionData['healthScore'] as double?,
+                      healthCategory:
+                          _nutritionData['healthScoreCategory'] as String?,
                     ),
                     CalorieSummaryCard(
                       isLoading: _isLoading,
                       calories: _calories,
                       primaryYellow: primaryYellow,
+                      primaryPink: primaryPink,
+                    ),
+                    // Health Score Section here
+                    HealthScoreSection(
+                      isLoading: _isLoading,
+                      nutritionData: _nutritionData,
+                      primaryGreen: primaryGreen,
                       primaryPink: primaryPink,
                     ),
                     NutritionalInfoSection(
@@ -233,12 +306,22 @@ class _NutritionPageState extends State<NutritionPage> {
                       primaryGreen: primaryGreen,
                       isLoading: _isLoading,
                     ),
+                    // Vitamins and Minerals Section
+                    VitaminsAndMineralsSection(
+                      isLoading: _isLoading,
+                      food: food,
+                      primaryColor: primaryGreen,
+                    ),
                     DietTagsSection(
                       warnings: _warnings,
                       primaryGreen: primaryGreen,
                       warningYellow: warningYellow,
                     ),
                     const SizedBox(height: 100),
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 50),
+                      child: SizedBox(),
+                    ),
                   ],
                 ),
               ),

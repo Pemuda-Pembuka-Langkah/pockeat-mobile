@@ -1,15 +1,16 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class RecommendationsSection extends StatelessWidget {
   final Color primaryYellow;
   final Color primaryPink;
 
   const RecommendationsSection({
-    Key? key,
+    super.key,
     required this.primaryYellow,
     required this.primaryPink,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,4 +57,4 @@ class RecommendationsSection extends StatelessWidget {
       ),
     );
   }
-} 
+}

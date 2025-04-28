@@ -1,9 +1,13 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
+import 'weight_lifting_repository_impl_test.mocks.dart';
 
 // Generate mocks for Firebase
 @GenerateMocks([
@@ -16,7 +20,6 @@ import 'package:pockeat/features/weight_training_log/domain/repositories/weight_
   QueryDocumentSnapshot,
 ])
 // This import should be after the annotation
-import 'weight_lifting_repository_impl_test.mocks.dart';
 
 void main() {
   late WeightLiftingRepositoryImpl repository;
@@ -33,6 +36,7 @@ void main() {
     name: 'Bench Press',
     bodyPart: 'Chest',
     metValue: 3.5,
+    userId: 'test-user-id',
     sets: [
       WeightLiftingSet(weight: 20.0, reps: 12, duration: 60.0),
     ],
@@ -433,6 +437,49 @@ void main() {
     verify(mockCollection.orderBy('name')).called(1);
     verify(mockQueryOrdered.limit(10)).called(1);
     expect(result.length, 1);
+  });
+  test('should handle December correctly (month=12)', () async {
+    // Setup
+    final testMonth = 12;
+    final testYear = 2025;
+    
+    // Create start and end timestamps for December
+    final startOfMonth = DateTime(testYear, testMonth, 1);
+    final endOfMonth = DateTime(testYear + 1, 1, 1).subtract(Duration(milliseconds: 1));
+    
+    final mockDocSnap = MockQueryDocumentSnapshot<Map<String, dynamic>>();
+    when(mockDocSnap.data()).thenReturn({
+      ...testExercise.toJson(),
+      'timestamp': DateTime(2025, 12, 25, 12, 0).millisecondsSinceEpoch
+    });
+    mockDocs = [mockDocSnap];
+    
+    // Mock the where queries for timestamp field
+    final mockQueryFirstWhere = MockQuery<Map<String, dynamic>>();
+    final mockQuerySecondWhere = MockQuery<Map<String, dynamic>>();
+    
+    when(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfMonth.millisecondsSinceEpoch))
+        .thenReturn(mockQueryFirstWhere);
+    
+    when(mockQueryFirstWhere.where('timestamp', isLessThanOrEqualTo: endOfMonth.millisecondsSinceEpoch))
+        .thenReturn(mockQuerySecondWhere);
+    
+    when(mockQuerySecondWhere.get()).thenAnswer((_) async => mockQuerySnapshot);
+    when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+    
+    // Execute
+    final result = await repository.filterByMonth(testMonth, testYear);
+    
+    // Verify
+    verify(mockFirestore.collection('weight_lifting_logs')).called(1);
+    verify(mockCollection.where('timestamp', isGreaterThanOrEqualTo: startOfMonth.millisecondsSinceEpoch)).called(1);
+    verify(mockQueryFirstWhere.where('timestamp', isLessThanOrEqualTo: endOfMonth.millisecondsSinceEpoch)).called(1);
+    expect(result.length, 1);
+    
+    // Verify we're testing data from December
+    final timestamp = result[0].toJson()['timestamp'] as int;
+    final resultDate = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    expect(resultDate.month, 12);
   });
 });
 

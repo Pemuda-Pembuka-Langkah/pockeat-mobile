@@ -1,10 +1,14 @@
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Project imports:
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
+import 'smart_exercise_log_repository_test.mocks.dart';
 
 // Mock Firebase dependencies with explicit generic types
 @GenerateMocks([], customMocks: [
@@ -30,7 +34,6 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
     as: #MockQueryDocumentSnapshot,
   )
 ])
-import 'smart_exercise_log_repository_test.mocks.dart';
 
 void main() {
   late MockFirebaseFirestore mockFirestore;
@@ -75,7 +78,8 @@ void main() {
         intensity: 'Low',
         estimatedCalories: 100,
         timestamp: DateTime.now(),
-        originalInput: 'Test input'
+        originalInput: 'Test input',
+        userId: 'test-user-123',
       ));
       
       // Assert
@@ -94,6 +98,7 @@ void main() {
         estimatedCalories: 300,
         timestamp: DateTime.now(),
         originalInput: 'Lari 30 menit dengan intensitas sedang',
+        userId: 'test-user-123',
       );
 
       // Setup mock Firestore behavior
@@ -118,6 +123,7 @@ void main() {
         estimatedCalories: 300,
         timestamp: DateTime.now(),
         originalInput: 'Lari 30 menit',
+        userId: 'test-user-123',
       );
 
       // Setup mock to throw an error
@@ -800,4 +806,479 @@ void main() {
       verify(mockCollection.doc(testId)).called(1);
     });
   });
+ group('Empty userId validation tests', () {
+    test('should throw Exception when userId is empty in saveAnalysisResult', () {
+      // Arrange
+      final result = ExerciseAnalysisResult(
+        exerciseType: 'Running',
+        duration: '30 minutes',
+        intensity: 'Medium',
+        estimatedCalories: 300,
+        timestamp: DateTime.now(),
+        originalInput: 'Run for 30 minutes',
+        userId: '', // Empty userId
+      );
+
+      // Act & Assert
+      expect(
+        () => repository.saveAnalysisResult(result),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('User ID cannot be empty when saving analysis result')
+        )),
+      );
+    });
+
+    test('should throw Exception when userId is empty in getAnalysisResultsByUser', () {
+      // Act & Assert
+      expect(
+        () => repository.getAnalysisResultsByUser(''),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to retrieve analysis results by user: Invalid argument(s): User ID cannot be empty')
+        )),
+      );
+    });
+
+    test('should throw Exception when userId is empty in getAnalysisResultsByUserAndDate', () {
+      // Arrange
+      final testDate = DateTime(2023, 5, 15);
+
+      // Act & Assert
+      expect(
+        () => repository.getAnalysisResultsByUserAndDate('', testDate),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to retrieve analysis results by user and date: Invalid argument(s): User ID cannot be empty')
+        )),
+      );
+    });
+
+    test('should throw Exception when userId is empty in getAnalysisResultsByUserAndMonth', () {
+      // Act & Assert
+      expect(
+        () => repository.getAnalysisResultsByUserAndMonth('', 5, 2023),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to retrieve analysis results by user and month: Invalid argument(s): User ID cannot be empty')
+        )),
+      );
+    });
+  });
+
+  group('Month validation tests', () {
+    test('should throw Exception for month < 1 in getAnalysisResultsByMonth', () {
+      // Act & Assert
+      expect(
+        () => repository.getAnalysisResultsByMonth(0, 2023),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to retrieve analysis results by month: Invalid argument(s): Month must be between 1 and 12')
+        )),
+      );
+    });
+
+    test('should throw Exception for month > 12 in getAnalysisResultsByMonth', () {
+      // Act & Assert
+      expect(
+        () => repository.getAnalysisResultsByMonth(13, 2023),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to retrieve analysis results by month: Invalid argument(s): Month must be between 1 and 12')
+        )),
+      );
+    });
+
+    test('should throw Exception for month < 1 in getAnalysisResultsByUserAndMonth', () {
+      // Act & Assert
+      expect(
+        () => repository.getAnalysisResultsByUserAndMonth('user123', 0, 2023),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to retrieve analysis results by user and month: Invalid argument(s): Month must be between 1 and 12')
+        )),
+      );
+    });
+
+    test('should throw Exception for month > 12 in getAnalysisResultsByUserAndMonth', () {
+      // Act & Assert
+      expect(
+        () => repository.getAnalysisResultsByUserAndMonth('user123', 13, 2023),
+        throwsA(isA<Exception>().having(
+          (e) => e.toString(),
+          'message',
+          contains('Failed to retrieve analysis results by user and month: Invalid argument(s): Month must be between 1 and 12')
+        )),
+      );
+    });
+  });
+  // Add these test groups to the existing test file
+
+group('getAnalysisResultsByUserAndMonth', () {
+  final testUserId = 'test-user-123';
+  final testMonth = 5; // May
+  final testYear = 2023;
+  final startOfMonth = DateTime(2023, 5, 1);
+  final endOfMonth = DateTime(2023, 6, 1).subtract(const Duration(milliseconds: 1));
+  final startTimestamp = startOfMonth.millisecondsSinceEpoch;
+  final endTimestamp = endOfMonth.millisecondsSinceEpoch;
+
+  test('should return results for specific user, month and year', () async {
+    // Arrange
+    final mockDoc = MockQueryDocumentSnapshot();
+    final mockDocs = [mockDoc];
+    
+    final mockData = {
+      'exerciseType': 'Running',
+      'duration': '30 menit',
+      'intensity': 'Sedang',
+      'estimatedCalories': 300,
+      'timestamp': DateTime(2023, 5, 15, 10, 0).millisecondsSinceEpoch,
+      'originalInput': 'Lari 30 menit',
+      'userId': testUserId,
+    };
+
+    // Setup mock behavior
+    when(mockCollection.where('userId', isEqualTo: testUserId))
+        .thenReturn(mockQuery);
+    when(mockQuery.where('timestamp', isGreaterThanOrEqualTo: startTimestamp))
+        .thenReturn(mockQuery);
+    when(mockQuery.where('timestamp', isLessThanOrEqualTo: endTimestamp))
+        .thenReturn(mockQuery);
+    when(mockQuery.orderBy('timestamp', descending: true))
+        .thenReturn(mockQuery);
+    when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+    when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+    
+    when(mockDoc.data()).thenReturn(mockData);
+    when(mockDoc.id).thenReturn('doc-1');
+
+    // Act
+    final results = await repository.getAnalysisResultsByUserAndMonth(
+        testUserId, testMonth, testYear);
+
+    // Assert
+    expect(results.length, 1);
+    expect(results[0].id, 'doc-1');
+    expect(results[0].exerciseType, 'Running');
+    expect(results[0].userId, testUserId);
+    
+    verify(mockCollection.where('userId', isEqualTo: testUserId)).called(1);
+    verify(mockQuery.where('timestamp', isGreaterThanOrEqualTo: startTimestamp)).called(1);
+    verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endTimestamp)).called(1);
+    verify(mockQuery.orderBy('timestamp', descending: true)).called(1);
+    verify(mockQuery.get()).called(1);
+  });
+
+  test('should apply limit when specified', () async {
+    // Arrange
+    final mockDoc = MockQueryDocumentSnapshot();
+    final mockDocs = [mockDoc];
+    
+    final mockData = {
+      'exerciseType': 'Running',
+      'duration': '30 menit',
+      'intensity': 'Sedang',
+      'estimatedCalories': 300,
+      'timestamp': DateTime(2023, 5, 15, 10, 0).millisecondsSinceEpoch,
+      'originalInput': 'Lari 30 menit',
+      'userId': testUserId,
+    };
+
+    // Setup mock behavior
+    when(mockCollection.where('userId', isEqualTo: testUserId))
+        .thenReturn(mockQuery);
+    when(mockQuery.where('timestamp', isGreaterThanOrEqualTo: startTimestamp))
+        .thenReturn(mockQuery);
+    when(mockQuery.where('timestamp', isLessThanOrEqualTo: endTimestamp))
+        .thenReturn(mockQuery);
+    when(mockQuery.orderBy('timestamp', descending: true))
+        .thenReturn(mockQuery);
+    when(mockQuery.limit(1)).thenReturn(mockQuery);
+    when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+    when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+    
+    when(mockDoc.data()).thenReturn(mockData);
+    when(mockDoc.id).thenReturn('doc-1');
+
+    // Act
+    final results = await repository.getAnalysisResultsByUserAndMonth(
+        testUserId, testMonth, testYear, limit: 1);
+
+    // Assert
+    expect(results.length, 1);
+    expect(results[0].id, 'doc-1');
+    expect(results[0].userId, testUserId);
+    
+    verify(mockCollection.where('userId', isEqualTo: testUserId)).called(1);
+    verify(mockQuery.where('timestamp', isGreaterThanOrEqualTo: startTimestamp)).called(1);
+    verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endTimestamp)).called(1);
+    verify(mockQuery.orderBy('timestamp', descending: true)).called(1);
+    verify(mockQuery.limit(1)).called(1);
+    verify(mockQuery.get()).called(1);
+  });
+
+  test('should throw error for empty userId', () async {
+    // Act & Assert
+    expect(
+      () => repository.getAnalysisResultsByUserAndMonth('', testMonth, testYear),
+      throwsA(predicate((e) => 
+        e is Exception && 
+        e.toString().contains('User ID cannot be empty')
+      )),
+    );
+  });
+
+  test('should throw error for invalid month', () async {
+    // Act & Assert
+    expect(
+      () => repository.getAnalysisResultsByUserAndMonth(testUserId, 0, testYear),
+      throwsA(predicate((e) => 
+        e is Exception && 
+        e.toString().contains('Month must be between 1 and 12')
+      )),
+    );
+    expect(
+      () => repository.getAnalysisResultsByUserAndMonth(testUserId, 13, testYear),
+      throwsA(predicate((e) => 
+        e is Exception && 
+        e.toString().contains('Month must be between 1 and 12')
+      )),
+    );
+  });
+
+  test('should throw exception when query fails', () async {
+    // Arrange
+    // Setup mock behavior to throw an exception
+    when(mockCollection.where('userId', isEqualTo: testUserId))
+        .thenReturn(mockQuery);
+    when(mockQuery.where('timestamp', isGreaterThanOrEqualTo: startTimestamp))
+        .thenReturn(mockQuery);
+    when(mockQuery.where('timestamp', isLessThanOrEqualTo: endTimestamp))
+        .thenReturn(mockQuery);
+    when(mockQuery.orderBy('timestamp', descending: true))
+        .thenReturn(mockQuery);
+    when(mockQuery.get())
+        .thenThrow(FirebaseException(plugin: 'firestore', message: 'Test error'));
+
+    // Act & Assert
+    expect(
+      () => repository.getAnalysisResultsByUserAndMonth(testUserId, testMonth, testYear),
+      throwsA(isA<Exception>()),
+    );
+  });
+
+  test('should correctly handle December edge case', () async {
+    // Arrange
+    final mockDoc = MockQueryDocumentSnapshot();
+    final mockDocs = [mockDoc];
+    final testMonth = 12;  // December
+    final testYear = 2023;
+    
+    // Start timestamp - 2023-12-01
+    final startOfMonth = DateTime(testYear, testMonth, 1);
+    final startTimestamp = startOfMonth.millisecondsSinceEpoch;
+    
+    // End timestamp - 2023-12-31 23:59:59.999
+    final endOfMonth = DateTime(testYear + 1, 1, 1).subtract(const Duration(milliseconds: 1));
+    final endTimestamp = endOfMonth.millisecondsSinceEpoch;
+
+    final mockData = {
+      'exerciseType': 'Running',
+      'duration': '30 menit',
+      'intensity': 'Sedang',
+      'estimatedCalories': 300,
+      'timestamp': DateTime(2023, 12, 25, 10, 0).millisecondsSinceEpoch,
+      'originalInput': 'Lari 30 menit',
+      'userId': testUserId,
+    };
+
+    // Setup mock behavior
+    when(mockCollection.where('userId', isEqualTo: testUserId))
+        .thenReturn(mockQuery);
+    when(mockQuery.where('timestamp', isGreaterThanOrEqualTo: startTimestamp))
+        .thenReturn(mockQuery);
+    when(mockQuery.where('timestamp', isLessThanOrEqualTo: endTimestamp))
+        .thenReturn(mockQuery);
+    when(mockQuery.orderBy('timestamp', descending: true))
+        .thenReturn(mockQuery);
+    when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+    when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+    
+    when(mockDoc.data()).thenReturn(mockData);
+    when(mockDoc.id).thenReturn('doc-1');
+
+    // Act
+    final results = await repository.getAnalysisResultsByUserAndMonth(
+        testUserId, testMonth, testYear);
+
+    // Assert
+    expect(results.length, 1);
+    expect(results[0].id, 'doc-1');
+    expect(results[0].exerciseType, 'Running');
+    expect(results[0].userId, testUserId);
+    
+    // Verify correct timestamps for December
+    verify(mockCollection.where('userId', isEqualTo: testUserId)).called(1);
+    verify(mockQuery.where('timestamp', isGreaterThanOrEqualTo: startTimestamp)).called(1);
+    verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endTimestamp)).called(1);
+  });
+});
+
+group('saveAnalysisResult validation', () {
+  test('should throw Exception when userId is empty', () async {
+    // Arrange
+    final result = ExerciseAnalysisResult(
+      exerciseType: 'Running',
+      duration: '30 menit',
+      intensity: 'Sedang',
+      estimatedCalories: 300,
+      timestamp: DateTime.now(),
+      originalInput: 'Lari 30 menit',
+      userId: '', // Empty userId
+    );
+
+    // Act & Assert
+    expect(
+      () => repository.saveAnalysisResult(result),
+      throwsA(predicate((e) =>
+          e is Exception &&
+          e.toString().contains('User ID cannot be empty'))),
+    );
+    
+    // Verify that Firestore was not called
+    verifyNever(mockFirestore.collection(any));
+    verifyNever(mockCollection.doc(any));
+    verifyNever(mockDocument.set(any));
+  });
+});
+
+group('getAnalysisResultsByUser', () {
+  final testUserId = 'test-user-123';
+
+  test('should return results for specific user', () async {
+    // Arrange
+    final mockDoc = MockQueryDocumentSnapshot();
+    final mockDocs = [mockDoc];
+    
+    final mockData = {
+      'exerciseType': 'Running',
+      'duration': '30 menit',
+      'intensity': 'Sedang',
+      'estimatedCalories': 300,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'originalInput': 'Lari 30 menit',
+      'userId': testUserId,
+    };
+
+    // Setup mock behavior
+    when(mockCollection.where('userId', isEqualTo: testUserId))
+        .thenReturn(mockQuery);
+    when(mockQuery.orderBy('timestamp', descending: true))
+        .thenReturn(mockQuery);
+    when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+    when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+    
+    when(mockDoc.data()).thenReturn(mockData);
+    when(mockDoc.id).thenReturn('doc-1');
+
+    // Act
+    final results = await repository.getAnalysisResultsByUser(testUserId);
+
+    // Assert
+    expect(results.length, 1);
+    expect(results[0].id, 'doc-1');
+    expect(results[0].exerciseType, 'Running');
+    expect(results[0].userId, testUserId);
+    
+    verify(mockCollection.where('userId', isEqualTo: testUserId)).called(1);
+    verify(mockQuery.orderBy('timestamp', descending: true)).called(1);
+    verify(mockQuery.get()).called(1);
+  });
+
+  test('should throw error for empty userId', () async {
+    // Act & Assert
+    expect(
+      () => repository.getAnalysisResultsByUser(''),
+      throwsA(predicate((e) => 
+        e is Exception && 
+        e.toString().contains('User ID cannot be empty')
+      )),
+    );
+  });
+});
+
+group('getAnalysisResultsByUserAndDate', () {
+  final testUserId = 'test-user-123';
+  final testDate = DateTime(2023, 5, 15);
+  final startOfDay = DateTime(2023, 5, 15, 0, 0, 0);
+  final endOfDay = DateTime(2023, 5, 15, 23, 59, 59, 999);
+  final startTimestamp = startOfDay.millisecondsSinceEpoch;
+  final endTimestamp = endOfDay.millisecondsSinceEpoch;
+
+  test('should return results for specific user and date', () async {
+    // Arrange
+    final mockDoc = MockQueryDocumentSnapshot();
+    final mockDocs = [mockDoc];
+    
+    final mockData = {
+      'exerciseType': 'Running',
+      'duration': '30 menit',
+      'intensity': 'Sedang',
+      'estimatedCalories': 300,
+      'timestamp': DateTime(2023, 5, 15, 10, 0).millisecondsSinceEpoch,
+      'originalInput': 'Lari 30 menit',
+      'userId': testUserId,
+    };
+
+    // Setup mock behavior
+    when(mockCollection.where('userId', isEqualTo: testUserId))
+        .thenReturn(mockQuery);
+    when(mockQuery.where('timestamp', isGreaterThanOrEqualTo: startTimestamp))
+        .thenReturn(mockQuery);
+    when(mockQuery.where('timestamp', isLessThanOrEqualTo: endTimestamp))
+        .thenReturn(mockQuery);
+    when(mockQuery.orderBy('timestamp', descending: true))
+        .thenReturn(mockQuery);
+    when(mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
+    when(mockQuerySnapshot.docs).thenReturn(mockDocs);
+    
+    when(mockDoc.data()).thenReturn(mockData);
+    when(mockDoc.id).thenReturn('doc-1');
+
+    // Act
+    final results = await repository.getAnalysisResultsByUserAndDate(
+        testUserId, testDate);
+
+    // Assert
+    expect(results.length, 1);
+    expect(results[0].id, 'doc-1');
+    expect(results[0].exerciseType, 'Running');
+    expect(results[0].userId, testUserId);
+    
+    verify(mockCollection.where('userId', isEqualTo: testUserId)).called(1);
+    verify(mockQuery.where('timestamp', isGreaterThanOrEqualTo: startTimestamp)).called(1);
+    verify(mockQuery.where('timestamp', isLessThanOrEqualTo: endTimestamp)).called(1);
+    verify(mockQuery.orderBy('timestamp', descending: true)).called(1);
+    verify(mockQuery.get()).called(1);
+  });
+
+  test('should throw error for empty userId', () async {
+    // Act & Assert
+    expect(
+      () => repository.getAnalysisResultsByUserAndDate('', testDate),
+      throwsA(predicate((e) => 
+        e is Exception && 
+        e.toString().contains('User ID cannot be empty')
+      )),
+    );
+  });
+});
 }

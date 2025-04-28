@@ -1,21 +1,98 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
+import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/cardio_log/presentation/screens/cardio_input_page.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/cycling_form.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/running_form.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/swimming_form.dart';
-
 import 'cardio_input_page_test.mocks.dart';
 
-@GenerateMocks([CardioRepository])
+@GenerateMocks([CardioRepository, FirebaseFirestore])
+
+// Manual implementation of MockFirebaseAuth
+class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
+// Create a mock User class
+class MockUser extends Mock implements User {
+  @override
+  String get uid => 'test-user-id';
+}
+
+void setupValidRunningForm(WidgetTester tester) {
+  final formFinder = find.byType(RunningForm);
+  expect(formFinder, findsOneWidget);
+
+  final form = tester.widget<RunningForm>(formFinder);
+  final state = (form.key as GlobalKey<RunningFormState>).currentState!;
+
+  state.selectedKm = 5;
+  state.selectedMeter = 0;
+
+  final now = DateTime.now();
+  state.selectedStartTime = DateTime(now.year, now.month, now.day, 10, 0);
+  state.selectedEndTime = DateTime(now.year, now.month, now.day, 10, 30);
+}
+
+void setupValidCyclingForm(
+    WidgetTester tester, CyclingActivityType cyclingType) {
+  final formFinder = find.byType(CyclingForm);
+  expect(formFinder, findsOneWidget);
+
+  final form = tester.widget<CyclingForm>(formFinder);
+  final state = (form.key as GlobalKey<CyclingFormState>).currentState!;
+
+  state.selectedKm = 5;
+  state.selectedMeter = 0;
+
+  state.selectedCyclingType = cyclingType;
+
+  final now = DateTime.now();
+  state.selectedStartTime = DateTime(now.year, now.month, now.day, 10, 0);
+  state.selectedEndTime = DateTime(now.year, now.month, now.day, 10, 30);
+}
+
+void setupValidSwimmingForm(WidgetTester tester) {
+  final formFinder = find.byType(SwimmingForm);
+  expect(formFinder, findsOneWidget);
+
+  final form = tester.widget<SwimmingForm>(formFinder);
+  final state = (form.key as GlobalKey<SwimmingFormState>).currentState!;
+
+  state.selectedLaps = 10;
+  state.customPoolLength = 25.0;
+
+  final now = DateTime.now();
+  state.selectedStartTime = DateTime(now.year, now.month, now.day, 10, 0);
+  state.selectedEndTime = DateTime(now.year, now.month, now.day, 10, 30);
+}
+
 void main() {
   late MockCardioRepository mockRepository;
+  late MockFirebaseAuth mockAuth;
+  late User mockUser;
 
   setUp(() {
     mockRepository = MockCardioRepository();
+    mockAuth = MockFirebaseAuth();
+    mockUser = MockUser();
+
+    // Configure mock auth
+    when(mockAuth.currentUser).thenReturn(mockUser);
+
+    // Set up successful repository response for all tests
+    when(mockRepository.saveCardioActivity(any))
+        .thenAnswer((_) async => 'activity-id-123');
   });
 
   // Helper to set up test widget
@@ -23,6 +100,7 @@ void main() {
     return MaterialApp(
       home: CardioInputPage(
         repository: mockRepository,
+        auth: mockAuth,
       ),
     );
   }
@@ -153,21 +231,24 @@ void main() {
       expect(find.text('Start Time'), findsOneWidget);
       expect(find.text('End Time'), findsOneWidget);
       expect(find.text('Distance'), findsOneWidget);
-      
+
       // Verify Personal Data Reminder is present
-      expect(find.text('Calculation of the number of calories burned is based on your personal data (height, weight, gender).'), findsOneWidget);
+      expect(
+          find.text(
+              'Calculation of the number of calories burned is based on your personal data (height, weight, gender).'),
+          findsOneWidget);
     });
-    
+
     testWidgets('Running form should calculate calories correctly',
         (WidgetTester tester) async {
       await tester.pumpWidget(createCardioInputPage());
-      
+
       // Get the form instance
       final formFinder = find.byType(RunningForm);
       expect(formFinder, findsOneWidget);
-      
+
       final form = tester.widget<RunningForm>(formFinder);
-      
+
       // Verify that calculateCalories method exists and can be called
       expect(form.calculateCalories(), isNotNull);
     });
@@ -194,9 +275,12 @@ void main() {
       expect(find.text('Mountain'), findsOneWidget);
       expect(find.text('Commute'), findsOneWidget);
       expect(find.text('Stationary'), findsOneWidget);
-      
+
       // Verify Personal Data Reminder is present
-      expect(find.text('Calculation of the number of calories burned is based on your personal data (height, weight, gender).'), findsOneWidget);
+      expect(
+          find.text(
+              'Calculation of the number of calories burned is based on your personal data (height, weight, gender).'),
+          findsOneWidget);
     });
 
     testWidgets('Cycling form should handle type selection',
@@ -250,9 +334,12 @@ void main() {
 
       // Verify swimming specific fields
       expect(find.text('Freestyle (Front Crawl)'), findsOneWidget);
-      
+
       // Verify Personal Data Reminder is present
-      expect(find.text('Calculation of the number of calories burned is based on your personal data (height, weight, gender).'), findsOneWidget);
+      expect(
+          find.text(
+              'Calculation of the number of calories burned is based on your personal data (height, weight, gender).'),
+          findsOneWidget);
     });
 
     testWidgets('Swimming form should handle stroke selection',
@@ -287,20 +374,18 @@ void main() {
   group('SaveActivity Method Tests', () {
     testWidgets('SaveActivity should call repository and show success message',
         (WidgetTester tester) async {
-      // Setup repository response
       when(mockRepository.saveCardioActivity(any))
           .thenAnswer((_) async => 'activity-id-123');
 
       await tester.pumpWidget(createCardioInputPage());
 
-      // Tap Save button
-      await tester.tap(find.text('Save Run'));
-      await tester.pump();
+      setupValidRunningForm(tester);
 
-      // Verify repository was called
+      await tester.tap(find.text('Save Run'));
+      await tester.pumpAndSettle();
+
       verify(mockRepository.saveCardioActivity(any)).called(1);
 
-      // Verify SnackBar is shown
       expect(find.byType(SnackBar), findsOneWidget);
     });
 
@@ -312,97 +397,157 @@ void main() {
 
       await tester.pumpWidget(createCardioInputPage());
 
+      // Set up valid form values
+      setupValidRunningForm(tester);
+
       // Tap Save button
       await tester.tap(find.text('Save Run'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Verify error SnackBar is shown
-      expect(find.text('Failed to save activity. Please try again.'),
-          findsOneWidget);
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.textContaining('Failed to save activity'), findsOneWidget);
     });
   });
 
   // Test application behavior for each cardio type
   group('Integration Tests', () {
+    testWidgets(
+        'Should correctly parse and save cycling activity with commute type',
+        (WidgetTester tester) async {
+      CardioActivity? capturedActivity;
+
+      when(mockRepository.saveCardioActivity(any)).thenAnswer((invocation) {
+        capturedActivity = invocation.positionalArguments[0];
+        return Future.value('activity-id-123');
+      });
+
+      await tester.pumpWidget(createCardioInputPage());
+
+      await tester.tap(find.text('Cycling'));
+      await tester.pump();
+
+      setupValidCyclingForm(tester, CyclingActivityType.commute);
+
+      await tester.tap(find.text('Save Ride'));
+      await tester.pumpAndSettle();
+
+      verify(mockRepository.saveCardioActivity(any)).called(1);
+
+      expect(capturedActivity, isA<CyclingActivity>());
+      expect((capturedActivity as CyclingActivity).cyclingType,
+          CyclingType.commute);
+      expect(capturedActivity!.userId, 'test-user-id');
+    });
+
+    testWidgets(
+        'Should correctly parse and save cycling activity with stationary type',
+        (WidgetTester tester) async {
+      CardioActivity? capturedActivity;
+
+      when(mockRepository.saveCardioActivity(any)).thenAnswer((invocation) {
+        capturedActivity = invocation.positionalArguments[0];
+        return Future.value('activity-id-123');
+      });
+
+      await tester.pumpWidget(createCardioInputPage());
+
+      await tester.tap(find.text('Cycling'));
+      await tester.pump();
+
+      setupValidCyclingForm(tester, CyclingActivityType.stationary);
+
+      await tester.tap(find.text('Save Ride'));
+      await tester.pumpAndSettle();
+
+      verify(mockRepository.saveCardioActivity(any)).called(1);
+
+      expect(capturedActivity, isA<CyclingActivity>());
+      expect((capturedActivity as CyclingActivity).cyclingType,
+          CyclingType.stationary);
+    });
+
+    testWidgets('CardioInputPage uses provided repository correctly',
+        (WidgetTester tester) async {
+      when(mockRepository.saveCardioActivity(any))
+          .thenAnswer((_) async => 'test-specific-id');
+
+      await tester.pumpWidget(createCardioInputPage());
+
+      setupValidRunningForm(tester);
+
+      await tester.tap(find.text('Save Run'));
+      await tester.pumpAndSettle();
+
+      verify(mockRepository.saveCardioActivity(any)).called(1);
+    });
+
     testWidgets('Running activity end-to-end test',
         (WidgetTester tester) async {
-      // Setup repository response
       when(mockRepository.saveCardioActivity(any))
           .thenAnswer((_) async => 'activity-id-123');
 
       await tester.pumpWidget(createCardioInputPage());
 
-      // Verify initial state
       expect(find.text('Running'), findsWidgets);
       expect(find.text('Save Run'), findsOneWidget);
-
-      // Verify form is displayed
       expect(find.byType(RunningForm), findsOneWidget);
 
-      // Tap Save button without changing values (using defaults)
-      await tester.tap(find.text('Save Run'));
-      await tester.pump();
+      setupValidRunningForm(tester);
 
-      // Verify repository method was called
+      await tester.tap(find.text('Save Run'));
+      await tester.pumpAndSettle();
+
       verify(mockRepository.saveCardioActivity(any)).called(1);
 
-      // Verify success message
       expect(find.byType(SnackBar), findsOneWidget);
     });
 
     testWidgets('Cycling activity end-to-end test',
         (WidgetTester tester) async {
-      // Setup repository response
       when(mockRepository.saveCardioActivity(any))
           .thenAnswer((_) async => 'activity-id-123');
 
       await tester.pumpWidget(createCardioInputPage());
 
-      // Switch to Cycling
       await tester.tap(find.text('Cycling'));
       await tester.pump();
 
-      // Verify form changed
       expect(find.text('Cycling'), findsWidgets);
       expect(find.text('Save Ride'), findsOneWidget);
       expect(find.byType(CyclingForm), findsOneWidget);
 
-      // Tap Save button without changing values (using defaults)
-      await tester.tap(find.text('Save Ride'));
-      await tester.pump();
+      setupValidCyclingForm(tester, CyclingActivityType.mountain);
 
-      // Verify repository method was called
+      await tester.tap(find.text('Save Ride'));
+      await tester.pumpAndSettle();
+
       verify(mockRepository.saveCardioActivity(any)).called(1);
 
-      // Verify success message
       expect(find.byType(SnackBar), findsOneWidget);
     });
 
     testWidgets('Swimming activity end-to-end test',
         (WidgetTester tester) async {
-      // Setup repository response
       when(mockRepository.saveCardioActivity(any))
           .thenAnswer((_) async => 'activity-id-123');
 
       await tester.pumpWidget(createCardioInputPage());
 
-      // Switch to Swimming
       await tester.tap(find.text('Swimming'));
       await tester.pump();
 
-      // Verify form changed
       expect(find.text('Swimming'), findsWidgets);
       expect(find.text('Save Swim'), findsOneWidget);
       expect(find.byType(SwimmingForm), findsOneWidget);
 
-      // Tap Save button without changing values (using defaults)
-      await tester.tap(find.text('Save Swim'));
-      await tester.pump();
+      setupValidSwimmingForm(tester);
 
-      // Verify repository method was called
+      await tester.tap(find.text('Save Swim'));
+      await tester.pumpAndSettle();
+
       verify(mockRepository.saveCardioActivity(any)).called(1);
 
-      // Verify success message
       expect(find.byType(SnackBar), findsOneWidget);
     });
   });

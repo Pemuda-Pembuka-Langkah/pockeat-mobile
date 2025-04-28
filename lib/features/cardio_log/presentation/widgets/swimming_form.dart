@@ -1,11 +1,15 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'personal_data_reminder.dart';
 import 'time_selection_widget.dart';
 
 class SwimmingForm extends StatefulWidget {
   final Color primaryPink;
-  final Function(int, double, String, Duration) onCalculate; // laps, poolLength, stroke, duration
-  
+  final Function(int, double, String, Duration)
+      onCalculate; // laps, poolLength, stroke, duration
+
   const SwimmingForm({
     super.key,
     required this.primaryPink,
@@ -32,7 +36,7 @@ class SwimmingFormState extends State<SwimmingForm> {
     'Backstroke',
     'Butterfly'
   ];
-  
+
   String selectedStroke = 'Freestyle (Front Crawl)';
   double customPoolLength = 25.0;
   int selectedLaps = 20;
@@ -41,13 +45,24 @@ class SwimmingFormState extends State<SwimmingForm> {
 
   // Menghitung kalori berdasarkan data form
   double _calculateFormCalories() {
-    Duration duration = selectedEndTime.difference(selectedStartTime);
-    return widget.onCalculate(
-      selectedLaps,
-      customPoolLength,
-      selectedStroke,
-      duration,
-    );
+    try {
+      Duration duration = selectedEndTime.difference(selectedStartTime);
+
+      // Check if duration is zero to avoid division by zero
+      if (duration.inSeconds <= 0) {
+        return 0.0;
+      }
+
+      return widget.onCalculate(
+        selectedLaps,
+        customPoolLength,
+        selectedStroke,
+        duration,
+      );
+    } catch (e) {
+      debugPrint('Error calculating swimming calories: $e');
+      return 0.0;
+    }
   }
 
   @override
@@ -56,7 +71,7 @@ class SwimmingFormState extends State<SwimmingForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PersonalDataReminder(),
+          const PersonalDataReminder(),
           const SizedBox(height: 16),
           TimeSelectionWidget(
             primaryColor: widget.primaryPink,
@@ -72,7 +87,7 @@ class SwimmingFormState extends State<SwimmingForm> {
                   newStartTime.hour,
                   newStartTime.minute,
                 );
-                
+
                 selectedEndTime = DateTime(
                   now.year,
                   now.month,
@@ -80,11 +95,12 @@ class SwimmingFormState extends State<SwimmingForm> {
                   selectedEndTime.hour,
                   selectedEndTime.minute,
                 );
-                
+
                 // If end time is before start time (e.g. swimming past midnight),
                 // add a day to end time
                 if (selectedEndTime.isBefore(selectedStartTime)) {
-                  selectedEndTime = selectedEndTime.add(const Duration(days: 1));
+                  selectedEndTime =
+                      selectedEndTime.add(const Duration(days: 1));
                 }
               });
             },
@@ -98,10 +114,11 @@ class SwimmingFormState extends State<SwimmingForm> {
                   newEndTime.hour,
                   newEndTime.minute,
                 );
-                
+
                 // If end time is before start time, add a day to end time
                 if (selectedEndTime.isBefore(selectedStartTime)) {
-                  selectedEndTime = selectedEndTime.add(const Duration(days: 1));
+                  selectedEndTime =
+                      selectedEndTime.add(const Duration(days: 1));
                 }
               });
             },
@@ -180,7 +197,7 @@ class SwimmingFormState extends State<SwimmingForm> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Pool Length Section
           Row(
             children: [
@@ -229,7 +246,7 @@ class SwimmingFormState extends State<SwimmingForm> {
             ),
           ),
           const SizedBox(height: 24),
-          
+
           // Laps Section
           Row(
             children: [

@@ -1,13 +1,35 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
+//coverage:ignore-file
 import 'package:flutter/cupertino.dart';
-import 'package:pockeat/features/food_text_input/presentation/pages/food_text_input_page.dart';
+import 'package:flutter/material.dart';
 
-class FoodInputPage extends StatelessWidget {
+// Package imports:
+import 'package:get_it/get_it.dart';
+
+// Project imports:
+import 'package:pockeat/core/services/analytics_service.dart';
+
+
+class FoodInputPage extends StatefulWidget {
+  const FoodInputPage({super.key});
+
+  @override
+  State<FoodInputPage> createState() => _FoodInputPageState();
+}
+
+class _FoodInputPageState extends State<FoodInputPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
+  late final AnalyticsService _analyticsService;
 
-  const FoodInputPage({super.key});
+  @override
+  void initState() {
+    super.initState();
+    _analyticsService = GetIt.instance<AnalyticsService>();
+    _analyticsService.logScreenView(
+        screenName: 'food_input_page', screenClass: 'FoodInputPage');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,10 +56,12 @@ class FoodInputPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                // add button to go to notification settings
+
+                Text(
                   'How would you like to\nadd your food?',
                   style: TextStyle(
                     fontSize: 24,
@@ -60,23 +84,39 @@ class FoodInputPage extends StatelessWidget {
               route: '/scan',
             ),
             const SizedBox(height: 16),
-            
-            // Manual Input Option
+
+            // Manual Text Input Option
             _buildInputOption(
               context: context,
               icon: CupertinoIcons.text_justify,
-              title: 'Input Manually',
-              subtitle: 'Search or prompt food details',
+              title: 'Explain your meal',
+              subtitle: 'Generate your meal\'s data with our AI',
               color: primaryPink,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FoodTextInputPage(),
-                  ),
-                );
-              },
+              route: '/food-text-input',
             ),
+            const SizedBox(height: 16),
+
+            // Database Option
+            _buildInputOption(
+              context: context,
+              icon: CupertinoIcons.table,
+              title: 'Create Your Own Meal',
+              subtitle: 'Choose ingredients from our nutrition database',
+              color: Colors.blue,
+              route: '/nutrition-database',
+            ),
+            const SizedBox(height: 16),
+
+            // Saved Meals Option
+            _buildInputOption(
+              context: context,
+              icon: CupertinoIcons.bookmark_fill,
+              title: 'Saved Meals',
+              subtitle: 'Choose from your previously saved meals',
+              color: Colors.amber,
+              route: '/saved-meals',
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -97,7 +137,45 @@ class FoodInputPage extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: route != null ? () => Navigator.pushNamed(context, route) : onTap,
+          onTap: route != null
+              ? () {
+                  // Track navigation event based on route
+                  if (route == '/scan') {
+                    _analyticsService.logEvent(
+                      name: 'food_input_method_selected',
+                      parameters: {
+                        'method': 'scan',
+                        'timestamp': DateTime.now().toIso8601String(),
+                      },
+                    );
+                  } else if (route == '/food-text-input') {
+                    _analyticsService.logEvent(
+                      name: 'food_input_method_selected',
+                      parameters: {
+                        'method': 'text',
+                        'timestamp': DateTime.now().toIso8601String(),
+                      },
+                    );
+                  } else if (route == '/nutrition-database') {
+                    _analyticsService.logEvent(
+                      name: 'food_input_method_selected',
+                      parameters: {
+                        'method': 'database',
+                        'timestamp': DateTime.now().toIso8601String(),
+                      },
+                    );
+                  } else if (route == '/saved-meals') {
+                    _analyticsService.logEvent(
+                      name: 'food_input_method_selected',
+                      parameters: {
+                        'method': 'saved_meals',
+                        'timestamp': DateTime.now().toIso8601String(),
+                      },
+                    );
+                  }
+                  Navigator.pushNamed(context, route);
+                }
+              : onTap,
           borderRadius: BorderRadius.circular(16),
           child: Ink(
             decoration: BoxDecoration(

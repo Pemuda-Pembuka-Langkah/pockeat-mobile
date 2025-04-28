@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+// Dart imports:
 import 'dart:io';
+
+// Flutter imports:
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class NutritionAppBar extends StatelessWidget {
   final bool isScrolledToTop;
@@ -8,11 +11,11 @@ class NutritionAppBar extends StatelessWidget {
   final Color primaryYellow;
 
   const NutritionAppBar({
-    Key? key,
+    super.key,
     required this.isScrolledToTop,
     required this.imagePath,
     required this.primaryYellow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +63,6 @@ class NutritionAppBar extends StatelessWidget {
           ],
         ),
       ),
-
     );
   }
 }

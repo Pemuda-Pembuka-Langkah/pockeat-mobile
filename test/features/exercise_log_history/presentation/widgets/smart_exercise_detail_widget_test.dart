@@ -1,9 +1,14 @@
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
+
+// Project imports:
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/smart_exercise_detail_widget.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 void main() {
   // Base test data
@@ -17,6 +22,7 @@ void main() {
     timestamp: DateTime(2025, 3, 4, 17, 30),
     originalInput: 'I did push-ups for 15 minutes',
     summary: 'Great push-up session with proper form. Keep it up!',
+    userId: 'test-user-123',
   );
 
   // Test data without summary
@@ -30,6 +36,7 @@ void main() {
     timestamp: DateTime(2025, 3, 5, 18, 0),
     originalInput: 'Did some squats today',
     summary: null,
+    userId: 'test-user-123',
   );
 
   group('SmartExerciseDetailWidget Tests', () {

@@ -1,43 +1,50 @@
+// Package imports:
 import 'package:uuid/uuid.dart';
 
 class ExerciseAnalysisResult {
   final String id;
+  final String exerciseName;
   final String exerciseType;
   final String duration;
   final String intensity;
   final num estimatedCalories;
-  final double metValue; // Field MET baru
+  final double metValue;
   final String? summary;
   final DateTime timestamp;
   final String originalInput;
   final List<String>? missingInfo;
+  final String userId; // Added userId field
 
   ExerciseAnalysisResult({
     String? id,
+    this.exerciseName = 'Unknown Exercise',
     required this.exerciseType,
     required this.duration,
     required this.intensity,
     required this.estimatedCalories,
-    this.metValue = 0.0, // Default value untuk MET
+    this.metValue = 0.0,
     this.summary,
     required this.timestamp,
     required this.originalInput,
     this.missingInfo,
+    required this.userId, // Required userId parameter
   }) : id = id ?? const Uuid().v4();
 
   bool get isComplete => missingInfo == null || missingInfo!.isEmpty;
-
 
   // Factory dari Map (untuk parsing response dari database)
   factory ExerciseAnalysisResult.fromDbMap(
       Map<String, dynamic> map, String id) {
     return ExerciseAnalysisResult(
       id: id,
+      exerciseName: map['exerciseName'] ?? 'Unknown Exercise',
       exerciseType: map['exerciseType'] ?? 'Unknown',
       duration: map['duration'] ?? 'Tidak ditentukan',
       intensity: map['intensity'] ?? 'Tidak ditentukan',
       estimatedCalories: map['estimatedCalories'] ?? 0,
-      metValue: (map['metValue'] ?? 0.0).toDouble(), // Parsing MET value dari database
+      metValue: (map['metValue'] ?? 0.0)
+          .toDouble(), // Parsing MET value dari database
+
       summary: map['summary'],
       timestamp: map['timestamp'] != null
           ? DateTime.fromMillisecondsSinceEpoch(map['timestamp'])
@@ -46,6 +53,7 @@ class ExerciseAnalysisResult {
       missingInfo: map['missingInfo'] != null
           ? List<String>.from(map['missingInfo'])
           : null,
+      userId: map['userId'] ?? '', // Parse userId from database
     );
   }
 
@@ -56,39 +64,48 @@ class ExerciseAnalysisResult {
       'duration': duration,
       'intensity': intensity,
       'estimatedCalories': estimatedCalories,
-      'metValue': metValue, // Menyimpan MET value ke database
+      'metValue': metValue,
       'summary': summary,
       'timestamp': timestamp.millisecondsSinceEpoch,
       'originalInput': originalInput,
       'missingInfo': missingInfo,
       'isComplete': isComplete,
+      'userId': userId, // Add userId to map
     };
   }
+
+  Map<String, dynamic> toJson() => toMap();
 
   // Copy with method untuk memudahkan update
   ExerciseAnalysisResult copyWith({
     String? id,
+    String? exerciseName,
     String? exerciseType,
     String? duration,
     String? intensity,
     num? estimatedCalories,
-    double? metValue, // Support untuk update MET value
+    double? metValue,
     String? summary,
     DateTime? timestamp,
     String? originalInput,
     List<String>? missingInfo,
+    String? userId, // Added userId parameter
   }) {
     return ExerciseAnalysisResult(
       id: id ?? this.id,
+      exerciseName: exerciseName ?? this.exerciseName,
       exerciseType: exerciseType ?? this.exerciseType,
       duration: duration ?? this.duration,
       intensity: intensity ?? this.intensity,
       estimatedCalories: estimatedCalories ?? this.estimatedCalories,
-      metValue: metValue ?? this.metValue, // Mempertahankan MET value atau menggantinya
+      metValue: metValue ??
+          this.metValue, // Mempertahankan MET value atau menggantinya
+
       summary: summary ?? this.summary,
       timestamp: timestamp ?? this.timestamp,
       originalInput: originalInput ?? this.originalInput,
       missingInfo: missingInfo ?? this.missingInfo,
+      userId: userId ?? this.userId, // Maintain userId when copying
     );
   }
 

@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/weight_lifting_detail_widget.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 
@@ -23,6 +28,7 @@ void main() {
       name: 'Bench Press',
       bodyPart: 'Chest',
       metValue: 6.0,
+      userId: 'test-user-id',
       timestamp: DateTime(2025, 3, 5, 15, 30), // 3:30 PM
       sets: [weightLiftingSet1, weightLiftingSet2],
     );
@@ -68,6 +74,7 @@ void main() {
         name: 'Empty Sets Exercise',
         bodyPart: 'Test',
         metValue: 5.0,
+        userId: 'test-user-id',
         timestamp: DateTime(2025, 3, 6),
         sets: [],
       );

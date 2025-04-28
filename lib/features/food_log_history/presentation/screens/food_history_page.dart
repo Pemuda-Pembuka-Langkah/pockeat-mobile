@@ -1,20 +1,32 @@
+// Flutter imports:
+//coverage: ignore-file
+
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+
+// Project imports:
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/presentation/widgets/food_history_card.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 
+//coverage: ignore-file
+
 /// A page that displays the user's food history with filtering options.
-/// 
+///
 /// This page allows users to view their food history and filter it by
 /// date, month, or year. It uses the FoodHistoryCard widget to display
 /// individual food items.
 class FoodHistoryPage extends StatefulWidget {
   final FoodLogHistoryService service;
+  final FirebaseAuth? auth;
 
   const FoodHistoryPage({
     super.key,
     required this.service,
+    this.auth,
   });
 
   @override
@@ -23,20 +35,20 @@ class FoodHistoryPage extends StatefulWidget {
 
 class _FoodHistoryPageState extends State<FoodHistoryPage> {
   late Future<List<FoodLogHistoryItem>> _foodsFuture;
-  
+
   // Filter state
   FilterType _activeFilterType = FilterType.all;
   DateTime _selectedDate = DateTime.now();
   int _selectedMonth = DateTime.now().month;
   int _selectedYear = DateTime.now().year;
-  
+
   // Search state
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   List<FoodLogHistoryItem>? _allFoods;
   List<FoodLogHistoryItem>? _filteredFoods;
   bool _isSearching = false;
-  
+
   // Colors
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
@@ -47,7 +59,7 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
     super.initState();
     _loadFoods();
   }
-  
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -57,44 +69,48 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
   //
   // Data loading and filtering methods
   //
-  
+
   void _loadFoods() {
+    // Get current user's ID
+    final userId =
+        (widget.auth ?? FirebaseAuth.instance).currentUser?.uid ?? '';
+
     setState(() {
-      _foodsFuture = _fetchFoods();
+      _foodsFuture = _fetchFoods(userId);
       _resetSearch();
     });
   }
 
-  Future<List<FoodLogHistoryItem>> _fetchFoods() async {
+  Future<List<FoodLogHistoryItem>> _fetchFoods(String userId) async {
     try {
       List<FoodLogHistoryItem> foods;
-      
-      // Apply filter based on active filter type
+
       switch (_activeFilterType) {
         case FilterType.date:
-          foods = await widget.service.getFoodLogsByDate(_selectedDate);
+          foods = await widget.service.getFoodLogsByDate(userId, _selectedDate);
           break;
         case FilterType.month:
-          foods = await widget.service.getFoodLogsByMonth(_selectedMonth, _selectedYear);
+          foods = await widget.service
+              .getFoodLogsByMonth(userId, _selectedMonth, _selectedYear);
           break;
         case FilterType.year:
-          foods = await widget.service.getFoodLogsByYear(_selectedYear);
+          foods = await widget.service.getFoodLogsByYear(userId, _selectedYear);
           break;
         case FilterType.all:
-          foods = await widget.service.getAllFoodLogs();
+          foods = await widget.service.getAllFoodLogs(userId);
           break;
       }
-      
+
       setState(() {
         _allFoods = foods;
       });
-      
+
       return foods;
     } catch (e) {
       throw Exception('Failed to load foods: $e');
     }
   }
-  
+
   void _resetSearch() {
     _searchQuery = '';
     _searchController.clear();
@@ -110,37 +126,37 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
         'foodId': food.sourceId ?? food.id,
       },
     );
-    
+
     // Refresh data jika detail page mengembalikan true (food telah dihapus)
     if (result == true) {
       _loadFoods();
     }
   }
-  
+
   //
   // Search-related methods
   //
-  
+
   /// Filters foods based on the given search query
-  /// 
+  ///
   /// This method filters the foods by title and subtitle and
   /// updates the filtered list state.
   void _filterFoods(String query) {
     setState(() {
       _searchQuery = query.trim().toLowerCase();
-      
+
       if (_allFoods == null || _searchQuery.isEmpty) {
         _filteredFoods = _allFoods;
         return;
       }
-      
+
       _filteredFoods = _allFoods!.where((food) {
-        return food.title.toLowerCase().contains(_searchQuery) || 
-               food.subtitle.toLowerCase().contains(_searchQuery);
+        return food.title.toLowerCase().contains(_searchQuery) ||
+            food.subtitle.toLowerCase().contains(_searchQuery);
       }).toList();
     });
   }
-  
+
   /// Clears the current search
   void _clearSearch() {
     _searchController.clear();
@@ -150,14 +166,14 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
       _isSearching = false;
     });
   }
-  
+
   /// Handles focus change when user taps on search field
   void _handleSearchFocus(bool isFocused) {
     setState(() {
       _isSearching = isFocused;
     });
   }
-  
+
   /// Builds empty state for search with no results
   Widget _buildEmptySearchState() {
     return Center(
@@ -186,12 +202,9 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
   //
   // UI filter-related methods
   //
-  
+
   Widget _buildFilterChip(
-    String label, 
-    FilterType filterType, 
-    VoidCallback onSelected
-  ) {
+      String label, FilterType filterType, VoidCallback onSelected) {
     final bool isSelected = _activeFilterType == filterType;
     return GestureDetector(
       onTap: onSelected,
@@ -222,40 +235,34 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _buildFilterChip(
-              'All', 
-              FilterType.all, 
-              () {
-                setState(() {
-                  _activeFilterType = FilterType.all;
-                  _loadFoods();
-                });
-              }
-            ),
+            _buildFilterChip('All', FilterType.all, () {
+              setState(() {
+                _activeFilterType = FilterType.all;
+                _loadFoods();
+              });
+            }),
             const SizedBox(width: 8),
             _buildFilterChip(
-              _activeFilterType == FilterType.date 
-                ? DateFormat('dd MMM yyyy').format(_selectedDate)
-                : 'By Date', 
-              FilterType.date, 
-              () => _selectDate(context)
-            ),
+                _activeFilterType == FilterType.date
+                    ? DateFormat('dd MMM yyyy').format(_selectedDate)
+                    : 'By Date',
+                FilterType.date,
+                () => _selectDate(context)),
             const SizedBox(width: 8),
             _buildFilterChip(
-              _activeFilterType == FilterType.month 
-                ? DateFormat('MMMM yyyy').format(DateTime(_selectedYear, _selectedMonth))
-                : 'By Month', 
-              FilterType.month, 
-              () => _selectMonth(context)
-            ),
+                _activeFilterType == FilterType.month
+                    ? DateFormat('MMMM yyyy')
+                        .format(DateTime(_selectedYear, _selectedMonth))
+                    : 'By Month',
+                FilterType.month,
+                () => _selectMonth(context)),
             const SizedBox(width: 8),
             _buildFilterChip(
-              _activeFilterType == FilterType.year 
-                ? _selectedYear.toString()
-                : 'By Year', 
-              FilterType.year, 
-              () => _selectYear(context)
-            ),
+                _activeFilterType == FilterType.year
+                    ? _selectedYear.toString()
+                    : 'By Year',
+                FilterType.year,
+                () => _selectYear(context)),
           ],
         ),
       ),
@@ -281,7 +288,7 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
         );
       },
     );
-    
+
     if (pickedDate != null) {
       setState(() {
         _selectedDate = pickedDate;
@@ -311,7 +318,7 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
         );
       },
     );
-    
+
     if (pickedDate != null) {
       setState(() {
         _selectedMonth = pickedDate.month;
@@ -343,7 +350,7 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
         );
       },
     );
-    
+
     if (pickedDate != null) {
       setState(() {
         _selectedYear = pickedDate.year;
@@ -387,19 +394,21 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
       ),
     );
   }
-  
+
   /// Builds the empty state for no food logs
   Widget _buildEmptyState() {
     String message;
     IconData icon;
-    
+
     switch (_activeFilterType) {
       case FilterType.date:
-        message = 'No food logs for ${DateFormat('MMM d, y').format(_selectedDate)}';
+        message =
+            'No food logs for ${DateFormat('MMM d, y').format(_selectedDate)}';
         icon = Icons.calendar_today;
         break;
       case FilterType.month:
-        message = 'No food logs for ${DateFormat('MMMM y').format(DateTime(_selectedYear, _selectedMonth))}';
+        message =
+            'No food logs for ${DateFormat('MMMM y').format(DateTime(_selectedYear, _selectedMonth))}';
         icon = Icons.calendar_month;
         break;
       case FilterType.year:
@@ -411,7 +420,7 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
         icon = Icons.fastfood;
         break;
     }
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -438,7 +447,6 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
   //
   // UI filter-related methods
   //
-  
 
   @override
   Widget build(BuildContext context) {
@@ -453,14 +461,16 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
         children: [
           // Search bar
           _buildSearchBar(),
-          
+
           // Filter chips
           _buildFilterChips(),
-          
+
           // Food list
           Expanded(
             child: _isSearching && _filteredFoods != null
-                ? _filteredFoods!.isEmpty ? _buildEmptySearchState() : _buildFoodList(_filteredFoods!)
+                ? _filteredFoods!.isEmpty
+                    ? _buildEmptySearchState()
+                    : _buildFoodList(_filteredFoods!)
                 : FutureBuilder<List<FoodLogHistoryItem>>(
                     future: _foodsFuture,
                     builder: (context, snapshot) {

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class FoodAnalysisError extends StatelessWidget {
   final String errorMessage;
@@ -9,13 +10,13 @@ class FoodAnalysisError extends StatelessWidget {
   final VoidCallback onBack;
 
   const FoodAnalysisError({
-    Key? key,
+    super.key,
     required this.errorMessage,
     required this.primaryPink,
     required this.primaryYellow,
     required this.onRetry,
     required this.onBack,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,7 @@ class FoodAnalysisError extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Judul error
               const Text(
                 'Makanan Tidak Terdeteksi',
@@ -55,11 +56,11 @@ class FoodAnalysisError extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              
+
               // Pesan error
-              Text(
+              const Text(
                 'AI kami tidak dapat mengidentifikasi makanan dalam foto. Pastikan makanan terlihat jelas dan coba lagi.',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   color: Colors.black54,
                   height: 1.5,
@@ -67,7 +68,7 @@ class FoodAnalysisError extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              
+
               // Tips untuk foto yang lebih baik
               Container(
                 padding: const EdgeInsets.all(16),
@@ -95,13 +96,14 @@ class FoodAnalysisError extends StatelessWidget {
                     _buildTipItem('Pastikan pencahayaan cukup terang'),
                     _buildTipItem('Ambil foto dari sudut atas'),
                     _buildTipItem('Hindari bayangan yang menutupi makanan'),
-                    _buildTipItem('Pastikan seluruh makanan terlihat dalam frame'),
+                    _buildTipItem(
+                        'Pastikan seluruh makanan terlihat dalam frame'),
                   ],
                 ),
               ),
-              
+
               const Spacer(),
-              
+
               // Tombol aksi
               Row(
                 children: [
@@ -171,4 +173,4 @@ class FoodAnalysisError extends StatelessWidget {
       ),
     );
   }
-} 
+}

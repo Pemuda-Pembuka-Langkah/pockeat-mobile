@@ -2,27 +2,29 @@ name: Development CI
 
 on:
   push:
-    branches: ['PBI-*']
+    branches: ["PBI-*"]
 
 jobs:
   test:
     name: Tests & Analysis
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'
-          channel: 'stable'
+          flutter-version: "3.27.4"
+          channel: "stable"
           cache: true
-      
+
       - name: Create .env file
         run: |
           echo "FLAVOR=dev" > .env
-          echo "GOOGLE_GEMINI_API_KEY=${{ secrets.STAGING_GOOGLE_GEMINI_API_KEY }}" >> .env
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
           echo "STAGING_FIREBASE_PROJECT_ID=${{ secrets.STAGING_FIREBASE_PROJECT_ID }}" >> .env
           echo "STAGING_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.STAGING_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
           echo "STAGING_FIREBASE_STORAGE_BUCKET=${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}" >> .env
@@ -37,51 +39,75 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
-        
+
       - name: Generate mocks with build_runner
         run: flutter pub run build_runner build --delete-conflicting-outputs
-              
+
       - name: Run Flutter Analyze for Report
         run: |
           mkdir -p analysis-results
           flutter analyze --no-fatal-warnings --no-fatal-infos > analysis-results/flutter-analyze.txt || true
-          
+
       - name: Install junitreport for test results
         run: dart pub global activate junitreport
-        
+
       - name: Run tests with coverage and generate JUnit report
         run: |
           mkdir -p test-results
           flutter test --coverage --machine | tee test_output.json
           dart pub global run junitreport:tojunit --input test_output.json --output test-results/junit_flutter_tests.xml
-          
+
       - name: Prepare coverage report
         run: |
           mkdir -p coverage/combined
           cp coverage/lcov.info coverage/combined/lcov.info
-        
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage/combined/lcov.info
           fail_ci_if_error: true
-      
+
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: test-results/junit_flutter_tests.xml
-          
+
       - name: Display Codecov link
         run: |
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
           REPO_NAME="${{ github.repository }}"
           echo "Code Coverage Report: https://codecov.io/gh/${REPO_NAME}/branch/${BRANCH_NAME}"
-          
+
       - name: Run Flutter Test for CI Failure
         run: flutter test
-          
+
       - name: Run Flutter Analyze for CI Failure
         run: flutter analyze --no-fatal-warnings --no-fatal-infos
+
+      - name: Check Functions Folder
+        id: check_functions
+        run: |
+          if [ -d "functions" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node.js
+        if: steps.check_functions.outputs.exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Test Firebase Functions
+        if: steps.check_functions.outputs.exists == 'true'
+        working-directory: functions
+        run: |
+          npm install
+          npm test

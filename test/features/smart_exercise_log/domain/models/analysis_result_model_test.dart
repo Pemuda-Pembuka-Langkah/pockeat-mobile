@@ -1,4 +1,7 @@
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 
 void main() {
@@ -17,6 +20,7 @@ void main() {
         summary: 'High-intensity training with short intervals',
         timestamp: timestamp,
         originalInput: 'HIIT run 30 minutes',
+        userId: 'test-user-123',
       );
 
       // Assert
@@ -47,6 +51,7 @@ void main() {
         metValue: 8.5,
         timestamp: DateTime.now(),
         originalInput: 'HIIT run 30 minutes',
+        userId: 'test-user-123',
       );
 
       // Assert
@@ -63,6 +68,7 @@ void main() {
         estimatedCalories: 200,
         timestamp: DateTime.now(),
         originalInput: 'Jogging 20 minutes',
+        userId: 'test-user-123',
       );
 
       // Assert
@@ -174,6 +180,7 @@ void main() {
         summary: 'Easy swimming',
         timestamp: timestamp,
         originalInput: 'Swimming 1 hour easy',
+        userId: 'test-user-123',
       );
 
       // Act
@@ -204,6 +211,7 @@ void main() {
         timestamp: DateTime.now(),
         originalInput: 'Exercise this morning',
         missingInfo: ['type', 'duration', 'intensity'],
+        userId: 'test-user-123',
       );
 
       // Assert
@@ -221,6 +229,7 @@ void main() {
         metValue: 7.0,
         timestamp: DateTime.now(),
         originalInput: 'Running 30 minutes',
+        userId: 'test-user-123',
       );
 
       // Act
@@ -251,6 +260,7 @@ void main() {
         estimatedCalories: 150,
         timestamp: DateTime.now(),
         originalInput: 'Yoga 45 minutes',
+        userId: 'test-user-123',
       );
 
       // Act
@@ -319,6 +329,7 @@ void main() {
         timestamp: DateTime.now(),
         originalInput: 'Running 30 minutes',
         missingInfo: ['intensity'],
+        userId: 'test-user-123',
       );
       
       final newTime = DateTime.now().add(Duration(days: 1));

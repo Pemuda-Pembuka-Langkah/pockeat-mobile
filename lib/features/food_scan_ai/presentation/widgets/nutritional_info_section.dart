@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/macro_item.dart';
 
 class NutritionalInfoSection extends StatelessWidget {
@@ -9,13 +12,13 @@ class NutritionalInfoSection extends StatelessWidget {
   final Color warningYellow;
 
   const NutritionalInfoSection({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.nutritionData,
     required this.primaryPink,
     required this.primaryGreen,
     required this.warningYellow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,31 +47,31 @@ class NutritionalInfoSection extends StatelessWidget {
                 MacroItem(
                   label: 'Protein',
                   value: isLoading ? 0 : (nutritionData['protein'] ?? 0),
-                  total: 120,
+                  total: 120, //static
                   color: primaryPink,
                   subtitle: isLoading
                       ? 'Loading...'
-                      : '${(nutritionData['protein'] ?? 0) * 100 ~/ 120}% of daily goal',
+                      : '${((nutritionData['protein'] ?? 0) * 100 / 120).round()}% of daily goal',
                 ),
                 const Divider(height: 1),
                 MacroItem(
                   label: 'Carbs',
                   value: isLoading ? 0 : (nutritionData['carbs'] ?? 0),
-                  total: 250,
+                  total: 250, //static
                   color: primaryGreen,
                   subtitle: isLoading
                       ? 'Loading...'
-                      : '${(nutritionData['carbs'] ?? 0) * 100 ~/ 250}% of daily goal',
+                      : '${((nutritionData['carbs'] ?? 0) * 100 / 250).round()}% of daily goal',
                 ),
                 const Divider(height: 1),
                 MacroItem(
                   label: 'Fat',
                   value: isLoading ? 0 : (nutritionData['fat'] ?? 0),
-                  total: 65,
+                  total: 65, //static
                   color: warningYellow,
                   subtitle: isLoading
                       ? 'Loading...'
-                      : '${(nutritionData['fat'] ?? 0) * 100 ~/ 65}% of daily goal',
+                      : '${((nutritionData['fat'] ?? 0) * 100 / 65).round()}% of daily goal',
                 ),
               ],
             ),
@@ -77,4 +80,4 @@ class NutritionalInfoSection extends StatelessWidget {
       ),
     );
   }
-} 
+}

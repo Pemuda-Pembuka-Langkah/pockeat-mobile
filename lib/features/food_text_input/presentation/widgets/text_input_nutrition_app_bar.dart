@@ -1,15 +1,16 @@
-import 'package:flutter/material.dart';
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class TextInputNutritionAppBar extends StatelessWidget {
   final bool isScrolledToTop;
   final Color primaryYellow;
 
   const TextInputNutritionAppBar({
-    Key? key,
+    super.key,
     required this.isScrolledToTop,
     required this.primaryYellow,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

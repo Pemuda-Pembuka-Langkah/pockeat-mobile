@@ -1,24 +1,37 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
+import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
-import 'package:pockeat/features/weight_training_log/presentation/widgets/exercise_card.dart';
 import 'package:pockeat/features/weight_training_log/presentation/widgets/body_part_chip.dart';
-import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/presentation/widgets/bottom_bar.dart';
-
-// Import the generated mock file
+import 'package:pockeat/features/weight_training_log/presentation/widgets/exercise_card.dart';
 import 'weightlifting_page_test.mocks.dart';
 
-@GenerateMocks([WeightLiftingRepository])
+// Import the generated mock file
+
+@GenerateMocks([WeightLiftingRepository, FirebaseAuth, User])
 void main() {
   late MockWeightLiftingRepository mockRepository;
+  late MockFirebaseAuth mockAuth;
+  late MockUser mockUser;
 
   setUp(() {
     mockRepository = MockWeightLiftingRepository();
+    mockAuth = MockFirebaseAuth();
+    mockUser = MockUser();
+    
     when(mockRepository.saveExercise(any)).thenAnswer((_) async => 'mock-id');
+    when(mockUser.uid).thenReturn('test-user-id');
+    when(mockAuth.currentUser).thenReturn(mockUser);
   });
 
   group('WeightliftingPage Tests', () {
@@ -29,7 +42,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Basic assertions
@@ -45,7 +61,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Initial state has body part chips
@@ -61,7 +80,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Find exercise item (this will depend on your actual UI structure)
@@ -85,7 +107,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise
@@ -152,7 +177,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise and set (same steps as save test)
@@ -199,7 +227,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise
@@ -244,7 +275,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise
@@ -292,7 +326,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise
@@ -331,7 +368,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Find all body part chips
@@ -361,7 +401,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise
@@ -400,7 +443,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise
@@ -439,7 +485,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise
@@ -489,7 +538,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise
@@ -542,7 +594,7 @@ void main() {
               }
               
               // Return a dummy widget that doesn't throw exceptions
-              return const Scaffold(
+              return Scaffold(
                 body: Center(
                   child: Text('Repository Initialization Test'),
                 ),
@@ -567,7 +619,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
       
       // Save without any exercises to trigger snackbar
@@ -589,7 +644,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise first time
@@ -627,7 +685,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
       
       // Add exercise
@@ -736,6 +797,7 @@ void main() {
                       name: 'Test Exercise',
                       bodyPart: 'Upper Body',
                       metValue: 3.0,
+                      userId: 'test-user-id',
                     );
                     
                     // Function to test the validation logic with different parameters
@@ -876,7 +938,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise without sets
@@ -906,7 +971,10 @@ void main() {
       
       // Build the widget
       await tester.pumpWidget(MaterialApp(
-        home: WeightliftingPage(repository: mockRepository),
+        home: WeightliftingPage(
+          repository: mockRepository,
+          auth: mockAuth,
+        ),
       ));
 
       // Add exercise without sets (volume will be 0)

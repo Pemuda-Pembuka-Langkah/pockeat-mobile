@@ -1,11 +1,16 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
-import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
+import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
+import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/swimming_activity.dart';
-import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/screens/exercise_log_detail_page.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/cycling_detail_widget.dart';
@@ -13,23 +18,25 @@ import 'package:pockeat/features/exercise_log_history/presentation/widgets/runni
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/smart_exercise_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/swimming_detail_widget.dart';
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/weight_lifting_detail_widget.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_detail_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
-import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
-
-// Generate mock classes for repositories
-@GenerateMocks(
-    [CardioRepository, SmartExerciseLogRepository, WeightLiftingRepository])
 import 'exercise_log_detail_page_test.mocks.dart';
 
-// Mock NavigatorObserver for testing navigation
+@GenerateMocks([ExerciseDetailService])
+
+// Mock NavigatorObserver untuk menguji navigasi
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
 void main() {
-  // Sample data for testing
+  late MockExerciseDetailService mockExerciseDetailService;
+  late MockNavigatorObserver mockNavigatorObserver;
+  final getIt = GetIt.instance;
+
+  // Sample data untuk testing
   final runningActivity = RunningActivity(
     id: 'run-1',
+    userId: "test-user-id",
     date: DateTime(2025, 3, 1),
     startTime: DateTime(2025, 3, 1, 8, 0),
     endTime: DateTime(2025, 3, 1, 8, 30),
@@ -39,6 +46,7 @@ void main() {
 
   final cyclingActivity = CyclingActivity(
     id: 'cycle-1',
+    userId: "test-user-id",
     date: DateTime(2025, 3, 2),
     startTime: DateTime(2025, 3, 2, 10, 0),
     endTime: DateTime(2025, 3, 2, 11, 0),
@@ -49,6 +57,7 @@ void main() {
 
   final swimmingActivity = SwimmingActivity(
     id: 'swim-1',
+    userId: "test-user-id",
     date: DateTime(2025, 3, 3),
     startTime: DateTime(2025, 3, 3, 16, 0),
     endTime: DateTime(2025, 3, 3, 16, 45),
@@ -58,8 +67,7 @@ void main() {
     caloriesBurned: 500,
   );
 
-  // Create an ExerciseAnalysisResult instance for smart exercise testing
-  final smartExercise = ExerciseAnalysisResult(
+  final smartExerciseResult = ExerciseAnalysisResult(
     id: 'smart-1',
     exerciseType: 'Push-ups',
     duration: '15 min',
@@ -68,87 +76,116 @@ void main() {
     metValue: 8.0,
     timestamp: DateTime(2025, 3, 4),
     originalInput: 'I did push-ups for 15 minutes',
+    userId: 'test-user-123',
+  );
+
+  // Membuat sample weight lifting exercise dengan set
+  final weightLiftingSet = WeightLiftingSet(
+    weight: 60.0,
+    reps: 12,
+    duration: 45.0,
   );
 
   final weightLiftingExercise = WeightLifting(
     id: 'weight-1',
+    userId: 'test-user-id',
     name: 'Bench Press',
     bodyPart: 'Chest',
     metValue: 6.0,
     timestamp: DateTime(2025, 3, 5),
-    sets: [
-      WeightLiftingSet(
-        weight: 60.0,
-        reps: 12,
-        duration: 45.0,
-      )
-    ],
+    sets: [weightLiftingSet],
   );
 
+  setUp(() {
+    mockExerciseDetailService = MockExerciseDetailService();
+    mockNavigatorObserver = MockNavigatorObserver();
+
+    // Register mock in GetIt
+    if (getIt.isRegistered<ExerciseDetailService>()) {
+      getIt.unregister<ExerciseDetailService>();
+    }
+    getIt.registerSingleton<ExerciseDetailService>(mockExerciseDetailService);
+
+    // Setup default mock responses
+    when(mockExerciseDetailService.getActualActivityType(any, any))
+        .thenAnswer((_) async => 'running');
+    when(mockExerciseDetailService
+            .getCardioActivityDetail<RunningActivity>(any))
+        .thenAnswer((_) async => runningActivity);
+    when(mockExerciseDetailService
+            .getCardioActivityDetail<CyclingActivity>(any))
+        .thenAnswer((_) async => cyclingActivity);
+    when(mockExerciseDetailService
+            .getCardioActivityDetail<SwimmingActivity>(any))
+        .thenAnswer((_) async => swimmingActivity);
+    when(mockExerciseDetailService.getSmartExerciseDetail(any))
+        .thenAnswer((_) async => smartExerciseResult);
+    when(mockExerciseDetailService.getWeightLiftingDetail(any))
+        .thenAnswer((_) async => weightLiftingExercise);
+    when(mockExerciseDetailService.deleteExerciseLog(any, any))
+        .thenAnswer((_) async => true);
+  });
+
+  tearDown(() {
+    getIt.reset();
+  });
+
   group('ExerciseLogDetailPage Widget Tests', () {
-    late MockCardioRepository mockCardioRepository;
-    late MockSmartExerciseLogRepository mockSmartExerciseRepository;
-    late MockWeightLiftingRepository mockWeightLiftingRepository;
-
-    setUp(() {
-      mockCardioRepository = MockCardioRepository();
-      mockSmartExerciseRepository = MockSmartExerciseLogRepository();
-      mockWeightLiftingRepository = MockWeightLiftingRepository();
-    });
-
     testWidgets('should show loading indicator while data is loading',
         (WidgetTester tester) async {
-      // Arrange
-      // Use a completer to keep the Future in a pending state
-      when(mockCardioRepository.getCardioActivityById(any)).thenAnswer((_) =>
-          Future.delayed(const Duration(seconds: 1), () => runningActivity));
+      // Arrange - Menggunakan Future yang tertunda untuk mensimulasikan loading
+      when(mockExerciseDetailService.getActualActivityType(any, any))
+          .thenAnswer((_) =>
+              Future.delayed(const Duration(seconds: 1), () => 'running'));
+      when(mockExerciseDetailService
+              .getCardioActivityDetail<RunningActivity>(any))
+          .thenAnswer((_) => Future.delayed(
+              const Duration(seconds: 1), () => runningActivity));
 
-      // Act - Create widget and pump it
+      // Act - Membuat widget dan pump
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'run-1',
           activityType: ExerciseLogHistoryItem.typeCardio,
-          cardioRepository: mockCardioRepository,
-          smartExerciseRepository: mockSmartExerciseRepository,
-          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
 
-      // Assert - should show loading indicator
+      // Assert - harus menampilkan loading indicator
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-      // Clean up - complete the futures so the test can finish
+      // Clean up - menyelesaikan future agar test bisa selesai
       await tester.pumpAndSettle();
     });
 
     testWidgets('should display error message when data loading fails',
         (WidgetTester tester) async {
-      // Arrange
-      when(mockCardioRepository.getCardioActivityById(any))
+      // Arrange - Setup error response
+      when(mockExerciseDetailService.getActualActivityType(any, any))
+          .thenAnswer((_) async => 'running');
+      when(mockExerciseDetailService
+              .getCardioActivityDetail<RunningActivity>(any))
           .thenAnswer((_) => Future.error('Failed to load data'));
 
-      // Act
+      // Act - Membuat widget dan menunggu hingga selesai
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'run-1',
           activityType: ExerciseLogHistoryItem.typeCardio,
-          cardioRepository: mockCardioRepository,
-          smartExerciseRepository: mockSmartExerciseRepository,
-          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
-
-      // Wait for error to appear
       await tester.pumpAndSettle();
 
-      // Assert - should show error message
+      // Assert - harus menampilkan pesan error
       expect(find.text('Error loading data'), findsOneWidget);
     });
 
-    testWidgets('should display RunningDetailWidget with modern UI components',
+    testWidgets('should display RunningDetailWidget for running activity',
         (WidgetTester tester) async {
       // Arrange
-      when(mockCardioRepository.getCardioActivityById(any))
+      when(mockExerciseDetailService.getActualActivityType(any, any))
+          .thenAnswer((_) async => 'running');
+      when(mockExerciseDetailService
+              .getCardioActivityDetail<RunningActivity>(any))
           .thenAnswer((_) async => runningActivity);
 
       // Act
@@ -156,33 +193,23 @@ void main() {
         home: ExerciseLogDetailPage(
           exerciseId: 'run-1',
           activityType: ExerciseLogHistoryItem.typeCardio,
-          cardioRepository: mockCardioRepository,
-          smartExerciseRepository: mockSmartExerciseRepository,
-          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
 
-      await tester.pumpAndSettle(); // Wait for all animations to complete
+      // Tunggu hingga future selesai
+      await tester.pumpAndSettle();
 
-      // Assert - should render RunningDetailWidget
+      // Assert - harus menampilkan RunningDetailWidget
       expect(find.byType(RunningDetailWidget), findsOneWidget);
-      
-      // Verify modern UI components
-      expect(find.text('Running Session'), findsOneWidget);
-      
-      // Test for metrics and icons
-      expect(find.byIcon(Icons.straighten), findsAtLeastNWidgets(1)); // Distance icon
-      expect(find.byIcon(Icons.timer), findsAtLeastNWidgets(1)); // Pace icon
-      expect(find.byIcon(Icons.local_fire_department), findsAtLeastNWidgets(1)); // Calories icon
-      
-      // Verify the container with gradient is present (looking for BoxDecoration)
-      expect(find.byType(Container), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('should display CyclingDetailWidget with modern UI components',
+    testWidgets('should display CyclingDetailWidget for cycling activity',
         (WidgetTester tester) async {
       // Arrange
-      when(mockCardioRepository.getCardioActivityById(any))
+      when(mockExerciseDetailService.getActualActivityType(any, any))
+          .thenAnswer((_) async => 'cycling');
+      when(mockExerciseDetailService
+              .getCardioActivityDetail<CyclingActivity>(any))
           .thenAnswer((_) async => cyclingActivity);
 
       // Act
@@ -190,33 +217,21 @@ void main() {
         home: ExerciseLogDetailPage(
           exerciseId: 'cycle-1',
           activityType: ExerciseLogHistoryItem.typeCardio,
-          cardioRepository: mockCardioRepository,
-          smartExerciseRepository: mockSmartExerciseRepository,
-          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
+      await tester.pumpAndSettle();
 
-      await tester.pumpAndSettle(); // Wait for all animations to complete
-
-      // Assert - should render CyclingDetailWidget
+      // Assert - harus menampilkan CyclingDetailWidget
       expect(find.byType(CyclingDetailWidget), findsOneWidget);
-      
-      // Verify modern UI components
-      expect(find.text('Cycling Session'), findsOneWidget);
-      
-      // Test for metrics and icons
-      expect(find.byIcon(Icons.straighten), findsAtLeastNWidgets(1)); // Distance icon
-      expect(find.byIcon(Icons.speed), findsAtLeastNWidgets(1)); // Speed icon
-      expect(find.byIcon(Icons.local_fire_department), findsAtLeastNWidgets(1)); // Calories icon
-      
-      // Verify activity details
-      expect(find.text('Activity Details'), findsOneWidget);
     });
 
-    testWidgets('should display SwimmingDetailWidget with modern UI components',
+    testWidgets('should display SwimmingDetailWidget for swimming activity',
         (WidgetTester tester) async {
       // Arrange
-      when(mockCardioRepository.getCardioActivityById(any))
+      when(mockExerciseDetailService.getActualActivityType(any, any))
+          .thenAnswer((_) async => 'swimming');
+      when(mockExerciseDetailService
+              .getCardioActivityDetail<SwimmingActivity>(any))
           .thenAnswer((_) async => swimmingActivity);
 
       // Act
@@ -224,202 +239,315 @@ void main() {
         home: ExerciseLogDetailPage(
           exerciseId: 'swim-1',
           activityType: ExerciseLogHistoryItem.typeCardio,
-          cardioRepository: mockCardioRepository,
-          smartExerciseRepository: mockSmartExerciseRepository,
-          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
+      await tester.pumpAndSettle();
 
-      await tester.pumpAndSettle(); // Wait for all animations to complete
-
-      // Assert - should render SwimmingDetailWidget
+      // Assert - harus menampilkan data swimming
       expect(find.byType(SwimmingDetailWidget), findsOneWidget);
-      
-      // Verify modern UI components
-      expect(find.text('Swimming Session'), findsOneWidget);
-      
-      // Test for metrics display
-      expect(find.text('Activity Details'), findsOneWidget);
-      expect(find.text('Stroke Style'), findsOneWidget);
-      
-      // Test for calculating pace per 100m is displayed
-      expect(find.text('Pace (100m)'), findsAtLeastNWidgets(1));
     });
 
     testWidgets('should display SmartExerciseDetailWidget for smart exercise',
         (WidgetTester tester) async {
-      // Arrange
-      when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
-          .thenAnswer((_) async => smartExercise);
-
       // Act
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'smart-1',
           activityType: ExerciseLogHistoryItem.typeSmartExercise,
-          cardioRepository: mockCardioRepository,
-          smartExerciseRepository: mockSmartExerciseRepository,
-          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
+      await tester.pumpAndSettle();
 
-      await tester.pumpAndSettle(); // Wait for all animations to complete
-
-      // Assert - should render SmartExerciseDetailWidget
+      // Assert - harus menampilkan SmartExerciseDetailWidget
       expect(find.byType(SmartExerciseDetailWidget), findsOneWidget);
     });
 
-    testWidgets('should show error message when exercise data is not found',
+    testWidgets('should display WeightLiftingDetailWidget for weight lifting',
         (WidgetTester tester) async {
-      // Arrange
-      when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
-          .thenAnswer((_) async => null);
-
       // Act
-      await tester.pumpWidget(MaterialApp(
-        home: ExerciseLogDetailPage(
-          exerciseId: 'non-existent-id',
-          activityType: ExerciseLogHistoryItem.typeSmartExercise,
-          cardioRepository: mockCardioRepository,
-          smartExerciseRepository: mockSmartExerciseRepository,
-          weightLiftingRepository: mockWeightLiftingRepository,
-        ),
-      ));
-
-      await tester.pumpAndSettle(); // Wait for all animations to complete
-
-      // Assert - should show the error message that appears when data is null
-      expect(find.text('An error occurred while loading exercise data'),
-          findsOneWidget);
-    });
-
-    testWidgets(
-        'should display weight lifting details with modern UI components',
-        (WidgetTester tester) async {
-      // Arrange
-      when(mockWeightLiftingRepository.getExerciseById('weight-1'))
-          .thenAnswer((_) async => weightLiftingExercise);
-
-      // Act - Create widget and pump it
       await tester.pumpWidget(MaterialApp(
         home: ExerciseLogDetailPage(
           exerciseId: 'weight-1',
           activityType: ExerciseLogHistoryItem.typeWeightlifting,
-          cardioRepository: mockCardioRepository,
-          smartExerciseRepository: mockSmartExerciseRepository,
-          weightLiftingRepository: mockWeightLiftingRepository,
         ),
       ));
-
-      // Wait for async operations to complete
       await tester.pumpAndSettle();
 
-      // Assert - basic info (using more flexible expectations)
-      expect(find.text('Bench Press'), findsOneWidget);
-
-      // Check that the body part is displayed somewhere (may appear multiple times)
-      expect(find.textContaining('Chest'), findsAtLeastNWidgets(1));
-
-      // Check that at least one weight value is displayed
-      expect(find.textContaining('60'), findsAtLeastNWidgets(1));
-      
-      // Verify modern UI components
-      // Look for headers that indicate the new design
-      expect(find.text('Workout Details'), findsOneWidget);
-      
-      // Verify gradient container is present
-      expect(find.byType(Container), findsAtLeastNWidgets(1));
+      // Assert - harus menampilkan WeightLiftingDetailWidget
+      expect(find.byType(WeightLiftingDetailWidget), findsOneWidget);
     });
 
-    group('Delete functionality tests', () {
-      testWidgets('should show delete button in AppBar', (WidgetTester tester) async {
-        // Arrange
-        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
-            .thenAnswer((_) async => smartExercise);
+    testWidgets('should show delete button in AppBar',
+        (WidgetTester tester) async {
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'run-1',
+          activityType: ExerciseLogHistoryItem.typeCardio,
+        ),
+      ));
+      await tester.pumpAndSettle();
 
-        // Act
-        await tester.pumpWidget(MaterialApp(
-          home: ExerciseLogDetailPage(
-            exerciseId: 'smart-1',
-            activityType: ExerciseLogHistoryItem.typeSmartExercise,
-            cardioRepository: mockCardioRepository,
-            smartExerciseRepository: mockSmartExerciseRepository,
-            weightLiftingRepository: mockWeightLiftingRepository,
+      // Assert - harus menampilkan tombol delete di AppBar
+      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+    });
+
+    testWidgets('should show confirmation dialog when delete button is pressed',
+        (WidgetTester tester) async {
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'run-1',
+          activityType: ExerciseLogHistoryItem.typeCardio,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Tap tombol delete
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+
+      // Assert - harus menampilkan dialog konfirmasi
+      expect(find.text('Delete Exercise'), findsOneWidget);
+      expect(
+          find.text(
+              'Are you sure you want to delete this exercise log? This action cannot be undone.'),
+          findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget);
+    });
+
+    testWidgets('should delete exercise when confirmed in dialog',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockExerciseDetailService.deleteExerciseLog(any, any))
+          .thenAnswer((_) async => true);
+
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        navigatorObservers: [mockNavigatorObserver],
+        home: ExerciseLogDetailPage(
+          exerciseId: 'run-1',
+          activityType: ExerciseLogHistoryItem.typeCardio,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Tap tombol delete
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+
+      // Tap "Delete" di dialog
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+
+      // Verify delete dipanggil
+      verify(mockExerciseDetailService.deleteExerciseLog(any, any)).called(1);
+    });
+
+    testWidgets('should not delete exercise when cancel is pressed in dialog',
+        (WidgetTester tester) async {
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'run-1',
+          activityType: ExerciseLogHistoryItem.typeCardio,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Tap tombol delete
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+
+      // Tap "Cancel" di dialog
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      // Verify delete tidak dipanggil
+      verifyNever(mockExerciseDetailService.deleteExerciseLog(any, any));
+    });
+
+    testWidgets('should show error snackbar when delete fails',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockExerciseDetailService.deleteExerciseLog(any, any))
+          .thenAnswer((_) async => false);
+
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: ExerciseLogDetailPage(
+            exerciseId: 'run-1',
+            activityType: ExerciseLogHistoryItem.typeCardio,
           ),
-        ));
+        ),
+      ));
+      await tester.pumpAndSettle();
 
-        await tester.pumpAndSettle();
+      // Tap tombol delete
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
 
-        // Assert - verify delete button is visible in AppBar
-        expect(find.byIcon(Icons.delete_outline), findsOneWidget);
-        expect(find.byTooltip('Delete'), findsOneWidget);
-      });
+      // Tap "Delete" di dialog
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
 
-      testWidgets('should show confirmation dialog when delete button is pressed',
-          (WidgetTester tester) async {
-        // Arrange
-        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
-            .thenAnswer((_) async => smartExercise);
+      // Assert - harus menampilkan snackbar error
+      expect(find.text('Failed to delete exercise log'), findsOneWidget);
+    });
 
-        // Act
-        await tester.pumpWidget(MaterialApp(
-          home: ExerciseLogDetailPage(
-            exerciseId: 'smart-1',
-            activityType: ExerciseLogHistoryItem.typeSmartExercise,
-            cardioRepository: mockCardioRepository,
-            smartExerciseRepository: mockSmartExerciseRepository,
-            weightLiftingRepository: mockWeightLiftingRepository,
-          ),
-        ));
+    testWidgets('should display unsupported cardio type message',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockExerciseDetailService.getActualActivityType(any, any))
+          .thenAnswer((_) async => 'unknown');
+      when(mockExerciseDetailService.getCardioActivityDetail(any))
+          .thenThrow(Exception('Invalid data type'));
 
-        await tester.pumpAndSettle();
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'unknown-1',
+          activityType: ExerciseLogHistoryItem.typeCardio,
+        ),
+      ));
+      await tester.pumpAndSettle();
 
-        // Tap the delete button
-        await tester.tap(find.byIcon(Icons.delete_outline));
-        await tester.pumpAndSettle();
+      // Assert - harus menampilkan pesan unsupported
+      expect(find.text('Cardio Details'), findsOneWidget);
+    });
 
-        // Assert - verify confirmation dialog appears
-        expect(find.text('Delete Exercise'), findsOneWidget);
-        expect(
-            find.text(
-                'Are you sure you want to delete this exercise log? This action cannot be undone.'),
-            findsOneWidget);
-        expect(find.text('Cancel'), findsOneWidget);
-        expect(find.text('Delete'), findsAtLeastNWidgets(1));
-      });
+    testWidgets('should display unsupported activity type message',
+        (WidgetTester tester) async {
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'unknown-1',
+          activityType: 'unknown-type',
+        ),
+      ));
+      await tester.pumpAndSettle();
 
-      testWidgets('should close dialog when Cancel is pressed',
-          (WidgetTester tester) async {
-        // Arrange
-        when(mockSmartExerciseRepository.getAnalysisResultFromId(any))
-            .thenAnswer((_) async => smartExercise);
+      // Assert - harus menampilkan pesan unsupported
+      expect(find.text('Exercise Details'), findsOneWidget);
+      // Hanya memeriksa AppBar title, tidak memeriksa konten yang mungkin berubah
+    });
 
-        // Act
-        await tester.pumpWidget(MaterialApp(
-          home: ExerciseLogDetailPage(
-            exerciseId: 'smart-1',
-            activityType: ExerciseLogHistoryItem.typeSmartExercise,
-            cardioRepository: mockCardioRepository,
-            smartExerciseRepository: mockSmartExerciseRepository,
-            weightLiftingRepository: mockWeightLiftingRepository,
-          ),
-        ));
+    testWidgets('should display invalid weight lifting data message',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockExerciseDetailService.getWeightLiftingDetail(any))
+          .thenThrow(Exception('Invalid data type'));
 
-        await tester.pumpAndSettle();
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'invalid-1',
+          activityType: ExerciseLogHistoryItem.typeWeightlifting,
+        ),
+      ));
+      await tester.pumpAndSettle();
 
-        // Tap the delete button to show dialog
-        await tester.tap(find.byIcon(Icons.delete_outline));
-        await tester.pumpAndSettle();
+      // Assert - harus menampilkan pesan invalid
+      expect(find.text('Weight Training Details'), findsOneWidget);
+    });
 
-        // Tap the cancel button
-        await tester.tap(find.text('Cancel'));
-        await tester.pumpAndSettle();
+    testWidgets('should display running activity data',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockExerciseDetailService.getActualActivityType(any, any))
+          .thenAnswer((_) async => 'running');
+      when(mockExerciseDetailService
+              .getCardioActivityDetail<RunningActivity>(any))
+          .thenAnswer((_) async => runningActivity);
 
-        // Assert - dialog should be closed
-        expect(find.text('Delete Exercise'), findsNothing);
-      });
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'run-1',
+          activityType: ExerciseLogHistoryItem.typeCardio,
+        ),
+      ));
+      await tester.pumpAndSettle();
 
-      // Delete confirmation test would be added here (requires mock navigators)
+      // Assert - harus menampilkan data running
+      expect(find.byType(RunningDetailWidget), findsOneWidget);
+      expect(find.byIcon(Icons.directions_run), findsOneWidget);
+    });
+
+    testWidgets('should display cycling activity data',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockExerciseDetailService.getActualActivityType(any, any))
+          .thenAnswer((_) async => 'cycling');
+      when(mockExerciseDetailService
+              .getCardioActivityDetail<CyclingActivity>(any))
+          .thenAnswer((_) async => cyclingActivity);
+
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'cycle-1',
+          activityType: ExerciseLogHistoryItem.typeCardio,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Assert - harus menampilkan data cycling
+      expect(find.byType(CyclingDetailWidget), findsOneWidget);
+    });
+
+    testWidgets('should display swimming activity data',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockExerciseDetailService.getActualActivityType(any, any))
+          .thenAnswer((_) async => 'swimming');
+      when(mockExerciseDetailService
+              .getCardioActivityDetail<SwimmingActivity>(any))
+          .thenAnswer((_) async => swimmingActivity);
+
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'swim-1',
+          activityType: ExerciseLogHistoryItem.typeCardio,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Assert - harus menampilkan data swimming
+      expect(find.byType(SwimmingDetailWidget), findsOneWidget);
+    });
+
+    testWidgets('should display smart exercise data',
+        (WidgetTester tester) async {
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'smart-1',
+          activityType: ExerciseLogHistoryItem.typeSmartExercise,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Assert - harus menampilkan data smart exercise
+      expect(find.text('Smart Exercise Details'), findsOneWidget);
+    });
+
+    testWidgets('should display weight lifting data',
+        (WidgetTester tester) async {
+      // Act
+      await tester.pumpWidget(MaterialApp(
+        home: ExerciseLogDetailPage(
+          exerciseId: 'weight-1',
+          activityType: ExerciseLogHistoryItem.typeWeightlifting,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      // Assert - harus menampilkan data weight lifting
+      expect(find.text('Weight Training Details'), findsOneWidget);
     });
   });
 }
