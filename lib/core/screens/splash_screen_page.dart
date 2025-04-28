@@ -1,15 +1,7 @@
-// Dart imports:
 import 'dart:async';
-
-// Flutter imports:
 import 'package:flutter/material.dart';
-
-// Package imports:
 import 'package:get_it/get_it.dart';
-
-// Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
-
 import 'package:lottie/lottie.dart'; // Add this package
 
 /// Splash screen page shown when the app is launched
@@ -70,20 +62,14 @@ class _SplashScreenPageState extends State<SplashScreenPage>
   void _navigateBasedOnAuth() {
     if (!mounted) return;
 
-    if (_isAuthenticated == true) {
-      // User is authenticated, navigate to home
-      Navigator.of(context).pushReplacementNamed('/');
-    } else {
-      // User is not authenticated, navigate to login
-      Navigator.of(context).pushReplacementNamed('/login');
-    }
+    Navigator.of(context).pushReplacementNamed('/');
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final circleSize = size.width * 0.6; // Adjust size as needed
-
+    
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
@@ -93,14 +79,14 @@ class _SplashScreenPageState extends State<SplashScreenPage>
             children: [
               // Pockeat Logo
               Image.asset(
-                'assets/icons/LogoPanjang_PockEat_draft_transparent.png',
+                'assets/icons/LogoPanjang_PockEat_draft_transparent.png', 
                 width: size.width * 0.6,
                 // Or use a custom logo widget if needed
                 // _buildCustomLogo(),
               ),
-
+              
               const SizedBox(height: 60), // 30px spacing as per design
-
+              
               // Red circle and panda
               Stack(
                 alignment: Alignment.center,
@@ -114,7 +100,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                       shape: BoxShape.circle,
                     ),
                   ),
-
+                  
                   // Panda animation
                   SizedBox(
                     width: circleSize * 1, // Slightly smaller than the circle
@@ -126,7 +112,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
                   ),
                 ],
               ),
-
+              
               const SizedBox(height: 40),
             ],
           ),

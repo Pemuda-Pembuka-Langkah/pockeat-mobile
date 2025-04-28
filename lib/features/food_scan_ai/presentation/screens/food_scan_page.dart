@@ -69,6 +69,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
     try {
       // Tambahkan log untuk debugging
       await widget.cameraController.initialize();
+
       if (mounted) {
         setState(() {
           _isCameraReady = true;
@@ -76,6 +77,15 @@ class ScanFoodPageState extends State<ScanFoodPage>
         });
       }
     } catch (e) {
+      // Tampilkan error ke user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal menginisialisasi kamera: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       // Tampilkan error ke user
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

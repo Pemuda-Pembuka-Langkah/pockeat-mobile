@@ -16,6 +16,7 @@ import 'package:pockeat/features/authentication/services/deep_link_service.dart'
 import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
 
+// coverage:ignore-start
 /// Exception khusus untuk DeepLinkService
 class DeepLinkException implements Exception {
   final String message;
@@ -166,7 +167,42 @@ class DeepLinkServiceImpl implements DeepLinkService {
     return hasWidgetName && hasType && (type == 'dashboard' || type == 'home');
   }
 
-  // coverage:ignore-start
+  // Method untuk mengecek apakah link ke streak celebration
+  bool _isStreakCelebrationLink(Uri link) {
+    debugPrint('Checking streak celebration link: ${link.toString()}');
+
+    // Cek apakah link memiliki scheme pockeat
+    if (link.scheme != 'pockeat') {
+      debugPrint(
+          'Not a streak celebration link: scheme is not "pockeat" but "${link.scheme}"');
+      return false;
+    }
+
+    // For debugging purposes, log all parts of the URI
+    debugPrint(
+        'URI details: scheme=${link.scheme}, host=${link.host}, path="${link.path}"');
+
+    // Cek path atau host untuk menentukan apakah ini streak celebration link
+    if (link.path == 'streak-celebration') {
+      debugPrint('Matched streak celebration: path="streak-celebration"');
+      return true;
+    }
+
+    if (link.path == '/streak-celebration') {
+      debugPrint('Matched streak celebration: path="/streak-celebration"');
+      return true;
+    }
+
+    if (link.host == 'streak-celebration') {
+      debugPrint('Matched streak celebration: host="streak-celebration"');
+      return true;
+    }
+
+    // If none of the above conditions matched
+    debugPrint('Not a streak celebration link: no path or host match');
+    return false;
+  }
+
   @override
   Future<bool> handleDeepLink(Uri link,
       [BuildContext? navigationContext]) async {
@@ -188,7 +224,6 @@ class DeepLinkServiceImpl implements DeepLinkService {
       _resultStreamController.add(result);
       throw DeepLinkException('Error handling deep link', originalError: e);
     }
-    // coverage:ignore-end
   }
 
   // Helper method untuk mendapatkan DeepLinkResult dari Uri
@@ -287,6 +322,26 @@ class DeepLinkServiceImpl implements DeepLinkService {
           originalUri: uri,
         );
       }
+    } else if (_isStreakCelebrationLink(uri)) {
+      try {
+        // Mendapatkan streak days dari query parameter
+        final streakDaysStr = uri.queryParameters['streakDays'] ?? '0';
+        final streakDays = int.tryParse(streakDaysStr) ?? 0;
+
+        return DeepLinkResult.streakCelebration(
+          success: true,
+          data: {
+            'streakDays': streakDays,
+          },
+          originalUri: uri,
+        );
+      } catch (e) {
+        return DeepLinkResult.streakCelebration(
+          success: false,
+          error: e.toString(),
+          originalUri: uri,
+        );
+      }
     } else {
       return DeepLinkResult.unknown(
         originalUri: uri,
@@ -328,3 +383,4 @@ class DeepLinkServiceImpl implements DeepLinkService {
     }
   }
 }
+// coverage:ignore-end

@@ -127,16 +127,19 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        // coverage:ignore-start
-        if (didPop) return;
-        // Jika user menekan tombol back, keluar dari aplikasi
-        // daripada kembali ke halaman utama yang memerlukan auth
+    return WillPopScope(
+      onWillPop: () async {
         SystemNavigator.pop();
-        // coverage:ignore-end
+        return false; // Prevents the default back button behavior
       },
+      // onPopInvoked: (didPop) {
+      //   // coverage:ignore-start
+      //   if (didPop) return;
+      //   // Jika user menekan tombol back, keluar dari aplikasi
+      //   // daripada kembali ke halaman utama yang memerlukan auth
+      //   SystemNavigator.pop();
+      //   // coverage:ignore-end
+      // },
       child: Scaffold(
         backgroundColor: bgColor,
         body: SafeArea(
@@ -382,7 +385,11 @@ class _LoginPageState extends State<LoginPage> {
                       ..onTap = () {
                         // Navigate to registration page
                         // coverage:ignore-line
-                        Navigator.pushReplacementNamed(context, '/register');
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/welcome', // 👈 balik ke Welcome
+                          (route) => false,
+                        );
                       },
                   ),
                 ],

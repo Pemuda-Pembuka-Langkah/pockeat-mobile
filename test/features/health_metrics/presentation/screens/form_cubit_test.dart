@@ -1,3 +1,5 @@
+// form_cubit_test.dart
+
 // Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -25,11 +27,22 @@ void main() {
     mockCaloricService = MockCaloricRequirementService();
     cubit = HealthMetricsFormCubit(
       repository: mockRepo,
-      userId: 'user123',
       caloricRequirementRepository: mockCaloricRepo,
       caloricRequirementService: mockCaloricService,
     );
+    cubit.setUserId('user123');
   });
+
+  void fillMinimalForm({String goal = "Lose Weight"}) {
+    cubit
+      ..setHeightWeight(height: 170, weight: 65)
+      ..setBirthDate(DateTime(2000, 1, 1))
+      ..setDesiredWeight(60)
+      ..setWeeklyGoal(0.5)
+      ..setGender("Male")
+      ..setActivityLevel("Lightly Active")
+      ..toggleGoal(goal);
+  }
 
   test('initial state is correct', () {
     expect(cubit.state.selectedGoals, []);
@@ -44,7 +57,7 @@ void main() {
     expect(cubit.state.selectedGoals, []);
   });
 
-  test('setHeightWeight updates height and weight', () {
+  test('setHeightWeight updates height, weight, and bmi', () {
     cubit.setHeightWeight(height: 175, weight: 70);
     expect(cubit.state.height, 175);
     expect(cubit.state.weight, 70);
@@ -76,38 +89,31 @@ void main() {
   });
 
   test('submit calls repository when all data is valid', () async {
-    cubit
-      ..setHeightWeight(height: 170, weight: 65)
-      ..setBirthDate(DateTime(2000, 1, 1))
-      ..setDesiredWeight(60)
-      ..setWeeklyGoal(0.5)
-      ..setGender("Male")
-      ..setActivityLevel("Lightly Active")
-      ..toggleGoal("Lose Weight");
+      fillMinimalForm();
 
-    // Mock analyze call
-    when(mockCaloricService.analyze(
+      when(mockCaloricService.analyze(
         userId: anyNamed('userId'),
         model: anyNamed('model'),
       )).thenReturn(
-      CaloricRequirementModel(
+        CaloricRequirementModel(
+          userId: 'user123',
+          bmr: 1500,
+          tdee: 2000,
+          timestamp: DateTime.now(),
+        ),
+      );
+
+      await cubit.submit();
+
+      // Verify health metrics saved
+      verify(mockRepo.saveHealthMetrics(any)).called(1);
+
+      // Verify caloric requirement saved
+      verify(mockCaloricRepo.saveCaloricRequirement(
         userId: 'user123',
-        bmr: 1500,
-        tdee: 2000,
-        timestamp: DateTime.now(),
-      ),
-    );
-
-    await cubit.submit();
-
-    // Verify saveHealthMetrics call
-    verify(mockRepo.saveHealthMetrics(any)).called(1);
-    // Verify saveCaloricRequirement call
-    verify(mockCaloricRepo.saveCaloricRequirement(
-      userId: 'user123',
-      result: anyNamed('result'),
-    )).called(1);
-  });
+        result: anyNamed('result'),
+      )).called(1);
+    });
 
   test('submit throws if "Other" goal has no reason', () async {
     cubit
@@ -117,47 +123,47 @@ void main() {
       ..setWeeklyGoal(0.5)
       ..setGender("Male")
       ..setActivityLevel("Lightly Active")
-      ..toggleGoal("Other");
+      ..toggleGoal("Other"); // No otherGoalReason set
 
     expect(() => cubit.submit(), throwsException);
   });
 
   test('submit includes otherGoalReason in model if provided', () async {
-    cubit
-      ..setHeightWeight(height: 180, weight: 75)
-      ..setBirthDate(DateTime(1995, 5, 5))
-      ..setDesiredWeight(70)
-      ..setWeeklyGoal(1)
-      ..setGender("Male")
-      ..setActivityLevel("Lightly Active")
-      ..toggleGoal("Other")
-      ..setOtherGoalReason("Build muscle");
+      cubit
+        ..setHeightWeight(height: 180, weight: 75)
+        ..setBirthDate(DateTime(1995, 5, 5))
+        ..setDesiredWeight(70)
+        ..setWeeklyGoal(1)
+        ..setGender("Male")
+        ..setActivityLevel("Lightly Active")
+        ..toggleGoal("Other")
+        ..setOtherGoalReason("Build muscle");
 
-    when(mockCaloricService.analyze(
-          userId: anyNamed('userId'),
-          model: anyNamed('model'),
-        )).thenReturn(
-      CaloricRequirementModel(
-        userId: 'user123',
-        bmr: 1500,
-        tdee: 2000,
-        timestamp: DateTime.now(),
-      ),
-    );
+      when(mockCaloricService.analyze(
+        userId: anyNamed('userId'),
+        model: anyNamed('model'),
+      )).thenReturn(
+        CaloricRequirementModel(
+          userId: 'user123',
+          bmr: 1500,
+          tdee: 2000,
+          timestamp: DateTime.now(),
+        ),
+      );
 
-    await cubit.submit();
+      await cubit.submit();
 
-    verify(mockRepo.saveHealthMetrics(argThat(predicate((model) {
-      final goal = (model as HealthMetricsModel).fitnessGoal;
-      return goal.contains("Other: Build muscle");
-    })))).called(1);
-  });
+      verify(mockRepo.saveHealthMetrics(argThat(predicate((model) {
+        final goal = (model as HealthMetricsModel).fitnessGoal;
+        return goal.contains("Other: Build muscle");
+      })))).called(1);
+    });
 
   test('submit calculates and saves caloric requirement', () async {
     when(mockCaloricService.analyze(
-          userId: anyNamed('userId'),
-          model: anyNamed('model'),
-        )).thenReturn(
+      userId: anyNamed('userId'),
+      model: anyNamed('model'),
+    )).thenReturn(
       CaloricRequirementModel(
         userId: 'user123',
         bmr: 1600,
@@ -166,14 +172,7 @@ void main() {
       ),
     );
 
-    cubit
-      ..setHeightWeight(height: 180, weight: 75)
-      ..setBirthDate(DateTime(1995, 5, 5))
-      ..setDesiredWeight(70)
-      ..setWeeklyGoal(1)
-      ..setGender("Male")
-      ..setActivityLevel("moderate")
-      ..toggleGoal("Build Muscle");
+    fillMinimalForm(goal: "Build Muscle");
 
     await cubit.submit();
 
@@ -184,47 +183,47 @@ void main() {
   });
 
   test('submit computes correct BMR and TDEE for Male with moderate activity', () async {
-    final now = DateTime.now();
-    int age = now.year - 2000;
-    if (now.month < 1 || (now.month == 1 && now.day < 1)) {
-      age--;
-    }
-    final expectedBMR = 10 * 75 + 6.25 * 180 - 5 * age + 5;
-    final expectedTDEE = expectedBMR * 1.55;
+      final now = DateTime.now();
+      int age = now.year - 2000;
+      if (now.month < 1 || (now.month == 1 && now.day < 1)) {
+        age--;
+      }
+      final expectedBMR = 10 * 75 + 6.25 * 180 - 5 * age + 5;
+      final expectedTDEE = expectedBMR * 1.55;
 
-    final fakeResult = CaloricRequirementModel(
-      userId: 'user123',
-      bmr: expectedBMR,
-      tdee: expectedTDEE,
-      timestamp: DateTime.now(),
-    );
+      final fakeResult = CaloricRequirementModel(
+        userId: 'user123',
+        bmr: expectedBMR,
+        tdee: expectedTDEE,
+        timestamp: DateTime.now(),
+      );
 
-    when(mockCaloricService.analyze(
+      when(mockCaloricService.analyze(
         userId: anyNamed('userId'),
         model: anyNamed('model'),
       )).thenReturn(fakeResult);
 
-    cubit
-      ..setHeightWeight(height: 180, weight: 75)
-      ..setBirthDate(DateTime(2000, 1, 1))
-      ..setDesiredWeight(70)
-      ..setWeeklyGoal(0.5)
-      ..setGender("Male")
-      ..setActivityLevel("moderate")
-      ..toggleGoal("Lose Weight");
+      cubit
+        ..setHeightWeight(height: 180, weight: 75)
+        ..setBirthDate(DateTime(2000, 1, 1))
+        ..setDesiredWeight(70)
+        ..setWeeklyGoal(0.5)
+        ..setGender("Male")
+        ..setActivityLevel("moderate")
+        ..toggleGoal("Lose Weight");
 
-    await cubit.submit();
+      await cubit.submit();
 
-    verify(mockCaloricRepo.saveCaloricRequirement(
-      userId: 'user123',
-      result: argThat(
-        predicate((model) =>
-          model is CaloricRequirementModel &&
-          (model.bmr - expectedBMR).abs() < 0.01 &&
-          (model.tdee - expectedTDEE).abs() < 0.01,
+      verify(mockCaloricRepo.saveCaloricRequirement(
+        userId: 'user123',
+        result: argThat(
+          predicate((model) =>
+            model is CaloricRequirementModel &&
+            (model.bmr - expectedBMR).abs() < 0.01 &&
+            (model.tdee - expectedTDEE).abs() < 0.01,
+          ),
+          named: 'result',
         ),
-        named: 'result',
-      ),
-    )).called(1);
-  });
+      )).called(1);
+    });
 }

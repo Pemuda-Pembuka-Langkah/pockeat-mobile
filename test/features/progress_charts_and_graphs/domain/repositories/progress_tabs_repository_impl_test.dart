@@ -1,7 +1,4 @@
-// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-
-// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository.dart';
@@ -53,8 +50,8 @@ void main() {
         // Assert
         expect(result, isA<TabConfiguration>());
         expect(result.mainTabCount, equals(2));
-        expect(result.progressTabCount, equals(3));
-        expect(result.progressTabLabels, equals(['Weight', 'Nutrition', 'Exercise']));
+        expect(result.logHistoryTabCount, equals(2));
+        expect(result.logHistoryTabLabels, equals(['Food', 'Exercise']));
       });
 
       test('should return TabConfiguration with exact values specified in implementation', () async {
@@ -63,11 +60,10 @@ void main() {
 
         // Assert
         expect(result.mainTabCount, equals(2));
-        expect(result.progressTabCount, equals(3));
-        expect(result.progressTabLabels.length, equals(3));
-        expect(result.progressTabLabels[0], equals('Weight'));
-        expect(result.progressTabLabels[1], equals('Nutrition'));
-        expect(result.progressTabLabels[2], equals('Exercise'));
+        expect(result.logHistoryTabCount, equals(2));
+        expect(result.logHistoryTabLabels.length, equals(2));
+        expect(result.logHistoryTabLabels[0], equals('Food'));
+        expect(result.logHistoryTabLabels[1], equals('Exercise'));
       });
     });
   });

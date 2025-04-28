@@ -19,6 +19,7 @@ import 'package:pockeat/features/authentication/presentation/screens/profile_pag
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'profile_page_test.mocks.dart';
 
 @GenerateNiceMocks([
@@ -28,7 +29,8 @@ import 'profile_page_test.mocks.dart';
   MockSpec<NavigatorObserver>(onMissingStub: OnMissingStub.returnDefault),
   MockSpec<FirebaseAuth>(),
   MockSpec<User>(),
-  MockSpec<UserInfo>()
+  MockSpec<UserInfo>(),
+  MockSpec<NotificationService>()
 ])
 
 void main() {
@@ -42,6 +44,7 @@ void main() {
   late MockFirebaseAuth mockAuth;
   late MockUser mockUser;
   late MockUserInfo mockUserInfo;
+  late MockNotificationService mockNotificationService;
 
   setUp(() {
     // Reset screen size to reasonable dimension
@@ -57,6 +60,7 @@ void main() {
     mockAuth = MockFirebaseAuth();
     mockUser = MockUser();
     mockUserInfo = MockUserInfo();
+    mockNotificationService = MockNotificationService();
 
     // Setup GetIt
     final getIt = GetIt.instance;
@@ -69,9 +73,13 @@ void main() {
     if (getIt.isRegistered<BugReportService>()) {
       getIt.unregister<BugReportService>();
     }
+    if (getIt.isRegistered<NotificationService>()) {
+      getIt.unregister<NotificationService>();
+    }
     getIt.registerSingleton<LoginService>(mockLoginService);
     getIt.registerSingleton<LogoutService>(mockLogoutService);
     getIt.registerSingleton<BugReportService>(mockBugReportService);
+    getIt.registerSingleton<NotificationService>(mockNotificationService);
 
     // Setup default User behavior
     when(mockUser.uid).thenReturn('test-uid');
@@ -98,6 +106,7 @@ void main() {
     reset(mockAuth);
     reset(mockUser);
     reset(mockUserInfo);
+    reset(mockNotificationService);
   });
 
   // Helper untuk membuat UserModel test
@@ -139,6 +148,10 @@ void main() {
         '/login': (context) => const Scaffold(body: Text('Login Page')),
         '/change-password': (context) =>
             const Scaffold(body: Text('Change Password Page')),
+        '/notification-settings': (context) =>
+            const Scaffold(body: Text('Notification Settings Page')),
+        '/edit-profile': (context) =>
+            const Scaffold(body: Text('Edit Profile Page')),
       },
     );
   }
@@ -461,6 +474,102 @@ void main() {
 
       // Verify Change Password option is hidden
       expect(find.text('Ubah Password'), findsNothing);
+    });
+  });
+  
+  // == NOTIFIKASI DAN PENGATURAN PROFILE ==
+  group('Notifikasi dan Pengaturan Profile', () {
+    testWidgets('Menampilkan menu pengaturan notifikasi dan navigasi ke halaman pengaturan notifikasi',
+        (WidgetTester tester) async {
+      // Setup user data
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Temukan dan scroll ke menu pengaturan notifikasi
+      final notifSettingsFinder = find.text('Pengaturan Notifikasi');
+      await tester.dragUntilVisible(
+        notifSettingsFinder,
+        find.byType(SingleChildScrollView),
+        const Offset(0, -200),
+      );
+      expect(notifSettingsFinder, findsOneWidget);
+
+      // Verifikasi subtitle menu pengaturan notifikasi
+      expect(find.text('Kelola pengaturan notifikasi aplikasi'), findsOneWidget);
+      expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
+
+      // Tap pada menu pengaturan notifikasi
+      await tester.tap(notifSettingsFinder);
+      await tester.pumpAndSettle();
+
+      // Verifikasi navigasi ke halaman pengaturan notifikasi
+      expect(find.text('Notification Settings Page'), findsOneWidget);
+      
+      // Verifikasi navigasi terobservasi
+      verify(mockNavigatorObserver.didPush(any, any));
+    });
+
+    testWidgets('Navigasi ke halaman edit profile ketika tombol edit ditekan',
+        (WidgetTester tester) async {
+      // Setup user data
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Temukan menu Edit Profil
+      final editProfileFinder = find.text('Edit Profil');
+      expect(editProfileFinder, findsOneWidget);
+      expect(find.text('Perbarui informasi profil Anda'), findsOneWidget);
+      
+      // Tap menu Edit Profil
+      await tester.tap(editProfileFinder);
+      await tester.pumpAndSettle();
+
+      // Verifikasi navigasi ke halaman edit profil
+      expect(find.text('Edit Profile Page'), findsOneWidget);
+      
+      // Verifikasi navigasi terobservasi
+      verify(mockNavigatorObserver.didPush(any, any));
+    });
+    
+    testWidgets('Cek interaksi dengan menu lain (Laporkan Bug)',
+        (WidgetTester tester) async {
+      // Setup user data dan service
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+      when(mockBugReportService.setUserData(any)).thenAnswer((_) async => true);
+      when(mockBugReportService.show()).thenAnswer((_) async => true);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Temukan dan scroll ke menu Laporkan Bug
+      final bugReportFinder = find.text('Laporkan Bug');
+      await tester.dragUntilVisible(
+        bugReportFinder,
+        find.byType(SingleChildScrollView),
+        const Offset(0, -200),
+      );
+      expect(bugReportFinder, findsOneWidget);
+
+      // Verifikasi subtitle menu
+      expect(find.text('Bantu kami meningkatkan aplikasi'), findsOneWidget);
+      
+      // Tap menu Laporkan Bug
+      await tester.tap(bugReportFinder);
+      await tester.pumpAndSettle();
+
+      // Verifikasi metode yang dipanggil
+      verify(mockBugReportService.setUserData(testUser)).called(1);
+      verify(mockBugReportService.show()).called(1);
     });
   });
 }

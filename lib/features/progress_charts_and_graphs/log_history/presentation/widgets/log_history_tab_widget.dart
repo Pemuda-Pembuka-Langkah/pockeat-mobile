@@ -1,7 +1,4 @@
-// Flutter imports:
 import 'package:flutter/material.dart';
-
-// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 
 class LogHistoryTabWidget extends StatelessWidget {

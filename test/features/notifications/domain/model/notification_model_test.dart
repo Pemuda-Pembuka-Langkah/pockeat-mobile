@@ -17,6 +17,7 @@ void main() {
         payload: 'test_payload',
         scheduledTime: testTime,
         isRead: true,
+        imageUrl: 'https://example.com/pet_sad.png',
       );
       
       expect(notification.id, 'test-id');
@@ -25,6 +26,7 @@ void main() {
       expect(notification.payload, 'test_payload');
       expect(notification.scheduledTime, testTime);
       expect(notification.isRead, true);
+      expect(notification.imageUrl, 'https://example.com/pet_sad.png');
     });
     
     test('should create a NotificationModel with generated id when not provided', () {
@@ -41,6 +43,7 @@ void main() {
       expect(notification.payload, isNull);
       expect(notification.scheduledTime, testTime);
       expect(notification.isRead, false);
+      expect(notification.imageUrl, isNull);
     });
     
     test('should create daily calorie reminder notification', () {
@@ -67,16 +70,19 @@ void main() {
         payload: 'original_payload',
         scheduledTime: testTime,
         isRead: false,
+        imageUrl: 'https://example.com/original.png',
       );
       
       final updated = original.copyWith(
         title: 'Updated Title',
         isRead: true,
+        imageUrl: 'https://example.com/updated.png',
       );
       
       // Memastikan nilai yang diperbarui sudah berubah
       expect(updated.title, 'Updated Title');
       expect(updated.isRead, true);
+      expect(updated.imageUrl, 'https://example.com/updated.png');
       
       // Memastikan nilai yang tidak diperbarui tetap sama
       expect(updated.id, 'original-id');
@@ -87,6 +93,7 @@ void main() {
       // Memastikan objek asli tidak dimodifikasi (immutability)
       expect(original.title, 'Original Title');
       expect(original.isRead, false);
+      expect(original.imageUrl, 'https://example.com/original.png');
     });
     
     test('should convert to and from map', () {
@@ -97,6 +104,7 @@ void main() {
         payload: 'map_test',
         scheduledTime: testTime,
         isRead: true,
+        imageUrl: 'https://example.com/pet.png',
       );
       
       final map = original.toMap();
@@ -108,9 +116,10 @@ void main() {
       expect(fromMap.payload, original.payload);
       expect(fromMap.scheduledTime.millisecondsSinceEpoch, original.scheduledTime.millisecondsSinceEpoch);
       expect(fromMap.isRead, original.isRead);
+      expect(fromMap.imageUrl, original.imageUrl);
     });
     
-    test('should handle null payload in toMap and fromMap', () {
+    test('should handle null payload and imageUrl in toMap and fromMap', () {
       final original = NotificationModel(
         id: 'null-payload-id',
         title: 'Null Payload Test',
@@ -118,12 +127,14 @@ void main() {
         payload: null,
         scheduledTime: testTime,
         isRead: false,
+        imageUrl: null,
       );
       
       final map = original.toMap();
       final fromMap = NotificationModel.fromMap(map);
       
       expect(fromMap.payload, isNull);
+      expect(fromMap.imageUrl, isNull);
     });
     
     test('should handle default isRead value in fromMap', () {
@@ -134,11 +145,13 @@ void main() {
         'payload': 'test_payload',
         'scheduledTime': testTime.millisecondsSinceEpoch,
         // isRead tidak ada di map
+        'imageUrl': 'https://example.com/default.png',
       };
       
       final fromMap = NotificationModel.fromMap(map);
       
       expect(fromMap.isRead, false); // Memastikan nilai default false digunakan
+      expect(fromMap.imageUrl, 'https://example.com/default.png');
     });
     
     test('copyWith should preserve values when called without parameters', () {
@@ -150,6 +163,7 @@ void main() {
         payload: 'test_payload',
         scheduledTime: testTime,
         isRead: false,
+        imageUrl: 'https://example.com/test.png',
       );
       
       // Act
@@ -162,6 +176,7 @@ void main() {
       expect(copied.payload, 'test_payload');
       expect(copied.scheduledTime, testTime);
       expect(copied.isRead, false);
+      expect(copied.imageUrl, 'https://example.com/test.png');
       expect(identical(original, copied), isFalse); // Memastikan objek berbeda
     });
     
