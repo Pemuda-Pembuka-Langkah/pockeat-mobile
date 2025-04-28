@@ -1,6 +1,4 @@
-// lib/features/homepage/presentation/widgets/pet_homepage_section.dart
-
-// Flutter imports:
+// lib/features/homepage/presentation/screens/pet_homepage_section.dart
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -13,6 +11,8 @@ import 'package:pockeat/features/homepage/presentation/widgets/heart_bar_widget.
 import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
+import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 
 class PetHomepageSection extends StatefulWidget {
   final String petName;
@@ -30,12 +30,16 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
   final PetService _petService = GetIt.instance<PetService>();
   final FoodLogHistoryService _foodLogHistoryService =
       GetIt.instance<FoodLogHistoryService>();
+  final CalorieStatsService _calorieStatsService = 
+      GetIt.instance<CalorieStatsService>();
 
+  static const int _goalCalories = 2000;
   final userId = GetIt.instance<FirebaseAuth>().currentUser?.uid ?? '';
 
   late Future<String> _petMood;
   late Future<int> _dayStreak;
   late Future<int> _petHeart;
+  late Future<DailyCalorieStats> _statsFuture;
 
   @override
   void initState() {
@@ -43,6 +47,7 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
     _petMood = _petService.getPetMood(userId);
     _dayStreak = _foodLogHistoryService.getFoodStreakDays(userId);
     _petHeart = _petService.getPetHeart(userId);
+    _statsFuture = _calorieStatsService.calculateStatsForDate(userId, DateTime.now());
   }
 
   @override
@@ -66,27 +71,33 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
           ),
           const SizedBox(height: 24),
 
-          // Bagian Peliharaan
-          // Menggunakan FutureBuilder untuk menangani state loading
+          // Pet Companion Widget
           Center(
-            child: FutureBuilder<String>(
-              future: _petMood,
+            child: FutureBuilder<List<dynamic>>(
+              future: Future.wait([_petMood, _statsFuture]),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  // Tampilkan loading indicator selama menunggu data
                   return const CircularProgressIndicator();
                 } else if (snapshot.hasError) {
-                  // Tampilkan pesan error jika terjadi kesalahan
                   return Text('Error: ${snapshot.error}');
                 } else {
-                  // Data sudah tersedia, tentukan image path berdasarkan mood
-                  final String imagePath = snapshot.data == 'happy'
+                  // Data is available
+                  final String mood = snapshot.data![0] as String;
+                  final DailyCalorieStats stats = snapshot.data![1] as DailyCalorieStats;
+                  
+                  // Calculate calorie progress percentage
+                  final consumed = stats.caloriesConsumed;
+                  final progress = (consumed / _goalCalories).clamp(0.0, 1.0);
+                  
+                  // Determine image path based on mood
+                  final String imagePath = mood == 'happy'
                       ? 'assets/images/panda_happy.json'
                       : 'assets/images/panda_sad.json';
 
                   return PetCompanionWidget(
                     petName: widget.petName,
                     petImagePath: imagePath,
+                    calorieProgress: progress,
                   );
                 }
               },

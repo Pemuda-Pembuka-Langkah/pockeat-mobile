@@ -6,14 +6,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
+import 'package:pockeat/features/calorie_stats/domain/repositories/calorie_stats_repository.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
+import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
+import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
+import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service_impl.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service_impl.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
@@ -23,6 +32,11 @@ import 'package:pockeat/features/home_screen_widget/services/impl/default_calori
 import 'package:pockeat/features/home_screen_widget/services/impl/default_nutrient_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/detailed_food_tracking_widget_service.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/simple_food_tracking_widget_service.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
+import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
 
 // coverage:ignore-start
 /// Service for setting up dependencies needed by background tasks
@@ -98,10 +112,50 @@ class BackgroundDependencyService {
       services['foodScanRepository'] = FoodScanRepository();
 
       // Food log history service for streak calculation
-      services['foodLogHistoryService'] = FoodLogHistoryServiceImpl(
+      final foodLogHistoryService = FoodLogHistoryServiceImpl(
         foodScanRepository:
             services['foodScanRepository'] as FoodScanRepository,
       );
+      services['foodLogHistoryService'] = foodLogHistoryService;
+      GetIt.instance.registerSingleton<FoodLogHistoryService>(foodLogHistoryService);
+      
+      // Get Firestore instance for repositories
+      final firestore = FirebaseFirestore.instance;
+      services['firestore'] = firestore;
+      
+      // Register repositories needed by ExerciseLogHistoryService
+      final smartExerciseLogRepository = SmartExerciseLogRepositoryImpl(firestore: firestore);
+      services['smartExerciseLogRepository'] = smartExerciseLogRepository;
+      GetIt.instance.registerSingleton<SmartExerciseLogRepository>(smartExerciseLogRepository);
+      
+      final cardioRepository = CardioRepositoryImpl(firestore: firestore);
+      services['cardioRepository'] = cardioRepository;
+      GetIt.instance.registerSingleton<CardioRepository>(cardioRepository);
+      
+      final weightLiftingRepository = WeightLiftingRepositoryImpl(firestore: firestore);
+      services['weightLiftingRepository'] = weightLiftingRepository;
+      GetIt.instance.registerSingleton<WeightLiftingRepository>(weightLiftingRepository);
+      
+      // Create exercise log service required for CalorieStatsService
+      final exerciseService = ExerciseLogHistoryServiceImpl();
+      services['exerciseLogHistoryService'] = exerciseService;
+      GetIt.instance.registerSingleton<ExerciseLogHistoryService>(exerciseService);
+      
+      // Create CalorieStatsRepository
+      final calorieStatsRepository = CalorieStatsRepositoryImpl();
+      services['calorieStatsRepository'] = calorieStatsRepository;
+      
+      // Create CalorieStatsService required for PetService
+      final calorieStatsService = CalorieStatsServiceImpl(
+        repository: calorieStatsRepository,
+        exerciseService: exerciseService,
+        foodService: foodLogHistoryService
+      );
+      services['calorieStatsService'] = calorieStatsService;
+      GetIt.instance.registerSingleton<CalorieStatsService>(calorieStatsService);
+      
+      // Now we can create the real PetService since all dependencies are registered
+      services['petService'] = PetServiceImpl();
 
       // Flutter local notifications plugin
       services['flutterLocalNotificationsPlugin'] =
@@ -145,5 +199,7 @@ class BackgroundDependencyService {
     }
   }
 }
+
+
 
 // coverage:ignore-end
