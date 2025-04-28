@@ -11,25 +11,34 @@ class FoodLogDataService {
   FoodLogDataService({required FoodLogHistoryService foodLogService}) 
     : _foodLogService = foodLogService;
   
-  // Get calorie data for the current week
-  Future<List<CalorieData>> getWeekCalorieData() async {
+  // Get calorie data for a specific week (current week by default)
+  Future<List<CalorieData>> getWeekCalorieData({int weeksAgo = 0}) async {
     try {
-      // Get the date range for current week (Sunday to Saturday)
+      // Get the date range for the requested week (Sunday to Saturday)
       final now = DateTime.now();
-      final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+      final currentStartOfWeek = now.subtract(Duration(days: now.weekday % 7));
       
-      final startDate = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+      // Calculate start date for the requested week (going back weeksAgo weeks)
+      final startDate = DateTime(
+        currentStartOfWeek.year, 
+        currentStartOfWeek.month, 
+        currentStartOfWeek.day - (7 * weeksAgo)
+      );
+      
+      final endDate = startDate.add(const Duration(days: 7));
+      
+      debugPrint('Fetching data for week starting ${startDate.toString()} to ${endDate.toString()}');
       
       // Get user ID from Firebase Auth
       final userId = await _getUserId();
       
-      // Fetch food log entries for the current week (limit to 100 to ensure we have enough data)
+      // Fetch food log entries (limit to 100 to ensure we have enough data)
       final foodLogs = await _foodLogService.getAllFoodLogs(userId, limit: 100);
       
-      // Filter logs for the current week
-      final weekLogs = _filterLogsForCurrentWeek(foodLogs, startDate);
+      // Filter logs for the requested week
+      final weekLogs = _filterLogsForSpecificWeek(foodLogs, startDate, endDate);
       
-      debugPrint('Found ${weekLogs.length} food logs for current week');
+      debugPrint('Found ${weekLogs.length} food logs for week (${weeksAgo} weeks ago)');
       
       // Debug print each food log
       for (var log in weekLogs) {
@@ -41,7 +50,7 @@ class FoodLogDataService {
       // Group entries by day and calculate macronutrient totals
       return _processLogsToCalorieData(weekLogs, startDate);
     } catch (e) {
-      debugPrint('Error fetching week calorie data: $e');
+      debugPrint('Error fetching week calorie data (${weeksAgo} weeks ago): $e');
       return _getDefaultWeekData();
     }
   }
@@ -51,14 +60,20 @@ class FoodLogDataService {
     return dayNames[date.weekday % 7];
   }
   
-  // Filter logs for the current week
-  List<FoodLogHistoryItem> _filterLogsForCurrentWeek(
-      List<FoodLogHistoryItem> logs, DateTime startDate) {
-    final endDate = startDate.add(const Duration(days: 7));
+  // Filter logs for a specific week
+  List<FoodLogHistoryItem> _filterLogsForSpecificWeek(
+      List<FoodLogHistoryItem> logs, DateTime startDate, DateTime endDate) {
     return logs.where((log) {
       return log.timestamp.isAfter(startDate) && 
              log.timestamp.isBefore(endDate);
     }).toList();
+  }
+  
+  // Filter logs for the current week (legacy method kept for compatibility)
+  List<FoodLogHistoryItem> _filterLogsForCurrentWeek(
+      List<FoodLogHistoryItem> logs, DateTime startDate) {
+    final endDate = startDate.add(const Duration(days: 7));
+    return _filterLogsForSpecificWeek(logs, startDate, endDate);
   }
   
   // Get calorie data for current month (grouped by weeks)
@@ -219,6 +234,7 @@ class FoodLogDataService {
         weeklyMacros[i]!['protein'] ?? 0,
         weeklyMacros[i]!['carbs'] ?? 0,
         weeklyMacros[i]!['fats'] ?? 0,
+        weeklyCalories[i] ?? 0,
       ));
     }
     
