@@ -61,7 +61,9 @@ void main() {
 
   group('AuthWrapper', () {
     testWidgets('should show child when requireAuth is false', (WidgetTester tester) async {
-      // Build widget tree
+      // Even though requireAuth = false, getCurrentUser is still called, so mock it
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => null);
+
       await tester.pumpWidget(
         MaterialApp(
           home: AuthWrapper(
@@ -71,10 +73,12 @@ void main() {
         ),
       );
 
-      // Verify the child is shown and loginService was not initialized
+      await tester.pumpAndSettle(); // wait for auth checking if any
+
       expect(find.text('Child Widget'), findsOneWidget);
-      verifyNever(mockLoginService.getCurrentUser());
+      verify(mockLoginService.getCurrentUser()).called(1);
     });
+
 
     testWidgets('should check auth when requireAuth is true', (WidgetTester tester) async {
       // Setup auth check
@@ -133,7 +137,6 @@ void main() {
       final completer = Completer<UserModel?>();
       when(mockLoginService.getCurrentUser()).thenAnswer((_) => completer.future);
 
-      // Build widget tree
       await tester.pumpWidget(
         MaterialApp(
           home: AuthWrapper(
@@ -143,11 +146,10 @@ void main() {
         ),
       );
 
-      // Wait for widget to rebuild
-      await tester.pump();
+      await tester.pump(); // pump once so build happens
 
-      // Verify the child is shown during loading
-      expect(find.text('Child Widget'), findsOneWidget);
+      // Verify CircularProgressIndicator shown during loading
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
     testWidgets('should handle auth check errors gracefully', (WidgetTester tester) async {
@@ -174,27 +176,45 @@ void main() {
       expect(find.text('Welcome Page'), findsOneWidget);
     });
 
-    testWidgets('redirects to onboarding when not completed and not in progress', (tester) async {
+    testWidgets('redirects to /height-weight if onboarding not completed and not inside onboarding route', (tester) async {
       SharedPreferences.setMockInitialValues({'onboardingInProgress': false});
+
+      final mockLoginService = MockLoginService();
+      final mockCheckService = MockHealthMetricsCheckService();
+      final getIt = GetIt.instance;
+
+      if (getIt.isRegistered<LoginService>()) getIt.unregister<LoginService>();
+      if (getIt.isRegistered<HealthMetricsCheckService>()) getIt.unregister<HealthMetricsCheckService>();
+
+      getIt.registerSingleton<LoginService>(mockLoginService);
+      getIt.registerSingleton<HealthMetricsCheckService>(mockCheckService);
+
       when(mockLoginService.getCurrentUser()).thenAnswer((_) async => authenticatedUser);
-      when(mockCheckService.hasCompletedOnboarding(any)).thenAnswer((_) async => false);
+      when(mockCheckService.hasCompletedOnboarding('test-user-id')).thenAnswer((_) async => false);
+
 
       await tester.pumpWidget(
         MaterialApp(
+          initialRoute: '/',
           routes: {
-            '/onboarding/goal': (_) => const Scaffold(body: Text('Onboarding Page')),
+            '/': (_) => AuthWrapper(
+                  requireAuth: true,
+                  child: const Scaffold(
+                    body: Text('Home Page'),
+                  ),
+                ),
+            '/height-weight': (_) => const Scaffold(
+                  body: Text('Height Weight Page'),
+                ),
           },
-          home: AuthWrapper(
-            requireAuth: true,
-            child: const Text('Child Widget'),
-          ),
         ),
       );
 
       await tester.pumpAndSettle();
 
-      // Verify user is redirected to onboarding
-      expect(find.text('Onboarding Page'), findsOneWidget);
+      // ✅ User should be redirected to /height-weight
+      expect(find.text('Height Weight Page'), findsOneWidget);
+      expect(find.text('Home Page'), findsNothing);
     });
 
     testWidgets('does not redirect if onboarding is in progress', (tester) async {

@@ -1,3 +1,5 @@
+// goal_obstacle_page.dart
+
 // ignore_for_file: use_build_context_synchronously
 
 // Flutter imports:
@@ -10,14 +12,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Project imports:
 import 'form_cubit.dart';
 
-class GenderPage extends StatelessWidget {
-  const GenderPage({super.key});
+/// A page that asks users what obstacles they face in reaching their goals.
+class GoalObstaclePage extends StatelessWidget {
+  const GoalObstaclePage({super.key});
 
-  static final List<String> genderOptions = [
-    "Male",
-    "Female",
+  /// Predefined obstacles users might face.
+  static final List<String> obstacles = [
+    "Lack of Time",
+    "Lack of Motivation",
+    "Not Sure Where to Start",
+    "Unhealthy Eating Habits",
+    "Inconsistent Exercise",
+    "Stress or Mental Health",
+    "Other",
   ];
 
+  /// Theme colors.
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
 
@@ -42,7 +52,7 @@ class GenderPage extends StatelessWidget {
           },
         ),
         title: const Text(
-          "Your Gender",
+          "What's Stopping You?",
           style: TextStyle(
             color: Colors.black87,
             fontSize: 18,
@@ -52,23 +62,24 @@ class GenderPage extends StatelessWidget {
       ),
       body: BlocBuilder<HealthMetricsFormCubit, HealthMetricsFormState>(
         builder: (context, state) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "What is your gender?",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    height: 1.3,
-                    color: Colors.black87,
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "What's been your biggest challenge?",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: Container(
+                  const SizedBox(height: 24),
+
+                  Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -83,37 +94,38 @@ class GenderPage extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        for (final option in genderOptions)
-                          _buildGenderOption(
+                        for (final obstacle in obstacles)
+                          _buildObstacleOption(
                             context,
-                            option,
-                            selected: state.gender == option,
+                            obstacle,
+                            selected: state.dietType == obstacle, // Reusing dietType field here
                           ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black87,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: state.gender != null
-                      ? () async {
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.setBool('onboardingInProgress', true);
 
-                          Navigator.pushNamed(context, '/desired-weight');
-                        }
-                      : null,
-                  child: const Center(child: Text("Next")),
-                ),
-              ],
+                  const SizedBox(height: 24),
+
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black87,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: state.dietType != null
+                        ? () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setBool('onboardingInProgress', true);
+                            Navigator.pushNamed(context, '/diet'); // ← Adjust this
+                          }
+                        : null,
+                    child: const Center(child: Text("Next")),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -121,8 +133,12 @@ class GenderPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGenderOption(BuildContext context, String label,
-      {required bool selected}) {
+  /// Builds a single obstacle option card.
+  Widget _buildObstacleOption(
+    BuildContext context,
+    String value, {
+    required bool selected,
+  }) {
     final cubit = context.read<HealthMetricsFormCubit>();
 
     return Padding(
@@ -131,7 +147,7 @@ class GenderPage extends StatelessWidget {
         color: selected ? primaryPink.withOpacity(0.1) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          onTap: () => cubit.setGender(label),
+          onTap: () => cubit.setDietType(value), // Using dietType field for obstacles
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.all(16),
@@ -151,9 +167,10 @@ class GenderPage extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    label,
+                    value,
                     style: const TextStyle(
                       fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
                   ),

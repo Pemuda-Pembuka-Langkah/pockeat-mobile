@@ -71,21 +71,33 @@ void main() {
     expect(nextButton.onPressed, isNull);
   });
 
-  testWidgets('navigates to next page when gender is selected and Next tapped',
-      (tester) async {
-    // Set a gender in the cubit's state
-    final updatedState = HealthMetricsFormState(gender: 'Female');
-    when(mockCubit.state).thenReturn(updatedState);
-    when(mockCubit.stream).thenAnswer((_) => Stream.value(updatedState));
+  testWidgets('navigates to next page when gender is selected and Next tapped', (tester) async {
+      // Set a gender in the cubit's state
+      final updatedState = HealthMetricsFormState(gender: 'Female');
+      when(mockCubit.state).thenReturn(updatedState);
+      when(mockCubit.stream).thenAnswer((_) => Stream.value(updatedState));
 
-    SharedPreferences.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({});
 
-    await tester.pumpWidget(buildTestableWidget());
-    await tester.pump(); // needed after changing state
+      await tester.pumpWidget(
+        MaterialApp(
+          routes: {
+            '/desired-weight': (_) => const Scaffold(body: Text('Desired Weight Page')),
+          },
+          home: BlocProvider<HealthMetricsFormCubit>.value(
+            value: mockCubit,
+            child: const GenderPage(),
+          ),
+        ),
+      );
 
-    await tester.tap(find.text('Next'));
-    await tester.pumpAndSettle();
+      await tester.pump(); // needed after changing state
 
-    expect(find.text('Activity Level Page'), findsOneWidget);
-  });
+      // Tap the Next button
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+
+      // Should navigate to Desired Weight Page
+      expect(find.text('Desired Weight Page'), findsOneWidget);
+    });
 }
