@@ -1,7 +1,9 @@
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -76,7 +78,6 @@ class BackgroundDependencyService {
   static Future<void> setupNotificationDependencies(
       Map<String, dynamic> services) async {
     try {
-
       // Set up the bare minimum services needed for the notification task
       final prefs = await SharedPreferences.getInstance();
       services['sharedPreferences'] = prefs;
@@ -114,7 +115,6 @@ class BackgroundDependencyService {
   static Future<void> setupWidgetDependencies(
       Map<String, dynamic> services) async {
     try {
-
       // Widget services for home screen widgets
       services['simpleWidgetService'] = SimpleFoodTrackingWidgetService(
         widgetName: HomeWidgetConfig.simpleWidgetName.value,
@@ -140,7 +140,6 @@ class BackgroundDependencyService {
       } catch (e) {
         debugPrint('Failed to get some GetIt services: $e');
       }
-
     } catch (e) {
       debugPrint('Failed to setup widget dependencies: $e');
     }

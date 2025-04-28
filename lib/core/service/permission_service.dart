@@ -22,13 +22,13 @@ class PermissionService {
   /// Request all needed permissions for the app
   Future<void> requestAllPermissions() async {
     debugPrint('Requesting all permissions...');
-    
+
     // Request notification permissions (via FCM dan permission_handler)
     await requestNotificationPermissions();
-    
+
     // Request battery optimization exemption
     await requestBatteryOptimizationExemption();
-    
+
     // Add other permission requests here as needed
     // e.g., storage, location, etc.
   }
@@ -36,7 +36,7 @@ class PermissionService {
   /// Request notification permissions specifically using FCM and permission_handler
   Future<void> requestNotificationPermissions() async {
     debugPrint('Requesting notification permissions...');
-    
+
     if (Platform.isAndroid) {
       try {
         // Request via FirebaseMessaging
@@ -45,9 +45,10 @@ class PermissionService {
           badge: true,
           sound: true,
         );
-        
-        debugPrint('User FCM notification permission status: ${settings.authorizationStatus}');
-        
+
+        debugPrint(
+            'User FCM notification permission status: ${settings.authorizationStatus}');
+
         // Also request via permission_handler for Android
         final status = await Permission.notification.request();
         debugPrint('User permission_handler notification status: $status');
@@ -56,11 +57,11 @@ class PermissionService {
       }
     }
   }
-  
+
   /// Request battery optimization exemption for background services
   Future<void> requestBatteryOptimizationExemption() async {
     debugPrint('Requesting battery optimization exemption...');
-    
+
     if (Platform.isAndroid) {
       try {
         // Check current status
@@ -76,7 +77,7 @@ class PermissionService {
       }
     }
   }
-  
+
   /// Check if battery optimization exemption is granted
   Future<bool> isBatteryOptimizationExemptionGranted() async {
     if (Platform.isAndroid) {

@@ -1,14 +1,16 @@
+// Package imports:
+import 'package:get_it/get_it.dart';
 
+// Project imports:
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
-import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 
 class PetServiceImpl implements PetService {
   final GetIt _getIt = GetIt.instance;
   late final FoodLogHistoryService foodLogHistoryService;
   late final CalorieStatsService calorieStatsService;
-  
+
   PetServiceImpl() {
     foodLogHistoryService = _getIt<FoodLogHistoryService>();
     calorieStatsService = _getIt<CalorieStatsService>();
@@ -16,9 +18,10 @@ class PetServiceImpl implements PetService {
 
   @override
   Future<String> getPetMood(String userId) async {
-
-    final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-    final isLogToday = await foodLogHistoryService.getFoodLogsByDate(userId, today);
+    final today =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final isLogToday =
+        await foodLogHistoryService.getFoodLogsByDate(userId, today);
 
     if (isLogToday.isNotEmpty) {
       return 'happy';
@@ -29,13 +32,13 @@ class PetServiceImpl implements PetService {
 
   @override
   Future<int> getPetHeart(String userId) async {
-
-    final stats = await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+    final stats =
+        await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
 
     const targetCalories = 2000; // static for now
 
     final percentage = stats.caloriesConsumed / targetCalories;
-    
+
     if (percentage > 0.75) {
       return 4;
     } else if (percentage > 0.5) {
@@ -49,4 +52,3 @@ class PetServiceImpl implements PetService {
     }
   }
 }
-

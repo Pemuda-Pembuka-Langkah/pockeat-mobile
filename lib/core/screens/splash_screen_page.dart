@@ -63,7 +63,7 @@ class _SplashScreenPageState extends State<SplashScreenPage>
     if (!mounted) return;
 
     Navigator.of(context).pushReplacementNamed('/');
-  }
+      }
 
   @override
   Widget build(BuildContext context) {

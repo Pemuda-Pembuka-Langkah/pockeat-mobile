@@ -48,8 +48,18 @@ class NotificationChannels {
   static const AndroidNotificationChannel dailyStreak =
       AndroidNotificationChannel(
     NotificationConstants.dailyStreakChannelId,
-    'Pengingat Streak Harian',
-    description: 'Channel untuk pengingat streak harian',
+    'Streak Harian',
+    description: 'Channel untuk mengirim notifikasi tentang streak pola makan',
+    importance: Importance.high,
+  );
+
+  /// Pet sadness notifications when user is inactive
+  static const AndroidNotificationChannel petSadness =
+      AndroidNotificationChannel(
+    NotificationConstants.petSadnessChannelId,
+    'Pet Sadness Alerts',
+    description:
+        'Notifikasi saat pet kamu sedih karena tidak melihatmu dalam waktu lama',
     importance: Importance.high,
   );
 
