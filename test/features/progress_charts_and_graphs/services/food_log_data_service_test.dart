@@ -43,29 +43,36 @@ class TestFoodLogDataService extends FoodLogDataService {
     return user.uid;
   }
   
-  // Override the main methods we are testing to avoid Firebase calls
+  // Override the method with the weeksAgo parameter
   @override
-  Future<List<CalorieData>> getWeekCalorieData() async {
+  Future<List<CalorieData>> getWeekCalorieData({int weeksAgo = 0}) async {
     try {
-      // Get the date range for current week (Sunday to Saturday)
+      // Get the date range for the requested week (Sunday to Saturday)
       final now = DateTime.now();
-      final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+      final currentStartOfWeek = now.subtract(Duration(days: now.weekday % 7));
       
-      final startDate = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+      // Calculate start date for the requested week (going back weeksAgo weeks)
+      final startDate = DateTime(
+        currentStartOfWeek.year, 
+        currentStartOfWeek.month, 
+        currentStartOfWeek.day - (7 * weeksAgo)
+      );
+      
+      final endDate = startDate.add(const Duration(days: 7));
       
       // Get user ID from our mocked auth
       final userId = await _getUserId();
       
-      // Fetch food log entries for the current week
+      // Fetch food log entries for the specified week
       final foodLogs = await foodLogService.getAllFoodLogs(userId, limit: 100);
       
-      // Filter logs for the current week
-      final weekLogs = filterLogsForCurrentWeek(foodLogs, startDate);
+      // Filter logs for the specific week
+      final weekLogs = filterLogsForSpecificWeek(foodLogs, startDate, endDate);
       
       // Group entries by day and calculate macronutrient totals
       return processLogsToCalorieData(weekLogs, startDate);
     } catch (e) {
-      debugPrint('Error fetching week calorie data: $e');
+      debugPrint('Error fetching week calorie data ($weeksAgo weeks ago): $e');
       return getDefaultWeekData();
     }
   }
@@ -180,18 +187,20 @@ class TestFoodLogDataService extends FoodLogDataService {
         weeklyMacros[i]!['protein'] ?? 0,
         weeklyMacros[i]!['carbs'] ?? 0,
         weeklyMacros[i]!['fats'] ?? 0,
-        weeklyCalories[i] ?? 0, // Include calories in the result
+        weeklyCalories[i] ?? 0,
       ));
     }
     
     return result;
   }
   
-  // Helper methods without @override annotation
-  List<FoodLogHistoryItem> filterLogsForCurrentWeek(List<FoodLogHistoryItem> logs, DateTime startDate) {
-    final endDate = startDate.add(const Duration(days: 7));
+  // Helper methods for filtering logs
+  List<FoodLogHistoryItem> filterLogsForSpecificWeek(
+      List<FoodLogHistoryItem> logs, DateTime startDate, DateTime endDate) {
     return logs.where((log) {
-      return log.timestamp.isAfter(startDate) && 
+      // The problem is likely here - we need to make sure we're correctly filtering by date range
+      // Make sure timestamps are properly compared, allowing for exact start date
+      return (log.timestamp.isAtSameMomentAs(startDate) || log.timestamp.isAfter(startDate)) && 
              log.timestamp.isBefore(endDate);
     }).toList();
   }
@@ -213,22 +222,22 @@ class TestFoodLogDataService extends FoodLogDataService {
   // Default data methods without @override annotation
   List<CalorieData> getDefaultWeekData() {
     return [
-      CalorieData('Sun', 0, 0, 0, 0),
-      CalorieData('Mon', 0, 0, 0, 0),
-      CalorieData('Tue', 0, 0, 0, 0),
-      CalorieData('Wed', 0, 0, 0, 0),
-      CalorieData('Thu', 0, 0, 0, 0),
-      CalorieData('Fri', 0, 0, 0, 0),
-      CalorieData('Sat', 0, 0, 0, 0),
+      CalorieData('Sun', 0.0, 0.0, 0.0, 0.0),
+      CalorieData('Mon', 0.0, 0.0, 0.0, 0.0),
+      CalorieData('Tue', 0.0, 0.0, 0.0, 0.0),
+      CalorieData('Wed', 0.0, 0.0, 0.0, 0.0),
+      CalorieData('Thu', 0.0, 0.0, 0.0, 0.0),
+      CalorieData('Fri', 0.0, 0.0, 0.0, 0.0),
+      CalorieData('Sat', 0.0, 0.0, 0.0, 0.0),
     ];
   }
   
   List<CalorieData> getDefaultMonthData() {
     return [
-      CalorieData('Week 1', 0, 0, 0, 0),
-      CalorieData('Week 2', 0, 0, 0, 0),
-      CalorieData('Week 3', 0, 0, 0, 0),
-      CalorieData('Week 4', 0, 0, 0, 0),
+      CalorieData('Week 1', 0.0, 0.0, 0.0, 0.0),
+      CalorieData('Week 2', 0.0, 0.0, 0.0, 0.0),
+      CalorieData('Week 3', 0.0, 0.0, 0.0, 0.0),
+      CalorieData('Week 4', 0.0, 0.0, 0.0, 0.0),
     ];
   }
 }
@@ -258,7 +267,7 @@ void main() {
 
   group('FoodLogDataService', () {
     group('getWeekCalorieData', () {
-      test('returns correctly processed data for current week', () async {
+      test('returns correctly processed data for current week (weeksAgo = 0)', () async {
         // Arrange
         final now = DateTime.now();
         final startOfWeek = now.subtract(Duration(days: now.weekday % 7));
@@ -284,6 +293,57 @@ void main() {
         
         // Verify the service called the history service
         verify(mockFoodLogService.getAllFoodLogs('test-user-id', limit: 100)).called(1);
+      });
+      
+      test('returns correctly processed data for past weeks based on weeksAgo parameter', () async {
+        // Arrange
+        final now = DateTime.now();
+        final currentStartOfWeek = now.subtract(Duration(days: now.weekday % 7));
+        
+        // Create food logs for different weeks
+        final currentWeekLogs = _createMockFoodLogs(currentStartOfWeek);
+        
+        // Create logs for 1 week ago with different values
+        final oneWeekAgo = DateTime(
+          currentStartOfWeek.year, 
+          currentStartOfWeek.month, 
+          currentStartOfWeek.day - 7
+        );
+        final pastWeekLogs = _createMockFoodLogsForPastWeek(oneWeekAgo, 2); // Higher values
+        
+        // Create logs for 2 weeks ago with different values
+        final twoWeeksAgo = DateTime(
+          currentStartOfWeek.year, 
+          currentStartOfWeek.month, 
+          currentStartOfWeek.day - 14
+        );
+        final twoWeeksPastLogs = _createMockFoodLogsForPastWeek(twoWeeksAgo, 3); // Even higher values
+        
+        // Combine all logs to simulate a database with logs from multiple weeks
+        final allLogs = [...currentWeekLogs, ...pastWeekLogs, ...twoWeeksPastLogs];
+        
+        when(mockFoodLogService.getAllFoodLogs('test-user-id', limit: 100))
+            .thenAnswer((_) async => allLogs);
+        
+        // Test for current week (weeksAgo = 0)
+        final currentWeekResult = await foodLogDataService.getWeekCalorieData(weeksAgo: 0);
+        expect(currentWeekResult.length, 7);
+        expect(currentWeekResult.firstWhere((data) => data.day == 'Sun').calories, 300.0);
+        
+        // Test for 1 week ago (weeksAgo = 1)
+        final oneWeekAgoResult = await foodLogDataService.getWeekCalorieData(weeksAgo: 1);
+        expect(oneWeekAgoResult.length, 7);
+        // Values should be doubled for week 1 based on our mock data
+        expect(oneWeekAgoResult.firstWhere((data) => data.day == 'Sun').calories, 600.0);
+        
+        // Test for 2 weeks ago (weeksAgo = 2)
+        final twoWeeksAgoResult = await foodLogDataService.getWeekCalorieData(weeksAgo: 2);
+        expect(twoWeeksAgoResult.length, 7);
+        // Values should be tripled for week 2 based on our mock data
+        expect(twoWeeksAgoResult.firstWhere((data) => data.day == 'Sun').calories, 900.0);
+        
+        // Verify the service called the history service 3 times
+        verify(mockFoodLogService.getAllFoodLogs('test-user-id', limit: 100)).called(3);
       });
       
       test('returns default data when exception occurs', () async {
@@ -383,9 +443,9 @@ void main() {
       test('calculates total calories correctly', () {
         // Arrange
         final calorieDataList = [
-          CalorieData('Day 1', 20, 30, 10, 300),
-          CalorieData('Day 2', 25, 35, 15, 400),
-          CalorieData('Day 3', 30, 40, 20, 500),
+          CalorieData('Day 1', 20.0, 30.0, 10.0, 300.0),
+          CalorieData('Day 2', 25.0, 35.0, 15.0, 400.0),
+          CalorieData('Day 3', 30.0, 40.0, 20.0, 500.0),
         ];
         
         // Act
@@ -412,30 +472,78 @@ void main() {
 // Helper methods to create mock data
 List<FoodLogHistoryItem> _createMockFoodLogs(DateTime startOfWeek) {
   return [
-    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 0)), 20, 30, 10, 300),        // Sunday
-    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 1)), 25, 35, 12, 350), // Monday
-    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 2)), 30, 40, 15, 400), // Tuesday
-    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 3)), 22, 33, 11, 320), // Wednesday
-    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 4)), 28, 38, 14, 390), // Thursday
-    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 5)), 24, 36, 12, 340), // Friday
-    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 6)), 26, 42, 13, 380), // Saturday
+    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 0)), 20.0, 30.0, 10.0, 300.0), // Sunday
+    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 1)), 25.0, 35.0, 12.0, 350.0), // Monday
+    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 2)), 30.0, 40.0, 15.0, 400.0), // Tuesday
+    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 3)), 22.0, 33.0, 11.0, 320.0), // Wednesday
+    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 4)), 28.0, 38.0, 14.0, 390.0), // Thursday
+    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 5)), 24.0, 36.0, 12.0, 340.0), // Friday
+    _createMockFoodLogItem(startOfWeek.add(const Duration(days: 6)), 26.0, 42.0, 13.0, 380.0), // Saturday
+  ];
+}
+
+// Helper method to create food logs for past weeks (with multiplier to make values distinct)
+List<FoodLogHistoryItem> _createMockFoodLogsForPastWeek(DateTime startOfWeek, int multiplier) {
+  return [
+    _createMockFoodLogItem(
+        startOfWeek.add(const Duration(days: 0)), 
+        20.0 * multiplier, 
+        30.0 * multiplier, 
+        10.0 * multiplier, 
+        300.0 * multiplier), // Sunday
+    _createMockFoodLogItem(
+        startOfWeek.add(const Duration(days: 1)), 
+        25.0 * multiplier, 
+        35.0 * multiplier, 
+        12.0 * multiplier, 
+        350.0 * multiplier), // Monday
+    _createMockFoodLogItem(
+        startOfWeek.add(const Duration(days: 2)), 
+        30.0 * multiplier, 
+        40.0 * multiplier, 
+        15.0 * multiplier, 
+        400.0 * multiplier), // Tuesday
+    _createMockFoodLogItem(
+        startOfWeek.add(const Duration(days: 3)), 
+        22.0 * multiplier, 
+        33.0 * multiplier, 
+        11.0 * multiplier, 
+        320.0 * multiplier), // Wednesday
+    _createMockFoodLogItem(
+        startOfWeek.add(const Duration(days: 4)), 
+        28.0 * multiplier, 
+        38.0 * multiplier, 
+        14.0 * multiplier, 
+        390.0 * multiplier), // Thursday
+    _createMockFoodLogItem(
+        startOfWeek.add(const Duration(days: 5)), 
+        24.0 * multiplier, 
+        36.0 * multiplier, 
+        12.0 * multiplier, 
+        340.0 * multiplier), // Friday
+    _createMockFoodLogItem(
+        startOfWeek.add(const Duration(days: 6)), 
+        26.0 * multiplier, 
+        42.0 * multiplier, 
+        13.0 * multiplier, 
+        380.0 * multiplier), // Saturday
   ];
 }
 
 List<FoodLogHistoryItem> _createMockFoodLogsForMonth(DateTime firstDayOfMonth) {
   return [
     // Week 1
-    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 1)), 20, 30, 10, 300),
-    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 3)), 20, 30, 10, 300),
+    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 1)), 20.0, 30.0, 10.0, 300.0),
+    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 3)), 20.0, 30.0, 10.0, 300.0),
     // Week 2
-    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 8)), 25, 35, 12, 350),
-    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 10)), 25, 35, 12, 350),
+    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 8)), 25.0, 35.0, 12.0, 350.0),
+    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 10)), 25.0, 35.0, 12.0, 350.0),
     // Week 3
-    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 15)), 30, 40, 15, 400),
-    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 17)), 30, 40, 15, 400),
+    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 15)), 30.0, 40.0, 15.0, 400.0),
+    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 17)), 30.0, 40.0, 15.0, 400.0),
     // Week 4
-    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 22)), 22, 33, 11, 320),
-    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 24)), 22, 33, 11, 320),
+    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 22)), 22.0, 33.0, 11.0, 320.0),
+    _createMockFoodLogItem(firstDayOfMonth.add(const Duration(days: 24)), 22.0, 33.0, 11.0, 320.0),
   ];
 }
 
