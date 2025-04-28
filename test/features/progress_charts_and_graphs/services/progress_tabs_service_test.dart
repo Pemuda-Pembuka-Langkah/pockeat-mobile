@@ -68,10 +68,8 @@ void main() {
         // Arrange
         final mockConfig = TabConfiguration(
           mainTabCount: 2,
-          progressTabCount: 3,
-          progressTabLabels: ['Weight', 'Nutrition', 'Exercise'],
-          logHistoryTabCount: 2,                       // Add this line
-          logHistoryTabLabels: ['Food', 'Exercise'],   // Add this line
+          logHistoryTabCount: 2,
+          logHistoryTabLabels: ['Food', 'Exercise'],
         );
         when(mockRepository.getTabConfiguration()).thenAnswer((_) async => mockConfig);
 
@@ -82,8 +80,8 @@ void main() {
         verify(mockRepository.getTabConfiguration()).called(1);
         expect(result, equals(mockConfig));
         expect(result.mainTabCount, equals(mockConfig.mainTabCount));
-        expect(result.progressTabCount, equals(mockConfig.progressTabCount));
-        expect(result.progressTabLabels, equals(mockConfig.progressTabLabels));
+        expect(result.logHistoryTabCount, equals(mockConfig.logHistoryTabCount));
+        expect(result.logHistoryTabLabels, equals(mockConfig.logHistoryTabLabels));
       });
 
       test('should propagate exceptions from repository', () async {

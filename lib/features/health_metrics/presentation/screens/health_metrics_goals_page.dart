@@ -126,7 +126,7 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> {
                           await prefs.setBool(
                               'onboardingInProgress', true); // ✅ set flag
                           if (!context.mounted) return;
-                          Navigator.pushNamed(context, '/height-weight');
+                          Navigator.pushNamed(context, '/activity-level');
                         }
                       : null,
                   child: const Center(child: Text("Next")),

@@ -1,3 +1,5 @@
+// health_metrics_repository_test.dart
+
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +9,7 @@ import 'package:mockito/mockito.dart';
 // Project imports:
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
+
 import 'health_metrics_repository_test.mocks.dart';
 
 @GenerateMocks([
@@ -31,6 +34,8 @@ void main() {
     gender: 'male',
     activityLevel: 'moderate',
     fitnessGoal: 'Maintain',
+    bmi: 23.1,
+    bmiCategory: 'Normal',
   );
 
   setUp(() {
@@ -49,15 +54,18 @@ void main() {
     expect(repository, isA<HealthMetricsRepositoryImpl>());
   });
 
-  test('saveHealthMetrics stores data with correct userId', () async {
+  test('saveHealthMetrics calls Firestore set with merge option', () async {
     await repository.saveHealthMetrics(testModel);
 
     verify(mockFirestore.collection('health_metrics')).called(1);
     verify(mockCollection.doc(userId)).called(1);
-    verify(mockDocumentRef.set(testModel.toMap(), any)).called(1);
+    verify(mockDocumentRef.set(
+        testModel.toMap(),
+        argThat(isA<SetOptions>()), // <<-- expect any SetOptions
+      )).called(1);
   });
 
-  test('getHealthMetrics returns a valid model if document exists', () async {
+  test('getHealthMetrics returns HealthMetricsModel when document exists', () async {
     when(mockDocumentRef.get()).thenAnswer((_) async => mockSnapshot);
     when(mockSnapshot.exists).thenReturn(true);
     when(mockSnapshot.data()).thenReturn(testModel.toMap());
@@ -65,17 +73,18 @@ void main() {
 
     final result = await repository.getHealthMetrics(userId);
 
+    expect(result, isNotNull);
     expect(result, isA<HealthMetricsModel>());
-    expect(result?.userId, equals(userId));
-    expect(result?.height, equals(180.0));
-    expect(result?.weight, equals(75.0));
-    expect(result?.age, equals(28));
-    expect(result?.gender, equals('male'));
-    expect(result?.activityLevel, equals('moderate'));
-    expect(result?.fitnessGoal, equals('Maintain'));
+    expect(result!.userId, userId);
+    expect(result.height, 180.0);
+    expect(result.weight, 75.0);
+    expect(result.age, 28);
+    expect(result.gender, 'male');
+    expect(result.activityLevel, 'moderate');
+    expect(result.fitnessGoal, 'Maintain');
   });
 
-  test('getHealthMetrics returns null if document does not exist', () async {
+  test('getHealthMetrics returns null when document does not exist', () async {
     when(mockDocumentRef.get()).thenAnswer((_) async => mockSnapshot);
     when(mockSnapshot.exists).thenReturn(false);
 
@@ -84,21 +93,25 @@ void main() {
     expect(result, isNull);
   });
 
-  test('saveHealthMetrics throws exception on Firestore failure', () async {
-    when(mockDocumentRef.set(any, any)).thenThrow(FirebaseException(
-      plugin: 'firestore',
-      message: 'Write error',
-    ));
+  test('saveHealthMetrics throws exception when Firestore write fails', () async {
+    when(mockDocumentRef.set(any, any)).thenThrow(
+      FirebaseException(plugin: 'firestore', message: 'Write error'),
+    );
 
-    expect(() => repository.saveHealthMetrics(testModel), throwsException);
+    expect(
+      () => repository.saveHealthMetrics(testModel),
+      throwsA(isA<Exception>()),
+    );
   });
 
-  test('getHealthMetrics throws exception on Firestore failure', () async {
-    when(mockDocumentRef.get()).thenThrow(FirebaseException(
-      plugin: 'firestore',
-      message: 'Read error',
-    ));
+  test('getHealthMetrics throws exception when Firestore read fails', () async {
+    when(mockDocumentRef.get()).thenThrow(
+      FirebaseException(plugin: 'firestore', message: 'Read error'),
+    );
 
-    expect(() => repository.getHealthMetrics(userId), throwsException);
+    expect(
+      () => repository.getHealthMetrics(userId),
+      throwsA(isA<Exception>()),
+    );
   });
 }

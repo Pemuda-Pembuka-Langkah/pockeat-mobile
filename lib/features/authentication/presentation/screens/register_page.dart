@@ -1,14 +1,18 @@
 // Flutter imports:
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Package imports:
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 // Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 
 /// Registration page for new users
 ///
@@ -68,76 +72,84 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  // Function to handle registration
+  /// Handles the registration process
   Future<void> _register() async {
-    // Close keyboard
-    FocusScope.of(context).unfocus();
+  FocusScope.of(context).unfocus();
 
-    // Validate form
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
 
-    // Validate terms and conditions
-    if (!_termsAccepted) {
-      setState(() {
-        _errorMessage = 'You must agree to the terms and conditions';
-      });
-      return;
-    }
+  if (!_formKey.currentState!.validate()) {
+    return;
+  }
+
+  if (!_termsAccepted) {
+    setState(() {
+      _errorMessage = 'You must agree to the terms and conditions';
+    });
+    return;
+  }
+
+  setState(() {
+    _isLoading = true;
+    _errorMessage = null;
+  });
+
+  try {
+    final result = await _registerService.register(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
+      termsAccepted: _termsAccepted,
+      displayName: _nameController.text.trim(),
+      birthDate: _selectedDate,
+      gender: _selectedGender,
+    );
+
 
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      _isLoading = false;
     });
 
-    try {
-      final result = await _registerService.register(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        confirmPassword: _confirmPasswordController.text,
-        termsAccepted: _termsAccepted,
-        displayName: _nameController.text.trim(),
-        birthDate: _selectedDate,
-        gender: _selectedGender,
-      );
+    if (result == RegisterResult.success) {
+
+      await _analyticsService.logSignUp(method: 'email');
+
+      final uid = GetIt.instance<FirebaseAuth>().currentUser?.uid;
+
+      if (uid != null && context.mounted) {
+        final formCubit = context.read<HealthMetricsFormCubit>();
+
+        formCubit.setUserId(uid);
+
+        await formCubit.submit();
+      }
 
       setState(() {
-        _isLoading = false;
+        _isRegistrationSuccess = true;
       });
 
-      if (result == RegisterResult.success) {
-        // Track signup event with analytics
-        await _analyticsService.logSignUp(method: 'email');
-
-        setState(() {
-          _isRegistrationSuccess = true;
-        });
-
-        // Show success message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                'Registration successful! Please verify your email.',
-              ),
-              backgroundColor: primaryGreen,
-            ),
-          );
-        }
-      } else {
-        // Show error message
-        setState(() {
-          _errorMessage = _getErrorMessage(result);
-        });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Registration successful! Please verify your email.'),
+            backgroundColor: primaryGreen,
+          ),
+        );
       }
-    } catch (e) {
+    } else {
+
       setState(() {
-        _isLoading = false;
-        _errorMessage = 'An error occurred. Please try again.';
+        _errorMessage = _getErrorMessage(result);
       });
     }
+  } catch (e, stacktrace) {
+
+    setState(() {
+      _isLoading = false;
+      _errorMessage = 'An error occurred. Please try again.';
+    });
   }
+}
+
 
   // Get error message based on registration result
   String _getErrorMessage(RegisterResult result) {

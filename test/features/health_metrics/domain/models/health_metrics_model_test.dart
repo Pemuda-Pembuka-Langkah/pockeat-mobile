@@ -1,3 +1,5 @@
+// health_metrics_model_test.dart
+
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,6 +31,8 @@ void main() {
         gender: 'male',
         activityLevel: 'moderate',
         fitnessGoal: 'Lose weight',
+        bmi: 23.7,
+        bmiCategory: 'Normal',
       );
 
       expect(metrics.userId, equals('test-uid'));
@@ -38,6 +42,8 @@ void main() {
       expect(metrics.gender, equals('male'));
       expect(metrics.activityLevel, equals('moderate'));
       expect(metrics.fitnessGoal, equals('Lose weight'));
+      expect(metrics.bmi, equals(23.7));
+      expect(metrics.bmiCategory, equals('Normal'));
     });
 
     test('toMap should convert HealthMetricsModel to a Map', () {
@@ -49,6 +55,8 @@ void main() {
         gender: 'female',
         activityLevel: 'active',
         fitnessGoal: 'Lose weight',
+        bmi: 22.5,
+        bmiCategory: 'Normal',
       );
 
       final map = metrics.toMap();
@@ -60,6 +68,8 @@ void main() {
       expect(map['gender'], equals('female'));
       expect(map['activityLevel'], equals('active'));
       expect(map['fitnessGoal'], equals('Lose weight'));
+      expect(map['bmi'], equals(22.5));
+      expect(map['bmiCategory'], equals('Normal'));
     });
 
     test('fromFirestore should create HealthMetricsModel from DocumentSnapshot', () {
@@ -70,6 +80,8 @@ void main() {
         'gender': 'female',
         'activityLevel': 'light',
         'fitnessGoal': 'Lose weight',
+        'bmi': 23.7,
+        'bmiCategory': 'Normal',
       };
 
       final mockSnapshot = MockDocumentSnapshot(mockData);
@@ -82,9 +94,11 @@ void main() {
       expect(metrics.gender, equals('female'));
       expect(metrics.activityLevel, equals('light'));
       expect(metrics.fitnessGoal, equals('Lose weight'));
+      expect(metrics.bmi, equals(23.7));
+      expect(metrics.bmiCategory, equals('Normal'));
     });
 
-    test('fromFirestore should handle missing fields gracefully', () {
+    test('fromFirestore should throw exception if fields are missing', () {
       final mockData = {
         'height': 180.0,
         'weight': 70.0,
@@ -93,6 +107,7 @@ void main() {
       final mockSnapshot = MockDocumentSnapshot(mockData);
 
       expect(() => HealthMetricsModel.fromFirestore(mockSnapshot), throwsA(isA<TypeError>()));
+
     });
 
     test('toMap should handle correct value types', () {
@@ -104,6 +119,8 @@ void main() {
         gender: 'male',
         activityLevel: 'very active',
         fitnessGoal: 'Gain muscle',
+        bmi: 24.5,
+        bmiCategory: 'Normal',
       );
 
       final map = metrics.toMap();
@@ -114,6 +131,8 @@ void main() {
       expect(map['gender'], isA<String>());
       expect(map['activityLevel'], isA<String>());
       expect(map['fitnessGoal'], isA<String>());
+      expect(map['bmi'], isA<double>());
+      expect(map['bmiCategory'], isA<String>());
     });
 
     test('fromFirestore should throw exception if data is null', () {
@@ -129,6 +148,8 @@ void main() {
         'gender': 'female',
         'activityLevel': 'moderate',
         'fitnessGoal': 'Maintain',
+        'bmi': 22,
+        'bmiCategory': 'Normal',
       };
 
       final mockSnapshot = MockDocumentSnapshot(mockData);
@@ -140,6 +161,8 @@ void main() {
       expect(metrics.gender, equals('female'));
       expect(metrics.activityLevel, equals('moderate'));
       expect(metrics.fitnessGoal, equals('Maintain'));
+      expect(metrics.bmi, equals(22.0));
+      expect(metrics.bmiCategory, equals('Normal'));
     });
   });
 }
