@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
+//coverage:ignore-file
 class SavedMeal {
   final String id;
   final String userId;

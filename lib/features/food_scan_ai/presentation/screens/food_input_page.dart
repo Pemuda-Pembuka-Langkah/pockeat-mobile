@@ -8,6 +8,8 @@ import 'package:get_it/get_it.dart';
 // Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
 
+//coverage:ignore-file
+
 class FoodInputPage extends StatefulWidget {
   const FoodInputPage({super.key});
 

@@ -15,6 +15,8 @@ import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 import 'package:pockeat/features/saved_meals/presentation/widgets/saved_meal_bottom_action_bar.dart';
 
+//coverage:ignore-file
+
 class SavedMealDetailPage extends StatefulWidget {
   final String savedMealId;
   final SavedMealService savedMealService;

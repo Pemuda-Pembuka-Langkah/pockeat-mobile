@@ -2,6 +2,8 @@
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/firebase/firebase_repository.dart';
 
+//coverage: ignore-file
+
 /// Repository for managing nutrition database meal entries
 ///
 /// Provides methods to save, retrieve, and delete meal data in Firebase

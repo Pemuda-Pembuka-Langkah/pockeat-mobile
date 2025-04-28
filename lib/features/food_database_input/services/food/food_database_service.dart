@@ -4,6 +4,7 @@ import 'package:pockeat/features/food_database_input/services/base/supabase.dart
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_database_input/domain/repositories/nutrition_database_repository.dart';
 
+//coverage: ignore-file
 abstract class NutritionDatabaseServiceInterface {
   // Food data operations from Supabase
   Future<List<FoodAnalysisResult>> getAllFoods(

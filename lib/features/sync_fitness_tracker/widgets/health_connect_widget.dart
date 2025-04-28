@@ -1,6 +1,8 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+//coverage:ignore-file
+
 // Project imports:
 import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
 

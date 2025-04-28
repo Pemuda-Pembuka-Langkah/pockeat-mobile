@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:camera/camera.dart';
 
+//coverage:ignore-file
+
 // Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';

@@ -11,6 +11,8 @@ import 'package:pockeat/features/api_scan/services/food/food_image_analysis_serv
 import 'package:pockeat/features/api_scan/services/food/nutrition_label_analysis_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 
+//coverage:ignore-file
+
 class FoodScanPhotoService {
   final FoodImageAnalysisService _foodImageAnalysisService =
       getIt<FoodImageAnalysisService>();

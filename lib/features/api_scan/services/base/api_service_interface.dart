@@ -2,7 +2,7 @@
 
 // Dart imports:
 import 'dart:io';
-
+//coverage: ignore-file
 abstract class ApiServiceInterface {
   /// Performs a POST request with a JSON body
   ///

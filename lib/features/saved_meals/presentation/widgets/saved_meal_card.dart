@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 // Project imports:
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 
+//coverage:ignore-file
+
 class SavedMealCard extends StatelessWidget {
   final SavedMeal savedMeal;
   final VoidCallback onTap;

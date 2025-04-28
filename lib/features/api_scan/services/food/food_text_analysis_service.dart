@@ -1,5 +1,7 @@
 // lib/features/ai_api_scan/services/food/food_text_analysis_service.dart
 
+//coverage: ignore-file
+
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';

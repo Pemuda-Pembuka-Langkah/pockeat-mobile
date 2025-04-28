@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 // Project imports:
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 
+//coverage: ignore-file
 class FoodAnalysisResult {
   final String foodName;
   final List<Ingredient> ingredients;

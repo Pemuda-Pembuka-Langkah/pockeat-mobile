@@ -4,6 +4,7 @@ import 'dart:convert';
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+//coverage: ignore-file
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';

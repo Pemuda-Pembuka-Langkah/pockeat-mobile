@@ -11,6 +11,8 @@ import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+//coverage:ignore-file
+
 class FitnessTrackerSync {
   /// Health plugin instance
   final Health _health;

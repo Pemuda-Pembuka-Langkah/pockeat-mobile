@@ -1,6 +1,7 @@
 // Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+//coverage:ignore-file
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';

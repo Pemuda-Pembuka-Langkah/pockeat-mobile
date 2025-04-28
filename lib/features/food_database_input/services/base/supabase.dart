@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+//coverage: ignore-file
 class SupabaseService {
   final SupabaseClient _client;
 

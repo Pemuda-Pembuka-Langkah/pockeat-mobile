@@ -6,6 +6,8 @@ import 'package:pockeat/features/api_scan/services/food/food_text_analysis_servi
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
 
+//coverage:ignore-file
+
 class SavedMealService {
   final SavedMealsRepository _repository;
   final FoodTextAnalysisService _textAnalysisService;

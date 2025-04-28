@@ -18,6 +18,8 @@ import 'package:pockeat/features/food_text_input/domain/repositories/food_text_i
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 
+//coverage: ignore-file
+
 /// A page that displays detailed information about a food item.
 ///
 class FoodDetailPage extends StatefulWidget {

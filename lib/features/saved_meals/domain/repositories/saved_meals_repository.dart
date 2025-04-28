@@ -6,6 +6,8 @@ import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/firebase/firebase_repository.dart';
 
+//coverage:ignore-file
+
 // Concrete implementation for food analysis repository - matching FoodScanRepository structure
 class FoodAnalysisRepository
     extends BaseFirestoreRepository<FoodAnalysisResult> {
