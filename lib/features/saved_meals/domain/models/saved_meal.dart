@@ -10,7 +10,7 @@ class SavedMeal {
   final FoodAnalysisResult foodAnalysis;
   final DateTime createdAt;
   final DateTime updatedAt;
-  
+
   SavedMeal({
     required this.id,
     required this.userId,
@@ -19,7 +19,7 @@ class SavedMeal {
     required this.createdAt,
     required this.updatedAt,
   });
-  
+
   // Create from Firestore document
   factory SavedMeal.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -32,7 +32,7 @@ class SavedMeal {
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
   }
-  
+
   // Convert to Map for Firestore
   Map<String, dynamic> toFirestore() {
     return {
@@ -42,5 +42,25 @@ class SavedMeal {
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
+  }
+
+  // Create a copy of this SavedMeal with optional field modifications
+  SavedMeal copyWith({
+    String? id,
+    String? userId,
+    String? name,
+    FoodAnalysisResult? foodAnalysis,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return SavedMeal(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+      foodAnalysis: foodAnalysis ?? this.foodAnalysis,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt:
+          updatedAt ?? DateTime.now(), // Default to current time when updating
+    );
   }
 }

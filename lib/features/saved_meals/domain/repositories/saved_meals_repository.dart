@@ -1,18 +1,51 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
+import 'package:pockeat/firebase/firebase_repository.dart';
 
+// Concrete implementation for food analysis repository - matching FoodScanRepository structure
+class FoodAnalysisRepository
+    extends BaseFirestoreRepository<FoodAnalysisResult> {
+  static const String _timestampField = 'timestamp';
+
+  FoodAnalysisRepository({FirebaseFirestore? firestore})
+      : super(
+          collectionName: 'food_analysis',
+          toMap: (item) =>
+              item.toJson(), // Direct serialization without nesting
+          fromMap: (map, id) => FoodAnalysisResult.fromJson(map),
+          firestore: firestore,
+        );
+
+  // Get food analysis results for a specific date
+  Future<List<FoodAnalysisResult>> getAnalysisResultsByDate(DateTime date,
+      {int? limit}) async {
+    return super.getByDate(
+      date: date,
+      timestampField: _timestampField,
+      limit: limit,
+      descending: true,
+    );
+  }
+}
+
+// SavedMealsRepository implementation
 class SavedMealsRepository {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
+  final FoodAnalysisRepository _foodAnalysisRepository;
 
   SavedMealsRepository({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+        _auth = auth ?? FirebaseAuth.instance,
+        _foodAnalysisRepository = FoodAnalysisRepository(
+          firestore: firestore,
+        );
 
   // Collection reference
   CollectionReference get _savedMealsCollection =>
@@ -59,7 +92,7 @@ class SavedMealsRepository {
     }
   }
 
-  // Get all saved meals for current user - simplified query without needing composite index
+  // Get all saved meals for current user
   Stream<List<SavedMeal>> getSavedMeals() {
     try {
       debugPrint(
@@ -114,24 +147,47 @@ class SavedMealsRepository {
     }
   }
 
-  // Log a saved meal to food_analysis collection without updating the saved meal
-  Future<void> logSavedMealAsNew(SavedMeal savedMeal) async {
+  // Log a food analysis to food_analysis collection
+  Future<String> logFoodAnalysis(FoodAnalysisResult foodAnalysis) async {
     try {
       debugPrint(
-          "SavedMealsRepository: Logging saved meal as new - ${savedMeal.id}");
-      // Reference to the food_analysis collection
-      final foodAnalysisCollection = _firestore.collection('food_analysis');
+          "SavedMealsRepository: Logging food analysis - ${foodAnalysis.foodName}");
 
+      // Create a more robust unique ID using UUID
+      final String uniqueId = const Uuid().v4();
       final now = DateTime.now();
 
-      // Add a new entry to food_analysis collection
-      final docRef = await foodAnalysisCollection.add({
-        'foodAnalysis': savedMeal.foodAnalysis.toJson(),
-      });
+      // Create a copy of the food analysis with the new ID, userId and timestamp
+      final updatedFoodAnalysis = foodAnalysis.copyWith(
+        id: uniqueId,
+        userId: _currentUserId,
+        timestamp: now,
+      );
+
+
+      // Use the repository's save method - this will use the toMap method that serializes directly
+      final savedId =
+          await _foodAnalysisRepository.save(updatedFoodAnalysis, uniqueId);
+
       debugPrint(
-          "SavedMealsRepository: Meal logged successfully with ID - ${docRef.id}");
+          "SavedMealsRepository: Food analysis logged successfully with ID - $savedId");
+
+      return savedId;
     } catch (e, stackTrace) {
-      debugPrint("SavedMealsRepository: Error logging saved meal - $e");
+      debugPrint("SavedMealsRepository: Error logging food analysis - $e");
+      debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      rethrow;
+    }
+  }
+
+  // Get food logs for the current user by date
+  Future<List<FoodAnalysisResult>> getFoodLogsByDate(DateTime date) async {
+    try {
+      debugPrint("SavedMealsRepository: Getting food logs for date - $date");
+
+      return await _foodAnalysisRepository.getAnalysisResultsByDate(date);
+    } catch (e, stackTrace) {
+      debugPrint("SavedMealsRepository: Error getting food logs - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
       rethrow;
     }

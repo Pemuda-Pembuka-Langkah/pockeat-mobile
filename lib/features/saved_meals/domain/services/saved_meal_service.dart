@@ -61,7 +61,7 @@ class SavedMealService {
     }
   }
 
-  // Correct a saved meal's analysis
+  // Correct a saved meal's analysis - don't save to firebase, just return the corrected analysis
   Future<FoodAnalysisResult> correctSavedMealAnalysis(
       SavedMeal savedMeal, String userComment) async {
     print("SavedMealService: Correcting saved meal analysis - ${savedMeal.id}");
@@ -71,6 +71,9 @@ class SavedMealService {
       final correctedAnalysis = await _textAnalysisService.correctAnalysis(
           savedMeal.foodAnalysis, userComment);
       print("SavedMealService: Meal correction completed successfully");
+      print(correctedAnalysis
+          .toJson()); // Print the corrected analysis for debugging
+
       return correctedAnalysis;
     } catch (e, stackTrace) {
       print("SavedMealService: Error correcting saved meal analysis - $e");
@@ -79,40 +82,16 @@ class SavedMealService {
     }
   }
 
-  // Log corrected meal without updating the saved meal
-  Future<void> logCorrectedMealAsNew(
-      SavedMeal originalSavedMeal, FoodAnalysisResult correctedAnalysis) async {
-    print(
-        "SavedMealService: Logging corrected meal as new - ${originalSavedMeal.id}");
+  // Single method to log a food analysis to Firebase
+  Future<String> logFoodAnalysis(FoodAnalysisResult foodAnalysis) async {
+    print("SavedMealService: Logging food analysis - ${foodAnalysis.foodName}");
     try {
-      // Create a temporary saved meal with the corrected analysis
-      final tempSavedMeal = SavedMeal(
-        id: originalSavedMeal.id,
-        userId: originalSavedMeal.userId,
-        name: originalSavedMeal.name,
-        foodAnalysis: correctedAnalysis,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      // Log the meal with corrected analysis
-      await _repository.logSavedMealAsNew(tempSavedMeal);
-      print("SavedMealService: Corrected meal logged successfully");
+      final savedId = await _repository.logFoodAnalysis(foodAnalysis);
+      print(
+          "SavedMealService: Food analysis logged successfully with ID - $savedId");
+      return savedId;
     } catch (e, stackTrace) {
-      print("SavedMealService: Error logging corrected meal - $e");
-      print("SavedMealService: Stack trace - $stackTrace");
-      rethrow;
-    }
-  }
-
-  // Log existing saved meal without any changes
-  Future<void> logSavedMealAsIs(SavedMeal savedMeal) async {
-    print("SavedMealService: Logging saved meal as is - ${savedMeal.id}");
-    try {
-      await _repository.logSavedMealAsNew(savedMeal);
-      print("SavedMealService: Meal logged successfully");
-    } catch (e, stackTrace) {
-      print("SavedMealService: Error logging saved meal - $e");
+      print("SavedMealService: Error logging food analysis - $e");
       print("SavedMealService: Stack trace - $stackTrace");
       rethrow;
     }
