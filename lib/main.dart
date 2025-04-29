@@ -680,9 +680,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           );
         },
-        // '/analytic': (context) => ProgressPage(
-        //       service: ProgressTabsService(ProgressTabsRepositoryImpl()),
-        //     ),
+        '/analytic': (context) => ProgressPage(
+              service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+            ),
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
         '/edit-profile': (context) {
