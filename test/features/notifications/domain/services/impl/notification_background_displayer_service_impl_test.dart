@@ -19,7 +19,6 @@ import 'package:pockeat/features/notifications/domain/services/impl/notification
 import 'package:pockeat/features/notifications/domain/services/notification_background_displayer_service.dart';
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
-
 import 'notification_background_displayer_service_impl_test.mocks.dart';
 
 @GenerateMocks([

@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 
 // Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -10,7 +11,6 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
@@ -117,43 +117,49 @@ class BackgroundDependencyService {
             services['foodScanRepository'] as FoodScanRepository,
       );
       services['foodLogHistoryService'] = foodLogHistoryService;
-      GetIt.instance.registerSingleton<FoodLogHistoryService>(foodLogHistoryService);
-      
+      GetIt.instance
+          .registerSingleton<FoodLogHistoryService>(foodLogHistoryService);
+
       // Get Firestore instance for repositories
       final firestore = FirebaseFirestore.instance;
       services['firestore'] = firestore;
-      
+
       // Register repositories needed by ExerciseLogHistoryService
-      final smartExerciseLogRepository = SmartExerciseLogRepositoryImpl(firestore: firestore);
+      final smartExerciseLogRepository =
+          SmartExerciseLogRepositoryImpl(firestore: firestore);
       services['smartExerciseLogRepository'] = smartExerciseLogRepository;
-      GetIt.instance.registerSingleton<SmartExerciseLogRepository>(smartExerciseLogRepository);
-      
+      GetIt.instance.registerSingleton<SmartExerciseLogRepository>(
+          smartExerciseLogRepository);
+
       final cardioRepository = CardioRepositoryImpl(firestore: firestore);
       services['cardioRepository'] = cardioRepository;
       GetIt.instance.registerSingleton<CardioRepository>(cardioRepository);
-      
-      final weightLiftingRepository = WeightLiftingRepositoryImpl(firestore: firestore);
+
+      final weightLiftingRepository =
+          WeightLiftingRepositoryImpl(firestore: firestore);
       services['weightLiftingRepository'] = weightLiftingRepository;
-      GetIt.instance.registerSingleton<WeightLiftingRepository>(weightLiftingRepository);
-      
+      GetIt.instance
+          .registerSingleton<WeightLiftingRepository>(weightLiftingRepository);
+
       // Create exercise log service required for CalorieStatsService
       final exerciseService = ExerciseLogHistoryServiceImpl();
       services['exerciseLogHistoryService'] = exerciseService;
-      GetIt.instance.registerSingleton<ExerciseLogHistoryService>(exerciseService);
-      
+      GetIt.instance
+          .registerSingleton<ExerciseLogHistoryService>(exerciseService);
+
       // Create CalorieStatsRepository
       final calorieStatsRepository = CalorieStatsRepositoryImpl();
       services['calorieStatsRepository'] = calorieStatsRepository;
-      
+
       // Create CalorieStatsService required for PetService
       final calorieStatsService = CalorieStatsServiceImpl(
-        repository: calorieStatsRepository,
-        exerciseService: exerciseService,
-        foodService: foodLogHistoryService
-      );
+          repository: calorieStatsRepository,
+          exerciseService: exerciseService,
+          foodService: foodLogHistoryService);
       services['calorieStatsService'] = calorieStatsService;
-      GetIt.instance.registerSingleton<CalorieStatsService>(calorieStatsService);
-      
+      GetIt.instance
+          .registerSingleton<CalorieStatsService>(calorieStatsService);
+
       // Now we can create the real PetService since all dependencies are registered
       services['petService'] = PetServiceImpl();
 
@@ -199,7 +205,5 @@ class BackgroundDependencyService {
     }
   }
 }
-
-
 
 // coverage:ignore-end

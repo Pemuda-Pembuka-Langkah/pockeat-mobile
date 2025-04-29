@@ -1,9 +1,8 @@
 // lib/features/weights_history/domain/models/weight_history_entry_test.dart
 
 // Package imports:
-import 'package:flutter_test/flutter_test.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:flutter_test/flutter_test.dart';
 
 // Project imports:
 import 'package:pockeat/features/weight_history/domain/models/weight_history_entry.dart';

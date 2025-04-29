@@ -1,19 +1,25 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
+
+// Project imports:
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/app_colors.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/tab_configuration.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
-import 'package:provider/provider.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
+import 'progress_page_test.mocks.dart';
 
 @GenerateMocks([
   ProgressTabsService, 
@@ -22,7 +28,6 @@ import 'package:provider/provider.dart';
   FoodLogHistoryService, 
   FoodLogDataService
 ])
-import 'progress_page_test.mocks.dart';
 
 // Mock the LogHistoryPage widget
 class MockLogHistoryPage extends StatelessWidget {

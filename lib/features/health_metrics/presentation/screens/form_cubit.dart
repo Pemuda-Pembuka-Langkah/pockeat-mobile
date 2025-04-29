@@ -106,17 +106,16 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
   }
 
   void setHeightWeight({required double height, required double weight}) {
-  final bmi = _calculateBMI(height: height, weight: weight);
-  final bmiCategory = _getBMICategory(bmi);
-  
-  emit(state.copyWith(
-    height: height,
-    weight: weight,
-    bmi: bmi,
-    bmiCategory: bmiCategory,
-  ));
-}
+    final bmi = _calculateBMI(height: height, weight: weight);
+    final bmiCategory = _getBMICategory(bmi);
 
+    emit(state.copyWith(
+      height: height,
+      weight: weight,
+      bmi: bmi,
+      bmiCategory: bmiCategory,
+    ));
+  }
 
   void setBirthDate(DateTime date) => emit(state.copyWith(birthDate: date));
   void setGender(String gender) => emit(state.copyWith(gender: gender));

@@ -1,6 +1,9 @@
 // lib/features/weights_history/domain/repositories/weight_history_repository_impl.dart
 
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Project imports:
 import 'package:pockeat/features/weight_history/domain/models/weight_history_entry.dart';
 import 'package:pockeat/features/weight_history/domain/repositories/weight_history_repository.dart';
 

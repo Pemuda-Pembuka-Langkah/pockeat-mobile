@@ -1,6 +1,9 @@
 // rollover_calories_page.dart
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RolloverCaloriesPage extends StatefulWidget {
@@ -83,8 +86,14 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildOptionButton(label: 'No', selected: _selectedOption == false, value: false),
-                    _buildOptionButton(label: 'Yes', selected: _selectedOption == true, value: true),
+                    _buildOptionButton(
+                        label: 'No',
+                        selected: _selectedOption == false,
+                        value: false),
+                    _buildOptionButton(
+                        label: 'Yes',
+                        selected: _selectedOption == true,
+                        value: true),
                   ],
                 ),
               ),
@@ -108,7 +117,8 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> {
     );
   }
 
-  Widget _buildOptionButton({required String label, required bool selected, required bool value}) {
+  Widget _buildOptionButton(
+      {required String label, required bool selected, required bool value}) {
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -121,7 +131,8 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> {
           margin: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
             color: selected ? primaryPink : Colors.white,
-            border: Border.all(color: selected ? primaryPink : Colors.grey.shade400),
+            border: Border.all(
+                color: selected ? primaryPink : Colors.grey.shade400),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
@@ -142,7 +153,9 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> {
   Future<void> _handleNextPressed() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('rolloverCaloriesEnabled', _selectedOption!);
-
-    Navigator.pushNamed(context, '/used-other-apps'); // <- Change this to your next page
+    if (mounted) {
+      Navigator.pushNamed(
+          context, '/used-other-apps'); // <- Change this to your next page
+    }
   }
 }
