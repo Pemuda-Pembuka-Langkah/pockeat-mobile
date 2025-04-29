@@ -13,11 +13,13 @@ import 'package:pockeat/core/services/analytics_service.dart';
 
 class ProgressPage extends StatefulWidget {
   final ProgressTabsService service;
-  
+  final int initialTabIndex;
+
   // ignore: use_super_parameters
   const ProgressPage({
     Key? key,
     required this.service,
+    this.initialTabIndex = 0,
   }) : super(key: key);
 
   @override
@@ -25,14 +27,15 @@ class ProgressPage extends StatefulWidget {
 }
 
 // coverage:ignore-start
-class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMixin {
+class _ProgressPageState extends State<ProgressPage>
+    with TickerProviderStateMixin {
   late TabController _mainTabController;
   final ScrollController _scrollController = ScrollController();
-  
+
   late AppColors _appColors;
   // ignore: unused_field
   late TabConfiguration _tabConfiguration;
-  
+
   bool _isInitialized = false;
   late AnalyticsService _googleAnalyticsService;
 
@@ -41,35 +44,39 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
     super.initState();
     _initializeData();
     _googleAnalyticsService = GetIt.instance<AnalyticsService>();
-    _googleAnalyticsService.logScreenView(screenName: 'progress_page', screenClass: 'ProgressPage');
+    _googleAnalyticsService.logScreenView(
+        screenName: 'progress_page', screenClass: 'ProgressPage');
     _googleAnalyticsService.logProgressViewed(category: 'all');
   }
-  
+
   Future<void> _initializeData() async {
     try {
       // Load configurations
       final colors = await widget.service.getAppColors();
       final tabConfig = await widget.service.getTabConfiguration();
-      
+
       // Initialize main tab controller - just 2 tabs: Progress Insights and Log History
       final mainTabController = TabController(
         length: 2, // Fixed at 2 tabs now
-        vsync: this
+        vsync: this,
+        initialIndex:
+            widget.initialTabIndex, // Set initial tab based on parameter
       );
-      
+
       // Set up tab change listeners
       mainTabController.addListener(() {
         setState(() {}); // Rebuild to update visibility
-        
+
         if (!mainTabController.indexIsChanging) {
           _scrollController.animateTo(
             0,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOut,
           );
-          
+
           // Track main tab changes for analytics
-          final tabName = mainTabController.index == 0 ? 'insights' : 'log_history';
+          final tabName =
+              mainTabController.index == 0 ? 'insights' : 'log_history';
           _googleAnalyticsService.logEvent(
             name: 'main_tab_changed',
             parameters: {
@@ -79,7 +86,7 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
           );
         }
       });
-      
+
       // Set state with loaded data
       if (mounted) {
         setState(() {
@@ -89,14 +96,13 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
           _isInitialized = true;
         });
       }
-      
+
       // Set navigation index
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           Provider.of<NavigationProvider>(context, listen: false).setIndex(1);
         }
       });
-      
     } catch (e) {
       debugPrint('Error initializing progress page: $e');
     }
@@ -141,7 +147,7 @@ class _ProgressPageState extends State<ProgressPage> with TickerProviderStateMix
           children: const [
             // Gunakan WeightProgressWidget langsung
             WeightProgressWidget(),
-            
+
             // Log History Tab - tetap sama
             LogHistoryPage(),
           ],

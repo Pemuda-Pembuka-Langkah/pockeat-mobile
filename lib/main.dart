@@ -294,8 +294,8 @@ void main() async {
         Provider<SavedMealService>(
           create: (_) => getIt<SavedMealService>(),
         ),
-        Provider<CaloricRequirementService>(create: (_) => getIt<CaloricRequirementService>()),
-
+        Provider<CaloricRequirementService>(
+            create: (_) => getIt<CaloricRequirementService>()),
         BlocProvider<HealthMetricsFormCubit>(
           create: (_) => HealthMetricsFormCubit(
             repository: getIt<HealthMetricsRepository>(),
@@ -514,9 +514,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/splash': (context) => const SplashScreenPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
         '/': (context) => const AuthWrapper(
-          redirectUrlIfNotLoggedIn: '/welcome',
-          child: HomePage(),
-        ),
+              redirectUrlIfNotLoggedIn: '/welcome',
+              child: HomePage(),
+            ),
         '/welcome': (context) => const WelcomePage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
@@ -568,77 +568,60 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
         },
         '/height-weight': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: HeightWeightPage()
-          ),
-        '/birthdate': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: BirthdatePage()
-          ),
-        '/gender': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: GenderPage()
-          ),
-        '/activity-level': (context) =>
-            const AuthWrapper(
-              requireAuth: false,
-              redirectUrlIfLoggedIn: '/',
-              child: ActivityLevelPage()
-              ),
-        '/diet': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: DietPage()
-          ),
-        '/desired-weight': (context) =>
-            const AuthWrapper(
-              requireAuth: false,
-              redirectUrlIfLoggedIn: '/',
-              child: DesiredWeightPage()
-              ),
-        '/speed': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: SpeedSelectionPage()
-          ),
-        '/goal-obstacle': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: GoalObstaclePage()
-          ),
-        '/add-calories-back': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: AddCaloriesBackPage()
-          ),
-        '/heard-about': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: HeardAboutPage()
-          ),
-        '/rollover-calories': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: RolloverCaloriesPage()
-          ),
-        '/thank-you': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: ThankYouPage()
-          ),
-        '/used-other-apps': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: UsedOtherAppsPage()
-          ),
-          '/review': (context) => const AuthWrapper(
             requireAuth: false,
             redirectUrlIfLoggedIn: '/',
-            child: ReviewSubmitPage(),
-          ),
+            child: HeightWeightPage()),
+        '/birthdate': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: BirthdatePage()),
+        '/gender': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: GenderPage()),
+        '/activity-level': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: ActivityLevelPage()),
+        '/diet': (context) => const AuthWrapper(
+            requireAuth: false, redirectUrlIfLoggedIn: '/', child: DietPage()),
+        '/desired-weight': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: DesiredWeightPage()),
+        '/speed': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: SpeedSelectionPage()),
+        '/goal-obstacle': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: GoalObstaclePage()),
+        '/add-calories-back': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: AddCaloriesBackPage()),
+        '/heard-about': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: HeardAboutPage()),
+        '/rollover-calories': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: RolloverCaloriesPage()),
+        '/thank-you': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: ThankYouPage()),
+        '/used-other-apps': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: UsedOtherAppsPage()),
+        '/review': (context) => const AuthWrapper(
+              requireAuth: false,
+              redirectUrlIfLoggedIn: '/',
+              child: ReviewSubmitPage(),
+            ),
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),
@@ -720,9 +703,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         },
         '/nutrition-database': (context) =>
             const AuthWrapper(child: NutritionDatabasePage()),
-        '/analytic': (context) => ProgressPage(
-              service: ProgressTabsService(ProgressTabsRepositoryImpl()),
-            ),
+        '/analytic': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return ProgressPage(
+            service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+            initialTabIndex: args?['initialTabIndex'] as int? ?? 0,
+          );
+        },
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
         '/edit-profile': (context) {
