@@ -48,71 +48,71 @@ class FoodAnalysisResult {
         id = id ?? const Uuid().v4(),
         healthScore = healthScore ?? _calculateHealthScore(nutritionInfo);
 
-  // Enhanced health score calculation method on a scale of 1-10 with 0.5 increments
-  static double _calculateHealthScore(NutritionInfo nutrition) {
-    // Base score starts at 7.5 (middle-high range)
-    double score = 7.5;
+    // Enhanced health score calculation method on a scale of 1-10 with 0.5 increments
+    static double _calculateHealthScore(NutritionInfo nutrition) {
+      // Base score starts at 7.5 (middle-high range)
+      double score = 7.5;
 
-    // Deductions for high sodium (over 0.5g = 500mg)
-    if (nutrition.sodium > highSodiumThreshold) {
-      // Deduct points based on how much it exceeds the threshold
-      double deduction =
-          ((nutrition.sodium - highSodiumThreshold) / 0.25).clamp(0.0, 3.0);
-      score -= deduction;
-    }
+      // Deductions for high sodium (over 0.5g = 500mg)
+      if (nutrition.sodium > highSodiumThreshold) {
+        // Deduct points based on how much it exceeds the threshold
+        double deduction =
+            ((nutrition.sodium - highSodiumThreshold) / 0.25).clamp(0.0, 3.0);
+        score -= deduction;
+      }
 
-    // Deductions for high sugar (over 20g)
-    if (nutrition.sugar > highSugarThreshold) {
-      // Deduct points based on how much it exceeds the threshold
-      double deduction =
-          ((nutrition.sugar - highSugarThreshold) / 10).clamp(0.0, 2.5);
-      score -= deduction;
-    }
+      // Deductions for high sugar (over 20g)
+      if (nutrition.sugar > highSugarThreshold) {
+        // Deduct points based on how much it exceeds the threshold
+        double deduction =
+            ((nutrition.sugar - highSugarThreshold) / 10).clamp(0.0, 2.5);
+        score -= deduction;
+      }
 
-    // Additions for high protein (up to 1.5 bonus points)
-    double proteinBonus = (nutrition.protein / 20).clamp(0.0, 1.5);
-    score += proteinBonus;
+      // Additions for high protein (up to 1.5 bonus points)
+      double proteinBonus = (nutrition.protein / 20).clamp(0.0, 1.5);
+      score += proteinBonus;
 
-    // Additions for fiber (up to 1 bonus point)
-    double fiberBonus = (nutrition.fiber / 5).clamp(0.0, 1.0);
-    score += fiberBonus;
+      // Additions for fiber (up to 1 bonus point)
+      double fiberBonus = (nutrition.fiber / 5).clamp(0.0, 1.0);
+      score += fiberBonus;
 
-    // Fat evaluation with consideration for saturated fat
-    if (nutrition.fat > 15) {
-      double baseFatDeduction = ((nutrition.fat - 15) / 10).clamp(0.0, 1.5);
-      score -= baseFatDeduction;
+      // Fat evaluation with consideration for saturated fat
+      if (nutrition.fat > 15) {
+        double baseFatDeduction = ((nutrition.fat - 15) / 10).clamp(0.0, 1.5);
+        score -= baseFatDeduction;
 
-      // Extra penalty for high saturated fat proportion
-      if (nutrition.saturatedFat > 0 && nutrition.fat > 0) {
-        double satFatRatio = nutrition.saturatedFat / nutrition.fat;
-        if (satFatRatio > 0.3) {
-          // If more than 30% of fat is saturated
-          double satFatDeduction = ((satFatRatio - 0.3) * 2).clamp(0.0, 1.0);
-          score -= satFatDeduction;
+        // Extra penalty for high saturated fat proportion
+        if (nutrition.saturatedFat > 0 && nutrition.fat > 0) {
+          double satFatRatio = nutrition.saturatedFat / nutrition.fat;
+          if (satFatRatio > 0.3) {
+            // If more than 30% of fat is saturated
+            double satFatDeduction = ((satFatRatio - 0.3) * 2).clamp(0.0, 1.0);
+            score -= satFatDeduction;
+          }
         }
       }
+
+      // Cholesterol consideration
+      if (nutrition.cholesterol > highCholesterolThreshold) {
+        double cholDeduction =
+            ((nutrition.cholesterol - highCholesterolThreshold) / 100)
+                .clamp(0.0, 1.0);
+        score -= cholDeduction;
+      }
+
+      // Bonus for nutrition density
+      if (nutrition.nutritionDensity > 0) {
+        double densityBonus = (nutrition.nutritionDensity / 100).clamp(0.0, 1.0);
+        score += densityBonus;
+      }
+
+      // Round to nearest 0.5
+      score = (score * 2.0).round() / 2.0;
+
+      // Ensure score stays within 1-10 range with 0.5 increments
+      return score.clamp(1.0, 10.0);
     }
-
-    // Cholesterol consideration
-    if (nutrition.cholesterol > highCholesterolThreshold) {
-      double cholDeduction =
-          ((nutrition.cholesterol - highCholesterolThreshold) / 100)
-              .clamp(0.0, 1.0);
-      score -= cholDeduction;
-    }
-
-    // Bonus for nutrition density
-    if (nutrition.nutritionDensity > 0) {
-      double densityBonus = (nutrition.nutritionDensity / 100).clamp(0.0, 1.0);
-      score += densityBonus;
-    }
-
-    // Round to nearest 0.5
-    score = (score * 2.0).round() / 2.0;
-
-    // Ensure score stays within 1-10 range with 0.5 increments
-    return score.clamp(1.0, 10.0);
-  }
 
   // Health score interpretation helper method for 1-10 scale with 0.5 increments
   String getHealthScoreCategory() {
