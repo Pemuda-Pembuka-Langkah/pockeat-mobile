@@ -129,8 +129,9 @@ class TextBottomActionBar extends StatelessWidget {
                               // Pop to the root route first
                               Navigator.of(context)
                                   .popUntil((route) => route.isFirst);
-                              // Then navigate to food history page
-                              Navigator.of(context).pushNamed('/food-history');
+                              // Then navigate to analytics page with food history tab (index 1) open
+                              Navigator.of(context).pushNamed('/analytic',
+                                  arguments: {'initialTabIndex': 1});
                             }
                           });
                         } catch (e) {

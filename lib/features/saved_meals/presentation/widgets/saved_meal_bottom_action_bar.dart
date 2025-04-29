@@ -632,8 +632,9 @@ class SavedMealBottomActionBar extends StatelessWidget {
           // Pop current screen
           Navigator.of(context).pop();
 
-          // Push to food history page
-          Navigator.of(context).pushNamed('/food-history');
+          // Navigate to analytics page with food history tab (index 1) open
+          Navigator.of(context)
+              .pushNamed('/analytic', arguments: {'initialTabIndex': 1});
         }
       });
     } catch (e) {

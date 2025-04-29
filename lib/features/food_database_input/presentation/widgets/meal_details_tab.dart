@@ -87,9 +87,9 @@ class MealDetailsTab extends StatelessWidget {
     // Handle the navigation to food history
     void handleSaveMeal() {
       onSaveMeal();
-      // After successful meal logging, navigate to food history page
-      // First pop the current page and then navigate to food history
-      Navigator.of(context).popAndPushNamed('/food-history');
+      // After successful meal logging, navigate to analytics with food history tab
+      Navigator.of(context).popAndPushNamed('/analytic', 
+          arguments: {'initialTabIndex': 1});
     }
 
     return SingleChildScrollView(
