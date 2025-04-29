@@ -1,29 +1,24 @@
 // Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_widget_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tracking.dart';
-import 'package:pockeat/features/home_screen_widget/services/impl/default_calorie_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
-import '../../services/calorie_calculation_strategy.dart';
 
 /// Controller khusus untuk simple food tracking widget
 /// Implementasi dari [FoodTrackingWidgetController] untuk widget simple
 /// Controller untuk Simple Food Tracking Widget
 class SimpleFoodTrackingController implements FoodTrackingWidgetController {
   final WidgetDataService<SimpleFoodTracking> _widgetService;
-  final FoodLogHistoryService _foodLogHistoryService;
-  final CalorieCalculationStrategy _calorieCalculationStrategy;
+  final CalorieStatsService _calorieStatsService;
 
   SimpleFoodTrackingController({
     required WidgetDataService<SimpleFoodTracking> widgetService,
-    required FoodLogHistoryService foodLogHistoryService,
-    CalorieCalculationStrategy? calorieCalculationStrategy,
-  })  : _widgetService = widgetService,
-        _foodLogHistoryService = foodLogHistoryService,
-        _calorieCalculationStrategy =
-            calorieCalculationStrategy ?? DefaultCalorieCalculationStrategy();
+    required CalorieStatsService calorieStatsService,
+  })
+      : _widgetService = widgetService,
+        _calorieStatsService = calorieStatsService;
 
   /// Inisialisasi controller
   @override
@@ -47,9 +42,11 @@ class SimpleFoodTrackingController implements FoodTrackingWidgetController {
     try {
       final userId = user.uid;
 
-      // Hitung total kalori hari ini menggunakan strategy
-      final consumedCalories = await _calorieCalculationStrategy
-          .calculateTodayTotalCalories(_foodLogHistoryService, userId);
+      // Hitung total kalori hari ini menggunakan CalorieStatsService
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final dailyStats = await _calorieStatsService.getStatsByDate(userId, today);
+      final consumedCalories = dailyStats.caloriesConsumed;
 
       // Target kalori sekarang dihitung oleh client controller dan diberikan sebagai parameter
       final calculatedTarget = targetCalories ?? 0;
