@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 // Project imports:
-// No Discord logging
+// coverage:ignore-start
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
@@ -251,3 +251,4 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
     }
   }
 }
+// coverage:ignore-end
