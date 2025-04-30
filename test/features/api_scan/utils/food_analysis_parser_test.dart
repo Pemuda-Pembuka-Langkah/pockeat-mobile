@@ -19,9 +19,17 @@ void main() {
           "calories": 95,
           "protein": 0.5,
           "carbs": 25,
-          "fat": 0.3
+          "fat": 0.3,
+          "sodium": 2,
+          "fiber": 4,
+          "sugar": 19,
+          "saturated_fat": 0.1,
+          "cholesterol": 0,
+          "nutrition_density": 80
         },
-        "timestamp": "${DateTime.now().toIso8601String()}"
+        "timestamp": "${DateTime.now().toIso8601String()}",
+        "health_score": 8.5,
+        "additional_information": {"source": "api_test"}
       }
       ''';
 
@@ -37,6 +45,15 @@ void main() {
       expect(result.nutritionInfo.protein, equals(0.5));
       expect(result.nutritionInfo.carbs, equals(25));
       expect(result.nutritionInfo.fat, equals(0.3));
+      expect(result.nutritionInfo.sodium, equals(2));
+      expect(result.nutritionInfo.fiber, equals(4));
+      expect(result.nutritionInfo.sugar, equals(19));
+      expect(result.nutritionInfo.saturatedFat, equals(0.1));
+      expect(result.nutritionInfo.cholesterol, equals(0));
+      expect(result.nutritionInfo.nutritionDensity, equals(80));
+      expect(result.healthScore, equals(8.5));
+      expect(result.additionalInformation, isA<Map<String, dynamic>>());
+      expect(result.additionalInformation['source'], equals('api_test'));
       expect(result.timestamp, isA<DateTime>());
     });
 
@@ -60,9 +77,17 @@ void main() {
           "calories": 95,
           "protein": 0.5,
           "carbs": 25,
-          "fat": 0.3
+          "fat": 0.3,
+          "sodium": 2,
+          "fiber": 4,
+          "sugar": 19,
+          "saturated_fat": 0.1,
+          "cholesterol": 0,
+          "nutrition_density": 85
         },
-        "timestamp": DateTime.now().toIso8601String()
+        "timestamp": DateTime.now().toIso8601String(),
+        "health_score": 8.0,
+        "additional_information": {"source": "api"}
       };
 
       // Act
@@ -77,7 +102,15 @@ void main() {
       expect(result.nutritionInfo.protein, equals(0.5));
       expect(result.nutritionInfo.carbs, equals(25));
       expect(result.nutritionInfo.fat, equals(0.3));
+      expect(result.nutritionInfo.sodium, equals(2));
+      expect(result.nutritionInfo.fiber, equals(4));
+      expect(result.nutritionInfo.sugar, equals(19));
+      expect(result.nutritionInfo.saturatedFat, equals(0.1));
+      expect(result.nutritionInfo.cholesterol, equals(0));
+      expect(result.nutritionInfo.nutritionDensity, equals(85));
       expect(result.timestamp, isA<DateTime>());
+      expect(result.healthScore, equals(8.0));
+      expect(result.additionalInformation['source'], equals('api'));
     });
 
     test('should handle error field in response', () {
@@ -95,6 +128,23 @@ void main() {
         () => FoodAnalysisParser.parseMap(jsonMap),
         throwsA(isA<ApiServiceException>().having((e) => e.message,
             'error message', contains('Could not analyze food'))),
+      );
+    });
+
+    test('should handle map-based error field in response', () {
+      // Arrange
+      final jsonMap = {
+        "error": {"message": "API error occurred"},
+        "food_name": "Unknown",
+        "ingredients": [],
+        "nutrition_info": {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
+      };
+
+      // Act & Assert
+      expect(
+        () => FoodAnalysisParser.parseMap(jsonMap),
+        throwsA(isA<ApiServiceException>().having(
+            (e) => e.message, 'error message', contains('API error occurred'))),
       );
     });
 
@@ -147,7 +197,7 @@ void main() {
           result.timestamp.difference(DateTime.now()).inSeconds, lessThan(1));
     });
 
-    test('should handle is_low_confidence flag', () {
+    test('should calculate health score when not provided', () {
       // Arrange
       final jsonMap = {
         "food_name": "Apple",
@@ -158,17 +208,63 @@ void main() {
           "calories": 95,
           "protein": 0.5,
           "carbs": 25,
-          "fat": 0.3
-        },
-        "timestamp": DateTime.now().toIso8601String(),
-        "is_low_confidence": true
+          "fat": 0.3,
+          "sodium": 2,
+          "fiber": 4.4,
+          "sugar": 19,
+          "saturated_fat": 0.1,
+          "cholesterol": 0,
+          "nutrition_density": 80
+        }
       };
 
       // Act
       final result = FoodAnalysisParser.parseMap(jsonMap);
 
       // Assert
-      expect(result.isLowConfidence, isTrue);
+      expect(result.healthScore, isA<double>());
+      expect(result.healthScore, greaterThan(0));
+    });
+
+    test('should use provided userId when available', () {
+      // Arrange
+      final jsonMap = {
+        "food_name": "Apple",
+        "ingredients": [],
+        "nutrition_info": {
+          "calories": 95,
+          "protein": 0.5,
+          "carbs": 25,
+          "fat": 0.3
+        },
+        "userId": "test-user-123"
+      };
+
+      // Act
+      final result = FoodAnalysisParser.parseMap(jsonMap);
+
+      // Assert
+      expect(result.userId, equals("test-user-123"));
+    });
+
+    test('should use empty string as default userId when not provided', () {
+      // Arrange
+      final jsonMap = {
+        "food_name": "Apple",
+        "ingredients": [],
+        "nutrition_info": {
+          "calories": 95,
+          "protein": 0.5,
+          "carbs": 25,
+          "fat": 0.3
+        }
+      };
+
+      // Act
+      final result = FoodAnalysisParser.parseMap(jsonMap);
+
+      // Assert
+      expect(result.userId, equals(""));
     });
 
     group('isEmptyNutrition', () {
@@ -182,6 +278,9 @@ void main() {
           'sodium': null,
           'fiber': null,
           'sugar': null,
+          'saturated_fat': null,
+          'cholesterol': null,
+          'nutrition_density': null
         };
 
         // Act
@@ -201,6 +300,9 @@ void main() {
           'sodium': 0,
           'fiber': 0.0,
           'sugar': "0",
+          'saturated_fat': 0,
+          'cholesterol': 0,
+          'nutrition_density': "0"
         };
 
         // Act
@@ -220,6 +322,31 @@ void main() {
           'sodium': 0,
           'fiber': 0,
           'sugar': 0,
+          'saturated_fat': 0,
+          'cholesterol': 0,
+          'nutrition_density': 0
+        };
+
+        // Act
+        final result = FoodAnalysisParser.isEmptyNutrition(nutritionInfo);
+
+        // Assert
+        expect(result, isFalse);
+      });
+
+      test('should return false when new field value is non-zero', () {
+        // Arrange
+        final nutritionInfo = {
+          'calories': 0,
+          'protein': 0,
+          'carbs': 0,
+          'fat': 0,
+          'sodium': 0,
+          'fiber': 0,
+          'sugar': 0,
+          'saturated_fat': 1.5, // non-zero value in new field
+          'cholesterol': 0,
+          'nutrition_density': 0
         };
 
         // Act
@@ -343,7 +470,10 @@ void main() {
           "fat": 0,
           "sodium": 0,
           "fiber": 0,
-          "sugar": 0
+          "sugar": 0,
+          "saturated_fat": 0,
+          "cholesterol": 0,
+          "nutrition_density": 0
         },
         "timestamp": DateTime.now().toIso8601String()
       };
@@ -357,6 +487,41 @@ void main() {
           contains('Cannot identify food from provided information'),
         )),
       );
+    });
+
+    test('should parse vitamins and minerals data', () {
+      // Arrange
+      final jsonMap = {
+        "food_name": "Nutritious Food",
+        "ingredients": [],
+        "nutrition_info": {
+          "calories": 200,
+          "protein": 10,
+          "carbs": 25,
+          "fat": 8,
+          "sodium": 50,
+          "fiber": 5,
+          "sugar": 10,
+          "vitamins_and_minerals": {
+            "vitamin_a": 800,
+            "vitamin_c": 60,
+            "calcium": 200,
+            "iron": 2.5
+          }
+        }
+      };
+
+      // Act
+      final result = FoodAnalysisParser.parseMap(jsonMap);
+
+      // Assert
+      expect(
+          result.nutritionInfo.vitaminsAndMinerals, isA<Map<String, double>>());
+      expect(result.nutritionInfo.vitaminsAndMinerals.length, 4);
+      expect(result.nutritionInfo.vitaminsAndMinerals['vitamin_a'], 800);
+      expect(result.nutritionInfo.vitaminsAndMinerals['vitamin_c'], 60);
+      expect(result.nutritionInfo.vitaminsAndMinerals['calcium'], 200);
+      expect(result.nutritionInfo.vitaminsAndMinerals['iron'], 2.5);
     });
   });
 }

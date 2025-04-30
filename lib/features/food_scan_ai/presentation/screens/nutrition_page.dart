@@ -1,5 +1,5 @@
 // Dart imports:
-//coverage:ignore-file
+//
 import 'dart:io';
 
 // Flutter imports:
@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:camera/camera.dart';
-
 
 // Project imports:
 import 'package:pockeat/core/di/service_locator.dart';

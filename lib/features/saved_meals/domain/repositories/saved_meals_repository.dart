@@ -1,4 +1,4 @@
-//coverage:ignore-file
+//
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -6,7 +6,6 @@ import 'package:uuid/uuid.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/firebase/firebase_repository.dart';
-
 
 // Concrete implementation for food analysis repository - matching FoodScanRepository structure
 class FoodAnalysisRepository
@@ -165,7 +164,6 @@ class SavedMealsRepository {
         userId: _currentUserId,
         timestamp: now,
       );
-
 
       // Use the repository's save method - this will use the toMap method that serializes directly
       final savedId =

@@ -1,11 +1,10 @@
 // lib/features/saved_meals/services/saved_meal_service.dart
-//coverage:ignore-file
+//
 import 'package:flutter/foundation.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
-
 
 class SavedMealService {
   final SavedMealsRepository _repository;
