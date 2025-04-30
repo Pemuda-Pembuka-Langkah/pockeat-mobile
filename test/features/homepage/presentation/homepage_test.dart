@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:pockeat/component/navigation.dart';
@@ -18,11 +18,11 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
 import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
+import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
+import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'homepage_test.mocks.dart';
-import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 @GenerateNiceMocks([
   MockSpec<NavigatorObserver>(onMissingStub: OnMissingStub.returnDefault),

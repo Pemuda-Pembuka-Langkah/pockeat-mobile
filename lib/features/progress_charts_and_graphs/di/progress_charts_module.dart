@@ -27,10 +27,10 @@
 //   final Color primaryYellow = const Color(0xFFFFE893);
 //   final Color primaryBlue = const Color(0xFF3498DB);
 //   final Color primaryOrange = const Color(0xFFFF9800);
-  
+
 //   // Services
 //   late FoodLogDataService _foodLogDataService;
-  
+
 //   // States
 //   bool _isLoadingCalorieData = true;
 //   List<CalorieData> _calorieData = [];
@@ -60,7 +60,7 @@
 //     _initializeFoodLogService();
 //     _loadCalorieData();
 //   }
-  
+
 //   void _initializeFoodLogService() {
 //     try {
 //       // Try to get the service from the global service locator
@@ -79,29 +79,29 @@
 //       }
 //     }
 //   }
-  
+
 //   FoodLogDataService _createMockFoodLogDataService() {
 //     // This creates a mock service for development and testing
 //     return FoodLogDataService(
 //       foodLogService: Provider.of<FoodLogHistoryService>(context, listen: false),
 //     );
 //   }
-  
+
 //   Future<void> _loadCalorieData() async {
 //     if (!mounted) return;
-    
+
 //     setState(() {
 //       _isLoadingCalorieData = true;
 //     });
-    
+
 //     try {
-//       final calorieData = selectedPeriod == '1 Month' 
+//       final calorieData = selectedPeriod == '1 Month'
 //           ? await _foodLogDataService.getMonthCalorieData()
 //           : await _foodLogDataService.getWeekCalorieData();
-      
+
 //       // Get direct calorie total from log data
 //       final totalCalories = await _foodLogDataService.calculateTotalCalories(calorieData);
-      
+
 //       if (mounted) {
 //         setState(() {
 //           _calorieData = calorieData;
@@ -122,7 +122,7 @@
 //   }
 
 //   List<CalorieData> _getDefaultCalorieData() {
-//     return selectedPeriod == '1 Month' 
+//     return selectedPeriod == '1 Month'
 //         ? [
 //             CalorieData('Week 1', 0, 0, 0),
 //             CalorieData('Week 2', 0, 0, 0),
@@ -186,7 +186,7 @@
 //               ),
 //               const SizedBox(height: 16),
 //               CaloriesChart(
-//                 calorieData: _calorieData, 
+//                 calorieData: _calorieData,
 //                 totalCalories: _totalCalories,
 //                 isLoading: _isLoadingCalorieData,
 //               ),
@@ -211,7 +211,7 @@
 //           ),
 //         ),
 //         const SizedBox(width: 16),
-        
+
 //         // Current Weight Section
 //         Expanded(
 //           child: CircularIndicatorWidget(

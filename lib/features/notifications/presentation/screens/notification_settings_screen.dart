@@ -410,8 +410,7 @@ class _NotificationSettingsScreenState
 
     if (picked != null && picked != _petStatusTime) {
       // Save new time to preferences
-      await _prefs.setInt(
-          NotificationConstants.prefPetStatusHour, picked.hour);
+      await _prefs.setInt(NotificationConstants.prefPetStatusHour, picked.hour);
       await _prefs.setInt(
           NotificationConstants.prefPetStatusMinute, picked.minute);
 

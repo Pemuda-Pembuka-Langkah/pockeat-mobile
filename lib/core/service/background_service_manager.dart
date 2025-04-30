@@ -34,7 +34,7 @@ void callbackDispatcher() {
           await notificationDisplayer.showPetStatusNotification(services);
 
           break;
-            
+
         case NotificationConstants.streakCalculationTaskName:
           final NotificationBackgroundDisplayerService notificationDisplayer =
               NotificationBackgroundDisplayerServiceImpl();

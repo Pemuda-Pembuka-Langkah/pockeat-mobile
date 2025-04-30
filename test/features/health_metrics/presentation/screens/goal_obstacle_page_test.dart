@@ -11,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Project imports:
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
-
 import 'goal_obstacle_page_test.mocks.dart';
 
 @GenerateMocks([HealthMetricsFormCubit])

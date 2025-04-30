@@ -58,28 +58,28 @@ import 'package:pockeat/features/food_text_input/domain/repositories/food_text_i
 import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/desired_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/diet_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/rollover_calories_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/thank_you_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/used_other_apps_page.dart';
-
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/di/progress_module.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
@@ -89,7 +89,6 @@ import 'package:pockeat/features/weight_training_log/domain/repositories/weight_
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
 
 // Core imports:
-import 'package:pockeat/features/progress_charts_and_graphs/di/progress_module.dart';
 
 // Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -279,8 +278,8 @@ void main() async {
         Provider<FoodTextInputRepository>(
           create: (_) => getIt<FoodTextInputRepository>(),
         ),
-        Provider<CaloricRequirementService>(create: (_) => getIt<CaloricRequirementService>()),
-
+        Provider<CaloricRequirementService>(
+            create: (_) => getIt<CaloricRequirementService>()),
         BlocProvider<HealthMetricsFormCubit>(
           create: (_) => HealthMetricsFormCubit(
             repository: getIt<HealthMetricsRepository>(),
@@ -499,9 +498,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/splash': (context) => const SplashScreenPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
         '/': (context) => const AuthWrapper(
-          redirectUrlIfNotLoggedIn: '/welcome',
-          child: HomePage(),
-        ),
+              redirectUrlIfNotLoggedIn: '/welcome',
+              child: HomePage(),
+            ),
         '/welcome': (context) => const WelcomePage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
@@ -553,77 +552,60 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
         },
         '/height-weight': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: HeightWeightPage()
-          ),
-        '/birthdate': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: BirthdatePage()
-          ),
-        '/gender': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: GenderPage()
-          ),
-        '/activity-level': (context) =>
-            const AuthWrapper(
-              requireAuth: false,
-              redirectUrlIfLoggedIn: '/',
-              child: ActivityLevelPage()
-              ),
-        '/diet': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: DietPage()
-          ),
-        '/desired-weight': (context) =>
-            const AuthWrapper(
-              requireAuth: false,
-              redirectUrlIfLoggedIn: '/',
-              child: DesiredWeightPage()
-              ),
-        '/speed': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: SpeedSelectionPage()
-          ),
-        '/goal-obstacle': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: GoalObstaclePage()
-          ),
-        '/add-calories-back': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: AddCaloriesBackPage()
-          ),
-        '/heard-about': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: HeardAboutPage()
-          ),
-        '/rollover-calories': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: RolloverCaloriesPage()
-          ),
-        '/thank-you': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: ThankYouPage()
-          ),
-        '/used-other-apps': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: UsedOtherAppsPage()
-          ),
-          '/review': (context) => const AuthWrapper(
             requireAuth: false,
             redirectUrlIfLoggedIn: '/',
-            child: ReviewSubmitPage(),
-          ),
+            child: HeightWeightPage()),
+        '/birthdate': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: BirthdatePage()),
+        '/gender': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: GenderPage()),
+        '/activity-level': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: ActivityLevelPage()),
+        '/diet': (context) => const AuthWrapper(
+            requireAuth: false, redirectUrlIfLoggedIn: '/', child: DietPage()),
+        '/desired-weight': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: DesiredWeightPage()),
+        '/speed': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: SpeedSelectionPage()),
+        '/goal-obstacle': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: GoalObstaclePage()),
+        '/add-calories-back': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: AddCaloriesBackPage()),
+        '/heard-about': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: HeardAboutPage()),
+        '/rollover-calories': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: RolloverCaloriesPage()),
+        '/thank-you': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: ThankYouPage()),
+        '/used-other-apps': (context) => const AuthWrapper(
+            requireAuth: false,
+            redirectUrlIfLoggedIn: '/',
+            child: UsedOtherAppsPage()),
+        '/review': (context) => const AuthWrapper(
+              requireAuth: false,
+              redirectUrlIfLoggedIn: '/',
+              child: ReviewSubmitPage(),
+            ),
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),

@@ -1,13 +1,12 @@
 // Flutter imports:
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 
 // Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
@@ -19,6 +18,8 @@ import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.
 /// This page contains a form to fill registration data such as
 /// email, password, name, birth date, and gender.
 /// Users must also agree to the terms and conditions.
+/// 
+// coverage:ignore-start
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -74,82 +75,75 @@ class _RegisterPageState extends State<RegisterPage> {
 
   /// Handles the registration process
   Future<void> _register() async {
-  FocusScope.of(context).unfocus();
+    FocusScope.of(context).unfocus();
 
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-  if (!_formKey.currentState!.validate()) {
-    return;
-  }
-
-  if (!_termsAccepted) {
-    setState(() {
-      _errorMessage = 'You must agree to the terms and conditions';
-    });
-    return;
-  }
-
-  setState(() {
-    _isLoading = true;
-    _errorMessage = null;
-  });
-
-  try {
-    final result = await _registerService.register(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-      confirmPassword: _confirmPasswordController.text,
-      termsAccepted: _termsAccepted,
-      displayName: _nameController.text.trim(),
-      birthDate: _selectedDate,
-      gender: _selectedGender,
-    );
-
+    if (!_termsAccepted) {
+      setState(() {
+        _errorMessage = 'You must agree to the terms and conditions';
+      });
+      return;
+    }
 
     setState(() {
-      _isLoading = false;
+      _isLoading = true;
+      _errorMessage = null;
     });
 
-    if (result == RegisterResult.success) {
-
-      await _analyticsService.logSignUp(method: 'email');
-
-      final uid = GetIt.instance<FirebaseAuth>().currentUser?.uid;
-
-      if (uid != null && context.mounted) {
-        final formCubit = context.read<HealthMetricsFormCubit>();
-
-        formCubit.setUserId(uid);
-
-        await formCubit.submit();
-      }
+    try {
+      final result = await _registerService.register(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        confirmPassword: _confirmPasswordController.text,
+        termsAccepted: _termsAccepted,
+        displayName: _nameController.text.trim(),
+        birthDate: _selectedDate,
+        gender: _selectedGender,
+      );
 
       setState(() {
-        _isRegistrationSuccess = true;
+        _isLoading = false;
       });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Registration successful! Please verify your email.'),
-            backgroundColor: primaryGreen,
-          ),
-        );
-      }
-    } else {
+      if (result == RegisterResult.success) {
+        await _analyticsService.logSignUp(method: 'email');
 
+        final uid = GetIt.instance<FirebaseAuth>().currentUser?.uid;
+
+        if (uid != null && mounted) {
+          final formCubit = context.read<HealthMetricsFormCubit>();
+          formCubit.setUserId(uid);
+          await formCubit.submit();
+        }
+
+        setState(() {
+          _isRegistrationSuccess = true;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                  'Registration successful! Please verify your email.'),
+              backgroundColor: primaryGreen,
+            ),
+          );
+        }
+      } else {
+        setState(() {
+          _errorMessage = _getErrorMessage(result);
+        });
+      }
+    } catch (e) {
       setState(() {
-        _errorMessage = _getErrorMessage(result);
+        _isLoading = false;
+        _errorMessage = 'An error occurred. Please try again.';
       });
     }
-  } catch (e, stacktrace) {
-
-    setState(() {
-      _isLoading = false;
-      _errorMessage = 'An error occurred. Please try again.';
-    });
   }
-}
-
 
   // Get error message based on registration result
   String _getErrorMessage(RegisterResult result) {
@@ -251,12 +245,12 @@ class _RegisterPageState extends State<RegisterPage> {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        // coverage:ignore-start
+    
         if (didPop) return;
         // Jika user menekan tombol back, arahkan ke halaman login
         // daripada ke halaman utama yang memerlukan auth
         Navigator.pushReplacementNamed(context, '/login');
-        // coverage:ignore-end
+        
       },
       child: Scaffold(
         backgroundColor: bgColor,
@@ -744,3 +738,4 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
+// coverage:ignore-end

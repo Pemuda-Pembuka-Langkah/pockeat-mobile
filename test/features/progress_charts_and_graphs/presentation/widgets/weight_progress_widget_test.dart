@@ -1,22 +1,27 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
-import 'package:provider/provider.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
+
+// Project imports:
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/weight_progress_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/bmi_section.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/period_selection_tabs.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/week_selection_tabs.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/goal_progress_chart.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/calories_chart.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/circular_indicator_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/goal_progress_chart.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/period_selection_tabs.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/week_selection_tabs.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/weight_progress_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'weight_progress_widget_test.mocks.dart';
 
 // Import the generated mock file
-import 'weight_progress_widget_test.mocks.dart';
 
 // Helper method untuk membuat type-safe matcher
 dynamic anyCalorieDataList() => argThat(isA<List<CalorieData>>());

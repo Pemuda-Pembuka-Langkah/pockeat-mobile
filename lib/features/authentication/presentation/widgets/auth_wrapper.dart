@@ -32,6 +32,7 @@ class AuthWrapper extends StatefulWidget {
 class _AuthWrapperState extends State<AuthWrapper> {
   late final LoginService _loginService;
   bool _isChecking = true;
+  // ignore: unused_field
   bool _isAuthenticated = false;
 
   @override
@@ -48,7 +49,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
     try {
       final user = await _loginService.getCurrentUser();
       final prefs = await SharedPreferences.getInstance();
-      final onboardingInProgress = prefs.getBool('onboardingInProgress') ?? false;
+      final onboardingInProgress =
+          prefs.getBool('onboardingInProgress') ?? false;
 
       if (user == null) {
         // Tidak login
@@ -63,13 +65,19 @@ class _AuthWrapperState extends State<AuthWrapper> {
       } else {
         // Login
         if (widget.requireAuth) {
-          final healthMetricsCheckService = GetIt.instance<HealthMetricsCheckService>();
-          final completed = await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
-
+          final healthMetricsCheckService =
+              GetIt.instance<HealthMetricsCheckService>();
+          final completed =
+              await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
+          if (!mounted) {
+            return;
+          }
           final currentRoute = ModalRoute.of(context)?.settings.name;
-          final isInsideOnboardingFlow = currentRoute?.startsWith('/onboarding') ?? false;
+          final isInsideOnboardingFlow =
+              currentRoute?.startsWith('/onboarding') ?? false;
 
-          if ((!completed && !onboardingInProgress) && !isInsideOnboardingFlow) {
+          if ((!completed && !onboardingInProgress) &&
+              !isInsideOnboardingFlow) {
             _redirect('/height-weight', removeUntil: true);
           } else {
             setState(() {
@@ -94,7 +102,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
     }
   }
 
-  void _redirect(String route, {bool removeUntil = false, bool replace = false}) {
+  void _redirect(String route,
+      {bool removeUntil = false, bool replace = false}) {
     if (!mounted) return;
     if (removeUntil) {
       Navigator.of(context).pushNamedAndRemoveUntil(route, (route) => false);

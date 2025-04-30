@@ -1,14 +1,17 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/domain/models/weight_data.dart';
+
+// Project imports:
+import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/domain/models/weight_data.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/bmi_section.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/calories_chart.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/circular_indicator_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/goal_progress_chart.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/period_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/week_selection_tabs.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/goal_progress_chart.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/calories_chart.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/bmi_section.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
-import 'package:pockeat/core/di/service_locator.dart';
 
 class WeightProgressWidget extends StatefulWidget {
   const WeightProgressWidget({super.key});
@@ -24,14 +27,14 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryBlue = const Color(0xFF3498DB);
   final Color primaryOrange = const Color(0xFFFF9800);
-  
+
   // State variables
   String selectedPeriod = '1 Week';
   String selectedWeek = 'This week';
   bool _isLoadingCalorieData = true;
   List<CalorieData> _calorieData = [];
   double _totalCalories = 0;
-  
+
   // Service instance
   late final FoodLogDataService _foodLogDataService;
 
@@ -60,17 +63,17 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     _loadCalorieData();
   }
 
-// coverage:ignore-start  
+// coverage:ignore-start
   Future<void> _loadCalorieData() async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoadingCalorieData = true;
     });
-    
+
     try {
       List<CalorieData> calorieData;
-      
+
       if (selectedPeriod == '1 Month') {
         calorieData = await _foodLogDataService.getMonthCalorieData();
       } else {
@@ -80,21 +83,25 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
             calorieData = await _foodLogDataService.getWeekCalorieData();
             break;
           case 'Last week':
-            calorieData = await _foodLogDataService.getWeekCalorieData(weeksAgo: 1);
+            calorieData =
+                await _foodLogDataService.getWeekCalorieData(weeksAgo: 1);
             break;
           case '2 wks. ago':
-            calorieData = await _foodLogDataService.getWeekCalorieData(weeksAgo: 2);
+            calorieData =
+                await _foodLogDataService.getWeekCalorieData(weeksAgo: 2);
             break;
           case '3 wks. ago':
-            calorieData = await _foodLogDataService.getWeekCalorieData(weeksAgo: 3);
+            calorieData =
+                await _foodLogDataService.getWeekCalorieData(weeksAgo: 3);
             break;
           default:
             calorieData = await _foodLogDataService.getWeekCalorieData();
         }
       }
-      
-      final totalCalories = _foodLogDataService.calculateTotalCalories(calorieData);
-      
+
+      final totalCalories =
+          _foodLogDataService.calculateTotalCalories(calorieData);
+
       if (mounted) {
         setState(() {
           _calorieData = calorieData;
@@ -115,7 +122,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
   }
 
   List<CalorieData> _getDefaultCalorieData() {
-    return selectedPeriod == '1 Month' 
+    return selectedPeriod == '1 Month'
         ? [
             CalorieData('Week 1', 0, 0, 0),
             CalorieData('Week 2', 0, 0, 0),
@@ -179,7 +186,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
               ),
               const SizedBox(height: 16),
               CaloriesChart(
-                calorieData: _calorieData, 
+                calorieData: _calorieData,
                 totalCalories: _totalCalories,
                 isLoading: _isLoadingCalorieData,
               ),

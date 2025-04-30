@@ -23,14 +23,15 @@ class WidgetBackgroundService {
     await Workmanager().registerPeriodicTask(
       BackgroundServiceConfig.periodicUpdateTaskId.value,
       BackgroundServiceConfig.periodicUpdateTaskName.value,
-      frequency: BackgroundServiceConfig.minimumFetchInterval.value,
+      // Set task untuk berjalan setiap 5 menit
+      frequency: const Duration(minutes: 5),
       constraints: Constraints(
         networkType: NetworkType.connected,
-        requiresBatteryNotLow: true,
       ),
       existingWorkPolicy: ExistingWorkPolicy.replace,
       backoffPolicy: BackoffPolicy.linear,
-      backoffPolicyDelay: const Duration(minutes: 5),
+      // Ini untuk delay retry jika task gagal, bukan frekuensi task
+      backoffPolicyDelay: const Duration(minutes: 1),
     );
   }
 

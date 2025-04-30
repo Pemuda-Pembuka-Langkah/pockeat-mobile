@@ -3,10 +3,9 @@
 // Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
-import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/impl/detailed_food_tracking_controller.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/impl/food_tracking_client_controller_impl.dart';
@@ -42,13 +41,14 @@ class HomeWidgetModule {
     getIt.registerLazySingleton<SimpleFoodTrackingController>(
       () => SimpleFoodTrackingController(
         widgetService: getIt<WidgetDataService<SimpleFoodTracking>>(),
-        foodLogHistoryService: getIt<FoodLogHistoryService>(),
+        calorieStatsService: getIt<CalorieStatsService>(),
       ),
     );
 
     getIt.registerLazySingleton<DetailedFoodTrackingController>(
       () => DetailedFoodTrackingController(
         widgetService: getIt<WidgetDataService<DetailedFoodTracking>>(),
+        calorieStatsService: getIt<CalorieStatsService>(), 
         foodLogHistoryService: getIt<FoodLogHistoryService>(),
       ),
     );
@@ -57,11 +57,9 @@ class HomeWidgetModule {
     getIt.registerLazySingleton<FoodTrackingClientController>(
       () => FoodTrackingClientControllerImpl(
         loginService: getIt<LoginService>(),
-        caloricRequirementService: getIt<CaloricRequirementService>(),
+        caloricRequirementRepository: getIt<CaloricRequirementRepository>(),
         simpleController: getIt<SimpleFoodTrackingController>(),
         detailedController: getIt<DetailedFoodTrackingController>(),
-        healthMetricsRepository: getIt<HealthMetricsRepository>(),
-        healthMetricsCheckService: getIt<HealthMetricsCheckService>(),
       ),
     );
   }

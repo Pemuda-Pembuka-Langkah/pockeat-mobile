@@ -78,7 +78,6 @@ class GoalObstaclePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -98,14 +97,13 @@ class GoalObstaclePage extends StatelessWidget {
                           _buildObstacleOption(
                             context,
                             obstacle,
-                            selected: state.dietType == obstacle, // Reusing dietType field here
+                            selected: state.dietType ==
+                                obstacle, // Reusing dietType field here
                           ),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 24),
-
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black87,
@@ -119,7 +117,8 @@ class GoalObstaclePage extends StatelessWidget {
                         ? () async {
                             final prefs = await SharedPreferences.getInstance();
                             await prefs.setBool('onboardingInProgress', true);
-                            Navigator.pushNamed(context, '/diet'); // ← Adjust this
+                            Navigator.pushNamed(
+                                context, '/diet'); // ← Adjust this
                           }
                         : null,
                     child: const Center(child: Text("Next")),
@@ -147,7 +146,8 @@ class GoalObstaclePage extends StatelessWidget {
         color: selected ? primaryPink.withOpacity(0.1) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
-          onTap: () => cubit.setDietType(value), // Using dietType field for obstacles
+          onTap: () =>
+              cubit.setDietType(value), // Using dietType field for obstacles
           borderRadius: BorderRadius.circular(12),
           child: Container(
             padding: const EdgeInsets.all(16),

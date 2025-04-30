@@ -38,13 +38,15 @@ class FoodRecentSection extends StatefulWidget {
 class _FoodRecentSectionState extends State<FoodRecentSection>
     with WidgetsBindingObserver {
   late Future<List<FoodLogHistoryItem>> _foodsFuture;
-  late final FirebaseAuth _auth; // Tambahkan variabel _auth seperti di ExerciseSection
+  late final FirebaseAuth
+      _auth; // Tambahkan variabel _auth seperti di ExerciseSection
   final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    _auth = widget.auth ?? FirebaseAuth.instance; // Initialize auth dengan benar
+    _auth =
+        widget.auth ?? FirebaseAuth.instance; // Initialize auth dengan benar
     _loadFoods();
 
     // Register as an observer to detect app lifecycle changes
@@ -102,21 +104,20 @@ class _FoodRecentSectionState extends State<FoodRecentSection>
     }
 
     debugPrint('FoodRecentSection: Loading for userId: $userId');
-    
+
     setState(() {
       // PERUBAHAN UTAMA: Hilangkan parameter limit seperti di food_history_page
       _foodsFuture = widget.service.getAllFoodLogs(userId).then((foods) {
         debugPrint('FoodRecentSection: Raw data loaded: ${foods.length} foods');
-        
+
         // Sort by timestamp (newest first)
-        foods.sort((a, b) => 
-            (b.timestamp ?? DateTime.now())
-            .compareTo(a.timestamp ?? DateTime.now()));
-        
+        foods.sort((a, b) => (b.timestamp).compareTo(a.timestamp));
+
         // Limit data setelah sorting
         final limitedFoods = foods.take(widget.limit).toList();
-        
-        debugPrint('FoodRecentSection: Showing ${limitedFoods.length} foods after filtering');
+
+        debugPrint(
+            'FoodRecentSection: Showing ${limitedFoods.length} foods after filtering');
         return limitedFoods;
       });
     });
@@ -192,21 +193,25 @@ class _FoodRecentSectionState extends State<FoodRecentSection>
             FutureBuilder<List<FoodLogHistoryItem>>(
               future: _foodsFuture,
               builder: (context, snapshot) {
-                debugPrint('FoodRecentSection FutureBuilder status: ${snapshot.connectionState}');
-                debugPrint('FoodRecentSection FutureBuilder hasError: ${snapshot.hasError}');
-                debugPrint('FoodRecentSection FutureBuilder hasData: ${snapshot.hasData}');
-                
+                debugPrint(
+                    'FoodRecentSection FutureBuilder status: ${snapshot.connectionState}');
+                debugPrint(
+                    'FoodRecentSection FutureBuilder hasError: ${snapshot.hasError}');
+                debugPrint(
+                    'FoodRecentSection FutureBuilder hasData: ${snapshot.hasData}');
+
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
                     child: Center(child: CircularProgressIndicator()),
                   );
                 }
-                
+
                 if (snapshot.hasError) {
                   debugPrint('FoodRecentSection error: ${snapshot.error}');
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
                     child: Center(
                       child: Text(
                         'Error loading foods: ${snapshot.error}',
@@ -215,7 +220,7 @@ class _FoodRecentSectionState extends State<FoodRecentSection>
                     ),
                   );
                 }
-                
+
                 // Check for empty data
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Padding(
@@ -228,7 +233,7 @@ class _FoodRecentSectionState extends State<FoodRecentSection>
                     ),
                   );
                 }
-                
+
                 // Data tersedia, render list
                 final foods = snapshot.data!;
                 debugPrint('FoodRecentSection rendering ${foods.length} items');

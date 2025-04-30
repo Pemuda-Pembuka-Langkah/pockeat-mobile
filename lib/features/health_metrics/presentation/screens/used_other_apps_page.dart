@@ -1,6 +1,9 @@
 // used_other_apps_page.dart
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UsedOtherAppsPage extends StatefulWidget {
@@ -79,7 +82,8 @@ class _UsedOtherAppsPageState extends State<UsedOtherAppsPage> {
                     ),
                   ],
                 ),
-                child: SingleChildScrollView( // ✅ Added scrollable here
+                child: SingleChildScrollView(
+                  // ✅ Added scrollable here
                   child: Column(
                     children: [
                       for (final option in options)
@@ -158,6 +162,8 @@ class _UsedOtherAppsPageState extends State<UsedOtherAppsPage> {
   Future<void> _handleNextPressed() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('usedOtherApps', _selectedOption!);
-    Navigator.pushNamed(context, '/heard-about'); // <-- next page
+    if (mounted) {
+      Navigator.pushNamed(context, '/heard-about'); // <-- next page
+    }
   }
 }

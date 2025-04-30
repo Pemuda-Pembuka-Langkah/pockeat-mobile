@@ -1,20 +1,22 @@
 // fixed_register_page_test.dart
 // [Corrected version of your register_page_test.dart to match your register_page.dart implementation]
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:intl/intl.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
+// Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
-import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
-
 import 'register_page_test.mocks.dart';
 
 @GenerateMocks([
@@ -24,6 +26,7 @@ void main() {
   late MockRegisterService mockRegisterService;
   late MockAnalyticsService mockAnalyticsService;
   late MockFirebaseAuth mockFirebaseAuth;
+  // ignore: unused_local_variable
   late MockUser mockUser;
   late MockHealthMetricsFormCubit mockHealthMetricsFormCubit;
   late GetIt getIt;
