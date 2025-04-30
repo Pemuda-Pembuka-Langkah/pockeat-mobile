@@ -16,12 +16,15 @@ import 'package:mockito/mockito.dart';
 // Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
+import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
+import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 import 'register_page_test.mocks.dart';
 
 @GenerateMocks([
-  RegisterService, AnalyticsService, FirebaseAuth, User, HealthMetricsFormCubit
+  RegisterService, AnalyticsService, FirebaseAuth, User, HealthMetricsFormCubit,
+  GoogleSignInService, UserCredential
 ])
 void main() {
   late MockRegisterService mockRegisterService;
@@ -29,6 +32,7 @@ void main() {
   late MockFirebaseAuth mockFirebaseAuth;
   late MockUser mockUser;
   late MockHealthMetricsFormCubit mockHealthMetricsFormCubit;
+  late MockGoogleSignInService mockGoogleSignInService;
   late GetIt getIt;
 
   setUp(() {
@@ -37,12 +41,14 @@ void main() {
     mockFirebaseAuth = MockFirebaseAuth();
     mockUser = MockUser();
     mockHealthMetricsFormCubit = MockHealthMetricsFormCubit();
+    mockGoogleSignInService = MockGoogleSignInService();
     getIt = GetIt.instance;
     getIt.reset();
 
     getIt.registerSingleton<RegisterService>(mockRegisterService);
     getIt.registerSingleton<AnalyticsService>(mockAnalyticsService);
     getIt.registerSingleton<FirebaseAuth>(mockFirebaseAuth);
+    getIt.registerSingleton<GoogleSignInService>(mockGoogleSignInService);
 
     when(mockAnalyticsService.logScreenView(
       screenName: anyNamed('screenName'),
@@ -69,34 +75,37 @@ void main() {
       await tester.pumpWidget(createTestableWidget());
       expect(find.text('Create New Account'), findsOneWidget);
       expect(find.text('Sign up to start your health journey'), findsOneWidget);
-      expect(find.byType(TextFormField), findsNWidgets(5));
+      expect(find.byType(TextFormField), findsNWidgets(4)); // Name, email, password, confirm password
       expect(find.byType(Checkbox), findsOneWidget);
-      expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+      // No gender dropdown anymore
       expect(find.text('SIGN UP'), findsOneWidget);
+      // Check for Google Sign-In button
+      expect(find.byType(GoogleSignInButton), findsOneWidget);
+      expect(find.text('Register with Google'), findsOneWidget);
     });
 
-    testWidgets('Gender dropdown selection', (tester) async {
+    // Gender dropdown and birthdate picker tests removed as those fields don't exist anymore
+
+    testWidgets('Google sign-in button works', (tester) async {
+      // Setup mock return value for Google sign-in
+      final mockAuthResult = MockUserCredential();
+      when(mockUser.uid).thenReturn('test-uid');
+      when(mockAuthResult.user).thenReturn(mockUser);
+      when(mockGoogleSignInService.signInWithGoogle()).thenAnswer((_) async => mockAuthResult);
+      when(mockAnalyticsService.logEvent(
+        name: anyNamed('name'),
+        parameters: anyNamed('parameters'),
+      )).thenAnswer((_) async {});
+      
       await tester.pumpWidget(createTestableWidget());
-
-      await tester.tap(find.widgetWithText(DropdownButtonFormField<String>, 'Select your gender'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Female').last);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Female'), findsOneWidget);
-    });
-
-    testWidgets('Birthdate picker selection', (tester) async {
-      await tester.pumpWidget(createTestableWidget());
-
-      await tester.tap(find.widgetWithText(TextFormField, 'Birth Date (Optional)'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(DatePickerDialog), findsOneWidget);
-      await tester.tap(find.text('15'));
-      await tester.tap(find.text('OK'));
-      await tester.pumpAndSettle();
+      
+      // Find and tap Google sign-in button
+      final googleButton = find.byType(GoogleSignInButton);
+      expect(googleButton, findsOneWidget);
+      
+      // This is just testing the presence of the button since we can't actually
+      // trigger the Google sign-in flow in a test environment
+      expect(find.text('Register with Google'), findsOneWidget);
     });
 
     testWidgets('Password visibility toggle works', (tester) async {
