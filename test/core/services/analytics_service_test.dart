@@ -15,13 +15,10 @@ void main() {
   group('AnalyticsService Tests', () {
     late MockFirebaseAnalytics mockAnalytics;
     late AnalyticsService analyticsService;
-    late FirebaseAnalyticsObserver mockObserver;
 
     setUp(() {
       mockAnalytics = MockFirebaseAnalytics();
       analyticsService = AnalyticsService(analytics: mockAnalytics);
-      mockObserver = analyticsService.observer;
-
       // Setup the mocks to return Future<void> for all relevant methods
       when(mockAnalytics.logLogin(loginMethod: anyNamed('loginMethod')))
           .thenAnswer((_) => Future<void>.value());
