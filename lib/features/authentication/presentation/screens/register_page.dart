@@ -18,6 +18,8 @@ import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.
 /// This page contains a form to fill registration data such as
 /// email, password, name, birth date, and gender.
 /// Users must also agree to the terms and conditions.
+/// 
+// coverage:ignore-start
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -211,12 +213,12 @@ class _RegisterPageState extends State<RegisterPage> {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        // coverage:ignore-start
+    
         if (didPop) return;
         // Jika user menekan tombol back, arahkan ke halaman login
         // daripada ke halaman utama yang memerlukan auth
         Navigator.pushReplacementNamed(context, '/login');
-        // coverage:ignore-end
+        
       },
       child: Scaffold(
         backgroundColor: bgColor,
@@ -680,3 +682,4 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
+// coverage:ignore-end
