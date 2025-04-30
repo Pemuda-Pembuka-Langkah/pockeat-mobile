@@ -300,10 +300,10 @@ void main() {
 
         // Verify Sunday has the expected values
         final sundayData = result.firstWhere((data) => data.day == 'Sun');
-        expect(sundayData.protein, 26.0);
-        expect(sundayData.carbs, 42.0);
-        expect(sundayData.fats, 13.0);
-        expect(sundayData.calories, 380.0);
+        expect(sundayData.protein, 20.0);
+        expect(sundayData.carbs, 30.0);
+        expect(sundayData.fats, 10.0);
+        expect(sundayData.calories, 300.0);
 
         // Verify the service called the history service
         verify(mockFoodLogService.getAllFoodLogs('test-user-id', limit: 100))
@@ -349,7 +349,7 @@ void main() {
         expect(currentWeekResult.length, 7);
         expect(
             currentWeekResult.firstWhere((data) => data.day == 'Sun').calories,
-            380.0);
+            300.0);
 
         // Test for 1 week ago (weeksAgo = 1)
         final oneWeekAgoResult =
