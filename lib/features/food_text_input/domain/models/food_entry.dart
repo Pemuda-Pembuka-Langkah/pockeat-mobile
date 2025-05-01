@@ -1,3 +1,4 @@
+//
 class FoodEntry {
   final String foodDescription;
 
