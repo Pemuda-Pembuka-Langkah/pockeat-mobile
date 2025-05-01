@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:intl/intl.dart';
 
+
 // Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/cycling_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/models/running_activity.dart';
@@ -99,11 +100,15 @@ class ExerciseSummaryCard extends StatelessWidget {
               children: [
                 Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
                 const SizedBox(width: 4),
-                Text(
-                  _formatTimestamp(),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
+                Expanded(
+                  child: Text(
+                    _formatTimestamp(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ],
@@ -121,18 +126,24 @@ class ExerciseSummaryCard extends StatelessWidget {
               child: Column(
                 children: [
                   // Main stats row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: _buildMainStats(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: _buildMainStats(),
+                    ),
                   ),
                   if (_getAdditionalStats().isNotEmpty) ...[
                     const SizedBox(height: 12),
                     const Divider(height: 1),
                     const SizedBox(height: 12),
                     // Additional stats
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: _getAdditionalStats(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: _getAdditionalStats(),
+                      ),
                     ),
                   ],
                 ],
@@ -374,30 +385,42 @@ class ExerciseSummaryCard extends StatelessWidget {
   }
 
   Widget _buildStatItem(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Icon(
-          icon,
-          size: 20,
-          color: Colors.grey[700],
+    return Flexible(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 60),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: Colors.grey[700],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+            ),
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
+      ),
     );
   }
 

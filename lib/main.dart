@@ -557,61 +557,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             child: const HealthMetricsGoalsPage(),
           );
         },
-        '/height-weight': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: HeightWeightPage()),
-        '/birthdate': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: BirthdatePage()),
-        '/gender': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: GenderPage()),
-        '/activity-level': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: ActivityLevelPage()),
-        '/diet': (context) => const AuthWrapper(
-            requireAuth: false, redirectUrlIfLoggedIn: '/', child: DietPage()),
-        '/desired-weight': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: DesiredWeightPage()),
-        '/speed': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: SpeedSelectionPage()),
-        '/goal-obstacle': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: GoalObstaclePage()),
-        '/add-calories-back': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: AddCaloriesBackPage()),
-        '/heard-about': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: HeardAboutPage()),
-        '/rollover-calories': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: RolloverCaloriesPage()),
-        '/thank-you': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: ThankYouPage()),
-        '/used-other-apps': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: UsedOtherAppsPage()),
-        '/review': (context) => const AuthWrapper(
-              requireAuth: false,
-              redirectUrlIfLoggedIn: '/',
-              child: ReviewSubmitPage(),
-            ),
+        '/height-weight': (context) => const HeightWeightPage(),
+        '/birthdate': (context) => const BirthdatePage(),
+        '/gender': (context) => const GenderPage(),
+        '/activity-level': (context) => const ActivityLevelPage(),
+        '/diet': (context) => const DietPage(),
+        '/desired-weight': (context) => const DesiredWeightPage(),
+        '/speed': (context) => const SpeedSelectionPage(),
+        '/goal-obstacle': (context) => const GoalObstaclePage(),
+        '/add-calories-back': (context) => const AddCaloriesBackPage(),
+        '/heard-about': (context) => const HeardAboutPage(),
+        '/rollover-calories': (context) => const RolloverCaloriesPage(),
+        '/thank-you': (context) => const ThankYouPage(),
+        '/used-other-apps': (context) => const UsedOtherAppsPage(),
+        '/review': (context) => BlocProvider.value(
+         value: context.read<HealthMetricsFormCubit>(),
+          child: const ReviewSubmitPage(),
+        ),
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),

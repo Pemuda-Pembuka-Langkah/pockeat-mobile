@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
-
 /// A wrapper widget that handles authentication state
 /// and redirects users to the appropriate screens
 class AuthWrapper extends StatefulWidget {
@@ -48,9 +46,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Future<void> _checkAuth() async {
     try {
       final user = await _loginService.getCurrentUser();
-      final prefs = await SharedPreferences.getInstance();
-      final onboardingInProgress =
-          prefs.getBool('onboardingInProgress') ?? false;
 
       if (user == null) {
         // Tidak login
@@ -65,26 +60,21 @@ class _AuthWrapperState extends State<AuthWrapper> {
       } else {
         // Login
         if (widget.requireAuth) {
-          final healthMetricsCheckService =
-              GetIt.instance<HealthMetricsCheckService>();
-          final completed =
-              await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
+          final healthMetricsCheckService = GetIt.instance<HealthMetricsCheckService>();
+          final isOnboardingCompleted = await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
           if (!mounted) {
             return;
           }
-          final currentRoute = ModalRoute.of(context)?.settings.name;
-          final isInsideOnboardingFlow =
-              currentRoute?.startsWith('/onboarding') ?? false;
-
-          if ((!completed && !onboardingInProgress) &&
-              !isInsideOnboardingFlow) {
-            _redirect('/height-weight', removeUntil: true);
-          } else {
+          debugPrint('isOnboardingCompleted: $isOnboardingCompleted');
+          if(!isOnboardingCompleted){
+            Navigator.of(context).pushReplacementNamed('/height-weight');
+          } else{
             setState(() {
               _isAuthenticated = true;
               _isChecking = false;
             });
           }
+         
         } else {
           _redirect(widget.redirectUrlIfLoggedIn, replace: true);
         }
