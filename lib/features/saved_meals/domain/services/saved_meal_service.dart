@@ -1,6 +1,5 @@
 // lib/features/saved_meals/services/saved_meal_service.dart
 //
-import 'package:flutter/foundation.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/food/food_text_analysis_service.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';

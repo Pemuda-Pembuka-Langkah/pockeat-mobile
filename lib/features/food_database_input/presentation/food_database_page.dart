@@ -8,7 +8,6 @@ import 'package:pockeat/features/food_database_input/presentation/widgets/search
 import 'package:pockeat/features/food_database_input/presentation/widgets/selected_foods_tab.dart';
 import 'package:pockeat/features/food_database_input/presentation/widgets/meal_details_tab.dart';
 
-
 class NutritionDatabasePage extends StatefulWidget {
   const NutritionDatabasePage({Key? key}) : super(key: key);
 
@@ -51,7 +50,6 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
   }
-
 
   void _searchFoods() async {
     if (_searchController.text.trim().isEmpty) return;
@@ -308,9 +306,7 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
         elevation: 0,
         backgroundColor: primaryYellow,
         foregroundColor: Colors.black87,
-        actions: [
-      
-        ],
+        actions: [],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: primaryPink,

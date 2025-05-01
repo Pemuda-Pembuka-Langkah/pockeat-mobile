@@ -656,7 +656,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
                 // Tampilkan loading selama menunggu kamera
                 return const Center(
-                  child: CircularProgressIndicator(),
+                  child: const CircularProgressIndicator(),
                 );
               },
             ),

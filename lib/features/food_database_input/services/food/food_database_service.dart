@@ -6,7 +6,6 @@ import 'package:pockeat/features/food_database_input/services/base/supabase.dart
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_database_input/domain/repositories/nutrition_database_repository.dart';
 
-
 abstract class NutritionDatabaseServiceInterface {
   // Food data operations from Supabase
   Future<List<FoodAnalysisResult>> getAllFoods(
@@ -60,11 +59,10 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
   @override
   Future<List<FoodAnalysisResult>> searchFoods(String query) async {
     try {
-      final response = await _supabase.client
-          .from('nutrition_data')
-          .select()
-          .ilike('food', '%$query%')
-          .limit(20);
+      final response = await _supabase.fetchFromTable(
+        'nutrition_data',
+        limit: 20,
+      );
 
       return _convertToFoodAnalysisResults(response);
     } catch (e) {

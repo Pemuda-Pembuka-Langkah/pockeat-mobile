@@ -42,6 +42,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
           SnackBar(
             content: Text(message),
             backgroundColor: backgroundColor,
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -219,7 +220,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
               SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(
+                child: const CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
