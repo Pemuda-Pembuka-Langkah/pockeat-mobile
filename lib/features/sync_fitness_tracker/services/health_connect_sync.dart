@@ -1,4 +1,4 @@
-// coverage:ignore-file
+//
 
 // Dart imports:
 import 'dart:async';
@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+//
 
 class FitnessTrackerSync {
   /// Health plugin instance
@@ -37,7 +39,7 @@ class FitnessTrackerSync {
 
   /// Local permission state to handle Health Connect inconsistencies
   bool _localPermissionState = false;
-
+//coverage:ignore-start
   /// Reset the cached permission state to force a fresh check
   void resetPermissionState() {
     _localPermissionState = false;
@@ -531,6 +533,7 @@ class FitnessTrackerSync {
     }
   }
 
+//coverage:ignore-end
   /// Helper method to get date range for a day (testable)
   @protected
   DateTimeRange getDateRange(DateTime date) {
