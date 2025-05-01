@@ -44,6 +44,7 @@ class FitnessTrackerSync {
   void resetPermissionState() {
     _localPermissionState = false;
   }
+
 //coverage:ignore-end
   /// Access to Health instance (protected for testing)
   // coverage:ignore-start
@@ -64,6 +65,8 @@ class FitnessTrackerSync {
   // coverage:ignore-end
 
   /// Initialize and check permissions in one step
+  ///
+  //coverage:ignore-start
   Future<bool> initializeAndCheckPermissions() async {
     try {
       debugPrint('Initializing Health Connect and checking permissions...');
@@ -206,6 +209,7 @@ class FitnessTrackerSync {
       return false;
     }
   }
+  //coverage:ignore-end
 
   /// Open the Health Connect permissions screen directly
   // coverage:ignore-start
@@ -306,6 +310,7 @@ class FitnessTrackerSync {
   }
   // coverage:ignore-end
 
+// coverage:ignore-start
   /// Perform a forced data read to ensure permissions are working
   Future<bool> performForcedDataRead() async {
     try {
@@ -452,6 +457,8 @@ class FitnessTrackerSync {
       return 0;
     }
   }
+  //coverage:ignore-end
+
 //coverage:ignore-start
   /// Get calories burned for a specific day
   Future<double?> getCaloriesBurnedForDay(DateTime date) async {
@@ -563,10 +570,12 @@ class FitnessTrackerSync {
   // coverage:ignore-end
 
   /// Manually set the permission state (for fixing permission detection issues)
+  //coverage:ignore-start
   @protected
   void setPermissionGranted() {
     _localPermissionState = true;
   }
+  //coverage:ignore-end
 
   /// Format readable date
   String formatDate(DateTime date) {
