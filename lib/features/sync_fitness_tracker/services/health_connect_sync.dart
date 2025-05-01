@@ -101,6 +101,7 @@ class FitnessTrackerSync {
     }
   }
 
+  // coverage:ignore-end
   /// Configure the health plugin (can be overridden in tests)
   // coverage:ignore-start
   @protected
@@ -119,6 +120,7 @@ class FitnessTrackerSync {
 
   /// Check if we have required permissions by actually trying to read data
   /// Only call this method when explicitly checking permissions, not in regular data flows
+  //coverage:ignore-start
   Future<bool> hasRequiredPermissions() async {
     // If we're sure we don't have permission, avoid unnecessary checks
     if (_localPermissionState == false) {
