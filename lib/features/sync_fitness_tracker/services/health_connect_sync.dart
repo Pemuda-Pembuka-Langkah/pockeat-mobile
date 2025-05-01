@@ -44,8 +44,7 @@ class FitnessTrackerSync {
   void resetPermissionState() {
     _localPermissionState = false;
   }
-// coverage:ignore-end
-
+//coverage:ignore-end
   /// Access to Health instance (protected for testing)
   // coverage:ignore-start
   @protected
@@ -453,9 +452,8 @@ class FitnessTrackerSync {
       return 0;
     }
   }
-
+//coverage:ignore-start
   /// Get calories burned for a specific day
-  //coverage:ignore-start
   Future<double?> getCaloriesBurnedForDay(DateTime date) async {
     debugPrint('Getting calories for day: ${formatDate(date)}');
 

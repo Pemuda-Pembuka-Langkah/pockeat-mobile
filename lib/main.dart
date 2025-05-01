@@ -12,7 +12,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
-// import 'package:pockeat/features/food_database_input/presentation/food_database_page.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 import 'package:pockeat/features/saved_meals/presentation/screens/saved_meal_detail_page.dart';
 import 'package:pockeat/features/saved_meals/presentation/screens/saved_meals_page.dart';
@@ -91,7 +90,6 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Core imports:
 
@@ -228,13 +226,6 @@ void main() async {
 
   // Initialize Instabug
   await _initializeInstabug(flavor);
-
-  // Initialize Supabase
-  // await Supabase.initialize(
-  //   url: dotenv.env['SUPABASE_URL'] ?? '',
-  //   anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
-  //   debug: flavor != 'production',
-  // );
 
   await Firebase.initializeApp(
     options: flavor == 'production'
@@ -700,16 +691,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           );
         },
-        // '/nutrition-database': (context) =>
-        //     const AuthWrapper(child: NutritionDatabasePage()),
-        // '/analytic': (context) {
-        //   final args = ModalRoute.of(context)!.settings.arguments
-        //       as Map<String, dynamic>?;
-        //   return ProgressPage(
-        //     service: ProgressTabsService(ProgressTabsRepositoryImpl()),
-        //     initialTabIndex: args?['initialTabIndex'] as int? ?? 0,
-        //   );
-        // },
+        '/analytic': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return ProgressPage(
+            service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+            initialTabIndex: args?['initialTabIndex'] as int? ?? 0,
+          );
+        },
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
         '/edit-profile': (context) {

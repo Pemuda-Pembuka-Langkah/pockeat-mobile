@@ -52,8 +52,11 @@ class FoodTextAnalysisService {
         },
       );
 
-      final foodResult = FoodAnalysisResult.fromJson(responseData);
+      //print('Response data: $responseData');
 
+      final foodResult = FoodAnalysisResult.fromJson(responseData);
+      //print('INI MASUK APA KAGA SIH ANJING');
+      //print('Corrected food analysis: $foodResult');
       // Even if there's an error field, return a FoodAnalysisResult
       // The fromJson method or caller can handle the error appropriately
       return foodResult;

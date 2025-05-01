@@ -42,9 +42,10 @@ class FoodLogDataService {
       final weekLogs = _filterLogsForSpecificWeek(foodLogs, startDate, endDate);
 
       debugPrint(
-          'Found ${weekLogs.length} food logs for week ($weeksAgo weeks ago)');
+          'Found ${weekLogs.length} food logs for week (${weeksAgo} weeks ago)');
 
-      // Debug print each food log
+      // Debugdebugprint each food log
+
       for (var log in weekLogs) {
         final day = _getDayName(log.timestamp.add(const Duration(hours: 7)));
         debugPrint('Food log on $day: ${log.title}, Calories: ${log.calories}, '
@@ -54,7 +55,9 @@ class FoodLogDataService {
       // Group entries by day and calculate macronutrient totals
       return _processLogsToCalorieData(weekLogs, startDate);
     } catch (e) {
-      debugPrint('Error fetching week calorie data ($weeksAgo weeks ago): $e');
+      debugPrint(
+          'Error fetching week calorie data (${weeksAgo} weeks ago): $e');
+
       return _getDefaultWeekData();
     }
   }
@@ -71,6 +74,13 @@ class FoodLogDataService {
       return log.timestamp.isAfter(startDate) &&
           log.timestamp.isBefore(endDate);
     }).toList();
+  }
+
+  // Filter logs for the current week (legacy method kept for compatibility)
+  List<FoodLogHistoryItem> _filterLogsForCurrentWeek(
+      List<FoodLogHistoryItem> logs, DateTime startDate) {
+    final endDate = startDate.add(const Duration(days: 7));
+    return _filterLogsForSpecificWeek(logs, startDate, endDate);
   }
 
   // Get calorie data for current month (grouped by weeks)

@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
-// import 'package:pockeat/features/food_database_input/services/food_database_module.dart';
 import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -189,9 +188,6 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<NotificationService>(
     NotificationServiceImpl(),
   );
-
-  // Register Supabase nutrition database module
-  // NutritionDatabaseModule.register();
 
   // Register SavedMealsRepository before SavedMealService
   getIt.registerSingleton<SavedMealsRepository>(
