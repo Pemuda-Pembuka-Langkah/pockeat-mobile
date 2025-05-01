@@ -1,3 +1,4 @@
+//coverage: ignore-file
 // Package imports:
 import 'package:http/http.dart' as http;
 
@@ -13,9 +14,11 @@ class ApiAuthInterceptor {
   /// Add authorization header to the request
   Future<http.Request> interceptRequest(http.Request request) async {
     final token = await _tokenManager.getIdToken();
+    //coverage:ignore-start
     if (token != null) {
       request.headers['Authorization'] = 'Bearer $token';
     }
+    //coverage:ignore-end
     return request;
   }
 

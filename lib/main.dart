@@ -12,6 +12,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
+import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+import 'package:pockeat/features/saved_meals/presentation/screens/saved_meal_detail_page.dart';
+import 'package:pockeat/features/saved_meals/presentation/screens/saved_meals_page.dart';
 import 'package:provider/provider.dart';
 
 // Project imports:
@@ -277,6 +280,9 @@ void main() async {
         ),
         Provider<FoodTextInputRepository>(
           create: (_) => getIt<FoodTextInputRepository>(),
+        ),
+        Provider<SavedMealService>(
+          create: (_) => getIt<SavedMealService>(),
         ),
         Provider<CaloricRequirementService>(
             create: (_) => getIt<CaloricRequirementService>()),
@@ -571,17 +577,40 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),
-        '/scan': (context) => AuthWrapper(
-              child: ScanFoodPage(
-                cameraController: CameraController(
-                  const CameraDescription(
-                    name: '0',
-                    lensDirection: CameraLensDirection.back,
-                    sensorOrientation: 0,
-                  ),
-                  ResolutionPreset.max,
-                ),
-              ),
+        '/scan': (context) => FutureBuilder<List<CameraDescription>>(
+              future: availableCameras(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
+
+                  if (snapshot.data?.isEmpty ?? true) {
+                    return const Center(
+                      child: Text('Tidak ada kamera yang tersedia'),
+                    );
+                  }
+
+                  return AuthWrapper(
+                    child: ScanFoodPage(
+                      cameraController: CameraController(
+                        snapshot
+                            .data![0], // Menggunakan kamera pertama (belakang)
+                        ResolutionPreset.max,
+                        enableAudio: false,
+                        imageFormatGroup: ImageFormatGroup.jpeg,
+                      ),
+                    ),
+                  );
+                }
+
+                // Tampilkan loading selama menunggu kamera
+                return const Center(
+                  child: const CircularProgressIndicator(),
+                );
+              },
             ),
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
         '/food-text-input': (context) =>
@@ -624,15 +653,35 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           );
         },
-        '/analytic': (context) => ProgressPage(
-              service: ProgressTabsService(ProgressTabsRepositoryImpl()),
-            ),
+        '/analytic': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return ProgressPage(
+            service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+            initialTabIndex: args?['initialTabIndex'] as int? ?? 0,
+          );
+        },
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
         '/edit-profile': (context) {
           final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
           return AuthWrapper(
             child: EditProfilePage(initialUser: user),
+          );
+        },
+        '/saved-meals': (context) => AuthWrapper(
+              child: SavedMealsPage(
+                savedMealService: getIt<SavedMealService>(),
+              ),
+            ),
+        '/saved-meal-detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
+          return AuthWrapper(
+            child: SavedMealDetailPage(
+              savedMealId: args['savedMealId'] as String,
+              savedMealService: getIt<SavedMealService>(),
+            ),
           );
         },
       },

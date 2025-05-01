@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:pockeat/features/home_screen_widget/domain/constants/widget_config.dart';
 import 'home_widget_client.dart';
 
-// coverage:ignore-file
+//
 /// Implementasi custom HomeWidgetInterface menggunakan MethodChannel langsung
 /// Ini memberikan kontrol lebih dan memudahkan debugging
 class CustomHomeWidgetClient implements HomeWidgetInterface {

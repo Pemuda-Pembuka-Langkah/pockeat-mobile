@@ -18,11 +18,13 @@ import 'package:pockeat/features/progress_charts_and_graphs/services/progress_ta
 
 class ProgressPage extends StatefulWidget {
   final ProgressTabsService service;
+  final int initialTabIndex;
 
   // ignore: use_super_parameters
   const ProgressPage({
     Key? key,
     required this.service,
+    this.initialTabIndex = 0,
   }) : super(key: key);
 
   @override
@@ -60,8 +62,11 @@ class _ProgressPageState extends State<ProgressPage>
 
       // Initialize main tab controller - just 2 tabs: Progress Insights and Log History
       final mainTabController = TabController(
-          length: 2, // Fixed at 2 tabs now
-          vsync: this);
+        length: 2, // Fixed at 2 tabs now
+        vsync: this,
+        initialIndex:
+            widget.initialTabIndex, // Set initial tab based on parameter
+      );
 
       // Set up tab change listeners
       mainTabController.addListener(() {
