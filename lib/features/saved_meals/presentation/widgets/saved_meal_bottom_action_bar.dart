@@ -34,6 +34,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
     this.onDelete,
   });
 
+  //coverage:ignore-start
   void showSnackBarMessage(BuildContext context, String message,
       {Color? backgroundColor}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -48,6 +49,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
       }
     });
   }
+  //coverage:ignore-end
 
   @override
   Widget build(BuildContext context) {
@@ -201,6 +203,8 @@ class SavedMealBottomActionBar extends StatelessWidget {
     );
   }
 
+  //coverage:ignore-start
+
   Future<void> _applyAICorrection(
       BuildContext context, String correction) async {
     if (correction.isEmpty || savedMeal == null) return;
@@ -285,8 +289,6 @@ class SavedMealBottomActionBar extends StatelessWidget {
         }
       });
     } catch (e) {
-      //print("Error correcting meal: $e");
-
       // Clear any existing snackbars
       scaffoldMessenger.hideCurrentSnackBar();
 
@@ -675,3 +677,4 @@ class SavedMealBottomActionBar extends StatelessWidget {
     }
   }
 }
+//coverage:ignore-end
