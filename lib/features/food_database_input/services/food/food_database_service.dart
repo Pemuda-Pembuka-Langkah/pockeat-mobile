@@ -59,14 +59,15 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
   @override
   Future<List<FoodAnalysisResult>> searchFoods(String query) async {
     try {
-      final response = await _supabase.fetchFromTable(
-        'nutrition_data',
-        limit: 20,
-      );
+      final response = await _supabase.client
+          .from('nutrition_data')
+          .select()
+          .ilike('food', '%$query%')
+          .limit(20);
 
       return _convertToFoodAnalysisResults(response);
     } catch (e) {
-      //print('Error searching foods: $e');
+      // print('Error searching foods: $e');
       return [];
     }
   }
