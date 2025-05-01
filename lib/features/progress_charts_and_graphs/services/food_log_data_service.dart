@@ -1,8 +1,13 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// Flutter imports:
 import 'package:flutter/foundation.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
 
 // coverage:ignore-start
 class FoodLogDataService {
@@ -40,6 +45,7 @@ class FoodLogDataService {
           'Found ${weekLogs.length} food logs for week (${weeksAgo} weeks ago)');
 
       // Debugdebugprint each food log
+
       for (var log in weekLogs) {
         final day = _getDayName(log.timestamp.add(const Duration(hours: 7)));
         debugPrint('Food log on $day: ${log.title}, Calories: ${log.calories}, '
@@ -51,6 +57,7 @@ class FoodLogDataService {
     } catch (e) {
       debugPrint(
           'Error fetching week calorie data (${weeksAgo} weeks ago): $e');
+
       return _getDefaultWeekData();
     }
   }
@@ -149,7 +156,7 @@ class FoodLogDataService {
       dailyCalories[dayOfWeek] = (dailyCalories[dayOfWeek] ?? 0) + calories;
     }
 
-    // Debugdebugprint daily macros and calories
+    // Debug print daily macros and calories
     double weekTotal = 0;
     for (var dayName in dayNames) {
       final dayCalories = dailyCalories[dayName] ?? 0;
@@ -223,7 +230,7 @@ class FoodLogDataService {
       weeklyCalories[weekNumber] = (weeklyCalories[weekNumber] ?? 0) + calories;
     }
 
-    // Debugdebugprint weekly macros and calories
+    // Debug print weekly macros and calories
     for (int i = 1; i <= 4; i++) {
       debugPrint('Week $i - Protein: ${weeklyMacros[i]!['protein']}, '
           'Carbs: ${weeklyMacros[i]!['carbs']}, '

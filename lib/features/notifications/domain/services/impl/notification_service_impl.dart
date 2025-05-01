@@ -164,19 +164,18 @@ class NotificationServiceImpl implements NotificationService {
       // Navigate to the dashboard with focus on main tab when pet status notification is tapped
       // Using the same behavior as pet sadness notification
       const deepLinkUri = 'pockeat://?type=dashboard&widgetName=main';
-      
+
       // Create a platform channel for launching URIs
       const platformChannel = MethodChannel('com.pockeat/notification_actions');
-      
+
       // Call the native method to open the URI
       await platformChannel.invokeMethod('launchUri', {
         'uri': deepLinkUri,
       });
-      
+
       // Track app open when user opens the notification
       await _userActivityService.trackAppOpen();
-    }
-    else if (details.payload == NotificationConstants.dailyStreakPayload) {
+    } else if (details.payload == NotificationConstants.dailyStreakPayload) {
       final userId = (await _loginService.getCurrentUser())?.uid;
       if (userId == null) return;
 
@@ -240,8 +239,7 @@ class NotificationServiceImpl implements NotificationService {
       await cancelNotificationsByChannel(channelId);
 
       // Save notification status to SharedPreferences
-      await _prefs.setBool(
-          NotificationConstants.prefPetStatusEnabled, enabled);
+      await _prefs.setBool(NotificationConstants.prefPetStatusEnabled, enabled);
 
       if (enabled) {
         // Schedule notification if enabled
@@ -328,12 +326,10 @@ class NotificationServiceImpl implements NotificationService {
     if (channelId == NotificationConstants.petStatusChannelId) {
       // If key doesn't exist, create it with default value true
       if (!_prefs.containsKey(NotificationConstants.prefPetStatusEnabled)) {
-        await _prefs.setBool(
-            NotificationConstants.prefPetStatusEnabled, true);
+        await _prefs.setBool(NotificationConstants.prefPetStatusEnabled, true);
         return true;
       }
-      return _prefs.getBool(NotificationConstants.prefPetStatusEnabled) ??
-          true;
+      return _prefs.getBool(NotificationConstants.prefPetStatusEnabled) ?? true;
     }
     // For daily streak notifications, default to true if key doesn't exist
     else if (channelId == NotificationConstants.dailyStreakChannelId) {
@@ -454,7 +450,7 @@ class NotificationServiceImpl implements NotificationService {
       await _setupNotificationByChannel(
           NotificationConstants.petStatusChannelId);
     }
-    
+
     // Set up daily streak notifications if enabled
     final isStreakEnabled =
         await isNotificationEnabled(NotificationConstants.dailyStreakChannelId);
@@ -780,8 +776,8 @@ class NotificationServiceImpl implements NotificationService {
     await _prefs.setInt(NotificationConstants.prefPetStatusMinute, time.minute);
 
     // Only reschedule if notifications are enabled
-    final isPetStatusEnabled = await isNotificationEnabled(
-        NotificationConstants.petStatusChannelId);
+    final isPetStatusEnabled =
+        await isNotificationEnabled(NotificationConstants.petStatusChannelId);
 
     if (isPetStatusEnabled) {
       // Cancel existing notification
@@ -800,9 +796,10 @@ class NotificationServiceImpl implements NotificationService {
 
     return TimeOfDay(
         hour: hour ?? NotificationConstants.defaultPetStatusNotificationHour,
-        minute: minute ?? NotificationConstants.defaultPetStatusNotificationMinute);
+        minute:
+            minute ?? NotificationConstants.defaultPetStatusNotificationMinute);
   }
-  
+
   /// Schedule a periodic task to check for user inactivity and show pet sadness notifications
   Future<void> _schedulePetSadnessCheck() async {
     // Cancel any existing task first to avoid duplicates
@@ -817,8 +814,8 @@ class NotificationServiceImpl implements NotificationService {
       now.year,
       now.month,
       now.day,
-      13, 
-      0, 
+      13,
+      0,
     );
 
     // If 2 AM today has already passed, schedule for tomorrow at 2 AM

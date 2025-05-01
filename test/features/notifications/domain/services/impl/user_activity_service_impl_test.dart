@@ -9,10 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 // Project imports:
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/user_activity_service_impl.dart';
+import 'user_activity_service_impl_test.mocks.dart';
 
 // Generate mocks for SharedPreferences
 @GenerateMocks([SharedPreferences])
-import 'user_activity_service_impl_test.mocks.dart';
 
 void main() {
   late UserActivityServiceImpl userActivityService;
