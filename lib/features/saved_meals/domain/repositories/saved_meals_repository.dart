@@ -42,13 +42,13 @@ class SavedMealsRepository {
   SavedMealsRepository({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
-    //coverage:ignore_start
+    //coverage:ignore-start
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance,
         _foodAnalysisRepository = FoodAnalysisRepository(
           firestore: firestore,
         );
-  //coverage:ignore_end
+  //coverage:ignore-end
 
   // Collection reference
   CollectionReference get _savedMealsCollection =>
@@ -115,7 +115,7 @@ class SavedMealsRepository {
         return meals;
       });
     } catch (e, stackTrace) {
-      //coverage:ignore_start
+      //coverage:ignore-start
       debugPrint("SavedMealsRepository: Error getting saved meals - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
       //coverage:ignore-end
