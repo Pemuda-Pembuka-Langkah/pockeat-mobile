@@ -1,10 +1,8 @@
 // lib/features/ai_api_scan/services/food/food_image_analysis_service.dart
 //coverage: ignore-file
 
-
 // Dart imports:
 import 'dart:io';
-
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
@@ -56,7 +54,7 @@ class FoodImageAnalysisService {
           'user_comment': userComment,
         },
       );
-      print('Response data: $responseData');
+      //print('Response data: $responseData');
 
       // Even if there's an error field, return a FoodAnalysisResult
       // The fromJson method or caller can handle the error appropriately

@@ -291,66 +291,58 @@ void main() {
 
     await tester.pumpWidget(nutritionPage);
     await tester.pumpAndSettle();
-    
+
     // Verify initial data
     expect(find.text('Test Food'), findsOneWidget);
     expect(find.text('250'), findsAtLeastNWidgets(1)); // Initial calories
-    
+
     // Find the BottomActionBar and its correction button
     final bottomActionBarFinder = find.byType(BottomActionBar);
     expect(bottomActionBarFinder, findsOneWidget);
-    
+
     final correctButtonFinder = find.descendant(
       of: bottomActionBarFinder,
       matching: find.text('Correct Analysis'),
     );
     expect(correctButtonFinder, findsOneWidget);
-    
+
     // Tap the correction button to show dialog
     await tester.tap(correctButtonFinder);
     await tester.pumpAndSettle();
-    
+
     // Dialog should be visible
     expect(find.text('Correct Analysis'), findsAtLeastNWidgets(1));
     expect(find.text('Enter your correction:'), findsOneWidget);
-    
+
     // Enter the correction text
-    await tester.enterText(find.byType(TextField), 'This is actually brown rice with vegetables');
-    
+    await tester.enterText(
+        find.byType(TextField), 'This is actually brown rice with vegetables');
+
     // Find and tap the Submit Correction button
     final submitButtonFinder = find.text('Submit Correction');
     expect(submitButtonFinder, findsOneWidget);
-    
+
     // Tap the Submit button
     await tester.tap(submitButtonFinder);
     await tester.pump(); // Process the tap
-    
+
     // Verify the dialog is dismissed
     expect(find.text('Submit Correction'), findsNothing);
-    
+
     // Verify that the correction service was called with the text
     verify(() => mockFoodScanPhotoService.correctFoodAnalysis(
-      any(), 
-      'This is actually brown rice with vegetables'
-    )).called(1);
+        any(), 'This is actually brown rice with vegetables')).called(1);
 
     // Skip checking for loading state since it may not be visible in tests
     // Instead, pump multiple times with delays to allow the UI to update
     await tester.pump(const Duration(milliseconds: 50));
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pumpAndSettle();
-    
+
     // Verify food name has changed
-    // First print all text in the widget tree to help debug
-    print('====== TEXTS IN WIDGET TREE =======');
+
     final allTextWidgets = tester.widgetList(find.byType(Text));
-    for (final widget in allTextWidgets) {
-      if (widget is Text) {
-        print('Text: "${widget.data}"');
-      }
-    }
-    print('=================================');
-    
+
     // We've confirmed the service was called and the success message appeared
     // That's enough to consider the test passed for this specific feature
   });

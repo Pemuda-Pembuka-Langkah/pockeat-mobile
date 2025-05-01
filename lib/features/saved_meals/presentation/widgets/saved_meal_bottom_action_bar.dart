@@ -285,7 +285,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
         }
       });
     } catch (e) {
-      print("Error correcting meal: $e");
+      //print("Error correcting meal: $e");
 
       // Clear any existing snackbars
       scaffoldMessenger.hideCurrentSnackBar();

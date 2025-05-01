@@ -51,7 +51,7 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
 
       return _convertToFoodAnalysisResults(response);
     } catch (e) {
-      print('Error fetching foods: $e');
+      //print('Error fetching foods: $e');
       return [];
     }
   }
@@ -66,7 +66,7 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
 
       return _convertToFoodAnalysisResults(response);
     } catch (e) {
-      print('Error searching foods: $e');
+      //print('Error searching foods: $e');
       return [];
     }
   }
@@ -79,7 +79,7 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
 
       return _convertToFoodAnalysisResult(response);
     } catch (e) {
-      print('Error getting food by ID: $e');
+      //print('Error getting food by ID: $e');
       return null;
     }
   }
@@ -231,7 +231,7 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
           timestamp: DateTime.now(),
           additionalInformation: finalAdditionalInfo);
     } catch (e) {
-      print('Error creating local meal: $e');
+      //print('Error creating local meal: $e');
       throw Exception('Failed to create local meal: $e');
     }
   }
@@ -347,7 +347,7 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
         additionalInformation: updatedAdditionalInfo,
       );
     } catch (e) {
-      print('Error updating local meal: $e');
+      //print('Error updating local meal: $e');
       throw Exception('Failed to update local meal: $e');
     }
   }
@@ -369,7 +369,7 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
       // Use the repository to save the meal
       return await _repository.save(mealWithUserId, mealWithUserId.id);
     } catch (e) {
-      print('Error saving meal to Firebase: $e');
+      //print('Error saving meal to Firebase: $e');
       throw Exception('Failed to save meal: $e');
     }
   }

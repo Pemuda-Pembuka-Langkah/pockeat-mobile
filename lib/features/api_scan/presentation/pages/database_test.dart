@@ -58,7 +58,7 @@ class _NutritionDatabaseTestPageState extends State<NutritionDatabaseTestPage> {
       _isSupabaseConnected = testData.isNotEmpty;
     } catch (e) {
       _isSupabaseConnected = false;
-      print('Supabase connection error: $e');
+      //print('Supabase connection error: $e');
     }
 
     try {
@@ -76,7 +76,7 @@ class _NutritionDatabaseTestPageState extends State<NutritionDatabaseTestPage> {
       }
     } catch (e) {
       _isFirebaseConnected = false;
-      print('Firebase connection error: $e');
+      //print('Firebase connection error: $e');
     }
 
     setState(() {
@@ -137,7 +137,7 @@ class _NutritionDatabaseTestPageState extends State<NutritionDatabaseTestPage> {
 
     try {
       int foodId;
-      
+
       // Handle different ID formats:
       // 1. Regular food item: "food_123"
       // 2. Portion-adjusted food: "portion_food_123_100g"
@@ -147,8 +147,10 @@ class _NutritionDatabaseTestPageState extends State<NutritionDatabaseTestPage> {
         foodId = int.parse(idString);
       } else if (selectedFood.id.startsWith('portion_')) {
         // Extract the original food ID from additional information
-        if (selectedFood.additionalInformation.containsKey('original_food_id')) {
-          String originalId = selectedFood.additionalInformation['original_food_id'];
+        if (selectedFood.additionalInformation
+            .containsKey('original_food_id')) {
+          String originalId =
+              selectedFood.additionalInformation['original_food_id'];
           originalId = originalId.replaceAll('food_', '');
           foodId = int.parse(originalId);
         } else {
@@ -224,7 +226,7 @@ class _NutritionDatabaseTestPageState extends State<NutritionDatabaseTestPage> {
         count = int.parse(countText);
         if (count < 1) count = 1; // Ensure minimum count of 1
       } catch (e) {
-        print('Invalid component count for ${food.foodName}: $e');
+        //print('Invalid component count for ${food.foodName}: $e');
       }
 
       // Get the adjusted portion for this food
@@ -253,8 +255,6 @@ class _NutritionDatabaseTestPageState extends State<NutritionDatabaseTestPage> {
           'Created meal "${_mealNameController.text}" with ${components.length} components';
     });
   }
-
-
 
   void _clearMeal() {
     setState(() {
@@ -626,7 +626,6 @@ class _NutritionDatabaseTestPageState extends State<NutritionDatabaseTestPage> {
 
                 const SizedBox(height: 16),
 
-
                 // Current meal details
                 if (_currentMeal != null) ...[
                   Text('Current Meal',
@@ -853,7 +852,6 @@ class _NutritionDatabaseTestPageState extends State<NutritionDatabaseTestPage> {
                                       'P: ${meal.nutritionInfo.protein.toStringAsFixed(2)}g | '
                                       'C: ${meal.nutritionInfo.carbs.toStringAsFixed(2)}g | '
                                       'F: ${meal.nutritionInfo.fat.toStringAsFixed(2)}g'),
-                     
                                 ),
                               );
                             },

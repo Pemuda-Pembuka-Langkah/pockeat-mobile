@@ -205,7 +205,7 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
         count = int.parse(countText);
         if (count < 1) count = 1; // Ensure minimum count of 1
       } catch (e) {
-        print('Invalid component count for ${food.foodName}: $e');
+        //print('Invalid component count for ${food.foodName}: $e');
       }
 
       // Get the adjusted portion for this food

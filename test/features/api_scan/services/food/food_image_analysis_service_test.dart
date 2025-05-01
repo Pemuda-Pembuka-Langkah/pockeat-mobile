@@ -106,11 +106,8 @@ void main() {
       // Act & Assert
       expect(
         () => service.analyze(mockFile),
-        throwsA(isA<ApiServiceException>().having(
-          (e) => e.message, 
-          'error message', 
-          equals('Could not analyze image')
-        )),
+        throwsA(isA<ApiServiceException>().having((e) => e.message,
+            'error message', equals('Could not analyze image'))),
       );
     });
 
@@ -279,11 +276,8 @@ void main() {
       // Act & Assert
       expect(
         () => service.correctAnalysis(previousResult, userComment),
-        throwsA(isA<ApiServiceException>().having(
-          (e) => e.message, 
-          'error message', 
-          equals('Failed to correct analysis')
-        )),
+        throwsA(isA<ApiServiceException>().having((e) => e.message,
+            'error message', equals('Failed to correct analysis'))),
       );
     });
 
@@ -367,8 +361,9 @@ void main() {
       );
     });
 
-    test('should log response during correction (debug print test)', () async {
-      // Arrange - This test is to cover the print statement in the service
+    test('should log response during correction (debugdebugprint test)',
+        () async {
+      // Arrange - This test is to cover thedebugprint statement in the service
       final previousResult = FoodAnalysisResult(
         foodName: 'Burger',
         ingredients: [],
@@ -419,8 +414,8 @@ void main() {
           'user_comment': userComment,
         },
       )).called(1);
-      
-      // We're not directly testing the print statement
+
+      // We're not directly testing thedebugprint statement
       // Just ensuring that branch is covered for code coverage
     });
   });
