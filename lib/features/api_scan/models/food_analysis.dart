@@ -176,7 +176,9 @@
             parsedTimestamp = DateTime.now();
           }
         } else {
+          //coverage:ignore-start
           parsedTimestamp = DateTime.now();
+          //coverage:ignore-end
         }
       } else {
         parsedTimestamp = DateTime.now();

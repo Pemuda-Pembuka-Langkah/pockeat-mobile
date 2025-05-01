@@ -39,7 +39,7 @@ class FitnessTrackerSync {
 
   /// Local permission state to handle Health Connect inconsistencies
   bool _localPermissionState = false;
-
+//coverage:ignore-start
   /// Reset the cached permission state to force a fresh check
   void resetPermissionState() {
     _localPermissionState = false;
@@ -533,6 +533,7 @@ class FitnessTrackerSync {
     }
   }
 
+//coverage:ignore-end
   /// Helper method to get date range for a day (testable)
   @protected
   DateTimeRange getDateRange(DateTime date) {

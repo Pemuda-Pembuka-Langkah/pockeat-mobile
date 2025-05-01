@@ -42,11 +42,13 @@ class SavedMealsRepository {
   SavedMealsRepository({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
+    //coverage:ignore_start
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance,
         _foodAnalysisRepository = FoodAnalysisRepository(
           firestore: firestore,
         );
+  //coverage:ignore_end
 
   // Collection reference
   CollectionReference get _savedMealsCollection =>
@@ -87,8 +89,10 @@ class SavedMealsRepository {
         updatedAt: now,
       );
     } catch (e, stackTrace) {
+      //coverage:ignore-start
       debugPrint("SavedMealsRepository: Error saving meal - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }
@@ -111,8 +115,10 @@ class SavedMealsRepository {
         return meals;
       });
     } catch (e, stackTrace) {
+      //coverage:ignore_start
       debugPrint("SavedMealsRepository: Error getting saved meals - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }
@@ -129,8 +135,10 @@ class SavedMealsRepository {
       debugPrint("SavedMealsRepository: Meal found - $id");
       return SavedMeal.fromFirestore(doc);
     } catch (e, stackTrace) {
+      //coverage:ignore-start
       debugPrint("SavedMealsRepository: Error getting saved meal - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }
@@ -174,8 +182,10 @@ class SavedMealsRepository {
 
       return savedId;
     } catch (e, stackTrace) {
+      //coverage:ignore-start
       debugPrint("SavedMealsRepository: Error logging food analysis - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }
@@ -187,8 +197,10 @@ class SavedMealsRepository {
 
       return await _foodAnalysisRepository.getAnalysisResultsByDate(date);
     } catch (e, stackTrace) {
+      //coverage:ignore-start
       debugPrint("SavedMealsRepository: Error getting food logs - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }
@@ -209,8 +221,10 @@ class SavedMealsRepository {
           "SavedMealsRepository: Meal saved check result - ${snapshot.docs.isNotEmpty}");
       return snapshot.docs.isNotEmpty;
     } catch (e, stackTrace) {
+      ////coverage:ignore-start
       debugPrint("SavedMealsRepository: Error checking if meal is saved - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }

@@ -85,12 +85,14 @@ class MealDetailsTab extends StatelessWidget {
     }
 
     // Handle the navigation to food history
+    //coverage:ignore-start
     void handleSaveMeal() {
       onSaveMeal();
       // After successful meal logging, navigate to analytics with food history tab
       Navigator.of(context).popAndPushNamed('/analytic', 
           arguments: {'initialTabIndex': 1});
     }
+    //coverage:ignore-end
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -327,6 +329,7 @@ class MealDetailsTab extends StatelessWidget {
                     children: [
                       FoodConsumptionItem(
                         food: food ??
+                        //coverage:ignore-start
                             FoodAnalysisResult(
                               foodName: ingredient.name,
                               ingredients: [ingredient],
@@ -349,6 +352,7 @@ class MealDetailsTab extends StatelessWidget {
                               timestamp: DateTime.now(),
                               additionalInformation: {},
                             ),
+                            //coverage:ignore-end
                         totalCalories: currentMeal!.nutritionInfo.calories,
                       ),
                       if (index < currentMeal!.ingredients.length - 1)

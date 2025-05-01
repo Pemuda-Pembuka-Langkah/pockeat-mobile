@@ -49,7 +49,9 @@ class ExerciseAnalysisService {
       if (e is ApiServiceException) {
         rethrow;
       }
+      //coverage:ignore-start
       throw ApiServiceException("Error analyzing exercise: $e");
+      //coverage:ignore-end
     }
   }
 

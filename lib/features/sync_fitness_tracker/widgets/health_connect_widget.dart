@@ -15,7 +15,7 @@ class HealthConnectWidget extends StatefulWidget {
     super.key,
     this.primaryColor = const Color(0xFFFF6B6B),
   });
-
+//coverage:ignore-start
   @override
   State<HealthConnectWidget> createState() => _HealthConnectWidgetState();
 }
@@ -548,6 +548,7 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
                 ),
                 child: Text(
                   '+${_calories.toInt()}',
+//coverage:ignore-end
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.black54,

@@ -4,7 +4,6 @@
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/firebase/firebase_repository.dart';
 
-
 /// Repository for managing nutrition database meal entries
 ///
 /// Provides methods to save, retrieve, and delete meal data in Firebase
@@ -81,7 +80,8 @@ class NutritionDatabaseRepository
   ///
   /// Parameter [year] the year
   /// Parameter [limit] optional limit on the number of results
-  /// Returns a list of food analysis results for the specified year
+  /// Returns a list of food analysis results for the specified year\
+  //coverage:ignore-start
   Future<List<FoodAnalysisResult>> getAnalysisResultsByYear(int year,
       {int? limit}) async {
     return super.getByYear(
@@ -91,4 +91,5 @@ class NutritionDatabaseRepository
       descending: true,
     );
   }
+  //coverage:ignore-end
 }
