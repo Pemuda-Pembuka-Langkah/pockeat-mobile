@@ -1,5 +1,4 @@
 // Flutter imports:
-//coverage: ignore-file
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +18,6 @@ import 'package:pockeat/features/food_scan_ai/presentation/widgets/vitamins_and_
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
-
-//coverage: ignore-file
 
 /// A page that displays detailed information about a food item.
 ///
@@ -84,11 +81,13 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
   Future<void> _checkIfMealIsSaved(String foodId) async {
     try {
       final savedMealService = GetIt.instance<SavedMealService>();
+      //coverage:ignore-start
       final isSaved = await savedMealService.isMealSaved(foodId);
 
       if (mounted) {
         setState(() {
           _isSaved = isSaved;
+          //coverage:ignore-end
         });
       }
     } catch (e) {
@@ -209,6 +208,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
             'Are you sure you want to delete this food entry? This action cannot be undone.'),
         actions: [
           TextButton(
+            //coverage:ignore-line
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
               'Cancel',
@@ -241,11 +241,10 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
     return DateFormat('EEEE, MMMM d, yyyy • h:mm a').format(date);
   }
 
-// coverage:ignore:start
+// coverage:ignore-start
   void _shareFood(FoodAnalysisResult food) async {
     await context.shareFoodSummary(food);
   }
-  // coverage:ignore:end
 
   void _showSaveMealDialog(FoodAnalysisResult food) {
     final TextEditingController nameController =
@@ -529,6 +528,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
     }
   }
 
+  // coverage:ignore-end
   @override
   Widget build(BuildContext context) {
     return Scaffold(

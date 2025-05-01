@@ -1,5 +1,4 @@
 // Flutter imports:
-//coverage: ignore-file
 
 import 'package:flutter/material.dart';
 
@@ -157,6 +156,7 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
     });
   }
 
+//coverage:ignore-start
   /// Clears the current search
   void _clearSearch() {
     _searchController.clear();
@@ -167,6 +167,8 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
     });
   }
 
+//coverage:ignore-end
+
   /// Handles focus change when user taps on search field
   void _handleSearchFocus(bool isFocused) {
     setState(() {
@@ -174,6 +176,7 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
     });
   }
 
+//coverage:ignore-start
   /// Builds empty state for search with no results
   Widget _buildEmptySearchState() {
     return Center(
@@ -198,7 +201,7 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
       ),
     );
   }
-
+//coverage:ignore-end
   //
   // UI filter-related methods
   //
@@ -288,7 +291,7 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
         );
       },
     );
-
+//coverage:ignore-start
     if (pickedDate != null) {
       setState(() {
         _selectedDate = pickedDate;
@@ -359,6 +362,8 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
       });
     }
   }
+
+//coverage:ignore-end
 
   /// Builds the search bar
   Widget _buildSearchBar() {
