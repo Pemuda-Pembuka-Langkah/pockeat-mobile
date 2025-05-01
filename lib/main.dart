@@ -12,7 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
-// import 'package:pockeat/features/food_database_input/presentation/food_database_page.dart';
+import 'package:pockeat/features/food_database_input/presentation/food_database_page.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 import 'package:pockeat/features/saved_meals/presentation/screens/saved_meal_detail_page.dart';
 import 'package:pockeat/features/saved_meals/presentation/screens/saved_meals_page.dart';
@@ -62,28 +62,28 @@ import 'package:pockeat/features/food_text_input/domain/repositories/food_text_i
 import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/desired_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/diet_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/rollover_calories_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/rollover_calories_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/thank_you_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/used_other_apps_page.dart';
+
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/di/progress_module.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
@@ -91,9 +91,10 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Core imports:
+import 'package:pockeat/features/progress_charts_and_graphs/di/progress_module.dart';
 
 // Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -230,11 +231,11 @@ void main() async {
   await _initializeInstabug(flavor);
 
   // Initialize Supabase
-  // await Supabase.initialize(
-  //   url: dotenv.env['SUPABASE_URL'] ?? '',
-  //   anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
-  //   debug: flavor != 'production',
-  // );
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+    debug: flavor != 'production',
+  );
 
   await Firebase.initializeApp(
     options: flavor == 'production'
@@ -617,7 +618,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
                 // Tampilkan loading selama menunggu kamera
                 return const Center(
-                  child: const CircularProgressIndicator(),
+                  child: CircularProgressIndicator(),
                 );
               },
             ),
@@ -662,16 +663,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           );
         },
-        // '/nutrition-database': (context) =>
-        //     const AuthWrapper(child: NutritionDatabasePage()),
-        // '/analytic': (context) {
-        //   final args = ModalRoute.of(context)!.settings.arguments
-        //       as Map<String, dynamic>?;
-        //   return ProgressPage(
-        //     service: ProgressTabsService(ProgressTabsRepositoryImpl()),
-        //     initialTabIndex: args?['initialTabIndex'] as int? ?? 0,
-        //   );
-        // },
+        '/nutrition-database': (context) =>
+            const AuthWrapper(child: NutritionDatabasePage()),
+        '/analytic': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return ProgressPage(
+            service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+            initialTabIndex: args?['initialTabIndex'] as int? ?? 0,
+          );
+        },
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
         '/edit-profile': (context) {
