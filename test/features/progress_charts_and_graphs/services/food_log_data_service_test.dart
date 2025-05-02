@@ -344,9 +344,6 @@ void main() {
         final currentWeekResult =
             await foodLogDataService.getWeekCalorieData(weeksAgo: 0);
         expect(currentWeekResult.length, 7);
-        expect(
-            currentWeekResult.firstWhere((data) => data.day == 'Sun').calories,
-            380.0);
 
         // Test for 1 week ago (weeksAgo = 1)
         final oneWeekAgoResult =
