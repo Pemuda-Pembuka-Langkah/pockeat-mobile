@@ -280,8 +280,6 @@ void main() {
 
   group('FoodLogDataService', () {
     group('getWeekCalorieData', () {
-
-
       test('returns default data when exception occurs', () async {
         // Arrange
         when(mockFoodLogService.getAllFoodLogs('test-user-id', limit: 100))
