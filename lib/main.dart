@@ -618,7 +618,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
                 // Tampilkan loading selama menunggu kamera
                 return const Center(
-                  child: CircularProgressIndicator(),
+                  child: const CircularProgressIndicator(),
                 );
               },
             ),
@@ -663,8 +663,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           );
         },
+
         '/nutrition-database': (context) =>
             const AuthWrapper(child: NutritionDatabasePage()),
+
         '/analytic': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>?;

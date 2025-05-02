@@ -44,6 +44,7 @@ class FitnessTrackerSync {
   void resetPermissionState() {
     _localPermissionState = false;
   }
+
 //coverage:ignore-end
   /// Access to Health instance (protected for testing)
   // coverage:ignore-start
@@ -99,7 +100,9 @@ class FitnessTrackerSync {
       return false;
     }
   }
+
  // coverage:ignore-end
+
   /// Configure the health plugin (can be overridden in tests)
   // coverage:ignore-start
   @protected
