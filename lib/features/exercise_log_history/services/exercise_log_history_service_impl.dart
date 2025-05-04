@@ -101,7 +101,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
 
       // Sort by timestamp (newest first)
       allLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
+      print("allLogs: $allLogs");
       return allLogs;
     } catch (e) {
       // Return empty list instead of throwing

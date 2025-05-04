@@ -64,14 +64,19 @@ class CalorieStatsServiceImpl implements CalorieStatsService {
     // Get exercise logs for the day
     final exerciseLogs =
         await _exerciseService.getExerciseLogsByDate(userId, date);
+    for (var log in exerciseLogs) {
+      int caloriesBurned = log.caloriesBurned.toInt();
+      print("exerciseLog: $caloriesBurned");
+    }
 
     // Calculate total calories burned
     final caloriesBurned = exerciseLogs.fold<int>(
         0, (sum, log) => sum + log.caloriesBurned.toInt());
-
+    print("caloriesBurned: $caloriesBurned");
     // Get food logs for the day
     final foodLogs = await _foodService.getFoodLogsByDate(userId, date);
-
+    print("date: $date");
+    print("userId: $userId");
     // Calculate total calories consumed
     final caloriesConsumed =
         foodLogs.fold<int>(0, (sum, log) => sum + log.calories.toInt());
