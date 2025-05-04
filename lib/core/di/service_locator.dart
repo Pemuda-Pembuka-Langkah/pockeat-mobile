@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/food_database_input/services/food_database_module.dart';
 import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
@@ -203,6 +204,11 @@ Future<void> setupDependencies() async {
       repository: getIt<SavedMealsRepository>(),
       textAnalysisService: getIt<FoodTextAnalysisService>(),
     ),
+  );
+
+  // Register UserPreferencesService
+  getIt.registerSingleton<UserPreferencesService>(
+    UserPreferencesService(),
   );
 
   // Register additional services

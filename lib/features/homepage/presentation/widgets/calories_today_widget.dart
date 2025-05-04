@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 // Project imports:
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 class CaloriesTodayWidget extends StatefulWidget {
   final int targetCalories;
@@ -24,11 +25,13 @@ class CaloriesTodayWidget extends StatefulWidget {
 class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
   final Color primaryPink = const Color(0xFFFF6B6B);
   late Future<DailyCalorieStats> _statsFuture;
+  late Future<bool> _isCalorieCompensationEnabledFuture;
 
   @override
   void initState() {
     super.initState();
     _loadCalorieStats();
+    _loadCalorieCompensationSetting();
   }
 
   @override
@@ -36,6 +39,13 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
     super.didChangeDependencies();
     // Refresh when dependencies change
     _loadCalorieStats();
+    _loadCalorieCompensationSetting();
+  }
+
+  void _loadCalorieCompensationSetting() {
+    final preferencesService = GetIt.instance<UserPreferencesService>();
+    _isCalorieCompensationEnabledFuture =
+        preferencesService.isExerciseCalorieCompensationEnabled();
   }
 
   void _loadCalorieStats() {
@@ -51,11 +61,13 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DailyCalorieStats>(
-      future: _statsFuture,
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([_statsFuture, _isCalorieCompensationEnabledFuture]),
       builder: (context, snapshot) {
         // Default values if data is loading or failed
         int caloriesConsumed = 0;
+        int caloriesBurned = 0;
+        bool isCalorieCompensationEnabled = false;
         double completionPercentage = 0.0;
         int remainingCalories = widget.targetCalories;
 
@@ -63,9 +75,24 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
         if (snapshot.connectionState == ConnectionState.done &&
             snapshot.hasData &&
             !snapshot.hasError) {
-          caloriesConsumed = snapshot.data!.caloriesConsumed;
-          remainingCalories = widget.targetCalories - caloriesConsumed;
-          completionPercentage = caloriesConsumed / widget.targetCalories;
+          final stats = snapshot.data![0] as DailyCalorieStats;
+          isCalorieCompensationEnabled = snapshot.data![1] as bool;
+
+          caloriesConsumed = stats.caloriesConsumed;
+          caloriesBurned = stats.caloriesBurned;
+
+          // Calculate remaining calories based on exercise calorie compensation preference
+          if (isCalorieCompensationEnabled) {
+            // If enabled, add burned calories to target
+            remainingCalories =
+                widget.targetCalories + caloriesBurned - caloriesConsumed;
+            completionPercentage =
+                caloriesConsumed / (widget.targetCalories + caloriesBurned);
+          } else {
+            // Standard calculation without considering burned calories
+            remainingCalories = widget.targetCalories - caloriesConsumed;
+            completionPercentage = caloriesConsumed / widget.targetCalories;
+          }
 
           // Ensure values are within reasonable bounds
           if (remainingCalories < 0) remainingCalories = 0;
@@ -92,25 +119,57 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
               : Column(
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '$remainingCalories',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -1,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '$remainingCalories',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -1,
+                              ),
+                            ),
+                            const Text(
+                              'Remaining Calories',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Remaining Calories',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
+                        if (isCalorieCompensationEnabled && caloriesBurned > 0)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.local_fire_department,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '+$caloriesBurned',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
