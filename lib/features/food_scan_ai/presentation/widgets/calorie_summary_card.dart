@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class CalorieSummaryCard extends StatelessWidget {
   final bool isLoading;
-  final int calories;
+  final double calories; // Changed from int to double
   final Color primaryYellow;
   final Color primaryPink;
 
@@ -34,7 +34,9 @@ class CalorieSummaryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isLoading ? '--' : '$calories',
+                      isLoading
+                          ? '--'
+                          : '${calories.round()}', // Round to nearest integer for display
                       key: const Key('food_calories'),
                       style: const TextStyle(
                         color: Colors.black87,
@@ -43,7 +45,7 @@ class CalorieSummaryCard extends StatelessWidget {
                       ),
                     ),
                     const Text(
-                      'calories',
+                      'Calories',
                       key: Key('food_calories_text'),
                       style: TextStyle(
                         color: Colors.black54,
