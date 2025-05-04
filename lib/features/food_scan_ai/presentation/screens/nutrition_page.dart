@@ -1,4 +1,5 @@
 // Dart imports:
+//
 import 'dart:io';
 
 // Flutter imports:
@@ -19,9 +20,11 @@ import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_sec
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_loading.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/health_score_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/vitamins_and_minerals_section.dart';
 
 class NutritionPage extends StatefulWidget {
   final String imagePath;
@@ -46,7 +49,7 @@ class _NutritionPageState extends State<NutritionPage> {
   bool _hasError = false;
   String _errorMessage = '';
   String _foodName = 'Analyzing...';
-  int _calories = 0;
+  double _calories = 0; // Changed from int to double
   Map<String, dynamic> _nutritionData = {};
   List<String> _warnings = [];
   List<Ingredient> _ingredients = [];
@@ -96,14 +99,20 @@ class _NutritionPageState extends State<NutritionPage> {
   // Update UI data with analysis result
   void _updateFoodData(FoodAnalysisResult result) {
     _foodName = result.foodName;
-    _calories = result.nutritionInfo.calories.toInt();
+    _calories =
+        result.nutritionInfo.calories; // Use calories directly as double
     _nutritionData = {
-      'protein': result.nutritionInfo.protein.toInt(),
-      'carbs': result.nutritionInfo.carbs.toInt(),
-      'fat': result.nutritionInfo.fat.toInt(),
-      'fiber': result.nutritionInfo.fiber.toInt(),
-      'sugar': result.nutritionInfo.sugar.toInt(),
-      'sodium': result.nutritionInfo.sodium.toInt(),
+      'protein': result.nutritionInfo.protein,
+      'carbs': result.nutritionInfo.carbs,
+      'fat': result.nutritionInfo.fat,
+      'fiber': result.nutritionInfo.fiber,
+      'sugar': result.nutritionInfo.sugar,
+      'sodium': result.nutritionInfo.sodium,
+      'saturatedFat': result.nutritionInfo.saturatedFat,
+      'cholesterol': result.nutritionInfo.cholesterol,
+      'nutritionDensity': result.nutritionInfo.nutritionDensity,
+      'healthScore': result.healthScore,
+      'healthScoreCategory': result.getHealthScoreCategory(),
     };
     _ingredients = result.ingredients;
     _warnings = result.warnings;
@@ -112,9 +121,41 @@ class _NutritionPageState extends State<NutritionPage> {
 
   // Handle analysis correction
   void _handleAnalysisCorrected(FoodAnalysisResult correctedResult) {
+    // Debug prints to see correction response data
+    //print('=========== CORRECTION RESPONSE ===========');
+    //print('Food Name: ${correctedResult.foodName}');
+    //print('Calories: ${correctedResult.nutritionInfo.calories}');
+    //print('Health Score: ${correctedResult.healthScore}');
+    //print('Vitamins: ${correctedResult.nutritionInfo.vitaminsAndMinerals}');
+    //print('========================================');
+
+    // Calculate health score if not provided by API response
+    double calculatedHealthScore = correctedResult.healthScore ?? 5.0;
+    String healthCategory = "Fair"; // Default medium category
+
+    // Use healthScore to determine category if available
+    if (correctedResult.healthScore != null) {
+      if (calculatedHealthScore >= 8)
+        healthCategory = "Excellent";
+      else if (calculatedHealthScore >= 6)
+        healthCategory = "Good";
+      else if (calculatedHealthScore >= 4)
+        healthCategory = "Fair";
+      else if (calculatedHealthScore >= 2)
+        healthCategory = "Poor";
+      else
+        healthCategory = "Very Poor";
+    }
+
+    // Ensure state update is synchronous and complete
     setState(() {
       _isCorrectingAnalysis = false;
-      _updateFoodData(correctedResult);
+      food = correctedResult; // Update the food object first
+      _updateFoodData(correctedResult); // Then update all the derived data
+
+      // Force update of health score section data with calculated values
+      _nutritionData['healthScore'] = calculatedHealthScore;
+      _nutritionData['healthScoreCategory'] = healthCategory;
     });
 
     // Show success message
@@ -229,11 +270,21 @@ class _NutritionPageState extends State<NutritionPage> {
                       isLoading: _isLoading,
                       foodName: _foodName,
                       primaryGreen: primaryGreen,
+                      healthScore: _nutritionData['healthScore'] as double?,
+                      healthCategory:
+                          _nutritionData['healthScoreCategory'] as String?,
                     ),
                     CalorieSummaryCard(
                       isLoading: _isLoading,
                       calories: _calories,
                       primaryYellow: primaryYellow,
+                      primaryPink: primaryPink,
+                    ),
+                    // Health Score Section here
+                    HealthScoreSection(
+                      isLoading: _isLoading,
+                      nutritionData: _nutritionData,
+                      primaryGreen: primaryGreen,
                       primaryPink: primaryPink,
                     ),
                     NutritionalInfoSection(
@@ -253,6 +304,12 @@ class _NutritionPageState extends State<NutritionPage> {
                       ingredients: _ingredients,
                       primaryGreen: primaryGreen,
                       isLoading: _isLoading,
+                    ),
+                    // Vitamins and Minerals Section
+                    VitaminsAndMineralsSection(
+                      isLoading: _isLoading,
+                      food: food,
+                      primaryColor: primaryGreen,
                     ),
                     DietTagsSection(
                       warnings: _warnings,

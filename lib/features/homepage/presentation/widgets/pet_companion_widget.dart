@@ -1,15 +1,19 @@
 // lib/features/homepage/presentation/widgets/pet_companion_widget.dart
 
+// Dart imports:
+import 'dart:async';
+import 'dart:math';
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:get_it/get_it.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:get_it/get_it.dart';
-import 'dart:math';
+
+// Project imports:
 import 'pet_chat_bubble.dart';
-import 'dart:async';
 
 // coverage:ignore-start
 class PetCompanionWidget extends StatefulWidget {

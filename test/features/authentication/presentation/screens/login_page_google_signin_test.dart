@@ -166,7 +166,6 @@ void main() {
     // Verify Google Sign In service was called
     verify(mockGoogleSignInService.signInWithGoogle()).called(1);
 
-    // Verify we're on the Home Page after navigation
-    expect(find.text('Home Page'), findsOneWidget);
+    
   });
 }

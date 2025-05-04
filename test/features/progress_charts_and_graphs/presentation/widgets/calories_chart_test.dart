@@ -1,9 +1,14 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/calories_chart.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 // A mock version of CaloriesChart that returns values we can validate in tests
 class MockCaloriesChart extends StatelessWidget {

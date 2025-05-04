@@ -12,6 +12,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
+import 'package:pockeat/features/food_database_input/presentation/food_database_page.dart';
+import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+import 'package:pockeat/features/saved_meals/presentation/screens/saved_meal_detail_page.dart';
+import 'package:pockeat/features/saved_meals/presentation/screens/saved_meals_page.dart';
 import 'package:provider/provider.dart';
 
 // Project imports:
@@ -87,6 +91,7 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Core imports:
 import 'package:pockeat/features/progress_charts_and_graphs/di/progress_module.dart';
@@ -225,6 +230,13 @@ void main() async {
   // Initialize Instabug
   await _initializeInstabug(flavor);
 
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+    debug: flavor != 'production',
+  );
+
   await Firebase.initializeApp(
     options: flavor == 'production'
         ? ProductionFirebaseOptions.currentPlatform
@@ -279,8 +291,11 @@ void main() async {
         Provider<FoodTextInputRepository>(
           create: (_) => getIt<FoodTextInputRepository>(),
         ),
-        Provider<CaloricRequirementService>(create: (_) => getIt<CaloricRequirementService>()),
-
+        Provider<SavedMealService>(
+          create: (_) => getIt<SavedMealService>(),
+        ),
+        Provider<CaloricRequirementService>(
+            create: (_) => getIt<CaloricRequirementService>()),
         BlocProvider<HealthMetricsFormCubit>(
           create: (_) => HealthMetricsFormCubit(
             repository: getIt<HealthMetricsRepository>(),
@@ -499,9 +514,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/splash': (context) => const SplashScreenPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
         '/': (context) => const AuthWrapper(
-          redirectUrlIfNotLoggedIn: '/welcome',
-          child: HomePage(),
-        ),
+              redirectUrlIfNotLoggedIn: '/welcome',
+              child: HomePage(),
+            ),
         '/welcome': (context) => const WelcomePage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
@@ -552,92 +567,60 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             child: const HealthMetricsGoalsPage(),
           );
         },
-        '/height-weight': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: HeightWeightPage()
-          ),
-        '/birthdate': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: BirthdatePage()
-          ),
-        '/gender': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: GenderPage()
-          ),
-        '/activity-level': (context) =>
-            const AuthWrapper(
-              requireAuth: false,
-              redirectUrlIfLoggedIn: '/',
-              child: ActivityLevelPage()
-              ),
-        '/diet': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: DietPage()
-          ),
-        '/desired-weight': (context) =>
-            const AuthWrapper(
-              requireAuth: false,
-              redirectUrlIfLoggedIn: '/',
-              child: DesiredWeightPage()
-              ),
-        '/speed': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: SpeedSelectionPage()
-          ),
-        '/goal-obstacle': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: GoalObstaclePage()
-          ),
-        '/add-calories-back': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: AddCaloriesBackPage()
-          ),
-        '/heard-about': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: HeardAboutPage()
-          ),
-        '/rollover-calories': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: RolloverCaloriesPage()
-          ),
-        '/thank-you': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: ThankYouPage()
-          ),
-        '/used-other-apps': (context) => const AuthWrapper(
-          requireAuth: false,
-          redirectUrlIfLoggedIn: '/',
-          child: UsedOtherAppsPage()
-          ),
-          '/review': (context) => const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: ReviewSubmitPage(),
-          ),
+        '/height-weight': (context) => const HeightWeightPage(),
+        '/birthdate': (context) => const BirthdatePage(),
+        '/gender': (context) => const GenderPage(),
+        '/activity-level': (context) => const ActivityLevelPage(),
+        '/diet': (context) => const DietPage(),
+        '/desired-weight': (context) => const DesiredWeightPage(),
+        '/speed': (context) => const SpeedSelectionPage(),
+        '/goal-obstacle': (context) => const GoalObstaclePage(),
+        '/add-calories-back': (context) => const AddCaloriesBackPage(),
+        '/heard-about': (context) => const HeardAboutPage(),
+        '/rollover-calories': (context) => const RolloverCaloriesPage(),
+        '/thank-you': (context) => const ThankYouPage(),
+        '/used-other-apps': (context) => const UsedOtherAppsPage(),
+        '/review': (context) => BlocProvider.value(
+         value: context.read<HealthMetricsFormCubit>(),
+          child: const ReviewSubmitPage(),
+        ),
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),
-        '/scan': (context) => AuthWrapper(
-              child: ScanFoodPage(
-                cameraController: CameraController(
-                  const CameraDescription(
-                    name: '0',
-                    lensDirection: CameraLensDirection.back,
-                    sensorOrientation: 0,
-                  ),
-                  ResolutionPreset.max,
-                ),
-              ),
+        '/scan': (context) => FutureBuilder<List<CameraDescription>>(
+              future: availableCameras(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
+
+                  if (snapshot.data?.isEmpty ?? true) {
+                    return const Center(
+                      child: Text('Tidak ada kamera yang tersedia'),
+                    );
+                  }
+
+                  return AuthWrapper(
+                    child: ScanFoodPage(
+                      cameraController: CameraController(
+                        snapshot
+                            .data![0], // Menggunakan kamera pertama (belakang)
+                        ResolutionPreset.max,
+                        enableAudio: false,
+                        imageFormatGroup: ImageFormatGroup.jpeg,
+                      ),
+                    ),
+                  );
+                }
+
+                // Tampilkan loading selama menunggu kamera
+                return const Center(
+                  child: const CircularProgressIndicator(),
+                );
+              },
             ),
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
         '/food-text-input': (context) =>
@@ -680,15 +663,39 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           );
         },
-        '/analytic': (context) => ProgressPage(
-              service: ProgressTabsService(ProgressTabsRepositoryImpl()),
-            ),
+
+        '/nutrition-database': (context) =>
+            const AuthWrapper(child: NutritionDatabasePage()),
+
+        '/analytic': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return ProgressPage(
+            service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+            initialTabIndex: args?['initialTabIndex'] as int? ?? 0,
+          );
+        },
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
         '/edit-profile': (context) {
           final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
           return AuthWrapper(
             child: EditProfilePage(initialUser: user),
+          );
+        },
+        '/saved-meals': (context) => AuthWrapper(
+              child: SavedMealsPage(
+                savedMealService: getIt<SavedMealService>(),
+              ),
+            ),
+        '/saved-meal-detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
+          return AuthWrapper(
+            child: SavedMealDetailPage(
+              savedMealId: args['savedMealId'] as String,
+              savedMealService: getIt<SavedMealService>(),
+            ),
           );
         },
       },

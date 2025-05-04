@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/weight_data.dart';
 
 class GoalProgressChart extends StatelessWidget {
@@ -72,7 +77,8 @@ class GoalProgressChart extends StatelessWidget {
               LineSeries<WeightData, String>(
                 dataSource: displayData,
                 xValueMapper: (WeightData data, _) => data.week,
-                yValueMapper: (WeightData data, _) => data.weight > 0 ? data.weight : null,
+                yValueMapper: (WeightData data, _) =>
+                    data.weight > 0 ? data.weight : null,
                 color: Colors.black,
                 width: 2,
                 emptyPointSettings: const EmptyPointSettings(

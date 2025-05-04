@@ -1,6 +1,11 @@
 // lib/features/homepage/presentation/widgets/pet_chat_bubble.dart
-import 'package:flutter/material.dart';
+
+// Dart imports:
 import 'dart:async';
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
 // coverage:ignore-start
 enum ChatBubbleType {
   reminder,

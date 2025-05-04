@@ -60,7 +60,7 @@ class HealthMetricsModel {
       gender: data['gender'] as String,
       activityLevel: data['activityLevel'] as String,
       fitnessGoal: data['fitnessGoal'] as String,
-      bmi: (data['bmi'] as num).toDouble(), 
+      bmi: (data['bmi'] as num).toDouble(),
       bmiCategory: data['bmiCategory'] as String,
     );
   }

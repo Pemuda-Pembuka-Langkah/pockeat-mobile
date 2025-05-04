@@ -11,7 +11,6 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/default_calorie_calculation_strategy.dart';
-
 import 'default_calorie_calculation_strategy_test.mocks.dart';
 
 // Generate mocks for all dependencies

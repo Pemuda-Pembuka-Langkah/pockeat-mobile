@@ -9,7 +9,6 @@ import 'package:mockito/mockito.dart';
 // Project imports:
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
-
 import 'health_metrics_repository_test.mocks.dart';
 
 @GenerateMocks([

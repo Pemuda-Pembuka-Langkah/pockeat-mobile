@@ -55,7 +55,7 @@ class NotificationConstants {
   // Pet Sadness Notification Preference Keys
   static const String prefPetSadnessEnabled =
       '$prefNotificationStatusPrefix$petSadnessChannelId';
-      
+
   // Pet Status Notification Preference Keys
   static const String prefPetStatusEnabled =
       '$prefNotificationStatusPrefix$petStatusChannelId';
@@ -79,7 +79,7 @@ class NotificationConstants {
   // Default notification times
   static const int defaultStreakNotificationHour = 10;
   static const int defaultStreakNotificationMinute = 0;
-  
+
   // Default pet status notification time (8:00 PM)
   static const int defaultPetStatusNotificationHour = 20;
   static const int defaultPetStatusNotificationMinute = 0;

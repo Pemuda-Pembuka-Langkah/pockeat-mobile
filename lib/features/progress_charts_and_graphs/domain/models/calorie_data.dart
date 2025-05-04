@@ -5,5 +5,6 @@ class CalorieData {
   final double fats;
   final double calories; // Tambahkan field calories
 
-  CalorieData(this.day, this.protein, this.carbs, this.fats, [this.calories = 0]);
+  CalorieData(this.day, this.protein, this.carbs, this.fats,
+      [this.calories = 0]);
 }

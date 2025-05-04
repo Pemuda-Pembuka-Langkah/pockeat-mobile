@@ -15,9 +15,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_log_history/presentation/widgets/food_summary_card.dart';
 
-//coverage:ignore-file
-
 extension FoodSharing on BuildContext {
+  //coverage:ignore-start
   /// Saves image bytes to a temporary file
   Future<File> _saveImageToTempFile(Uint8List imageBytes) async {
     final tempDir = await getTemporaryDirectory();
@@ -164,4 +163,5 @@ extension FoodSharing on BuildContext {
       );
     }
   }
+  //coverage:ignore-end
 }

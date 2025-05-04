@@ -6,24 +6,23 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
-import 'package:pockeat/features/home_screen_widget/services/calorie_calculation_strategy.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/model/meal_reminder_message.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
 import 'package:pockeat/features/notifications/domain/model/pet_sadness_message.dart';
 import 'package:pockeat/features/notifications/domain/model/pet_status_message.dart';
 import 'package:pockeat/features/notifications/domain/model/streak_message.dart';
-import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/user_activity_service_impl.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_background_displayer_service.dart';
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 
 /// Implementation of NotificationBackgroundDisplayerService
 class NotificationBackgroundDisplayerServiceImpl
@@ -36,17 +35,17 @@ class NotificationBackgroundDisplayerServiceImpl
   NotificationBackgroundDisplayerServiceImpl({this.isTest = false});
 
   @override
-  Future<bool> showPetSadnessNotification(
-      Map<String, dynamic> services, {UserActivityService? userActivityService}) async {
+  Future<bool> showPetSadnessNotification(Map<String, dynamic> services,
+      {UserActivityService? userActivityService}) async {
     try {
       // Use provided userActivityService or create a new one
       // coverage:ignore-start
-      final activityService = userActivityService ?? UserActivityServiceImpl(
-        prefs: services['sharedPreferences'] as SharedPreferences,
-      );
+      final activityService = userActivityService ??
+          UserActivityServiceImpl(
+            prefs: services['sharedPreferences'] as SharedPreferences,
+          );
       // coverage:ignore-end
-      final inactivityDuration =
-          await activityService.getInactiveDuration();
+      final inactivityDuration = await activityService.getInactiveDuration();
 
       debugPrint(
           'Checking pet sadness: User inactive for ${inactivityDuration.inHours} hours');
@@ -259,31 +258,21 @@ class NotificationBackgroundDisplayerServiceImpl
       // Get current pet mood and heart level
       final String mood = await petService.getPetMood(userId);
       final int heartLevel = await petService.getPetHeart(userId);
-      
+
       // Calculate consumed calories using proper strategy
       int currentCalories = 0;
       int targetCalories = 0;
       try {
         // Calculate consumed calories
-        final calorieStrategy =
-            services['calorieCalculationStrategy'] as CalorieCalculationStrategy;
-        final foodLogService =
-            services['foodLogHistoryService'] as FoodLogHistoryService;
 
-        // Use strategy to calculate total calories
-        currentCalories = await calorieStrategy.calculateTodayTotalCalories(
-            foodLogService, userId);
-            
-        // Calculate target calories
-        final healthMetricsRepository =
-            services['healthMetricsRepository'] as HealthMetricsRepository;
-        final caloricRequirementService =
-            services['caloricRequirementService'] as CaloricRequirementService;
+        final caloricStatsService = services['caloricStatsService'] as CalorieStatsService;
 
-        // Use strategy to calculate target calories
-        targetCalories = await calorieStrategy.calculateTargetCalories(
-            healthMetricsRepository, caloricRequirementService, userId);
-            
+        final stats = await caloricStatsService.getStatsByDate(userId, DateTime.now());
+
+        currentCalories = stats.caloriesConsumed;
+        final caloricRequirementRepository = services['caloricRequirementRepository'] as CaloricRequirementRepository;
+        final caloricRequirement = await caloricRequirementRepository.getCaloricRequirement(userId);
+        targetCalories = caloricRequirement?.tdee.toInt() ?? 2000;
       } catch (e) {
         debugPrint('Error calculating calories: $e');
         // Fallback to use heart level to estimate calories as before
@@ -298,8 +287,6 @@ class NotificationBackgroundDisplayerServiceImpl
         currentCalories: currentCalories,
         requiredCalories: targetCalories,
       );
-
-      debugPrint('Creating pet status notification: ${statusMessage.title}');
 
       // Initialize local notifications if needed
       const AndroidInitializationSettings initializationSettingsAndroid =
@@ -335,7 +322,8 @@ class NotificationBackgroundDisplayerServiceImpl
               NotificationChannels.petStatus.name,
               channelDescription: NotificationChannels.petStatus.description,
               icon: '@mipmap/launcher_icon',
-              largeIcon: DrawableResourceAndroidBitmap(statusMessage.imageAsset),
+              largeIcon:
+                  DrawableResourceAndroidBitmap(statusMessage.imageAsset),
               styleInformation: bigPictureStyle,
               playSound: true,
               priority: Priority.high,
@@ -372,7 +360,7 @@ class NotificationBackgroundDisplayerServiceImpl
       return false;
     }
   }
-  
+
   @override
   Future<bool> showStreakNotification(Map<String, dynamic> services) async {
     try {

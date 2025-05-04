@@ -1,4 +1,5 @@
 // Flutter imports:
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +17,7 @@ class FoodHistoryCard extends StatelessWidget {
   // Colors
   final Color primaryGreen = const Color(0xFF4CAF50);
   final Color primaryOrange = const Color(0xFFFF9800);
+  final Color primaryRed = const Color(0xFFE53935);
 
   const FoodHistoryCard({
     super.key,
@@ -117,6 +119,17 @@ class FoodHistoryCard extends StatelessWidget {
     }
   }
 
+  /// Get color based on health score
+  Color _getHealthScoreColor(double healthScore) {
+    if (healthScore >= 7) {
+      return primaryGreen;
+    } else if (healthScore >= 4) {
+      return primaryOrange;
+    } else {
+      return primaryRed;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -189,9 +202,10 @@ class FoodHistoryCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     _buildEnhancedSubtitle(),
                     const SizedBox(height: 8),
-                    // Calories badge
+                    // Calories and health score badges
                     Row(
                       children: [
+                        // Calories badge
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
@@ -219,6 +233,39 @@ class FoodHistoryCard extends StatelessWidget {
                             ],
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        // Health score badge
+                        if (food.healthScore != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _getHealthScoreColor(food.healthScore!)
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.favorite,
+                                  color:
+                                      _getHealthScoreColor(food.healthScore!),
+                                  size: 12,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Health: ${food.healthScore!.toStringAsFixed(1)}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        _getHealthScoreColor(food.healthScore!),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   ],
