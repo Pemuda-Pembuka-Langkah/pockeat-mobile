@@ -72,6 +72,6 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
     } catch (e) {
       debugPrint('Error saving exercise calorie compensation setting: $e');
       throw Exception('Failed to save preference: $e');
-flut    }
+  }
   }
 }
