@@ -20,6 +20,7 @@ import 'package:pockeat/features/authentication/services/bug_report_service.dart
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import 'profile_page_test.mocks.dart';
 
 @GenerateNiceMocks([
@@ -30,9 +31,10 @@ import 'profile_page_test.mocks.dart';
   MockSpec<FirebaseAuth>(),
   MockSpec<User>(),
   MockSpec<UserInfo>(),
-  MockSpec<NotificationService>()
+  MockSpec<NotificationService>(),
+  MockSpec<
+      UserPreferencesService>() // Add this line to mock UserPreferencesService
 ])
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -45,6 +47,7 @@ void main() {
   late MockUser mockUser;
   late MockUserInfo mockUserInfo;
   late MockNotificationService mockNotificationService;
+  late MockUserPreferencesService mockUserPreferencesService; // Add this line
 
   setUp(() {
     // Reset screen size to reasonable dimension
@@ -61,6 +64,8 @@ void main() {
     mockUser = MockUser();
     mockUserInfo = MockUserInfo();
     mockNotificationService = MockNotificationService();
+    mockUserPreferencesService =
+        MockUserPreferencesService(); // Initialize the mock
 
     // Setup GetIt
     final getIt = GetIt.instance;
@@ -76,10 +81,21 @@ void main() {
     if (getIt.isRegistered<NotificationService>()) {
       getIt.unregister<NotificationService>();
     }
+    if (getIt.isRegistered<UserPreferencesService>()) {
+      getIt.unregister<UserPreferencesService>();
+    }
     getIt.registerSingleton<LoginService>(mockLoginService);
     getIt.registerSingleton<LogoutService>(mockLogoutService);
     getIt.registerSingleton<BugReportService>(mockBugReportService);
     getIt.registerSingleton<NotificationService>(mockNotificationService);
+    getIt.registerSingleton<UserPreferencesService>(
+        mockUserPreferencesService); // Register the mock
+
+    // Setup default behavior for UserPreferencesService
+    when(mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+        .thenAnswer((_) async => false);
+    when(mockUserPreferencesService.setExerciseCalorieCompensationEnabled(any))
+        .thenAnswer((_) async => {});
 
     // Setup default User behavior
     when(mockUser.uid).thenReturn('test-uid');
@@ -107,6 +123,7 @@ void main() {
     reset(mockUser);
     reset(mockUserInfo);
     reset(mockNotificationService);
+    reset(mockUserPreferencesService); // Reset the mock
   });
 
   // Helper untuk membuat UserModel test
@@ -476,10 +493,11 @@ void main() {
       expect(find.text('Ubah Password'), findsNothing);
     });
   });
-  
+
   // == NOTIFIKASI DAN PENGATURAN PROFILE ==
   group('Notifikasi dan Pengaturan Profile', () {
-    testWidgets('Menampilkan menu pengaturan notifikasi dan navigasi ke halaman pengaturan notifikasi',
+    testWidgets(
+        'Menampilkan menu pengaturan notifikasi dan navigasi ke halaman pengaturan notifikasi',
         (WidgetTester tester) async {
       // Setup user data
       final testUser = createTestUser();
@@ -499,7 +517,8 @@ void main() {
       expect(notifSettingsFinder, findsOneWidget);
 
       // Verifikasi subtitle menu pengaturan notifikasi
-      expect(find.text('Kelola pengaturan notifikasi aplikasi'), findsOneWidget);
+      expect(
+          find.text('Kelola pengaturan notifikasi aplikasi'), findsOneWidget);
       expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
 
       // Tap pada menu pengaturan notifikasi
@@ -508,7 +527,7 @@ void main() {
 
       // Verifikasi navigasi ke halaman pengaturan notifikasi
       expect(find.text('Notification Settings Page'), findsOneWidget);
-      
+
       // Verifikasi navigasi terobservasi
       verify(mockNavigatorObserver.didPush(any, any));
     });
@@ -527,18 +546,18 @@ void main() {
       final editProfileFinder = find.text('Edit Profil');
       expect(editProfileFinder, findsOneWidget);
       expect(find.text('Perbarui informasi profil Anda'), findsOneWidget);
-      
+
       // Tap menu Edit Profil
       await tester.tap(editProfileFinder);
       await tester.pumpAndSettle();
 
       // Verifikasi navigasi ke halaman edit profil
       expect(find.text('Edit Profile Page'), findsOneWidget);
-      
+
       // Verifikasi navigasi terobservasi
       verify(mockNavigatorObserver.didPush(any, any));
     });
-    
+
     testWidgets('Cek interaksi dengan menu lain (Laporkan Bug)',
         (WidgetTester tester) async {
       // Setup user data dan service
@@ -562,7 +581,7 @@ void main() {
 
       // Verifikasi subtitle menu
       expect(find.text('Bantu kami meningkatkan aplikasi'), findsOneWidget);
-      
+
       // Tap menu Laporkan Bug
       await tester.tap(bugReportFinder);
       await tester.pumpAndSettle();
