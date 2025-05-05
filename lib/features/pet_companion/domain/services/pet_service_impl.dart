@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 // Project imports:
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/pet_companion/domain/model/pet_information.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 
 class PetServiceImpl implements PetService {
@@ -54,5 +55,34 @@ class PetServiceImpl implements PetService {
     } else {
       return 0;
     }
+  }
+
+  @override
+  Future<bool> getIsPetCalorieOverTarget(String userId) async {
+    final stats =
+        await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+
+    final caloriesConsumed = stats.caloriesConsumed;
+    final caloricRequirement =
+        await firestore.collection('caloric_requirements').doc(userId).get();
+
+    final targetCalories = caloricRequirement.data()!['tdee'];
+
+    return (caloriesConsumed - targetCalories) > targetCalories * 0.2;
+  }
+
+  @override
+  Future<PetInformation> getPetInformation(String userId) async {
+    final isCalorieOverTarget = await getIsPetCalorieOverTarget(userId);
+    final heart = await getPetHeart(userId);
+    var mood = await getPetMood(userId);
+    if (isCalorieOverTarget) {
+      mood = 'sad';
+    }
+    return PetInformation(
+      isCalorieOverTarget: isCalorieOverTarget,
+      heart: heart,
+      mood: mood,
+    );
   }
 }
