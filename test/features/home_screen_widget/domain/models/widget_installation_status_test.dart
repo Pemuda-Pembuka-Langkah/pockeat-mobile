@@ -301,8 +301,9 @@ void main() {
         // Arrange
         final status = WidgetInstallationStatus();
         
-        // Assert - compare with null
-        expect(status == null, isFalse, reason: 'Should not be equal to null');
+        // Assert - null equality check
+        // ignore: unrelated_type_equality_checks
+        expect(identical(status, null), isFalse, reason: 'Should not be identical to null');
         
         // Assert - compare with different type
         expect(status == 'not a status object', isFalse, reason: 'Should not be equal to string');
