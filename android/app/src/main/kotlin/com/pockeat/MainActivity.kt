@@ -34,6 +34,7 @@ class MainActivity: FlutterFragmentActivity() {
         // Setup method channels
         setupNotificationActionsChannel(flutterEngine)
         setupHealthConnectChannel(flutterEngine)
+        setupWidgetInstallationChannel(flutterEngine)
     }
     
     private fun registerCustomHomeWidgetPlugin(flutterEngine: FlutterEngine) {
@@ -147,5 +148,19 @@ class MainActivity: FlutterFragmentActivity() {
         } catch (e2: Exception) {
             result.error("ERROR", "Failed to open Play Store: ${e2.message}", null)
         }
+    }
+    
+    /**
+     * Setup the method channel for widget installation operations
+     */
+    private fun setupWidgetInstallationChannel(flutterEngine: FlutterEngine) {
+        // Create widget installation handler
+        val widgetInstallationHandler = com.pockeat.widget.WidgetInstallationHandler(applicationContext, this)
+        
+        // Setup widget installation method channel
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIDGET_CHANNEL)
+            .setMethodCallHandler { call, result -> 
+                widgetInstallationHandler.handleMethodCall(call, result)
+            }
     }
 }
