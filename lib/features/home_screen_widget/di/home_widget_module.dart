@@ -10,12 +10,16 @@ import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_cl
 import 'package:pockeat/features/home_screen_widget/controllers/impl/detailed_food_tracking_controller.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/impl/food_tracking_client_controller_impl.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/impl/simple_food_tracking_controller.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/impl/widget_installation_controller_impl.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/widget_installation_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/constants/widget_config.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/detailed_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/detailed_food_tracking_widget_service.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/simple_food_tracking_widget_service.dart';
+import 'package:pockeat/features/home_screen_widget/services/impl/widget_installation_service_impl.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
+import 'package:pockeat/features/home_screen_widget/services/widget_installation_service.dart';
 
 // coverage:ignore-start
 /// Module untuk dependency injection widget home screen
@@ -35,6 +39,11 @@ class HomeWidgetModule {
         widgetName: HomeWidgetConfig.detailedWidgetName.value,
         appGroupId: HomeWidgetConfig.appGroupId.value,
       ),
+    );
+    
+    // Register widget installation service
+    getIt.registerLazySingleton<WidgetInstallationService>(
+      () => WidgetInstallationServiceImpl(),
     );
 
     // 2. Register controller-controller spesifik
@@ -62,6 +71,13 @@ class HomeWidgetModule {
         detailedController: getIt<DetailedFoodTrackingController>(),
       ),
     );
+    
+    // 4. Register widget installation controller
+    getIt.registerLazySingleton<WidgetInstallationController>(
+      () => WidgetInstallationControllerImpl(
+        widgetInstallationService: getIt<WidgetInstallationService>(),
+      ),
+    );
   }
 
   /// Mendapatkan controller untuk simple food tracking
@@ -77,6 +93,11 @@ class HomeWidgetModule {
   /// Mendapatkan client controller untuk koordinasi semua controller
   static FoodTrackingClientController getClientController() {
     return getIt<FoodTrackingClientController>();
+  }
+  
+  /// Mendapatkan controller untuk instalasi dan manajemen widget
+  static WidgetInstallationController getWidgetInstallationController() {
+    return getIt<WidgetInstallationController>();
   }
 }
 // coverage:ignore-end
