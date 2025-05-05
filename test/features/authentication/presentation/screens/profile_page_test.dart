@@ -159,9 +159,9 @@ void main() {
     );
   }
 
-  // == KASUS POSITIF ==
-  group('Kasus Positif', () {
-    testWidgets('Menampilkan loading indicator saat loading data',
+  // == POSITIVE CASES ==
+  group('Positive Cases', () {
+    testWidgets('Shows loading indicator when loading data',
         (WidgetTester tester) async {
       // Setup loading delay
       final completer = Completer<UserModel>();
@@ -184,7 +184,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('Menampilkan data profil dengan benar',
+    testWidgets('Displays profile data correctly',
         (WidgetTester tester) async {
       // Setup user data
       final testUser = createTestUser();
@@ -199,15 +199,15 @@ void main() {
 
       // Verify user data is displayed - gunakan nilai yang sesuai dari helper
       expect(find.text('Test User'), findsOneWidget);
-      // Email sekarang hanya muncul sekali di header profil
+      // Email now only appears once in the profile header
       expect(find.text('test@example.com'), findsOneWidget);
-      expect(find.text('Email terverifikasi'), findsOneWidget);
+      expect(find.text('Email verified'), findsOneWidget);
     });
   });
 
-  // == KASUS NEGATIF ==
-  group('Kasus Negatif', () {
-    testWidgets('Menampilkan error view ketika gagal memuat data profil',
+  // == NEGATIVE CASES ==
+  group('Negative Cases', () {
+    testWidgets('Shows error view when failed to load profile data',
         (WidgetTester tester) async {
       // Setup error response
       when(mockLoginService.getCurrentUser())
@@ -220,22 +220,22 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify error view shown
-      expect(find.textContaining('Gagal memuat profil'), findsOneWidget);
-      expect(find.text('Coba Lagi'), findsOneWidget);
+      expect(find.textContaining('Failed to load profile'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
 
       // Setup success response for retry
       when(mockLoginService.getCurrentUser())
           .thenAnswer((_) async => createTestUser());
 
       // Tap retry button
-      await tester.tap(find.text('Coba Lagi'));
+      await tester.tap(find.text('Retry'));
       await tester.pumpAndSettle();
 
       // Verify profile loaded after retry
       expect(find.text('Test User'), findsOneWidget);
     });
 
-    testWidgets('Menghapus user data dari bug reporting service sebelum logout',
+    testWidgets('Clears user data from bug reporting service before logout',
         (WidgetTester tester) async {
       // Setup user and logout services
       when(mockLoginService.getCurrentUser())
@@ -271,7 +271,7 @@ void main() {
       ]);
     });
 
-    testWidgets('Menampilkan error saat gagal logout',
+    testWidgets('Shows error when logout fails',
         (WidgetTester tester) async {
       // Setup user and throw on logout
       when(mockLoginService.getCurrentUser())
@@ -303,11 +303,11 @@ void main() {
       verify(mockBugReportService.clearUserData()).called(1);
 
       // Verify error snackbar shown
-      expect(find.textContaining('Gagal logout'), findsOneWidget);
+      expect(find.textContaining('Logout failed'), findsOneWidget);
     });
 
     testWidgets(
-        'Menampilkan UI pelaporan bug saat tombol Report Bug ditekan dan set user data',
+        'Shows bug reporting UI when Report Bug button is pressed and sets user data',
         (WidgetTester tester) async {
       // Setup user and successful bug report response
       final testUser = createTestUser();
@@ -320,7 +320,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find Report Bug button
-      final reportBugFinder = find.text('Laporkan Bug');
+      final reportBugFinder = find.text('Report Bug');
       expect(reportBugFinder, findsOneWidget);
 
       // Tap Report Bug button
@@ -336,7 +336,7 @@ void main() {
       ]);
     });
 
-    testWidgets('Menampilkan error saat gagal menampilkan UI pelaporan bug',
+    testWidgets('Shows error when failed to display bug reporting UI',
         (WidgetTester tester) async {
       // Setup user and failed bug report response
       final testUser = createTestUser();
@@ -349,7 +349,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find Report Bug button
-      final reportBugFinder = find.text('Laporkan Bug');
+      final reportBugFinder = find.text('Report Bug');
       expect(reportBugFinder, findsOneWidget);
 
       // Tap Report Bug button
@@ -365,11 +365,11 @@ void main() {
       ]);
 
       // Verify error snackbar shown
-      expect(find.text('Gagal membuka pelaporan bug'), findsOneWidget);
+      expect(find.text('Failed to open bug reporting'), findsOneWidget);
     });
 
     testWidgets(
-        'Menampilkan peringatan saat user data tidak tersedia untuk pelaporan bug',
+        'Shows warning when user data is not available for bug reporting',
         (WidgetTester tester) async {
       // Setup null user scenario
       when(mockLoginService.getCurrentUser()).thenAnswer((_) async => null);
@@ -389,7 +389,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find and tap Report Bug button
-      final reportBugFinder = find.text('Laporkan Bug');
+      final reportBugFinder = find.text('Report Bug');
       expect(reportBugFinder, findsOneWidget);
 
       // Force currentUser to be null to test the null check path
@@ -409,14 +409,14 @@ void main() {
       verifyNever(mockBugReportService.show());
 
       // Verify warning snackbar about missing user data
-      expect(find.text('Data pengguna tidak tersedia untuk pelaporan bug'),
+      expect(find.text('User data not available for bug reporting'),
           findsOneWidget);
     });
   });
 
   // == EDGE CASES ==
   group('Edge Cases', () {
-    testWidgets('Menampilkan nama default untuk user tanpa displayName',
+    testWidgets('Shows default name for user without displayName',
         (WidgetTester tester) async {
       // Setup user with null displayName
       when(mockLoginService.getCurrentUser())
@@ -427,10 +427,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify default name displayed
-      expect(find.text('Pengguna Pockeat'), findsOneWidget);
+      expect(find.text('Pockeat User'), findsOneWidget);
     });
 
-    testWidgets('Menampilkan initial tunggal untuk nama satu kata',
+    testWidgets('Shows single initial for one-word name',
         (WidgetTester tester) async {
       // Setup user with single-word name
       when(mockLoginService.getCurrentUser()).thenAnswer(
@@ -448,7 +448,7 @@ void main() {
     });
 
     testWidgets(
-        'Menampilkan button verifikasi email untuk email yang belum diverifikasi',
+        'Shows email verification button for unverified email',
         (WidgetTester tester) async {
       // Setup unverified user
       final unverifiedUser = createTestUser(emailVerified: false);
@@ -461,11 +461,11 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify verification status and button shown
-      expect(find.text('Email belum terverifikasi'), findsOneWidget);
-      expect(find.text('Kirim Email Verifikasi'), findsOneWidget);
+      expect(find.text('Email not verified'), findsOneWidget);
+      expect(find.text('Send Verification Email'), findsOneWidget);
     });
 
-    testWidgets('Google login user tidak melihat menu ubah password',
+    testWidgets('Google login user does not see change password menu',
         (WidgetTester tester) async {
       // Setup Google login user
       when(mockLoginService.getCurrentUser())
@@ -477,13 +477,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify Change Password option is hidden
-      expect(find.text('Ubah Password'), findsNothing);
+      expect(find.text('Change Password'), findsNothing);
     });
   });
-  
-  // == NOTIFIKASI DAN PENGATURAN PROFILE ==
-  group('Notifikasi dan Pengaturan Profile', () {
-    testWidgets('Menampilkan menu pengaturan notifikasi dan navigasi ke halaman pengaturan notifikasi',
+
+  // == NOTIFICATION AND PROFILE SETTINGS ==
+  group('Notification and Profile Settings', () {
+    testWidgets('Navigates to Notification Settings page when button is pressed',
         (WidgetTester tester) async {
       // Setup user data
       final testUser = createTestUser();
@@ -493,8 +493,8 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // Temukan dan scroll ke menu pengaturan notifikasi
-      final notifSettingsFinder = find.text('Pengaturan Notifikasi');
+      // Find and scroll to notification settings menu
+      final notifSettingsFinder = find.text('Notification Settings');
       await tester.dragUntilVisible(
         notifSettingsFinder,
         find.byType(SingleChildScrollView),
@@ -502,22 +502,22 @@ void main() {
       );
       expect(notifSettingsFinder, findsOneWidget);
 
-      // Verifikasi subtitle menu pengaturan notifikasi
-      expect(find.text('Kelola pengaturan notifikasi aplikasi'), findsOneWidget);
+      // Verify notification settings menu subtitle
+      expect(find.text('Manage app notification settings'), findsOneWidget);
       expect(find.byIcon(Icons.notifications_outlined), findsOneWidget);
 
-      // Tap pada menu pengaturan notifikasi
+      // Tap on notification settings menu
       await tester.tap(notifSettingsFinder);
       await tester.pumpAndSettle();
 
-      // Verifikasi navigasi ke halaman pengaturan notifikasi
+      // Verify navigation to notification settings page
       expect(find.text('Notification Settings Page'), findsOneWidget);
-      
-      // Verifikasi navigasi terobservasi
+
+      // Verify navigation was observed
       verify(mockNavigatorObserver.didPush(any, any));
     });
 
-    testWidgets('Navigasi ke halaman edit profile ketika tombol edit ditekan',
+    testWidgets('Navigates to edit profile page when edit button is pressed',
         (WidgetTester tester) async {
       // Setup user data
       final testUser = createTestUser();
@@ -527,25 +527,25 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // Temukan menu Edit Profil
-      final editProfileFinder = find.text('Edit Profil');
+      // Find Edit Profile menu
+      final editProfileFinder = find.text('Edit Profile');
       expect(editProfileFinder, findsOneWidget);
-      expect(find.text('Perbarui informasi profil Anda'), findsOneWidget);
-      
-      // Tap menu Edit Profil
+      expect(find.text('Update your profile information'), findsOneWidget);
+
+      // Tap Edit Profile menu
       await tester.tap(editProfileFinder);
       await tester.pumpAndSettle();
 
-      // Verifikasi navigasi ke halaman edit profil
+      // Verify navigation to edit profile page
       expect(find.text('Edit Profile Page'), findsOneWidget);
       
-      // Verifikasi navigasi terobservasi
+      // Verify navigation was observed
       verify(mockNavigatorObserver.didPush(any, any));
     });
     
-    testWidgets('Cek interaksi dengan menu lain (Laporkan Bug)',
+    testWidgets('Check interaction with other menu (Report Bug)',
         (WidgetTester tester) async {
-      // Setup user data dan service
+      // Setup user data and service
       final testUser = createTestUser();
       when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
       when(mockBugReportService.setUserData(any)).thenAnswer((_) async => true);
@@ -555,8 +555,8 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // Temukan dan scroll ke menu Laporkan Bug
-      final bugReportFinder = find.text('Laporkan Bug');
+      // Find and scroll to Report Bug menu
+      final bugReportFinder = find.text('Report Bug');
       await tester.dragUntilVisible(
         bugReportFinder,
         find.byType(SingleChildScrollView),
@@ -564,14 +564,14 @@ void main() {
       );
       expect(bugReportFinder, findsOneWidget);
 
-      // Verifikasi subtitle menu
-      expect(find.text('Bantu kami meningkatkan aplikasi'), findsOneWidget);
+      // Verify menu subtitle
+      expect(find.text('Help us improve the app'), findsOneWidget);
       
-      // Tap menu Laporkan Bug
+      // Tap Report Bug menu
       await tester.tap(bugReportFinder);
       await tester.pumpAndSettle();
 
-      // Verifikasi metode yang dipanggil
+      // Verify methods were called
       verify(mockBugReportService.setUserData(testUser)).called(1);
       verify(mockBugReportService.show()).called(1);
     });

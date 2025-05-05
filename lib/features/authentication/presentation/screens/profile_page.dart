@@ -14,11 +14,11 @@ import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
 import 'package:pockeat/features/home_screen_widget/presentation/screens/widget_manager_screen.dart';
 
-/// Halaman profil pengguna
+/// User profile page
 ///
-/// Menampilkan informasi profil pengguna dan opsi untuk:
-/// - Edit profil
-/// - Ubah password
+/// Displays user profile information and options for:
+/// - Edit profile
+/// - Change password
 /// - Report bug (instabug)
 /// - Logout
 class ProfilePage extends StatefulWidget {
@@ -31,7 +31,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // Colors - sama dengan di login page untuk konsistensi
+  // Colors - same as login page for consistency
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color bgColor = const Color(0xFFF9F9F9);
@@ -43,7 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _isLoading = true;
   String? _errorMessage;
 
-  // Getter untuk akses FirebaseAuth
+  // Getter for FirebaseAuth access
   FirebaseAuth get _auth => widget.firebaseAuth ?? FirebaseAuth.instance;
 
   @override
@@ -55,7 +55,7 @@ class _ProfilePageState extends State<ProfilePage> {
     _loadUserData();
   }
 
-  /// Memuat data user
+  /// Load user data
   Future<void> _loadUserData() async {
     setState(() {
       _isLoading = true;
@@ -70,26 +70,26 @@ class _ProfilePageState extends State<ProfilePage> {
       });
     } catch (e) {
       setState(() {
+        _errorMessage = 'Failed to load profile: ${e.toString()}';
         _isLoading = false;
-        _errorMessage = 'Gagal memuat profil: ${e.toString()}';
       });
     }
   }
 
-  /// Fungsi untuk logout
+  /// Function to logout
   Future<void> _logout() async {
     try {
-      // Konfirmasi logout
+      // Confirm logout
       final shouldLogout = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Konfirmasi Logout'),
-          content: const Text('Apakah Anda yakin ingin keluar dari akun?'),
+          title: const Text('Confirm Logout'),
+          content: const Text('Are you sure you want to log out of your account?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(
-                'Batal',
+                'Cancel',
                 style: TextStyle(color: Colors.grey[700]),
               ),
             ),
@@ -108,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage> {
         // Clear user data from bug reporting system before logout
         await _bugReportService.clearUserData();
 
-        // Implementasi logout sesuai dengan logout service
+        // Implement logout according to logout service
         await _logoutService.logout();
 
         if (mounted) {
@@ -119,7 +119,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal logout: ${e.toString()}'),
+            content: Text('Failed to logout: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -129,7 +129,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Set index pada navigation provider
+    // Set index on navigation provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<NavigationProvider>(context, listen: false).setIndex(4);
     });
@@ -140,7 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: bgColor,
         appBar: AppBar(
           title: const Text(
-            'Profil Saya',
+            'Profile',
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
@@ -168,7 +168,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Widget untuk menampilkan pesan error
+  /// Widget to display error view
   Widget _buildErrorView() {
     return Center(
       child: Padding(
@@ -183,7 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 16),
             Text(
-              _errorMessage ?? 'Terjadi kesalahan',
+              _errorMessage ?? 'Failed to load profile',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
@@ -196,13 +196,10 @@ class _ProfilePageState extends State<ProfilePage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryPink,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: const Text('Coba Lagi'),
+              child: const Text('Retry'),
             ),
           ],
         ),
@@ -210,7 +207,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Widget untuk tampilan profil
+  /// Widget to display profile view
   Widget _buildProfileView() {
     return SingleChildScrollView(
       child: Column(
@@ -226,7 +223,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Widget untuk header profil dengan foto dan info
+  /// Widget to display profile header
   Widget _buildProfileHeader() {
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 20, top: 30, bottom: 20),
@@ -245,7 +242,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Column(
         children: [
-          // Foto profil
+          // Profile picture
           Stack(
             alignment: Alignment.bottomRight,
             children: [
@@ -283,9 +280,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const SizedBox(height: 20),
 
-          // Nama pengguna
+          // User name
           Text(
-            _currentUser?.displayName ?? 'Pengguna Pockeat',
+            _currentUser?.displayName ?? 'Pockeat User',
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -294,7 +291,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           const SizedBox(height: 8),
 
-          // Email pengguna
+          // User email
           Text(
             _currentUser?.email ?? '',
             style: TextStyle(
@@ -308,7 +305,7 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 8),
           _buildLoginProviderBadge(),
 
-          // Status verifikasi email
+          // Email verification status
           const SizedBox(height: 12),
           _buildVerificationStatus(),
         ],
@@ -316,11 +313,11 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Widget untuk menampilkan badge provider login
+  /// Widget to display login provider badge
   Widget _buildLoginProviderBadge() {
     final user = _auth.currentUser;
 
-    // Cek provider data untuk menentukan metode login
+    // Check provider data to determine login method
     final providerData = user?.providerData;
     bool isGoogleLogin = false;
 
@@ -396,7 +393,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Widget untuk tampilan status verifikasi email
+  /// Widget to display email verification status
   Widget _buildVerificationStatus() {
     final isVerified = _currentUser?.emailVerified == true;
 
@@ -422,8 +419,8 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(width: 6),
               Text(
                 isVerified
-                    ? 'Email terverifikasi'
-                    : 'Email belum terverifikasi',
+                    ? 'Email verified'
+                    : 'Email not verified',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -434,7 +431,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
 
-        // Tombol verifikasi ulang
+        // Resend verification email button
         if (!isVerified)
           Padding(
             padding: const EdgeInsets.only(top: 10),
@@ -455,7 +452,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   Icon(Icons.send, size: 16),
                   SizedBox(width: 8),
-                  Text('Kirim Email Verifikasi',
+                  Text('Send Verification Email',
                       style:
                           TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
                 ],
@@ -466,7 +463,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Fungsi untuk mengirim email verifikasi
+  /// Function to send verification email
   Future<void> _sendVerificationEmail() async {
     try {
       final user = _auth.currentUser;
@@ -476,7 +473,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
-                  'Email verifikasi telah dikirim. Silakan cek inbox Anda.'),
+                  'Verification email has been sent. Please check your inbox.'),
               backgroundColor: Color(0xFF4ECDC4),
               behavior: SnackBarBehavior.floating,
             ),
@@ -487,7 +484,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal mengirim email verifikasi: ${e.toString()}'),
+            content: Text('Failed to send verification email: ${e.toString()}'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -496,7 +493,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  /// Widget untuk statistik profil
+  /// Widget for profile statistics
   Widget _buildProfileStats() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -518,7 +515,7 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           _buildStatItem(
             icon: Icons.calendar_today_outlined,
-            label: 'Bergabung',
+            label: 'Joined',
             value: _currentUser?.createdAt != null
                 ? '${_currentUser!.createdAt.day}/${_currentUser!.createdAt.month}/${_currentUser!.createdAt.year}'
                 : 'N/A',
@@ -529,8 +526,8 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: Icons.person_outline_rounded,
             label: 'Status',
             value: _currentUser?.emailVerified == true
-                ? 'Terverifikasi'
-                : 'Belum Terverifikasi',
+                ? 'Verified'
+                : 'Not Verified',
             color: primaryPink,
           ),
         ],
@@ -582,9 +579,9 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Widget untuk menu aksi profil
+  /// Widget for profile action menu
   Widget _buildProfileActions() {
-    // Cek jika user login menggunakan Google
+    // Check if user logged in using Google
     final user = _auth.currentUser;
     final providerData = user?.providerData;
     bool isGoogleLogin = false;
@@ -615,7 +612,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 16, bottom: 8),
             child: Text(
-              'Pengaturan Akun',
+              'Account Settings',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -624,17 +621,17 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           _buildActionTile(
-            title: 'Edit Profil',
-            subtitle: 'Perbarui informasi profil Anda',
+            title: 'Edit Profile',
+            subtitle: 'Update your profile information',
             icon: Icons.edit,
             onTap: () async {
-              // Navigasi ke halaman edit profil
+              // Navigate to edit profile page
               final result = await Navigator.of(context).pushNamed(
                 '/edit-profile',
                 arguments: _currentUser,
               );
 
-              // Reload user data jika ada perubahan
+              // Reload user data if there are changes
               if (result == true) {
                 // coverage:ignore-line
                 _loadUserData();
@@ -644,11 +641,11 @@ class _ProfilePageState extends State<ProfilePage> {
           if (!isGoogleLogin) ...[
             _buildDivider(),
             _buildActionTile(
-              title: 'Ubah Password',
-              subtitle: 'Perbarui password akun Anda',
+              title: 'Change Password',
+              subtitle: 'Update your account password',
               icon: Icons.lock_outline,
               onTap: () {
-                // Navigasi ke halaman ubah password
+                // Navigate to change password page
                 // coverage:ignore-line
                 Navigator.of(context).pushNamed('/change-password');
               },
@@ -656,8 +653,8 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
           _buildDivider(),
           _buildActionTile(
-            title: 'Pengaturan Notifikasi',
-            subtitle: 'Kelola pengaturan notifikasi aplikasi',
+            title: 'Notification Settings',
+            subtitle: 'Manage app notification settings',
             icon: Icons.notifications_outlined,
             onTap: () {
               Navigator.of(context).pushNamed('/notification-settings');
@@ -665,8 +662,8 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           _buildDivider(),
           _buildActionTile(
-            title: 'Pengaturan Widget',
-            subtitle: 'Kelola widget aplikasi di layar utama',
+            title: 'Widget Settings',
+            subtitle: 'Manage app widgets on home screen',
             icon: Icons.widgets_outlined,
             onTap: () {
               Navigator.of(context).push(
@@ -678,8 +675,8 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           _buildDivider(),
           _buildActionTile(
-            title: 'Laporkan Bug',
-            subtitle: 'Bantu kami meningkatkan aplikasi',
+            title: 'Report Bug',
+            subtitle: 'Help us improve the app',
             icon: Icons.bug_report_outlined,
             onTap: () async {
               // Ensure user data is set correctly before showing bug reporting UI
@@ -693,7 +690,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (!result && mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Gagal membuka pelaporan bug'),
+                      content: Text('Failed to open bug reporting'),
                       behavior: SnackBarBehavior.floating,
                       backgroundColor: Colors.red,
                     ),
@@ -705,7 +702,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                          'Data pengguna tidak tersedia untuk pelaporan bug'),
+                          'User data not available for bug reporting'),
                       behavior: SnackBarBehavior.floating,
                       backgroundColor: Colors.orange,
                     ),
@@ -717,7 +714,7 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildDivider(),
           _buildActionTile(
             title: 'Logout',
-            subtitle: 'Keluar dari akun Anda',
+            subtitle: 'Sign out from your account',
             icon: Icons.logout,
             iconColor: primaryPink,
             textColor: primaryPink,
@@ -728,7 +725,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Helper untuk membangun divider
+  /// Helper to build divider
   Widget _buildDivider() {
     return Divider(
       color: Colors.grey.withOpacity(0.2),
@@ -739,7 +736,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Helper untuk membangun tile aksi
+  /// Helper to build action tile
   Widget _buildActionTile({
     required String title,
     required String subtitle,
@@ -805,14 +802,18 @@ class _ProfilePageState extends State<ProfilePage> {
   String _getInitials() {
     final name = _currentUser?.displayName;
     if (name == null || name.isEmpty) {
-      return '?';
+      return 'P'; // Default for Pockeat User
     }
 
-    final nameParts = name.split(' ');
-    if (nameParts.length == 1) {
-      return nameParts[0][0].toUpperCase();
+    final nameParts = name.trim().split(' ');
+    if (nameParts.length >= 2) {
+      // Get initials from first and last name
+      return '${nameParts[0][0]}${nameParts[1][0]}';
+    } else if (nameParts.isNotEmpty) {
+      // If only one word, use the first letter
+      return nameParts[0][0];
+    } else {
+      return 'P';
     }
-
-    return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
   }
 }
