@@ -14,13 +14,30 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/bottom_action_bar.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/correction_dialog.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 
 // Service locator diakses melalui GetIt.I di test
 
 class MockFoodScanPhotoService extends Mock implements FoodScanPhotoService {}
 
-class MockFoodTrackingClientController extends Mock implements FoodTrackingClientController {}
+class MockFoodTrackingClientController extends Mock
+    implements FoodTrackingClientController {}
+
+class MockBuildContext extends Mock implements BuildContext {}
+
+// Properly defined MockNavigatorObserver
+class MockNavigatorObserver extends NavigatorObserver {
+  final Function onPop;
+
+  MockNavigatorObserver({required this.onPop});
+
+  @override
+  void didPop(Route route, Route? previousRoute) {
+    onPop();
+    super.didPop(route, previousRoute);
+  }
+}
 
 void main() {
   late MockFoodScanPhotoService mockFoodScanPhotoService;
@@ -32,10 +49,12 @@ void main() {
 
   void setupGetIt() {
     if (!GetIt.I.isRegistered<FoodTrackingClientController>()) {
-      GetIt.I.registerSingleton<FoodTrackingClientController>(mockFoodTrackingController);
+      GetIt.I.registerSingleton<FoodTrackingClientController>(
+          mockFoodTrackingController);
     } else {
       GetIt.I.unregister<FoodTrackingClientController>();
-      GetIt.I.registerSingleton<FoodTrackingClientController>(mockFoodTrackingController);
+      GetIt.I.registerSingleton<FoodTrackingClientController>(
+          mockFoodTrackingController);
     }
   }
 
@@ -61,8 +80,13 @@ void main() {
 
     registerFallbackValue(testFood);
     registerFallbackValue('');
+    registerFallbackValue(1.0);
 
-    when(() => mockFoodTrackingController.forceUpdate()).thenAnswer((_) async {});
+    when(() => mockFoodTrackingController.forceUpdate())
+        .thenAnswer((_) async {});
+
+    // Register routes for navigation tests
+    TestWidgetsFlutterBinding.ensureInitialized();
   });
 
   group('BottomActionBar', () {
@@ -175,7 +199,8 @@ void main() {
       expect(find.text('Current analysis:'), findsNothing);
     });
 
-    testWidgets('calls correctFoodAnalysis with correct parameters when correction button is pressed',
+    testWidgets(
+        'calls correctFoodAnalysis with correct parameters when correction button is pressed',
         (WidgetTester tester) async {
       final correctedResult = FoodAnalysisResult(
         foodName: 'Corrected Food',
@@ -227,7 +252,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify service was called with correct parameters
-      verify(() => mockFoodScanPhotoService.correctFoodAnalysis(testFood, correctionText)).called(1);
+      verify(() => mockFoodScanPhotoService.correctFoodAnalysis(
+          testFood, correctionText)).called(1);
 
       // Verify callback was called with corrected result
       expect(callbackResult, equals(correctedResult));
@@ -264,10 +290,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify service was called
-      verify(() => mockFoodScanPhotoService.correctFoodAnalysis(any(), any())).called(1);
+      verify(() => mockFoodScanPhotoService.correctFoodAnalysis(any(), any()))
+          .called(1);
     });
 
-    testWidgets('calls saveFoodAnalysis with correct parameters when save button is pressed',
+    testWidgets(
+        'calls saveFoodAnalysis with correct parameters when save button is pressed',
         (WidgetTester tester) async {
       const successMessage = 'Successfully saved food analysis';
 
@@ -285,15 +313,29 @@ void main() {
               primaryPink: primaryPink,
             ),
           ),
+          // Add route definition to prevent navigation errors
+          onGenerateRoute: (settings) {
+            if (settings.name == '/analytic') {
+              return MaterialPageRoute(
+                builder: (_) => const Scaffold(body: Text('Analytics Page')),
+              );
+            }
+            return null;
+          },
         ),
       );
 
-      // Tap the button
+      // Tap the add to log button
       await tester.tap(find.byKey(const Key('add_to_log_button')));
       await tester.pump();
+      await tester.pump();
+
+      await tester.pumpAndSettle();
 
       // Verify service was called with correct food
-      verify(() => mockFoodScanPhotoService.saveFoodAnalysis(testFood)).called(1);
+      verify(() => mockFoodScanPhotoService.saveFoodAnalysis(testFood))
+          .called(1);
+      verify(() => mockFoodTrackingController.forceUpdate()).called(1);
     });
 
     testWidgets('add to log button is disabled when isLoading is true',
@@ -367,8 +409,12 @@ void main() {
       when(() => mockFoodScanPhotoService.saveFoodAnalysis(any()))
           .thenAnswer((_) => completer.future);
 
+      // Create a test navigation observer
+      final navigatorKey = GlobalKey<NavigatorState>();
+
       await tester.pumpWidget(
         MaterialApp(
+          navigatorKey: navigatorKey,
           home: Builder(
             builder: (context) => Scaffold(
               body: BottomActionBar(
@@ -380,6 +426,15 @@ void main() {
               ),
             ),
           ),
+          // Mock the routes to prevent navigation errors
+          onGenerateRoute: (settings) {
+            if (settings.name == '/analytic') {
+              return MaterialPageRoute(
+                builder: (_) => const Scaffold(body: Text('Analytics Page')),
+              );
+            }
+            return null;
+          },
         ),
       );
 
@@ -396,7 +451,8 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('calls service with correct parameters when save succeeds', (WidgetTester tester) async {
+    testWidgets('calls service with correct parameters when save succeeds',
+        (WidgetTester tester) async {
       const successMessage = 'Successfully saved food analysis';
 
       when(() => mockFoodScanPhotoService.saveFoodAnalysis(any()))
@@ -413,6 +469,15 @@ void main() {
               primaryPink: primaryPink,
             ),
           ),
+          // Add route definition to prevent navigation errors
+          onGenerateRoute: (settings) {
+            if (settings.name == '/analytic') {
+              return MaterialPageRoute(
+                builder: (_) => const Scaffold(body: Text('Analytics Page')),
+              );
+            }
+            return null;
+          },
         ),
       );
 
@@ -420,47 +485,60 @@ void main() {
       await tester.tap(find.byKey(const Key('add_to_log_button')));
       await tester.pump();
       await tester.pump();
+
       await tester.pumpAndSettle();
 
       // Verify service was called with correct food
-      verify(() => mockFoodScanPhotoService.saveFoodAnalysis(testFood)).called(1);
+      verify(() => mockFoodScanPhotoService.saveFoodAnalysis(testFood))
+          .called(1);
       verify(() => mockFoodTrackingController.forceUpdate()).called(1);
     });
 
-    testWidgets('handles forceUpdate exception gracefully', (WidgetTester tester) async {
-    // Setup mocks
-    when(() => mockFoodScanPhotoService.saveFoodAnalysis(any()))
-        .thenAnswer((_) async => 'Success');
-    
-    // Setup forceUpdate to throw exception
-    when(() => mockFoodTrackingController.forceUpdate())
-        .thenThrow(Exception('Network error'));
+    testWidgets('handles forceUpdate exception gracefully',
+        (WidgetTester tester) async {
+      // Setup mocks
+      when(() => mockFoodScanPhotoService.saveFoodAnalysis(any()))
+          .thenAnswer((_) async => 'Success');
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: BottomActionBar(
-            isLoading: false,
-            food: testFood,
-            foodScanPhotoService: mockFoodScanPhotoService,
-            primaryYellow: primaryYellow,
-            primaryPink: primaryPink,
+      // Setup forceUpdate to throw exception
+      when(() => mockFoodTrackingController.forceUpdate())
+          .thenThrow(Exception('Network error'));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BottomActionBar(
+              isLoading: false,
+              food: testFood,
+              foodScanPhotoService: mockFoodScanPhotoService,
+              primaryYellow: primaryYellow,
+              primaryPink: primaryPink,
+            ),
           ),
+          // Add route definition to prevent navigation errors
+          onGenerateRoute: (settings) {
+            if (settings.name == '/analytic') {
+              return MaterialPageRoute(
+                builder: (_) => const Scaffold(body: Text('Analytics Page')),
+              );
+            }
+            return null;
+          },
         ),
-      ),
-    );
+      );
 
-    // Tap the add to log button
-    await tester.tap(find.byKey(const Key('add_to_log_button')));
-    await tester.pump();
-    
-    // Verify service was still called despite exception
-    verify(() => mockFoodScanPhotoService.saveFoodAnalysis(testFood)).called(1);
-    verify(() => mockFoodTrackingController.forceUpdate()).called(1);
-    
-    // Test bahwa tidak ada crash meskipun forceUpdate melempar exception
-    await tester.pumpAndSettle();
-  });
+      // Tap the add to log button
+      await tester.tap(find.byKey(const Key('add_to_log_button')));
+      await tester.pump();
+
+      // Wait for all animations and asynchronous operations to complete
+      await tester.pumpAndSettle();
+
+      // Verify service was still called despite exception
+      verify(() => mockFoodScanPhotoService.saveFoodAnalysis(testFood))
+          .called(1);
+      verify(() => mockFoodTrackingController.forceUpdate()).called(1);
+    });
 
     testWidgets('navigates back after successful save',
         (WidgetTester tester) async {
@@ -474,7 +552,8 @@ void main() {
           home: Builder(
             builder: (context) => ElevatedButton(
               onPressed: () {
-                Navigator.of(context).push(
+                Navigator.of(context)
+                    .push(
                   MaterialPageRoute(
                     builder: (_) => Scaffold(
                       body: BottomActionBar(
@@ -486,7 +565,8 @@ void main() {
                       ),
                     ),
                   ),
-                ).then((_) async {
+                )
+                    .then((_) async {
                   try {
                     final controller = GetIt.I<FoodTrackingClientController>();
                     await controller.forceUpdate();
@@ -508,7 +588,7 @@ void main() {
       // Open the route
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
-      
+
       // Manually trigger navigation back to simulate what happens after save
       Navigator.of(tester.element(find.byType(BottomActionBar))).pop();
       await tester.pumpAndSettle();
@@ -516,17 +596,230 @@ void main() {
       // Verify navigation occurred
       expect(didPop, isTrue);
     });
+
+    group('showSnackBarMessage', () {
+      testWidgets('should show SnackBar with correct message and color',
+          (WidgetTester tester) async {
+        // Create instance of BottomActionBar to access the non-static method
+        final bottomActionBar = BottomActionBar(
+          isLoading: false,
+          food: testFood,
+          foodScanPhotoService: mockFoodScanPhotoService,
+          primaryYellow: primaryYellow,
+          primaryPink: primaryPink,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) {
+                  // Invoke the method after building the widget
+                  bottomActionBar.showSnackBarMessage(context, 'Test Message',
+                      backgroundColor: Colors.purple);
+                  return const Text('Test');
+                },
+              ),
+            ),
+          ),
+        );
+
+        // Allow the post frame callback to execute
+        await tester.pump();
+
+        // Verify SnackBar was shown with correct message and color
+        expect(find.byType(SnackBar), findsOneWidget);
+        expect(find.text('Test Message'), findsOneWidget);
+
+        final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+        expect(snackBar.backgroundColor, Colors.purple);
+      });
+
+      testWidgets('should not crash when context is no longer mounted',
+          (WidgetTester tester) async {
+        // Create an unmounted context
+        late BuildContext testContext;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) {
+                testContext = context;
+                return const Text('Test');
+              },
+            ),
+          ),
+        );
+
+        // Create new widget tree to make the old context obsolete
+        await tester.pumpWidget(const MaterialApp(home: Text('New Tree')));
+
+        // Create instance of BottomActionBar
+        final bottomActionBar = BottomActionBar(
+          isLoading: false,
+          food: testFood,
+          foodScanPhotoService: mockFoodScanPhotoService,
+          primaryYellow: primaryYellow,
+          primaryPink: primaryPink,
+        );
+
+        // Should not crash even with unmounted context
+        bottomActionBar.showSnackBarMessage(testContext, 'Test Message');
+
+        await tester.pump();
+        // No assertions needed, test passes if no exception is thrown
+      });
+    });
+
+    testWidgets('calls correctNutritionLabelAnalysis when isLabelScan is true',
+        (WidgetTester tester) async {
+      // Prepare mock result
+      final correctedResult = FoodAnalysisResult(
+        foodName: 'Corrected Label Food',
+        ingredients: [],
+        nutritionInfo: NutritionInfo(
+          calories: 200,
+          protein: 20,
+          carbs: 30,
+          fat: 10,
+          sodium: 200,
+          fiber: 5,
+          sugar: 5,
+        ),
+        warnings: [],
+      );
+
+      // Setup mock to return corrected result
+      when(() => mockFoodScanPhotoService.correctNutritionLabelAnalysis(
+          any(), any(), any())).thenAnswer((_) async => correctedResult);
+
+      FoodAnalysisResult? callbackResult;
+
+      // Build widget with isLabelScan set to true
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BottomActionBar(
+              isLoading: false,
+              food: testFood,
+              foodScanPhotoService: mockFoodScanPhotoService,
+              primaryYellow: primaryYellow,
+              primaryPink: primaryPink,
+              onAnalysisCorrected: (result) {
+                callbackResult = result;
+              },
+              isLabelScan: true,
+              servingSize: 2.5,
+            ),
+          ),
+        ),
+      );
+
+      // Tap the correction button to open dialog
+      await tester.tap(find.text('Correct Analysis'));
+      await tester.pumpAndSettle();
+
+      // Enter correction text
+      final correctionText = 'This is a nutrition label for cereal';
+      await tester.enterText(find.byType(TextField), correctionText);
+
+      // Tap the submit button
+      await tester.tap(find.text('Submit Correction'));
+      await tester.pumpAndSettle();
+
+      // Verify correct service method was called with right parameters
+      verify(() => mockFoodScanPhotoService.correctNutritionLabelAnalysis(
+          testFood, correctionText, 2.5)).called(1);
+
+      // Verify callback was called with corrected result
+      expect(callbackResult, equals(correctedResult));
+    });
+
+    testWidgets('handles error when saving food analysis fails',
+        (WidgetTester tester) async {
+      // Setup mock to throw exception
+      when(() => mockFoodScanPhotoService.saveFoodAnalysis(any()))
+          .thenThrow(Exception('Failed to save food'));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BottomActionBar(
+              isLoading: false,
+              food: testFood,
+              foodScanPhotoService: mockFoodScanPhotoService,
+              primaryYellow: primaryYellow,
+              primaryPink: primaryPink,
+            ),
+          ),
+        ),
+      );
+
+      // Tap the add to log button
+      await tester.tap(find.byKey(const Key('add_to_log_button')));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      // Verify error message is shown
+      expect(find.text('Failed to save: Exception: Failed to save food'),
+          findsOneWidget);
+    });
+
+    testWidgets('navigates to analytics page after successful save',
+        (WidgetTester tester) async {
+      // Track navigation
+      List<String> navigatedRoutes = [];
+
+      // Setup mock service
+      when(() => mockFoodScanPhotoService.saveFoodAnalysis(any()))
+          .thenAnswer((_) async => 'Success');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          initialRoute: '/test',
+          onGenerateRoute: (settings) {
+            navigatedRoutes.add(settings.name ?? 'unknown');
+            if (settings.name == '/analytic') {
+              final args = settings.arguments as Map<String, dynamic>;
+              expect(args['initialTabIndex'], 1);
+              return MaterialPageRoute(
+                builder: (_) => const Scaffold(body: Text('Analytics Page')),
+              );
+            }
+            return MaterialPageRoute(
+              builder: (_) => Scaffold(
+                body: BottomActionBar(
+                  isLoading: false,
+                  food: testFood,
+                  foodScanPhotoService: mockFoodScanPhotoService,
+                  primaryYellow: primaryYellow,
+                  primaryPink: primaryPink,
+                ),
+              ),
+            );
+          },
+          navigatorObservers: [
+            MockNavigatorObserver(onPop: () {}),
+          ],
+        ),
+      );
+
+      // Tap the add to log button
+      await tester.tap(find.byKey(const Key('add_to_log_button')));
+      await tester.pump();
+      await tester.pump();
+
+      // Skip loading dialog
+      await tester.pumpAndSettle();
+
+      // Skip SnackBar duration
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Now we should be navigating
+      await tester.pumpAndSettle();
+
+      // Verify navigation occurred to analytics page with correct parameters
+      expect(navigatedRoutes, contains('/analytic'));
+    });
   });
-}
-
-class MockNavigatorObserver extends NavigatorObserver {
-  final Function onPop;
-
-  MockNavigatorObserver({required this.onPop});
-
-  @override
-  void didPop(Route route, Route? previousRoute) {
-    onPop();
-    super.didPop(route, previousRoute);
-  }
 }

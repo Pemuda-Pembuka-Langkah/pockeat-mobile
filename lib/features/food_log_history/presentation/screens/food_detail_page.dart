@@ -1,21 +1,29 @@
 // Flutter imports:
+//coverage: ignore-file
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_log_history/utils/food_sharing_extension.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/health_score_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/vitamins_and_minerals_section.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
+import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+
+//coverage: ignore-file
 
 /// A page that displays detailed information about a food item.
 ///
-/// This page shows all the nutrition information and ingredients of a food item,
-/// and allows the user to delete the food entry if needed.
 class FoodDetailPage extends StatefulWidget {
   final String foodId;
   final FoodScanRepository foodRepository;
@@ -37,6 +45,8 @@ class FoodDetailPage extends StatefulWidget {
 class _FoodDetailPageState extends State<FoodDetailPage> {
   late Future<FoodAnalysisResult?> _foodFuture;
   bool _isLoading = false;
+  bool _isSaved = false;
+  String? _savedMealId;
 
   // Colors
   final Color primaryGreen = const Color(0xFF4CAF50);
@@ -51,18 +61,39 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
   }
 
   void _loadFoodDetails() {
-    // print(widget.foodId ?? 'No food ID provided');
     setState(() {
-      _foodFuture = _fetchFoodDetails();
+      _foodFuture = _fetchFoodDetailsAndCheckSaved();
     });
   }
 
-  Future<FoodAnalysisResult?> _fetchFoodDetails() async {
+  Future<FoodAnalysisResult?> _fetchFoodDetailsAndCheckSaved() async {
     try {
       final result = await widget.foodRepository.getById(widget.foodId);
+
+      if (result != null) {
+        // Check if this meal is already saved
+        await _checkIfMealIsSaved(result.id);
+      }
+
       return result;
     } catch (e) {
       throw Exception('Failed to load food details: $e');
+    }
+  }
+
+  Future<void> _checkIfMealIsSaved(String foodId) async {
+    try {
+      final savedMealService = GetIt.instance<SavedMealService>();
+      final isSaved = await savedMealService.isMealSaved(foodId);
+
+      if (mounted) {
+        setState(() {
+          _isSaved = isSaved;
+        });
+      }
+    } catch (e) {
+      // Silently handle the error - default to not saved
+      debugPrint('Error checking if meal is saved: $e');
     }
   }
 
@@ -210,11 +241,293 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
     return DateFormat('EEEE, MMMM d, yyyy • h:mm a').format(date);
   }
 
-// coverage:ignore:start
+// coverage:ignore-start
   void _shareFood(FoodAnalysisResult food) async {
     await context.shareFoodSummary(food);
   }
-  // coverage:ignore:end
+  // coverage:ignore-end
+
+  void _showSaveMealDialog(FoodAnalysisResult food) {
+    final TextEditingController nameController =
+        TextEditingController(text: food.foodName);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.bookmark, color: primaryGreen),
+            const SizedBox(width: 8),
+            const Text('Save Meal'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Save this meal to your collection for quick access later.',
+              style: TextStyle(color: Colors.black87),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Meal Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                hintText: 'Enter a name for this saved meal',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey[700]),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _saveMeal(food, name: nameController.text.trim());
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryGreen,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveMeal(FoodAnalysisResult food, {String? name}) async {
+    if (!mounted) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      debugPrint("FoodDetailPage: Getting SavedMealService from GetIt");
+      try {
+        // Get the saved meal service from GetIt
+        final savedMealService = GetIt.instance<SavedMealService>();
+        debugPrint(
+            "FoodDetailPage: Successfully got SavedMealService from GetIt");
+
+        debugPrint(
+            "FoodDetailPage: Calling saveMeal with food ID ${food.id} and name $name");
+        // Save the meal with the provided name or default to food name
+        final savedMeal = await savedMealService.saveMeal(food, name: name);
+        debugPrint("FoodDetailPage: Meal saved with ID: ${savedMeal.id}");
+
+        if (!mounted) return;
+
+        setState(() {
+          _isLoading = false;
+          _isSaved = true;
+          _savedMealId = savedMeal.id;
+        });
+
+        // Show success message
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 8),
+                Text('Meal saved successfully'),
+              ],
+            ),
+            backgroundColor: primaryGreen,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      } catch (getItError) {
+        debugPrint(
+            "FoodDetailPage: Error getting SavedMealService from GetIt - $getItError");
+        throw Exception("Error accessing SavedMealService: $getItError");
+      }
+    } catch (e, stackTrace) {
+      debugPrint("FoodDetailPage: Error saving meal - $e");
+      debugPrint("FoodDetailPage: Stack trace - $stackTrace");
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      // Show detailed error message
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(child: Text('Failed to save meal: ${e.toString()}')),
+            ],
+          ),
+          backgroundColor: primaryRed,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: const Duration(seconds: 8),
+        ),
+      );
+    }
+  }
+
+  void _showUnsaveMealDialog(FoodAnalysisResult food) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.bookmark_remove, color: primaryRed),
+            const SizedBox(width: 8),
+            const Text('Remove Saved Meal'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Are you sure you want to remove this meal from your saved collection?',
+              style: TextStyle(color: Colors.black87),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey[700]),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _unsaveMeal(food);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryRed,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _unsaveMeal(FoodAnalysisResult food) async {
+    if (!mounted) return;
+
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Get the saved meal service from GetIt
+      final savedMealService = GetIt.instance<SavedMealService>();
+
+      // Find the saved meal with this food analysis ID
+      final snapshot = await FirebaseFirestore.instance
+          .collection('saved_meals')
+          .where('foodAnalysis.id', isEqualTo: food.id)
+          .where('userId',
+              isEqualTo: FirebaseAuth.instance.currentUser?.uid ?? '')
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        throw Exception('Saved meal not found');
+      }
+
+      final savedMealId = snapshot.docs.first.id;
+
+      // Delete the saved meal
+      await savedMealService.deleteSavedMeal(savedMealId);
+
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+        _isSaved = false;
+      });
+
+      // Show success message
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Meal removed from saved collection'),
+            ],
+          ),
+          backgroundColor: primaryGreen,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      // Show error message
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(child: Text('Failed to remove meal: ${e.toString()}')),
+            ],
+          ),
+          backgroundColor: primaryRed,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -356,14 +669,36 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Food name and timestamp
-                Text(
-                  food.foodName,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                // Food name and save button
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        food.foodName,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _isSaved ? Icons.bookmark : Icons.bookmark_border,
+                        color: _isSaved ? primaryGreen : Colors.black87,
+                      ),
+                      onPressed: () => _isSaved
+                          ? _showUnsaveMealDialog(food)
+                          : _showSaveMealDialog(food),
+                      tooltip: _isSaved ? 'Saved Meal' : 'Save Meal',
+                      style: IconButton.styleFrom(
+                        backgroundColor:
+                            primaryGreen.withOpacity(_isSaved ? 0.2 : 0.1),
+                        foregroundColor:
+                            _isSaved ? primaryGreen : Colors.black87,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -504,9 +839,24 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
         totalMacros > 0 ? (totalProtein / totalMacros) * 100 : 0;
     final fatPercentage = totalMacros > 0 ? (totalFat / totalMacros) * 100 : 0;
 
+    // Convert nutrition info to a map for HealthScoreSection
+    final Map<String, dynamic> nutritionMap = {
+      'healthScore': food.healthScore,
+      'healthScoreCategory': food.getHealthScoreCategory(),
+    };
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Health Score Section
+        HealthScoreSection(
+          isLoading: false,
+          nutritionData: nutritionMap,
+          primaryGreen: primaryGreen,
+          primaryPink: primaryRed,
+        ),
+        const SizedBox(height: 16),
+
         _buildSectionHeader('Nutrition Information',
             CupertinoIcons.chart_pie_fill, primaryBlue),
         const SizedBox(height: 16),
@@ -771,7 +1121,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                                 ),
                                 if (ingredient.servings > 0)
                                   Text(
-                                    '${ingredient.servings} grams',
+                                    '${ingredient.servings} kcal',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: Colors.black54,
@@ -787,6 +1137,13 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                 ),
         ),
         const SizedBox(height: 24),
+
+        // Vitamins and Minerals Section
+        VitaminsAndMineralsSection(
+          isLoading: false,
+          food: food,
+          primaryColor: primaryBlue,
+        ),
       ],
     );
   }

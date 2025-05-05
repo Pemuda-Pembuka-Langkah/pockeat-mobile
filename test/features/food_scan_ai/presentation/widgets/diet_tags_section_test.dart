@@ -30,23 +30,25 @@ void main() {
       expect(find.text('Warnings'), findsOneWidget);
 
       // Verify safety tag is displayed
-      expect(find.text('The food is safe for consumption'), findsOneWidget);
+      expect(find.text('No nutritional concerns detected'), findsOneWidget);
+
+      // Verify check icon is displayed
+      expect(find.byIcon(Icons.check_circle), findsOneWidget);
 
       // Verify no warning tags are displayed
-      expect(
-          find.byWidgetPredicate((widget) =>
-              widget is Container &&
-              widget.child is Text &&
-              (widget.child as Text).data != 'The food is safe for consumption'),
-          findsNothing);
+      expect(find.byIcon(Icons.warning_amber), findsNothing);
+      expect(find.byIcon(Icons.water_drop), findsNothing);
+      expect(find.byIcon(Icons.icecream), findsNothing);
     });
 
     testWidgets('displays warning tags when warnings list is not empty',
         (WidgetTester tester) async {
       final warnings = [
-        'Contains allergens',
-        'High in sugar',
-        'May contain traces of nuts'
+        'High sodium content',
+        'High sugar content',
+        'High cholesterol content',
+        'High saturated fat content',
+        'Generic warning'
       ];
 
       await tester.pumpWidget(
@@ -65,12 +67,20 @@ void main() {
       expect(find.text('Warnings'), findsOneWidget);
 
       // Verify safety tag is NOT displayed
-      expect(find.text('The food is safe for consumption'), findsNothing);
+      expect(find.text('No nutritional concerns detected'), findsNothing);
+      expect(find.byIcon(Icons.check_circle), findsNothing);
 
       // Verify all warning tags are displayed
       for (final warning in warnings) {
         expect(find.text(warning), findsOneWidget);
       }
+
+      // Check that specific icons are used for different warning types
+      expect(find.byIcon(Icons.water_drop), findsOneWidget); // sodium
+      expect(find.byIcon(Icons.icecream), findsOneWidget); // sugar
+      expect(find.byIcon(Icons.medical_information), findsOneWidget); // cholesterol
+      expect(find.byIcon(Icons.opacity), findsOneWidget); // fat
+      expect(find.byIcon(Icons.warning_amber), findsOneWidget); // generic
     });
 
     testWidgets('uses correct colors for safety tag',
@@ -90,7 +100,7 @@ void main() {
       // Find the safety tag container
       final safetyContainer = tester.widget<Container>(
         find.ancestor(
-          of: find.text('The food is safe for consumption'),
+          of: find.text('No nutritional concerns detected'),
           matching: find.byType(Container),
         ),
       );
@@ -105,7 +115,7 @@ void main() {
 
     testWidgets('uses correct colors for warning tags',
         (WidgetTester tester) async {
-      final warnings = ['Contains allergens'];
+      final warnings = ['High sodium content'];
 
       await tester.pumpWidget(
         MaterialApp(
@@ -122,7 +132,7 @@ void main() {
       // Find the warning tag container
       final warningContainer = tester.widget<Container>(
         find.ancestor(
-          of: find.text('Contains allergens'),
+          of: find.text('High sodium content'),
           matching: find.byType(Container),
         ),
       );
@@ -137,7 +147,7 @@ void main() {
 
     testWidgets('handles multiple warning tags with proper layout',
         (WidgetTester tester) async {
-      final warnings = List.generate(10, (index) => 'Warning ${index + 1}');
+      final warnings = List.generate(5, (index) => 'Warning ${index + 1}');
 
       await tester.pumpWidget(
         MaterialApp(
@@ -176,9 +186,12 @@ void main() {
         ),
       );
 
-      // Find the main padding widget
+      // Find the main padding widget directly under DietTagsSection
       final paddingWidget = tester.widget<Padding>(
-        find.byType(Padding).first,
+        find.ancestor(
+          of: find.text('Warnings'),
+          matching: find.byType(Padding),
+        ),
       );
 
       // Verify padding values
@@ -186,9 +199,15 @@ void main() {
           paddingWidget.padding,
           equals(const EdgeInsets.symmetric(horizontal: 16, vertical: 8)));
 
-      // Verify spacing between title and content
-      expect(find.byType(SizedBox), findsOneWidget);
-      final sizedBox = tester.widget<SizedBox>(find.byType(SizedBox));
+      // Find the specific SizedBox between title and content using descendant finder
+      final sizedBox = tester.widget<SizedBox>(
+        find.descendant(
+          of: find.byType(Column),
+          matching: find.byType(SizedBox),
+        ).first,
+      );
+      
+      // Verify the height of this SizedBox
       expect(sizedBox.height, equals(12));
     });
 
@@ -214,10 +233,10 @@ void main() {
 
       // Verify safety tag text style
       final safetyText = tester.widget<Text>(
-          find.text('The food is safe for consumption'));
+          find.text('No nutritional concerns detected'));
       expect(safetyText.style?.fontSize, equals(14));
       expect(safetyText.style?.fontWeight, equals(FontWeight.w500));
       expect(safetyText.style?.color, equals(Colors.black87));
     });
   });
-} 
+}

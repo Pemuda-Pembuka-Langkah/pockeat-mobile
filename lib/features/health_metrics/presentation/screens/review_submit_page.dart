@@ -1,10 +1,14 @@
 // review_submit_page.dart
 
+// ignore_for_file: use_build_context_synchronously
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
@@ -137,13 +141,18 @@ class ReviewSubmitPage extends StatelessWidget {
                   onPressed: () async {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setBool('onboardingInProgress', false);
-
-                    if (!context.mounted) return;
-
-                    Navigator.pushNamed(context, '/register');
+                    final loginService = GetIt.instance<LoginService>();
+                    final user = await loginService.getCurrentUser();
+                    if (user != null) {
+                      final formCubit = context.read<HealthMetricsFormCubit>();
+                      formCubit.setUserId(user.uid);
+                      await formCubit.submit();
+                      Navigator.pushReplacementNamed(context, '/');
+                    } else {
+                      Navigator.pushNamed(context, '/register');
+                    }
                   },
-                  child:
-                      const Center(child: Text("Continue to Create Account")),
+                  child: const Center(child: Text("Continue")),
                 ),
               ],
             ),

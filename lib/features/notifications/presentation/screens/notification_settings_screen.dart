@@ -9,7 +9,7 @@ import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 
-// coverage-ignore:start
+// coverage:ignore-start
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -1025,4 +1025,4 @@ class _NotificationSettingsScreenState
   }
 }
 
-// coverage-ignore:end
+// coverage:ignore-end

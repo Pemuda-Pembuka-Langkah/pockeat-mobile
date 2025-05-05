@@ -58,7 +58,7 @@ class RunningFormState extends State<RunningForm> {
 
       return widget.onCalculate(totalDistance, duration);
     } catch (e) {
-      // Using Flutter's built-in logger instead of print
+      // Using Flutter's built-in logger instead ofdebugprint
       debugPrint('Error calculating running calories: $e');
       return 0.0;
     }
