@@ -33,6 +33,7 @@ void main() {
         fitnessGoal: 'Lose weight',
         bmi: 23.7,
         bmiCategory: 'Normal',
+        desiredWeight: 70.0,
       );
 
       expect(metrics.userId, equals('test-uid'));
@@ -44,6 +45,7 @@ void main() {
       expect(metrics.fitnessGoal, equals('Lose weight'));
       expect(metrics.bmi, equals(23.7));
       expect(metrics.bmiCategory, equals('Normal'));
+      expect(metrics.desiredWeight, equals(70.0));
     });
 
     test('toMap should convert HealthMetricsModel to a Map', () {
@@ -57,6 +59,7 @@ void main() {
         fitnessGoal: 'Lose weight',
         bmi: 22.5,
         bmiCategory: 'Normal',
+        desiredWeight: 68.0,
       );
 
       final map = metrics.toMap();
@@ -70,6 +73,7 @@ void main() {
       expect(map['fitnessGoal'], equals('Lose weight'));
       expect(map['bmi'], equals(22.5));
       expect(map['bmiCategory'], equals('Normal'));
+      expect(map['desiredWeight'], equals(68.0));
     });
 
     test('fromFirestore should create HealthMetricsModel from DocumentSnapshot', () {
@@ -82,6 +86,7 @@ void main() {
         'fitnessGoal': 'Lose weight',
         'bmi': 23.7,
         'bmiCategory': 'Normal',
+        'desiredWeight': 70.0,
       };
 
       final mockSnapshot = MockDocumentSnapshot(mockData);
@@ -96,6 +101,7 @@ void main() {
       expect(metrics.fitnessGoal, equals('Lose weight'));
       expect(metrics.bmi, equals(23.7));
       expect(metrics.bmiCategory, equals('Normal'));
+      expect(metrics.desiredWeight, equals(70.0));
     });
 
     test('fromFirestore should throw exception if fields are missing', () {
@@ -121,6 +127,7 @@ void main() {
         fitnessGoal: 'Gain muscle',
         bmi: 24.5,
         bmiCategory: 'Normal',
+        desiredWeight: 80.0,
       );
 
       final map = metrics.toMap();
@@ -133,6 +140,7 @@ void main() {
       expect(map['fitnessGoal'], isA<String>());
       expect(map['bmi'], isA<double>());
       expect(map['bmiCategory'], isA<String>());
+      expect(map['desiredWeight'], isA<double>());
     });
 
     test('fromFirestore should throw exception if data is null', () {
@@ -150,6 +158,7 @@ void main() {
         'fitnessGoal': 'Maintain',
         'bmi': 22,
         'bmiCategory': 'Normal',
+        'desiredWeight': 70,
       };
 
       final mockSnapshot = MockDocumentSnapshot(mockData);
@@ -163,6 +172,7 @@ void main() {
       expect(metrics.fitnessGoal, equals('Maintain'));
       expect(metrics.bmi, equals(22.0));
       expect(metrics.bmiCategory, equals('Normal'));
+      expect(metrics.desiredWeight, equals(70.0));
     });
   });
 }
