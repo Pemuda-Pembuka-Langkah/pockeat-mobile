@@ -12,6 +12,7 @@ import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/home_screen_widget/presentation/screens/widget_manager_screen.dart';
 
 /// Halaman profil pengguna
 ///
@@ -660,6 +661,19 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: Icons.notifications_outlined,
             onTap: () {
               Navigator.of(context).pushNamed('/notification-settings');
+            },
+          ),
+          _buildDivider(),
+          _buildActionTile(
+            title: 'Pengaturan Widget',
+            subtitle: 'Kelola widget aplikasi di layar utama',
+            icon: Icons.widgets_outlined,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const WidgetManagerScreen(),
+                ),
+              );
             },
           ),
           _buildDivider(),

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/home_screen_widget/domain/constants/widget_preview_constants.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_installation_status.dart';
-import 'package:pockeat/features/home_screen_widget/domain/models/widget_preview_info.dart';
 import 'package:pockeat/features/home_screen_widget/presentation/widgets/widget_preview_card.dart';
 import 'package:pockeat/features/home_screen_widget/presentation/widgets/widget_preview_card_factory.dart';
 

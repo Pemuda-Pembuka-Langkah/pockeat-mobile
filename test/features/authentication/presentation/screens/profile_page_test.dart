@@ -19,6 +19,7 @@ import 'package:pockeat/features/authentication/presentation/screens/profile_pag
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/home_screen_widget/presentation/screens/widget_manager_screen.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'profile_page_test.mocks.dart';
 
@@ -152,6 +153,8 @@ void main() {
             const Scaffold(body: Text('Notification Settings Page')),
         '/edit-profile': (context) =>
             const Scaffold(body: Text('Edit Profile Page')),
+        '/widget-settings': (context) =>
+            const WidgetManagerScreen(), // tambahkan route untuk widget settings
       },
     );
   }
@@ -257,6 +260,7 @@ void main() {
       // Tap confirm button
       final confirmButton = find.text('Logout').last;
       await tester.ensureVisible(confirmButton);
+      await tester.pumpAndSettle();
       await tester.tap(confirmButton);
       await tester.pumpAndSettle();
 
