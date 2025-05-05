@@ -169,7 +169,7 @@ class _DietPageState extends State<DietPage> {
                       context
                           .read<HealthMetricsFormCubit>()
                           .setDietType(_selected!);
-                      Navigator.pushNamed(context, '/desired-weight');
+                      Navigator.pushNamed(context, '/onboarding/goal');
                     },
               child: const Center(child: Text("Next")),
             ),

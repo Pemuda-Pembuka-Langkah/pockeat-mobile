@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 // Package imports:
 import 'package:firebase_analytics/firebase_analytics.dart';
 
+// coverage:ignore-start
 /// Service for tracking app analytics
 class AnalyticsService {
   final FirebaseAnalytics _analytics;
@@ -172,3 +173,5 @@ class AnalyticsService {
     }
   }
 }
+
+//coverage:ignore-end

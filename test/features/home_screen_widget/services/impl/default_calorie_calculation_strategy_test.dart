@@ -14,9 +14,11 @@ import 'package:pockeat/features/home_screen_widget/services/impl/default_calori
 import 'default_calorie_calculation_strategy_test.mocks.dart';
 
 // Generate mocks for all dependencies
-@GenerateMocks(
-    [FoodLogHistoryService, HealthMetricsRepository, CaloricRequirementService])
-
+@GenerateMocks([
+  FoodLogHistoryService,
+  HealthMetricsRepository,
+  CaloricRequirementService,
+])
 void main() {
   late DefaultCalorieCalculationStrategy strategy;
   late MockFoodLogHistoryService mockFoodLogHistoryService;
@@ -33,9 +35,7 @@ void main() {
   });
 
   group('DefaultCalorieCalculationStrategy - calculateTodayTotalCalories', () {
-    test('should calculate total calories from today\'s food logs correctly',
-        () async {
-      // Arrange
+    test('should calculate total calories from today\'s food logs correctly', () async {
       final DateTime today = DateTime.now();
 
       final logs = [
@@ -74,34 +74,27 @@ void main() {
       when(mockFoodLogHistoryService.getFoodLogsByDate(any, any))
           .thenAnswer((_) async => logs);
 
-      // Act
       final result = await strategy.calculateTodayTotalCalories(
           mockFoodLogHistoryService, testUserId);
 
-      // Assert
-      expect(result, 1550); // 350 + 550 + 650 = 1550
+      expect(result, 1550);
       verify(mockFoodLogHistoryService.getFoodLogsByDate(any, any)).called(1);
     });
 
     test('should return 0 when no food logs are found for today', () async {
-      // Arrange
-      // We'll just mock the service to return empty logs
       when(mockFoodLogHistoryService.getFoodLogsByDate(any, any))
           .thenAnswer((_) async => []);
 
-      // Act
       final result = await strategy.calculateTodayTotalCalories(
           mockFoodLogHistoryService, testUserId);
 
-      // Assert
       expect(result, 0);
       verify(mockFoodLogHistoryService.getFoodLogsByDate(any, any)).called(1);
     });
 
     test('should handle fractional calorie values correctly', () async {
-      // Arrange
       final DateTime today = DateTime.now();
-      
+
       final logs = [
         FoodLogHistoryItem(
           id: '1',
@@ -128,20 +121,16 @@ void main() {
       when(mockFoodLogHistoryService.getFoodLogsByDate(any, any))
           .thenAnswer((_) async => logs);
 
-      // Act
       final result = await strategy.calculateTodayTotalCalories(
           mockFoodLogHistoryService, testUserId);
 
-      // Assert
-      expect(result, 350); // Note: The calculation rounds down to int
+      expect(result, 350);
       verify(mockFoodLogHistoryService.getFoodLogsByDate(any, any)).called(1);
     });
   });
 
   group('DefaultCalorieCalculationStrategy - calculateTargetCalories', () {
-    test('should calculate target calories from health metrics correctly',
-        () async {
-      // Arrange
+    test('should calculate target calories from health metrics correctly', () async {
       final mockHealthMetrics = HealthMetricsModel(
         userId: testUserId,
         height: 175.0,
@@ -150,6 +139,8 @@ void main() {
         gender: 'male',
         activityLevel: 'moderate',
         fitnessGoal: 'maintain',
+        bmi: 22.9,
+        bmiCategory: 'Normal',
       );
 
       final mockRequirementResult = CaloricRequirementModel(
@@ -163,17 +154,15 @@ void main() {
           .thenAnswer((_) async => mockHealthMetrics);
 
       when(mockCaloricRequirementService.analyze(
-  userId: anyNamed('userId'),
-  model: anyNamed('model'),
-)).thenReturn(mockRequirementResult);
+        userId: anyNamed('userId'),
+        model: anyNamed('model'),
+      )).thenReturn(mockRequirementResult);
 
-      // Act
       final result = await strategy.calculateTargetCalories(
           mockHealthMetricsRepository,
           mockCaloricRequirementService,
           testUserId);
 
-      // Assert
       expect(result, 2500);
       verify(mockHealthMetricsRepository.getHealthMetrics(any)).called(1);
       verify(mockCaloricRequirementService.analyze(
@@ -183,17 +172,14 @@ void main() {
     });
 
     test('should return 0 when health metrics are null', () async {
-      // Arrange
       when(mockHealthMetricsRepository.getHealthMetrics(testUserId))
           .thenAnswer((_) async => null);
 
-      // Act
       final result = await strategy.calculateTargetCalories(
           mockHealthMetricsRepository,
           mockCaloricRequirementService,
           testUserId);
 
-      // Assert
       expect(result, 0);
       verify(mockHealthMetricsRepository.getHealthMetrics(any)).called(1);
       verifyNever(mockCaloricRequirementService.analyze(
@@ -203,7 +189,6 @@ void main() {
     });
 
     test('should handle fractional tdee values correctly', () async {
-      // Arrange
       final mockHealthMetrics = HealthMetricsModel(
         userId: testUserId,
         height: 175.0,
@@ -212,12 +197,14 @@ void main() {
         gender: 'male',
         activityLevel: 'moderate',
         fitnessGoal: 'maintain',
+        bmi: 22.9,
+        bmiCategory: 'Normal',
       );
 
       final mockRequirementResult = CaloricRequirementModel(
         userId: testUserId,
         bmr: 1700.5,
-        tdee: 2550.7, // Fractional value
+        tdee: 2550.7,
         timestamp: DateTime.now(),
       );
 
@@ -225,18 +212,16 @@ void main() {
           .thenAnswer((_) async => mockHealthMetrics);
 
       when(mockCaloricRequirementService.analyze(
-      userId: anyNamed('userId'),
-      model: anyNamed('model'),
-    )).thenReturn(mockRequirementResult);
+        userId: anyNamed('userId'),
+        model: anyNamed('model'),
+      )).thenReturn(mockRequirementResult);
 
-      // Act
       final result = await strategy.calculateTargetCalories(
           mockHealthMetricsRepository,
           mockCaloricRequirementService,
           testUserId);
 
-      // Assert
-      expect(result, 2550); // 2550.7 truncated to int
+      expect(result, 2550); // 2550.7 truncated to 2550
       verify(mockHealthMetricsRepository.getHealthMetrics(any)).called(1);
       verify(mockCaloricRequirementService.analyze(
         userId: anyNamed('userId'),

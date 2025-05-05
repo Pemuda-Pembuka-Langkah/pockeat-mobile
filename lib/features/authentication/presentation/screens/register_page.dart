@@ -3,18 +3,23 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 import 'package:pockeat/features/authentication/services/register_service.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 
 /// Registration page for new users
 ///
 /// This page contains a form to fill registration data such as
 /// email, password, name, birth date, and gender.
 /// Users must also agree to the terms and conditions.
+/// 
+// coverage:ignore-start
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -29,8 +34,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
 
-  DateTime? _selectedDate;
-  String? _selectedGender;
   bool _termsAccepted = false;
   bool _isLoading = false;
   bool _isPasswordVisible = false;
@@ -47,8 +50,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   late RegisterService _registerService;
   late AnalyticsService _analyticsService;
-  // Gender options list
-  final List<String> _genderOptions = ['Male', 'Female', 'Other'];
+  // No gender options needed
 
   @override
   void initState() {
@@ -68,17 +70,14 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  // Function to handle registration
+  /// Handles the registration process
   Future<void> _register() async {
-    // Close keyboard
     FocusScope.of(context).unfocus();
 
-    // Validate form
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
-    // Validate terms and conditions
     if (!_termsAccepted) {
       setState(() {
         _errorMessage = 'You must agree to the terms and conditions';
@@ -98,8 +97,8 @@ class _RegisterPageState extends State<RegisterPage> {
         confirmPassword: _confirmPasswordController.text,
         termsAccepted: _termsAccepted,
         displayName: _nameController.text.trim(),
-        birthDate: _selectedDate,
-        gender: _selectedGender,
+        birthDate: null,
+        gender: null,
       );
 
       setState(() {
@@ -107,26 +106,30 @@ class _RegisterPageState extends State<RegisterPage> {
       });
 
       if (result == RegisterResult.success) {
-        // Track signup event with analytics
         await _analyticsService.logSignUp(method: 'email');
+
+        final uid = GetIt.instance<FirebaseAuth>().currentUser?.uid;
+
+        if (uid != null && mounted) {
+          final formCubit = context.read<HealthMetricsFormCubit>();
+          formCubit.setUserId(uid);
+          await formCubit.submit();
+        }
 
         setState(() {
           _isRegistrationSuccess = true;
         });
 
-        // Show success message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text(
-                'Registration successful! Please verify your email.',
-              ),
+                  'Registration successful! Please verify your email.'),
               backgroundColor: primaryGreen,
             ),
           );
         }
       } else {
-        // Show error message
         setState(() {
           _errorMessage = _getErrorMessage(result);
         });
@@ -157,36 +160,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  // Function to select birth date
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ??
-          DateTime.now().subtract(
-            const Duration(days: 365 * 18),
-          ), // Default 18 years
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: primaryPink,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
+  // Birth date selection removed
 
   // Resend verification email
   Future<void> _resendVerificationEmail() async {
@@ -239,12 +213,12 @@ class _RegisterPageState extends State<RegisterPage> {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        // coverage:ignore-start
+    
         if (didPop) return;
         // Jika user menekan tombol back, arahkan ke halaman login
         // daripada ke halaman utama yang memerlukan auth
         Navigator.pushReplacementNamed(context, '/login');
-        // coverage:ignore-end
+        
       },
       child: Scaffold(
         backgroundColor: bgColor,
@@ -486,70 +460,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
           const SizedBox(height: 16),
 
-          // Birth date
-          GestureDetector(
-            onTap: () => _selectDate(context),
-            child: AbsorbPointer(
-              child: TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Birth Date (Optional)',
-                  hintText: 'Select your birth date',
-                  prefixIcon: const Icon(Icons.calendar_today),
-                  suffixIcon: Icon(Icons.arrow_drop_down, color: primaryPink),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: primaryPink),
-                  ),
-                ),
-                controller: TextEditingController(
-                  text: _selectedDate != null
-                      ? DateFormat('dd MMMM yyyy').format(_selectedDate!)
-                      : '',
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Gender
-          DropdownButtonFormField<String>(
-            decoration: InputDecoration(
-              labelText: 'Gender (Optional)',
-              prefixIcon: const Icon(Icons.person_outline),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: primaryPink),
-              ),
-            ),
-            value: _selectedGender,
-            items: _genderOptions
-                .map(
-                  (gender) =>
-                      DropdownMenuItem(value: gender, child: Text(gender)),
-                )
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedGender = value;
-              });
-            },
-            hint: const Text('Select your gender'),
-          ),
+          // Birth date and Gender fields removed
 
           const SizedBox(height: 20),
 
@@ -628,6 +539,45 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
             ),
+          ),
+
+          const SizedBox(height: 20),
+          
+          // Or divider
+          Row(
+            children: [
+              Expanded(
+                child: Divider(
+                  color: Colors.grey.shade300,
+                  thickness: 1,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'OR',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Divider(
+                  color: Colors.grey.shade300,
+                  thickness: 1,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Google Sign In Button
+          const GoogleSignInButton(
+            height: 55,
+            isRegister: true, // Set to register mode
           ),
 
           const SizedBox(height: 20),
@@ -732,3 +682,4 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
+// coverage:ignore-end

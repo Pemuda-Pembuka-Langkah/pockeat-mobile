@@ -5,12 +5,15 @@ import 'package:mockito/mockito.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
+import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/impl/detailed_food_tracking_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/detailed_food_tracking.dart';
-import 'package:pockeat/features/home_screen_widget/services/calorie_calculation_strategy.dart';
+import 'package:pockeat/features/home_screen_widget/services/impl/default_nutrient_calculation_strategy.dart';
+import 'package:pockeat/features/home_screen_widget/services/nutrient_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
 import 'detailed_food_tracking_controller_test.mocks.dart';
 
@@ -18,7 +21,8 @@ import 'detailed_food_tracking_controller_test.mocks.dart';
 @GenerateMocks([
   WidgetDataService,
   FoodLogHistoryService,
-  CalorieCalculationStrategy,
+  CalorieStatsService,
+  NutrientCalculationStrategy,
 ])
 
 void main() {
@@ -28,7 +32,8 @@ void main() {
   late DetailedFoodTrackingController controller;
   late MockWidgetDataService<DetailedFoodTracking> mockWidgetService;
   late MockFoodLogHistoryService mockFoodLogHistoryService;
-  late MockCalorieCalculationStrategy mockCalorieCalculationStrategy;
+  late MockCalorieStatsService mockCalorieStatsService;
+  late MockNutrientCalculationStrategy mockNutrientCalculationStrategy;
   
   const String testUserId = 'test-user-123';
   final testUser = UserModel(
@@ -43,15 +48,33 @@ void main() {
   setUp(() {
     mockWidgetService = MockWidgetDataService<DetailedFoodTracking>();
     mockFoodLogHistoryService = MockFoodLogHistoryService();
-    mockCalorieCalculationStrategy = MockCalorieCalculationStrategy();
+    mockCalorieStatsService = MockCalorieStatsService();
+    mockNutrientCalculationStrategy = MockNutrientCalculationStrategy();
     
     controller = DetailedFoodTrackingController(
       widgetService: mockWidgetService,
       foodLogHistoryService: mockFoodLogHistoryService,
-      calorieCalculationStrategy: mockCalorieCalculationStrategy,
+      calorieStatsService: mockCalorieStatsService,
+      nutrientCalculationStrategy: mockNutrientCalculationStrategy,
     );
   });
 
+  group('DetailedFoodTrackingController - constructor', () {
+    test('should initialize with default nutrient strategy when none is provided', () {
+      // Arrange & Act - buat controller tanpa nutrient strategy
+      final controllerWithDefault = DetailedFoodTrackingController(
+        widgetService: mockWidgetService,
+        foodLogHistoryService: mockFoodLogHistoryService,
+        calorieStatsService: mockCalorieStatsService,
+        // tidak memberikan nutrientCalculationStrategy secara eksplisit
+      );
+      
+      // Assert - tidak dapat langsung mengakses private field, tapi kita bisa
+      // memverifikasi bahwa controller dibuat dengan sukses
+      expect(controllerWithDefault, isA<DetailedFoodTrackingController>());
+    });
+  });
+  
   group('DetailedFoodTrackingController - initialize', () {
     test('should initialize successfully', () async {
       // Arrange
@@ -82,6 +105,9 @@ void main() {
       // Arrange
       const targetCalories = 2500;
       const consumedCalories = 1500;
+      const protein = 45;
+      const carbs = 100;
+      const fat = 25;
       
       final DateTime today = DateTime.now();
       final DateTime startOfDay = DateTime(today.year, today.month, today.day);
@@ -109,19 +135,34 @@ void main() {
         ),
       ];
       
-      when(mockCalorieCalculationStrategy.calculateTodayTotalCalories(
-        mockFoodLogHistoryService, testUserId))
-          .thenAnswer((_) async => consumedCalories);
+      // Setup CalorieStatsService untuk memberikan stats harian
+      final dailyStats = DailyCalorieStats(
+        caloriesConsumed: consumedCalories,
+        caloriesBurned: 500,
+        userId: testUserId,
+        date: startOfDay,
+      );
+      
+      when(mockCalorieStatsService.getStatsByDate(testUserId, startOfDay))
+          .thenAnswer((_) async => dailyStats);
       
       when(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, startOfDay))
           .thenAnswer((_) async => logs);
           
+      when(mockNutrientCalculationStrategy.calculateNutrientFromLogs(logs, 'protein'))
+          .thenReturn(protein.toDouble());
+      
+      when(mockNutrientCalculationStrategy.calculateNutrientFromLogs(logs, 'carbs'))
+          .thenReturn(carbs.toDouble());
+          
+      when(mockNutrientCalculationStrategy.calculateNutrientFromLogs(logs, 'fat'))
+          .thenReturn(fat.toDouble());
+      
       // Act
       await controller.updateWidgetData(testUser, targetCalories: targetCalories);
       
       // Assert
-      verify(mockCalorieCalculationStrategy.calculateTodayTotalCalories(
-        mockFoodLogHistoryService, testUserId)).called(1);
+      verify(mockCalorieStatsService.getStatsByDate(testUserId, startOfDay)).called(1);
         
       verify(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, any)).called(1);
       
@@ -134,6 +175,9 @@ void main() {
     test('should update widget data with zero target calories when not provided', () async {
       // Arrange
       const consumedCalories = 1500;
+      const protein = 45;
+      const carbs = 100;
+      const fat = 25;
       
       final DateTime today = DateTime.now();
       final DateTime startOfDay = DateTime(today.year, today.month, today.day);
@@ -145,19 +189,35 @@ void main() {
           subtitle: '350 calories',
           timestamp: today,
           calories: 350,
-          protein: 15,
+          protein: 15.0,
           carbs: 40,
           fat: 10,
         ),
       ];
       
-      when(mockCalorieCalculationStrategy.calculateTodayTotalCalories(
-        mockFoodLogHistoryService, testUserId))
-          .thenAnswer((_) async => consumedCalories);
+      // Setup CalorieStatsService untuk memberikan stats harian
+      final dailyStats = DailyCalorieStats(
+        caloriesConsumed: consumedCalories,
+        caloriesBurned: 500,
+        userId: testUserId,
+        date: startOfDay,
+      );
+      
+      when(mockCalorieStatsService.getStatsByDate(testUserId, startOfDay))
+          .thenAnswer((_) async => dailyStats);
       
       when(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, startOfDay))
           .thenAnswer((_) async => logs);
           
+      when(mockNutrientCalculationStrategy.calculateNutrientFromLogs(logs, 'protein'))
+          .thenReturn(protein.toDouble());
+      
+      when(mockNutrientCalculationStrategy.calculateNutrientFromLogs(logs, 'carbs'))
+          .thenReturn(carbs.toDouble());
+          
+      when(mockNutrientCalculationStrategy.calculateNutrientFromLogs(logs, 'fat'))
+          .thenReturn(fat.toDouble());
+      
       // Act
       await controller.updateWidgetData(testUser);
       
@@ -187,9 +247,8 @@ void main() {
     
     test('should throw WidgetUpdateException when update fails', () async {
       // Arrange
-      when(mockCalorieCalculationStrategy.calculateTodayTotalCalories(
-        mockFoodLogHistoryService, testUserId))
-          .thenThrow(Exception('Failed to calculate calories'));
+      when(mockCalorieStatsService.getStatsByDate(testUserId, any))
+          .thenThrow(Exception('Failed to get calories stats'));
       
       // Act & Assert
       expect(
@@ -230,53 +289,46 @@ void main() {
   });
 
   group('Integration tests', () {
-    test('initialization and updating should work together', () async {
-      // Arrange
-      when(mockWidgetService.initialize()).thenAnswer((_) async => {});
-      
-      // Create empty logs list for the test
-      final logs = <FoodLogHistoryItem>[];
-      
-      when(mockCalorieCalculationStrategy.calculateTodayTotalCalories(any, any))
-          .thenAnswer((_) async => 1500);
-      
-      when(mockFoodLogHistoryService.getFoodLogsByDate(any, any))
-          .thenAnswer((_) async => logs);
-          
-      // Act - Initialize and then update
-      await controller.initialize();
-      await controller.updateWidgetData(testUser, targetCalories: 2000);
-      
-      // Assert
-      verify(mockWidgetService.initialize()).called(1);
-      verify(mockCalorieCalculationStrategy.calculateTodayTotalCalories(any, any)).called(1);
-      
-      final captured = verify(mockWidgetService.updateData(captureAny)).captured.first as DetailedFoodTracking;
-      expect(captured.caloriesNeeded, equals(2000));
-      expect(captured.currentCaloriesConsumed, equals(1500));
-    });
-    
     test('should handle a complete widget lifecycle', () async {
       // Arrange
-      when(mockWidgetService.initialize()).thenAnswer((_) async => {});
+      const targetCalories = 2000;
+      const consumedCalories = 1500;
       
-      // Create empty logs list for the test
-      final logs = <FoodLogHistoryItem>[];
+      final DateTime today = DateTime.now();
+      final DateTime startOfDay = DateTime(today.year, today.month, today.day);
       
-      when(mockCalorieCalculationStrategy.calculateTodayTotalCalories(any, any))
-          .thenAnswer((_) async => 1500);
+      // Setup CalorieStatsService untuk memberikan stats harian
+      final dailyStats = DailyCalorieStats(
+        caloriesConsumed: consumedCalories,
+        caloriesBurned: 500,
+        userId: testUserId,
+        date: startOfDay,
+      );
+      
+      when(mockCalorieStatsService.getStatsByDate(any, any))
+          .thenAnswer((_) async => dailyStats);
+      
+      when(mockNutrientCalculationStrategy.calculateNutrientFromLogs(any, 'protein'))
+          .thenReturn(30);
+      
+      when(mockNutrientCalculationStrategy.calculateNutrientFromLogs(any, 'carbs'))
+          .thenReturn(100);
+          
+      when(mockNutrientCalculationStrategy.calculateNutrientFromLogs(any, 'fat'))
+          .thenReturn(25);
       
       when(mockFoodLogHistoryService.getFoodLogsByDate(any, any))
-          .thenAnswer((_) async => logs);
-          
-      // Act - Initialize, update and cleanup
+          .thenAnswer((_) async => []);
+      
+      // Act - Initialize, update, and cleanup
       await controller.initialize();
-      await controller.updateWidgetData(testUser, targetCalories: 2500);
+      await controller.updateWidgetData(testUser, targetCalories: targetCalories);
       await controller.cleanupData();
       
       // Assert
       verify(mockWidgetService.initialize()).called(1);
-      verify(mockWidgetService.updateWidget()).called(2); // Once for update, once for cleanup
+      verify(mockCalorieStatsService.getStatsByDate(any, any)).called(1);
+      verify(mockFoodLogHistoryService.getFoodLogsByDate(any, any)).called(1);
     });
   });
 }

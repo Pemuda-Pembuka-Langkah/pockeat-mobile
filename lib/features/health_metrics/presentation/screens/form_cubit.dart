@@ -16,6 +16,8 @@ class HealthMetricsFormState {
   final String? otherGoalReason;
   final double? height;
   final double? weight;
+  final double? bmi;
+  final String? bmiCategory;
   final DateTime? birthDate;
   final String? gender;
   final String? activityLevel;
@@ -28,6 +30,8 @@ class HealthMetricsFormState {
     this.otherGoalReason,
     this.height,
     this.weight,
+    this.bmi,
+    this.bmiCategory,
     this.birthDate,
     this.gender,
     this.activityLevel,
@@ -41,6 +45,8 @@ class HealthMetricsFormState {
     String? otherGoalReason,
     double? height,
     double? weight,
+    double? bmi,
+    String? bmiCategory,
     DateTime? birthDate,
     String? gender,
     String? activityLevel,
@@ -53,6 +59,8 @@ class HealthMetricsFormState {
       otherGoalReason: otherGoalReason ?? this.otherGoalReason,
       height: height ?? this.height,
       weight: weight ?? this.weight,
+      bmi: bmi ?? this.bmi,
+      bmiCategory: bmiCategory ?? this.bmiCategory,
       birthDate: birthDate ?? this.birthDate,
       gender: gender ?? this.gender,
       activityLevel: activityLevel ?? this.activityLevel,
@@ -98,7 +106,15 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
   }
 
   void setHeightWeight({required double height, required double weight}) {
-    emit(state.copyWith(height: height, weight: weight));
+    final bmi = _calculateBMI(height: height, weight: weight);
+    final bmiCategory = _getBMICategory(bmi);
+
+    emit(state.copyWith(
+      height: height,
+      weight: weight,
+      bmi: bmi,
+      bmiCategory: bmiCategory,
+    ));
   }
 
   void setBirthDate(DateTime date) => emit(state.copyWith(birthDate: date));
@@ -159,6 +175,8 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
       gender: state.gender!,
       activityLevel: state.activityLevel!,
       fitnessGoal: allGoals.join(", "),
+      bmi: state.bmi!,
+      bmiCategory: state.bmiCategory!,
     );
 
     await repository.saveHealthMetrics(model);
@@ -177,5 +195,23 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
     } catch (e) {
       throw Exception("Failed to save caloric requirement: $e");
     }
+  }
+}
+
+double _calculateBMI({required double height, required double weight}) {
+  // height dalam cm → ubah ke meter
+  final heightInMeter = height / 100;
+  return weight / (heightInMeter * heightInMeter);
+}
+
+String _getBMICategory(double bmi) {
+  if (bmi < 18.5) {
+    return "Underweight";
+  } else if (bmi < 25) {
+    return "Normal weight";
+  } else if (bmi < 30) {
+    return "Overweight";
+  } else {
+    return "Obesity";
   }
 }

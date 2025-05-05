@@ -1,4 +1,5 @@
 // Flutter imports:
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -56,8 +57,9 @@ void main() {
         home: const FoodInputPage(),
         routes: {
           '/scan': (context) => const Scaffold(body: Text('Scan Page')),
-          '/food-text-input': (context) => const Scaffold(body: Text('Manual Input')),
-          '/notification-settings': (context) => const Scaffold(body: Text('Notifications')),
+          '/food-text-input': (context) => const Scaffold(body: Text('Text Input')),
+          '/nutrition-database': (context) => const Scaffold(body: Text('Database')),
+          '/saved-meals': (context) => const Scaffold(body: Text('Saved Meals')),
         },
         navigatorObservers: [mockNavigatorObserver],
       ),
@@ -77,8 +79,9 @@ void main() {
         home: const FoodInputPage(),
         routes: {
           '/scan': (context) => const Scaffold(body: Text('Scan Page')),
-          '/food-text-input': (context) => const Scaffold(body: Text('Manual Input')),
-          '/notification-settings': (context) => const Scaffold(body: Text('Notifications')),
+          '/food-text-input': (context) => const Scaffold(body: Text('Text Input')),
+          '/nutrition-database': (context) => const Scaffold(body: Text('Database')),
+          '/saved-meals': (context) => const Scaffold(body: Text('Saved Meals')),
         },
       ),
     );
@@ -87,8 +90,9 @@ void main() {
     expect(find.text('Add Food'), findsOneWidget);
     expect(find.text('How would you like to\nadd your food?'), findsOneWidget);
     expect(find.text('Scan Food'), findsOneWidget);
-    expect(find.text('Input Manually'), findsOneWidget);
-    expect(find.text('Notification Settings'), findsOneWidget);
+    expect(find.text('Explain your meal'), findsOneWidget);
+    expect(find.text('Create Your Own Meal'), findsOneWidget);
+    expect(find.text('Saved Meals'), findsOneWidget);
   });
 
   testWidgets('FoodInputPage should track analytics when scan option is selected',
@@ -98,8 +102,9 @@ void main() {
         home: const FoodInputPage(),
         routes: {
           '/scan': (context) => const Scaffold(body: Text('Scan Page')),
-          '/food-text-input': (context) => const Scaffold(body: Text('Manual Input')),
-          '/notification-settings': (context) => const Scaffold(body: Text('Notifications')),
+          '/food-text-input': (context) => const Scaffold(body: Text('Text Input')),
+          '/nutrition-database': (context) => const Scaffold(body: Text('Database')),
+          '/saved-meals': (context) => const Scaffold(body: Text('Saved Meals')),
         },
         navigatorObservers: [mockNavigatorObserver],
       ),
@@ -109,32 +114,39 @@ void main() {
     await tester.tap(find.text('Scan Food'));
     await tester.pumpAndSettle();
 
-    // Verify analytics event was tracked
+    // Verify analytics event was tracked with correct parameters
     verify(mockAnalyticsService.logEvent(
       name: 'food_input_method_selected',
-      parameters: anyNamed('parameters'),
+      parameters: captureThat(
+        predicate<Map<String, dynamic>>((params) {
+          return params['method'] == 'scan' && 
+                 params['timestamp'] != null;
+        }),
+        named: 'parameters',
+      ),
     )).called(1);
 
     // Verify navigation happened
     expect(find.text('Scan Page'), findsOneWidget);
   });
   
-  testWidgets('FoodInputPage should track analytics when manual input option is selected',
+  testWidgets('FoodInputPage should track analytics when text input option is selected',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: const FoodInputPage(),
         routes: {
           '/scan': (context) => const Scaffold(body: Text('Scan Page')),
-          '/food-text-input': (context) => const Scaffold(body: Text('Manual Input')),
-          '/notification-settings': (context) => const Scaffold(body: Text('Notifications')),
+          '/food-text-input': (context) => const Scaffold(body: Text('Text Input')),
+          '/nutrition-database': (context) => const Scaffold(body: Text('Database')),
+          '/saved-meals': (context) => const Scaffold(body: Text('Saved Meals')),
         },
         navigatorObservers: [mockNavigatorObserver],
       ),
     );
 
-    // Tap the Manual Input option
-    await tester.tap(find.text('Input Manually'));
+    // Tap the Explain your meal option
+    await tester.tap(find.text('Explain your meal'));
     await tester.pumpAndSettle();
 
     // Verify analytics event was tracked with correct parameters
@@ -150,33 +162,34 @@ void main() {
     )).called(1);
 
     // Verify navigation happened
-    expect(find.text('Manual Input'), findsOneWidget);
+    expect(find.text('Text Input'), findsOneWidget);
   });
-  
-  testWidgets('FoodInputPage should track analytics when notification settings option is selected',
+
+  testWidgets('FoodInputPage should track analytics when database option is selected',
       (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: const FoodInputPage(),
         routes: {
           '/scan': (context) => const Scaffold(body: Text('Scan Page')),
-          '/food-text-input': (context) => const Scaffold(body: Text('Manual Input')),
-          '/notification-settings': (context) => const Scaffold(body: Text('Notifications')),
+          '/food-text-input': (context) => const Scaffold(body: Text('Text Input')),
+          '/nutrition-database': (context) => const Scaffold(body: Text('Database')),
+          '/saved-meals': (context) => const Scaffold(body: Text('Saved Meals')),
         },
         navigatorObservers: [mockNavigatorObserver],
       ),
     );
 
-    // Tap the Notification Settings option
-    await tester.tap(find.text('Notification Settings'));
+    // Tap the Create Your Own Meal option
+    await tester.tap(find.text('Create Your Own Meal'));
     await tester.pumpAndSettle();
 
     // Verify analytics event was tracked with correct parameters
     verify(mockAnalyticsService.logEvent(
-      name: 'view_notification_settings',
+      name: 'food_input_method_selected',
       parameters: captureThat(
         predicate<Map<String, dynamic>>((params) {
-          return params['source'] == 'food_input_page' && 
+          return params['method'] == 'database' && 
                  params['timestamp'] != null;
         }),
         named: 'parameters',
@@ -184,7 +197,42 @@ void main() {
     )).called(1);
 
     // Verify navigation happened
-    expect(find.text('Notifications'), findsOneWidget);
+    expect(find.text('Database'), findsOneWidget);
+  });
+
+  testWidgets('FoodInputPage should track analytics when saved meals option is selected',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const FoodInputPage(),
+        routes: {
+          '/scan': (context) => const Scaffold(body: Text('Scan Page')),
+          '/food-text-input': (context) => const Scaffold(body: Text('Text Input')),
+          '/nutrition-database': (context) => const Scaffold(body: Text('Database')),
+          '/saved-meals': (context) => const Scaffold(body: Text('Saved Meals')),
+        },
+        navigatorObservers: [mockNavigatorObserver],
+      ),
+    );
+
+    // Tap the Saved Meals option
+    await tester.tap(find.text('Saved Meals'));
+    await tester.pumpAndSettle();
+
+    // Verify analytics event was tracked with correct parameters
+    verify(mockAnalyticsService.logEvent(
+      name: 'food_input_method_selected',
+      parameters: captureThat(
+        predicate<Map<String, dynamic>>((params) {
+          return params['method'] == 'saved_meals' && 
+                 params['timestamp'] != null;
+        }),
+        named: 'parameters',
+      ),
+    )).called(1);
+
+    // Verify navigation happened
+    expect(find.text('Saved Meals'), findsOneWidget);
   });
   
   testWidgets('FoodInputPage should handle navigation flow correctly',
@@ -270,7 +318,7 @@ void main() {
     expect(find.text('Route not found'), findsOneWidget);
   });
 
-  testWidgets('FoodInputPage should display all input options',
+  testWidgets('FoodInputPage should display all input options with correct subtitles',
       (WidgetTester tester) async {
     // Setup test widget with FoodInputPage
     await tester.pumpWidget(
@@ -284,15 +332,23 @@ void main() {
     // Verify we're on the food input page
     expect(find.text('Add Food'), findsOneWidget);
     
-    // Verify all three options are displayed
+    // Verify all four options are displayed
     expect(find.text('Scan Food'), findsOneWidget);
-    expect(find.text('Input Manually'), findsOneWidget);
-    expect(find.text('Notification Settings'), findsOneWidget);
+    expect(find.text('Explain your meal'), findsOneWidget);
+    expect(find.text('Create Your Own Meal'), findsOneWidget);
+    expect(find.text('Saved Meals'), findsOneWidget);
     
     // Check subtitles
     expect(find.text('Take a photo of your food'), findsOneWidget);
-    expect(find.text('Search or prompt food details'), findsOneWidget);
-    expect(find.text('Set your notification preferences'), findsOneWidget);
+    expect(find.text('Generate your meal\'s data with our AI'), findsOneWidget);
+    expect(find.text('Choose ingredients from our nutrition database'), findsOneWidget);
+    expect(find.text('Choose from your previously saved meals'), findsOneWidget);
+    
+    // Verify each option has the correct icon
+    expect(find.byIcon(CupertinoIcons.camera_viewfinder), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.text_justify), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.table), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.bookmark_fill), findsOneWidget);
   });
 
   testWidgets('FoodInputPage should handle multiple rapid taps on options gracefully',

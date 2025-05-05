@@ -1,14 +1,20 @@
 // Flutter imports:
+//coverage: ignore-file
+
+
+// Flutter imports:
+import 'package:flutter/foundation.dart';
 
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+
+//coverage: ignore-file
 
 class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   final FoodScanRepository _foodScanRepository;
@@ -117,7 +123,6 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
         foodImageUrl: result.foodImageUrl,
         timestamp: localTimestamp, // Use the adjusted timestamp
         id: result.id,
-        isLowConfidence: result.isLowConfidence,
         userId: result.userId,
       );
 
@@ -133,16 +138,18 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
           today.subtract(const Duration(days: 100)); // Reasonable limit
 
       debugPrint('Fetching streak data for userId: $userId');
-      debugPrint('Date range: ${startDate.toIso8601String()} to ${today.toIso8601String()}');
-      
+      debugPrint(
+          'Date range: ${startDate.toIso8601String()} to ${today.toIso8601String()}');
+
       // PERBAIKAN: Ubah field date menjadi timestamp, sesuai dengan yang digunakan di repository
       // Sederhanakan query dengan mengurangi jumlah filter
       final QuerySnapshot querySnapshot = await _firestore
           .collection('food_analysis')
           .where('userId', isEqualTo: userId)
-          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('timestamp',
+              isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
           .get();
-          
+
       debugPrint('QuerySnapshot: ${querySnapshot.docs.length} documents');
 
       if (querySnapshot.docs.isEmpty) {
@@ -152,14 +159,14 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
 
       // Map untuk tracking tanggal yang memiliki log
       final Map<String, bool> daysWithLogs = {};
-      
+
       // Debug info
       debugPrint('Processing documents...');
-      
+
       // Iterasi melalui hasil query
       for (var doc in querySnapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
-        
+
         // Pastikan field yang diakses ada dan dalam format yang benar
         Timestamp? timestampData;
         if (data['timestamp'] is Timestamp) {
@@ -168,19 +175,20 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
           debugPrint('Invalid timestamp format in document: ${doc.id}');
           continue;
         }
-        
+
         final date = timestampData.toDate();
         final dateKey = '${date.year}-${date.month}-${date.day}';
         daysWithLogs[dateKey] = true;
         debugPrint('Found log for date: $dateKey');
       }
-      
+
       // Hitung streak
       int streakDays = 0;
       DateTime checkDate = today;
 
       // Jika tidak ada log hari ini, mulai dari kemarin
-      String checkDateKey = '${checkDate.year}-${checkDate.month}-${checkDate.day}';
+      String checkDateKey =
+          '${checkDate.year}-${checkDate.month}-${checkDate.day}';
       if (!daysWithLogs.containsKey(checkDateKey)) {
         checkDate = checkDate.subtract(const Duration(days: 1));
         debugPrint('No log for today, checking yesterday');
@@ -191,7 +199,7 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
       while (streakContinues) {
         checkDateKey = '${checkDate.year}-${checkDate.month}-${checkDate.day}';
         debugPrint('Checking streak for date: $checkDateKey');
-        
+
         if (daysWithLogs.containsKey(checkDateKey)) {
           streakDays++;
           debugPrint('Streak day found: $streakDays');

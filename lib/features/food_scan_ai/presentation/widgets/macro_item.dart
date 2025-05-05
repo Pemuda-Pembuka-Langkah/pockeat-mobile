@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 class MacroItem extends StatelessWidget {
   final String label;
-  final int value;
-  final int total;
+  final double value;
+  final double total;
   final Color color;
   final String? subtitle;
 
@@ -36,7 +36,7 @@ class MacroItem extends StatelessWidget {
                 ),
               ),
               Text(
-                '${value}g',
+                '${value.toStringAsFixed(1)}g',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -44,6 +44,26 @@ class MacroItem extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              subtitle!,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.black54,
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: total > 0 ? value / total : 0,
+              backgroundColor: Colors.grey[200],
+              color: color,
+              minHeight: 8,
+            ),
           ),
         ],
       ),
