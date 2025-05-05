@@ -1,7 +1,7 @@
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
-
+import 'package:flutter/foundation.dart';
 // Project imports:
 import 'package:pockeat/features/cardio_log/domain/models/cardio_activity.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
@@ -101,7 +101,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
 
       // Sort by timestamp (newest first)
       allLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      print("allLogs: $allLogs");
+      debugPrint("allLogs: $allLogs");
       return allLogs;
     } catch (e) {
       // Return empty list instead of throwing

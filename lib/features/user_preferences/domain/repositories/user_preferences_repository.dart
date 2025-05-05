@@ -1,6 +1,7 @@
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 /// Repository for managing user preferences
 abstract class UserPreferencesRepository {
@@ -61,7 +62,7 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
 
       return setting;
     } catch (e) {
-      print('Error fetching exercise calorie compensation setting: $e');
+      debugPrint('Error fetching exercise calorie compensation setting: $e');
       return false;
     }
   }
@@ -82,7 +83,7 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
       await prefs.setBool(
           '${_exerciseCalorieCompensationKey}_$userId', enabled);
     } catch (e) {
-      print('Error saving exercise calorie compensation setting: $e');
+      debugPrint('Error saving exercise calorie compensation setting: $e');
       throw Exception('Failed to save preference: $e');
     }
   }
@@ -109,7 +110,7 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
 
       return setting;
     } catch (e) {
-      print('Error fetching rollover calories setting: $e');
+      debugPrint('Error fetching rollover calories setting: $e');
       return false;
     }
   }
@@ -128,20 +129,20 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('${_rolloverCaloriesKey}_$userId', enabled);
     } catch (e) {
-      print('Error saving rollover calories setting: $e');
+      debugPrint('Error saving rollover calories setting: $e');
       throw Exception('Failed to save preference: $e');
     }
   }
 
   @override
   Future<int> calculateRolloverCalories(String userId) async {
-    print('Calculating rollover calories for user: $userId');
+    debugPrint('Calculating rollover calories for user: $userId');
     if (userId.isEmpty) return 0;
 
     try {
       // Check if the feature is enabled first
       final isEnabled = await isRolloverCaloriesEnabled(userId);
-      print('Rollover calories feature enabled: $isEnabled');
+      debugPrint('Rollover calories feature enabled: $isEnabled');
       if (!isEnabled) return 0;
 
       // Get user's TDE (Total Daily Energy) from caloric_requirements collection
@@ -151,7 +152,7 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
           .orderBy('timestamp', descending: true)
           .limit(1)
           .get();
-      print('Requirements Document: ${requirementsDoc.docs}');
+      debugPrint('Requirements Document: ${requirementsDoc.docs}');
       if (requirementsDoc.docs.isEmpty) return 0;
 
       // Get the TDE value and round up if decimal part >= 0.5
@@ -162,7 +163,7 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
       final double tdeValue = tdeeValue ?? 0.0;
       final int tde =
           (tdeValue % 1 >= 0.5) ? tdeValue.ceil() : tdeValue.floor();
-      print('TDE: $tde');
+      debugPrint('TDE: $tde');
 
       // Get yesterday's date as a string in format YYYY-MM-DD
       final now = DateTime.now();
@@ -170,7 +171,8 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
       final dateString =
           "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
 
-      print('Looking for stats between: $dateString and ${DateTime.now()}');
+      debugPrint(
+          'Looking for stats between: $dateString and ${DateTime.now()}');
 
       // Query documents by date string
       final statsDoc = await _firestore
@@ -180,22 +182,22 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
           .limit(1)
           .get();
 
-      print('Stats Document: ${statsDoc.docs}');
+      debugPrint('Stats Document: ${statsDoc.docs}');
       if (statsDoc.docs.isEmpty) return 0;
 
       final caloriesConsumed =
           statsDoc.docs.first.data()['caloriesConsumed'] as int? ?? 0;
-      print('Calories Consumed: $caloriesConsumed');
+      debugPrint('Calories Consumed: $caloriesConsumed');
 
       // Calculate rollover calories: TDE - caloriesConsumed
       // Ensure it's not negative and cap at 1000
       int rolloverCalories = tde - caloriesConsumed;
       rolloverCalories = (rolloverCalories < 0) ? 0 : rolloverCalories;
       rolloverCalories = (rolloverCalories > 1000) ? 1000 : rolloverCalories;
-      print('Rollover Calories: $rolloverCalories');
+      debugPrint('Rollover Calories: $rolloverCalories');
       return rolloverCalories;
     } catch (e) {
-      print('Error calculating rollover calories: $e');
+      debugPrint('Error calculating rollover calories: $e');
       return 0;
     }
   }
