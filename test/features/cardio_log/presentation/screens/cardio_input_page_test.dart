@@ -20,6 +20,9 @@ import 'cardio_input_page_test.mocks.dart';
 
 @GenerateMocks([CardioRepository, FirebaseFirestore])
 
+// Add a global key for scaffold messenger
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
 // Manual implementation of MockFirebaseAuth
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 
@@ -98,10 +101,14 @@ void main() {
   // Helper to set up test widget
   Widget createCardioInputPage() {
     return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       home: CardioInputPage(
         repository: mockRepository,
         auth: mockAuth,
       ),
+      routes: {
+        '/analytic': (context) => const Scaffold(body: Text('Mock Analytic Page')),
+      },
     );
   }
 
@@ -382,10 +389,12 @@ void main() {
       setupValidRunningForm(tester);
 
       await tester.tap(find.text('Save Run'));
-      await tester.pumpAndSettle();
-
+      // Pump once to process the tap and start the save process
+      await tester.pump();
+      // Give some time for the async operation to complete
+      await tester.pump(const Duration(milliseconds: 300));
+      
       verify(mockRepository.saveCardioActivity(any)).called(1);
-
       expect(find.byType(SnackBar), findsOneWidget);
     });
 
@@ -402,8 +411,10 @@ void main() {
 
       // Tap Save button
       await tester.tap(find.text('Save Run'));
-      await tester.pumpAndSettle();
-
+      // Use pump instead of pumpAndSettle to avoid timeout
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      
       // Verify error SnackBar is shown
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.textContaining('Failed to save activity'), findsOneWidget);
@@ -430,7 +441,8 @@ void main() {
       setupValidCyclingForm(tester, CyclingActivityType.commute);
 
       await tester.tap(find.text('Save Ride'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       verify(mockRepository.saveCardioActivity(any)).called(1);
 
@@ -458,7 +470,8 @@ void main() {
       setupValidCyclingForm(tester, CyclingActivityType.stationary);
 
       await tester.tap(find.text('Save Ride'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       verify(mockRepository.saveCardioActivity(any)).called(1);
 
@@ -477,7 +490,8 @@ void main() {
       setupValidRunningForm(tester);
 
       await tester.tap(find.text('Save Run'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       verify(mockRepository.saveCardioActivity(any)).called(1);
     });
@@ -496,10 +510,10 @@ void main() {
       setupValidRunningForm(tester);
 
       await tester.tap(find.text('Save Run'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       verify(mockRepository.saveCardioActivity(any)).called(1);
-
       expect(find.byType(SnackBar), findsOneWidget);
     });
 
@@ -520,10 +534,10 @@ void main() {
       setupValidCyclingForm(tester, CyclingActivityType.mountain);
 
       await tester.tap(find.text('Save Ride'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       verify(mockRepository.saveCardioActivity(any)).called(1);
-
       expect(find.byType(SnackBar), findsOneWidget);
     });
 
@@ -544,10 +558,10 @@ void main() {
       setupValidSwimmingForm(tester);
 
       await tester.tap(find.text('Save Swim'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       verify(mockRepository.saveCardioActivity(any)).called(1);
-
       expect(find.byType(SnackBar), findsOneWidget);
     });
   });
