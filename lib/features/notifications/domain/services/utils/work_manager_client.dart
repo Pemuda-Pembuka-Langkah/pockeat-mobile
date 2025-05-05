@@ -1,7 +1,7 @@
 // Package imports:
 import 'package:workmanager/workmanager.dart';
 
-// coverage-ignore:start
+// coverage:ignore-start
 
 /// Wrapper for WorkManager that allows mocking in tests
 class WorkManagerClient {
@@ -72,4 +72,4 @@ class WorkManagerClient {
   }
 }
 
-// coverage-ignore:end
+// coverage:ignore-end

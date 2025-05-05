@@ -1,10 +1,14 @@
 // lib/core/di/service_locator.dart
 
 // Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/food_database_input/services/food_database_module.dart';
+import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
+import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
@@ -67,6 +71,10 @@ Future<void> setupDependencies() async {
   // Register Firebase instances first
   getIt.registerSingleton<FirebaseAuth>(
     FirebaseAuth.instance,
+  );
+
+  getIt.registerSingleton<FirebaseFirestore>(
+    FirebaseFirestore.instance,
   );
 
   getIt.registerSingleton<FirebaseMessaging>(
@@ -185,6 +193,21 @@ Future<void> setupDependencies() async {
   // Now register NotificationService which depends on FoodLogHistoryService and UserActivityService
   getIt.registerSingleton<NotificationService>(
     NotificationServiceImpl(),
+  );
+
+  // Register Supabase nutrition database module
+  NutritionDatabaseModule.register();
+
+  // Register SavedMealsRepository before SavedMealService
+  getIt.registerSingleton<SavedMealsRepository>(
+    SavedMealsRepository(),
+  );
+
+  getIt.registerSingleton<SavedMealService>(
+    SavedMealService(
+      repository: getIt<SavedMealsRepository>(),
+      textAnalysisService: getIt<FoodTextAnalysisService>(),
+    ),
   );
 
   // Register additional services

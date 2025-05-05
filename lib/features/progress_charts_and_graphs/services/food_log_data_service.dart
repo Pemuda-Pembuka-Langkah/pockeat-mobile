@@ -42,9 +42,10 @@ class FoodLogDataService {
       final weekLogs = _filterLogsForSpecificWeek(foodLogs, startDate, endDate);
 
       debugPrint(
-          'Found ${weekLogs.length} food logs for week ($weeksAgo weeks ago)');
+          'Found ${weekLogs.length} food logs for week (${weeksAgo} weeks ago)');
 
-      // Debug print each food log
+      // Debugdebugprint each food log
+
       for (var log in weekLogs) {
         final day = _getDayName(log.timestamp.add(const Duration(hours: 7)));
         debugPrint('Food log on $day: ${log.title}, Calories: ${log.calories}, '
@@ -54,7 +55,9 @@ class FoodLogDataService {
       // Group entries by day and calculate macronutrient totals
       return _processLogsToCalorieData(weekLogs, startDate);
     } catch (e) {
-      debugPrint('Error fetching week calorie data ($weeksAgo weeks ago): $e');
+      debugPrint(
+          'Error fetching week calorie data (${weeksAgo} weeks ago): $e');
+
       return _getDefaultWeekData();
     }
   }
@@ -71,6 +74,13 @@ class FoodLogDataService {
       return log.timestamp.isAfter(startDate) &&
           log.timestamp.isBefore(endDate);
     }).toList();
+  }
+
+  // Filter logs for the current week (legacy method kept for compatibility)
+  List<FoodLogHistoryItem> _filterLogsForCurrentWeek(
+      List<FoodLogHistoryItem> logs, DateTime startDate) {
+    final endDate = startDate.add(const Duration(days: 7));
+    return _filterLogsForSpecificWeek(logs, startDate, endDate);
   }
 
   // Get calorie data for current month (grouped by weeks)
@@ -122,9 +132,9 @@ class FoodLogDataService {
 
     // Process each log entry
     for (var log in logs) {
-      // Adjust timestamp for GMT+7 (adjust for Indonesia timezone)
-      final adjustedTime = log.timestamp.add(const Duration(hours: 7));
-      final dayOfWeek = dayNames[adjustedTime.weekday % 7];
+      // Use timestamp directly without timezone adjustment
+      final logDateTime = log.timestamp;
+      final dayOfWeek = dayNames[logDateTime.weekday % 7];
 
       // Extract macronutrient values directly from FoodLogHistoryItem properties
       final protein = log.protein?.toDouble() ?? 0;
@@ -193,11 +203,11 @@ class FoodLogDataService {
 
     // Process each log entry
     for (var log in logs) {
-      // Adjusted time for GMT+7 (adjust for Indonesia timezone)
-      final adjustedTime = log.timestamp.add(const Duration(hours: 7));
+      // Use timestamp directly without timezone adjustment
+      final logDateTime = log.timestamp;
 
       // Calculate week number (1-4)
-      final weekOfMonth = ((adjustedTime.day - 1) / 7).floor() + 1;
+      final weekOfMonth = ((logDateTime.day - 1) / 7).floor() + 1;
       final weekNumber = weekOfMonth.clamp(1, 4);
 
       // Extract macronutrient values

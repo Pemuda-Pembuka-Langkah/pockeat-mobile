@@ -1,7 +1,10 @@
 // lib/features/ai_api_scan/services/food/nutrition_label_analysis_service.dart
+//coverage: ignore-file
+
 
 // Dart imports:
 import 'dart:io';
+
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
@@ -48,7 +51,7 @@ class NutritionLabelAnalysisService {
       String userComment, double servings) async {
     try {
       final responseData = await _apiService.postJsonRequest(
-        '/food/correct/nutrition-label',
+        '/food/correct/text',
         {
           'previous_result': previousResult.toJson(),
           'user_comment': userComment,

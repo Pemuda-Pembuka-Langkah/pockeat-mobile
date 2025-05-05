@@ -6,14 +6,13 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
-import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
-import 'package:pockeat/features/home_screen_widget/services/calorie_calculation_strategy.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/model/meal_reminder_message.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
@@ -265,24 +264,15 @@ class NotificationBackgroundDisplayerServiceImpl
       int targetCalories = 0;
       try {
         // Calculate consumed calories
-        final calorieStrategy = services['calorieCalculationStrategy']
-            as CalorieCalculationStrategy;
-        final foodLogService =
-            services['foodLogHistoryService'] as FoodLogHistoryService;
 
-        // Use strategy to calculate total calories
-        currentCalories = await calorieStrategy.calculateTodayTotalCalories(
-            foodLogService, userId);
+        final caloricStatsService = services['caloricStatsService'] as CalorieStatsService;
 
-        // Calculate target calories
-        final healthMetricsRepository =
-            services['healthMetricsRepository'] as HealthMetricsRepository;
-        final caloricRequirementService =
-            services['caloricRequirementService'] as CaloricRequirementService;
+        final stats = await caloricStatsService.getStatsByDate(userId, DateTime.now());
 
-        // Use strategy to calculate target calories
-        targetCalories = await calorieStrategy.calculateTargetCalories(
-            healthMetricsRepository, caloricRequirementService, userId);
+        currentCalories = stats.caloriesConsumed;
+        final caloricRequirementRepository = services['caloricRequirementRepository'] as CaloricRequirementRepository;
+        final caloricRequirement = await caloricRequirementRepository.getCaloricRequirement(userId);
+        targetCalories = caloricRequirement?.tdee.toInt() ?? 2000;
       } catch (e) {
         debugPrint('Error calculating calories: $e');
         // Fallback to use heart level to estimate calories as before
@@ -297,8 +287,6 @@ class NotificationBackgroundDisplayerServiceImpl
         currentCalories: currentCalories,
         requiredCalories: targetCalories,
       );
-
-      debugPrint('Creating pet status notification: ${statusMessage.title}');
 
       // Initialize local notifications if needed
       const AndroidInitializationSettings initializationSettingsAndroid =

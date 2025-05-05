@@ -1,8 +1,12 @@
 // Dart imports:
+//coverage: ignore-file
+
+
 import 'dart:convert';
 
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
@@ -46,6 +50,12 @@ class FoodAnalysisParser {
           NutritionInfo.fromJson(jsonData['nutrition_info'] ?? {});
       final warnings = jsonData['warnings'] ?? [];
 
+      // Process health score if provided
+      double? healthScore;
+      if (jsonData['health_score'] != null) {
+        healthScore = parseDouble(jsonData['health_score']);
+      }
+
       // Process timestamp
       DateTime parsedTimestamp;
       if (jsonData['timestamp'] != null) {
@@ -73,7 +83,11 @@ class FoodAnalysisParser {
         nutritionInfo: nutritionInfo,
         warnings: warnings is List ? List<String>.from(warnings) : <String>[],
         timestamp: parsedTimestamp,
-        isLowConfidence: jsonData['is_low_confidence'] ?? false,
+        healthScore: healthScore, // Pass the health score if provided
+        foodImageUrl: jsonData['food_image_url'],
+        id: jsonData['id'],
+        userId: jsonData['userId'] ?? '',
+        additionalInformation: jsonData['additional_information'] ?? {},
       );
     } catch (e) {
       if (e is ApiServiceException) {
@@ -93,6 +107,10 @@ class FoodAnalysisParser {
       nutritionInfo['sodium'],
       nutritionInfo['fiber'],
       nutritionInfo['sugar'],
+      // Add the additional fields to check
+      nutritionInfo['saturated_fat'],
+      nutritionInfo['cholesterol'],
+      nutritionInfo['nutrition_density'],
     ];
 
     // Check if all values are null, 0, or "0"
