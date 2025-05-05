@@ -1,72 +1,111 @@
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+
+// Project imports:
+import 'package:pockeat/features/user_preferences/domain/repositories/user_preferences_repository.dart';
 
 /// Service for managing user preferences
 class UserPreferencesService {
-  final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-
-  // Key for the exercise calorie compensation setting
-  static const String _exerciseCalorieCompensationKey =
-      'exercise_calorie_compensation_enabled';
+  final UserPreferencesRepository _repository;
 
   UserPreferencesService({
-    FirebaseFirestore? firestore,
     FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+    FirebaseFirestore? firestore,
+  })  : _auth = auth ?? FirebaseAuth.instance,
+        _repository = UserPreferencesRepositoryImpl(
+          firestore: firestore ?? FirebaseFirestore.instance,
+        );
 
   /// Check if exercise calorie compensation is enabled
   Future<bool> isExerciseCalorieCompensationEnabled() async {
-    final userId = _auth.currentUser?.uid;
-    if (userId == null) return false;
+    final userId = _auth.currentUser?.uid ?? '';
+    if (userId.isEmpty) {
+      return false;
+    }
 
     try {
-      // Try getting setting from local storage first for fast access
-      final prefs = await SharedPreferences.getInstance();
-      final localSetting =
-          prefs.getBool('${_exerciseCalorieCompensationKey}_$userId');
-
-      if (localSetting != null) return localSetting;
-
-      // If not in local storage, get from Firestore
-      final doc = await _firestore.collection('users').doc(userId).get();
-
-      final setting = doc.data()?['preferences']
-              ?[_exerciseCalorieCompensationKey] as bool? ??
-          false;
-
-      // Cache in local storage for faster access next time
-      await prefs.setBool(
-          '${_exerciseCalorieCompensationKey}_$userId', setting);
-
-      return setting;
+      return await _repository.isExerciseCalorieCompensationEnabled(userId);
     } catch (e) {
-      debugPrint('Error fetching exercise calorie compensation setting: $e');
+      debugPrint('Error checking exercise calorie compensation setting: $e');
       return false;
     }
   }
 
   /// Set exercise calorie compensation setting
   Future<void> setExerciseCalorieCompensationEnabled(bool enabled) async {
-    final userId = _auth.currentUser?.uid;
-    if (userId == null) return;
+    final userId = _auth.currentUser?.uid ?? '';
+    if (userId.isEmpty) {
+      return;
+    }
 
     try {
-      // Update Firestore
-      await _firestore.collection('users').doc(userId).set({
-        'preferences': {_exerciseCalorieCompensationKey: enabled}
-      }, SetOptions(merge: true));
-
-      // Update local cache
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(
-          '${_exerciseCalorieCompensationKey}_$userId', enabled);
+      await _repository.setExerciseCalorieCompensationEnabled(userId, enabled);
     } catch (e) {
-      debugPrint('Error saving exercise calorie compensation setting: $e');
+      debugPrint('Error setting exercise calorie compensation setting: $e');
+      throw Exception('Failed to update setting: $e');
+    }
+  }
+
+  /// Check if rollover calories feature is enabled
+  Future<bool> isRolloverCaloriesEnabled() async {
+    final userId = _auth.currentUser?.uid ?? '';
+    if (userId.isEmpty) {
+      return false;
+    }
+
+    try {
+      return await _repository.isRolloverCaloriesEnabled(userId);
+    } catch (e) {
+      debugPrint('Error checking rollover calories setting: $e');
+      return false;
+    }
+  }
+
+  /// Set rollover calories setting
+  Future<void> setRolloverCaloriesEnabled(bool enabled) async {
+    final userId = _auth.currentUser?.uid ?? '';
+    if (userId.isEmpty) {
+      return;
+    }
+
+    try {
+      await _repository.setRolloverCaloriesEnabled(userId, enabled);
+
+      // If the feature is being enabled, immediately calculate rollover
+      // to ensure data is available in the UI
+      if (enabled) {
+        await getRolloverCalories();
+      }
+    } catch (e) {
+      debugPrint('Error setting rollover calories setting: $e');
+      throw Exception('Failed to update setting: $e');
+    }
+  }
+
+  /// Get rollover calories from previous day
+  Future<int> getRolloverCalories() async {
+    final userId = _auth.currentUser?.uid ?? '';
+    if (userId.isEmpty) {
+      return 0;
+    }
+
+    try {
+      // First check if feature is enabled
+      final isEnabled = await _repository.isRolloverCaloriesEnabled(userId);
+      if (!isEnabled) {
+        return 0;
+      }
+
+      // Calculate rollover calories
+      return await _repository.calculateRolloverCalories(userId);
+    } catch (e) {
+      debugPrint('Error calculating rollover calories: $e');
+      return 0;
     }
   }
 }

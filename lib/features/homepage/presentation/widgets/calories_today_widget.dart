@@ -26,26 +26,39 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
   final Color primaryPink = const Color(0xFFFF6B6B);
   late Future<DailyCalorieStats> _statsFuture;
   late Future<bool> _isCalorieCompensationEnabledFuture;
+  late Future<bool> _isRolloverCaloriesEnabledFuture;
+  late Future<int> _rolloverCaloriesFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadCalorieStats();
-    _loadCalorieCompensationSetting();
+    _loadData();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Refresh when dependencies change
+    _loadData();
+  }
+
+  void _loadData() {
     _loadCalorieStats();
     _loadCalorieCompensationSetting();
+    _loadRolloverCaloriesSetting();
   }
 
   void _loadCalorieCompensationSetting() {
     final preferencesService = GetIt.instance<UserPreferencesService>();
     _isCalorieCompensationEnabledFuture =
         preferencesService.isExerciseCalorieCompensationEnabled();
+  }
+
+  void _loadRolloverCaloriesSetting() {
+    final preferencesService = GetIt.instance<UserPreferencesService>();
+    _isRolloverCaloriesEnabledFuture =
+        preferencesService.isRolloverCaloriesEnabled();
+    _rolloverCaloriesFuture = preferencesService.getRolloverCalories();
   }
 
   void _loadCalorieStats() {
@@ -62,14 +75,22 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<dynamic>>(
-      future: Future.wait([_statsFuture, _isCalorieCompensationEnabledFuture]),
+      future: Future.wait([
+        _statsFuture,
+        _isCalorieCompensationEnabledFuture,
+        _isRolloverCaloriesEnabledFuture,
+        _rolloverCaloriesFuture
+      ]),
       builder: (context, snapshot) {
         // Default values if data is loading or failed
         int caloriesConsumed = 0;
         int caloriesBurned = 0;
         bool isCalorieCompensationEnabled = false;
+        bool isRolloverCaloriesEnabled = false;
+        int rolloverCalories = 0;
         double completionPercentage = 0.0;
         int remainingCalories = widget.targetCalories;
+        int adjustedTargetCalories = widget.targetCalories;
 
         // If we have data, calculate actual values
         if (snapshot.connectionState == ConnectionState.done &&
@@ -77,22 +98,28 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
             !snapshot.hasError) {
           final stats = snapshot.data![0] as DailyCalorieStats;
           isCalorieCompensationEnabled = snapshot.data![1] as bool;
+          isRolloverCaloriesEnabled = snapshot.data![2] as bool;
+          rolloverCalories = snapshot.data![3] as int;
 
           caloriesConsumed = stats.caloriesConsumed;
           caloriesBurned = stats.caloriesBurned;
 
-          // Calculate remaining calories based on exercise calorie compensation preference
+          // Apply adjustments to target calories based on preferences
+          adjustedTargetCalories = widget.targetCalories;
+
+          // Add calorie compensation from exercise if enabled
           if (isCalorieCompensationEnabled) {
-            // If enabled, add burned calories to target
-            remainingCalories =
-                widget.targetCalories + caloriesBurned - caloriesConsumed;
-            completionPercentage =
-                caloriesConsumed / (widget.targetCalories + caloriesBurned);
-          } else {
-            // Standard calculation without considering burned calories
-            remainingCalories = widget.targetCalories - caloriesConsumed;
-            completionPercentage = caloriesConsumed / widget.targetCalories;
+            adjustedTargetCalories += caloriesBurned;
           }
+
+          // Add rollover calories from previous day if enabled
+          if (isRolloverCaloriesEnabled) {
+            adjustedTargetCalories += rolloverCalories;
+          }
+
+          // Calculate remaining calories based on adjusted target
+          remainingCalories = adjustedTargetCalories - caloriesConsumed;
+          completionPercentage = caloriesConsumed / adjustedTargetCalories;
 
           // Ensure values are within reasonable bounds
           if (remainingCalories < 0) remainingCalories = 0;
@@ -143,33 +170,70 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
                             ),
                           ],
                         ),
-                        if (isCalorieCompensationEnabled && caloriesBurned > 0)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.local_fire_department,
-                                  color: Colors.white,
-                                  size: 16,
+                        Row(
+                          children: [
+                            // Show exercise compensation bonus if enabled
+                            if (isCalorieCompensationEnabled &&
+                                caloriesBurned > 0)
+                              Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '+$caloriesBurned',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.local_fire_department,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '+$caloriesBurned',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            // Show rollover calories bonus if enabled
+                            if (isRolloverCaloriesEnabled &&
+                                rolloverCalories > 0)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons
+                                          .update, // Different icon for rollover
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '+$rolloverCalories',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
                     const SizedBox(height: 20),

@@ -1,5 +1,4 @@
 // Project imports:
-import 'package:flutter/foundation.dart';
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/calorie_stats/domain/repositories/calorie_stats_repository.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
@@ -67,17 +66,17 @@ class CalorieStatsServiceImpl implements CalorieStatsService {
         await _exerciseService.getExerciseLogsByDate(userId, date);
     for (var log in exerciseLogs) {
       int caloriesBurned = log.caloriesBurned.toInt();
-      debugPrint("exerciseLog: $caloriesBurned");
+      print("exerciseLog: $caloriesBurned");
     }
 
     // Calculate total calories burned
     final caloriesBurned = exerciseLogs.fold<int>(
         0, (sum, log) => sum + log.caloriesBurned.toInt());
-    debugPrint("caloriesBurned: $caloriesBurned");
+    print("caloriesBurned: $caloriesBurned");
     // Get food logs for the day
     final foodLogs = await _foodService.getFoodLogsByDate(userId, date);
-    debugPrint("date: $date");
-    debugPrint("userId: $userId");
+    print("date: $date");
+    print("userId: $userId");
     // Calculate total calories consumed
     final caloriesConsumed =
         foodLogs.fold<int>(0, (sum, log) => sum + log.calories.toInt());
