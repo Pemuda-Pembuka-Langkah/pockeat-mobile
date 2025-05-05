@@ -103,7 +103,7 @@ void main() {
       // Verify UI
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.text('App Widget Settings'), findsOneWidget);
-      expect(find.text('Available Widgets'), findsOneWidget);
+      expect(find.text('Add these widgets to your home screen for quick access to your nutrition tracking data.'), findsOneWidget);
       expect(find.byType(WidgetPreviewCard), findsNWidgets(2));
     });
 
@@ -192,7 +192,7 @@ void main() {
       when(mockController.getWidgetStatus()).thenAnswer((_) async => bothInstalledStatus);
       
       // Trigger pull-to-refresh
-      await tester.drag(find.text('Available Widgets'), const Offset(0, 300));
+      await tester.drag(find.text('Add these widgets to your home screen for quick access to your nutrition tracking data.'), const Offset(0, 300));
       await tester.pump(); // Start the refresh
       
       // Allow refresh to complete

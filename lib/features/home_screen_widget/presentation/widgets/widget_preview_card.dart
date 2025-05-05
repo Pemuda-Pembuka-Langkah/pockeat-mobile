@@ -8,6 +8,8 @@ import 'package:pockeat/features/home_screen_widget/domain/models/widget_preview
 /// Widget card that displays a preview of a home screen widget,
 /// its installation status, and a button to install/update it
 class WidgetPreviewCard extends StatelessWidget {
+  /// Color for primary accent elements, matching ProfilePage style
+  final Color primaryGreen = const Color(0xFF4ECDC4);
   /// Informasi preview widget
   final WidgetPreviewInfo widgetInfo;
 
@@ -34,6 +36,7 @@ class WidgetPreviewCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
       ),
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -45,7 +48,7 @@ class WidgetPreviewCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     widgetInfo.title,
-                    style: theme.textTheme.titleLarge?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -61,7 +64,7 @@ class WidgetPreviewCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12.0),
               child: Image.asset(
                 widgetInfo.imagePath,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
                 height: 180.0,
                 width: double.infinity,
               ),
@@ -75,10 +78,13 @@ class WidgetPreviewCard extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => _handleInstallTap(context),
                 style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: primaryGreen,
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
+                  elevation: 0,
                 ),
                 child: Text(
                   isInstalled ? 'Update Widget' : 'Add to Home Screen',
@@ -99,28 +105,16 @@ class WidgetPreviewCard extends StatelessWidget {
         vertical: 4.0,
       ),
       decoration: BoxDecoration(
-        color: isInstalled 
-            ? Colors.green.withOpacity(0.2) 
-            : Colors.grey.withOpacity(0.2),
+        color: isInstalled ? primaryGreen.withOpacity(0.1) : Colors.orange[100],
         borderRadius: BorderRadius.circular(12.0),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isInstalled ? Icons.check_circle : Icons.info_outline,
-            size: 16.0,
-            color: isInstalled ? Colors.green : Colors.grey,
-          ),
-          const SizedBox(width: 4.0),
-          Text(
-            isInstalled ? 'Installed' : 'Not Installed',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: isInstalled ? Colors.green : Colors.grey,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+      child: Text(
+        isInstalled ? 'Installed' : 'Not Installed',
+        style: TextStyle(
+          fontSize: 12.0,
+          fontWeight: FontWeight.w500,
+          color: isInstalled ? primaryGreen : Colors.orange[800],
+        ),
       ),
     );
   }

@@ -16,7 +16,7 @@ import com.pockeat.widget.CustomHomeWidgetPlugin
 class MainActivity: FlutterFragmentActivity() {
     private val CHANNEL = "com.pockeat/health_connect"
     private val NOTIFICATION_CHANNEL = "com.pockeat/notification_actions"
-    private val WIDGET_CHANNEL = "com.pockeat/custom_home_widget"
+    private val WIDGET_INSTALLATION_CHANNEL = "com.pockeat/widget_installation"
     
     companion object {
         private const val TAG = "MainActivity"
@@ -30,7 +30,7 @@ class MainActivity: FlutterFragmentActivity() {
         
         // Register plugins
         registerCustomHomeWidgetPlugin(flutterEngine)
-        
+        Log.d("MainActivity", "Successfully Registering CustomHomeWidgetPlugin")
         // Setup method channels
         setupNotificationActionsChannel(flutterEngine)
         setupHealthConnectChannel(flutterEngine)
@@ -158,7 +158,7 @@ class MainActivity: FlutterFragmentActivity() {
         val widgetInstallationHandler = com.pockeat.widget.WidgetInstallationHandler(applicationContext, this)
         
         // Setup widget installation method channel
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIDGET_CHANNEL)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIDGET_INSTALLATION_CHANNEL)
             .setMethodCallHandler { call, result -> 
                 widgetInstallationHandler.handleMethodCall(call, result)
             }

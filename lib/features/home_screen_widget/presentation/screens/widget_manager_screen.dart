@@ -164,10 +164,6 @@ class _WidgetManagerScreenState extends State<WidgetManagerScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Available Widgets',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
           const SizedBox(height: 8),
           Text(
             'Add these widgets to your home screen for quick access to your nutrition tracking data.',

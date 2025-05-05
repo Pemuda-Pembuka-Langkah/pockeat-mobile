@@ -22,7 +22,7 @@ void main() {
     test('should have correct static getters', () {
       // Test static getters match HomeWidgetConfig values
       expect(WidgetInstallationConstants.channelName, 
-          equals(HomeWidgetConfig.customChannelName.value));
+          equals("com.pockeat/widget_installation"));
       expect(WidgetInstallationConstants.simpleWidgetIdentifier, 
           equals(HomeWidgetConfig.simpleWidgetName.value));
       expect(WidgetInstallationConstants.detailedWidgetIdentifier, 
@@ -31,7 +31,7 @@ void main() {
 
     test('should match expected values from existing HomeWidgetConfig', () {
       // Check the actual values to ensure they match expectations
-      expect(WidgetInstallationConstants.channelName, equals('com.pockeat/custom_home_widget'));
+      expect(WidgetInstallationConstants.channelName, equals('com.pockeat/widget_installation'));
       expect(WidgetInstallationConstants.simpleWidgetIdentifier, equals('simple_food_tracking_widget'));
       expect(WidgetInstallationConstants.detailedWidgetIdentifier, equals('detailed_food_tracking_widget'));
     });

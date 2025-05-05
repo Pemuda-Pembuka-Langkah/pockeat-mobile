@@ -25,7 +25,7 @@ enum WidgetInstallationConstants {
   
   /// Method channel name for widget installation
   /// Uses the existing channel name from HomeWidgetConfig
-  static String get channelName => HomeWidgetConfig.customChannelName.value;
+  static String get channelName => "com.pockeat/widget_installation";
 
   /// Widget identifiers from HomeWidgetConfig
   static String get simpleWidgetIdentifier => HomeWidgetConfig.simpleWidgetName.value;
