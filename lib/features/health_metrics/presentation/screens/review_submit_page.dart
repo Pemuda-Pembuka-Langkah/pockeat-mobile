@@ -93,6 +93,7 @@ class ReviewSubmitPage extends StatelessWidget {
             fitnessGoal: goalsDisplay,
             bmi: state.bmi ?? 0,
             bmiCategory: state.bmiCategory ?? "-",
+            desiredWeight: state.desiredWeight ?? 0,
           );
 
           final result = caloricService.analyze(

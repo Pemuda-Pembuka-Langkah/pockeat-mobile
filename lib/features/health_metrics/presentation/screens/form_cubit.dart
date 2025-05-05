@@ -177,6 +177,7 @@ class HealthMetricsFormCubit extends Cubit<HealthMetricsFormState> {
       fitnessGoal: allGoals.join(", "),
       bmi: state.bmi!,
       bmiCategory: state.bmiCategory!,
+      desiredWeight: state.desiredWeight!,
     );
 
     await repository.saveHealthMetrics(model);
