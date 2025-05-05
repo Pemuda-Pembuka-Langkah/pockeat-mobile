@@ -156,13 +156,12 @@ class _HeightWeightPageState extends State<HeightWeightPage> {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState?.save();
 
-      final bmi = calculateBMI(_height!, _weight!);
-      final bmiCategory = getBMICategory(bmi);
+      calculateBMI(_height!, _weight!);
 
       context.read<HealthMetricsFormCubit>().setHeightWeight(
-        height: _height!,
-        weight: _weight!,
-      );
+            height: _height!,
+            weight: _weight!,
+          );
 
       Navigator.pushNamed(context, '/birthdate');
     }

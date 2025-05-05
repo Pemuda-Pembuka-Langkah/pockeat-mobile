@@ -1,4 +1,4 @@
-//coverage:ignore-file
+//
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -6,7 +6,6 @@ import 'package:uuid/uuid.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/firebase/firebase_repository.dart';
-
 
 // Concrete implementation for food analysis repository - matching FoodScanRepository structure
 class FoodAnalysisRepository
@@ -43,11 +42,13 @@ class SavedMealsRepository {
   SavedMealsRepository({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
+    //coverage:ignore-start
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance,
         _foodAnalysisRepository = FoodAnalysisRepository(
           firestore: firestore,
         );
+  //coverage:ignore-end
 
   // Collection reference
   CollectionReference get _savedMealsCollection =>
@@ -88,8 +89,10 @@ class SavedMealsRepository {
         updatedAt: now,
       );
     } catch (e, stackTrace) {
+      //coverage:ignore-start
       debugPrint("SavedMealsRepository: Error saving meal - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }
@@ -112,8 +115,10 @@ class SavedMealsRepository {
         return meals;
       });
     } catch (e, stackTrace) {
+      //coverage:ignore-start
       debugPrint("SavedMealsRepository: Error getting saved meals - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }
@@ -130,8 +135,10 @@ class SavedMealsRepository {
       debugPrint("SavedMealsRepository: Meal found - $id");
       return SavedMeal.fromFirestore(doc);
     } catch (e, stackTrace) {
+      //coverage:ignore-start
       debugPrint("SavedMealsRepository: Error getting saved meal - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }
@@ -166,7 +173,6 @@ class SavedMealsRepository {
         timestamp: now,
       );
 
-
       // Use the repository's save method - this will use the toMap method that serializes directly
       final savedId =
           await _foodAnalysisRepository.save(updatedFoodAnalysis, uniqueId);
@@ -176,8 +182,10 @@ class SavedMealsRepository {
 
       return savedId;
     } catch (e, stackTrace) {
+      //coverage:ignore-start
       debugPrint("SavedMealsRepository: Error logging food analysis - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }
@@ -189,8 +197,10 @@ class SavedMealsRepository {
 
       return await _foodAnalysisRepository.getAnalysisResultsByDate(date);
     } catch (e, stackTrace) {
+      //coverage:ignore-start
       debugPrint("SavedMealsRepository: Error getting food logs - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }
@@ -211,8 +221,10 @@ class SavedMealsRepository {
           "SavedMealsRepository: Meal saved check result - ${snapshot.docs.isNotEmpty}");
       return snapshot.docs.isNotEmpty;
     } catch (e, stackTrace) {
+      ////coverage:ignore-start
       debugPrint("SavedMealsRepository: Error checking if meal is saved - $e");
       debugPrint("SavedMealsRepository: Stack trace - $stackTrace");
+      //coverage:ignore-end
       rethrow;
     }
   }

@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/period_tab_widget.dart';
 
 class WeekSelectionTabs extends StatelessWidget {

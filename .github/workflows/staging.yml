@@ -173,6 +173,12 @@ jobs:
       - name: Build Staging APK
         run: flutter build apk --release
 
+      - name: Upload to AppSweep for security testing
+        uses: guardsquare/appsweep-action@main
+        with:
+          appsweep_api_key: ${{ secrets.APPSWEEP_API_KEY }}
+          input_file: build/app/outputs/flutter-apk/app-release.apk
+
       - name: Upload Staging APK
         uses: actions/upload-artifact@v4
         with:

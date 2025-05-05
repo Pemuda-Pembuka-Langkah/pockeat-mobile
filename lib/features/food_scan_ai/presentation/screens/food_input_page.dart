@@ -51,73 +51,76 @@ class _FoodInputPageState extends State<FoodInputPage> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // add button to go to notification settings
+      // Replace Column with SingleChildScrollView to handle overflow
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // add button to go to notification settings
 
-                Text(
-                  'How would you like to\nadd your food?',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    height: 1.3,
-                    color: Colors.black87,
+                  Text(
+                    'How would you like to\nadd your food?',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      height: 1.3,
+                      color: Colors.black87,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32),
+                ],
+              ),
+              const SizedBox(height: 32),
 
-            // Scan Option
-            _buildInputOption(
-              context: context,
-              icon: CupertinoIcons.camera_viewfinder,
-              title: 'Scan Food',
-              subtitle: 'Take a photo of your food',
-              color: primaryGreen,
-              route: '/scan',
-            ),
-            const SizedBox(height: 16),
+              // Scan Option
+              _buildInputOption(
+                context: context,
+                icon: CupertinoIcons.camera_viewfinder,
+                title: 'Scan Food',
+                subtitle: 'Take a photo of your food',
+                color: primaryGreen,
+                route: '/scan',
+              ),
+              const SizedBox(height: 16),
 
-            // Manual Text Input Option
-            _buildInputOption(
-              context: context,
-              icon: CupertinoIcons.text_justify,
-              title: 'Explain your meal',
-              subtitle: 'Generate your meal\'s data with our AI',
-              color: primaryPink,
-              route: '/food-text-input',
-            ),
-            const SizedBox(height: 16),
+              // Manual Text Input Option
+              _buildInputOption(
+                context: context,
+                icon: CupertinoIcons.text_justify,
+                title: 'Explain your meal',
+                subtitle: 'Generate your meal\'s data with our AI',
+                color: primaryPink,
+                route: '/food-text-input',
+              ),
+              const SizedBox(height: 16),
 
-            // Database Option
-            _buildInputOption(
-              context: context,
-              icon: CupertinoIcons.table,
-              title: 'Create Your Own Meal',
-              subtitle: 'Choose ingredients from our nutrition database',
-              color: Colors.blue,
-              route: '/nutrition-database',
-            ),
-            const SizedBox(height: 16),
+              // Database Option
+              _buildInputOption(
+                context: context,
+                icon: CupertinoIcons.table,
+                title: 'Create Your Own Meal',
+                subtitle: 'Choose ingredients from our nutrition database',
+                color: Colors.blue,
+                route: '/nutrition-database',
+              ),
+              const SizedBox(height: 16),
 
-            // Saved Meals Option
-            _buildInputOption(
-              context: context,
-              icon: CupertinoIcons.bookmark_fill,
-              title: 'Saved Meals',
-              subtitle: 'Choose from your previously saved meals',
-              color: Colors.amber,
-              route: '/saved-meals',
-            ),
-            const SizedBox(height: 16),
-          ],
+              // Saved Meals Option
+              _buildInputOption(
+                context: context,
+                icon: CupertinoIcons.bookmark_fill,
+                title: 'Saved Meals',
+                subtitle: 'Choose from your previously saved meals',
+                color: Colors.amber,
+                route: '/saved-meals',
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );

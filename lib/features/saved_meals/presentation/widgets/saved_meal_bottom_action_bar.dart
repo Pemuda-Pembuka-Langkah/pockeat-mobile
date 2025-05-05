@@ -1,7 +1,7 @@
 // Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-//coverage:ignore-file
+//
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
@@ -34,6 +34,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
     this.onDelete,
   });
 
+  //coverage:ignore-start
   void showSnackBarMessage(BuildContext context, String message,
       {Color? backgroundColor}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -42,11 +43,13 @@ class SavedMealBottomActionBar extends StatelessWidget {
           SnackBar(
             content: Text(message),
             backgroundColor: backgroundColor,
+            duration: const Duration(seconds: 2),
           ),
         );
       }
     });
   }
+  //coverage:ignore-end
 
   @override
   Widget build(BuildContext context) {
@@ -200,6 +203,8 @@ class SavedMealBottomActionBar extends StatelessWidget {
     );
   }
 
+  //coverage:ignore-start
+
   Future<void> _applyAICorrection(
       BuildContext context, String correction) async {
     if (correction.isEmpty || savedMeal == null) return;
@@ -219,7 +224,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
               SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(
+                child: const CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
@@ -284,8 +289,6 @@ class SavedMealBottomActionBar extends StatelessWidget {
         }
       });
     } catch (e) {
-      print("Error correcting meal: $e");
-
       // Clear any existing snackbars
       scaffoldMessenger.hideCurrentSnackBar();
 
@@ -632,8 +635,9 @@ class SavedMealBottomActionBar extends StatelessWidget {
           // Pop current screen
           Navigator.of(context).pop();
 
-          // Push to food history page
-          Navigator.of(context).pushNamed('/food-history');
+          // Navigate to analytics page with food history tab (index 1) open
+          Navigator.of(context)
+              .pushNamed('/analytic', arguments: {'initialTabIndex': 1});
         }
       });
     } catch (e) {
@@ -673,3 +677,4 @@ class SavedMealBottomActionBar extends StatelessWidget {
     }
   }
 }
+//coverage:ignore-end

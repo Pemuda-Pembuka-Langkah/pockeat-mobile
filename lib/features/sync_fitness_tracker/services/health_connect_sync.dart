@@ -1,4 +1,4 @@
-// coverage:ignore-file
+//
 
 // Dart imports:
 import 'dart:async';
@@ -13,7 +13,7 @@ import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-//coverage:ignore-file
+//
 
 class FitnessTrackerSync {
   /// Health plugin instance
@@ -39,12 +39,13 @@ class FitnessTrackerSync {
 
   /// Local permission state to handle Health Connect inconsistencies
   bool _localPermissionState = false;
-
+//coverage:ignore-start
   /// Reset the cached permission state to force a fresh check
   void resetPermissionState() {
     _localPermissionState = false;
   }
 
+//coverage:ignore-end
   /// Access to Health instance (protected for testing)
   // coverage:ignore-start
   @protected
@@ -64,6 +65,8 @@ class FitnessTrackerSync {
   // coverage:ignore-end
 
   /// Initialize and check permissions in one step
+  ///
+  //coverage:ignore-start
   Future<bool> initializeAndCheckPermissions() async {
     try {
       debugPrint('Initializing Health Connect and checking permissions...');
@@ -98,6 +101,8 @@ class FitnessTrackerSync {
     }
   }
 
+ // coverage:ignore-end
+
   /// Configure the health plugin (can be overridden in tests)
   // coverage:ignore-start
   @protected
@@ -116,6 +121,7 @@ class FitnessTrackerSync {
 
   /// Check if we have required permissions by actually trying to read data
   /// Only call this method when explicitly checking permissions, not in regular data flows
+  //coverage:ignore-start
   Future<bool> hasRequiredPermissions() async {
     // If we're sure we don't have permission, avoid unnecessary checks
     if (_localPermissionState == false) {
@@ -206,6 +212,7 @@ class FitnessTrackerSync {
       return false;
     }
   }
+  //coverage:ignore-end
 
   /// Open the Health Connect permissions screen directly
   // coverage:ignore-start
@@ -306,6 +313,7 @@ class FitnessTrackerSync {
   }
   // coverage:ignore-end
 
+// coverage:ignore-start
   /// Perform a forced data read to ensure permissions are working
   Future<bool> performForcedDataRead() async {
     try {
@@ -452,7 +460,9 @@ class FitnessTrackerSync {
       return 0;
     }
   }
+  //coverage:ignore-end
 
+//coverage:ignore-start
   /// Get calories burned for a specific day
   Future<double?> getCaloriesBurnedForDay(DateTime date) async {
     debugPrint('Getting calories for day: ${formatDate(date)}');
@@ -533,6 +543,7 @@ class FitnessTrackerSync {
     }
   }
 
+//coverage:ignore-end
   /// Helper method to get date range for a day (testable)
   @protected
   DateTimeRange getDateRange(DateTime date) {
@@ -562,10 +573,12 @@ class FitnessTrackerSync {
   // coverage:ignore-end
 
   /// Manually set the permission state (for fixing permission detection issues)
+  //coverage:ignore-start
   @protected
   void setPermissionGranted() {
     _localPermissionState = true;
   }
+  //coverage:ignore-end
 
   /// Format readable date
   String formatDate(DateTime date) {

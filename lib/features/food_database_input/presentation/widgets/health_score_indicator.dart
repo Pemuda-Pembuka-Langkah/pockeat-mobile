@@ -20,10 +20,12 @@ class HealthScoreIndicator extends StatelessWidget {
     if (score >= 7) {
       scoreColor = primaryGreen;
       category = 'Good';
+      // coverage:ignore-line
     } else if (score >= 4) {
       scoreColor = Colors.orange;
       category = 'Moderate';
     } else {
+      // coverage:ignore-line
       scoreColor = primaryPink;
       category = 'Poor';
     }

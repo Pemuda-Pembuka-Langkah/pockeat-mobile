@@ -1,7 +1,6 @@
 // Flutter imports:
-//coverage:ignore-file
+//
 import 'package:flutter/material.dart';
-
 
 // Project imports:
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
@@ -44,10 +43,12 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
+            //coverage:ignore-start
             child: TextField(
               onChanged: (value) {
                 setState(() {
                   _searchQuery = value;
+            //coverage:ignore-end
                 });
               },
               decoration: InputDecoration(
@@ -84,6 +85,7 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
                 final filteredMeals = _searchQuery.isEmpty
                     ? meals
                     : meals
+                    //coverage:ignore-start
                         .where((meal) =>
                             meal.name
                                 .toLowerCase()
@@ -92,6 +94,7 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
                                 .toLowerCase()
                                 .contains(_searchQuery.toLowerCase()))
                         .toList();
+                      //coverage:ignore-end
 
                 if (filteredMeals.isEmpty) {
                   return Center(
@@ -116,9 +119,11 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
                         if (_searchQuery.isEmpty) ...[
                           const SizedBox(height: 24),
                           ElevatedButton(
+                          //coverage:ignore-start
                             onPressed: () {
                               // Navigate to food input page
                               Navigator.pushNamed(context, '/add-food');
+                              //coverage:ignore-end
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryGreen,
@@ -142,12 +147,14 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
                     final savedMeal = filteredMeals[index];
                     return SavedMealCard(
                       savedMeal: savedMeal,
+                      //coverage:ignore-start
                       onTap: () {
                         Navigator.pushNamed(
                           context,
                           '/saved-meal-detail',
                           arguments: {
                             'savedMealId': savedMeal.id,
+                        //coverage:ignore-end
                           },
                         );
                       },
@@ -160,8 +167,10 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        //coverage:ignore-start
         onPressed: () {
           Navigator.pushNamed(context, '/add-food');
+        //coverage:ignore-end
         },
         backgroundColor: primaryGreen,
         child: const Icon(Icons.add),

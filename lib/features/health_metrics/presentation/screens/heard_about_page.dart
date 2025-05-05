@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HeardAboutPage extends StatefulWidget {
@@ -51,7 +54,8 @@ class _HeardAboutPageState extends State<HeardAboutPage> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(), // smoother scrolling (optional)
+          physics:
+              const BouncingScrollPhysics(), // smoother scrolling (optional)
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -155,6 +159,8 @@ class _HeardAboutPageState extends State<HeardAboutPage> {
   Future<void> _handleNextPressed() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('heardAboutPockEat', _selectedOption!);
-    Navigator.pushNamed(context, '/review'); // <-- next step
+    if (mounted) {
+      Navigator.pushNamed(context, '/review'); // <-- next step
+    }
   }
 }

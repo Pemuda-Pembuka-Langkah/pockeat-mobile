@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
-
 /// A wrapper widget that handles authentication state
 /// and redirects users to the appropriate screens
 class AuthWrapper extends StatefulWidget {
@@ -32,6 +30,7 @@ class AuthWrapper extends StatefulWidget {
 class _AuthWrapperState extends State<AuthWrapper> {
   late final LoginService _loginService;
   bool _isChecking = true;
+  // ignore: unused_field
   bool _isAuthenticated = false;
 
   @override
@@ -47,8 +46,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Future<void> _checkAuth() async {
     try {
       final user = await _loginService.getCurrentUser();
-      final prefs = await SharedPreferences.getInstance();
-      final onboardingInProgress = prefs.getBool('onboardingInProgress') ?? false;
 
       if (user == null) {
         // Tidak login
@@ -64,19 +61,20 @@ class _AuthWrapperState extends State<AuthWrapper> {
         // Login
         if (widget.requireAuth) {
           final healthMetricsCheckService = GetIt.instance<HealthMetricsCheckService>();
-          final completed = await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
-
-          final currentRoute = ModalRoute.of(context)?.settings.name;
-          final isInsideOnboardingFlow = currentRoute?.startsWith('/onboarding') ?? false;
-
-          if ((!completed && !onboardingInProgress) && !isInsideOnboardingFlow) {
-            _redirect('/height-weight', removeUntil: true);
-          } else {
+          final isOnboardingCompleted = await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
+          if (!mounted) {
+            return;
+          }
+          debugPrint('isOnboardingCompleted: $isOnboardingCompleted');
+          if(!isOnboardingCompleted){
+            Navigator.of(context).pushReplacementNamed('/height-weight');
+          } else{
             setState(() {
               _isAuthenticated = true;
               _isChecking = false;
             });
           }
+         
         } else {
           _redirect(widget.redirectUrlIfLoggedIn, replace: true);
         }
@@ -94,7 +92,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
     }
   }
 
-  void _redirect(String route, {bool removeUntil = false, bool replace = false}) {
+  void _redirect(String route,
+      {bool removeUntil = false, bool replace = false}) {
     if (!mounted) return;
     if (removeUntil) {
       Navigator.of(context).pushNamedAndRemoveUntil(route, (route) => false);

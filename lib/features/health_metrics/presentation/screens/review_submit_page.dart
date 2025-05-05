@@ -1,15 +1,23 @@
 // review_submit_page.dart
 
+// ignore_for_file: use_build_context_synchronously
+
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
-import 'package:pockeat/core/di/service_locator.dart';
+import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Project imports
-import 'form_cubit.dart';
+// Project imports:
+import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
+import 'form_cubit.dart';
+
+// Project imports
 
 class ReviewSubmitPage extends StatelessWidget {
   const ReviewSubmitPage({super.key});
@@ -131,15 +139,20 @@ class ReviewSubmitPage extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setBool('onboardingInProgress', false);
-
-  if (!context.mounted) return;
-  
-  Navigator.pushNamed(context, '/register');
-},
-
-                  child: const Center(child: Text("Continue to Create Account")),
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('onboardingInProgress', false);
+                    final loginService = GetIt.instance<LoginService>();
+                    final user = await loginService.getCurrentUser();
+                    if (user != null) {
+                      final formCubit = context.read<HealthMetricsFormCubit>();
+                      formCubit.setUserId(user.uid);
+                      await formCubit.submit();
+                      Navigator.pushReplacementNamed(context, '/');
+                    } else {
+                      Navigator.pushNamed(context, '/register');
+                    }
+                  },
+                  child: const Center(child: Text("Continue")),
                 ),
               ],
             ),
@@ -160,7 +173,8 @@ class ReviewSubmitPage extends StatelessWidget {
     return age;
   }
 
-  Widget _buildInfoCard(String goalsDisplay, HealthMetricsFormState state, BuildContext context) {
+  Widget _buildInfoCard(
+      String goalsDisplay, HealthMetricsFormState state, BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: _boxDecoration(),
@@ -168,20 +182,30 @@ class ReviewSubmitPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildItem("Goals", goalsDisplay),
-          _buildItem("Height", state.height != null ? "${state.height} cm" : "-"),
-          _buildItem("Weight", state.weight != null ? "${state.weight} kg" : "-"),
-          _buildItem("Birth Date", state.birthDate?.toLocal().toString().split(" ")[0] ?? "-"),
+          _buildItem(
+              "Height", state.height != null ? "${state.height} cm" : "-"),
+          _buildItem(
+              "Weight", state.weight != null ? "${state.weight} kg" : "-"),
+          _buildItem("Birth Date",
+              state.birthDate?.toLocal().toString().split(" ")[0] ?? "-"),
           _buildItem("Gender", state.gender ?? "-"),
-          _buildItem("Activity Level", formatActivityLevel(state.activityLevel)),
+          _buildItem(
+              "Activity Level", formatActivityLevel(state.activityLevel)),
           _buildItem("Diet Type", state.dietType ?? "-"),
-          _buildItem("Desired Weight", state.desiredWeight != null ? "${state.desiredWeight} kg" : "-"),
-          _buildItem("Weekly Goal", state.weeklyGoal != null ? "${state.weeklyGoal!.toStringAsFixed(1)} kg/week" : "-"),
+          _buildItem("Desired Weight",
+              state.desiredWeight != null ? "${state.desiredWeight} kg" : "-"),
+          _buildItem(
+              "Weekly Goal",
+              state.weeklyGoal != null
+                  ? "${state.weeklyGoal!.toStringAsFixed(1)} kg/week"
+                  : "-"),
         ],
       ),
     );
   }
 
-  Widget _buildCalorieMacronutrientCard(double tdee, Map<String, double> macros) {
+  Widget _buildCalorieMacronutrientCard(
+      double tdee, Map<String, double> macros) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: _boxDecoration(),
@@ -197,9 +221,9 @@ class ReviewSubmitPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             "Macronutrient Breakdown:",
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),

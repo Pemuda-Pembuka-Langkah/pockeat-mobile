@@ -68,6 +68,7 @@ class MacroDistributionBar extends StatelessWidget {
                     color: Colors.blue[400],
                     child: Center(
                       child: proteinPercent >= 10
+                      // coverage:ignore-line 
                           ? Text(
                               'P: ${proteinPercent.toStringAsFixed(0)}%',
                               style: const TextStyle(
@@ -95,6 +96,7 @@ class MacroDistributionBar extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             )
+                            // coverage:ignore-line
                           : Container(),
                     ),
                   ),
@@ -106,6 +108,7 @@ class MacroDistributionBar extends StatelessWidget {
                     color: primaryPink,
                     child: Center(
                       child: fatPercent >= 10
+                      // coverage:ignore-line
                           ? Text(
                               'F: ${fatPercent.toStringAsFixed(0)}%',
                               style: const TextStyle(

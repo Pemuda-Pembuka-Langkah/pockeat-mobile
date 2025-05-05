@@ -1,4 +1,6 @@
 // lib/features/homepage/presentation/screens/pet_homepage_section.dart
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -6,13 +8,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
 // Project imports:
+import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/heart_bar_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
-import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
-import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 
 class PetHomepageSection extends StatefulWidget {
   final String petName;
@@ -30,7 +32,7 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
   final PetService _petService = GetIt.instance<PetService>();
   final FoodLogHistoryService _foodLogHistoryService =
       GetIt.instance<FoodLogHistoryService>();
-  final CalorieStatsService _calorieStatsService = 
+  final CalorieStatsService _calorieStatsService =
       GetIt.instance<CalorieStatsService>();
 
   static const int _goalCalories = 2000;
@@ -47,7 +49,8 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
     _petMood = _petService.getPetMood(userId);
     _dayStreak = _foodLogHistoryService.getFoodStreakDays(userId);
     _petHeart = _petService.getPetHeart(userId);
-    _statsFuture = _calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+    _statsFuture =
+        _calorieStatsService.calculateStatsForDate(userId, DateTime.now());
   }
 
   @override
@@ -83,12 +86,13 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
                 } else {
                   // Data is available
                   final String mood = snapshot.data![0] as String;
-                  final DailyCalorieStats stats = snapshot.data![1] as DailyCalorieStats;
-                  
+                  final DailyCalorieStats stats =
+                      snapshot.data![1] as DailyCalorieStats;
+
                   // Calculate calorie progress percentage
                   final consumed = stats.caloriesConsumed;
                   final progress = (consumed / _goalCalories).clamp(0.0, 1.0);
-                  
+
                   // Determine image path based on mood
                   final String imagePath = mood == 'happy'
                       ? 'assets/images/panda_happy.json'

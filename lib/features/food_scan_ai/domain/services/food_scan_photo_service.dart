@@ -1,5 +1,5 @@
 // Dart imports:
-//coverage:ignore-file
+//
 import 'dart:io';
 
 // Package imports:

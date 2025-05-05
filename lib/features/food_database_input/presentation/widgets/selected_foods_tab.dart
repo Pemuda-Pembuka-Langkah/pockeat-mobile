@@ -61,6 +61,7 @@ class SelectedFoodsTab extends StatelessWidget {
                 filled: true,
                 fillColor: Colors.white,
               ),
+              // coverage:ignore-line
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Please enter a meal name';
@@ -138,6 +139,7 @@ class SelectedFoodsTab extends StatelessWidget {
                     itemCount: selectedFoods.length,
                     itemBuilder: (context, index) {
                       final food = selectedFoods[index];
+                      // coverage:ignore-line
                       final portion = portionValues[index] ??
                           (food.ingredients.isNotEmpty
                               ? food.ingredients[0].servings

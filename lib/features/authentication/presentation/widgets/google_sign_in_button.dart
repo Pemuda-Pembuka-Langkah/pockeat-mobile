@@ -1,21 +1,26 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Package imports:
 import 'package:get_it/get_it.dart';
+import 'package:pockeat/core/services/analytics_service.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 
 class GoogleSignInButton extends StatelessWidget {
   final bool isUnderTest;
   final GoogleSignInService? googleAuthService;
   final EdgeInsetsGeometry? padding;
   final double? height;
+  final bool isRegister;
 
   const GoogleSignInButton({
     super.key,
     this.isUnderTest = false,
+    this.isRegister = false,
     this.googleAuthService,
     this.padding,
     this.height,
@@ -29,10 +34,24 @@ class GoogleSignInButton extends StatelessWidget {
         onPressed: () async {
           try {
             final service = googleAuthService ?? GetIt.I<GoogleSignInService>();
-            await service.signInWithGoogle();
-
-            // Navigate to home page on successful login
+            final analyticsService = GetIt.I<AnalyticsService>();
+            analyticsService.logEvent(
+              name: isRegister ? 'google_sign_up_attempt' : 'google_sign_in_attempt'
+            );
+            final result = await service.signInWithGoogle();
+            if (result.user != null && isRegister && context.mounted) {
+              final uid = result.user!.uid;
+              final formCubit = context.read<HealthMetricsFormCubit>();
+              formCubit.setUserId(uid);
+              await formCubit.submit();
+            }
+            // Log successful authentication
             if (context.mounted) {
+              final analyticsService = GetIt.I<AnalyticsService>();
+              analyticsService.logEvent(
+                name: isRegister ? 'google_sign_up_success' : 'google_sign_in_success',
+                parameters: {'uid': result.user?.uid ?? 'unknown'}
+              );
               Navigator.pushReplacementNamed(context, '/');
             }
           } catch (e) {
@@ -57,9 +76,9 @@ class GoogleSignInButton extends StatelessWidget {
                 ),
           // coverage:ignore-end
         ),
-        label: const Text(
-          'Sign in with Google',
-          style: TextStyle(
+        label: Text(
+          isRegister ? 'Register with Google' : 'Sign in with Google',
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: Colors.black87,

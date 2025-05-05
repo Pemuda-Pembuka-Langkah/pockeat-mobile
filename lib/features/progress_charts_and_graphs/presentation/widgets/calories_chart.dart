@@ -1,8 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
-import 'package:intl/intl.dart';
+// Dart imports:
 import 'dart:math' as math;
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:intl/intl.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+
+// Project imports:
+import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
 
 class CaloriesChart extends StatelessWidget {
   final List<CalorieData> calorieData;
@@ -20,16 +27,17 @@ class CaloriesChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final numberFormat = NumberFormat('#,###');
     final formattedCalories = numberFormat.format(totalCalories.round());
-    
+
     // Check if data is empty
     final bool hasNoData = calorieData.isEmpty;
-    
+
     // Calculate average calories per day (only for days with logs)
     final String averageCalories = _calculateAverageCalories();
-    
+
     // Calculate proportional data
-    final List<Map<String, dynamic>> proportionalData = hasNoData ? [] : _calculateProportionalData();
-    
+    final List<Map<String, dynamic>> proportionalData =
+        hasNoData ? [] : _calculateProportionalData();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -48,25 +56,24 @@ class CaloriesChart extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                isLoading 
-                  ? const SizedBox(
-                      height: 28, 
-                      width: 80,
-                      child: Center(
-                        child: SizedBox(
-                          height: 16, 
-                          width: 16, 
-                          child: CircularProgressIndicator(strokeWidth: 2)
-                        )
+                isLoading
+                    ? const SizedBox(
+                        height: 28,
+                        width: 80,
+                        child: Center(
+                            child: SizedBox(
+                                height: 16,
+                                width: 16,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2))),
+                      )
+                    : Text(
+                        hasNoData ? '0' : formattedCalories,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    )
-                  : Text(
-                      hasNoData ? '0' : formattedCalories,
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                 const SizedBox(width: 4),
                 Text(
                   'kcal',
@@ -126,45 +133,61 @@ class CaloriesChart extends StatelessWidget {
                         // Use either calculated max or default 500 for empty data
                         maximum: hasNoData ? 500 : _calculateYAxisMaximum(),
                         // Set interval
-                        interval: hasNoData ? 100 : _calculateYAxisMaximum() / 5,
+                        interval:
+                            hasNoData ? 100 : _calculateYAxisMaximum() / 5,
                         maximumLabelWidth: 50,
                         labelFormat: '{value}',
                         decimalPlaces: 0,
                       ),
 // coverage:ignore-start
-                      series: hasNoData ? <CartesianSeries>[] : <CartesianSeries>[
-                        StackedColumnSeries<Map<String, dynamic>, String>(
-                          dataSource: proportionalData,
-                          xValueMapper: (Map<String, dynamic> data, _) => data['day'],
-                          yValueMapper: (Map<String, dynamic> data, _) => data['carbsCalories'],
-                          color: Colors.amber,
-                          name: 'Carbs',
-                          dataLabelMapper: (Map<String, dynamic> data, _) => data['carbs'].toString(),
-                        ),
-                        StackedColumnSeries<Map<String, dynamic>, String>(
-                          dataSource: proportionalData,
-                          xValueMapper: (Map<String, dynamic> data, _) => data['day'],
-                          yValueMapper: (Map<String, dynamic> data, _) => data['proteinCalories'],
-                          color: const Color(0xFF2196F3),
-                          name: 'Protein',
-                          dataLabelMapper: (Map<String, dynamic> data, _) => data['protein'].toString(),
-                        ),
-                        StackedColumnSeries<Map<String, dynamic>, String>(
-                          dataSource: proportionalData,
-                          xValueMapper: (Map<String, dynamic> data, _) => data['day'],
-                          yValueMapper: (Map<String, dynamic> data, _) => data['fatCalories'],
-                          color: const Color(0xFFE57373),
-                          name: 'Fats',
-                          dataLabelMapper: (Map<String, dynamic> data, _) => data['fats'].toString(),
-                        ),
-                      ],
+                      series: hasNoData
+                          ? <CartesianSeries>[]
+                          : <CartesianSeries>[
+                              StackedColumnSeries<Map<String, dynamic>, String>(
+                                dataSource: proportionalData,
+                                xValueMapper: (Map<String, dynamic> data, _) =>
+                                    data['day'],
+                                yValueMapper: (Map<String, dynamic> data, _) =>
+                                    data['carbsCalories'],
+                                color: Colors.amber,
+                                name: 'Carbs',
+                                dataLabelMapper:
+                                    (Map<String, dynamic> data, _) =>
+                                        data['carbs'].toString(),
+                              ),
+                              StackedColumnSeries<Map<String, dynamic>, String>(
+                                dataSource: proportionalData,
+                                xValueMapper: (Map<String, dynamic> data, _) =>
+                                    data['day'],
+                                yValueMapper: (Map<String, dynamic> data, _) =>
+                                    data['proteinCalories'],
+                                color: const Color(0xFF2196F3),
+                                name: 'Protein',
+                                dataLabelMapper:
+                                    (Map<String, dynamic> data, _) =>
+                                        data['protein'].toString(),
+                              ),
+                              StackedColumnSeries<Map<String, dynamic>, String>(
+                                dataSource: proportionalData,
+                                xValueMapper: (Map<String, dynamic> data, _) =>
+                                    data['day'],
+                                yValueMapper: (Map<String, dynamic> data, _) =>
+                                    data['fatCalories'],
+                                color: const Color(0xFFE57373),
+                                name: 'Fats',
+                                dataLabelMapper:
+                                    (Map<String, dynamic> data, _) =>
+                                        data['fats'].toString(),
+                              ),
+                            ],
                       tooltipBehavior: TooltipBehavior(
                         enable: true && !hasNoData,
-                        builder: (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
+                        builder: (dynamic data, dynamic point, dynamic series,
+                            int pointIndex, int seriesIndex) {
                           final macroData = proportionalData[pointIndex];
                           String value = '';
                           String macroType = '';
-                          
+
                           if (seriesIndex == 0) {
                             value = macroData['carbs'];
                             macroType = 'Carbs';
@@ -175,11 +198,13 @@ class CaloriesChart extends StatelessWidget {
                             value = macroData['fats'];
                             macroType = 'Fats';
                           }
-                          
-                          final String fullDayName = _getFullDayName(macroData['day']);
-                          
+
+                          final String fullDayName =
+                              _getFullDayName(macroData['day']);
+
                           return Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 14),
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.8),
                               borderRadius: BorderRadius.circular(8),
@@ -193,10 +218,10 @@ class CaloriesChart extends StatelessWidget {
                                     alignment: Alignment.center,
                                     margin: const EdgeInsets.only(bottom: 8),
                                     decoration: const BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(color: Colors.white, width: 1)
-                                      )
-                                    ),
+                                        border: Border(
+                                            bottom: BorderSide(
+                                                color: Colors.white,
+                                                width: 1))),
                                     padding: const EdgeInsets.only(bottom: 4),
                                     child: Text(
                                       fullDayName,
@@ -223,11 +248,12 @@ class CaloriesChart extends StatelessWidget {
                         },
                       ),
                     ),
-                    
+
                     // Show "No food logs" message if data is empty
                     if (hasNoData)
                       Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 20),
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
                           borderRadius: BorderRadius.circular(8),
@@ -237,7 +263,7 @@ class CaloriesChart extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.info_outline, 
+                              Icons.info_outline,
                               size: 30,
                               color: Colors.grey[600],
                             ),
@@ -281,22 +307,24 @@ class CaloriesChart extends StatelessWidget {
 
   String _calculateAverageCalories() {
     if (calorieData.isEmpty) return '0';
-    
+
     // Count days with actual calorie logs
     int daysWithLogs = 0;
     double totalCaloriesForAverage = 0;
-    
+
     for (var data in calorieData) {
-      final dailyCalories = data.calories > 0 ? data.calories : _calculateCaloriesFromMacros(data);
-      
+      final dailyCalories = data.calories > 0
+          ? data.calories
+          : _calculateCaloriesFromMacros(data);
+
       if (dailyCalories > 0) {
         daysWithLogs++;
         totalCaloriesForAverage += dailyCalories;
       }
     }
-    
+
     if (daysWithLogs == 0) return '0';
-    
+
     final average = totalCaloriesForAverage / daysWithLogs;
     final numberFormat = NumberFormat('#,###');
     return numberFormat.format(average.round());
@@ -304,15 +332,17 @@ class CaloriesChart extends StatelessWidget {
 
   List<Map<String, dynamic>> _calculateProportionalData() {
     List<Map<String, dynamic>> result = [];
-    
+
     for (var data in calorieData) {
-      final dailyCalories = data.calories > 0 ? data.calories : _calculateCaloriesFromMacros(data);
-      
+      final dailyCalories = data.calories > 0
+          ? data.calories
+          : _calculateCaloriesFromMacros(data);
+
       // Calculate the proportion of each macronutrient
       final totalGrams = data.protein + data.carbs + data.fats;
-      
+
       double proteinCalories, carbsCalories, fatCalories;
-      
+
       if (totalGrams > 0) {
         // Calculate proportional calories
         proteinCalories = (data.protein / totalGrams) * dailyCalories;
@@ -324,7 +354,7 @@ class CaloriesChart extends StatelessWidget {
         carbsCalories = data.carbs * 4;
         fatCalories = data.fats * 9;
       }
-      
+
       result.add({
         'day': data.day,
         'calories': dailyCalories,
@@ -337,10 +367,10 @@ class CaloriesChart extends StatelessWidget {
         'fats': data.fats.toStringAsFixed(1),
       });
     }
-    
+
     return result;
   }
-  
+
   double _calculateCaloriesFromMacros(CalorieData data) {
     // Standard calorie calculations: protein & carbs = 4cal/g, fat = 9cal/g
     return (data.protein * 4) + (data.carbs * 4) + (data.fats * 9);
@@ -349,16 +379,18 @@ class CaloriesChart extends StatelessWidget {
   double _calculateYAxisMaximum() {
     // Find the maximum daily calorie total in the data
     double maxDailyCalories = 0;
-    
+
     for (var data in calorieData) {
       // Use either stored calories value or calculate from macronutrients
-      final dailyCalories = data.calories > 0 ? data.calories : _calculateCaloriesFromMacros(data);
-      
+      final dailyCalories = data.calories > 0
+          ? data.calories
+          : _calculateCaloriesFromMacros(data);
+
       if (dailyCalories > maxDailyCalories) {
         maxDailyCalories = dailyCalories;
       }
     }
-    
+
     // Round up to the nearest 100 for better visualization
     // e.g., if max calories is 1243, round up to 1300
     // Ensure minimum is 500 for better visualization when values are very small

@@ -61,7 +61,7 @@ class _AddCaloriesBackPageState extends State<AddCaloriesBackPage> {
                       foregroundColor: _addCaloriesBack == false
                           ? Colors.white
                           : Colors.black87,
-                      side: BorderSide(
+                      side: const BorderSide(
                         color: Colors.black87,
                         width: 1,
                       ),
@@ -84,13 +84,12 @@ class _AddCaloriesBackPageState extends State<AddCaloriesBackPage> {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _addCaloriesBack == true
-                          ? primaryPink
-                          : Colors.white,
+                      backgroundColor:
+                          _addCaloriesBack == true ? primaryPink : Colors.white,
                       foregroundColor: _addCaloriesBack == true
                           ? Colors.white
                           : Colors.black87,
-                      side: BorderSide(
+                      side: const BorderSide(
                         color: Colors.black87,
                         width: 1,
                       ),
@@ -129,9 +128,11 @@ class _AddCaloriesBackPageState extends State<AddCaloriesBackPage> {
                 onPressed: _addCaloriesBack != null
                     ? () async {
                         final prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool('addCaloriesBack', _addCaloriesBack!);
-
-                        Navigator.pushNamed(context, '/rollover-calories');
+                        await prefs.setBool(
+                            'addCaloriesBack', _addCaloriesBack!);
+                        if (context.mounted) {
+                          Navigator.pushNamed(context, '/rollover-calories');
+                        }
                       }
                     : null,
                 child: const Text(

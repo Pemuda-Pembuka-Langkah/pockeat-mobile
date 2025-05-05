@@ -27,7 +27,6 @@ class ThankYouPage extends StatelessWidget {
               size: 100,
             ),
             const SizedBox(height: 30),
-
             const Text(
               "Thank You!",
               style: TextStyle(
@@ -37,7 +36,6 @@ class ThankYouPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-
             const Text(
               "Thanks for trusting us! Let's move forward together 🚀",
               textAlign: TextAlign.center,
@@ -47,9 +45,7 @@ class ThankYouPage extends StatelessWidget {
                 color: Colors.black54,
               ),
             ),
-
             const SizedBox(height: 50),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -65,10 +61,9 @@ class ThankYouPage extends StatelessWidget {
                   final prefs = await SharedPreferences.getInstance();
                   // ✅ Still set onboardingInProgress = true
                   await prefs.setBool('onboardingInProgress', true);
-
-                  // ✅ Go to next onboarding step
-                  Navigator.pushNamed(context, '/add-calories-back'); 
-                  // 👈 Replace '/nextStep' with your real next page, e.g., '/goal', '/review', etc
+                  if (context.mounted) {
+                    Navigator.pushNamed(context, '/add-calories-back');
+                  }
                 },
                 child: const Text(
                   "Continue",

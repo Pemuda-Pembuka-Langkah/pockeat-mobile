@@ -116,7 +116,7 @@ class BottomActionBar extends StatelessWidget {
                           barrierDismissible: false,
                           builder: (BuildContext context) {
                             return const Center(
-                              child: CircularProgressIndicator(),
+                              child: const CircularProgressIndicator(),
                             );
                           },
                         );
@@ -158,8 +158,17 @@ class BottomActionBar extends StatelessWidget {
                           // Check if widget is still mounted before using context
                           if (!context.mounted) return;
 
-                          // Navigate back to the previous screen
-                          Navigator.of(context).pop();
+                          // Navigate to analytics page with food history tab open after success
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            if (context.mounted) {
+                              // First navigate back to the previous screen
+                              Navigator.of(context).pop();
+
+                              // Then navigate to analytics page with food history tab (index 1) open
+                              Navigator.of(context).pushNamed('/analytic',
+                                  arguments: {'initialTabIndex': 1});
+                            }
+                          });
                         } catch (e) {
                           if (!context.mounted) return;
 

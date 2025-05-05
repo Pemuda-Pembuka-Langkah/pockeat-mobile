@@ -11,36 +11,33 @@ import 'analytics_service_test.mocks.dart';
 // Use build_runner to generate mocks
 @GenerateMocks([FirebaseAnalytics])
 void main() {
-  // group('AnalyticsService Tests', () {
-  //   late MockFirebaseAnalytics mockAnalytics;
-  //   late AnalyticsService analyticsService;
-  //   late FirebaseAnalyticsObserver mockObserver;
+  group('AnalyticsService Tests', () {
+    late MockFirebaseAnalytics mockAnalytics;
+    late AnalyticsService analyticsService;
 
-  //   setUp(() {
-  //     mockAnalytics = MockFirebaseAnalytics();
-  //     analyticsService = AnalyticsService(analytics: mockAnalytics);
-  //     mockObserver = analyticsService.observer;
-
-  //     // Setup the mocks to return Future<void> for all relevant methods
-  //     when(mockAnalytics.logLogin(loginMethod: anyNamed('loginMethod')))
-  //         .thenAnswer((_) => Future<void>.value());
-
-  //     when(mockAnalytics.logSignUp(signUpMethod: anyNamed('signUpMethod')))
-  //         .thenAnswer((_) => Future<void>.value());
-
-  //     when(mockAnalytics.logEvent(
-  //       name: anyNamed('name'),
-  //       parameters: anyNamed('parameters')
-  //     )).thenAnswer((_) => Future<void>.value());
-
-  //     when(mockAnalytics.logScreenView(
-  //       screenName: anyNamed('screenName'),
-  //       screenClass: anyNamed('screenClass')
-  //     )).thenAnswer((_) => Future<void>.value());
-
-  //     when(mockAnalytics.setAnalyticsCollectionEnabled(any))
-  //         .thenAnswer((_) => Future<void>.value());
-  //   });
+    setUp(() {
+      mockAnalytics = MockFirebaseAnalytics();
+      analyticsService = AnalyticsService(analytics: mockAnalytics);
+      // Setup the mocks to return Future<void> for all relevant methods
+      when(mockAnalytics.logLogin(loginMethod: anyNamed('loginMethod')))
+          .thenAnswer((_) => Future<void>.value());
+      
+      when(mockAnalytics.logSignUp(signUpMethod: anyNamed('signUpMethod')))
+          .thenAnswer((_) => Future<void>.value());
+          
+      when(mockAnalytics.logEvent(
+        name: anyNamed('name'),
+        parameters: anyNamed('parameters')
+      )).thenAnswer((_) => Future<void>.value());
+          
+      when(mockAnalytics.logScreenView(
+        screenName: anyNamed('screenName'),
+        screenClass: anyNamed('screenClass')
+      )).thenAnswer((_) => Future<void>.value());
+          
+      when(mockAnalytics.setAnalyticsCollectionEnabled(any))
+          .thenAnswer((_) => Future<void>.value());
+    });
 
   //   test('observer returns FirebaseAnalyticsObserver', () {
   //     // Act

@@ -1,5 +1,5 @@
 // Dart imports:
-//coverage:ignore-file
+//
 import 'dart:io';
 
 // Flutter imports:
@@ -123,12 +123,12 @@ class _NutritionPageState extends State<NutritionPage> {
   // Handle analysis correction
   void _handleAnalysisCorrected(FoodAnalysisResult correctedResult) {
     // Debug prints to see correction response data
-    print('=========== CORRECTION RESPONSE ===========');
-    print('Food Name: ${correctedResult.foodName}');
-    print('Calories: ${correctedResult.nutritionInfo.calories}');
-    print('Health Score: ${correctedResult.healthScore}');
-    print('Vitamins: ${correctedResult.nutritionInfo.vitaminsAndMinerals}');
-    print('========================================');
+    //print('=========== CORRECTION RESPONSE ===========');
+    //print('Food Name: ${correctedResult.foodName}');
+    //print('Calories: ${correctedResult.nutritionInfo.calories}');
+    //print('Health Score: ${correctedResult.healthScore}');
+    //print('Vitamins: ${correctedResult.nutritionInfo.vitaminsAndMinerals}');
+    //print('========================================');
 
     // Calculate health score if not provided by API response
     double calculatedHealthScore = correctedResult.healthScore ?? 5.0;
