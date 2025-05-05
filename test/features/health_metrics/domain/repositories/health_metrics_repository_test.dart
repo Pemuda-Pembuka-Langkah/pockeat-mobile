@@ -35,6 +35,7 @@ void main() {
     fitnessGoal: 'Maintain',
     bmi: 23.1,
     bmiCategory: 'Normal',
+    desiredWeight: 72.0,
   );
 
   setUp(() {
@@ -81,6 +82,7 @@ void main() {
     expect(result.gender, 'male');
     expect(result.activityLevel, 'moderate');
     expect(result.fitnessGoal, 'Maintain');
+    expect(result.desiredWeight, 72.0);
   });
 
   test('getHealthMetrics returns null when document does not exist', () async {
