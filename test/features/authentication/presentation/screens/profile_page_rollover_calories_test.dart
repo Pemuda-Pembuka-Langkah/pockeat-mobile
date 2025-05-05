@@ -1,0 +1,327 @@
+// Flutter imports:
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+import 'package:mocktail/mocktail.dart';
+
+// Project imports:
+import 'package:pockeat/features/authentication/services/bug_report_service.dart';
+import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
+
+/// This test specifically focuses on the rollover calories toggle feature
+/// in the profile page without loading the full ProfilePage widget which has too many dependencies
+///
+/// We're creating a simpler test widget that only tests the toggle functionality
+
+// Mock classes
+class MockUserPreferencesService extends Mock
+    implements UserPreferencesService {}
+
+class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
+class MockUser extends Mock implements User {}
+
+class MockLoginService extends Mock implements LoginService {}
+
+class MockLogoutService extends Mock implements LogoutService {}
+
+class MockBugReportService extends Mock implements BugReportService {}
+
+class MockUserInfo extends Mock implements UserInfo {}
+
+/// A simplified version of the rollover calories toggle widget to test
+class RolloverCaloriesToggle extends StatefulWidget {
+  final UserPreferencesService preferencesService;
+
+  const RolloverCaloriesToggle({
+    Key? key,
+    required this.preferencesService,
+  }) : super(key: key);
+
+  @override
+  State<RolloverCaloriesToggle> createState() => _RolloverCaloriesToggleState();
+}
+
+class _RolloverCaloriesToggleState extends State<RolloverCaloriesToggle> {
+  bool _isRolloverCaloriesEnabled = false;
+  bool _loadingPreferences = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserPreferences();
+  }
+
+  Future<void> _loadUserPreferences() async {
+    setState(() {
+      _loadingPreferences = true;
+    });
+
+    try {
+      final isEnabled =
+          await widget.preferencesService.isRolloverCaloriesEnabled();
+
+      setState(() {
+        _isRolloverCaloriesEnabled = isEnabled;
+        _loadingPreferences = false;
+      });
+    } catch (e) {
+      setState(() {
+        _loadingPreferences = false;
+      });
+    }
+  }
+
+  Future<void> _toggleRolloverCalories(bool value) async {
+    setState(() {
+      _isRolloverCaloriesEnabled = value;
+    });
+
+    try {
+      await widget.preferencesService.setRolloverCaloriesEnabled(value);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value
+                ? 'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya'
+                : 'Kalori yang tidak terpakai tidak akan diakumulasikan'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      // Revert state if there was an error
+      setState(() {
+        _isRolloverCaloriesEnabled = !value;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal mengubah pengaturan: ${e.toString()}'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Pengaturan Kalori',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Rollover Kalori',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya (maks 1000)',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+                _loadingPreferences
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Switch(
+                        value: _isRolloverCaloriesEnabled,
+                        onChanged: _toggleRolloverCalories,
+                      ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+void main() {
+  late MockUserPreferencesService mockPreferencesService;
+
+  setUp(() {
+    mockPreferencesService = MockUserPreferencesService();
+
+    // Reset any previous registrations
+    GetIt.instance.reset();
+  });
+
+  tearDown(() {
+    GetIt.instance.reset();
+  });
+
+  Widget createTestWidget(
+      {required bool initialPreference, bool delayLoading = false}) {
+    // Setup the mock behavior
+    when(() => mockPreferencesService.isRolloverCaloriesEnabled()).thenAnswer(
+        (_) => delayLoading
+            ? Future.delayed(
+                const Duration(milliseconds: 100), () => initialPreference)
+            : Future.value(initialPreference));
+
+    return MaterialApp(
+      home: RolloverCaloriesToggle(preferencesService: mockPreferencesService),
+    );
+  }
+
+  group('RolloverCaloriesToggle', () {
+    testWidgets('should show loading indicator while preference is loading',
+        (WidgetTester tester) async {
+      // Arrange - use delayed loading to ensure we can see the loading state
+      await tester.pumpWidget(
+          createTestWidget(initialPreference: false, delayLoading: true));
+
+      // Assert - should have a loading indicator
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Complete the future and remove loading indicator
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets(
+        'should display toggle with correct initial state when preferences loaded',
+        (WidgetTester tester) async {
+      // Arrange - set initial preference to ON
+      await tester.pumpWidget(createTestWidget(initialPreference: true));
+
+      // Wait for futures to complete
+      await tester.pumpAndSettle();
+
+      // Assert - toggle should be on
+      final switchWidget = tester.widget<Switch>(find.byType(Switch));
+      expect(switchWidget.value, isTrue);
+    });
+
+    testWidgets('should update preference when toggle is switched',
+        (WidgetTester tester) async {
+      // Arrange
+      when(() => mockPreferencesService.setRolloverCaloriesEnabled(any()))
+          .thenAnswer((_) => Future.value());
+
+      await tester.pumpWidget(createTestWidget(initialPreference: false));
+      await tester.pumpAndSettle();
+
+      // Act - tap the switch to toggle it on
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      // Assert - should call the service to update preference
+      verify(() => mockPreferencesService.setRolloverCaloriesEnabled(true))
+          .called(1);
+
+      // The switch should now be on
+      final switchWidget = tester.widget<Switch>(find.byType(Switch));
+      expect(switchWidget.value, isTrue);
+    });
+
+    testWidgets(
+        'should show snackbar with success message when toggle is changed successfully',
+        (WidgetTester tester) async {
+      // Arrange
+      when(() => mockPreferencesService.setRolloverCaloriesEnabled(any()))
+          .thenAnswer((_) => Future.value());
+
+      await tester.pumpWidget(createTestWidget(initialPreference: false));
+      await tester.pumpAndSettle();
+
+      // Act - tap the switch to toggle it on
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      // Assert - should show success snackbar
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(
+          find.text(
+              'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya'),
+          findsOneWidget);
+    });
+
+    testWidgets('should show error snackbar when toggle update fails',
+        (WidgetTester tester) async {
+      // Arrange
+      when(() => mockPreferencesService.setRolloverCaloriesEnabled(any()))
+          .thenAnswer((_) => Future.error('Service error'));
+
+      await tester.pumpWidget(createTestWidget(initialPreference: false));
+      await tester.pumpAndSettle();
+
+      // Act - tap the switch to toggle it on
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      // Assert - should show error snackbar
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.textContaining('Gagal mengubah pengaturan:'), findsOneWidget);
+
+      // Switch should revert to original state
+      final switchWidget = tester.widget<Switch>(find.byType(Switch));
+      expect(switchWidget.value, isFalse);
+    });
+
+    testWidgets(
+        'should display correct text label and description for rollover calories',
+        (WidgetTester tester) async {
+      // Arrange
+      await tester.pumpWidget(createTestWidget(initialPreference: false));
+      await tester.pumpAndSettle();
+
+      // Assert - check that the correct label and description text is displayed
+      expect(find.text('Rollover Kalori'), findsOneWidget);
+      expect(
+          find.text(
+              'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya (maks 1000)'),
+          findsOneWidget);
+    });
+
+    testWidgets('should toggle off with appropriate message',
+        (WidgetTester tester) async {
+      // Arrange - start with feature enabled
+      when(() => mockPreferencesService.setRolloverCaloriesEnabled(any()))
+          .thenAnswer((_) => Future.value());
+
+      await tester.pumpWidget(createTestWidget(initialPreference: true));
+      await tester.pumpAndSettle();
+
+      // Act - tap to disable
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      // Assert
+      verify(() => mockPreferencesService.setRolloverCaloriesEnabled(false))
+          .called(1);
+
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('Kalori yang tidak terpakai tidak akan diakumulasikan'),
+          findsOneWidget);
+    });
+  });
+}

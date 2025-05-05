@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -76,15 +78,22 @@ void main() {
         caloriesConsumed: 1200,
       );
 
-      // Setup mock responses with Future.delayed to simulate loading
+      // Setup mock responses with Completer to avoid pending timers
+      final completer = Completer<DailyCalorieStats>();
+
+      // Use immediate responses instead of delayed futures to avoid pending timers
       when(() => mockCalorieStatsService.calculateStatsForDate(any(), any()))
-          .thenAnswer((_) =>
-              Future.delayed(const Duration(seconds: 1), () => dailyStats));
+          .thenAnswer((_) => completer.future);
 
       when(() =>
               mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
-          .thenAnswer(
-              (_) => Future.delayed(const Duration(seconds: 1), () => false));
+          .thenAnswer((_) => Future.value(false));
+
+      when(() => mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) => Future.value(false));
+
+      when(() => mockUserPreferencesService.getRolloverCalories())
+          .thenAnswer((_) => Future.value(0));
 
       // Act
       await tester.pumpWidget(
@@ -95,8 +104,14 @@ void main() {
         ),
       );
 
-      // Assert - should show loading indicator
+      // Assert - should show loading indicator since data is not yet available
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Complete the future to avoid pending timers
+      completer.complete(dailyStats);
+
+      // Pump a small amount to process futures but don't wait for animations
+      await tester.pump(const Duration(milliseconds: 50));
     });
 
     testWidgets(
@@ -118,6 +133,12 @@ void main() {
               mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
           .thenAnswer((_) => Future.value(false));
 
+      when(() => mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) => Future.value(false));
+
+      when(() => mockUserPreferencesService.getRolloverCalories())
+          .thenAnswer((_) => Future.value(0));
+
       // Act
       await tester.pumpWidget(
         MaterialApp(
@@ -135,6 +156,8 @@ void main() {
       expect(find.text('800'), findsOneWidget);
       // Should NOT display the calories burned badge
       expect(find.text('+300'), findsNothing);
+      // Should NOT display the rollover calories badge
+      expect(find.byIcon(Icons.update), findsNothing);
     });
 
     testWidgets(
@@ -156,6 +179,12 @@ void main() {
               mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
           .thenAnswer((_) => Future.value(true));
 
+      when(() => mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) => Future.value(false));
+
+      when(() => mockUserPreferencesService.getRolloverCalories())
+          .thenAnswer((_) => Future.value(0));
+
       // Act
       await tester.pumpWidget(
         MaterialApp(
@@ -173,6 +202,100 @@ void main() {
       expect(find.text('1100'), findsOneWidget);
       // Should display the calories burned badge
       expect(find.text('+300'), findsOneWidget);
+      // Should show fire icon for exercise compensation
+      expect(find.byIcon(Icons.local_fire_department), findsOneWidget);
+    });
+
+    testWidgets(
+        'should display remaining calories with rollover when rollover feature is enabled',
+        (WidgetTester tester) async {
+      // Arrange
+      final dailyStats = DailyCalorieStats(
+        userId: 'test-user',
+        date: DateTime.now(),
+        caloriesBurned: 300,
+        caloriesConsumed: 1200,
+      );
+
+      // Setup mock responses
+      when(() => mockCalorieStatsService.calculateStatsForDate(any(), any()))
+          .thenAnswer((_) => Future.value(dailyStats));
+
+      when(() =>
+              mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+          .thenAnswer((_) => Future.value(false));
+
+      when(() => mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) => Future.value(true));
+
+      when(() => mockUserPreferencesService.getRolloverCalories())
+          .thenAnswer((_) => Future.value(500));
+
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CaloriesTodayWidget(targetCalories: 2000),
+          ),
+        ),
+      );
+
+      // Wait for futures to complete
+      await tester.pumpAndSettle();
+
+      // Assert
+      // Target (2000) + rollover (500) - consumed (1200) = 1300 remaining calories
+      expect(find.text('1300'), findsOneWidget);
+      // Should display the rollover calories badge with update icon
+      expect(find.text('+500'), findsOneWidget);
+      expect(find.byIcon(Icons.update), findsOneWidget);
+    });
+
+    testWidgets(
+        'should display both rollover and exercise calories when both features are enabled',
+        (WidgetTester tester) async {
+      // Arrange
+      final dailyStats = DailyCalorieStats(
+        userId: 'test-user',
+        date: DateTime.now(),
+        caloriesBurned: 300,
+        caloriesConsumed: 1200,
+      );
+
+      // Setup mock responses
+      when(() => mockCalorieStatsService.calculateStatsForDate(any(), any()))
+          .thenAnswer((_) => Future.value(dailyStats));
+
+      when(() =>
+              mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+          .thenAnswer((_) => Future.value(true));
+
+      when(() => mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) => Future.value(true));
+
+      when(() => mockUserPreferencesService.getRolloverCalories())
+          .thenAnswer((_) => Future.value(500));
+
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CaloriesTodayWidget(targetCalories: 2000),
+          ),
+        ),
+      );
+
+      // Wait for futures to complete
+      await tester.pumpAndSettle();
+
+      // Assert
+      // Target (2000) + burned (300) + rollover (500) - consumed (1200) = 1600 remaining calories
+      expect(find.text('1600'), findsOneWidget);
+      // Should display both badges
+      expect(find.text('+300'), findsOneWidget);
+      expect(find.text('+500'), findsOneWidget);
+      expect(find.byIcon(Icons.local_fire_department), findsOneWidget);
+      expect(find.byIcon(Icons.update), findsOneWidget);
     });
 
     testWidgets(
@@ -193,6 +316,12 @@ void main() {
       when(() =>
               mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
           .thenAnswer((_) => Future.value(false));
+
+      when(() => mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) => Future.value(false));
+
+      when(() => mockUserPreferencesService.getRolloverCalories())
+          .thenAnswer((_) => Future.value(0));
 
       // Act
       await tester.pumpWidget(
@@ -230,6 +359,12 @@ void main() {
               mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
           .thenAnswer((_) => Future.value(true));
 
+      when(() => mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) => Future.value(false));
+
+      when(() => mockUserPreferencesService.getRolloverCalories())
+          .thenAnswer((_) => Future.value(0));
+
       // Act
       await tester.pumpWidget(
         MaterialApp(
@@ -244,6 +379,48 @@ void main() {
 
       // Assert
       // Consumed (1000) / (Target (2000) + Burned (1000)) = 33%
+      expect(find.text('33%'), findsOneWidget);
+    });
+
+    testWidgets(
+        'should display correct completion percentage with rollover calories',
+        (WidgetTester tester) async {
+      // Arrange
+      final dailyStats = DailyCalorieStats(
+        userId: 'test-user',
+        date: DateTime.now(),
+        caloriesBurned: 0,
+        caloriesConsumed: 1000,
+      );
+
+      // Setup mock responses
+      when(() => mockCalorieStatsService.calculateStatsForDate(any(), any()))
+          .thenAnswer((_) => Future.value(dailyStats));
+
+      when(() =>
+              mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+          .thenAnswer((_) => Future.value(false));
+
+      when(() => mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) => Future.value(true));
+
+      when(() => mockUserPreferencesService.getRolloverCalories())
+          .thenAnswer((_) => Future.value(1000));
+
+      // Act
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CaloriesTodayWidget(targetCalories: 2000),
+          ),
+        ),
+      );
+
+      // Wait for futures to complete
+      await tester.pumpAndSettle();
+
+      // Assert
+      // Consumed (1000) / (Target (2000) + Rollover (1000)) = 33%
       expect(find.text('33%'), findsOneWidget);
     });
   });
