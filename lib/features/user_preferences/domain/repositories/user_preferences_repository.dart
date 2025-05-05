@@ -1,7 +1,7 @@
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter/foundation.dart';
 /// Repository for managing user preferences
 abstract class UserPreferencesRepository {
   /// Check if exercise calorie compensation is enabled
@@ -72,6 +72,6 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
     } catch (e) {
       debugPrint('Error saving exercise calorie compensation setting: $e');
       throw Exception('Failed to save preference: $e');
-    }
+flut    }
   }
 }
