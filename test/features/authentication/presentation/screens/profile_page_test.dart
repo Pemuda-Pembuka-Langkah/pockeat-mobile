@@ -19,7 +19,7 @@ import 'package:pockeat/features/authentication/presentation/screens/profile_pag
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
-import 'package:pockeat/features/home_screen_widget/presentation/screens/widget_manager_screen.dart';
+// Remove the import of the real WidgetManagerScreen
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'profile_page_test.mocks.dart';
 
@@ -154,7 +154,7 @@ void main() {
         '/edit-profile': (context) =>
             const Scaffold(body: Text('Edit Profile Page')),
         '/widget-settings': (context) =>
-            const WidgetManagerScreen(), // tambahkan route untuk widget settings
+            const Scaffold(body: Text('Widget Settings Page')),
       },
     );
   }
@@ -483,6 +483,42 @@ void main() {
 
   // == NOTIFICATION AND PROFILE SETTINGS ==
   group('Notification and Profile Settings', () {
+    testWidgets('Navigates to Widget Settings page when widget settings button is pressed',
+        (WidgetTester tester) async {
+      // Setup user data
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+
+      // Mock the navigation to prevent actual navigation to WidgetManagerScreen
+      // which would require actual dependencies
+      when(mockNavigatorObserver.didPush(any, any))
+          .thenAnswer((_) => null);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Find and scroll to widget settings menu
+      final widgetSettingsFinder = find.text('Widget Settings');
+      await tester.dragUntilVisible(
+        widgetSettingsFinder,
+        find.byType(SingleChildScrollView),
+        const Offset(0, -200),
+      );
+      expect(widgetSettingsFinder, findsOneWidget);
+
+      // Verify widget settings menu subtitle and icon
+      expect(find.text('Manage app widgets on home screen'), findsOneWidget);
+      expect(find.byIcon(Icons.widgets_outlined), findsOneWidget);
+
+      // Tap on widget settings menu
+      await tester.tap(widgetSettingsFinder);
+      await tester.pumpAndSettle();
+
+      // Verify navigation was triggered
+      verify(mockNavigatorObserver.didPush(any, any));
+    });
+
     testWidgets('Navigates to Notification Settings page when button is pressed',
         (WidgetTester tester) async {
       // Setup user data

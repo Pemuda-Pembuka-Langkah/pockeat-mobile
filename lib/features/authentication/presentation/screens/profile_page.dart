@@ -12,7 +12,7 @@ import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
-import 'package:pockeat/features/home_screen_widget/presentation/screens/widget_manager_screen.dart';
+// Widget Manager Screen is now accessed via named route
 
 /// User profile page
 ///
@@ -666,11 +666,7 @@ class _ProfilePageState extends State<ProfilePage> {
             subtitle: 'Manage app widgets on home screen',
             icon: Icons.widgets_outlined,
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const WidgetManagerScreen(),
-                ),
-              );
+              Navigator.of(context).pushNamed('/widget-settings');
             },
           ),
           _buildDivider(),
