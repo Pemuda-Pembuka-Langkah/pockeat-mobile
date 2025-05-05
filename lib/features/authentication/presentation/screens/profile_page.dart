@@ -43,8 +43,13 @@ class _ProfilePageState extends State<ProfilePage> {
   UserModel? _currentUser;
   bool _isLoading = true;
   String? _errorMessage;
-  bool _isCalorieCompensationEnabled = false;
-  bool _loadingPreferences = true;
+  late Future<bool> _exerciseCalorieCompensationEnabled;
+  late Future<bool> _rolloverCaloriesEnabled;
+  bool _loadingExerciseCompensation =
+      false; // Separate loading state for exercise toggle
+  bool _loadingRolloverCalories =
+      false; // Separate loading state for rollover toggle
+  bool _loadingPreferences = true; // Initial loading state for both preferences
 
   // Getter untuk akses FirebaseAuth
   FirebaseAuth get _auth => widget.firebaseAuth ?? FirebaseAuth.instance;
@@ -57,7 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
     _bugReportService = GetIt.instance<BugReportService>();
     _preferencesService = GetIt.instance<UserPreferencesService>();
     _loadUserData();
-    _loadUserPreferences();
+    _loadPreferences();
   }
 
   /// Memuat data user
@@ -82,35 +87,55 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // Method to load user preferences
-  Future<void> _loadUserPreferences() async {
+  Future<void> _loadPreferences() async {
     setState(() {
       _loadingPreferences = true;
     });
 
     try {
-      final isEnabled =
-          await _preferencesService.isExerciseCalorieCompensationEnabled();
+      _exerciseCalorieCompensationEnabled =
+          _preferencesService.isExerciseCalorieCompensationEnabled();
+      _rolloverCaloriesEnabled =
+          _preferencesService.isRolloverCaloriesEnabled();
 
-      setState(() {
-        _isCalorieCompensationEnabled = isEnabled;
-        _loadingPreferences = false;
-      });
+      // Wait for preferences to load before setting _loadingPreferences to false
+      await Future.wait([
+        _exerciseCalorieCompensationEnabled,
+        _rolloverCaloriesEnabled,
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _loadingPreferences = false;
+        });
+      }
     } catch (e) {
-      print('Error loading preferences: $e');
-      setState(() {
-        _loadingPreferences = false;
-      });
+      if (mounted) {
+        setState(() {
+          _loadingPreferences = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load preferences: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   // Method to toggle exercise calorie compensation
   Future<void> _toggleExerciseCalorieCompensation(bool value) async {
     setState(() {
-      _isCalorieCompensationEnabled = value;
+      _loadingExerciseCompensation = true; // Only set exercise loading state
     });
 
     try {
       await _preferencesService.setExerciseCalorieCompensationEnabled(value);
+      setState(() {
+        _exerciseCalorieCompensationEnabled = Future.value(value);
+        _loadingExerciseCompensation = false;
+      });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -123,11 +148,55 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       }
     } catch (e) {
-      // Revert state if there was an error
       setState(() {
-        _isCalorieCompensationEnabled = !value;
+        _loadingExerciseCompensation = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal mengubah pengaturan: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  // Method to toggle calorie rollover
+  Future<void> _toggleCalorieRollover(bool value) async {
+    setState(() {
+      _loadingRolloverCalories = true; // Only set rollover loading state
+    });
+
+    try {
+      await _preferencesService.setRolloverCaloriesEnabled(value);
+      setState(() {
+        _rolloverCaloriesEnabled = Future.value(value);
+        _loadingRolloverCalories = false;
       });
 
+      // If rollover calories are enabled, we should also call getRolloverCalories to update UI
+      if (value) {
+        // No need to wait for this result, just trigger the calculation
+        _preferencesService.getRolloverCalories();
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value
+                ? 'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya'
+                : 'Kalori yang tidak terpakai tidak akan diakumulasikan'),
+            backgroundColor: primaryGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _loadingRolloverCalories = false;
+      });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -722,11 +791,87 @@ class _ProfilePageState extends State<ProfilePage> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Switch(
-                        value: _isCalorieCompensationEnabled,
-                        onChanged: _toggleExerciseCalorieCompensation,
-                        activeColor: primaryGreen,
+                    : _loadingExerciseCompensation // Check exercise-specific loading state
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : FutureBuilder<bool>(
+                            future: _exerciseCalorieCompensationEnabled,
+                            builder: (context, snapshot) {
+                              final isEnabled = snapshot.data ?? false;
+                              return Switch(
+                                value: isEnabled,
+                                onChanged: _toggleExerciseCalorieCompensation,
+                                activeColor: primaryGreen,
+                              );
+                            },
+                          ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.update,
+                            color: primaryGreen,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Rollover Kalori',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya (maks 1000)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _loadingPreferences
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : _loadingRolloverCalories // Check rollover-specific loading state
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : FutureBuilder<bool>(
+                            future: _rolloverCaloriesEnabled,
+                            builder: (context, snapshot) {
+                              final isEnabled = snapshot.data ?? false;
+                              return Switch(
+                                value: isEnabled,
+                                onChanged: _toggleCalorieRollover,
+                                activeColor: primaryGreen,
+                              );
+                            },
+                          ),
               ],
             ),
           ),
