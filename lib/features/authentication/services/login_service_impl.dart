@@ -102,15 +102,7 @@ class LoginServiceImpl implements LoginService {
       }
 
       // Convert Firebase User to UserModel
-      return UserModel(
-        uid: firebaseUser.uid,
-        email: firebaseUser.email ?? '',
-        displayName: firebaseUser.displayName,
-        photoURL: firebaseUser.photoURL,
-        emailVerified: firebaseUser.emailVerified,
-        createdAt:
-            DateTime.now(), // We don't know the actual creation time here
-      );
+      return _userRepository.getUserById(firebaseUser.uid);
     } catch (e) {
       return null;
     }
