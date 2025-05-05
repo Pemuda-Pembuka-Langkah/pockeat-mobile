@@ -19,12 +19,14 @@ import 'package:pockeat/features/progress_charts_and_graphs/services/progress_ta
 class ProgressPage extends StatefulWidget {
   final ProgressTabsService service;
   final int initialTabIndex;
+  final int initialSubTabIndex;
 
   // ignore: use_super_parameters
   const ProgressPage({
     Key? key,
     required this.service,
     this.initialTabIndex = 0,
+    this.initialSubTabIndex = 0,
   }) : super(key: key);
 
   @override
@@ -149,12 +151,9 @@ class _ProgressPageState extends State<ProgressPage>
         ],
         body: TabBarView(
           controller: _mainTabController,
-          children: const [
-            // Gunakan WeightProgressWidget langsung
-            WeightProgressWidget(),
-
-            // Log History Tab - tetap sama
-            LogHistoryPage(),
+          children: [
+            const WeightProgressWidget(),
+            LogHistoryPage(initialTabIndex: widget.initialSubTabIndex),
           ],
         ),
       ),
