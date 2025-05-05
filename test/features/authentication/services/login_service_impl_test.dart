@@ -341,7 +341,7 @@ void main() {
         email: 'test@example.com',
         displayName: 'Test User',
         photoURL: 'https://example.com/photo.jpg',
-        emailVerified: true,
+        emailVerified: false, // Sengaja berbeda dengan yang dari Firebase Auth
         createdAt: DateTime.now(),
       );
       when(mockUserRepository.getUserById('test-user-id')).thenAnswer((_) async => testUserModel);

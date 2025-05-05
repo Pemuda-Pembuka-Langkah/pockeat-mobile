@@ -101,8 +101,15 @@ class LoginServiceImpl implements LoginService {
         return null;
       }
 
-      // Convert Firebase User to UserModel
-      return _userRepository.getUserById(firebaseUser.uid);
+      // Get user data from repository
+      final userData = await _userRepository.getUserById(firebaseUser.uid);
+      if (userData == null) {
+        return null;
+      }
+      
+      // Override emailVerified with the value from Firebase Auth
+      // This ensures we always have the most up-to-date verification status
+      return userData.copyWith(emailVerified: firebaseUser.emailVerified);
     } catch (e) {
       return null;
     }
