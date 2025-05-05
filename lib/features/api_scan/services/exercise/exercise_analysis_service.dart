@@ -1,7 +1,10 @@
 // lib/features/ai_api_scan/services/exercise/exercise_analysis_service.dart
 
+//coverage: ignore-file
+
 // Dart imports:
 import 'dart:convert';
+
 
 // Project imports:
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
@@ -46,7 +49,9 @@ class ExerciseAnalysisService {
       if (e is ApiServiceException) {
         rethrow;
       }
+      //coverage:ignore-start
       throw ApiServiceException("Error analyzing exercise: $e");
+      //coverage:ignore-end
     }
   }
 

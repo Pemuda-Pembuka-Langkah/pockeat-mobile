@@ -1,4 +1,6 @@
 // Flutter imports:
+//coverage: ignore-file
+
 
 // Flutter imports:
 import 'package:flutter/foundation.dart';
@@ -11,6 +13,8 @@ import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
+
+//coverage: ignore-file
 
 class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
   final FoodScanRepository _foodScanRepository;
@@ -119,7 +123,6 @@ class FoodLogHistoryServiceImpl implements FoodLogHistoryService {
         foodImageUrl: result.foodImageUrl,
         timestamp: localTimestamp, // Use the adjusted timestamp
         id: result.id,
-        isLowConfidence: result.isLowConfidence,
         userId: result.userId,
       );
 

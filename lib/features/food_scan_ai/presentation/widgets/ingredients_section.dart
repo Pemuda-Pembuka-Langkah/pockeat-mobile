@@ -1,5 +1,4 @@
 // Flutter imports:
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -19,8 +18,56 @@ class IngredientsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading || ingredients.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Ingredients',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.black12),
+              ),
+              child: isLoading
+                  ? const Center(
+                      child: Text(
+                        'Analyzing ingredients...',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    )
+                  : const Center(
+                      child: Text(
+                        'No ingredients information available',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -32,97 +79,53 @@ class IngredientsSection extends StatelessWidget {
               color: Colors.black87,
             ),
           ),
-          const SizedBox(height: 12),
-          if (isLoading)
-            _buildLoadingState()
-          else if (ingredients.isEmpty)
-            _buildEmptyState()
-          else
-            _buildIngredientsList(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Center(
-        child: Padding(
-          padding: EdgeInsets.all(8.0),
-          child: CircularProgressIndicator(),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            CupertinoIcons.info_circle,
-            color: Colors.grey.shade600,
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              'No ingredients information available',
-              style: TextStyle(
-                color: Colors.black54,
-                fontSize: 14,
-              ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.black12),
+            ),
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: ingredients.length,
+              separatorBuilder: (context, index) => const Divider(height: 24),
+              itemBuilder: (context, index) {
+                final ingredient = ingredients[index];
+                return Row(
+                  children: [
+                    Icon(
+                      Icons.restaurant,
+                      color: primaryGreen,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        ingredient.name,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${ingredient.servings.toStringAsFixed(0)} kcal',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildIngredientsList() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: ingredients
-            .map((ingredient) => _buildIngredientChip(ingredient))
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildIngredientChip(Ingredient ingredient) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: primaryGreen.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: primaryGreen.withOpacity(0.3),
-        ),
-      ),
-      child: Text(
-        ingredient.name,
-        style: const TextStyle(
-          fontSize: 14,
-          color: Colors.black87,
-          fontWeight: FontWeight.w500,
-        ),
       ),
     );
   }

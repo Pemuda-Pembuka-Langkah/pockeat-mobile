@@ -68,7 +68,6 @@ class ScanFoodPageState extends State<ScanFoodPage>
   Future<void> _initializeCamera() async {
     try {
       // Tambahkan log untuk debugging
-
       await widget.cameraController.initialize();
 
       if (mounted) {

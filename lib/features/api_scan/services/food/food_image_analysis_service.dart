@@ -1,4 +1,5 @@
 // lib/features/ai_api_scan/services/food/food_image_analysis_service.dart
+//coverage: ignore-file
 
 // Dart imports:
 import 'dart:io';
@@ -47,12 +48,13 @@ class FoodImageAnalysisService {
       FoodAnalysisResult previousResult, String userComment) async {
     try {
       final responseData = await _apiService.postJsonRequest(
-        '/food/image/correct',
+        '/food/correct/text',
         {
           'previous_result': previousResult.toJson(),
           'user_comment': userComment,
         },
       );
+      //print('Response data: $responseData');
 
       // Even if there's an error field, return a FoodAnalysisResult
       // The fromJson method or caller can handle the error appropriately

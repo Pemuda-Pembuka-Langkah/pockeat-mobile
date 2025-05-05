@@ -12,6 +12,7 @@ import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 /// Halaman profil pengguna
 ///
@@ -38,9 +39,12 @@ class _ProfilePageState extends State<ProfilePage> {
   late final LoginService _loginService;
   late final LogoutService _logoutService;
   late final BugReportService _bugReportService;
+  late final UserPreferencesService _preferencesService;
   UserModel? _currentUser;
   bool _isLoading = true;
   String? _errorMessage;
+  bool _isCalorieCompensationEnabled = false;
+  bool _loadingPreferences = true;
 
   // Getter untuk akses FirebaseAuth
   FirebaseAuth get _auth => widget.firebaseAuth ?? FirebaseAuth.instance;
@@ -51,7 +55,9 @@ class _ProfilePageState extends State<ProfilePage> {
     _loginService = GetIt.instance<LoginService>();
     _logoutService = GetIt.instance<LogoutService>();
     _bugReportService = GetIt.instance<BugReportService>();
+    _preferencesService = GetIt.instance<UserPreferencesService>();
     _loadUserData();
+    _loadUserPreferences();
   }
 
   /// Memuat data user
@@ -72,6 +78,65 @@ class _ProfilePageState extends State<ProfilePage> {
         _isLoading = false;
         _errorMessage = 'Gagal memuat profil: ${e.toString()}';
       });
+    }
+  }
+
+  // Method to load user preferences
+  Future<void> _loadUserPreferences() async {
+    setState(() {
+      _loadingPreferences = true;
+    });
+
+    try {
+      final isEnabled =
+          await _preferencesService.isExerciseCalorieCompensationEnabled();
+
+      setState(() {
+        _isCalorieCompensationEnabled = isEnabled;
+        _loadingPreferences = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading preferences: $e');
+      setState(() {
+        _loadingPreferences = false;
+      });
+    }
+  }
+
+  // Method to toggle exercise calorie compensation
+  Future<void> _toggleExerciseCalorieCompensation(bool value) async {
+    setState(() {
+      _isCalorieCompensationEnabled = value;
+    });
+
+    try {
+      await _preferencesService.setExerciseCalorieCompensationEnabled(value);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value
+                ? 'Kalori dari olahraga akan dikompensasi dalam sisa kalori'
+                : 'Kalori dari olahraga tidak diperhitungkan dalam sisa kalori'),
+            backgroundColor: primaryGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      // Revert state if there was an error
+      setState(() {
+        _isCalorieCompensationEnabled = !value;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal mengubah pengaturan: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -217,6 +282,8 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildProfileHeader(),
           const SizedBox(height: 16),
           _buildProfileStats(),
+          const SizedBox(height: 16),
+          _buildCalorieSettings(),
           const SizedBox(height: 16),
           _buildProfileActions(),
           const SizedBox(height: 20),
@@ -578,6 +645,94 @@ class _ProfilePageState extends State<ProfilePage> {
       height: 40,
       width: 1,
       color: Colors.grey.withOpacity(0.2),
+    );
+  }
+
+  /// Widget untuk pengaturan kalori
+  Widget _buildCalorieSettings() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 20, top: 16, bottom: 8),
+            child: Text(
+              'Pengaturan Kalori',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.local_fire_department_outlined,
+                            color: primaryGreen,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Hitung Kalori Terbakar',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Kalori terbakar akan ditambahkan ke sisa kalori harian Anda',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _loadingPreferences
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Switch(
+                        value: _isCalorieCompensationEnabled,
+                        onChanged: _toggleExerciseCalorieCompensation,
+                        activeColor: primaryGreen,
+                      ),
+              ],
+            ),
+          ),
+          _buildDivider(),
+        ],
+      ),
     );
   }
 
