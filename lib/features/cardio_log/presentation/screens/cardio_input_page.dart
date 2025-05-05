@@ -14,9 +14,6 @@ import '../widgets/cycling_form.dart';
 import '../widgets/running_form.dart';
 import '../widgets/swimming_form.dart';
 
-// Using CardioType from model for consistency
-// enum CardioType { running, cycling, swimming }
-
 class CardioInputPage extends StatefulWidget {
   final CardioRepository? repository;
   final FirebaseAuth? auth; // Add this parameter
@@ -32,6 +29,8 @@ class CardioInputPage extends StatefulWidget {
 }
 
 class CardioInputPageState extends State<CardioInputPage> {
+  bool _isSaving = false; // disable button while saving
+
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
@@ -150,38 +149,37 @@ class CardioInputPageState extends State<CardioInputPage> {
         ),
         child: SafeArea(
           child: ElevatedButton(
-            onPressed: () {
-              // Get data directly from active form
-              double calories = 0;
+            onPressed: _isSaving
+                ? null
+                : () {
+                    setState(() => _isSaving = true);
+                    double calories = 0;
 
-              switch (selectedType) {
-                case CardioType.running:
-                  if (runningForm != null) {
-                    // Get values directly from running form
-                    calories = runningForm!.calculateCalories();
-                  }
-                  break;
+                    switch (selectedType) {
+                      case CardioType.running:
+                        if (runningForm != null) {
+                          // Get values directly from running form
+                          calories = runningForm!.calculateCalories();
+                        }
+                        break;
 
-                case CardioType.cycling:
-                  if (cyclingForm != null) {
-                    // Get values directly from cycling form
-                    calories = cyclingForm!.calculateCalories();
-                  }
-                  break;
+                      case CardioType.cycling:
+                        if (cyclingForm != null) {
+                          // Get values directly from cycling form
+                          calories = cyclingForm!.calculateCalories();
+                        }
+                        break;
 
-                case CardioType.swimming:
-                  if (swimmingForm != null) {
-                    // Get values directly from swimming form
-                    calories = swimmingForm!.calculateCalories();
-                  }
-                  break;
-              }
+                      case CardioType.swimming:
+                        if (swimmingForm != null) {
+                          // Get values directly from swimming form
+                          calories = swimmingForm!.calculateCalories();
+                        }
+                        break;
+                    }
 
-              // Create and save activity object without popping immediately
-              _saveActivity(calories);
-              // Remove this line to prevent immediate navigation
-              // Navigator.pop(context);
-            },
+                    _saveActivity(calories);
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryPink,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -189,14 +187,21 @@ class CardioInputPageState extends State<CardioInputPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
-              'Save ${_getActivityName()}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
+            child: _isSaving
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2),
+                  )
+                : Text(
+                    'Save ${_getActivityName()}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ),
@@ -476,7 +481,13 @@ class CardioInputPageState extends State<CardioInputPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(snackBar).closed.then((_) {
           if (mounted) {
-            Navigator.pop(context);
+            Navigator.of(context).pushNamed(
+              '/analytic',
+              arguments: {
+                'initialTabIndex': 1,
+                'initialSubTabIndex': 1,
+              },
+            );
           }
         });
       }
@@ -493,7 +504,7 @@ class CardioInputPageState extends State<CardioInputPage> {
               ),
             ),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(days: 1),
           ),
         );
       }
