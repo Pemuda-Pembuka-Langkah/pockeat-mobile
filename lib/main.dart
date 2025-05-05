@@ -4,7 +4,7 @@ import 'dart:async';
 // Flutter imports:
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
 // Package imports:
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -220,6 +220,13 @@ void _handleDeepLink(DeepLinkResult result) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Lock the app to portrait orientation only
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   await dotenv.load(fileName: '.env');
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
 

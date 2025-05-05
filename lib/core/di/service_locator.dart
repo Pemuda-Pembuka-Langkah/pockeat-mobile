@@ -1,6 +1,7 @@
 // lib/core/di/service_locator.dart
 
 // Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -70,6 +71,10 @@ Future<void> setupDependencies() async {
   // Register Firebase instances first
   getIt.registerSingleton<FirebaseAuth>(
     FirebaseAuth.instance,
+  );
+
+  getIt.registerSingleton<FirebaseFirestore>(
+    FirebaseFirestore.instance,
   );
 
   getIt.registerSingleton<FirebaseMessaging>(
