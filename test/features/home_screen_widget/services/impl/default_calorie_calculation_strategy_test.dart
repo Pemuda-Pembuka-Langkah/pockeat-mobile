@@ -141,6 +141,7 @@ void main() {
         fitnessGoal: 'maintain',
         bmi: 22.9,
         bmiCategory: 'Normal',
+        desiredWeight: 69.0,
       );
 
       final mockRequirementResult = CaloricRequirementModel(
@@ -199,6 +200,7 @@ void main() {
         fitnessGoal: 'maintain',
         bmi: 22.9,
         bmiCategory: 'Normal',
+        desiredWeight: 69.0,
       );
 
       final mockRequirementResult = CaloricRequirementModel(
