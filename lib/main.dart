@@ -84,6 +84,7 @@ import 'package:pockeat/features/notifications/domain/constants/notification_con
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
+import 'package:pockeat/features/home_screen_widget/presentation/screens/widget_manager_screen.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
@@ -685,6 +686,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         },
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
+        '/widget-settings': (context) =>
+            const AuthWrapper(child: WidgetManagerScreen()),
         '/edit-profile': (context) {
           final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
           return AuthWrapper(
