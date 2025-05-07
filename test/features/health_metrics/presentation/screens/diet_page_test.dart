@@ -73,23 +73,39 @@ void main() {
     expect(button.onPressed, isNotNull);
   });
 
-  testWidgets('selects a diet, submits it, and navigates to /desired-weight', (WidgetTester tester) async {
-    await tester.pumpWidget(createTestWidget());
-    await tester.pumpAndSettle();
+  testWidgets('selects a diet, submits it, and navigates to /onboarding/goal', (WidgetTester tester) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      routes: {
+        '/onboarding/goal': (_) => const Scaffold(body: Text('Onboarding Goal Page')),
+      },
+      home: BlocProvider<HealthMetricsFormCubit>.value(
+        value: mockCubit,
+        child: const DietPage(),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
 
-    final firstOptionText = find.text('No specific diet');
-    await tester.ensureVisible(firstOptionText);
-    await tester.tap(firstOptionText);
-    await tester.pumpAndSettle();
+  // Select the first RadioListTile (No specific diet)
+  final radioTile = find.byType(RadioListTile<String>).first;
+  await tester.tap(radioTile);
+  await tester.pumpAndSettle();
 
-    when(mockCubit.setDietType(any)).thenReturn(null);
+  // Make sure cubit.setDietType is stubbed properly (optional here because Next button just calls it)
+  when(mockCubit.setDietType(any)).thenReturn(null);
 
-    await tester.tap(find.byType(ElevatedButton));
-    await tester.pumpAndSettle();
+  // Tap the Next button
+  await tester.tap(find.byType(ElevatedButton));
+  await tester.pumpAndSettle();
 
-    verify(mockCubit.setDietType('No specific diet')).called(1);
-    expect(find.text('Desired Weight Page'), findsOneWidget);
-  });
+  // Check if cubit method is called correctly
+  verify(mockCubit.setDietType('No specific diet')).called(1);
+
+  // Check if navigated to onboarding
+  expect(find.text('Onboarding Goal Page'), findsOneWidget);
+});
+
 
   testWidgets('Back button pops when onboarding is in progress and canPop is true', (tester) async {
     SharedPreferences.setMockInitialValues({'onboardingInProgress': true});

@@ -15,6 +15,7 @@ import 'package:pockeat/features/authentication/services/change_password_deeplin
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deep_link_service_impl.dart';
 import 'package:pockeat/features/authentication/services/email_verification_deeplink_service.dart';
+
 // coverage:ignore-start
 /// Exception khusus untuk DeepLinkService
 class DeepLinkException implements Exception {

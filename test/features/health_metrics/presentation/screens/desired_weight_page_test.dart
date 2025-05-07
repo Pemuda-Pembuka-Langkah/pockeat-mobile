@@ -48,16 +48,35 @@ void main() {
     expect(find.text('Please enter a valid weight'), findsOneWidget);
   });
 
-  testWidgets('enters valid weight and navigates to /speed', (WidgetTester tester) async {
-    await tester.pumpWidget(createTestWidget());
+  testWidgets('enters valid weight, saves it, toggles goal, and navigates to goal-obstacle', (WidgetTester tester) async {
+      // Mock cubit with a non-null current weight
+      when(mockCubit.state).thenReturn(HealthMetricsFormState(weight: 75.0)); // Assume user currently weighs 75 kg
 
-    await tester.enterText(find.byType(TextFormField), '70');
-    await tester.tap(find.text('Next'));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BlocProvider<HealthMetricsFormCubit>.value(
+            value: mockCubit,
+            child: const DesiredWeightPage(),
+          ),
+          routes: {
+            '/goal-obstacle': (_) => const Scaffold(body: Text('Goal Obstacle Page')),
+          },
+        ),
+      );
 
-    verify(mockCubit.setDesiredWeight(70.0)).called(1);
-    expect(find.text('Speed Page'), findsOneWidget);
-  });
+      await tester.enterText(find.byType(TextFormField), '70'); // Enter target weight (70 kg)
+      await tester.tap(find.text('Next'));
+      await tester.pumpAndSettle();
+
+      // Check if setDesiredWeight was called correctly
+      verify(mockCubit.setDesiredWeight(70.0)).called(1);
+
+      // Check if toggleGoal was called with "Lose Weight" (since 70 < 75)
+      verify(mockCubit.toggleGoal('Lose Weight')).called(1);
+
+      // Should navigate to /goal-obstacle
+      expect(find.text('Goal Obstacle Page'), findsOneWidget);
+    });
 
   testWidgets('Back button pops when onboarding is in progress and canPop is true', (tester) async {
     SharedPreferences.setMockInitialValues({'onboardingInProgress': true});

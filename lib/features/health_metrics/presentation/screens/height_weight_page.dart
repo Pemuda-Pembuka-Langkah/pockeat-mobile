@@ -34,16 +34,7 @@ class _HeightWeightPageState extends State<HeightWeightPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () async {
-            final prefs = await SharedPreferences.getInstance();
-            final inProgress = prefs.getBool('onboardingInProgress') ?? true;
-
-            if (inProgress && Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            } else {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            }
-          },
+          onPressed: _handleBackPressed,
         ),
         title: const Text(
           "Height & Weight",
@@ -136,18 +127,7 @@ class _HeightWeightPageState extends State<HeightWeightPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () {
-                          if (_formKey.currentState?.validate() ?? false) {
-                            _formKey.currentState?.save();
-                            context
-                                .read<HealthMetricsFormCubit>()
-                                .setHeightWeight(
-                                  height: _height!,
-                                  weight: _weight!,
-                                );
-                            Navigator.pushNamed(context, '/birthdate');
-                          }
-                        },
+                        onPressed: _handleNextPressed,
                         child: const Center(child: Text("Next")),
                       ),
                     ],
@@ -159,5 +139,48 @@ class _HeightWeightPageState extends State<HeightWeightPage> {
         ),
       ),
     );
+  }
+
+  void _handleBackPressed() async {
+    final prefs = await SharedPreferences.getInstance();
+    final inProgress = prefs.getBool('onboardingInProgress') ?? true;
+
+    if (inProgress && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
+  }
+
+  void _handleNextPressed() {
+    if (_formKey.currentState?.validate() ?? false) {
+      _formKey.currentState?.save();
+
+      calculateBMI(_height!, _weight!);
+
+      context.read<HealthMetricsFormCubit>().setHeightWeight(
+            height: _height!,
+            weight: _weight!,
+          );
+
+      Navigator.pushNamed(context, '/birthdate');
+    }
+  }
+
+  double calculateBMI(double heightCm, double weightKg) {
+    final heightM = heightCm / 100;
+    return weightKg / (heightM * heightM);
+  }
+
+  String getBMICategory(double bmi) {
+    if (bmi < 18.5) {
+      return 'Underweight';
+    } else if (bmi < 24.9) {
+      return 'Normal';
+    } else if (bmi < 29.9) {
+      return 'Overweight';
+    } else {
+      return 'Obese';
+    }
   }
 }

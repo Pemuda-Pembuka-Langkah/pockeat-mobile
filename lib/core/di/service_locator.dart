@@ -1,10 +1,14 @@
 // lib/core/di/service_locator.dart
 
 // Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/food_database_input/services/food_database_module.dart';
+import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
+import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
@@ -51,12 +55,12 @@ import 'package:pockeat/features/health_metrics/domain/repositories/health_metri
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
-import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/notification_service_impl.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/calories_nutrition/di/nutrition_module.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/exercise_progress/di/exercise_progress_module.dart';
-import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
+import 'package:pockeat/features/notifications/domain/services/impl/user_activity_service_impl.dart';
+import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -67,6 +71,10 @@ Future<void> setupDependencies() async {
   // Register Firebase instances first
   getIt.registerSingleton<FirebaseAuth>(
     FirebaseAuth.instance,
+  );
+
+  getIt.registerSingleton<FirebaseFirestore>(
+    FirebaseFirestore.instance,
   );
 
   getIt.registerSingleton<FirebaseMessaging>(
@@ -172,16 +180,34 @@ Future<void> setupDependencies() async {
     FlutterLocalNotificationsPlugin(),
   );
 
+  // Register UserActivityService to track app usage (must be before NotificationService)
+  getIt.registerSingleton<UserActivityService>(
+    UserActivityServiceImpl(),
+  );
+
   // Register feature modules first (before services that depend on them)
   FoodLogHistoryModule.register();
   ExerciseLogHistoryModule.register();
   CalorieStatsModule.register();
-  NutritionModule.register();
-  ExerciseProgressModule.register();
 
-  // Now register NotificationService which depends on FoodLogHistoryService
+  // Now register NotificationService which depends on FoodLogHistoryService and UserActivityService
   getIt.registerSingleton<NotificationService>(
     NotificationServiceImpl(),
+  );
+
+  // Register Supabase nutrition database module
+  NutritionDatabaseModule.register();
+
+  // Register SavedMealsRepository before SavedMealService
+  getIt.registerSingleton<SavedMealsRepository>(
+    SavedMealsRepository(),
+  );
+
+  getIt.registerSingleton<SavedMealService>(
+    SavedMealService(
+      repository: getIt<SavedMealsRepository>(),
+      textAnalysisService: getIt<FoodTextAnalysisService>(),
+    ),
   );
 
   // Register additional services

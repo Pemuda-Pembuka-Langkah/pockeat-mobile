@@ -1,7 +1,8 @@
+// Flutter imports:
+import 'package:flutter/services.dart';
+
 // Package imports:
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart'; // Add for TimeOfDay
-import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -15,7 +16,12 @@ import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/notification_service_impl.dart';
+import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/notifications/domain/services/utils/work_manager_client.dart';
+import 'notification_service_impl_test.mocks.dart';
+
+import 'package:flutter/material.dart'; // Add for TimeOfDay
+
 
 // Generate mocks for the dependencies
 @GenerateMocks([
@@ -24,9 +30,9 @@ import 'package:pockeat/features/notifications/domain/services/utils/work_manage
   LoginService,
   WorkManagerClient,
   AndroidFlutterLocalNotificationsPlugin,
+  UserActivityService,
 ])
 // Import generated mocks
-import 'notification_service_impl_test.mocks.dart';
 
 // Manual mocks untuk Firebase classes
 class MockFirebaseMessaging extends Mock implements FirebaseMessaging {
@@ -95,6 +101,7 @@ void main() {
   late MockFoodLogHistoryService mockFoodLogHistoryService;
   late MockLoginService mockLoginService;
   late MockWorkManagerClient mockWorkManagerClient;
+  late MockUserActivityService mockUserActivityService;
   late NotificationServiceImpl notificationService;
   late SharedPreferences mockPrefs;
   late MockAndroidFlutterLocalNotificationsPlugin mockAndroidFlutterLocalNotificationsPlugin;
@@ -114,6 +121,7 @@ void main() {
       NotificationConstants.prefBreakfastEnabled: true,
       NotificationConstants.prefLunchEnabled: true,
       NotificationConstants.prefDinnerEnabled: true,
+      NotificationConstants.prefPetSadnessEnabled: true,
     });
     mockPrefs = await SharedPreferences.getInstance();
     
@@ -122,7 +130,11 @@ void main() {
     mockFoodLogHistoryService = MockFoodLogHistoryService();
     mockLoginService = MockLoginService();
     mockWorkManagerClient = MockWorkManagerClient();
+    mockUserActivityService = MockUserActivityService();
     mockAndroidFlutterLocalNotificationsPlugin = MockAndroidFlutterLocalNotificationsPlugin();
+    
+    // Setup user activity service mock
+    when(mockUserActivityService.trackAppOpen()).thenAnswer((_) async {});
     
     // Setup Android plugin resolution
     when(mockLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>())
@@ -152,6 +164,7 @@ void main() {
       foodLogHistoryService: mockFoodLogHistoryService,
       loginService: mockLoginService,
       workManagerClient: mockWorkManagerClient,
+      userActivityService: mockUserActivityService,
     );
   });
 
@@ -194,9 +207,15 @@ void main() {
         )),
       )).called(1);
       
+      verify(mockAndroidFlutterLocalNotificationsPlugin.createNotificationChannel(
+        argThat(predicate((AndroidNotificationChannel channel) => 
+          channel.id == NotificationConstants.petSadnessChannelId
+        )),
+      )).called(1);
+      
       // Check that all channels were created - server, meal reminder, and daily streak
       verify(mockAndroidFlutterLocalNotificationsPlugin.createNotificationChannel(any))
-          .called(2);
+          .called(3);
     });
   });
 
@@ -412,6 +431,7 @@ void main() {
         any,
         frequency: anyNamed('frequency'),
         initialDelay: anyNamed('initialDelay'),
+        inputData: anyNamed('inputData'),
         constraints: anyNamed('constraints'),
       )).thenAnswer((_) async {});
       

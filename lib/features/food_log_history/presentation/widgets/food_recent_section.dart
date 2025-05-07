@@ -38,11 +38,15 @@ class FoodRecentSection extends StatefulWidget {
 class _FoodRecentSectionState extends State<FoodRecentSection>
     with WidgetsBindingObserver {
   late Future<List<FoodLogHistoryItem>> _foodsFuture;
+  late final FirebaseAuth
+      _auth; // Tambahkan variabel _auth seperti di ExerciseSection
   final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    _auth =
+        widget.auth ?? FirebaseAuth.instance; // Initialize auth dengan benar
     _loadFoods();
 
     // Register as an observer to detect app lifecycle changes
@@ -91,12 +95,31 @@ class _FoodRecentSectionState extends State<FoodRecentSection>
   }
 
   void _loadFoods() {
-    // Get current user's ID
-    final userId =
-        (widget.auth ?? FirebaseAuth.instance).currentUser?.uid ?? '';
+    // Gunakan pendekatan yang sama seperti di food_history_page.dart
+    final userId = (_auth.currentUser?.uid ?? '');
+
+    if (userId.isEmpty) {
+      debugPrint('FoodRecentSection: UserId is empty!');
+      return;
+    }
+
+    debugPrint('FoodRecentSection: Loading for userId: $userId');
 
     setState(() {
-      _foodsFuture = widget.service.getAllFoodLogs(userId, limit: widget.limit);
+      // PERUBAHAN UTAMA: Hilangkan parameter limit seperti di food_history_page
+      _foodsFuture = widget.service.getAllFoodLogs(userId).then((foods) {
+        debugPrint('FoodRecentSection: Raw data loaded: ${foods.length} foods');
+
+        // Sort by timestamp (newest first)
+        foods.sort((a, b) => (b.timestamp).compareTo(a.timestamp));
+
+        // Limit data setelah sorting
+        final limitedFoods = foods.take(widget.limit).toList();
+
+        debugPrint(
+            'FoodRecentSection: Showing ${limitedFoods.length} foods after filtering');
+        return limitedFoods;
+      });
     });
   }
 
@@ -170,66 +193,66 @@ class _FoodRecentSectionState extends State<FoodRecentSection>
             FutureBuilder<List<FoodLogHistoryItem>>(
               future: _foodsFuture,
               builder: (context, snapshot) {
+                debugPrint(
+                    'FoodRecentSection FutureBuilder status: ${snapshot.connectionState}');
+                debugPrint(
+                    'FoodRecentSection FutureBuilder hasError: ${snapshot.hasError}');
+                debugPrint(
+                    'FoodRecentSection FutureBuilder hasData: ${snapshot.hasData}');
+
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
-                    padding: EdgeInsets.symmetric(
-                        vertical: 16), // Consistent vertical padding
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
                   );
-                } else if (snapshot.hasError) {
+                }
+
+                if (snapshot.hasError) {
+                  debugPrint('FoodRecentSection error: ${snapshot.error}');
                   return Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16), // Consistent with other paddings
+                        horizontal: 16, vertical: 16),
                     child: Center(
                       child: Text(
                         'Error loading foods: ${snapshot.error}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16), // Consistent with other paddings
-                    child: Center(
-                      child: Text(
-                        'No food history yet',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ),
-                  );
-                } else {
-                  final foods = snapshot.data!;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16), // Consistent horizontal padding
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding:
-                          EdgeInsets.zero, // No additional padding in ListView
-                      itemCount: foods.length,
-                      itemBuilder: (context, index) => Padding(
-                        padding: const EdgeInsets.only(
-                            bottom: 8), // Consistent spacing between cards
-                        child: FoodHistoryCard(
-                          food: foods[index],
-                          onTap: () => _navigateToFoodDetail(foods[index]),
-                        ),
+                        style: const TextStyle(fontSize: 16, color: Colors.red),
                       ),
                     ),
                   );
                 }
+
+                // Check for empty data
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    child: Center(
+                      child: Text(
+                        'No food history yet',
+                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                      ),
+                    ),
+                  );
+                }
+
+                // Data tersedia, render list
+                final foods = snapshot.data!;
+                debugPrint('FoodRecentSection rendering ${foods.length} items');
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    itemCount: foods.length,
+                    itemBuilder: (context, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: FoodHistoryCard(
+                        food: foods[index],
+                        onTap: () => _navigateToFoodDetail(foods[index]),
+                      ),
+                    ),
+                  ),
+                );
               },
             ),
           ],

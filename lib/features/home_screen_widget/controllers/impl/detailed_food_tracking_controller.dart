@@ -1,13 +1,12 @@
 // Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_widget_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/detailed_food_tracking.dart';
-import 'package:pockeat/features/home_screen_widget/services/impl/default_calorie_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/default_nutrient_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
-import '../../services/calorie_calculation_strategy.dart';
 import '../../services/nutrient_calculation_strategy.dart';
 
 /// Controller khusus untuk detailed food tracking widget
@@ -17,20 +16,20 @@ import '../../services/nutrient_calculation_strategy.dart';
 class DetailedFoodTrackingController implements FoodTrackingWidgetController {
   final WidgetDataService<DetailedFoodTracking> _widgetService;
   final FoodLogHistoryService _foodLogHistoryService;
+  final CalorieStatsService _calorieStatsService;
 
-  /// Strategies for calorie and nutrient calculations
-  final CalorieCalculationStrategy _calorieCalculationStrategy;
+  /// Strategy for nutrient calculations
   final NutrientCalculationStrategy _nutrientCalculationStrategy;
 
   DetailedFoodTrackingController({
     required WidgetDataService<DetailedFoodTracking> widgetService,
     required FoodLogHistoryService foodLogHistoryService,
-    CalorieCalculationStrategy? calorieCalculationStrategy,
+    required CalorieStatsService calorieStatsService,
     NutrientCalculationStrategy? nutrientCalculationStrategy,
-  })  : _widgetService = widgetService,
+  })
+      : _widgetService = widgetService,
         _foodLogHistoryService = foodLogHistoryService,
-        _calorieCalculationStrategy =
-            calorieCalculationStrategy ?? DefaultCalorieCalculationStrategy(),
+        _calorieStatsService = calorieStatsService,
         _nutrientCalculationStrategy =
             nutrientCalculationStrategy ?? DefaultNutrientCalculationStrategy();
 
@@ -56,15 +55,15 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
     try {
       final userId = user.uid;
 
-      // Hitung total kalori hari ini menggunakan strategy
-      final consumedCalories = await _calorieCalculationStrategy
-          .calculateTodayTotalCalories(_foodLogHistoryService, userId);
+      // Hitung total kalori hari ini menggunakan CalorieStatsService
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final dailyStats = await _calorieStatsService.getStatsByDate(userId, today);
+      final consumedCalories = dailyStats.caloriesConsumed;
 
       // Dapatkan data untuk nutrisi
-      final DateTime now = DateTime.now();
-      final DateTime startOfDay = DateTime(now.year, now.month, now.day);
-      final todayLogs =
-          await _foodLogHistoryService.getFoodLogsByDate(userId, startOfDay);
+      final todayLogs = 
+          await _foodLogHistoryService.getFoodLogsByDate(userId, today);
 
       // Hitung nutrisi menggunakan strategy
       final protein = _nutrientCalculationStrategy.calculateNutrientFromLogs(

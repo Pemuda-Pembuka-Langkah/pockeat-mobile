@@ -138,7 +138,7 @@ class _SpeedSelectionPageState extends State<SpeedSelectionPage> {
                         context
                             .read<HealthMetricsFormCubit>()
                             .setWeeklyGoal(_weeklyGoal);
-                        Navigator.pushNamed(context, '/review');
+                        Navigator.pushNamed(context, '/thank-you');
                       },
                       child: const Center(child: Text("Next")),
                     ),

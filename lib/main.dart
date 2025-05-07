@@ -5,14 +5,17 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 // Package imports:
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
+import 'package:pockeat/features/food_database_input/presentation/food_database_page.dart';
+import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+import 'package:pockeat/features/saved_meals/presentation/screens/saved_meal_detail_page.dart';
+import 'package:pockeat/features/saved_meals/presentation/screens/saved_meals_page.dart';
 import 'package:provider/provider.dart';
 
 // Project imports:
@@ -24,7 +27,6 @@ import 'package:pockeat/core/screens/splash_screen_page.dart';
 import 'package:pockeat/core/screens/streak_celebration_page.dart';
 import 'package:pockeat/core/service/background_service_manager.dart';
 import 'package:pockeat/core/service/permission_service.dart';
-import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
@@ -38,6 +40,7 @@ import 'package:pockeat/features/authentication/presentation/screens/login_page.
 import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/reset_password_request_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/auth_wrapper.dart';
 import 'package:pockeat/features/authentication/services/deep_link_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
@@ -68,21 +71,31 @@ import 'package:pockeat/features/health_metrics/presentation/screens/health_metr
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/rollover_calories_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/thank_you_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/used_other_apps_page.dart';
+
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
+import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
-
-import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
+import 'package:pockeat/features/home_screen_widget/presentation/screens/widget_manager_screen.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/presentation/screens/weightlifting_page.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // Core imports:
+import 'package:pockeat/features/progress_charts_and_graphs/di/progress_module.dart';
 
 // Single global NavigatorKey untuk seluruh aplikasi
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -208,6 +221,13 @@ void _handleDeepLink(DeepLinkResult result) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Lock the app to portrait orientation only
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   await dotenv.load(fileName: '.env');
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
 
@@ -218,6 +238,13 @@ void main() async {
   // Initialize Instabug
   await _initializeInstabug(flavor);
 
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+    debug: flavor != 'production',
+  );
+
   await Firebase.initializeApp(
     options: flavor == 'production'
         ? ProductionFirebaseOptions.currentPlatform
@@ -227,6 +254,7 @@ void main() async {
   );
 
   await setupDependencies();
+  ProgressModule.register(); // <-- Add this line
 
   // Initialize Google Analytics
   await getIt<AnalyticsService>().initialize();
@@ -271,6 +299,11 @@ void main() async {
         Provider<FoodTextInputRepository>(
           create: (_) => getIt<FoodTextInputRepository>(),
         ),
+        Provider<SavedMealService>(
+          create: (_) => getIt<SavedMealService>(),
+        ),
+        Provider<CaloricRequirementService>(
+            create: (_) => getIt<CaloricRequirementService>()),
         BlocProvider<HealthMetricsFormCubit>(
           create: (_) => HealthMetricsFormCubit(
             repository: getIt<HealthMetricsRepository>(),
@@ -304,6 +337,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     // Cek notifikasi di initState untuk menangani cold start dari notifikasi
     _checkNotificationLaunch();
+
+    // Track app open saat aplikasi pertama kali dibuka
+    _trackAppOpen();
+  }
+
+  // Track app open menggunakan UserActivityService
+  Future<void> _trackAppOpen() async {
+    try {
+      final userActivityService = getIt<UserActivityService>();
+      await userActivityService.trackAppOpen();
+      debugPrint('Tracked app open at startup');
+    } catch (e) {
+      debugPrint('Error tracking app open: $e');
+    }
   }
 
   Future<void> _initializeDeepLinkService() async {
@@ -362,12 +409,43 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             }
 
             // Navigasi langsung ke streak celebration page menggunakan navigatorKey
-            navigatorKey.currentState?.pushNamed(
-              '/streak-celebration',
-              arguments:  {'showStreakCelebration': true, 'streakDays': streakDays}
-            );
+            navigatorKey.currentState?.pushNamed('/streak-celebration',
+                arguments: {
+                  'showStreakCelebration': true,
+                  'streakDays': streakDays
+                });
           } catch (e) {
             debugPrint('Error handling streak notification: $e');
+          }
+        }
+        // Handle pet sadness notification (cold start via notification)
+        else if (payload == NotificationConstants.petSadnessPayload) {
+          debugPrint('App launched from pet sadness notification');
+
+          try {
+            // Track app open untuk reset inactiveDuration
+            await _trackAppOpen();
+
+            // Langsung navigasi ke halaman utama/dashboard menggunakan navigatorKey
+            navigatorKey.currentState?.pushReplacementNamed('/');
+            debugPrint('Navigated to dashboard from pet sadness notification');
+          } catch (e) {
+            debugPrint('Error handling pet sadness notification: $e');
+          }
+        }
+        // Handle pet status notification (cold start via notification)
+        else if (payload == NotificationConstants.petStatusPayload) {
+          debugPrint('App launched from pet status notification');
+
+          try {
+            // Track app open
+            await _trackAppOpen();
+
+            // Navigate to the main dashboard screen
+            navigatorKey.currentState?.pushReplacementNamed('/');
+            debugPrint('Navigated to dashboard from pet status notification');
+          } catch (e) {
+            debugPrint('Error handling pet status notification: $e');
           }
         } else if (payload == NotificationConstants.mealReminderPayload) {
           // Untuk meal notification, navigate dengan deeplink
@@ -386,13 +464,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
-
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _deepLinkSubscription?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Track when app is resumed from background
+      _trackAppOpen();
+      debugPrint('App resumed from background, tracked activity');
+    }
   }
 
   @override
@@ -440,13 +525,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               redirectUrlIfNotLoggedIn: '/welcome',
               child: HomePage(),
             ),
-        '/welcome': (context) {
-          return const AuthWrapper(
-            requireAuth: false,
-            redirectUrlIfLoggedIn: '/',
-            child: WelcomePage(),
-          );
-        },
+        '/welcome': (context) => const WelcomePage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
         '/streak-celebration': (context) {
@@ -496,54 +575,61 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             child: const HealthMetricsGoalsPage(),
           );
         },
-        '/height-weight': (context) =>
-            const AuthWrapper(child: HeightWeightPage()),
-        '/birthdate': (context) => const AuthWrapper(child: BirthdatePage()),
-        '/gender': (context) => const AuthWrapper(child: GenderPage()),
-        '/activity-level': (context) =>
-            const AuthWrapper(child: ActivityLevelPage()),
-        '/diet': (context) => const AuthWrapper(child: DietPage()),
-        '/desired-weight': (context) =>
-            const AuthWrapper(child: DesiredWeightPage()),
-        '/speed': (context) => const AuthWrapper(child: SpeedSelectionPage()),
-        '/review': (context) => const AuthWrapper(child: ReviewSubmitPage()),
+        '/height-weight': (context) => const HeightWeightPage(),
+        '/birthdate': (context) => const BirthdatePage(),
+        '/gender': (context) => const GenderPage(),
+        '/activity-level': (context) => const ActivityLevelPage(),
+        '/diet': (context) => const DietPage(),
+        '/desired-weight': (context) => const DesiredWeightPage(),
+        '/speed': (context) => const SpeedSelectionPage(),
+        '/goal-obstacle': (context) => const GoalObstaclePage(),
+        '/add-calories-back': (context) => const AddCaloriesBackPage(),
+        '/heard-about': (context) => const HeardAboutPage(),
+        '/rollover-calories': (context) => const RolloverCaloriesPage(),
+        '/thank-you': (context) => const ThankYouPage(),
+        '/used-other-apps': (context) => const UsedOtherAppsPage(),
+        '/review': (context) => BlocProvider.value(
+         value: context.read<HealthMetricsFormCubit>(),
+          child: const ReviewSubmitPage(),
+        ),
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),
         '/scan': (context) => FutureBuilder<List<CameraDescription>>(
-          future: availableCameras(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              }
-              
-              if (snapshot.data?.isEmpty ?? true) {
-                return const Center(
-                  child: Text('Tidak ada kamera yang tersedia'),
-                );
-              }
+              future: availableCameras(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  }
 
-              return AuthWrapper(
-                child: ScanFoodPage(
-                  cameraController: CameraController(
-                    snapshot.data![0], // Menggunakan kamera pertama (belakang)
-                    ResolutionPreset.max,
-                    enableAudio: false,
-                    imageFormatGroup: ImageFormatGroup.jpeg,
-                  ),
-                ),
-              );
-            }
-            
-            // Tampilkan loading selama menunggu kamera
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
-        ),
+                  if (snapshot.data?.isEmpty ?? true) {
+                    return const Center(
+                      child: Text('Tidak ada kamera yang tersedia'),
+                    );
+                  }
+
+                  return AuthWrapper(
+                    child: ScanFoodPage(
+                      cameraController: CameraController(
+                        snapshot
+                            .data![0], // Menggunakan kamera pertama (belakang)
+                        ResolutionPreset.max,
+                        enableAudio: false,
+                        imageFormatGroup: ImageFormatGroup.jpeg,
+                      ),
+                    ),
+                  );
+                }
+
+                // Tampilkan loading selama menunggu kamera
+                return const Center(
+                  child: const CircularProgressIndicator(),
+                );
+              },
+            ),
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
         '/food-text-input': (context) =>
             const AuthWrapper(child: FoodTextInputPage()),
@@ -585,15 +671,41 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             ),
           );
         },
-        '/analytic': (context) => ProgressPage(
-              service: ProgressTabsService(ProgressTabsRepositoryImpl()),
-            ),
+
+        '/nutrition-database': (context) =>
+            const AuthWrapper(child: NutritionDatabasePage()),
+
+        '/analytic': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return ProgressPage(
+            service: ProgressTabsService(ProgressTabsRepositoryImpl()),
+            initialTabIndex: args?['initialTabIndex'] as int? ?? 0,
+          );
+        },
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
+        '/widget-settings': (context) =>
+            const AuthWrapper(child: WidgetManagerScreen()),
         '/edit-profile': (context) {
           final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
           return AuthWrapper(
             child: EditProfilePage(initialUser: user),
+          );
+        },
+        '/saved-meals': (context) => AuthWrapper(
+              child: SavedMealsPage(
+                savedMealService: getIt<SavedMealService>(),
+              ),
+            ),
+        '/saved-meal-detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
+          return AuthWrapper(
+            child: SavedMealDetailPage(
+              savedMealId: args['savedMealId'] as String,
+              savedMealService: getIt<SavedMealService>(),
+            ),
           );
         },
       },

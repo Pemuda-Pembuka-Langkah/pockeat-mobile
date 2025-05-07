@@ -1,3 +1,5 @@
+// caloric_requirement_service_test.dart
+
 // Package imports:
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,7 +17,8 @@ void main() {
         age: 25,
         gender: 'male',
       );
-      expect(bmr, closeTo(10 * 70 + 6.25 * 175 - 5 * 25 + 5, 0.01));
+      final expectedBMR = 10 * 70 + 6.25 * 175 - 5 * 25 + 5;
+      expect(bmr, closeTo(expectedBMR, 0.01));
     });
 
     test('calculates BMR for female correctly', () {
@@ -25,7 +28,8 @@ void main() {
         age: 30,
         gender: 'female',
       );
-      expect(bmr, closeTo(10 * 60 + 6.25 * 160 - 5 * 30 - 161, 0.01));
+      final expectedBMR = 10 * 60 + 6.25 * 160 - 5 * 30 - 161;
+      expect(bmr, closeTo(expectedBMR, 0.01));
     });
 
     test('returns correct activity multiplier for all levels', () {
@@ -36,50 +40,54 @@ void main() {
         'active': 1.725,
         'very active': 1.9,
         'extra active': 2.0,
-        'unknown': 1.2, // fallback
+        'unknown': 1.2, // fallback default
       };
 
-      levels.forEach((level, expected) {
+      levels.forEach((level, expectedMultiplier) {
         final result = CaloricRequirementCalculator.activityMultiplier(level);
-        expect(result, expected);
+        expect(result, expectedMultiplier);
       });
     });
 
     test('calculates TDEE correctly', () {
       final bmr = 1500.0;
       final tdee = CaloricRequirementCalculator.calculateTDEE(bmr, 'moderate');
-      expect(tdee, closeTo(1500.0 * 1.55, 0.01));
+      final expectedTDEE = 1500.0 * 1.55;
+      expect(tdee, closeTo(expectedTDEE, 0.01));
     });
   });
 
   group('CaloricRequirementService', () {
-    test('analyze returns correct model based on HealthMetricsModel', () {
+    test('analyze() returns model with correct BMR and TDEE', () {
       final model = HealthMetricsModel(
-        userId: 'abc',
+        userId: 'user123',
         height: 170,
         weight: 65,
         age: 24,
         gender: 'male',
         activityLevel: 'active',
         fitnessGoal: 'Maintain',
+        bmi: 22.5,
+        bmiCategory: 'Normal',
+        desiredWeight: 60,
       );
 
       final service = CaloricRequirementService();
       final result = service.analyze(
         userId: model.userId,
         model: model,
-        );
+      );
 
       final expectedBMR = CaloricRequirementCalculator.calculateBMR(
-        weight: 65,
-        height: 170,
-        age: 24,
-        gender: 'male',
+        weight: model.weight,
+        height: model.height,
+        age: model.age,
+        gender: model.gender,
       );
 
       final expectedTDEE = CaloricRequirementCalculator.calculateTDEE(
         expectedBMR,
-        'active',
+        model.activityLevel,
       );
 
       expect(result.userId, model.userId);

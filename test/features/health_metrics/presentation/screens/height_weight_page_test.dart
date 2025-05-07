@@ -91,4 +91,53 @@ void main() {
     expect(find.text('Please enter a valid weight'), findsOneWidget);
     expect(find.text('Please enter a valid height'), findsNothing);
   });
+
+  testWidgets('shows range error for too small height', (tester) async {
+  await tester.pumpWidget(createTestWidget());
+
+  await tester.enterText(find.byType(TextFormField).at(0), '20'); // too small
+  await tester.enterText(find.byType(TextFormField).at(1), '65'); // valid weight
+
+  await tester.tap(find.text('Next'));
+  await tester.pump();
+
+  expect(find.text('Height must be between 50 and 300 cm'), findsOneWidget);
+});
+
+testWidgets('shows range error for too large height', (tester) async {
+  await tester.pumpWidget(createTestWidget());
+
+  await tester.enterText(find.byType(TextFormField).at(0), '400'); // too big
+  await tester.enterText(find.byType(TextFormField).at(1), '70'); // valid weight
+
+  await tester.tap(find.text('Next'));
+  await tester.pump();
+
+  expect(find.text('Height must be between 50 and 300 cm'), findsOneWidget);
+});
+
+testWidgets('shows range error for too small weight', (tester) async {
+  await tester.pumpWidget(createTestWidget());
+
+  await tester.enterText(find.byType(TextFormField).at(0), '170'); // valid height
+  await tester.enterText(find.byType(TextFormField).at(1), '5'); // too small
+
+  await tester.tap(find.text('Next'));
+  await tester.pump();
+
+  expect(find.text('Weight must be between 10 and 500 kg'), findsOneWidget);
+});
+
+testWidgets('shows range error for too large weight', (tester) async {
+  await tester.pumpWidget(createTestWidget());
+
+  await tester.enterText(find.byType(TextFormField).at(0), '175'); // valid height
+  await tester.enterText(find.byType(TextFormField).at(1), '800'); // too big
+
+  await tester.tap(find.text('Next'));
+  await tester.pump();
+
+  expect(find.text('Weight must be between 10 and 500 kg'), findsOneWidget);
+});
+
 }
