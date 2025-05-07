@@ -6,6 +6,8 @@ class BMISection extends StatelessWidget {
   final Color primaryGreen;
   final Color primaryYellow;
   final Color primaryPink;
+  final String bmiValue;
+  final bool isLoading;
 
   const BMISection({
     super.key,
@@ -13,10 +15,72 @@ class BMISection extends StatelessWidget {
     required this.primaryGreen,
     required this.primaryYellow,
     required this.primaryPink,
+    required this.bmiValue,
+    required this.isLoading,
   });
+
+  String _getBMICategory(double bmi) {
+    if (bmi < 18.5) {
+      return 'Underweight';
+    } else if (bmi >= 18.5 && bmi < 25) {
+      return 'Healthy';
+    } else if (bmi >= 25 && bmi < 30) {
+      return 'Overweight';
+    } else {
+      return 'Obese';
+    }
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'Underweight':
+        return primaryBlue;
+      case 'Healthy':
+        return primaryGreen;
+      case 'Overweight':
+        return primaryYellow;
+      case 'Obese':
+        return primaryPink;
+      default:
+        return primaryGreen;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    String displayText = isLoading ? "Loading..." : bmiValue;
+    String bmiCategory = "Healthy"; // Default
+    Color categoryColor = primaryGreen; // Default
+
+    if (!isLoading && bmiValue != "N/A" && bmiValue != "Error") {
+      try {
+        double bmiDouble = double.parse(bmiValue);
+        bmiCategory = _getBMICategory(bmiDouble);
+        categoryColor = _getCategoryColor(bmiCategory);
+      } catch (e) {
+        // Handle parsing error
+      }
+    }
+
+    double sliderPosition = 0.4; // Default position (healthy)
+    
+    if (!isLoading && bmiValue != "N/A" && bmiValue != "Error") {
+      try {
+        double bmiDouble = double.parse(bmiValue);
+        if (bmiDouble < 18.5) {
+          sliderPosition = 0.2; // Underweight
+        } else if (bmiDouble >= 18.5 && bmiDouble < 25) {
+          sliderPosition = 0.4; // Healthy
+        } else if (bmiDouble >= 25 && bmiDouble < 30) {
+          sliderPosition = 0.6; // Overweight
+        } else {
+          sliderPosition = 0.8; // Obese
+        }
+      } catch (e) {
+        // Handle parsing error
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -29,9 +93,9 @@ class BMISection extends StatelessWidget {
         ),
         Row(
           children: [
-            const Text(
-              '24.3',
-              style: TextStyle(
+            Text(
+              displayText,
+              style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
@@ -47,12 +111,12 @@ class BMISection extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: primaryGreen,
+                color: categoryColor,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
-                'Healthy',
-                style: TextStyle(
+              child: Text(
+                bmiCategory,
+                style: const TextStyle(
                   fontSize: 14,
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -79,7 +143,7 @@ class BMISection extends StatelessWidget {
           child: Stack(
             children: [
               Positioned(
-                left: MediaQuery.of(context).size.width * 0.4,
+                left: MediaQuery.of(context).size.width * sliderPosition,
                 top: 0,
                 bottom: 0,
                 child: Container(
