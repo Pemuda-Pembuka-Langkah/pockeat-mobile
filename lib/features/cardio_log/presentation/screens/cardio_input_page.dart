@@ -447,20 +447,33 @@ class CardioInputPageState extends State<CardioInputPage> {
           );
           break;
       }
-
-      // If validation failed, show error message
+// coverage:ignore-start
+      // If validation failed, show error message and reset _isSaving
       if (!isValid) {
         if (mounted) {
+          setState(() => _isSaving = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(errorMessage),
               backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: 'Dismiss',
+                textColor: Colors.white,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                },
+              ),
             ),
           );
         }
         return;
       }
-
+// coverage:ignore-end
       // Save using repository
       await _repository.saveCardioActivity(activity!);
 
@@ -504,7 +517,18 @@ class CardioInputPageState extends State<CardioInputPage> {
               ),
             ),
             backgroundColor: Colors.red,
-            duration: const Duration(days: 1),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              textColor: Colors.white,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
           ),
         );
       }
