@@ -177,7 +177,13 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
         );
 
         // Navigate back
-        Navigator.pop(context);
+        Navigator.of(context).pushNamed(
+          '/analytic',
+          arguments: {
+            'initialTabIndex': 1,
+            'initialSubTabIndex': 1,
+          },
+        );
       }
     } catch (e) {
       if (mounted) {

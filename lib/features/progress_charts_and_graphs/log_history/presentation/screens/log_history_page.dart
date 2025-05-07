@@ -14,9 +14,12 @@ import 'package:pockeat/features/progress_charts_and_graphs/log_history/presenta
 
 // coverage:ignore-start
 class LogHistoryPage extends StatefulWidget {
+  /// Initial selected sub-tab index (0: Food, 1: Exercise)
+  final int initialTabIndex;
   // ignore: use_super_parameters
   const LogHistoryPage({
     Key? key,
+    this.initialTabIndex = 0,
   }) : super(key: key);
 
   @override
@@ -38,7 +41,11 @@ class _LogHistoryPageState extends State<LogHistoryPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex,
+    );
     _appColors = AppColors(
         primaryPink: primaryPink,
         primaryGreen: primaryGreen,
