@@ -155,26 +155,35 @@ jobs:
           # Write updated changelog
           with open('CHANGELOG.md', 'w') as f:
               f.write(updated_changelog)
-
-          # Save the changelog content to a file so it can be used in PR description
-          with open('changelog_snippet.txt', 'w') as f:
+              
+          # Ambil konten changelog untuk PR
+          with open('/tmp/changelog_entry.txt', 'w') as f:
               f.write(changelog_content)
-
-          print("::set-output name=changelog_updated::true")
-          print(f"Successfully updated CHANGELOG.md with {version} changes")
+              
+          print("Changelog updated successfully")
           EOF
 
           python update_changelog.py
+          
+          # Cek apakah file changelog ada & diupdate
+          if [ -f "/tmp/changelog_entry.txt" ]; then
+            echo "changelog_updated=true" >> $GITHUB_OUTPUT
+            # Simpan isi untuk PR body
+            CHANGELOG_CONTENT=$(cat /tmp/changelog_entry.txt)
+            # Escape multiline content untuk GitHub Actions output
+            CHANGELOG_CONTENT="${CHANGELOG_CONTENT//'%'/'%25'}"
+            CHANGELOG_CONTENT="${CHANGELOG_CONTENT//$'\n'/'%0A'}"
+            CHANGELOG_CONTENT="${CHANGELOG_CONTENT//$'\r'/'%0D'}"
+            echo "changelog_content=$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
+            echo "Changelog has been updated"
+          else
+            echo "changelog_updated=false" >> $GITHUB_OUTPUT
+            echo "Changelog was not updated, likely version already exists"
+          fi
         env:
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
           CLAUDE_MODEL: ${{ secrets.CLAUDE_MODEL || 'claude-3-7-sonnet-20250219' }}
           VERSION: ${{ steps.extract_version.outputs.VERSION }}
-
-      # Menambahkan langkah untuk mendapatkan isi snippet changelog
-      - name: Get Changelog Snippet
-        id: get_snippet
-        if: steps.generate_changelog.outputs.changelog_updated == 'true'
-        run: echo "CHANGELOG_SNIPPET=$(cat changelog_snippet.txt)" >> $GITHUB_OUTPUT
 
       # Tambahkan langkah cleanup untuk menghapus file-file sementara
       - name: Cleanup temporary files
@@ -182,7 +191,7 @@ jobs:
         run: |
           rm -f commits.txt
           rm -f update_changelog.py
-          rm -f changelog_snippet.txt
+          rm -f /tmp/changelog_entry.txt
           echo "Cleaned up temporary files"
 
       - name: Create PR with changelog update
@@ -198,7 +207,7 @@ jobs:
             
             ### Changes:
             ```markdown
-            ${{ steps.get_snippet.outputs.CHANGELOG_SNIPPET }}
+            ${{ steps.generate_changelog.outputs.changelog_content }}
             ```
             
             Please review the changes and merge if they look good.
