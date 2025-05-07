@@ -1,13 +1,17 @@
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 import 'package:pockeat/features/saved_meals/presentation/widgets/saved_meal_bottom_action_bar.dart';
-
 import 'saved_meal_bottom_action_bar_test.mocks.dart';
 
 @GenerateMocks([SavedMealService])

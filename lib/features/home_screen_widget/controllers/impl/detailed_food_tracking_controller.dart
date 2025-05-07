@@ -26,8 +26,7 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
     required FoodLogHistoryService foodLogHistoryService,
     required CalorieStatsService calorieStatsService,
     NutrientCalculationStrategy? nutrientCalculationStrategy,
-  })
-      : _widgetService = widgetService,
+  })  : _widgetService = widgetService,
         _foodLogHistoryService = foodLogHistoryService,
         _calorieStatsService = calorieStatsService,
         _nutrientCalculationStrategy =
@@ -58,11 +57,12 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
       // Hitung total kalori hari ini menggunakan CalorieStatsService
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      final dailyStats = await _calorieStatsService.getStatsByDate(userId, today);
+      final dailyStats =
+          await _calorieStatsService.getStatsByDate(userId, today);
       final consumedCalories = dailyStats.caloriesConsumed;
 
       // Dapatkan data untuk nutrisi
-      final todayLogs = 
+      final todayLogs =
           await _foodLogHistoryService.getFoodLogsByDate(userId, today);
 
       // Hitung nutrisi menggunakan strategy

@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
-import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
-import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/model/meal_reminder_message.dart';
 import 'package:pockeat/features/notifications/domain/model/notification_channel.dart';
@@ -265,13 +265,18 @@ class NotificationBackgroundDisplayerServiceImpl
       try {
         // Calculate consumed calories
 
-        final caloricStatsService = services['caloricStatsService'] as CalorieStatsService;
+        final caloricStatsService =
+            services['caloricStatsService'] as CalorieStatsService;
 
-        final stats = await caloricStatsService.getStatsByDate(userId, DateTime.now());
+        final stats =
+            await caloricStatsService.getStatsByDate(userId, DateTime.now());
 
         currentCalories = stats.caloriesConsumed;
-        final caloricRequirementRepository = services['caloricRequirementRepository'] as CaloricRequirementRepository;
-        final caloricRequirement = await caloricRequirementRepository.getCaloricRequirement(userId);
+        final caloricRequirementRepository =
+            services['caloricRequirementRepository']
+                as CaloricRequirementRepository;
+        final caloricRequirement =
+            await caloricRequirementRepository.getCaloricRequirement(userId);
         targetCalories = caloricRequirement?.tdee.toInt() ?? 2000;
       } catch (e) {
         debugPrint('Error calculating calories: $e');

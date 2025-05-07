@@ -1,8 +1,12 @@
 // lib/features/home_screen_widget/presentation/screens/widget_manager_screen.dart
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
 
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/controllers/widget_installation_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_installation_status.dart';
 import 'package:pockeat/features/home_screen_widget/presentation/widgets/widget_preview_card_factory.dart';
@@ -50,7 +54,7 @@ class _WidgetManagerScreenState extends State<WidgetManagerScreen> {
       });
 
       final status = await _controller.getWidgetStatus();
-      
+
       if (mounted) {
         setState(() {
           _status = status;

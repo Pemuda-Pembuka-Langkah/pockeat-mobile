@@ -63,7 +63,7 @@ class BMISection extends StatelessWidget {
     }
 
     double sliderPosition = 0.4; // Default position (healthy)
-    
+
     if (!isLoading && bmiValue != "N/A" && bmiValue != "Error") {
       try {
         double bmiDouble = double.parse(bmiValue);

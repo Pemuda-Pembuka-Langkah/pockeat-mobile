@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 class FoodConsumptionItem extends StatelessWidget {
@@ -6,10 +9,10 @@ class FoodConsumptionItem extends StatelessWidget {
   final double totalCalories;
 
   const FoodConsumptionItem({
-    Key? key,
+    super.key,
     required this.food,
     required this.totalCalories,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

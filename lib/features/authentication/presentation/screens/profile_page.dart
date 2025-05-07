@@ -12,6 +12,7 @@ import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
+
 // Widget Manager Screen is now accessed via named route
 
 /// User profile page
@@ -84,7 +85,8 @@ class _ProfilePageState extends State<ProfilePage> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Confirm Logout'),
-          content: const Text('Are you sure you want to log out of your account?'),
+          content:
+              const Text('Are you sure you want to log out of your account?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -418,9 +420,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(width: 6),
               Text(
-                isVerified
-                    ? 'Email verified'
-                    : 'Email not verified',
+                isVerified ? 'Email verified' : 'Email not verified',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
@@ -697,8 +697,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text(
-                          'User data not available for bug reporting'),
+                      content:
+                          Text('User data not available for bug reporting'),
                       behavior: SnackBarBehavior.floating,
                       backgroundColor: Colors.orange,
                     ),

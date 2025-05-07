@@ -101,7 +101,7 @@ class FitnessTrackerSync {
     }
   }
 
- // coverage:ignore-end
+  // coverage:ignore-end
 
   /// Configure the health plugin (can be overridden in tests)
   // coverage:ignore-start

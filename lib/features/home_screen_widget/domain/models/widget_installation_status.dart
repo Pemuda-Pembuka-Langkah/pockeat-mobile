@@ -26,7 +26,7 @@ class WidgetInstallationStatus {
   });
 
   /// Checks if any widget type is installed
-  bool get isAnyWidgetInstalled => 
+  bool get isAnyWidgetInstalled =>
       isSimpleWidgetInstalled || isDetailedWidgetInstalled;
 
   /// Creates a copy of this object with given fields replaced with new values
@@ -35,9 +35,9 @@ class WidgetInstallationStatus {
     bool? isDetailedWidgetInstalled,
   }) {
     return WidgetInstallationStatus(
-      isSimpleWidgetInstalled: 
+      isSimpleWidgetInstalled:
           isSimpleWidgetInstalled ?? this.isSimpleWidgetInstalled,
-      isDetailedWidgetInstalled: 
+      isDetailedWidgetInstalled:
           isDetailedWidgetInstalled ?? this.isDetailedWidgetInstalled,
     );
   }
@@ -51,7 +51,7 @@ class WidgetInstallationStatus {
   }
 
   @override
-  int get hashCode => 
+  int get hashCode =>
       isSimpleWidgetInstalled.hashCode ^ isDetailedWidgetInstalled.hashCode;
 
   @override

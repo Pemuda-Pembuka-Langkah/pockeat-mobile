@@ -19,9 +19,10 @@ import 'package:pockeat/features/authentication/presentation/screens/profile_pag
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
-// Remove the import of the real WidgetManagerScreen
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'profile_page_test.mocks.dart';
+
+// Remove the import of the real WidgetManagerScreen
 
 @GenerateNiceMocks([
   MockSpec<LoginService>(),

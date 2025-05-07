@@ -13,11 +13,11 @@ import 'package:pockeat/features/home_screen_widget/services/widget_installation
 class WidgetInstallationServiceImpl implements WidgetInstallationService {
   /// Method channel for communication with native platform
   final MethodChannel _channel;
-  
+
   /// Creates a new instance of [WidgetInstallationServiceImpl] with default channel
   WidgetInstallationServiceImpl()
       : _channel = MethodChannel(WidgetInstallationConstants.channelName);
-      
+
   /// Creates a new instance with custom method channel (for testing)
   @visibleForTesting
   WidgetInstallationServiceImpl.withChannel(this._channel);
@@ -29,11 +29,11 @@ class WidgetInstallationServiceImpl implements WidgetInstallationService {
       final Map<dynamic, dynamic>? result = await _channel.invokeMethod(
         WidgetInstallationConstants.checkWidgetInstalledMethod.value,
       );
-      
+
       if (result == null) {
         return const WidgetInstallationStatus();
       }
-      
+
       // Parse result into model
       return WidgetInstallationStatus(
         isSimpleWidgetInstalled: result['isSimpleWidgetInstalled'] ?? false,
@@ -54,7 +54,7 @@ class WidgetInstallationServiceImpl implements WidgetInstallationService {
         WidgetInstallationConstants.addWidgetToHomeScreenMethod.value,
         {'widgetType': widgetType.name},
       );
-      
+
       return result;
     } on PlatformException catch (e) {
       debugPrint('Error adding widget to homescreen: ${e.message}');

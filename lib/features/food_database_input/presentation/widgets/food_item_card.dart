@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 class FoodItemCard extends StatelessWidget {
@@ -12,7 +15,7 @@ class FoodItemCard extends StatelessWidget {
   final Color primaryPink;
 
   const FoodItemCard({
-    Key? key,
+    super.key,
     required this.food,
     required this.index,
     required this.portion,
@@ -21,7 +24,7 @@ class FoodItemCard extends StatelessWidget {
     required this.onRemove,
     required this.primaryGreen,
     required this.primaryPink,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

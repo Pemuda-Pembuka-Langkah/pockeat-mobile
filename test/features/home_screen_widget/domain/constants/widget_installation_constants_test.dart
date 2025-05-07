@@ -1,6 +1,6 @@
 // test/features/home_screen_widget/domain/constants/widget_installation_constants_test.dart
 
-// Flutter imports:
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 
 // Project imports:

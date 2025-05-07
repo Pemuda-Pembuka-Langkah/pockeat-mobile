@@ -2,6 +2,8 @@
 
 // Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_installation_status.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_preview_info.dart';
 
@@ -10,6 +12,7 @@ import 'package:pockeat/features/home_screen_widget/domain/models/widget_preview
 class WidgetPreviewCard extends StatelessWidget {
   /// Color for primary accent elements, matching ProfilePage style
   final Color primaryGreen = const Color(0xFF4ECDC4);
+
   /// Informasi preview widget
   final WidgetPreviewInfo widgetInfo;
 
@@ -26,7 +29,7 @@ class WidgetPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Get widget info properties
     final bool isInstalled = widgetInfo.isInstalled;
 
@@ -56,9 +59,9 @@ class WidgetPreviewCard extends StatelessWidget {
                 _buildStatusIndicator(isInstalled, theme),
               ],
             ),
-            
+
             const SizedBox(height: 12.0),
-            
+
             // Widget preview image
             ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
@@ -69,9 +72,9 @@ class WidgetPreviewCard extends StatelessWidget {
                 width: double.infinity,
               ),
             ),
-            
+
             const SizedBox(height: 16.0),
-            
+
             // Install/Update button
             SizedBox(
               width: double.infinity,
@@ -101,7 +104,7 @@ class WidgetPreviewCard extends StatelessWidget {
   Widget _buildStatusIndicator(bool isInstalled, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 8.0, 
+        horizontal: 8.0,
         vertical: 4.0,
       ),
       decoration: BoxDecoration(
@@ -119,13 +122,11 @@ class WidgetPreviewCard extends StatelessWidget {
     );
   }
 
-
-
   /// Handles tap on install button
   Future<void> _handleInstallTap(BuildContext context) async {
     try {
       final result = await onInstall(widgetInfo.widgetType);
-      
+
       if (!result) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -1,6 +1,7 @@
 // Package imports:
 //coverage: ignore-file
 
+// Package imports:
 import 'package:uuid/uuid.dart';
 
 // Project imports:
@@ -22,22 +23,22 @@ class FoodLogHistoryItem {
   final num? protein;
   final num? carbs;
   final num? fat;
-  
+
   final double? healthScore;
 
-  FoodLogHistoryItem({
-    String? id,
-    required this.title,
-    required this.subtitle,
-    required this.timestamp,
-    required this.calories,
-    this.sourceId,
-    this.imageUrl,
-    this.protein,
-    this.carbs,
-    this.fat,
-    this.healthScore
-  }) : id = id ?? const Uuid().v4();
+  FoodLogHistoryItem(
+      {String? id,
+      required this.title,
+      required this.subtitle,
+      required this.timestamp,
+      required this.calories,
+      this.sourceId,
+      this.imageUrl,
+      this.protein,
+      this.carbs,
+      this.fat,
+      this.healthScore})
+      : id = id ?? const Uuid().v4();
 
   /// Mendapatkan string representasi waktu yang user-friendly (contoh: "1d ago")
   String get timeAgo {
@@ -79,7 +80,8 @@ class FoodLogHistoryItem {
       fat: fat,
       sourceId: foodAnalysisResult.id, // Use id if available, otherwise use URL
       imageUrl: foodAnalysisResult.foodImageUrl,
-      healthScore: foodAnalysisResult.healthScore, // Pass the health score if provided
+      healthScore:
+          foodAnalysisResult.healthScore, // Pass the health score if provided
     );
   }
 

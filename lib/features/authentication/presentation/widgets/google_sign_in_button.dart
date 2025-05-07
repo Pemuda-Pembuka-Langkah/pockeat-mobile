@@ -1,12 +1,12 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 // Package imports:
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:pockeat/core/services/analytics_service.dart';
 
 // Project imports:
+import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 
@@ -36,8 +36,9 @@ class GoogleSignInButton extends StatelessWidget {
             final service = googleAuthService ?? GetIt.I<GoogleSignInService>();
             final analyticsService = GetIt.I<AnalyticsService>();
             analyticsService.logEvent(
-              name: isRegister ? 'google_sign_up_attempt' : 'google_sign_in_attempt'
-            );
+                name: isRegister
+                    ? 'google_sign_up_attempt'
+                    : 'google_sign_in_attempt');
             final result = await service.signInWithGoogle();
             if (result.user != null && isRegister && context.mounted) {
               final uid = result.user!.uid;
@@ -49,9 +50,10 @@ class GoogleSignInButton extends StatelessWidget {
             if (context.mounted) {
               final analyticsService = GetIt.I<AnalyticsService>();
               analyticsService.logEvent(
-                name: isRegister ? 'google_sign_up_success' : 'google_sign_in_success',
-                parameters: {'uid': result.user?.uid ?? 'unknown'}
-              );
+                  name: isRegister
+                      ? 'google_sign_up_success'
+                      : 'google_sign_in_success',
+                  parameters: {'uid': result.user?.uid ?? 'unknown'});
               Navigator.pushReplacementNamed(context, '/');
             }
           } catch (e) {
