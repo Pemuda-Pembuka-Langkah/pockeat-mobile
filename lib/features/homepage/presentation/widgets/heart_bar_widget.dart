@@ -6,8 +6,13 @@ import 'package:flutter/material.dart';
 class HeartBarWidget extends StatelessWidget {
   final int heart;
   static const int maxHeart = 4;
+  final bool isCalorieOverTarget;
 
-  const HeartBarWidget({super.key, required this.heart});
+  const HeartBarWidget({
+    super.key,
+    required this.heart,
+    required this.isCalorieOverTarget,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +45,11 @@ class HeartBarWidget extends StatelessWidget {
   Widget _buildHeart(bool filled) {
     return Icon(
       Icons.favorite,
-      color: filled ? Colors.red : Colors.grey.shade300,
+      color: filled
+          ? isCalorieOverTarget
+              ? Colors.purple
+              : Colors.red
+          : Colors.grey.shade300,
       size: 32,
     );
   }

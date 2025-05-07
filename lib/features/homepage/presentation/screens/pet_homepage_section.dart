@@ -15,6 +15,7 @@ import 'package:pockeat/features/homepage/presentation/widgets/heart_bar_widget.
 import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
+import 'package:pockeat/features/pet_companion/domain/model/pet_information.dart';
 
 class PetHomepageSection extends StatefulWidget {
   final String petName;
@@ -30,25 +31,23 @@ class PetHomepageSection extends StatefulWidget {
 
 class _PetHomepageSectionState extends State<PetHomepageSection> {
   final PetService _petService = GetIt.instance<PetService>();
-  final FoodLogHistoryService _foodLogHistoryService =
-      GetIt.instance<FoodLogHistoryService>();
   final CalorieStatsService _calorieStatsService =
       GetIt.instance<CalorieStatsService>();
+  final FoodLogHistoryService _foodLogHistoryService =
+      GetIt.instance<FoodLogHistoryService>();
 
   static const int _goalCalories = 2000;
   final userId = GetIt.instance<FirebaseAuth>().currentUser?.uid ?? '';
 
-  late Future<String> _petMood;
-  late Future<int> _dayStreak;
-  late Future<int> _petHeart;
   late Future<DailyCalorieStats> _statsFuture;
+  late Future<PetInformation> _petInformation;
+  late Future<int> _dayStreak;
 
   @override
   void initState() {
     super.initState();
-    _petMood = _petService.getPetMood(userId);
+    _petInformation = _petService.getPetInformation(userId);
     _dayStreak = _foodLogHistoryService.getFoodStreakDays(userId);
-    _petHeart = _petService.getPetHeart(userId);
     _statsFuture =
         _calorieStatsService.calculateStatsForDate(userId, DateTime.now());
   }
@@ -60,15 +59,19 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
       child: Column(
         children: [
           // Heart Bar
-          FutureBuilder<int>(
-            future: _petHeart,
+          FutureBuilder<PetInformation>(
+            future: _petInformation,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
-                return HeartBarWidget(heart: snapshot.data ?? 0);
+                return HeartBarWidget(
+                  heart: snapshot.data?.heart ?? 0,
+                  isCalorieOverTarget:
+                      snapshot.data?.isCalorieOverTarget ?? false,
+                );
               }
             },
           ),
@@ -77,7 +80,7 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
           // Pet Companion Widget
           Center(
             child: FutureBuilder<List<dynamic>>(
-              future: Future.wait([_petMood, _statsFuture]),
+              future: Future.wait([_petInformation, _statsFuture]),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
@@ -85,7 +88,7 @@ class _PetHomepageSectionState extends State<PetHomepageSection> {
                   return Text('Error: ${snapshot.error}');
                 } else {
                   // Data is available
-                  final String mood = snapshot.data![0] as String;
+                  final String mood = snapshot.data![0].mood;
                   final DailyCalorieStats stats =
                       snapshot.data![1] as DailyCalorieStats;
 

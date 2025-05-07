@@ -200,6 +200,171 @@ void main() {
     });
   });
 
+  group('getIsPetCalorieOverTarget', () {
+    test('should return true when calories exceed 120% of target', () async {
+      // Arrange
+      when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .thenAnswer((_) async => DailyCalorieStats(
+                userId: testUserId,
+                date: DateTime.now(),
+                caloriesConsumed: 2500, // 125% of 2000
+                caloriesBurned: 0,
+              ));
+
+      // Act
+      final result = await petService.getIsPetCalorieOverTarget(testUserId);
+
+      // Assert
+      expect(result, true);
+      verify(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .called(1);
+      verify(mockFirebaseFirestore.collection('caloric_requirements')).called(1);
+    });
+
+    test('should return false when calories are below 120% of target', () async {
+      // Arrange
+      when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .thenAnswer((_) async => DailyCalorieStats(
+                userId: testUserId,
+                date: DateTime.now(),
+                caloriesConsumed: 2300, // 115% of 2000
+                caloriesBurned: 0,
+              ));
+
+      // Act
+      final result = await petService.getIsPetCalorieOverTarget(testUserId);
+
+      // Assert
+      expect(result, false);
+      verify(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .called(1);
+    });
+
+    test('should return false when calories are exactly at target', () async {
+      // Arrange
+      when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .thenAnswer((_) async => DailyCalorieStats(
+                userId: testUserId,
+                date: DateTime.now(),
+                caloriesConsumed: 2000, // 100% of 2000
+                caloriesBurned: 0,
+              ));
+
+      // Act
+      final result = await petService.getIsPetCalorieOverTarget(testUserId);
+
+      // Assert
+      expect(result, false);
+    });
+
+    test('should return false when calories are below target', () async {
+      // Arrange
+      when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .thenAnswer((_) async => DailyCalorieStats(
+                userId: testUserId,
+                date: DateTime.now(),
+                caloriesConsumed: 1500, // 75% of 2000
+                caloriesBurned: 0,
+              ));
+
+      // Act
+      final result = await petService.getIsPetCalorieOverTarget(testUserId);
+
+      // Assert
+      expect(result, false);
+    });
+  });
+
+  group('getPetInformation', () {
+    test('should return PetInformation with happy mood when conditions are good', () async {
+      // Arrange
+      // Mock the individual method calls that getPetInformation depends on
+      when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .thenAnswer((_) async => DailyCalorieStats(
+                userId: testUserId,
+                date: DateTime.now(),
+                caloriesConsumed: 1800, // 90% of target (not over)
+                caloriesBurned: 0,
+              ));
+
+      final today = DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      when(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, today))
+          .thenAnswer((_) async => [
+                FoodLogHistoryItem(
+                    title: 'Test',
+                    subtitle: 'Test',
+                    timestamp: today,
+                    calories: 500)
+              ]);
+
+      // Act
+      final result = await petService.getPetInformation(testUserId);
+
+      // Assert
+      expect(result.name, 'Panda');
+      expect(result.heart, 4); // 90% of target is 4 hearts
+      expect(result.mood, 'happy');
+      expect(result.isCalorieOverTarget, false);
+    });
+
+    test('should return PetInformation with sad mood when calories are over target', () async {
+      // Arrange
+      when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .thenAnswer((_) async => DailyCalorieStats(
+                userId: testUserId,
+                date: DateTime.now(),
+                caloriesConsumed: 2500, // 125% of target (over)
+                caloriesBurned: 0,
+              ));
+
+      final today = DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      when(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, today))
+          .thenAnswer((_) async => [
+                FoodLogHistoryItem(
+                    title: 'Test',
+                    subtitle: 'Test',
+                    timestamp: today,
+                    calories: 500)
+              ]);
+
+      // Act
+      final result = await petService.getPetInformation(testUserId);
+
+      // Assert
+      expect(result.name, 'Panda');
+      expect(result.heart, 4); // 125% of target is 4 hearts
+      expect(result.mood, 'sad'); // Should be sad despite having logs, because calories are over
+      expect(result.isCalorieOverTarget, true);
+    });
+
+    test('should return PetInformation with sad mood when no food logs exist', () async {
+      // Arrange
+      when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .thenAnswer((_) async => DailyCalorieStats(
+                userId: testUserId,
+                date: DateTime.now(),
+                caloriesConsumed: 1500, // 75% of target (not over)
+                caloriesBurned: 0,
+              ));
+
+      final today = DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      when(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, today))
+          .thenAnswer((_) async => []); // No food logs
+
+      // Act
+      final result = await petService.getPetInformation(testUserId);
+
+      // Assert
+      expect(result.name, 'Panda');
+      expect(result.heart, 3); // 75% of target is 3 hearts
+      expect(result.mood, 'sad'); // Should be sad because no food logs
+      expect(result.isCalorieOverTarget, false);
+    });
+  });
+
   tearDown(() {
     GetIt.instance.reset();
   });
