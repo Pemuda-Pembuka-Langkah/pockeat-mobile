@@ -21,7 +21,8 @@ import 'cardio_input_page_test.mocks.dart';
 @GenerateMocks([CardioRepository, FirebaseFirestore])
 
 // Add a global key for scaffold messenger
-final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
 
 // Manual implementation of MockFirebaseAuth
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
@@ -107,7 +108,8 @@ void main() {
         auth: mockAuth,
       ),
       routes: {
-        '/analytic': (context) => const Scaffold(body: Text('Mock Analytic Page')),
+        '/analytic': (context) =>
+            const Scaffold(body: Text('Mock Analytic Page')),
       },
     );
   }
@@ -393,29 +395,27 @@ void main() {
       await tester.pump();
       // Give some time for the async operation to complete
       await tester.pump(const Duration(milliseconds: 300));
-      
+
       verify(mockRepository.saveCardioActivity(any)).called(1);
       expect(find.byType(SnackBar), findsOneWidget);
     });
 
     testWidgets('SaveActivity should show error SnackBar on failure',
         (WidgetTester tester) async {
-      // Setup repository to throw exception
       when(mockRepository.saveCardioActivity(any))
           .thenThrow(Exception('Test error'));
 
       await tester.pumpWidget(createCardioInputPage());
 
-      // Set up valid form values
       setupValidRunningForm(tester);
 
-      // Tap Save button
       await tester.tap(find.text('Save Run'));
-      // Use pump instead of pumpAndSettle to avoid timeout
       await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
       await tester.pump(const Duration(milliseconds: 300));
-      
-      // Verify error SnackBar is shown
+
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.textContaining('Failed to save activity'), findsOneWidget);
     });
