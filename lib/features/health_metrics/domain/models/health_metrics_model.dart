@@ -21,6 +21,8 @@ class HealthMetricsModel {
 
   final String bmiCategory; // Category based on BMI value
 
+  final double desiredWeight; // User's desired weight based on their input
+
   HealthMetricsModel({
     required this.userId,
     required this.height,
@@ -31,6 +33,7 @@ class HealthMetricsModel {
     required this.fitnessGoal,
     required this.bmi,
     required this.bmiCategory,
+    required this.desiredWeight,
   });
 
   Map<String, dynamic> toMap() {
@@ -44,6 +47,7 @@ class HealthMetricsModel {
       'fitnessGoal': fitnessGoal,
       'bmi': bmi,
       'bmiCategory': bmiCategory,
+      'desiredWeight': desiredWeight,
     };
   }
 
@@ -62,6 +66,7 @@ class HealthMetricsModel {
       fitnessGoal: data['fitnessGoal'] as String,
       bmi: (data['bmi'] as num).toDouble(),
       bmiCategory: data['bmiCategory'] as String,
+      desiredWeight: (data['desiredWeight'] as num).toDouble(),
     );
   }
 }

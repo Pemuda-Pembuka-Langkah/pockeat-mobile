@@ -69,6 +69,7 @@ void main() {
         fitnessGoal: 'Maintain',
         bmi: 22.5,
         bmiCategory: 'Normal',
+        desiredWeight: 60,
       );
 
       final service = CaloricRequirementService();
