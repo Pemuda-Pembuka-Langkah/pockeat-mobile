@@ -213,5 +213,4 @@ jobs:
             Please review the changes and merge if they look good.
           branch: auto-update-changelog
           base: master
-          labels: documentation, automated-pr
           delete-branch: false
