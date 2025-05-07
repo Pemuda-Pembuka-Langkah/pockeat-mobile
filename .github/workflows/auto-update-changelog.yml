@@ -58,7 +58,6 @@ jobs:
         id: generate_changelog
         run: |
           cat > update_changelog.py << 'EOF'
-          import google.generativeai as genai
           import os
           import re
           import yaml
