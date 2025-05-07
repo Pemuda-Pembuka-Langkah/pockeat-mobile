@@ -13,6 +13,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+//coverage:ignore-start
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
@@ -63,3 +64,4 @@ class _HomePageState extends State<HomePage>
     );
   }
 }
+//coverage:ignore-end

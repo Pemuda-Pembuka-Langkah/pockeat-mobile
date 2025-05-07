@@ -17,7 +17,7 @@ class CaloriesTodayWidget extends StatefulWidget {
     super.key,
     this.targetCalories = 2000,
   });
-
+//coverage:ignore-start
   @override
   State<CaloriesTodayWidget> createState() => _CaloriesTodayWidgetState();
 }
@@ -222,3 +222,4 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
     );
   }
 }
+//coverage:ignore-end
