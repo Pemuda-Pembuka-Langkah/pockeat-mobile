@@ -1,4 +1,16 @@
 # Changelog
+## v1.3.1
+**Release Date: May 5, 2025**
+
+### Features
+- **Food Database Input** - Implementasi sistem input database makanan lengkap dengan antarmuka pengguna yang intuitif
+- **Health Score Analysis** - Penambahan fitur analisis health score dan parameter nutrisi tambahan
+
+### Bug Fixes
+- Memperbaiki integrasi antara Google Auth dan proses onboarding 
+- Perbaikan bug di mana homescreen widget tidak terupdate dengan baik
+- Memperbaiki masalah blank screen pada aplikasi
+
 ## v1.3.0
 **Release Date: April 26, 2025**
 
