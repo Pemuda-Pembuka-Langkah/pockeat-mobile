@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 // Project imports:
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
@@ -15,16 +15,29 @@ import 'pet_service_test.mocks.dart';
 @GenerateNiceMocks([
   MockSpec<FoodLogHistoryService>(),
   MockSpec<CalorieStatsService>(),
+  MockSpec<FirebaseFirestore>(),
+  MockSpec<DocumentSnapshot<Map<String, dynamic>>>(),
+  MockSpec<CollectionReference<Map<String, dynamic>>>(),
+  MockSpec<DocumentReference<Map<String, dynamic>>>(),
 ])
 void main() {
   late PetServiceImpl petService;
   late MockFoodLogHistoryService mockFoodLogHistoryService;
   late MockCalorieStatsService mockCalorieStatsService;
+  late MockFirebaseFirestore mockFirebaseFirestore;
+  late MockCollectionReference mockCollection;
+  late MockDocumentReference mockDocRef;
+  late MockDocumentSnapshot mockDocSnapshot;
+
   const String testUserId = 'test-user-id';
 
   setUp(() {
     mockFoodLogHistoryService = MockFoodLogHistoryService();
     mockCalorieStatsService = MockCalorieStatsService();
+    mockFirebaseFirestore = MockFirebaseFirestore();
+    mockCollection = MockCollectionReference();
+    mockDocRef = MockDocumentReference();
+    mockDocSnapshot = MockDocumentSnapshot();
 
     // Reset GetIt instance
     if (GetIt.instance.isRegistered<FoodLogHistoryService>()) {
@@ -35,8 +48,21 @@ void main() {
     }
 
     // Register mocks
-    GetIt.instance.registerSingleton<FoodLogHistoryService>(mockFoodLogHistoryService);
-    GetIt.instance.registerSingleton<CalorieStatsService>(mockCalorieStatsService);
+    GetIt.instance.registerSingleton<FirebaseFirestore>(mockFirebaseFirestore);
+    GetIt.instance
+        .registerSingleton<FoodLogHistoryService>(mockFoodLogHistoryService);
+    GetIt.instance
+        .registerSingleton<CalorieStatsService>(mockCalorieStatsService);
+
+    // Setup the chain of calls
+    when(mockFirebaseFirestore.collection('caloric_requirements'))
+        .thenReturn(mockCollection);
+    when(mockCollection.doc(testUserId)).thenReturn(mockDocRef);
+    when(mockDocRef.get()).thenAnswer((_) async => mockDocSnapshot);
+
+    // Set up the snapshot properties
+    when(mockDocSnapshot.exists).thenReturn(true);
+    when(mockDocSnapshot.data()).thenReturn({'tdee': 2000.0});
 
     // Initialize service
     petService = PetServiceImpl();
@@ -45,21 +71,30 @@ void main() {
   group('getPetMood', () {
     test('should return happy when user has food logs today', () async {
       // Arrange
-      final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      final today = DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day);
       when(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, today))
-          .thenAnswer((_) async => [FoodLogHistoryItem(title: 'Test', subtitle: 'Test', timestamp: today, calories: 500)]);
+          .thenAnswer((_) async => [
+                FoodLogHistoryItem(
+                    title: 'Test',
+                    subtitle: 'Test',
+                    timestamp: today,
+                    calories: 500)
+              ]);
 
       // Act
       final result = await petService.getPetMood(testUserId);
 
       // Assert
       expect(result, 'happy');
-      verify(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, today)).called(1);
+      verify(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, today))
+          .called(1);
     });
 
     test('should return sad when user has no food logs today', () async {
       // Arrange
-      final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      final today = DateTime(
+          DateTime.now().year, DateTime.now().month, DateTime.now().day);
       when(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, today))
           .thenAnswer((_) async => []);
 
@@ -68,7 +103,8 @@ void main() {
 
       // Assert
       expect(result, 'sad');
-      verify(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, today)).called(1);
+      verify(mockFoodLogHistoryService.getFoodLogsByDate(testUserId, today))
+          .called(1);
     });
   });
 
@@ -88,10 +124,12 @@ void main() {
 
       // Assert
       expect(result, 4);
-      verify(mockCalorieStatsService.calculateStatsForDate(testUserId, any)).called(1);
+      verify(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .called(1);
     });
 
-    test('should return 3 hearts when calories between 50-75% of target', () async {
+    test('should return 3 hearts when calories between 50-75% of target',
+        () async {
       // Arrange
       when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
           .thenAnswer((_) async => DailyCalorieStats(
@@ -108,7 +146,8 @@ void main() {
       expect(result, 3);
     });
 
-    test('should return 2 hearts when calories between 25-50% of target', () async {
+    test('should return 2 hearts when calories between 25-50% of target',
+        () async {
       // Arrange
       when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
           .thenAnswer((_) async => DailyCalorieStats(
@@ -125,7 +164,8 @@ void main() {
       expect(result, 2);
     });
 
-    test('should return 1 heart when calories between 0-25% of target', () async {
+    test('should return 1 heart when calories between 0-25% of target',
+        () async {
       // Arrange
       when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
           .thenAnswer((_) async => DailyCalorieStats(

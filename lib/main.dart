@@ -4,7 +4,7 @@ import 'dart:async';
 // Flutter imports:
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
 // Package imports:
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -84,6 +84,7 @@ import 'package:pockeat/features/notifications/domain/constants/notification_con
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/notifications/presentation/screens/notification_settings_screen.dart';
+import 'package:pockeat/features/home_screen_widget/presentation/screens/widget_manager_screen.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/repositories/progress_tabs_repository_impl.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/progress_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/progress_tabs_service.dart';
@@ -220,6 +221,13 @@ void _handleDeepLink(DeepLinkResult result) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Lock the app to portrait orientation only
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   await dotenv.load(fileName: '.env');
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
 
@@ -677,6 +685,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         },
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
+        '/widget-settings': (context) =>
+            const AuthWrapper(child: WidgetManagerScreen()),
         '/edit-profile': (context) {
           final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
           return AuthWrapper(

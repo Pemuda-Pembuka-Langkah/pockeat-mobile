@@ -14,7 +14,7 @@ void main() {
   final Color testYellow = Colors.yellow;
   final Color testPink = Colors.pink;
   
-  Widget createWidgetUnderTest() {
+  Widget createWidgetUnderTest({String bmiValue = "24.3", bool isLoading = false}) {
     return MaterialApp(
       home: Scaffold(
         body: BMISection(
@@ -22,6 +22,8 @@ void main() {
           primaryGreen: testGreen,
           primaryYellow: testYellow,
           primaryPink: testPink,
+          bmiValue: bmiValue,
+          isLoading: isLoading,
         ),
       ),
     );
@@ -54,6 +56,39 @@ void main() {
       ).evaluate().last; // Last container is the badge
       
       expect(badgeContainer, isNotNull);
+    });
+
+    testWidgets('shows loading state correctly', (WidgetTester tester) async {
+      // Build the widget with loading state
+      await tester.pumpWidget(createWidgetUnderTest(isLoading: true));
+      
+      // Verify loading text is displayed
+      expect(find.text('Loading...'), findsOneWidget);
+      
+      // Verify BMI value is NOT displayed
+      expect(find.text('24.3'), findsNothing);
+    });
+
+    testWidgets('handles N/A state correctly', (WidgetTester tester) async {
+      // Build the widget with N/A value
+      await tester.pumpWidget(createWidgetUnderTest(bmiValue: "N/A"));
+      
+      // Verify N/A is displayed
+      expect(find.text('N/A'), findsOneWidget);
+      
+      // Still shows "Healthy" as default category
+      expect(find.text('Healthy'), findsNWidgets(2));
+    });
+
+    testWidgets('handles Error state correctly', (WidgetTester tester) async {
+      // Build the widget with Error value
+      await tester.pumpWidget(createWidgetUnderTest(bmiValue: "Error"));
+      
+      // Verify Error is displayed
+      expect(find.text('Error'), findsOneWidget);
+      
+      // Still shows "Healthy" as default category
+      expect(find.text('Healthy'), findsNWidgets(2));
     });
     
     testWidgets('uses provided colors for BMI category indicators', (WidgetTester tester) async {
@@ -155,62 +190,28 @@ void main() {
       // Get the Container widget 
       final container = tester.widget<Container>(positionedContainer);
       expect(container.color, Colors.black);
-      
-      // Another way to verify is to check if the widget tree matches
-      // what we expect from the BMI section's build method by finding
-      // a black container with width 3 as defined in the source code
-      final markerContainer = find.descendant(
-        of: positioned,
-        matching: find.byWidgetPredicate((widget) => 
-          widget is Container && 
-          widget.color == Colors.black
-        ),
-      );
-      expect(markerContainer, findsOneWidget);
     });
-    
-    testWidgets('_buildBMICategory creates correct structure', (WidgetTester tester) async {
-      // Build the widget
-      await tester.pumpWidget(createWidgetUnderTest());
-      
-      // Find the child rows created by _buildBMICategory
-      // We need to find them inside the main row that has MainAxisAlignment.spaceBetween
-      final mainRow = find.byWidgetPredicate((widget) => 
-        widget is Row && 
-        widget.mainAxisAlignment == MainAxisAlignment.spaceBetween
-      );
-      
-      // Get the main row widget
-      final mainRowWidget = tester.widget<Row>(mainRow);
-      
-      // Check that the main row has 4 children (each created by _buildBMICategory)
-      expect(mainRowWidget.children.length, 4);
-      
-      // Verify that each child is a Row widget
-      for (var i = 0; i < mainRowWidget.children.length; i++) {
-        expect(mainRowWidget.children[i], isA<Row>());
-        
-        // Get the category row
-        final categoryRow = mainRowWidget.children[i] as Row;
-        
-        // Verify structure: Container + SizedBox + Text
-        expect(categoryRow.children.length, 3);
-        expect(categoryRow.children[0], isA<Container>());
-        expect(categoryRow.children[1], isA<SizedBox>());
-        expect(categoryRow.children[2], isA<Text>());
-        
-        // Check container is a circle
-        final container = categoryRow.children[0] as Container;
-        final decoration = container.decoration as BoxDecoration;
-        expect(decoration.shape, BoxShape.circle);
-        
-        // Verify color is one of our test colors
-        expect(
-          [testBlue, testGreen, testYellow, testPink].contains(decoration.color),
-          isTrue,
-          reason: 'Category indicator ${i+1} should use one of the test colors'
-        );
-      }
+
+    group('displays correct BMI categories', () {
+      testWidgets('for Underweight', (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest(bmiValue: "18.0"));
+        expect(find.text('Underweight'), findsNWidgets(2)); // One in badge, one in categories
+      });
+
+      testWidgets('for Healthy', (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest(bmiValue: "22.5"));
+        expect(find.text('Healthy'), findsNWidgets(2)); // One in badge, one in categories
+      });
+
+      testWidgets('for Overweight', (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest(bmiValue: "27.5"));
+        expect(find.text('Overweight'), findsNWidgets(2)); // One in badge, one in categories
+      });
+
+      testWidgets('for Obese', (WidgetTester tester) async {
+        await tester.pumpWidget(createWidgetUnderTest(bmiValue: "32.0"));
+        expect(find.text('Obese'), findsNWidgets(2)); // One in badge, one in categories
+      });
     });
   });
 }
