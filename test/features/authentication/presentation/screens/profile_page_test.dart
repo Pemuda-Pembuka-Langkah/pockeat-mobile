@@ -21,6 +21,7 @@ import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
 // Remove the import of the real WidgetManagerScreen
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import 'profile_page_test.mocks.dart';
 
 @GenerateNiceMocks([
@@ -31,9 +32,10 @@ import 'profile_page_test.mocks.dart';
   MockSpec<FirebaseAuth>(),
   MockSpec<User>(),
   MockSpec<UserInfo>(),
-  MockSpec<NotificationService>()
+  MockSpec<NotificationService>(),
+  MockSpec<
+      UserPreferencesService>() // Add this line to mock UserPreferencesService
 ])
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -46,6 +48,7 @@ void main() {
   late MockUser mockUser;
   late MockUserInfo mockUserInfo;
   late MockNotificationService mockNotificationService;
+  late MockUserPreferencesService mockUserPreferencesService; // Add this line
 
   setUp(() {
     // Reset screen size to reasonable dimension
@@ -62,6 +65,8 @@ void main() {
     mockUser = MockUser();
     mockUserInfo = MockUserInfo();
     mockNotificationService = MockNotificationService();
+    mockUserPreferencesService =
+        MockUserPreferencesService(); // Initialize the mock
 
     // Setup GetIt
     final getIt = GetIt.instance;
@@ -77,10 +82,21 @@ void main() {
     if (getIt.isRegistered<NotificationService>()) {
       getIt.unregister<NotificationService>();
     }
+    if (getIt.isRegistered<UserPreferencesService>()) {
+      getIt.unregister<UserPreferencesService>();
+    }
     getIt.registerSingleton<LoginService>(mockLoginService);
     getIt.registerSingleton<LogoutService>(mockLogoutService);
     getIt.registerSingleton<BugReportService>(mockBugReportService);
     getIt.registerSingleton<NotificationService>(mockNotificationService);
+    getIt.registerSingleton<UserPreferencesService>(
+        mockUserPreferencesService); // Register the mock
+
+    // Setup default behavior for UserPreferencesService
+    when(mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+        .thenAnswer((_) async => false);
+    when(mockUserPreferencesService.setExerciseCalorieCompensationEnabled(any))
+        .thenAnswer((_) async => {});
 
     // Setup default User behavior
     when(mockUser.uid).thenReturn('test-uid');
@@ -108,6 +124,7 @@ void main() {
     reset(mockUser);
     reset(mockUserInfo);
     reset(mockNotificationService);
+    reset(mockUserPreferencesService); // Reset the mock
   });
 
   // Helper untuk membuat UserModel test
@@ -481,6 +498,7 @@ void main() {
     });
   });
 
+
   // == NOTIFICATION AND PROFILE SETTINGS ==
   group('Notification and Profile Settings', () {
     testWidgets('Navigates to Widget Settings page when widget settings button is pressed',
@@ -550,6 +568,7 @@ void main() {
       expect(find.text('Notification Settings Page'), findsOneWidget);
 
       // Verify navigation was observed
+
       verify(mockNavigatorObserver.didPush(any, any));
     });
 
@@ -566,14 +585,16 @@ void main() {
       // Find Edit Profile menu
       final editProfileFinder = find.text('Edit Profile');
       expect(editProfileFinder, findsOneWidget);
+
       expect(find.text('Update your profile information'), findsOneWidget);
 
-      // Tap Edit Profile menu
+
       await tester.tap(editProfileFinder);
       await tester.pumpAndSettle();
 
       // Verify navigation to edit profile page
       expect(find.text('Edit Profile Page'), findsOneWidget);
+
       
       // Verify navigation was observed
       verify(mockNavigatorObserver.didPush(any, any));
@@ -599,6 +620,7 @@ void main() {
         const Offset(0, -200),
       );
       expect(bugReportFinder, findsOneWidget);
+
 
       // Verify menu subtitle
       expect(find.text('Help us improve the app'), findsOneWidget);

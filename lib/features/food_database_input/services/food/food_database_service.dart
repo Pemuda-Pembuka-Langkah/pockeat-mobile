@@ -67,7 +67,8 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
 
       return _convertToFoodAnalysisResults(response);
     } catch (e) {
-      // print('Error searching foods: $e');
+      //debugPrint('Error searching foods: $e');
+
       return [];
     }
   }
