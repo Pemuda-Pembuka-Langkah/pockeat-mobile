@@ -1,5 +1,6 @@
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
@@ -16,6 +17,7 @@ class UserFirestoreRepository extends UserRepositoryBase {
   Future<UserModel?> getUserById(String userId) async {
     try {
       final docSnapshot = await usersCollection.doc(userId).get();
+      debugPrint(docSnapshot.toString());
 
       if (!docSnapshot.exists) {
         return null;
