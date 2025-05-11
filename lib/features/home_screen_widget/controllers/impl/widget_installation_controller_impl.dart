@@ -57,7 +57,8 @@ class WidgetInstallationControllerImpl implements WidgetInstallationController {
   @visibleForTesting
   void startPeriodicTimer() {
     _statusCheckTimer = Timer.periodic(
-      const Duration(seconds: 30),
+      const Duration(seconds: 300),
+
       (_) => refreshWidgetStatus(),
     );
   }

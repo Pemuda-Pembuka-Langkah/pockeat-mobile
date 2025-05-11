@@ -334,6 +334,17 @@ void main() {
       when(mockUser.photoURL).thenReturn('https://example.com/photo.jpg');
       when(mockUser.emailVerified).thenReturn(true);
       when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
+      
+      // Setup mock untuk getUserById yang sekarang digunakan oleh getCurrentUser
+      final testUserModel = UserModel(
+        uid: 'test-user-id',
+        email: 'test@example.com',
+        displayName: 'Test User',
+        photoURL: 'https://example.com/photo.jpg',
+        emailVerified: false, // Sengaja berbeda dengan yang dari Firebase Auth
+        createdAt: DateTime.now(),
+      );
+      when(mockUserRepository.getUserById('test-user-id')).thenAnswer((_) async => testUserModel);
 
       // Act
       final result = await loginService.getCurrentUser();
@@ -346,6 +357,7 @@ void main() {
       expect(result?.photoURL, equals('https://example.com/photo.jpg'));
       expect(result?.emailVerified, isTrue);
       verify(mockFirebaseAuth.currentUser).called(1);
+      verify(mockUserRepository.getUserById('test-user-id')).called(1);
     });
 
     test('getCurrentUser should return null when no user is authenticated',
