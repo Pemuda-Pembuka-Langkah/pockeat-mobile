@@ -13,6 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/health_value_proposition_page.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -233,7 +234,6 @@ void main() async {
 
   // Inisialisasi required services
   await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp();
 
   // Initialize Instabug
   await _initializeInstabug(flavor);
@@ -569,6 +569,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 'Verification failed. Please try again.',
           );
         },
+        // Di main.dart pada bagian routes:
+        '/onboarding': (context) => const HealthValuePropositionPage(),
         '/onboarding/goal': (context) {
           return BlocProvider.value(
             value: context.read<HealthMetricsFormCubit>(),
