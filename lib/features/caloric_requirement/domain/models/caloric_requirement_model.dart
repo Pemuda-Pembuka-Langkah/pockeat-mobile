@@ -44,9 +44,9 @@ class CaloricRequirementModel {
       bmr: (data['bmr'] as num).toDouble(),
       tdee: (data['tdee'] as num).toDouble(),
       timestamp: DateTime.parse(data['timestamp']),
-      proteinGrams: (data['proteinGrams'] as num).toDouble(),
-      carbsGrams: (data['carbsGrams'] as num).toDouble(),
-      fatGrams: (data['fatGrams'] as num).toDouble(),
+      proteinGrams: data.containsKey('proteinGrams') ? (data['proteinGrams'] as num).toDouble() : 0.0,
+      carbsGrams: data.containsKey('carbsGrams') ? (data['carbsGrams'] as num).toDouble() : 0.0,
+      fatGrams: data.containsKey('fatGrams') ? (data['fatGrams'] as num).toDouble() : 0.0,
     );
   }
 }
