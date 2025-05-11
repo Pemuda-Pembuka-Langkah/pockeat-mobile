@@ -30,9 +30,9 @@ class CaloricRequirementService {
       userId: userId,
       bmr: bmr,
       tdee: tdee,
-      proteinGrams: macros['proteinGrams']!,
-      carbsGrams: macros['carbsGrams']!,
-      fatGrams: macros['fatGrams']!,
+      proteinGrams: macros['proteinGrams'] ?? 0.0,
+      carbsGrams: macros['carbsGrams'] ?? 0.0,
+      fatGrams: macros['fatGrams'] ?? 0.0,
       timestamp: DateTime.now(),
     );
   }
