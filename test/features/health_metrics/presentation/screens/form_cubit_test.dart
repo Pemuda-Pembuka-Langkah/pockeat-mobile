@@ -99,8 +99,11 @@ void main() {
           userId: 'user123',
           bmr: 1500,
           tdee: 2000,
+          proteinGrams: 150.0,
+          carbsGrams: 200.0,
+          fatGrams: 66.7,
           timestamp: DateTime.now(),
-        ),
+        )
       );
 
       await cubit.submit();
@@ -147,8 +150,11 @@ void main() {
           userId: 'user123',
           bmr: 1500,
           tdee: 2000,
+          proteinGrams: 150.0,
+          carbsGrams: 200.0,
+          fatGrams: 66.7,
           timestamp: DateTime.now(),
-        ),
+        )
       );
 
       await cubit.submit();
@@ -166,8 +172,11 @@ void main() {
     )).thenReturn(
       CaloricRequirementModel(
         userId: 'user123',
-        bmr: 1600,
-        tdee: 2100,
+        bmr: 1500,
+        tdee: 2000,
+        proteinGrams: 150.0,
+        carbsGrams: 200.0,
+        fatGrams: 66.7,
         timestamp: DateTime.now(),
       ),
     );
@@ -183,47 +192,67 @@ void main() {
   });
 
   test('submit computes correct BMR and TDEE for Male with moderate activity', () async {
-      final now = DateTime.now();
-      int age = now.year - 2000;
-      if (now.month < 1 || (now.month == 1 && now.day < 1)) {
-        age--;
-      }
-      final expectedBMR = 10 * 75 + 6.25 * 180 - 5 * age + 5;
-      final expectedTDEE = expectedBMR * 1.55;
+    // Prepare input
+    final birthDate = DateTime(2000, 1, 1);
+    final now = DateTime.now();
+    int age = now.year - birthDate.year;
+    if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+      age--;
+    }
 
-      final fakeResult = CaloricRequirementModel(
-        userId: 'user123',
-        bmr: expectedBMR,
-        tdee: expectedTDEE,
-        timestamp: DateTime.now(),
-      );
+    final weight = 75.0;
+    final height = 180.0;
+    final gender = 'Male';
+    final activityLevel = 'moderate';
 
-      when(mockCaloricService.analyze(
-        userId: anyNamed('userId'),
-        model: anyNamed('model'),
-      )).thenReturn(fakeResult);
+    final expectedBMR = 10 * weight + 6.25 * height - 5 * age + 5;
+    final expectedTDEE = expectedBMR * 1.55;
 
-      cubit
-        ..setHeightWeight(height: 180, weight: 75)
-        ..setBirthDate(DateTime(2000, 1, 1))
-        ..setDesiredWeight(70)
-        ..setWeeklyGoal(0.5)
-        ..setGender("Male")
-        ..setActivityLevel("moderate")
-        ..toggleGoal("Lose Weight");
+    final expectedProtein = (expectedTDEE * 0.3) / 4;
+    final expectedCarbs = (expectedTDEE * 0.4) / 4;
+    final expectedFat = (expectedTDEE * 0.3) / 9;
 
-      await cubit.submit();
+    final fakeResult = CaloricRequirementModel(
+      userId: 'user123',
+      bmr: expectedBMR,
+      tdee: expectedTDEE,
+      proteinGrams: expectedProtein,
+      carbsGrams: expectedCarbs,
+      fatGrams: expectedFat,
+      timestamp: now,
+    );
 
-      verify(mockCaloricRepo.saveCaloricRequirement(
-        userId: 'user123',
-        result: argThat(
-          predicate((model) =>
-            model is CaloricRequirementModel &&
-            (model.bmr - expectedBMR).abs() < 0.01 &&
-            (model.tdee - expectedTDEE).abs() < 0.01,
-          ),
-          named: 'result',
+    when(mockCaloricService.analyze(
+      userId: anyNamed('userId'),
+      model: anyNamed('model'),
+    )).thenReturn(fakeResult);
+
+    // Fill in form
+    cubit
+      ..setHeightWeight(height: height, weight: weight)
+      ..setBirthDate(birthDate)
+      ..setDesiredWeight(70)
+      ..setWeeklyGoal(0.5)
+      ..setGender(gender)
+      ..setActivityLevel(activityLevel)
+      ..toggleGoal("Lose Weight");
+
+    await cubit.submit();
+
+    // Assert correct model saved to caloric repo
+    verify(mockCaloricRepo.saveCaloricRequirement(
+      userId: 'user123',
+      result: argThat(
+        predicate((model) =>
+          model is CaloricRequirementModel &&
+          (model.bmr - expectedBMR).abs() < 0.01 &&
+          (model.tdee - expectedTDEE).abs() < 0.01 &&
+          (model.proteinGrams - expectedProtein).abs() < 0.01 &&
+          (model.carbsGrams - expectedCarbs).abs() < 0.01 &&
+          (model.fatGrams - expectedFat).abs() < 0.01
         ),
-      )).called(1);
-    });
+        named: 'result',
+      ),
+    )).called(1);
+  });
 }
