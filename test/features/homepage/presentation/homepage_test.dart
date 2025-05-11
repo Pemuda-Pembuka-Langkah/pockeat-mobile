@@ -154,7 +154,7 @@ void main() async {
       await tester.scrollUntilVisible(
         find.byType(OverviewSection),
         100,
-        scrollable: find.byType(Scrollable),
+        scrollable: find.byType(Scrollable).first,
       );
       expect(find.byType(OverviewSection), findsOneWidget);
       expect(find.byType(CustomBottomNavBar), findsOneWidget);

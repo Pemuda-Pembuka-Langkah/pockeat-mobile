@@ -3,8 +3,16 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import 'package:pockeat/component/navigation.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
 import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
+import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
+import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
+import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
+import 'package:pockeat/features/pet_companion/domain/model/pet_information.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,7 +28,32 @@ class _HomePageState extends State<HomePage>
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
-  String? dbInfo;
+
+   // Services
+  final PetService _petService = GetIt.instance<PetService>();
+  final CalorieStatsService _calorieStatsService = GetIt.instance<CalorieStatsService>();
+  final FoodLogHistoryService _foodLogHistoryService = GetIt.instance<FoodLogHistoryService>();
+  final userId = GetIt.instance<FirebaseAuth>().currentUser?.uid ?? '';
+  final caloricRequirementRepository = GetIt.instance<CaloricRequirementRepository>();
+
+  // Futures
+  late Future<PetInformation> _petInformation;
+  late Future<DailyCalorieStats> _statsFuture;
+  late Future<int> _dayStreak;
+  late Future<int> _targetCalories;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  void _loadData() {
+    _petInformation = _petService.getPetInformation(userId);
+    _dayStreak = _foodLogHistoryService.getFoodStreakDays(userId);
+    _statsFuture = _calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+    _targetCalories = caloricRequirementRepository.getCaloricRequirement(userId).then((value) => value?.tdee.toInt() ?? 0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,35 +62,51 @@ class _HomePageState extends State<HomePage>
       body: DefaultTabController(
         length: 3,
         child: NestedScrollView(
-            controller: _scrollController,
-            headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                  SliverAppBar(
-                    pinned: true,
-                    floating: false,
-                    backgroundColor: primaryYellow,
-                    elevation: 0,
-                    toolbarHeight: 60,
-                    title: const Row(
-                      children: [
-                        Text(
-                          'Pockeat',
-                          style: TextStyle(
-                            color: Colors.black87,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+          controller: _scrollController,
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverAppBar(
+              pinned: true,
+              floating: false,
+              backgroundColor: primaryYellow,
+              elevation: 0,
+              toolbarHeight: 60,
+              automaticallyImplyLeading: false,
+              title: const Row(
+                children: [
+                  Text(
+                    'Pockeat',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
-            body: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
-              children: const [
-                PetHomepageSection(),
-                OverviewSection(),
-              ],
-            )),
+              ),
+            ),
+          ],
+          body: FutureBuilder<List<dynamic>>(
+            future: Future.wait([_petInformation, _statsFuture, _dayStreak, _targetCalories]),
+            builder: (context, snapshot) {
+              return ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+                children: [
+                  PetHomepageSection(
+                    isLoading: snapshot.connectionState == ConnectionState.waiting,
+                    petInfo: snapshot.data?[0] as PetInformation?,
+                    stats: snapshot.data?[1] as DailyCalorieStats?,
+                    streakDays: snapshot.data?[2] as int?,
+                  ),
+                  OverviewSection(
+                    isLoading: snapshot.connectionState == ConnectionState.waiting,
+                    stats: snapshot.data?[1] as DailyCalorieStats?,
+                    targetCalories: snapshot.data?[3] as int?,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
       bottomNavigationBar: const CustomBottomNavBar(),
     );
