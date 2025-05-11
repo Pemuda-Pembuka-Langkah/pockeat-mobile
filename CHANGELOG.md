@@ -1,4 +1,40 @@
 # Changelog
+## v1.3.3
+**Release Date: May 11, 2025**
+
+# Changelog
+
+## v1.3.3
+**Release Date: May 11, 2025**
+
+### Features
+- **Onboarding Experience Enhancement**
+  - Implementation of health value proposition page
+  - Addition of onboarding progress indicator
+  - Redesigned welcome page with updated assets
+  - Improved birthday page and height/weight page designs
+  - New feature card implementation
+
+### Improvements
+- **Pet Companion Enhancement**
+  - Integration of pet with calorie tracking for heart bar and mood state
+  - Implementation of getPetInformation and getIsOverCalorie in pet service
+  - Addition of pet information model
+
+### Bug Fixes
+- Fixed bug where email verification status was outdated from Firestore
+- Fixed incorrect user account creation date
+- Changed SnackBar duration from 1 day to 5 seconds
+- Updated widget installation status refresh timer to 5 minutes
+- Improved Cardio Log's Save Activity button to prevent multiple saves from aggressive tapping
+
+### Technical
+- Increased code coverage for onboarding components
+- Improved coverage for widget service
+- Added routing to recent exercise tab with tabIndex and subTabIndex parameters
+- Added automated tag creation workflow for approved documentation
+- Enhanced release workflow to include APK upload to Pockeat web
+
 ## v1.3.2
 **Release Date: May 07, 2025**
 
