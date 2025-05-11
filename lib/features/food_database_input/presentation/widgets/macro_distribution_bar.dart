@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 class MacroDistributionBar extends StatelessWidget {
@@ -7,11 +10,11 @@ class MacroDistributionBar extends StatelessWidget {
   final Color primaryPink;
 
   const MacroDistributionBar({
-    Key? key,
+    super.key,
     required this.nutrition,
     required this.primaryGreen,
     required this.primaryPink,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +71,7 @@ class MacroDistributionBar extends StatelessWidget {
                     color: Colors.blue[400],
                     child: Center(
                       child: proteinPercent >= 10
-                      // coverage:ignore-line 
+                          // coverage:ignore-line
                           ? Text(
                               'P: ${proteinPercent.toStringAsFixed(0)}%',
                               style: const TextStyle(
@@ -96,7 +99,7 @@ class MacroDistributionBar extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                               ),
                             )
-                            // coverage:ignore-line
+                          // coverage:ignore-line
                           : Container(),
                     ),
                   ),
@@ -108,7 +111,7 @@ class MacroDistributionBar extends StatelessWidget {
                     color: primaryPink,
                     child: Center(
                       child: fatPercent >= 10
-                      // coverage:ignore-line
+                          // coverage:ignore-line
                           ? Text(
                               'F: ${fatPercent.toStringAsFixed(0)}%',
                               style: const TextStyle(

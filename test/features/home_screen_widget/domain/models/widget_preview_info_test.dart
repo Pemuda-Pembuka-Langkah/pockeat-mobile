@@ -1,6 +1,9 @@
 // test/features/home_screen_widget/domain/models/widget_preview_info_test.dart
 
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_installation_status.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_preview_info.dart';
 

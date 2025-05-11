@@ -1,6 +1,6 @@
 // test/features/home_screen_widget/controllers/widget_installation_controller_test.dart
 
-// Flutter imports:
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -12,10 +12,10 @@ import 'package:pockeat/features/home_screen_widget/controllers/widget_installat
 import 'package:pockeat/features/home_screen_widget/domain/constants/widget_installation_constants.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_installation_status.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_installation_service.dart';
+import 'widget_installation_controller_test.mocks.dart';
 
 // Generate mocks
 @GenerateMocks([WidgetInstallationService])
-import 'widget_installation_controller_test.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -1,6 +1,7 @@
 // Flutter imports:
 //coverage: ignore-file
 
+// Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -46,6 +47,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
   late Future<FoodAnalysisResult?> _foodFuture;
   bool _isLoading = false;
   bool _isSaved = false;
+  // ignore: unused_field
   String? _savedMealId;
 
   // Colors

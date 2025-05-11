@@ -6,9 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/food_database_input/services/food_database_module.dart';
-import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
-import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
@@ -46,6 +43,7 @@ import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/calorie_stats/di/calorie_stats_module.dart';
 import 'package:pockeat/features/exercise_log_history/di/exercise_log_history_module.dart';
+import 'package:pockeat/features/food_database_input/services/food_database_module.dart';
 import 'package:pockeat/features/food_log_history/di/food_log_history_module.dart';
 import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repository.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
@@ -61,6 +59,8 @@ import 'package:pockeat/features/notifications/domain/services/notification_serv
 import 'package:pockeat/features/notifications/domain/services/user_activity_service.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
+import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
+import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start

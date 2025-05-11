@@ -3,11 +3,10 @@
 // Dart imports:
 import 'dart:async';
 
-// Package imports:
+// Flutter imports:
 import 'package:flutter/foundation.dart';
 
 // Project imports:
-// coverage:ignore-start
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
@@ -16,6 +15,9 @@ import 'package:pockeat/features/home_screen_widget/controllers/impl/detailed_fo
 import 'package:pockeat/features/home_screen_widget/controllers/impl/simple_food_tracking_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/widget_background_service_helper.dart';
+
+// Project imports:
+// coverage:ignore-start
 
 class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   // Dependencies
@@ -28,7 +30,7 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   // State variables
   UserModel? _currentUser;
   Timer? _updateTimer;
-  
+
   // No Discord logging
 
   // Controller tidak perlu mengakses widget client langsung
@@ -41,8 +43,7 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
     required SimpleFoodTrackingController simpleController,
     required DetailedFoodTrackingController detailedController,
     WidgetBackgroundServiceHelperInterface? backgroundServiceHelper,
-  })
-      : _loginService = loginService,
+  })  : _loginService = loginService,
         _caloricRequirementRepository = caloricRequirementRepository,
         _simpleController = simpleController,
         _detailedController = detailedController,
@@ -56,7 +57,7 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
       // 1. Initialize sub-controllers
       await _simpleController.initialize();
       await _detailedController.initialize();
-      
+
       // 2. Get current user and update if already logged in (will also setup auto-updates)
       _currentUser = await _loginService.getCurrentUser();
       if (_currentUser != null) {
@@ -69,7 +70,7 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
 
       // 5. Start listening to auth changes
       await startListeningToUserChanges();
-      
+
       // FoodTrackingClientController initialized successfully
     } catch (e) {
       debugPrint('Failed to initialize client controller: $e');
@@ -91,13 +92,14 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
 
       // User logged in, setting up auto-updates
       _setupAutoUpdate();
-      
+
       // Dapatkan target kalori dari CaloricRequirementRepository
-      final caloricRequirement = await _caloricRequirementRepository.getCaloricRequirement(user.uid);
-      
+      final caloricRequirement =
+          await _caloricRequirementRepository.getCaloricRequirement(user.uid);
+
       // Gunakan TDEE dari caloric requirement atau default 2000 jika tidak ada
       int targetCalories = 2000; // Default jika tidak ada data
-      
+
       if (caloricRequirement != null) {
         // TDEE adalah total daily energy expenditure - kalori harian yang dibutuhkan
         targetCalories = caloricRequirement.tdee.toInt();
@@ -113,7 +115,7 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
         _detailedController.updateWidgetData(user,
             targetCalories: targetCalories)
       ]);
-      
+
       // Widget data updated successfully
     } catch (e) {
       debugPrint('Failed to process user status change: $e');
@@ -172,17 +174,17 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
   Future<void> startListeningToUserChanges() async {
     try {
       debugPrint('Setting up LoginService auth stream listener');
-      
+
       // Gunakan stream dari LoginService (sudah diperbaiki)
       final authStream = _loginService.initialize();
       authStream.listen((userModel) async {
         // Deteksi perubahan login state
-        debugPrint('Auth state changed: ${userModel != null ? 'Logged in' : 'Logged out'}');
-        
+        debugPrint(
+            'Auth state changed: ${userModel != null ? 'Logged in' : 'Logged out'}');
+
         // Update widget berdasarkan userModel
         await processUserStatusChange(userModel);
       });
-      
     } catch (e) {
       debugPrint('Failed to setup Firebase Auth state listener: $e');
       throw WidgetInitializationException(
@@ -215,7 +217,7 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
         _simpleController.updateWidgetData(null),
         _detailedController.updateWidgetData(null)
       ]);
-      
+
       // Widget data updated successfully
     } catch (e) {
       throw WidgetUpdateException('Failed to force update: $e');
@@ -236,7 +238,7 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
 
       // 2. Setup background service untuk update ketika app tidak aktif
       await _setupBackgroundService();
-      
+
       // Auto-update setup completed successfully
     } catch (e) {
       debugPrint('Failed to setup auto-update: $e');

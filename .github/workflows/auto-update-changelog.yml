@@ -66,7 +66,7 @@ jobs:
           # Setup Claude API
           from anthropic import Anthropic
           claude = Anthropic(api_key=os.environ['CLAUDE_API_KEY'])
-          model_name = os.environ.get('CLAUDE_MODEL', 'claude-3-7-sonnet-20250219')  # Default to latest Opus model
+          model_name = os.environ.get('CLAUDE_MODEL', 'claude-3-7-sonnet-20250219')  # Default to Claude 3.7 Sonnet
 
           # Get current date in the required format
           current_date = datetime.now().strftime("%B %d, %Y")
@@ -100,7 +100,7 @@ jobs:
                   if len(entries) >= 2:
                       existing_format += "\n" + entries[1]
           
-          # Prepare prompt for Gemini
+          # Prepare prompt for Claude
           prompt = f"""
           Based on these commit messages:
 
@@ -155,29 +155,81 @@ jobs:
           # Write updated changelog
           with open('CHANGELOG.md', 'w') as f:
               f.write(updated_changelog)
-
-          print("::set-output name=changelog_updated::true")
-          print(f"Successfully updated CHANGELOG.md with {version} changes")
+              
+          # Ambil konten changelog untuk PR
+          with open('/tmp/changelog_entry.txt', 'w') as f:
+              f.write(changelog_content)
+              
+          # Tampilkan bagian changelog yang baru saja dibuat
+          print("New changelog entry:")
+          print(changelog_content)
+          print("Changelog updated successfully")
           EOF
 
           python update_changelog.py
+          
+          # Cek apakah file changelog ada & diupdate
+          if [ -f "/tmp/changelog_entry.txt" ]; then
+            echo "changelog_updated=true" >> $GITHUB_OUTPUT
+            # Simpan isi untuk PR body
+            CHANGELOG_CONTENT=$(cat /tmp/changelog_entry.txt)
+            # Escape multiline content untuk GitHub Actions output
+            CHANGELOG_CONTENT="${CHANGELOG_CONTENT//'%'/'%25'}"
+            CHANGELOG_CONTENT="${CHANGELOG_CONTENT//$'\n'/'%0A'}"
+            CHANGELOG_CONTENT="${CHANGELOG_CONTENT//$'\r'/'%0D'}"
+            echo "changelog_content=$CHANGELOG_CONTENT" >> $GITHUB_OUTPUT
+            echo "Changelog has been updated"
+          else
+            echo "changelog_updated=false" >> $GITHUB_OUTPUT
+            echo "Changelog was not updated, likely version already exists"
+          fi
         env:
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
           CLAUDE_MODEL: ${{ secrets.CLAUDE_MODEL || 'claude-3-7-sonnet-20250219' }}
           VERSION: ${{ steps.extract_version.outputs.VERSION }}
 
+      # Prepare PR body file with proper markdown formatting
+      - name: Create PR body file
+        if: steps.generate_changelog.outputs.changelog_updated == 'true'
+        run: |
+          # Buat file PR body dengan menggabungkan teks statis dengan isi changelog
+          echo "This PR automatically updates the CHANGELOG.md file based on recent commits." > /tmp/pr_body.txt
+          echo "" >> /tmp/pr_body.txt
+          echo "The changelog has been generated using Claude AI to analyze commit messages and categorize changes appropriately." >> /tmp/pr_body.txt
+          echo "" >> /tmp/pr_body.txt
+          echo "### Changes:" >> /tmp/pr_body.txt
+          echo "```markdown" >> /tmp/pr_body.txt
+          cat /tmp/changelog_entry.txt >> /tmp/pr_body.txt
+          echo "```" >> /tmp/pr_body.txt
+          echo "" >> /tmp/pr_body.txt
+          echo "Please review the changes and merge if they look good." >> /tmp/pr_body.txt
+          
+          echo "Created PR body file with properly formatted changelog"
+      
+      # Tambahkan langkah cleanup untuk menghapus file-file sementara
+      - name: Cleanup temporary files
+        if: always()
+        run: |
+          rm -f commits.txt
+          rm -f update_changelog.py
+          # Don't delete changelog_entry.txt until after PR is created
+          echo "Cleaned up temporary files"
+
       - name: Create PR with changelog update
+        if: steps.generate_changelog.outputs.changelog_updated == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: "docs: update CHANGELOG.md for ${{ steps.extract_version.outputs.VERSION }}"
           title: "docs: update CHANGELOG.md for ${{ steps.extract_version.outputs.VERSION }}"
-          body: |
-            This PR automatically updates the CHANGELOG.md file based on recent commits.
-            
-            The changelog has been generated using Claude AI to analyze commit messages and categorize changes appropriately.
-            
-            Please review the changes and merge if they look good.
+          body-file: /tmp/pr_body.txt
           branch: auto-update-changelog
           base: master
-          labels: documentation, automated-pr
           delete-branch: false
+
+      # Final cleanup of all temporary files
+      - name: Final cleanup
+        if: always()
+        run: |
+          rm -f /tmp/changelog_entry.txt
+          rm -f /tmp/pr_body.txt
+          echo "All temporary files removed"

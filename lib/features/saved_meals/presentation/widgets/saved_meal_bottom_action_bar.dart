@@ -1,12 +1,13 @@
 // Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-//
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+
+//
 
 class SavedMealBottomActionBar extends StatelessWidget {
   final bool isLoading;
@@ -157,7 +158,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
               style: TextStyle(color: Colors.black87),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               '• "This has 300 calories, not 400"\n• "It contains less sugar, about 5g"\n• "Add broccoli as an ingredient"',
               style: TextStyle(color: Colors.black54, fontSize: 13),
             ),
@@ -224,7 +225,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
               SizedBox(
                 width: 20,
                 height: 20,
-                child: const CircularProgressIndicator(
+                child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
@@ -496,79 +497,6 @@ class SavedMealBottomActionBar extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void _confirmDelete(BuildContext context) {
-    if (savedMeal == null) return;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.delete_outline, color: primaryPink),
-            const SizedBox(width: 8),
-            const Text('Confirm Delete'),
-          ],
-        ),
-        content: Text(
-            'Are you sure you want to delete "${savedMeal!.foodAnalysis.foodName}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey[700]),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _deleteMeal(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primaryPink,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _deleteMeal(BuildContext context) async {
-    if (savedMeal == null) return;
-
-    onSavingStateChange?.call(true);
-
-    try {
-      showSnackBarMessage(context, 'Deleting meal...',
-          backgroundColor: Colors.orange);
-
-      await savedMealService.deleteSavedMeal(savedMeal!.id);
-
-      if (!context.mounted) return;
-
-      showSnackBarMessage(context, 'Meal deleted successfully!',
-          backgroundColor: primaryGreen);
-
-      // Call the onDelete callback if provided
-      onDelete?.call();
-
-      // Navigate back after a short delay
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (context.mounted) {
-          Navigator.of(context).pop();
-        }
-      });
-    } catch (e) {
-      if (!context.mounted) return;
-      showSnackBarMessage(context, 'Failed to delete meal: ${e.toString()}',
-          backgroundColor: Colors.red);
-    } finally {
-      onSavingStateChange?.call(false);
-    }
   }
 
   Future<void> _logMeal(BuildContext context) async {

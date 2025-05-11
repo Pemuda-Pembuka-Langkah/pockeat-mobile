@@ -1,9 +1,10 @@
 // Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 // Project imports:
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';

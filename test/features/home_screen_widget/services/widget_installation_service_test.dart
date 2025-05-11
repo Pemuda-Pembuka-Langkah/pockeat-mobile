@@ -2,6 +2,8 @@
 
 // Flutter imports:
 import 'package:flutter/services.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -11,10 +13,10 @@ import 'package:pockeat/features/home_screen_widget/domain/constants/widget_inst
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_installation_status.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/widget_installation_service_impl.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_installation_service.dart';
+import 'widget_installation_service_test.mocks.dart';
 
 // Generate mocks untuk MethodChannel
 @GenerateMocks([MethodChannel])
-import 'widget_installation_service_test.mocks.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

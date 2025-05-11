@@ -1,8 +1,14 @@
 //
+
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/firebase/firebase_repository.dart';
@@ -12,6 +18,7 @@ class FoodAnalysisRepository
     extends BaseFirestoreRepository<FoodAnalysisResult> {
   static const String _timestampField = 'timestamp';
 
+  // ignore: use_super_parameters
   FoodAnalysisRepository({FirebaseFirestore? firestore})
       : super(
           collectionName: 'food_analysis',

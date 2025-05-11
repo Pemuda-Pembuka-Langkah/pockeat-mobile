@@ -22,12 +22,14 @@ enum WidgetInstallationConstants {
 
   /// Constructor
   const WidgetInstallationConstants(this.value);
-  
+
   /// Method channel name for widget installation
   /// Uses the existing channel name from HomeWidgetConfig
   static String get channelName => "com.pockeat/widget_installation";
 
   /// Widget identifiers from HomeWidgetConfig
-  static String get simpleWidgetIdentifier => HomeWidgetConfig.simpleWidgetName.value;
-  static String get detailedWidgetIdentifier => HomeWidgetConfig.detailedWidgetName.value;
+  static String get simpleWidgetIdentifier =>
+      HomeWidgetConfig.simpleWidgetName.value;
+  static String get detailedWidgetIdentifier =>
+      HomeWidgetConfig.detailedWidgetName.value;
 }

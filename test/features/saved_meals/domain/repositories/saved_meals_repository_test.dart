@@ -1,9 +1,12 @@
-import 'package:flutter_test/flutter_test.dart';
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';

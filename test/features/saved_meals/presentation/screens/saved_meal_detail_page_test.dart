@@ -1,9 +1,15 @@
+// Dart imports:
 import 'dart:async';
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_title_section.dart';
@@ -13,7 +19,6 @@ import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 import 'package:pockeat/features/saved_meals/presentation/screens/saved_meal_detail_page.dart';
 import 'package:pockeat/features/saved_meals/presentation/widgets/saved_meal_bottom_action_bar.dart';
-
 import 'saved_meal_detail_page_test.mocks.dart';
 
 @GenerateMocks([SavedMealService, NavigatorObserver])

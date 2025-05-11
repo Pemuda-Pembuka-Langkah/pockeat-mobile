@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class HealthScoreIndicator extends StatelessWidget {
@@ -6,11 +7,11 @@ class HealthScoreIndicator extends StatelessWidget {
   final Color primaryPink;
 
   const HealthScoreIndicator({
-    Key? key,
+    super.key,
     required this.score,
     required this.primaryGreen,
     required this.primaryPink,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

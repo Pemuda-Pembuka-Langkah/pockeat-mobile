@@ -14,7 +14,6 @@ import 'package:share_plus/share_plus.dart';
 // Project imports:
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_summary_card.dart';
 
-
 extension ExerciseSharing on BuildContext {
   /// Saves image bytes to a temporary file
   Future<File> _saveImageToTempFile(Uint8List imageBytes) async {

@@ -4,7 +4,6 @@ import 'dart:math';
 // Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:camera/camera.dart';
@@ -110,7 +109,7 @@ class ScanFoodPageState extends State<ScanFoodPage>
   Widget build(BuildContext context) {
     // Calculate a consistent shift value to use for all elements
     final double verticalShift = MediaQuery.of(context).size.height * 0.05;
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -138,7 +137,8 @@ class ScanFoodPageState extends State<ScanFoodPage>
               animation: _scanLineController,
               builder: (context, child) {
                 return Transform.translate(
-                  offset: Offset(0, sin(_scanLineController.value * 2 * pi) * 120),
+                  offset:
+                      Offset(0, sin(_scanLineController.value * 2 * pi) * 120),
                   child: Container(
                     width: 280,
                     height: 4,
@@ -162,7 +162,9 @@ class ScanFoodPageState extends State<ScanFoodPage>
             left: 0,
             right: 0,
             // Position it at the center but shifted up like the camera view
-            top: MediaQuery.of(context).size.height * 0.5 - 140 - verticalShift, // Center height (50%) - half frame height (140px) - shift
+            top: MediaQuery.of(context).size.height * 0.5 -
+                140 -
+                verticalShift, // Center height (50%) - half frame height (140px) - shift
             child: Center(
               child: Container(
                 width: 280,

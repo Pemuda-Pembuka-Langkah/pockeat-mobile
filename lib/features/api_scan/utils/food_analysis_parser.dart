@@ -1,12 +1,11 @@
 // Dart imports:
 //coverage: ignore-file
 
-
+// Dart imports:
 import 'dart:convert';
 
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';

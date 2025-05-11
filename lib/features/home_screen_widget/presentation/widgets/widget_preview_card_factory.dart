@@ -1,6 +1,9 @@
 // lib/features/home_screen_widget/presentation/widgets/widget_preview_card_factory.dart
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/domain/constants/widget_preview_constants.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_installation_status.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_preview_info.dart';
@@ -9,7 +12,8 @@ import 'package:pockeat/features/home_screen_widget/presentation/widgets/widget_
 /// Factory untuk membuat widget preview card
 class WidgetPreviewCardFactory {
   /// Membuat Widget Preview Info berdasarkan type dan status instalasi
-  static WidgetPreviewInfo createWidgetPreviewInfo(WidgetType type, bool isInstalled) {
+  static WidgetPreviewInfo createWidgetPreviewInfo(
+      WidgetType type, bool isInstalled) {
     // Gunakan switch dengan exhaustive case
     // untuk memastikan semua tipe widget ditangani
     switch (type) {
@@ -50,9 +54,11 @@ class WidgetPreviewCardFactory {
     Future<bool> Function(WidgetType) onInstall,
   ) {
     return [
-      createWidgetPreviewCard(WidgetType.simple, isSimpleWidgetInstalled, onInstall),
+      createWidgetPreviewCard(
+          WidgetType.simple, isSimpleWidgetInstalled, onInstall),
       const SizedBox(height: 16.0),
-      createWidgetPreviewCard(WidgetType.detailed, isDetailedWidgetInstalled, onInstall),
+      createWidgetPreviewCard(
+          WidgetType.detailed, isDetailedWidgetInstalled, onInstall),
     ];
   }
 }

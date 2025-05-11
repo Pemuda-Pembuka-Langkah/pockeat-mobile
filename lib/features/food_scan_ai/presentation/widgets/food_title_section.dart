@@ -89,7 +89,7 @@ class FoodTitleSection extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            '${healthScore!.toStringAsFixed(1)}',
+            healthScore!.toStringAsFixed(1),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: scoreColor,

@@ -1,5 +1,7 @@
 // Flutter imports:
 //
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -10,8 +12,7 @@ import 'package:pockeat/features/saved_meals/presentation/widgets/saved_meal_car
 class SavedMealsPage extends StatefulWidget {
   final SavedMealService savedMealService;
 
-  const SavedMealsPage({Key? key, required this.savedMealService})
-      : super(key: key);
+  const SavedMealsPage({super.key, required this.savedMealService});
 
   @override
   State<SavedMealsPage> createState() => _SavedMealsPageState();
@@ -48,7 +49,7 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
               onChanged: (value) {
                 setState(() {
                   _searchQuery = value;
-            //coverage:ignore-end
+                  //coverage:ignore-end
                 });
               },
               decoration: InputDecoration(
@@ -85,7 +86,7 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
                 final filteredMeals = _searchQuery.isEmpty
                     ? meals
                     : meals
-                    //coverage:ignore-start
+                        //coverage:ignore-start
                         .where((meal) =>
                             meal.name
                                 .toLowerCase()
@@ -94,7 +95,7 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
                                 .toLowerCase()
                                 .contains(_searchQuery.toLowerCase()))
                         .toList();
-                      //coverage:ignore-end
+                //coverage:ignore-end
 
                 if (filteredMeals.isEmpty) {
                   return Center(
@@ -119,7 +120,7 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
                         if (_searchQuery.isEmpty) ...[
                           const SizedBox(height: 24),
                           ElevatedButton(
-                          //coverage:ignore-start
+                            //coverage:ignore-start
                             onPressed: () {
                               // Navigate to food input page
                               Navigator.pushNamed(context, '/add-food');
@@ -154,7 +155,7 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
                           '/saved-meal-detail',
                           arguments: {
                             'savedMealId': savedMeal.id,
-                        //coverage:ignore-end
+                            //coverage:ignore-end
                           },
                         );
                       },
@@ -170,7 +171,7 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
         //coverage:ignore-start
         onPressed: () {
           Navigator.pushNamed(context, '/add-food');
-        //coverage:ignore-end
+          //coverage:ignore-end
         },
         backgroundColor: primaryGreen,
         child: const Icon(Icons.add),
