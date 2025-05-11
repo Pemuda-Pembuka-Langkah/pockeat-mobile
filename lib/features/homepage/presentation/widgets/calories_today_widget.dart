@@ -8,13 +8,14 @@ import 'package:get_it/get_it.dart';
 // Project imports:
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 
 class CaloriesTodayWidget extends StatefulWidget {
-  final int targetCalories;
+  final int? targetCalories;
 
   const CaloriesTodayWidget({
     super.key,
-    this.targetCalories = 2000,
+    this.targetCalories,
   });
 
   @override
@@ -24,11 +25,13 @@ class CaloriesTodayWidget extends StatefulWidget {
 class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
   final Color primaryPink = const Color(0xFFFF6B6B);
   late Future<DailyCalorieStats> _statsFuture;
+  late Future<int> _targetCaloriesFuture;
 
   @override
   void initState() {
     super.initState();
     _loadCalorieStats();
+    _loadTargetCalories();
   }
 
   @override
@@ -36,6 +39,7 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
     super.didChangeDependencies();
     // Refresh when dependencies change
     _loadCalorieStats();
+    _loadTargetCalories();
   }
 
   void _loadCalorieStats() {
@@ -49,23 +53,52 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
     });
   }
 
+  void _loadTargetCalories() {
+    final userId = GetIt.instance<FirebaseAuth>().currentUser?.uid ?? '';
+    final caloricRequirementRepository = GetIt.instance<CaloricRequirementRepository>();
+
+    setState(() {
+      _targetCaloriesFuture = _getTargetCalories(caloricRequirementRepository, userId);
+    });
+  }
+
+  Future<int> _getTargetCalories(CaloricRequirementRepository repository, String userId) async {
+    // Jika widget.targetCalories disediakan, gunakan nilai tersebut
+    if (widget.targetCalories != null) {
+      return widget.targetCalories!;
+    }
+
+    // Jika tidak, ambil dari repository
+    final caloricRequirement = await repository.getCaloricRequirement(userId);
+    if (caloricRequirement != null) {
+      return caloricRequirement.tdee.toInt();
+    }
+    
+    // Default jika tidak ada data
+    return 2000;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DailyCalorieStats>(
-      future: _statsFuture,
+    return FutureBuilder<List<dynamic>>(
+      future: Future.wait([_statsFuture, _targetCaloriesFuture]),
       builder: (context, snapshot) {
         // Default values if data is loading or failed
         int caloriesConsumed = 0;
         double completionPercentage = 0.0;
-        int remainingCalories = widget.targetCalories;
+        int targetCalories = 2000;
+        int remainingCalories = 2000;
 
         // If we have data, calculate actual values
         if (snapshot.connectionState == ConnectionState.done &&
             snapshot.hasData &&
             !snapshot.hasError) {
-          caloriesConsumed = snapshot.data!.caloriesConsumed;
-          remainingCalories = widget.targetCalories - caloriesConsumed;
-          completionPercentage = caloriesConsumed / widget.targetCalories;
+          final stats = snapshot.data![0] as DailyCalorieStats;
+          targetCalories = snapshot.data![1] as int;
+          
+          caloriesConsumed = stats.caloriesConsumed;
+          remainingCalories = targetCalories - caloriesConsumed;
+          completionPercentage = caloriesConsumed / targetCalories;
 
           // Ensure values are within reasonable bounds
           if (remainingCalories < 0) remainingCalories = 0;
