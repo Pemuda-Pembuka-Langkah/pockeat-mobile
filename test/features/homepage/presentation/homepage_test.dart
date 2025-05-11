@@ -21,6 +21,8 @@ import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_sect
 import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
+import 'package:pockeat/features/pet_companion/domain/model/pet_information.dart';
+
 import 'homepage_test.mocks.dart';
 
 @GenerateNiceMocks([
@@ -93,6 +95,13 @@ void main() async {
         .thenAnswer((_) async => 1);
     when(mockPetService.getPetMood(any)).thenAnswer((_) async => 'happy');
     when(mockPetService.getPetHeart(any)).thenAnswer((_) async => 4);
+    when(mockPetService.getPetInformation(any)).thenAnswer((_) async =>
+        PetInformation(
+          mood: 'happy',
+          heart: 4,
+          isCalorieOverTarget: false,
+        ));
+
     when(mockSharedPreferences.getString(any))
         .thenReturn('assets/images/gym.jpg');
   });

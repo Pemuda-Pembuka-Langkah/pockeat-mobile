@@ -1,7 +1,7 @@
 // Package imports:
 import 'package:permission_handler/permission_handler.dart';
 
-//
+// coverage:ignore-start
 /// Interface for handling permissions that makes it easier to mock in unit tests
 abstract class PermissionHelperInterface {
   /// Request notification permission
@@ -31,3 +31,4 @@ class PermissionHelper implements PermissionHelperInterface {
     return await Permission.ignoreBatteryOptimizations.isGranted;
   }
 }
+// coverage:ignore-end
