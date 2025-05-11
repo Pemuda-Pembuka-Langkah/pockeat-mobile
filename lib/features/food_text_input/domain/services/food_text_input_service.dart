@@ -1,5 +1,7 @@
 // Package imports:
 //
+
+// Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Project imports:

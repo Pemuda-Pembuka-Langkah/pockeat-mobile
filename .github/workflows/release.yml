@@ -134,6 +134,13 @@ jobs:
       - name: Build Release AAB
         run: flutter build appbundle --release
 
+      # Get APK file size
+      - name: Get APK file size
+        id: apk_size
+        run: |
+          APK_SIZE=$(stat -c%s "build/app/outputs/flutter-apk/app-release.apk")
+          echo "size=$APK_SIZE" >> $GITHUB_OUTPUT
+
       # Analisis tambahan untuk memastikan kualitas
       - name: Run Flutter Analyze for CI Failure
         run: flutter analyze --no-fatal-warnings --no-fatal-infos
@@ -146,6 +153,9 @@ jobs:
           echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           # Simpan versi tanpa 'v' (ex: 1.1.2) untuk Firebase
           echo "VERSION_NO_V=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          # Extract version code from pubspec.yaml
+          VERSION_CODE=$(grep -E 'version:.*\+[0-9]+' pubspec.yaml | grep -oE '\+[0-9]+' | grep -oE '[0-9]+')
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
 
       # Extract release notes from CHANGELOG.md
       - name: Extract changelog for current version
@@ -164,6 +174,7 @@ jobs:
 
       # Upload to GitHub Release
       - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           files: |
@@ -182,3 +193,33 @@ jobs:
           file: build/app/outputs/flutter-apk/app-release.apk
           releaseNotes: ${{ steps.extract_changelog.outputs.CHANGELOG }}
           releaseNumber: ${{ steps.get_version.outputs.VERSION_NO_V }}
+      
+      # Update Pockeat Web API with the new APK information
+      - name: Update Pockeat Web APK Database
+        id: update_pockeat_web
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: '${{ secrets.POCKEAT_WEB_API_URL }}/api/apk/upload'
+          method: 'POST'
+          contentType: 'application/json'
+          data: >
+            {
+              "version": "${{ steps.get_version.outputs.VERSION_NO_V }}",
+              "versionCode": ${{ steps.get_version.outputs.VERSION_CODE }},
+              "fileSize": ${{ steps.apk_size.outputs.size }},
+              "fileUrl": "https://github.com/${{ github.repository }}/releases/download/${{ steps.get_version.outputs.VERSION }}/app-release.apk",
+              "releaseDate": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+              "releaseNotes": ${{ toJSON(steps.extract_changelog.outputs.CHANGELOG) }}
+            }
+        continue-on-error: true
+
+      # Log whether the API update was successful
+      - name: Log API Update Status
+        run: |
+          if [ "${{ steps.update_pockeat_web.outcome }}" == "success" ]; then
+            echo "✅ Successfully updated Pockeat Web APK database"
+            echo "Response: ${{ steps.update_pockeat_web.outputs.response }}"
+          else
+            echo "❌ Failed to update Pockeat Web APK database"
+            echo "Error: ${{ steps.update_pockeat_web.outputs.error }}"
+          fi

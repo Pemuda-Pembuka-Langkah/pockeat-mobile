@@ -1,20 +1,26 @@
 // test/features/home_screen_widget/presentation/screens/widget_manager_screen_test.dart
 
+// Dart imports:
 import 'dart:async';
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/controllers/widget_installation_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_installation_status.dart';
 import 'package:pockeat/features/home_screen_widget/presentation/screens/widget_manager_screen.dart';
 import 'package:pockeat/features/home_screen_widget/presentation/widgets/widget_preview_card.dart';
+import 'widget_manager_screen_test.mocks.dart';
 
 // Generate mocks
 @GenerateMocks([WidgetInstallationController])
-import 'widget_manager_screen_test.mocks.dart';
 
 void main() {
   late MockWidgetInstallationController mockController;

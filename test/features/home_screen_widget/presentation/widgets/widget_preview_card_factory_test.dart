@@ -1,7 +1,12 @@
 // test/features/home_screen_widget/presentation/widgets/widget_preview_card_factory_test.dart
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/domain/constants/widget_preview_constants.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_installation_status.dart';
 import 'package:pockeat/features/home_screen_widget/presentation/widgets/widget_preview_card.dart';

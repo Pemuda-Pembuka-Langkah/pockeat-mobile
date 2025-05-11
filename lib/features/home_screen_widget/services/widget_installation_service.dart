@@ -13,7 +13,7 @@ abstract class WidgetInstallationService {
   /// Returns [WidgetInstallationStatus] containing detailed information
   /// about which widgets are currently installed
   Future<WidgetInstallationStatus> checkWidgetInstallationStatus();
-  
+
   /// Attempts to add a specific widget type to homescreen
   ///
   /// Takes [widgetType] to determine which widget to add

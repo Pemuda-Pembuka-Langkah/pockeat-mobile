@@ -3,10 +3,10 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
-//
-
 // Project imports:
 import 'package:pockeat/features/tracking_preference/services/health_connect_sync.dart';
+
+//
 
 class HealthConnectWidget extends StatefulWidget {
   final Color primaryColor;

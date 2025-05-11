@@ -1,9 +1,11 @@
 // Dart imports:
 import 'dart:async';
 
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 
 // Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
@@ -30,7 +32,7 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
       }
 
       final userId = auth.currentUser!.uid;
-      
+
       final simpleWidgetService = services['simpleWidgetService']
           as WidgetDataService<SimpleFoodTracking>;
       final detailedWidgetService = services['detailedWidgetService']
@@ -43,7 +45,7 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
       // 2. Calculate target calories using the same service as client controller
       final int targetCalories =
           await calculateTargetCalories(services, userId);
-          
+
       // 3. Update simple widget
       await simpleWidgetService.updateData(SimpleFoodTracking(
         userId: userId,
@@ -51,7 +53,7 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
         currentCaloriesConsumed: totalCalories,
       ));
       await simpleWidgetService.updateWidget();
-      
+
       // 4. Update detailed widget with nutrients
       final nutrientStrategy = services['nutrientCalculationStrategy']
           as NutrientCalculationStrategy;
@@ -70,7 +72,7 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
       final carbs =
           nutrientStrategy.calculateNutrientFromLogs(todayLogs, 'carbs');
       final fat = nutrientStrategy.calculateNutrientFromLogs(todayLogs, 'fat');
-      
+
       await detailedWidgetService.updateData(DetailedFoodTracking(
         userId: userId,
         caloriesNeeded: targetCalories,
@@ -87,16 +89,17 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
 
   @override
   Future<int> calculateConsumedCalories(
-    Map<String, dynamic> services, String userId) async {
-  try {
-    // Use CalorieStatsService to get consumed calories
-    final calorieStatsService = services['caloricStatsService'] as CalorieStatsService;
-    final today = DateTime.now();
-      
+      Map<String, dynamic> services, String userId) async {
+    try {
+      // Use CalorieStatsService to get consumed calories
+      final calorieStatsService =
+          services['caloricStatsService'] as CalorieStatsService;
+      final today = DateTime.now();
+
       // Get daily stats for today
       final stats = await calorieStatsService.getStatsByDate(userId, today);
       final consumedCalories = stats.caloriesConsumed;
-      
+
       return consumedCalories;
     } catch (e) {
       debugPrint('Error calculating consumed calories: $e');
@@ -106,23 +109,25 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
 
   @override
   Future<int> calculateTargetCalories(
-    Map<String, dynamic> services, String userId) async {
-  try {
-    // Use CaloricRequirementRepository to get target calories
-      final caloricRequirementRepository = 
-          services['caloricRequirementRepository'] as CaloricRequirementRepository;
+      Map<String, dynamic> services, String userId) async {
+    try {
+      // Use CaloricRequirementRepository to get target calories
+      final caloricRequirementRepository =
+          services['caloricRequirementRepository']
+              as CaloricRequirementRepository;
 
       // Get caloric requirement for the user
-      final caloricRequirement = await caloricRequirementRepository.getCaloricRequirement(userId);
-      
+      final caloricRequirement =
+          await caloricRequirementRepository.getCaloricRequirement(userId);
+
       // Use TDEE from caloric requirement or default to 2000 if not found
       int targetCalories = 2000; // Default if not found
-      
+
       if (caloricRequirement != null) {
         // TDEE is the total daily energy expenditure - calories needed per day
         targetCalories = caloricRequirement.tdee.toInt();
-      } 
-      
+      }
+
       return targetCalories;
     } catch (e) {
       debugPrint('Error calculating target calories: $e');

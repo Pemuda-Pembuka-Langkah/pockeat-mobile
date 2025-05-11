@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_database_input/presentation/widgets/food_consumption_item.dart';
 import 'package:pockeat/features/food_database_input/presentation/widgets/health_score_indicator.dart';
@@ -19,7 +22,7 @@ class MealDetailsTab extends StatelessWidget {
   final Color primaryGreen;
 
   const MealDetailsTab({
-    Key? key,
+    super.key,
     required this.currentMeal,
     required this.selectedFoods,
     required this.isLoading,
@@ -31,7 +34,7 @@ class MealDetailsTab extends StatelessWidget {
     required this.primaryYellow,
     required this.primaryPink,
     required this.primaryGreen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +92,8 @@ class MealDetailsTab extends StatelessWidget {
     void handleSaveMeal() {
       onSaveMeal();
       // After successful meal logging, navigate to analytics with food history tab
-      Navigator.of(context).popAndPushNamed('/analytic', 
-          arguments: {'initialTabIndex': 1});
+      Navigator.of(context)
+          .popAndPushNamed('/analytic', arguments: {'initialTabIndex': 1});
     }
     //coverage:ignore-end
 
@@ -329,7 +332,7 @@ class MealDetailsTab extends StatelessWidget {
                     children: [
                       FoodConsumptionItem(
                         food: food ??
-                        //coverage:ignore-start
+                            //coverage:ignore-start
                             FoodAnalysisResult(
                               foodName: ingredient.name,
                               ingredients: [ingredient],
@@ -352,14 +355,14 @@ class MealDetailsTab extends StatelessWidget {
                               timestamp: DateTime.now(),
                               additionalInformation: {},
                             ),
-                            //coverage:ignore-end
+                        //coverage:ignore-end
                         totalCalories: currentMeal!.nutritionInfo.calories,
                       ),
                       if (index < currentMeal!.ingredients.length - 1)
                         const Divider(height: 1),
                     ],
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -431,7 +434,7 @@ class MealDetailsTab extends StatelessWidget {
                       ? null
                       : handleSaveMeal, // Use the new handler instead of onSaveMeal
                   icon: isLoading
-                      ? SizedBox(
+                      ? const SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(

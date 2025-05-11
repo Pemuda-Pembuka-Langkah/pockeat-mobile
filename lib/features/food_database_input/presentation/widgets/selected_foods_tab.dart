@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_database_input/presentation/widgets/food_item_card.dart';
 
@@ -18,7 +21,7 @@ class SelectedFoodsTab extends StatelessWidget {
   final Color primaryGreen;
 
   const SelectedFoodsTab({
-    Key? key,
+    super.key,
     required this.mealNameController,
     required this.selectedFoods,
     required this.componentCountControllers,
@@ -32,7 +35,7 @@ class SelectedFoodsTab extends StatelessWidget {
     required this.primaryYellow,
     required this.primaryPink,
     required this.primaryGreen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

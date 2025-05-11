@@ -40,7 +40,7 @@ class HomeWidgetModule {
         appGroupId: HomeWidgetConfig.appGroupId.value,
       ),
     );
-    
+
     // Register widget installation service
     getIt.registerLazySingleton<WidgetInstallationService>(
       () => WidgetInstallationServiceImpl(),
@@ -57,7 +57,7 @@ class HomeWidgetModule {
     getIt.registerLazySingleton<DetailedFoodTrackingController>(
       () => DetailedFoodTrackingController(
         widgetService: getIt<WidgetDataService<DetailedFoodTracking>>(),
-        calorieStatsService: getIt<CalorieStatsService>(), 
+        calorieStatsService: getIt<CalorieStatsService>(),
         foodLogHistoryService: getIt<FoodLogHistoryService>(),
       ),
     );
@@ -71,7 +71,7 @@ class HomeWidgetModule {
         detailedController: getIt<DetailedFoodTrackingController>(),
       ),
     );
-    
+
     // 4. Register widget installation controller
     getIt.registerLazySingleton<WidgetInstallationController>(
       () => WidgetInstallationControllerImpl(
@@ -94,7 +94,7 @@ class HomeWidgetModule {
   static FoodTrackingClientController getClientController() {
     return getIt<FoodTrackingClientController>();
   }
-  
+
   /// Mendapatkan controller untuk instalasi dan manajemen widget
   static WidgetInstallationController getWidgetInstallationController() {
     return getIt<WidgetInstallationController>();

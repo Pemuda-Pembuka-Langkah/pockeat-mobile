@@ -1,31 +1,34 @@
 // Dart imports:
 import 'dart:io';
-import 'dart:ui' as ui;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 // Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:share_plus/share_plus.dart' as share_plus;
+
+// Project imports:
+import 'package:pockeat/features/api_scan/models/food_analysis.dart';
+import 'package:pockeat/features/food_log_history/presentation/widgets/food_summary_card.dart';
+import 'food_sharing_extension_test.mocks.dart';
 
 // Use a custom import prefix for share_plus
-import 'package:share_plus/share_plus.dart' as share_plus;
 
 // Create a test wrapper for share_plus
 // Create the test wrapper file in the same directory
 // share_plus_test_wrapper.dart file content is created separately
 
-// Project imports:
-import 'package:pockeat/features/api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/food_log_history/presentation/widgets/food_summary_card.dart';
 
 // Generate mocks for File, RenderRepaintBoundary
 @GenerateMocks([File, RenderRepaintBoundary])
-import 'food_sharing_extension_test.mocks.dart';
 
 // Rename our testing extension to avoid conflicts with the actual implementation
 extension TestingFoodSharing on MockBuildContext {

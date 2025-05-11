@@ -14,21 +14,21 @@ abstract class WidgetInstallationController {
   ///
   /// Returns [WidgetInstallationStatus] containing information about installed widgets
   Future<WidgetInstallationStatus> getWidgetStatus();
-  
+
   /// Initiates installation of specified widget type
   ///
   /// Takes [widgetType] to determine which widget to install
   /// Returns [bool] indicating if request was successfully initiated
   Future<bool> installWidget(WidgetType widgetType);
-  
+
   /// Stream of widget installation status updates
   ///
   /// Can be used to reactively update UI based on widget installation changes
   Stream<WidgetInstallationStatus> get widgetStatusStream;
 
   /// Refreshes the widget status
-  /// 
-  /// Forces a check of the current widget installation status and 
+  ///
+  /// Forces a check of the current widget installation status and
   /// updates the stream if needed
   Future<void> refreshWidgetStatus();
 }

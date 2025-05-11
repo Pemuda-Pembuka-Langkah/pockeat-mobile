@@ -1,7 +1,7 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
-// Firebase imports:
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -16,6 +16,8 @@ import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/period_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/week_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
+
+// Firebase imports:
 
 // coverage:ignore-start
 class WeightProgressWidget extends StatefulWidget {
@@ -133,29 +135,29 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
 
   Future<void> _loadCurrentWeight() async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoadingWeight = true;
     });
-    
+
     try {
       // Get the current user ID
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception('No authenticated user found');
       }
-      
+
       // Query the user's weight entry directly since each userId has a unique record
       final snapshot = await FirebaseFirestore.instance
           .collection('health_metrics')
           .where('userId', isEqualTo: user.uid)
           .limit(1)
           .get();
-      
+
       if (snapshot.docs.isNotEmpty) {
         final data = snapshot.docs.first.data();
         final weight = data['weight'];
-        
+
         if (mounted) {
           setState(() {
             _currentWeight = "$weight";
@@ -184,34 +186,34 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
 
   Future<void> _loadCurrentBMI() async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoadingBMI = true;
     });
-    
+
     try {
       // Get the current user ID
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         throw Exception('No authenticated user found');
       }
-      
+
       // Query the user's BMI entry
       final snapshot = await FirebaseFirestore.instance
           .collection('health_metrics')
           .where('userId', isEqualTo: user.uid)
           .limit(1)
           .get();
-      
+
       if (snapshot.docs.isNotEmpty) {
         final data = snapshot.docs.first.data();
         final bmi = data['bmi'];
-        
+
         // Format to 2 decimal places
-        final formattedBMI = bmi is double 
-            ? bmi.toStringAsFixed(2) 
+        final formattedBMI = bmi is double
+            ? bmi.toStringAsFixed(2)
             : double.parse(bmi.toString()).toStringAsFixed(2);
-        
+
         if (mounted) {
           setState(() {
             _currentBMI = formattedBMI;

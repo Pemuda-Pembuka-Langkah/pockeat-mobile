@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class NutrientItem extends StatelessWidget {
@@ -7,12 +8,12 @@ class NutrientItem extends StatelessWidget {
   final Color color;
 
   const NutrientItem({
-    Key? key,
+    super.key,
     required this.label,
     required this.value,
     required this.icon,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

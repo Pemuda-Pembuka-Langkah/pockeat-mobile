@@ -1,15 +1,20 @@
 //coverage: ignore-file
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
-import 'package:pockeat/features/food_database_input/services/food/food_database_service.dart';
+import 'package:pockeat/features/food_database_input/presentation/widgets/meal_details_tab.dart';
 import 'package:pockeat/features/food_database_input/presentation/widgets/search_tab.dart';
 import 'package:pockeat/features/food_database_input/presentation/widgets/selected_foods_tab.dart';
-import 'package:pockeat/features/food_database_input/presentation/widgets/meal_details_tab.dart';
+import 'package:pockeat/features/food_database_input/services/food/food_database_service.dart';
 
 class NutritionDatabasePage extends StatefulWidget {
-  const NutritionDatabasePage({Key? key}) : super(key: key);
+  const NutritionDatabasePage({super.key});
 
   @override
   State<NutritionDatabasePage> createState() => _NutritionDatabasePageState();
@@ -27,7 +32,7 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
 
   // State variables
   List<FoodAnalysisResult> _searchResults = [];
-  List<FoodAnalysisResult> _selectedFoods = [];
+  final List<FoodAnalysisResult> _selectedFoods = [];
   FoodAnalysisResult? _currentMeal;
   bool _isLoading = false;
   bool _isSearching = false;
@@ -307,7 +312,7 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
         elevation: 0,
         backgroundColor: primaryYellow,
         foregroundColor: Colors.black87,
-        actions: [],
+        actions: const [],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: primaryPink,
@@ -339,7 +344,7 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
                 padding:
                     const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
                 color: _statusMessage.contains('Error')
-                // coverage:ignore-line
+                    // coverage:ignore-line
                     ? primaryPink.withOpacity(0.1)
                     : primaryGreen.withOpacity(0.1),
                 width: double.infinity,
@@ -351,7 +356,7 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
                           : Icons.info_outline,
                       size: 16,
                       color: _statusMessage.contains('Error')
-                      // coverage:ignore-line
+                          // coverage:ignore-line
                           ? primaryPink
                           : primaryGreen,
                     ),
@@ -362,14 +367,14 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
                         style: TextStyle(
                           fontSize: 12,
                           color: _statusMessage.contains('Error')
-                          // coverage:ignore-line 
+                              // coverage:ignore-line
                               ? primaryPink
                               : Colors.black87,
                         ),
                       ),
                     ),
                     if (_isLoading)
-                    //coverage:ignore-start
+                      //coverage:ignore-start
                       SizedBox(
                         width: 16,
                         height: 16,
@@ -378,7 +383,7 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
                           valueColor:
                               AlwaysStoppedAnimation<Color>(primaryGreen),
                         ),
-                      //coverage:ignore-end
+                        //coverage:ignore-end
                       ),
                   ],
                 ),

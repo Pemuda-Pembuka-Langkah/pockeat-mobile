@@ -1,10 +1,13 @@
 //coverage: ignore-file
 
-import 'package:firebase_auth/firebase_auth.dart';
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pockeat/features/food_database_input/services/base/supabase.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_database_input/domain/repositories/nutrition_database_repository.dart';
+import 'package:pockeat/features/food_database_input/services/base/supabase.dart';
 
 abstract class NutritionDatabaseServiceInterface {
   // Food data operations from Supabase
@@ -510,6 +513,7 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
     double avgNutritionDensity = 0;
     if (components.isNotEmpty) {
       avgNutritionDensity =
+          // ignore: avoid_types_as_parameter_names
           components.fold(0.0, (sum, comp) => sum + comp.nutritionDensity) /
               components.length;
     }

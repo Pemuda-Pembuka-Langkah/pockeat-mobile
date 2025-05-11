@@ -1,17 +1,20 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
 
-// Firebase imports:
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 // Project imports:
-import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/circular_indicator_widget.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
+
+// Firebase imports:
+
 
 // Mocks
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}

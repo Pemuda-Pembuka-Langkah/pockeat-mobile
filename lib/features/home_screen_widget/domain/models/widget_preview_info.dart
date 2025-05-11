@@ -1,5 +1,6 @@
 // lib/features/home_screen_widget/domain/models/widget_preview_info.dart
 
+// Project imports:
 import 'package:pockeat/features/home_screen_widget/domain/models/widget_installation_status.dart';
 
 /// Model yang membungkus informasi preview widget
