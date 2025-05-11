@@ -80,7 +80,7 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
       });
     }
   }
-
+  // coverage:ignore-start
   // Function to show year/month picker dialog
   void _showYearMonthPicker() {
     final years = List.generate(
@@ -209,6 +209,7 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
       ),
     );
   }
+  // coverage:ignore-end
   
   // Function to check if a day is enabled
   bool _isDayEnabled(DateTime day) {

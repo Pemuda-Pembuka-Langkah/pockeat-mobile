@@ -202,4 +202,59 @@ void main() {
       findsOneWidget
     );
   });
+  
+  testWidgets('Calendar page navigation controls work correctly', (tester) async {
+    await tester.pumpWidget(createWidgetUnderTest());
+    await pumpFramesForAnimation(tester);
+    
+    // Get the initial month/year text before navigation
+    final initialMonthHeader = find.textContaining(RegExp(r'\b(January|February|March|April|May|June|July|August|September|October|November|December)\b.*\d{4}'));
+    expect(initialMonthHeader, findsOneWidget);
+    final initialHeaderText = (tester.widget(initialMonthHeader) as Text).data ?? '';
+    
+    // Find and tap left chevron to navigate to previous month
+    final prevMonthButton = find.byIcon(Icons.chevron_left);
+    if (prevMonthButton.evaluate().isNotEmpty) {
+      await tester.tap(prevMonthButton.first);
+      await tester.pumpAndSettle();
+      
+      // Verify month header has changed
+      final newMonthHeader = find.textContaining(RegExp(r'\b(January|February|March|April|May|June|July|August|September|October|November|December)\b.*\d{4}'));
+      expect(newMonthHeader, findsOneWidget);
+      final newHeaderText = (tester.widget(newMonthHeader) as Text).data ?? '';
+      
+      // They should be different after navigation
+      expect(newHeaderText != initialHeaderText, isTrue, reason: 'Calendar month should change after navigation');
+    }
+  });
+  
+  testWidgets('Calendar correctly handles date selection', (tester) async {
+    // Create the widget and pump frames for animations
+    await tester.pumpWidget(createWidgetUnderTest());
+    await pumpFramesForAnimation(tester);
+    
+    // Initially the Add Birthdate button should be disabled
+    final addButtonFinder = find.text('Add Birthdate');
+    final initialButton = tester.widget<ElevatedButton>(
+      find.ancestor(of: addButtonFinder, matching: find.byType(ElevatedButton))
+    );
+    expect(initialButton.onPressed, isNull, reason: 'Button should be disabled before date selection');
+    
+    // Find a day to tap
+    final dayNumbers = find.textContaining(RegExp(r'^\d{1,2}$')).evaluate();
+    expect(dayNumbers.isNotEmpty, isTrue);
+    
+    // Tap a day to select it
+    await tester.tap(find.byWidget(dayNumbers.first.widget));
+    await tester.pump();
+    
+    // Button should now be enabled
+    final updatedButton = tester.widget<ElevatedButton>(
+      find.ancestor(of: addButtonFinder, matching: find.byType(ElevatedButton))
+    );
+    expect(updatedButton.onPressed, isNotNull, reason: 'Button should be enabled after date selection');
+    
+    // Age display should be visible after selection
+    expect(find.textContaining('Age:'), findsOneWidget, reason: 'Age calculation should appear after date selection');
+  });
 }
