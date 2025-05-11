@@ -1,4 +1,5 @@
 // Package imports:
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -28,6 +29,9 @@ void main() {
     userId: userId,
     bmr: 1500.0,
     tdee: 2000.0,
+    proteinGrams: 150.0,
+    carbsGrams: 200.0,
+    fatGrams: 66.7,
     timestamp: timestamp,
   );
 
@@ -75,6 +79,9 @@ void main() {
       'userId': userId,
       'bmr': 1500.0,
       'tdee': 2000.0,
+      'proteinGrams': 150.0,
+      'carbsGrams': 200.0,
+      'fatGrams': 66.7,
       'timestamp': timestamp.toIso8601String(),
     });
 
@@ -83,6 +90,9 @@ void main() {
     expect(result, isA<CaloricRequirementModel>());
     expect(result?.bmr, 1500.0);
     expect(result?.tdee, 2000.0);
+    expect(result?.proteinGrams, 150.0);
+    expect(result?.carbsGrams, 200.0);  
+    expect(result?.fatGrams, 66.7);
     expect(result?.timestamp, timestamp);
     expect(result?.userId, userId);
   });
