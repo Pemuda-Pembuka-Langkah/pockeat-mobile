@@ -317,9 +317,12 @@ class FakeCaloricRequirementService extends CaloricRequirementService {
   }) {
     // Just return a dummy model
     return CaloricRequirementModel(
-      userId: userId,
+      userId: 'user123',
       bmr: 1500,
       tdee: 2000,
+      proteinGrams: 150.0,
+      carbsGrams: 200.0,
+      fatGrams: 66.7,
       timestamp: DateTime.now(),
     );
   }

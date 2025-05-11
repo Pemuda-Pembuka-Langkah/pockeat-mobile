@@ -6,12 +6,19 @@ class CaloricRequirementModel {
   final double bmr;
   final double tdee;
   final DateTime timestamp;
+  final double proteinGrams;
+  final double carbsGrams;
+  final double fatGrams;
+
 
   CaloricRequirementModel({
     required this.userId,
     required this.bmr,
     required this.tdee,
     required this.timestamp,
+    required this.proteinGrams,
+    required this.carbsGrams,
+    required this.fatGrams,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +27,10 @@ class CaloricRequirementModel {
       'bmr': bmr,
       'tdee': tdee,
       'timestamp': timestamp.toIso8601String(),
+      'proteinGrams': proteinGrams,
+      'carbsGrams': carbsGrams, 
+      'fatGrams': fatGrams,
+
     };
   }
 
@@ -33,6 +44,9 @@ class CaloricRequirementModel {
       bmr: (data['bmr'] as num).toDouble(),
       tdee: (data['tdee'] as num).toDouble(),
       timestamp: DateTime.parse(data['timestamp']),
+      proteinGrams: data.containsKey('proteinGrams') ? (data['proteinGrams'] as num).toDouble() : 0.0,
+      carbsGrams: data.containsKey('carbsGrams') ? (data['carbsGrams'] as num).toDouble() : 0.0,
+      fatGrams: data.containsKey('fatGrams') ? (data['fatGrams'] as num).toDouble() : 0.0,
     );
   }
 }

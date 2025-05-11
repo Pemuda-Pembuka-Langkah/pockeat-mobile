@@ -466,6 +466,9 @@ void main() {
         bmr: 1500.0,
         tdee: 2000.0,
         userId: testUserId,
+        proteinGrams: 150.0,
+        carbsGrams: 200.0,
+        fatGrams: 66.7,
         timestamp: DateTime.now(),
       );
       when(mockCaloricRequirementRepository.getCaloricRequirement(testUserId))
