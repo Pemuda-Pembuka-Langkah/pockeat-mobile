@@ -1,0 +1,59 @@
+name: Auto Create Tag
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  create-tag:
+    name: Create Tag After Changelog PR Merged
+    # Only run when PR is merged (not closed without merging) and it's from the auto-update-changelog branch
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'auto-update-changelog'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need all git history for comparing changes
+          token: ${{ secrets.GITHUB_TOKEN }}  # Need token for pushing tags
+
+      - name: Extract version from pubspec.yaml
+        id: extract_version
+        run: |
+          VERSION=$(grep -m 1 "version:" pubspec.yaml | sed 's/version://g' | awk -F'+' '{print $1}' | xargs)
+          echo "VERSION=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: v$VERSION"
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          if git rev-parse "${{ steps.extract_version.outputs.VERSION }}" >/dev/null 2>&1; then
+            echo "TAG_EXISTS=true" >> $GITHUB_OUTPUT
+            echo "Tag ${{ steps.extract_version.outputs.VERSION }} already exists"
+          else
+            echo "TAG_EXISTS=false" >> $GITHUB_OUTPUT
+            echo "Tag ${{ steps.extract_version.outputs.VERSION }} does not exist"
+          fi
+
+      - name: Create and push tag
+        if: steps.check_tag.outputs.TAG_EXISTS == 'false'
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          
+          echo "Creating tag ${{ steps.extract_version.outputs.VERSION }}"
+          git tag -a ${{ steps.extract_version.outputs.VERSION }} -m "Release ${{ steps.extract_version.outputs.VERSION }}"
+          git push origin ${{ steps.extract_version.outputs.VERSION }}
+          
+          echo "Successfully created and pushed tag ${{ steps.extract_version.outputs.VERSION }}"
+
+      - name: Tag already exists
+        if: steps.check_tag.outputs.TAG_EXISTS == 'true'
+        run: |
+          echo "Tag ${{ steps.extract_version.outputs.VERSION }} already exists, skipping tag creation"
