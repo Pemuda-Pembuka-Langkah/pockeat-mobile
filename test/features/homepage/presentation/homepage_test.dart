@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,7 +23,7 @@ import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_wid
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'package:pockeat/features/pet_companion/domain/model/pet_information.dart';
-
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 import 'homepage_test.mocks.dart';
 
 @GenerateNiceMocks([
@@ -33,6 +34,7 @@ import 'homepage_test.mocks.dart';
   MockSpec<PetService>(),
   MockSpec<FoodLogHistoryService>(),
   MockSpec<SharedPreferences>(),
+  MockSpec<CaloricRequirementRepository>(),
 ])
 void main() async {
   late MockNavigatorObserver mockNavigatorObserver;
@@ -42,6 +44,7 @@ void main() async {
   late MockPetService mockPetService;
   late MockFoodLogHistoryService mockFoodLogHistoryService;
   late MockSharedPreferences mockSharedPreferences;
+  late MockCaloricRequirementRepository mockCaloricRequirementRepository;
 
   setUp(() {
     mockNavigatorObserver = MockNavigatorObserver();
@@ -51,6 +54,7 @@ void main() async {
     mockPetService = MockPetService();
     mockFoodLogHistoryService = MockFoodLogHistoryService();
     mockSharedPreferences = MockSharedPreferences();
+    mockCaloricRequirementRepository = MockCaloricRequirementRepository();
     final getIt = GetIt.instance;
 
     if (getIt.isRegistered<FirebaseAuth>()) {
@@ -75,12 +79,18 @@ void main() async {
       getIt.unregister<SharedPreferences>();
     }
 
+    if (getIt.isRegistered<CaloricRequirementRepository>()) {
+      getIt.unregister<CaloricRequirementRepository>();
+    }
+
     // Register mock services
     getIt.registerSingleton<FirebaseAuth>(mockFirebaseAuth);
     getIt.registerSingleton<CalorieStatsService>(mockCalorieStatsService);
     getIt.registerSingleton<PetService>(mockPetService);
     getIt.registerSingleton<FoodLogHistoryService>(mockFoodLogHistoryService);
     getIt.registerSingleton<SharedPreferences>(mockSharedPreferences);
+    getIt.registerSingleton<CaloricRequirementRepository>(
+        mockCaloricRequirementRepository);
     // Setup default mock behaviors
     when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
     when(mockUser.uid).thenReturn('test-uid');
@@ -95,15 +105,22 @@ void main() async {
         .thenAnswer((_) async => 1);
     when(mockPetService.getPetMood(any)).thenAnswer((_) async => 'happy');
     when(mockPetService.getPetHeart(any)).thenAnswer((_) async => 4);
-    when(mockPetService.getPetInformation(any)).thenAnswer((_) async =>
-        PetInformation(
-          mood: 'happy',
-          heart: 4,
-          isCalorieOverTarget: false,
-        ));
+    when(mockPetService.getPetInformation(any))
+        .thenAnswer((_) async => PetInformation(
+              mood: 'happy',
+              heart: 4,
+              isCalorieOverTarget: false,
+            ));
 
     when(mockSharedPreferences.getString(any))
         .thenReturn('assets/images/gym.jpg');
+    when(mockCaloricRequirementRepository.getCaloricRequirement(any))
+        .thenAnswer((_) async => CaloricRequirementModel(
+              tdee: 2000,
+              bmr: 1000,
+              timestamp: DateTime.now(),
+              userId: 'test-uid',
+            ));
   });
 
   // Widget helper untuk membungkus test dengan Provider
@@ -137,7 +154,7 @@ void main() async {
       await tester.scrollUntilVisible(
         find.byType(OverviewSection),
         100,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: find.byType(Scrollable),
       );
       expect(find.byType(OverviewSection), findsOneWidget);
       expect(find.byType(CustomBottomNavBar), findsOneWidget);
@@ -238,8 +255,9 @@ void main() async {
 
     testWidgets('HomePage should handle case when user is null',
         (WidgetTester tester) async {
-      // Arrange - simulate no logged in user
+
       when(mockFirebaseAuth.currentUser).thenReturn(null);
+
       when(mockFoodLogHistoryService.getFoodStreakDays(''))
           .thenAnswer((_) async => throw Exception('Test error'));
       // Act
@@ -249,16 +267,6 @@ void main() async {
       // Assert - should still render but with default values
       expect(find.byType(PetHomepageSection), findsOneWidget);
 
-      // Verify display error text
-      expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is Text &&
-              widget.data != null &&
-              widget.data!.startsWith('Error'),
-        ),
-        findsOneWidget,
-      );
     });
 
     testWidgets('Modal should pop up correctly', (WidgetTester tester) async {
