@@ -681,6 +681,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           return ProgressPage(
             service: ProgressTabsService(ProgressTabsRepositoryImpl()),
             initialTabIndex: args?['initialTabIndex'] as int? ?? 0,
+            initialSubTabIndex: args?['initialSubTabIndex'] as int? ?? 0,
           );
         },
         '/notification-settings': (context) =>
