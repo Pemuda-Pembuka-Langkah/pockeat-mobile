@@ -16,6 +16,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/period_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/week_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_goal_page.dart';
 
 // Firebase imports:
 
@@ -376,22 +377,40 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
         Expanded(
           child: CircularIndicatorWidget(
             label: "Weight Goal",
-            value: _isLoadingWeightGoal ? "Loading..." : "$_weightGoal kg",
-            icon: Icons.flag_outlined,
-            color: primaryGreen,
-          ),
+          value: _isLoadingWeightGoal ? "Loading..." : "$_weightGoal kg",
+          icon: Icons.flag_outlined,
+          color: primaryGreen,
+          onTap: _isLoadingWeightGoal 
+              ? null 
+              : () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UpdateGoalPage(initialGoalWeight: _weightGoal),
+                    ),
+                  );
+                  
+                  // Jika berhasil update, refresh data
+                  if (result != null) {
+                    setState(() {
+                      _weightGoal = result;
+                      _isLoadingWeightGoal = false;
+                    });
+                  }
+                },
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: CircularIndicatorWidget(
-            label: "Current Weight",
-            value: _isLoadingWeight ? "Loading..." : "$_currentWeight kg",
-            icon: Icons.scale,
-            color: primaryPink,
-          ),
+      ),
+      const SizedBox(width: 16),
+      Expanded(
+        child: CircularIndicatorWidget(
+          label: "Current Weight",
+          value: _isLoadingWeight ? "Loading..." : "$_currentWeight kg",
+          icon: Icons.scale,
+          color: primaryPink,
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 }
 // coverage:ignore-end
