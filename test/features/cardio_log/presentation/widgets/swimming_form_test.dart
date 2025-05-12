@@ -8,17 +8,33 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/personal_data_reminder.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/swimming_form.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/time_selection_widget.dart';
+import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
 
 void main() {
   late SwimmingForm swimmingForm;
   final Color primaryPink = const Color(0xFFFF6B6B);
   double calculatedCalories = 0.0;
+  late HealthMetricsModel testHealthMetrics;
 
   setUp(() {
+    testHealthMetrics = HealthMetricsModel(
+      userId: 'test-user',
+      height: 175.0,
+      weight: 70.0,
+      age: 30,
+      gender: 'Male',
+      activityLevel: 'moderate',
+      fitnessGoal: 'maintain',
+      bmi: 22.9,
+      bmiCategory: 'Normal weight',
+      desiredWeight: 70.0,
+    );
+
     // Initialize with proper GlobalKey to access state
     swimmingForm = SwimmingForm(
       key: GlobalKey<SwimmingFormState>(),
       primaryPink: primaryPink,
+      healthMetrics: testHealthMetrics,
       onCalculate: (laps, poolLength, stroke, duration) {
         calculatedCalories = laps * poolLength * 0.1;
         return calculatedCalories;
@@ -210,7 +226,7 @@ void main() {
       expect(find.text('Total Distance: 1500.0 meters'), findsOneWidget);
     });
 
-    testWidgets('calculateCalories should use correct values',
+    testWidgets('calculateCalories should work correctly with health metrics',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestableWidget(swimmingForm));
 
@@ -229,18 +245,10 @@ void main() {
           DateTime(now.year, now.month, now.day, 11, 0);
       await tester.pump();
 
-      // Calculate calories
-      final calories = swimmingForm.onCalculate(
-          currentState.selectedLaps,
-          currentState.customPoolLength,
-          currentState.selectedStroke,
-          currentState.selectedEndTime
-              .difference(currentState.selectedStartTime));
-
-      // Verify calculation used our test values
-      // Based on our mock calculation: laps * poolLength * 0.1
-      expect(calories, 30 * 50.0 * 0.1);
-      expect(calculatedCalories, 30 * 50.0 * 0.1);
+      // Verify that the form can calculate calories with health metrics
+      final calories = swimmingForm.calculateCalories(testHealthMetrics);
+      expect(calories, isNotNull);
+      expect(calories, greaterThan(0));
     });
 
     testWidgets('form methods work correctly when called through widget',

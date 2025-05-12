@@ -2,23 +2,32 @@
 import 'package:flutter_test/flutter_test.dart';
 
 // Project imports:
-import 'package:pockeat/features/cardio_log/domain/models/user_constants.dart';
 import 'package:pockeat/features/cardio_log/services/calorie_calculator.dart';
+import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
 
 void main() {
   group('CalorieCalculator Tests', () {
+    late HealthMetricsModel healthMetrics;
+
     setUp(() {
-      // Set up user constants for consistent tests
-      UserConstants.weight = 70; // kg
-      UserConstants.height = 170; // cm
-      UserConstants.age = 30;
-      UserConstants.gender = 'Male';
+      // Set up health metrics for consistent tests
+      healthMetrics = HealthMetricsModel(
+        userId: 'test-user',
+        height: 170.0,
+        weight: 70.0,
+        age: 30,
+        gender: 'Male',
+        activityLevel: 'moderate',
+        fitnessGoal: 'maintain',
+        bmi: 24.2,
+        bmiCategory: 'Normal weight',
+        desiredWeight: 70.0,
+      );
     });
 
     group('Basic Functionality Tests', () {
       test('calculateBMR should calculate correct BMR for male', () {
-        UserConstants.gender = 'Male';
-        double bmr = CalorieCalculator.calculateBMR();
+        double bmr = CalorieCalculator.calculateBMR(healthMetrics);
 
         // BMR formula for men: (10 * weight) + (6.25 * height) - (5 * age) + 5
         double expectedBMR = (10 * 70) + (6.25 * 170) - (5 * 30) + 5;
@@ -26,8 +35,19 @@ void main() {
       });
 
       test('calculateBMR should calculate correct BMR for female', () {
-        UserConstants.gender = 'Female';
-        double bmr = CalorieCalculator.calculateBMR();
+        final femaleHealthMetrics = HealthMetricsModel(
+          userId: 'test-user',
+          height: 170.0,
+          weight: 70.0,
+          age: 30,
+          gender: 'Female', // Changed to Female
+          activityLevel: 'moderate',
+          fitnessGoal: 'maintain',
+          bmi: 24.2,
+          bmiCategory: 'Normal weight',
+          desiredWeight: 70.0,
+        );
+        double bmr = CalorieCalculator.calculateBMR(femaleHealthMetrics);
 
         // BMR formula for women: (10 * weight) + (6.25 * height) - (5 * age) - 161
         double expectedBMR = (10 * 70) + (6.25 * 170) - (5 * 30) - 161;
@@ -37,7 +57,7 @@ void main() {
       test(
           'calculateCaloriesWithMET should calculate calories based on MET and duration',
           () {
-        double bmr = CalorieCalculator.calculateBMR();
+        double bmr = CalorieCalculator.calculateBMR(healthMetrics);
         double met = 8.0;
         Duration duration = const Duration(minutes: 60);
 
@@ -47,6 +67,7 @@ void main() {
         double result = CalorieCalculator.calculateCaloriesWithMET(
           met: met,
           duration: duration,
+          healthMetrics: healthMetrics,
         );
 
         expect(result, expectedCalories);
@@ -118,11 +139,13 @@ void main() {
         double expectedCalories = CalorieCalculator.calculateCaloriesWithMET(
           met: met,
           duration: duration,
+          healthMetrics: healthMetrics,
         );
 
         double result = CalorieCalculator.calculateRunningCalories(
           distanceKm: distance,
           duration: duration,
+          healthMetrics: healthMetrics,
         );
 
         expect(result, expectedCalories);
@@ -134,6 +157,7 @@ void main() {
         final result = CalorieCalculator.calculateRunningCalories(
           distanceKm: -1.0,
           duration: const Duration(minutes: 30),
+          healthMetrics: healthMetrics,
         );
         expect(result, 0.0);
       });
@@ -176,6 +200,7 @@ void main() {
           distanceKm: distance,
           duration: duration,
           cyclingType: type,
+          healthMetrics: healthMetrics,
         );
 
         // Manual calculation to verify
@@ -184,18 +209,21 @@ void main() {
         double expectedCalories = CalorieCalculator.calculateCaloriesWithMET(
           met: met,
           duration: duration,
+          healthMetrics: healthMetrics,
         );
 
         expect(result, expectedCalories);
       });
 
-      test('calculateCyclingCalories should handle invalid inputs by returning 0',
+      test(
+          'calculateCyclingCalories should handle invalid inputs by returning 0',
           () {
         // Test with negative distance
         final result1 = CalorieCalculator.calculateCyclingCalories(
           distanceKm: -1.0,
           duration: const Duration(minutes: 30),
           cyclingType: 'mountain',
+          healthMetrics: healthMetrics,
         );
         expect(result1, 0.0);
 
@@ -204,6 +232,7 @@ void main() {
           distanceKm: 5.0,
           duration: const Duration(seconds: 0),
           cyclingType: 'mountain',
+          healthMetrics: healthMetrics,
         );
         expect(result2, 0.0);
       });
@@ -264,6 +293,7 @@ void main() {
           poolLength: poolLength,
           stroke: stroke,
           duration: duration,
+          healthMetrics: healthMetrics,
         );
 
         // Manual calculation to verify
@@ -274,12 +304,14 @@ void main() {
         double expectedCalories = CalorieCalculator.calculateCaloriesWithMET(
           met: met,
           duration: duration,
+          healthMetrics: healthMetrics,
         );
 
         expect(result, expectedCalories);
       });
 
-      test('calculateSwimmingCalories should handle invalid inputs by returning 0',
+      test(
+          'calculateSwimmingCalories should handle invalid inputs by returning 0',
           () {
         // Test with zero laps
         final result1 = CalorieCalculator.calculateSwimmingCalories(
@@ -287,6 +319,7 @@ void main() {
           poolLength: 25.0,
           stroke: 'Freestyle (Front Crawl)',
           duration: const Duration(minutes: 30),
+          healthMetrics: healthMetrics,
         );
         expect(result1, 0.0);
 
@@ -296,6 +329,7 @@ void main() {
           poolLength: 0,
           stroke: 'Freestyle (Front Crawl)',
           duration: const Duration(minutes: 30),
+          healthMetrics: healthMetrics,
         );
         expect(result2, 0.0);
 
@@ -305,6 +339,7 @@ void main() {
           poolLength: 25.0,
           stroke: 'Freestyle (Front Crawl)',
           duration: const Duration(seconds: 0),
+          healthMetrics: healthMetrics,
         );
         expect(result3, 0.0);
       });

@@ -8,6 +8,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'distance_selection_widget.dart';
 import 'personal_data_reminder.dart';
 import 'time_selection_widget.dart';
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
+import '../../services/calorie_calculator.dart';
 
 enum CyclingActivityType { mountain, commute, stationary }
 
@@ -15,22 +17,20 @@ class CyclingForm extends StatefulWidget {
   final Color primaryPink;
   final Function(double, Duration, String) onCalculate;
   final Function(String)? onTypeChanged;
+  final HealthMetricsModel healthMetrics;
 
   const CyclingForm({
     super.key,
     required this.primaryPink,
     required this.onCalculate,
+    required this.healthMetrics,
     this.onTypeChanged,
   });
 
-  double getCalories() {
-    return calculateCalories();
-  }
-
-  double calculateCalories() {
+  double calculateCalories(HealthMetricsModel healthMetrics) {
     final state = (key as GlobalKey<CyclingFormState>).currentState;
     if (state is CyclingFormState) {
-      return state.calculateCalories();
+      return state.calculateCalories(healthMetrics);
     }
     return 0.0;
   }
@@ -46,7 +46,7 @@ class CyclingFormState extends State<CyclingForm> {
   DateTime selectedStartTime = DateTime.now();
   DateTime selectedEndTime = DateTime.now().add(const Duration(minutes: 30));
 
-  double calculateCalories() {
+  double calculateCalories(HealthMetricsModel healthMetrics) {
     try {
       final totalDistance = selectedKm + (selectedMeter / 1000);
       final duration = selectedEndTime.difference(selectedStartTime);
@@ -60,7 +60,13 @@ class CyclingFormState extends State<CyclingForm> {
           .toString()
           .split('.')
           .last; // 'mountain', 'commute', or 'stationary'
-      return widget.onCalculate(totalDistance, duration, type);
+
+      return CalorieCalculator.calculateCyclingCalories(
+        distanceKm: totalDistance,
+        duration: duration,
+        cyclingType: type,
+        healthMetrics: healthMetrics,
+      );
     } catch (e) {
       debugPrint('Error calculating cycling calories: $e');
       return 0.0;
