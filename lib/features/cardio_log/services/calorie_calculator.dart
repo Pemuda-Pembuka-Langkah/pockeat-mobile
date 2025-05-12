@@ -2,7 +2,7 @@
 import 'package:flutter/foundation.dart';
 
 // Project imports:
-import '../domain/models/user_constants.dart';
+import '../../health_metrics/domain/models/health_metrics_model.dart';
 
 class CalorieCalculator {
   // MET values for different activities
@@ -20,17 +20,17 @@ class CalorieCalculator {
     'Butterfly': 13.8
   };
 
-  // Menghitung BMR (Basal Metabolic Rate)
-  static double calculateBMR() {
-    if (UserConstants.gender == 'Male') {
-      return (10 * UserConstants.weight) +
-          (6.25 * UserConstants.height) -
-          (5 * UserConstants.age) +
+  // Menghitung BMR (Basal Metabolic Rate) with health metrics
+  static double calculateBMR(HealthMetricsModel healthMetrics) {
+    if (healthMetrics.gender.toLowerCase() == 'male') {
+      return (10 * healthMetrics.weight) +
+          (6.25 * healthMetrics.height) -
+          (5 * healthMetrics.age) +
           5;
     } else {
-      return (10 * UserConstants.weight) +
-          (6.25 * UserConstants.height) -
-          (5 * UserConstants.age) -
+      return (10 * healthMetrics.weight) +
+          (6.25 * healthMetrics.height) -
+          (5 * healthMetrics.age) -
           161;
     }
   }
@@ -39,9 +39,10 @@ class CalorieCalculator {
   static double calculateCaloriesWithMET({
     required double met,
     required Duration duration,
+    required HealthMetricsModel healthMetrics,
   }) {
     // Hitung BMR
-    double bmr = calculateBMR();
+    double bmr = calculateBMR(healthMetrics);
 
     // Hitung kalori terbakar per menit
     double caloriesPerMinute = (bmr / 1440) * met;
@@ -92,6 +93,7 @@ class CalorieCalculator {
   static double calculateRunningCalories({
     required double distanceKm,
     required Duration duration,
+    required HealthMetricsModel healthMetrics,
   }) {
     try {
       validateInputs(distanceKm: distanceKm, duration: duration);
@@ -102,7 +104,11 @@ class CalorieCalculator {
       // Get MET based on speed
       double runningMET = getRunningMETBySpeed(speedKmPerHour);
 
-      return calculateCaloriesWithMET(met: runningMET, duration: duration);
+      return calculateCaloriesWithMET(
+        met: runningMET,
+        duration: duration,
+        healthMetrics: healthMetrics,
+      );
     } catch (e) {
       debugPrint('Error calculating running calories: $e');
       return 0.0;
@@ -141,6 +147,7 @@ class CalorieCalculator {
     required double distanceKm,
     required Duration duration,
     required String cyclingType,
+    required HealthMetricsModel healthMetrics,
   }) {
     try {
       validateInputs(distanceKm: distanceKm, duration: duration);
@@ -151,7 +158,11 @@ class CalorieCalculator {
       // Get MET based on speed and cycling type
       double cyclingMET = getCyclingMETBySpeed(speedKmPerHour, cyclingType);
 
-      return calculateCaloriesWithMET(met: cyclingMET, duration: duration);
+      return calculateCaloriesWithMET(
+        met: cyclingMET,
+        duration: duration,
+        healthMetrics: healthMetrics,
+      );
     } catch (e) {
       debugPrint('Error calculating cycling calories: $e');
       return 0.0;
@@ -180,6 +191,7 @@ class CalorieCalculator {
     required double poolLength,
     required String stroke,
     required Duration duration,
+    required HealthMetricsModel healthMetrics,
   }) {
     try {
       if (laps <= 0) {
@@ -202,7 +214,11 @@ class CalorieCalculator {
       double swimmingMET =
           getSwimmingMETBySpeedAndStroke(speedMetersPerMinute, stroke);
 
-      return calculateCaloriesWithMET(met: swimmingMET, duration: duration);
+      return calculateCaloriesWithMET(
+        met: swimmingMET,
+        duration: duration,
+        healthMetrics: healthMetrics,
+      );
     } catch (e) {
       debugPrint('Error calculating swimming calories: $e');
       return 0.0;

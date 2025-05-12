@@ -1,6 +1,7 @@
 // Project imports:
 import '../../services/calorie_calculator.dart';
 import 'cardio_activity.dart';
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
 
 /// Model untuk aktivitas renang
 class SwimmingActivity extends CardioActivity {
@@ -27,12 +28,13 @@ class SwimmingActivity extends CardioActivity {
   double get totalDistance => laps * poolLength;
 
   @override
-  double calculateCalories() {
+  double calculateCaloriesWithHealthMetrics(HealthMetricsModel healthMetrics) {
     return CalorieCalculator.calculateSwimmingCalories(
       laps: laps,
       poolLength: poolLength,
       stroke: stroke,
       duration: duration,
+      healthMetrics: healthMetrics,
     );
   }
 

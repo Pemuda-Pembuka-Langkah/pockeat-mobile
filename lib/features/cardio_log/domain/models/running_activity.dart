@@ -1,6 +1,7 @@
 // Project imports:
 import '../../services/calorie_calculator.dart';
 import 'cardio_activity.dart';
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
 
 /// Model untuk aktivitas lari
 class RunningActivity extends CardioActivity {
@@ -20,10 +21,11 @@ class RunningActivity extends CardioActivity {
         );
 
   @override
-  double calculateCalories() {
+  double calculateCaloriesWithHealthMetrics(HealthMetricsModel healthMetrics) {
     return CalorieCalculator.calculateRunningCalories(
       distanceKm: distanceKm,
       duration: duration,
+      healthMetrics: healthMetrics,
     );
   }
 
