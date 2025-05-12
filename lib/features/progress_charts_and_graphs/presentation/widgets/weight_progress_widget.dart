@@ -17,6 +17,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/week_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_goal_page.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_weight_page.dart';
 
 // Firebase imports:
 
@@ -407,6 +408,26 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
           value: _isLoadingWeight ? "Loading..." : "$_currentWeight kg",
           icon: Icons.scale,
           color: primaryPink,
+          onTap: _isLoadingWeight 
+              ? null 
+              : () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UpdateWeightPage(initialCurrentWeight: _currentWeight),
+                    ),
+                  );
+                  
+                  // Refresh data if successfully updated
+                  if (result != null) {
+                    setState(() {
+                      _currentWeight = result;
+                      _isLoadingWeight = false;
+                    });
+                    // Also reload BMI since weight affects it
+                    _loadCurrentBMI();
+                  }
+                },
         ),
       ),
     ],
