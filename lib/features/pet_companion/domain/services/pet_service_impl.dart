@@ -37,23 +37,54 @@ class PetServiceImpl implements PetService {
 
   @override
   Future<int> getPetHeart(String userId) async {
-    final stats =
-        await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+    try {
+      // Validate input
+      if (userId.isEmpty) {
+        throw ArgumentError('userId cannot be empty');
+      }
 
-    final targetCalories =
-        await firestore.collection('caloric_requirements').doc(userId).get();
-
-    final percentage = stats.caloriesConsumed / targetCalories.data()!['tdee'];
-
-    if (percentage > 0.75) {
-      return 4;
-    } else if (percentage > 0.5) {
-      return 3;
-    } else if (percentage > 0.25) {
-      return 2;
-    } else if (percentage > 0) {
-      return 1;
-    } else {
+      final stats = 
+          await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+      
+      final targetCaloriesDoc = 
+          await firestore.collection('caloric_requirements').doc(userId).get();
+      
+      // Check if document exists
+      if (!targetCaloriesDoc.exists) {
+        throw Exception('Caloric requirements not found for user $userId');
+      }
+      
+      // Get data with null safety
+      final data = targetCaloriesDoc.data();
+      if (data == null || !data.containsKey('tdee')) {
+        throw Exception('TDEE value not found in caloric requirements');
+      }
+      
+      final tdee = data['tdee'] as num;
+      
+      // Avoid division by zero
+      if (tdee <= 0) {
+        throw Exception('TDEE must be greater than zero');
+      }
+      
+      final percentage = stats.caloriesConsumed / tdee;
+      
+      if (percentage > 0.75) {
+        return 4;
+      } else if (percentage > 0.5) {
+        return 3;
+      } else if (percentage > 0.25) {
+        return 2;
+      } else if (percentage > 0) {
+        return 1;
+      } else {
+        return 0;
+      }
+    } catch (e) {
+      // Log error
+      debugPrint('Error in getPetHeart: $e');
+      
+      // Return a default value for graceful degradation
       return 0;
     }
   }
