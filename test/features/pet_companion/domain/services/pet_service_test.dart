@@ -276,6 +276,71 @@ void main() {
     });
   });
 
+  group('getIsPetCalorieOverTarget error handling', () {
+    test('should return false when userId is empty', () async {
+      // Act
+      final result = await petService.getIsPetCalorieOverTarget('');
+
+      // Assert
+      expect(result, false);
+      verifyNever(mockCalorieStatsService.calculateStatsForDate(any, any));
+    });
+
+    test('should return false when document does not exist', () async {
+      // Arrange
+      when(mockDocSnapshot.exists).thenReturn(false);
+
+      // Act
+      final result = await petService.getIsPetCalorieOverTarget(testUserId);
+
+      // Assert
+      expect(result, false);
+      verify(mockCalorieStatsService.calculateStatsForDate(testUserId, any)).called(1);
+    });
+
+    test('should return false when tdee field is missing', () async {
+      // Arrange
+      when(mockDocSnapshot.data()).thenReturn({});
+
+      // Act
+      final result = await petService.getIsPetCalorieOverTarget(testUserId);
+
+      // Assert
+      expect(result, false);
+      verify(mockCalorieStatsService.calculateStatsForDate(testUserId, any)).called(1);
+    });
+
+    test('should return false when calorie stats service throws exception', () async {
+      // Arrange
+      when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .thenThrow(Exception('Service failure'));
+
+      // Act
+      final result = await petService.getIsPetCalorieOverTarget(testUserId);
+
+      // Assert
+      expect(result, false);
+    });
+
+    test('should return true when tdee is zero', () async {
+      // Arrange
+      when(mockDocSnapshot.data()).thenReturn({'tdee': 0});
+      when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
+          .thenAnswer((_) async => DailyCalorieStats(
+                userId: testUserId,
+                date: DateTime.now(),
+                caloriesConsumed: 1500,
+                caloriesBurned: 0,
+              ));
+
+      // Act
+      final result = await petService.getIsPetCalorieOverTarget(testUserId);
+
+      // Assert
+      expect(result, true);
+    });
+  });
+
   group('getPetInformation', () {
     test('should return PetInformation with happy mood when conditions are good', () async {
       // Arrange
