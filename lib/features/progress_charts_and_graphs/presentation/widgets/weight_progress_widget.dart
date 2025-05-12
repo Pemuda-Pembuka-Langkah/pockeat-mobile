@@ -45,6 +45,8 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
   bool _isLoadingWeight = true;
   String _currentBMI = "0";
   bool _isLoadingBMI = true;
+  String _weightGoal = "0";
+  bool _isLoadingWeightGoal = true;
 
   // Service instance
   late final FoodLogDataService _foodLogDataService;
@@ -74,6 +76,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     _loadCalorieData();
     _loadCurrentWeight();
     _loadCurrentBMI();
+    _loadWeightGoal();
   }
 
   Future<void> _loadCalorieData() async {
@@ -240,6 +243,54 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     }
   }
 
+  Future<void> _loadWeightGoal() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingWeightGoal = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No authenticated user found');
+      }
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('health_metrics')
+          .where('userId', isEqualTo: user.uid)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final data = snapshot.docs.first.data();
+        final desiredWeight = data['desiredWeight'];
+
+        if (mounted) {
+          setState(() {
+            _weightGoal = "$desiredWeight";
+            _isLoadingWeightGoal = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _weightGoal = "N/A";
+            _isLoadingWeightGoal = false;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading weight goal: $e');
+      if (mounted) {
+        setState(() {
+          _weightGoal = "Error";
+          _isLoadingWeightGoal = false;
+        });
+      }
+    }
+  }
+
   List<CalorieData> _getDefaultCalorieData() {
     return selectedPeriod == '1 Month'
         ? [
@@ -325,7 +376,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
         Expanded(
           child: CircularIndicatorWidget(
             label: "Weight Goal",
-            value: "74 kg",
+            value: _isLoadingWeightGoal ? "Loading..." : "$_weightGoal kg",
             icon: Icons.flag_outlined,
             color: primaryGreen,
           ),
