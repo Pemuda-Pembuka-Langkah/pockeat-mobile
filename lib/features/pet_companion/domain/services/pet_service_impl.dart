@@ -1,6 +1,7 @@
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
+import 'package:flutter/foundation.dart';
 
 // Project imports:
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
@@ -59,16 +60,43 @@ class PetServiceImpl implements PetService {
 
   @override
   Future<bool> getIsPetCalorieOverTarget(String userId) async {
-    final stats =
-        await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+    try {
+      // Validate input
+      if (userId.isEmpty) {
+        throw ArgumentError('userId cannot be empty');
+      }
 
-    final caloriesConsumed = stats.caloriesConsumed;
-    final caloricRequirement =
-        await firestore.collection('caloric_requirements').doc(userId).get();
+      // Get calories consumed
+      final stats = await calorieStatsService.calculateStatsForDate(
+          userId, DateTime.now());
+      final caloriesConsumed = stats.caloriesConsumed;
 
-    final targetCalories = caloricRequirement.data()!['tdee'];
+      // Get caloric requirement
+      final caloricRequirementDoc =
+          await firestore.collection('caloric_requirements').doc(userId).get();
 
-    return (caloriesConsumed - targetCalories) > 0;
+      // Check if document exists
+      if (!caloricRequirementDoc.exists) {
+        throw Exception('Caloric requirements not found for user $userId');
+      }
+
+      // Get data with null safety
+      final data = caloricRequirementDoc.data();
+      if (data == null || !data.containsKey('tdee')) {
+        throw Exception('TDEE value not found in caloric requirements');
+      }
+
+      final targetCalories = data['tdee'] as num;
+
+      return (caloriesConsumed - targetCalories) > 0;
+    } catch (e) {
+      // Log the error (you may want to add proper logging)
+      debugPrint('Error in getIsPetCalorieOverTarget: $e');
+
+      // Return a default value for graceful degradation
+      // Assuming false (not over target) is the safe default
+      return false;
+    }
   }
 
   @override
