@@ -111,6 +111,7 @@ class BackgroundDependencyService {
       GetIt.instance
           .registerSingleton<FoodLogHistoryService>(foodLogHistoryService);
 
+
       // Get Firestore instance for repositories
       final firestore = FirebaseFirestore.instance;
       services['firestore'] = firestore;
