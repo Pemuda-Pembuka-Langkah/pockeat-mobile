@@ -2,6 +2,7 @@
 import 'package:permission_handler/permission_handler.dart';
 
 // coverage:ignore-start
+
 /// Interface for handling permissions that makes it easier to mock in unit tests
 abstract class PermissionHelperInterface {
   /// Request notification permission

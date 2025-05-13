@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
-import 'personal_data_reminder.dart';
-import 'time_selection_widget.dart';
 import '../../../health_metrics/domain/models/health_metrics_model.dart';
 import '../../services/calorie_calculator.dart';
+import 'personal_data_reminder.dart';
+import 'time_selection_widget.dart';
 
 class SwimmingForm extends StatefulWidget {
   final Color primaryPink;

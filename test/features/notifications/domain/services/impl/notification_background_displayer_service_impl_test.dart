@@ -469,6 +469,7 @@ void main() {
         proteinGrams: 150.0,
         carbsGrams: 200.0,
         fatGrams: 66.7,
+
         timestamp: DateTime.now(),
       );
       when(mockCaloricRequirementRepository.getCaloricRequirement(testUserId))

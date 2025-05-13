@@ -10,7 +10,6 @@ class CaloricRequirementModel {
   final double carbsGrams;
   final double fatGrams;
 
-
   CaloricRequirementModel({
     required this.userId,
     required this.bmr,
@@ -28,9 +27,8 @@ class CaloricRequirementModel {
       'tdee': tdee,
       'timestamp': timestamp.toIso8601String(),
       'proteinGrams': proteinGrams,
-      'carbsGrams': carbsGrams, 
+      'carbsGrams': carbsGrams,
       'fatGrams': fatGrams,
-
     };
   }
 
@@ -44,9 +42,15 @@ class CaloricRequirementModel {
       bmr: (data['bmr'] as num).toDouble(),
       tdee: (data['tdee'] as num).toDouble(),
       timestamp: DateTime.parse(data['timestamp']),
-      proteinGrams: data.containsKey('proteinGrams') ? (data['proteinGrams'] as num).toDouble() : 0.0,
-      carbsGrams: data.containsKey('carbsGrams') ? (data['carbsGrams'] as num).toDouble() : 0.0,
-      fatGrams: data.containsKey('fatGrams') ? (data['fatGrams'] as num).toDouble() : 0.0,
+      proteinGrams: data.containsKey('proteinGrams')
+          ? (data['proteinGrams'] as num).toDouble()
+          : 0.0,
+      carbsGrams: data.containsKey('carbsGrams')
+          ? (data['carbsGrams'] as num).toDouble()
+          : 0.0,
+      fatGrams: data.containsKey('fatGrams')
+          ? (data['fatGrams'] as num).toDouble()
+          : 0.0,
     );
   }
 }

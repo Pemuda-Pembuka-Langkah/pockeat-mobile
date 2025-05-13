@@ -1,10 +1,15 @@
-// Flutter imports:
+// Dart imports:
 import 'dart:async';
+
+// Flutter imports:
+import 'package:flutter/material.dart';
+
+// Project imports:
+import 'package:pockeat/features/authentication/domain/model/feature_card.dart';
+
 // Flutter imports only
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import untuk SystemNavigator
-import 'package:pockeat/features/authentication/domain/model/feature_card.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
@@ -230,8 +235,8 @@ class _WelcomePageState extends State<WelcomePage> {
                               },
                               itemBuilder: (context, index) {
                                 return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8.0),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 20, vertical: 15),
@@ -249,7 +254,8 @@ class _WelcomePageState extends State<WelcomePage> {
                                     child: Row(
                                       children: [
                                         Icon(_featureCards[index].icon,
-                                            color: _featureCards[index].iconColor,
+                                            color:
+                                                _featureCards[index].iconColor,
                                             size:
                                                 32), // Increased icon size from 24 to 32
                                         const SizedBox(width: 12),
@@ -268,7 +274,8 @@ class _WelcomePageState extends State<WelcomePage> {
                                                     fontWeight: FontWeight.bold,
                                                     color: textDarkColor,
                                                   ),
-                                                  overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                   maxLines: 1,
                                                 ),
                                               ),
@@ -280,7 +287,8 @@ class _WelcomePageState extends State<WelcomePage> {
                                                     fontSize: 12,
                                                     color: Colors.black54,
                                                   ),
-                                                  overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                   maxLines: 1,
                                                 ),
                                               ),
@@ -325,8 +333,8 @@ class _WelcomePageState extends State<WelcomePage> {
                       ),
                       child: const Text(
                         "Get Started",
-                        style:
-                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                     const SizedBox(height: 16),

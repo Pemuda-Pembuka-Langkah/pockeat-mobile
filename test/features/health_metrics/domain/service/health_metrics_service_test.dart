@@ -8,9 +8,9 @@ import 'package:mockito/mockito.dart';
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_service.dart';
+import 'health_metrics_service_test.mocks.dart';
 
 // Import generated mocks
-import 'health_metrics_service_test.mocks.dart';
 
 @GenerateMocks([HealthMetricsRepository, FirebaseAuth, User])
 void main() {

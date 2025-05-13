@@ -6,15 +6,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Project imports:
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
+import '../../../health_metrics/domain/service/health_metrics_service.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/cardio_repository.dart';
 import '../../domain/repositories/cardio_repository_impl.dart';
-import '../../../health_metrics/domain/service/health_metrics_service.dart';
 import '../../services/calorie_calculator.dart';
 import '../widgets/cycling_form.dart';
 import '../widgets/running_form.dart';
 import '../widgets/swimming_form.dart';
-import '../../../health_metrics/domain/models/health_metrics_model.dart';
 
 class CardioInputPage extends StatefulWidget {
   final CardioRepository? repository;
@@ -82,8 +82,9 @@ class CardioInputPageState extends State<CardioInputPage> {
     _repository = widget.repository ??
         CardioRepositoryImpl(firestore: FirebaseFirestore.instance);
     _auth = widget.auth ?? FirebaseAuth.instance;
-    _healthMetricsService = widget.healthMetricsService ?? HealthMetricsService();
-    
+    _healthMetricsService =
+        widget.healthMetricsService ?? HealthMetricsService();
+
     // Load health metrics
     _loadHealthMetrics();
   }
@@ -213,19 +214,22 @@ class CardioInputPageState extends State<CardioInputPage> {
                     switch (selectedType) {
                       case CardioType.running:
                         if (runningForm != null && _healthMetrics != null) {
-                          calories = runningForm!.calculateCalories(_healthMetrics!);
+                          calories =
+                              runningForm!.calculateCalories(_healthMetrics!);
                         }
                         break;
 
                       case CardioType.cycling:
                         if (cyclingForm != null && _healthMetrics != null) {
-                          calories = cyclingForm!.calculateCalories(_healthMetrics!);
+                          calories =
+                              cyclingForm!.calculateCalories(_healthMetrics!);
                         }
                         break;
 
                       case CardioType.swimming:
                         if (swimmingForm != null && _healthMetrics != null) {
-                          calories = swimmingForm!.calculateCalories(_healthMetrics!);
+                          calories =
+                              swimmingForm!.calculateCalories(_healthMetrics!);
                         }
                         break;
                     }

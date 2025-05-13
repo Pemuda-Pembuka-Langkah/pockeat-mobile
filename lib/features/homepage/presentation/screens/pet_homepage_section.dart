@@ -14,8 +14,8 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/homepage/presentation/widgets/heart_bar_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
-import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'package:pockeat/features/pet_companion/domain/model/pet_information.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 
 class PetHomepageSection extends StatefulWidget {
   final String petName;

@@ -1,7 +1,7 @@
 // Project imports:
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
 import '../../services/calorie_calculator.dart';
 import 'cardio_activity.dart';
-import '../../../health_metrics/domain/models/health_metrics_model.dart';
 
 /// Model untuk aktivitas renang
 class SwimmingActivity extends CardioActivity {

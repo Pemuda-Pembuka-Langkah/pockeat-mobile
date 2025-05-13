@@ -19,6 +19,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/services/progress_ta
 class ProgressPage extends StatefulWidget {
   final ProgressTabsService service;
   final int initialTabIndex;
+
   final int initialSubTabIndex;
 
   // ignore: use_super_parameters

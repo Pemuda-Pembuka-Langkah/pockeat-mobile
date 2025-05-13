@@ -69,6 +69,16 @@ class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
         setState(() {
           _isLoading = false;
         });
+        // Show error snackbar instead of using flag
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Meal not found'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+
         return;
       }
 
@@ -81,6 +91,16 @@ class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
       setState(() {
         _isLoading = false;
       });
+
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading meal: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

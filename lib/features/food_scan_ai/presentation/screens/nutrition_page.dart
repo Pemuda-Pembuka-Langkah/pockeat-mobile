@@ -131,23 +131,22 @@ class _NutritionPageState extends State<NutritionPage> {
     //print('Calories: ${correctedResult.nutritionInfo.calories}');
     //print('Health Score: ${correctedResult.healthScore}');
     //print('Vitamins: ${correctedResult.nutritionInfo.vitaminsAndMinerals}');
-    //print('========================================');
 
-    // Calculate health score if not provided by API response
+    //print('========================================');    // Use the health score from the API response
     double calculatedHealthScore = correctedResult.healthScore;
     String healthCategory = "Fair"; // Default medium category
-
-    // Use healthScore to determine category if available
+    // Use healthScore to determine category
     if (calculatedHealthScore >= 8) {
       healthCategory = "Excellent";
-    } else if (calculatedHealthScore >= 6)
+    } else if (calculatedHealthScore >= 6) {
       healthCategory = "Good";
-    else if (calculatedHealthScore >= 4)
+    } else if (calculatedHealthScore >= 4) {
       healthCategory = "Fair";
-    else if (calculatedHealthScore >= 2)
+    } else if (calculatedHealthScore >= 2) {
       healthCategory = "Poor";
-    else
+    } else {
       healthCategory = "Very Poor";
+    }
 
     // Ensure state update is synchronous and complete
     setState(() {

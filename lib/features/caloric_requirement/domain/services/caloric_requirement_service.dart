@@ -25,7 +25,6 @@ class CaloricRequirementService {
 
     final macros = MacronutrientCalculator.calculateGramsFromTDEE(tdee);
 
-
     return CaloricRequirementModel(
       userId: userId,
       bmr: bmr,

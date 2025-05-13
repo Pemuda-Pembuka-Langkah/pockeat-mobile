@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 // Project imports:
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
+import '../../services/calorie_calculator.dart';
 import 'distance_selection_widget.dart';
 import 'personal_data_reminder.dart';
 import 'time_selection_widget.dart';
-import '../../../health_metrics/domain/models/health_metrics_model.dart';
-import '../../services/calorie_calculator.dart';
 
 enum CyclingActivityType { mountain, commute, stationary }
 

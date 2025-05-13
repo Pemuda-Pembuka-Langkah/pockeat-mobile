@@ -2,11 +2,11 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
+import '../../services/calorie_calculator.dart';
 import 'distance_selection_widget.dart';
 import 'personal_data_reminder.dart';
 import 'time_selection_widget.dart';
-import '../../../health_metrics/domain/models/health_metrics_model.dart';
-import '../../services/calorie_calculator.dart';
 
 class RunningForm extends StatefulWidget {
   final Color primaryPink;

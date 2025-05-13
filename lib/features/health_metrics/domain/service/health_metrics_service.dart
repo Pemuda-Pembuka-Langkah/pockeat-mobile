@@ -14,11 +14,11 @@ class HealthMetricsService {
   HealthMetricsService({
     HealthMetricsRepository? repository,
     FirebaseAuth? auth,
-  }) : _repository = repository ?? HealthMetricsRepositoryImpl(),
+  })  : _repository = repository ?? HealthMetricsRepositoryImpl(),
         _auth = auth ?? FirebaseAuth.instance;
 
   /// Fetches health metrics for the current user
-  /// 
+  ///
   /// Returns the user's health metrics or creates a default one if not found
   Future<HealthMetricsModel> getUserHealthMetrics() async {
     final user = _auth.currentUser;
@@ -28,11 +28,11 @@ class HealthMetricsService {
 
     try {
       final metrics = await _repository.getHealthMetrics(user.uid);
-      
+
       if (metrics != null) {
         return metrics;
       }
-      
+
       // Return default health metrics if not found
       return _getDefaultHealthMetrics(user.uid);
     } catch (e) {
