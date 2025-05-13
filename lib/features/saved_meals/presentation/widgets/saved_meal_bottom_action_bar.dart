@@ -498,7 +498,6 @@ class SavedMealBottomActionBar extends StatelessWidget {
       ),
     );
   }
-  // Both _confirmDelete and _deleteMeal methods were removed as they were unused
 
   Future<void> _logMeal(BuildContext context) async {
     if (savedMeal == null) return;

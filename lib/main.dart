@@ -4,6 +4,7 @@ import 'dart:async';
 // Flutter imports:
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:camera/camera.dart';
@@ -67,6 +68,7 @@ import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.
 import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/health_value_proposition_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
@@ -75,6 +77,7 @@ import 'package:pockeat/features/health_metrics/presentation/screens/speed_selec
 import 'package:pockeat/features/health_metrics/presentation/screens/thank_you_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/used_other_apps_page.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
+import 'package:pockeat/features/home_screen_widget/presentation/screens/widget_manager_screen.dart';
 import 'package:pockeat/features/homepage/presentation/screens/homepage.dart';
 import 'package:pockeat/features/notifications/domain/constants/notification_constants.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
@@ -218,12 +221,18 @@ void _handleDeepLink(DeepLinkResult result) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Lock the app to portrait orientation only
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   await dotenv.load(fileName: '.env');
   final flavor = dotenv.env['FLAVOR'] ?? 'dev';
 
   // Inisialisasi required services
   await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp();
 
   // Initialize Instabug
   await _initializeInstabug(flavor);
@@ -559,6 +568,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 'Verification failed. Please try again.',
           );
         },
+        // Di main.dart pada bagian routes:
+        '/onboarding': (context) => const HealthValuePropositionPage(),
         '/onboarding/goal': (context) {
           return BlocProvider.value(
             value: context.read<HealthMetricsFormCubit>(),
@@ -667,10 +678,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           return ProgressPage(
             service: ProgressTabsService(ProgressTabsRepositoryImpl()),
             initialTabIndex: args?['initialTabIndex'] as int? ?? 0,
+            initialSubTabIndex: args?['initialSubTabIndex'] as int? ?? 0,
           );
         },
         '/notification-settings': (context) =>
             const AuthWrapper(child: NotificationSettingsScreen()),
+        '/widget-settings': (context) =>
+            const AuthWrapper(child: WidgetManagerScreen()),
         '/edit-profile': (context) {
           final user = ModalRoute.of(context)!.settings.arguments as UserModel?;
           return AuthWrapper(

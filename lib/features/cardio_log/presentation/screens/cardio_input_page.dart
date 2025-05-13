@@ -6,6 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // Project imports:
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
+import '../../../health_metrics/domain/service/health_metrics_service.dart';
 import '../../domain/models/models.dart';
 import '../../domain/repositories/cardio_repository.dart';
 import '../../domain/repositories/cardio_repository_impl.dart';
@@ -14,17 +16,16 @@ import '../widgets/cycling_form.dart';
 import '../widgets/running_form.dart';
 import '../widgets/swimming_form.dart';
 
-// Using CardioType from model for consistency
-// enum CardioType { running, cycling, swimming }
-
 class CardioInputPage extends StatefulWidget {
   final CardioRepository? repository;
-  final FirebaseAuth? auth; // Add this parameter
+  final FirebaseAuth? auth;
+  final HealthMetricsService? healthMetricsService;
 
   const CardioInputPage({
     super.key,
     this.repository,
     this.auth,
+    this.healthMetricsService,
   });
 
   @override
@@ -32,6 +33,10 @@ class CardioInputPage extends StatefulWidget {
 }
 
 class CardioInputPageState extends State<CardioInputPage> {
+  bool _isSaving = false;
+  bool _isLoadingHealthMetrics = true;
+  HealthMetricsModel? _healthMetrics;
+
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
@@ -39,6 +44,7 @@ class CardioInputPageState extends State<CardioInputPage> {
   // Repository to store data
   late CardioRepository _repository;
   late FirebaseAuth _auth;
+  late HealthMetricsService _healthMetricsService;
 
   // GlobalKeys for each form
   final GlobalKey<RunningFormState> _runningFormKey =
@@ -72,15 +78,64 @@ class CardioInputPageState extends State<CardioInputPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize repository, use injected repository or create a new one
+    // Initialize services
     _repository = widget.repository ??
         CardioRepositoryImpl(firestore: FirebaseFirestore.instance);
-    _auth =
-        widget.auth ?? FirebaseAuth.instance; // Use injected auth or default
+    _auth = widget.auth ?? FirebaseAuth.instance;
+    _healthMetricsService =
+        widget.healthMetricsService ?? HealthMetricsService();
+
+    // Load health metrics
+    _loadHealthMetrics();
+  }
+
+  Future<void> _loadHealthMetrics() async {
+    try {
+      setState(() => _isLoadingHealthMetrics = true);
+      _healthMetrics = await _healthMetricsService.getUserHealthMetrics();
+    } catch (e) {
+      debugPrint('Error loading health metrics: $e');
+      // Set default health metrics if loading fails
+      _healthMetrics = _getDefaultHealthMetrics();
+    } finally {
+      setState(() => _isLoadingHealthMetrics = false);
+    }
+  }
+
+  HealthMetricsModel _getDefaultHealthMetrics() {
+    return HealthMetricsModel(
+      userId: _auth.currentUser?.uid ?? 'anonymous',
+      height: 175.0,
+      weight: 70.0,
+      age: 30,
+      gender: 'Male',
+      activityLevel: 'moderate',
+      fitnessGoal: 'maintain',
+      bmi: 22.9,
+      bmiCategory: 'Normal weight',
+      desiredWeight: 70.0,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingHealthMetrics) {
+      return Scaffold(
+        backgroundColor: primaryYellow,
+        appBar: AppBar(
+          backgroundColor: primaryYellow,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black87),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: primaryYellow,
       appBar: AppBar(
@@ -150,38 +205,37 @@ class CardioInputPageState extends State<CardioInputPage> {
         ),
         child: SafeArea(
           child: ElevatedButton(
-            onPressed: () {
-              // Get data directly from active form
-              double calories = 0;
+            onPressed: _isSaving
+                ? null
+                : () {
+                    setState(() => _isSaving = true);
+                    double calories = 0;
 
-              switch (selectedType) {
-                case CardioType.running:
-                  if (runningForm != null) {
-                    // Get values directly from running form
-                    calories = runningForm!.calculateCalories();
-                  }
-                  break;
+                    switch (selectedType) {
+                      case CardioType.running:
+                        if (runningForm != null && _healthMetrics != null) {
+                          calories =
+                              runningForm!.calculateCalories(_healthMetrics!);
+                        }
+                        break;
 
-                case CardioType.cycling:
-                  if (cyclingForm != null) {
-                    // Get values directly from cycling form
-                    calories = cyclingForm!.calculateCalories();
-                  }
-                  break;
+                      case CardioType.cycling:
+                        if (cyclingForm != null && _healthMetrics != null) {
+                          calories =
+                              cyclingForm!.calculateCalories(_healthMetrics!);
+                        }
+                        break;
 
-                case CardioType.swimming:
-                  if (swimmingForm != null) {
-                    // Get values directly from swimming form
-                    calories = swimmingForm!.calculateCalories();
-                  }
-                  break;
-              }
+                      case CardioType.swimming:
+                        if (swimmingForm != null && _healthMetrics != null) {
+                          calories =
+                              swimmingForm!.calculateCalories(_healthMetrics!);
+                        }
+                        break;
+                    }
 
-              // Create and save activity object without popping immediately
-              _saveActivity(calories);
-              // Remove this line to prevent immediate navigation
-              // Navigator.pop(context);
-            },
+                    _saveActivity(calories);
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryPink,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -189,14 +243,21 @@ class CardioInputPageState extends State<CardioInputPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: Text(
-              'Save ${_getActivityName()}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
+            child: _isSaving
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2),
+                  )
+                : Text(
+                    'Save ${_getActivityName()}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ),
@@ -256,17 +317,22 @@ class CardioInputPageState extends State<CardioInputPage> {
   }
 
   Widget _buildFormFields() {
+    if (_healthMetrics == null) {
+      return const Center(child: Text('Loading health metrics...'));
+    }
+
     switch (selectedType) {
       case CardioType.running:
         runningForm = RunningForm(
           key: _runningFormKey,
           primaryPink: primaryPink,
+          healthMetrics: _healthMetrics!,
           onCalculate: (distance, duration) {
-            // Store the values for later
             _updateRunningData(distance, duration);
             return CalorieCalculator.calculateRunningCalories(
               distanceKm: distance,
               duration: duration,
+              healthMetrics: _healthMetrics!,
             );
           },
         );
@@ -276,16 +342,16 @@ class CardioInputPageState extends State<CardioInputPage> {
         cyclingForm = CyclingForm(
           key: _cyclingFormKey,
           primaryPink: primaryPink,
+          healthMetrics: _healthMetrics!,
           onCalculate: (distance, duration, type) {
-            // Store the values for later
             _updateCyclingData(distance, duration, type);
             return CalorieCalculator.calculateCyclingCalories(
               distanceKm: distance,
               duration: duration,
               cyclingType: type,
+              healthMetrics: _healthMetrics!,
             );
           },
-          // Add this callback to update the cycling type directly when it changes
           onTypeChanged: (type) {
             cyclingType = type;
           },
@@ -296,6 +362,7 @@ class CardioInputPageState extends State<CardioInputPage> {
         swimmingForm = SwimmingForm(
           key: _swimmingFormKey,
           primaryPink: primaryPink,
+          healthMetrics: _healthMetrics!,
           onCalculate: (laps, poolLength, stroke, duration) {
             _updateSwimmingData(laps, poolLength, duration);
             swimmingStroke = stroke;
@@ -304,6 +371,7 @@ class CardioInputPageState extends State<CardioInputPage> {
               poolLength: poolLength,
               stroke: stroke,
               duration: duration,
+              healthMetrics: _healthMetrics!,
             );
           },
         );
@@ -443,13 +511,26 @@ class CardioInputPageState extends State<CardioInputPage> {
           break;
       }
 
-      // If validation failed, show error message
+      // If validation failed, show error message and reset _isSaving
       if (!isValid) {
         if (mounted) {
+          setState(() => _isSaving = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(errorMessage),
               backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              duration: const Duration(seconds: 5),
+              action: SnackBarAction(
+                label: 'Dismiss',
+                textColor: Colors.white,
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                },
+              ),
             ),
           );
         }
@@ -476,7 +557,13 @@ class CardioInputPageState extends State<CardioInputPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(snackBar).closed.then((_) {
           if (mounted) {
-            Navigator.pop(context);
+            Navigator.of(context).pushNamed(
+              '/analytic',
+              arguments: {
+                'initialTabIndex': 1,
+                'initialSubTabIndex': 1,
+              },
+            );
           }
         });
       }
@@ -493,7 +580,18 @@ class CardioInputPageState extends State<CardioInputPage> {
               ),
             ),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Dismiss',
+              textColor: Colors.white,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
           ),
         );
       }

@@ -69,7 +69,6 @@ class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
         setState(() {
           _isLoading = false;
         });
-
         // Show error snackbar instead of using flag
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -79,6 +78,7 @@ class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
             ),
           );
         }
+
         return;
       }
 

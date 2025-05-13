@@ -10,16 +10,34 @@ import 'package:pockeat/features/cardio_log/presentation/widgets/distance_select
 import 'package:pockeat/features/cardio_log/presentation/widgets/running_form.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/swimming_form.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/time_selection_widget.dart';
+import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
 
 void main() {
   final Color primaryPink = const Color(0xFFFF6B6B);
-  
+  late HealthMetricsModel testHealthMetrics;
+
+  setUp(() {
+    testHealthMetrics = HealthMetricsModel(
+      userId: 'test-user',
+      height: 175.0,
+      weight: 70.0,
+      age: 30,
+      gender: 'Male',
+      activityLevel: 'moderate',
+      fitnessGoal: 'maintain',
+      bmi: 22.9,
+      bmiCategory: 'Normal weight',
+      desiredWeight: 70.0,
+    );
+  });
+
   group('TimeSelectionWidget Tests', () {
-    testWidgets('TimeSelectionWidget should render correctly', 
+    testWidgets('TimeSelectionWidget should render correctly',
         (WidgetTester tester) async {
-      DateTime selectedStartTime = DateTime.now().subtract(const Duration(hours: 1));
+      DateTime selectedStartTime =
+          DateTime.now().subtract(const Duration(hours: 1));
       DateTime selectedEndTime = DateTime.now();
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -37,26 +55,27 @@ void main() {
           ),
         ),
       );
-      
+
       // Verify time selection UI elements
       expect(find.text('Start Time'), findsOneWidget);
       expect(find.text('End Time'), findsOneWidget);
-      
+
       // Instead of checking for specific time format, check for the widget's existence
       // and verify that the duration text is displayed
-      expect(find.byType(InkWell), findsAtLeast(2)); // At least 2 InkWell widgets for time selection
-      
+      expect(find.byType(InkWell),
+          findsAtLeast(2)); // At least 2 InkWell widgets for time selection
+
       // Check for duration text
       expect(find.textContaining('Duration:'), findsOneWidget);
     });
   });
-  
+
   group('DistanceSelectionWidget Tests', () {
-    testWidgets('DistanceSelectionWidget should render correctly', 
+    testWidgets('DistanceSelectionWidget should render correctly',
         (WidgetTester tester) async {
       int selectedKm = 5;
       int selectedMeter = 0;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -74,7 +93,7 @@ void main() {
           ),
         ),
       );
-      
+
       // Verify distance selection UI elements
       expect(find.text('Distance'), findsOneWidget);
       expect(find.text('km'), findsOneWidget);
@@ -83,24 +102,26 @@ void main() {
   });
 
   group('RunningForm Tests', () {
-    testWidgets('RunningForm should render correctly', 
+    testWidgets('RunningForm should render correctly',
         (WidgetTester tester) async {
       double calculatedCalories = 0;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: RunningForm(
               primaryPink: primaryPink,
+              healthMetrics: testHealthMetrics,
               onCalculate: (distance, duration) {
-                calculatedCalories = distance * 60; // Simplified calculation for test
+                calculatedCalories =
+                    distance * 60; // Simplified calculation for test
                 return calculatedCalories;
               },
             ),
           ),
         ),
       );
-      
+
       // Verify running form UI elements
       expect(find.text('Start Time'), findsOneWidget);
       expect(find.text('End Time'), findsOneWidget);
@@ -109,19 +130,21 @@ void main() {
   });
 
   group('CyclingForm Tests', () {
-    testWidgets('CyclingForm should render correctly', 
+    testWidgets('CyclingForm should render correctly',
         (WidgetTester tester) async {
       double calculatedCalories = 0;
       // ignore: unused_local_variable
       String selectedType = '';
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: CyclingForm(
               primaryPink: primaryPink,
+              healthMetrics: testHealthMetrics,
               onCalculate: (distance, duration, type) {
-                calculatedCalories = distance * 50; // Simplified calculation for test
+                calculatedCalories =
+                    distance * 50; // Simplified calculation for test
                 return calculatedCalories;
               },
               onTypeChanged: (type) {
@@ -131,7 +154,7 @@ void main() {
           ),
         ),
       );
-      
+
       // Verify cycling form UI elements
       expect(find.text('Start Time'), findsOneWidget);
       expect(find.text('End Time'), findsOneWidget);
@@ -144,24 +167,26 @@ void main() {
   });
 
   group('SwimmingForm Tests', () {
-    testWidgets('SwimmingForm should render correctly', 
+    testWidgets('SwimmingForm should render correctly',
         (WidgetTester tester) async {
       double calculatedCalories = 0;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: SwimmingForm(
               primaryPink: primaryPink,
+              healthMetrics: testHealthMetrics,
               onCalculate: (laps, poolLength, stroke, duration) {
-                calculatedCalories = laps * 15; // Simplified calculation for test
+                calculatedCalories =
+                    laps * 15; // Simplified calculation for test
                 return calculatedCalories;
               },
             ),
           ),
         ),
       );
-      
+
       // Verify swimming form UI elements
       expect(find.text('Start Time'), findsOneWidget);
       expect(find.text('End Time'), findsOneWidget);
@@ -170,4 +195,4 @@ void main() {
       expect(find.text('Swimming Stroke'), findsOneWidget);
     });
   });
-} 
+}

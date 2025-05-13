@@ -1,4 +1,48 @@
 # Changelog
+## v1.3.2
+**Release Date: May 07, 2025**
+
+### Features
+- **Widget System Integration** - Implementation of home screen widgets for food tracking
+  - Simple and detailed food widget preview with drawable preview
+  - Widget manager screen for customization and installation
+  - Widget preview card factory for different widget types
+  - Native code integration for widget installation
+
+### Improvements
+- **Profile Page Enhancement**
+  - Integration of BMI and user weight data from database
+  - Addition of widget setting shortcut on profile page
+  - Refactoring to use English instead of Indonesian
+  - Increased code coverage for profile page components
+
+### Bug Fixes
+- Fixed timezone bug on calories chart
+- Fixed widget installation and update issues
+- Corrected desiredWeight field implementation
+
+### Technical
+- **Widget Architecture**
+  - Implementation of widget installation controller and service
+  - Widget preview info DTO and constants
+  - Widget installation status model and handler
+- **Pet Companion Enhancement**
+  - Implementation of integration with caloric requirements
+  - Tests for pet integration with calorie requirements
+- Setup automatic changelog updates using AI
+
+## v1.3.1
+**Release Date: May 5, 2025**
+
+### Features
+- **Food Database Input** - Implementasi sistem input database makanan lengkap dengan antarmuka pengguna yang intuitif
+- **Health Score Analysis** - Penambahan fitur analisis health score dan parameter nutrisi tambahan
+
+### Bug Fixes
+- Memperbaiki integrasi antara Google Auth dan proses onboarding 
+- Perbaikan bug di mana homescreen widget tidak terupdate dengan baik
+- Memperbaiki masalah blank screen pada aplikasi
+
 ## v1.3.0
 **Release Date: April 26, 2025**
 

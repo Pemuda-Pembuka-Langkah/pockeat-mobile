@@ -1,3 +1,6 @@
+// Project imports:
+import 'package:pockeat/features/pet_companion/domain/model/pet_information.dart';
+
 abstract class PetService {
   /// Get the pet mood
   ///
@@ -19,4 +22,19 @@ abstract class PetService {
   /// between 50% and 75% of the target calories returns 3
   /// between 75% and 100% of the target calories returns 4
   Future<int> getPetHeart(String userId);
+
+  /// Get the pet calorie over target
+  ///
+  /// [userId] is the user id
+  /// Returns the pet calorie over target
+  ///
+  /// returns true if the pet has consumed more calories than the target
+  /// returns false if the pet has consumed less than the target
+  Future<bool> getIsPetCalorieOverTarget(String userId);
+
+  /// Get the pet information
+  ///
+  /// [userId] is the user id
+  /// Returns the pet information
+  Future<PetInformation> getPetInformation(String userId);
 }

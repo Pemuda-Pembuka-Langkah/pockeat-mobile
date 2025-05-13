@@ -1,147 +1,229 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:flutter_test/flutter_test.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/presentation/screens/welcome_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  // Mock for SystemNavigator
+  const channel = MethodChannel('plugins.flutter.io/url_launcher');
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+    return null;
+  });
+
   group('WelcomePage', () {
-    testWidgets('renders title and tagline', (WidgetTester tester) async {
+    testWidgets('renders taglines and subtitle', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: WelcomePage()),
       );
 
-      expect(find.text('Pockeat'), findsOneWidget);
-      expect(find.text('Your health companion'), findsOneWidget);
+      // Check for RichText widgets that contain the taglines
+      expect(find.byType(RichText), findsAtLeastNWidgets(2));
+      
+      // Verify the specific TextSpan content using predicates
+      expect(
+        find.byWidgetPredicate((widget) {
+          if (widget is RichText) {
+            final span = widget.text as TextSpan;
+            return span.children?.any((element) => 
+              element is TextSpan && element.text == 'Matters') ?? false;
+          }
+          return false;
+        }),
+        findsOneWidget,
+        reason: 'Should find RichText with "Matters" TextSpan',
+      );
+      
+      expect(
+        find.byWidgetPredicate((widget) {
+          if (widget is RichText) {
+            final span = widget.text as TextSpan;
+            return span.children?.any((element) => 
+              element is TextSpan && element.text == 'Counts') ?? false;
+          }
+          return false;
+        }),
+        findsOneWidget,
+        reason: 'Should find RichText with "Counts" TextSpan',
+      );
+      
+      // Check subtitle
+      expect(
+        find.text('AI-Driven Smart Companion for Seamless Calorie & Health Tracking'),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('shows Log In and Get Started buttons', (WidgetTester tester) async {
+    testWidgets('shows feature cards and page indicators', (WidgetTester tester) async {
+      // Set up a larger size to avoid overflow issues
+      tester.binding.window.physicalSizeTestValue = const Size(1080, 1920);
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      
       await tester.pumpWidget(
         const MaterialApp(home: WelcomePage()),
       );
 
-      expect(find.text('Log In'), findsOneWidget);
-      expect(find.text('Get Started'), findsOneWidget);
+      // Check for at least one feature card structure
+      expect(find.byType(PageView), findsOneWidget);
+      
+      // Check that there are container widgets for the card design
+      expect(find.byType(Container), findsAtLeastNWidgets(1));
+      
+      // Check for page indicators
+      expect(find.byType(AnimatedContainer), findsAtLeastNWidgets(1));
+      
+      // Reset the test window size
+      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
     });
 
-    testWidgets('tapping Log In shows loading and navigates', (WidgetTester tester) async {
-      final mockObserver = _MockNavigatorObserver();
+    testWidgets('shows Get Started button', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: WelcomePage()),
+      );
 
+      // Check for main CTA button
+      expect(find.widgetWithText(ElevatedButton, 'Get Started'), findsOneWidget);
+    });
+    
+    // Helper function to extract all text from a TextSpan hierarchy
+    String extractTextFromSpan(TextSpan span) {
+      String text = span.text ?? '';
+      if (span.children != null) {
+        for (var child in span.children!) {
+          if (child is TextSpan) {
+            text += extractTextFromSpan(child);
+          }
+        }
+      }
+      return text;
+    }
+
+    testWidgets('shows login text', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: WelcomePage()),
+      );
+
+      // Check for TextButton
+      expect(find.byType(TextButton), findsOneWidget);
+      
+      // Check for RichText component that might contain login related text
+      final loginRelatedText = find.byWidgetPredicate((widget) {
+        if (widget is RichText) {
+          final span = widget.text as TextSpan;
+          final allText = extractTextFromSpan(span);
+          return allText.contains('account') || allText.contains('Log in');
+        }
+        return false;
+      });
+      
+      expect(loginRelatedText, findsOneWidget);
+    });
+
+    testWidgets('has PopScope to handle back button', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: WelcomePage()),
+      );
+
+      // Just verify the PopScope widget is present to handle back navigation
+      expect(find.byType(PopScope), findsOneWidget);
+    });
+
+    testWidgets('has login button that triggers navigation', (WidgetTester tester) async {
+      bool navigatedToLogin = false;
+      
       await tester.pumpWidget(
         MaterialApp(
           home: const WelcomePage(),
-          navigatorObservers: [mockObserver],
-          routes: {
-            '/login': (_) => const Scaffold(body: Text('Login Page')),
+          onGenerateRoute: (settings) {
+            if (settings.name == '/login') {
+              navigatedToLogin = true;
+              return MaterialPageRoute(
+                builder: (_) => const Scaffold(body: Text('Login Page')),
+              );
+            }
+            return null;
           },
         ),
       );
 
-      await tester.tap(find.text('Log In'));
-      await tester.pump(); // triggers setState (loading)
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-
-      // Fast-forward delayed future
-      await tester.pump(const Duration(milliseconds: 500));
+      // Just find and tap the TextButton which should handle login
+      final buttonFinder = find.byType(TextButton);
+      expect(buttonFinder, findsOneWidget);
+      
+      await tester.tap(buttonFinder);
       await tester.pumpAndSettle();
 
-      expect(find.text('Login Page'), findsOneWidget);
+      expect(navigatedToLogin, isTrue, reason: 'Should navigate to login page');
     });
 
-    testWidgets('tapping Get Started navigates to onboarding', (WidgetTester tester) async {
-  final mockObserver = _MockNavigatorObserver();
-
-  await tester.pumpWidget(
-    MaterialApp(
-      home: const WelcomePage(),
-      navigatorObservers: [mockObserver],
-      routes: {
-        '/height-weight': (_) => const HeightWeightPage(), // correct destination page
-      },
-    ),
-  );
-
-  await tester.tap(find.text('Get Started'));
-  await tester.pump(); // triggers loading state
-  await tester.pump(const Duration(milliseconds: 500));
-  await tester.pumpAndSettle();
-
-  expect(find.text('Enter your height and weight'), findsOneWidget); // <- THIS
-});
-
-
-    testWidgets('shows error message when navigation throws', (WidgetTester tester) async {
-      // Wrap in a try/catch to simulate failure inside `_navigateTo`
+    testWidgets('navigates to onboarding when Get Started is tapped', (WidgetTester tester) async {
+      bool navigatedToOnboarding = false;
+      
       await tester.pumpWidget(
         MaterialApp(
-          home: Builder(
-            builder: (context) => MaterialApp(
-              home: WelcomePageWithNavigationFailure(),
-            ),
-          ),
+          home: const WelcomePage(),
+          onGenerateRoute: (settings) {
+            if (settings.name == '/onboarding') {
+              navigatedToOnboarding = true;
+              return MaterialPageRoute(
+                builder: (_) => const Scaffold(body: Text('Onboarding')),
+              );
+            }
+            return null;
+          },
         ),
       );
 
-      await tester.tap(find.text('Log In'));
-      await tester.pump(); // triggers loading
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.text('Get Started'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Something went wrong. Please try again.'), findsOneWidget);
+      expect(navigatedToOnboarding, isTrue);
+    });
+
+
+    testWidgets('has components for auto-scrolling feature cards', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: WelcomePage()),
+      );
+
+      // Check that PageView exists for the feature cards
+      expect(find.byType(PageView), findsOneWidget);
+      
+      // Verify that page indicators exist for the auto-scroll functionality
+      expect(find.byType(Row), findsAtLeastNWidgets(1));
+      expect(find.byType(AnimatedContainer), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('contains decorative visual elements', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: WelcomePage()),
+      );
+
+      // Verify the existence of Stack widget which contains visual elements
+      expect(find.byType(Stack), findsAtLeastNWidgets(1));
+      
+      // Verify containers exist (likely decorative elements)
+      expect(find.byType(Container), findsAtLeastNWidgets(1)); 
+      
+      // Verify some decorative elements with circular shape
+      final decorativeElements = find.byWidgetPredicate((widget) {
+        if (widget is Container && widget.decoration != null) {
+          final decoration = widget.decoration as BoxDecoration?;
+          return decoration?.shape == BoxShape.circle;
+        }
+        return false;
+      });
+      
+      expect(decorativeElements, findsAtLeastNWidgets(1));
     });
   });
 }
 
-// Mocks a failing navigation for test
-class WelcomePageWithNavigationFailure extends StatefulWidget {
-  @override
-  State<WelcomePageWithNavigationFailure> createState() => _WelcomePageWithNavigationFailureState();
-}
 
-class _WelcomePageWithNavigationFailureState extends State<WelcomePageWithNavigationFailure> {
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  Future<void> _navigateTo(String routeName) async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      throw Exception("Fake navigation failure"); // simulate error
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Something went wrong. Please try again.';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          ElevatedButton(onPressed: () => _navigateTo('/login'), child: const Text('Log In')),
-          if (_isLoading) const CircularProgressIndicator(),
-          if (_errorMessage != null)
-            Text(
-              _errorMessage!,
-              style: const TextStyle(color: Colors.red),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-// Mock NavigatorObserver (if needed later)
-class _MockNavigatorObserver extends NavigatorObserver {}

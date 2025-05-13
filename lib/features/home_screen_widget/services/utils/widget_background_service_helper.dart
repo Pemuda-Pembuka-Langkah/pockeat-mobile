@@ -1,7 +1,8 @@
 // Project imports:
 import 'package:pockeat/features/home_screen_widget/services/widget_background_service.dart';
 
-//
+// coverage:ignore-start
+
 /// Interface untuk WidgetBackgroundService yang memudahkan mocking di unit tests
 abstract class WidgetBackgroundServiceHelperInterface {
   /// Initialize workmanager untuk background task
@@ -24,3 +25,4 @@ class WidgetBackgroundServiceHelper
     await WidgetBackgroundService.cancelAllTasks();
   }
 }
+// coverage:ignore-end

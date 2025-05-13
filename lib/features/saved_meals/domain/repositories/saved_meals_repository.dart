@@ -17,12 +17,16 @@ import 'package:pockeat/firebase/firebase_repository.dart';
 class FoodAnalysisRepository
     extends BaseFirestoreRepository<FoodAnalysisResult> {
   static const String _timestampField = 'timestamp';
-  FoodAnalysisRepository({super.firestore})
+
+  // ignore: use_super_parameters
+  FoodAnalysisRepository({FirebaseFirestore? firestore})
       : super(
           collectionName: 'food_analysis',
           toMap: (item) =>
               item.toJson(), // Direct serialization without nesting
           fromMap: (map, id) => FoodAnalysisResult.fromJson(map),
+
+          firestore: firestore,
         );
 
   // Get food analysis results for a specific date

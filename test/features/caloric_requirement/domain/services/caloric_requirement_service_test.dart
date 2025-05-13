@@ -1,11 +1,10 @@
-// caloric_requirement_service_test.dart
-
 // Package imports:
 import 'package:flutter_test/flutter_test.dart';
 
 // Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_calculator.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
+import 'package:pockeat/features/caloric_requirement/domain/services/macronutrient_requirement_calculator.dart';
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
 
 void main() {
@@ -58,7 +57,7 @@ void main() {
   });
 
   group('CaloricRequirementService', () {
-    test('analyze() returns model with correct BMR and TDEE', () {
+    test('analyze() returns model with correct BMR, TDEE, and macronutrients', () {
       final model = HealthMetricsModel(
         userId: 'user123',
         height: 170,
@@ -69,6 +68,7 @@ void main() {
         fitnessGoal: 'Maintain',
         bmi: 22.5,
         bmiCategory: 'Normal',
+        desiredWeight: 60,
       );
 
       final service = CaloricRequirementService();
@@ -77,6 +77,7 @@ void main() {
         model: model,
       );
 
+      // Expected calculations
       final expectedBMR = CaloricRequirementCalculator.calculateBMR(
         weight: model.weight,
         height: model.height,
@@ -89,9 +90,14 @@ void main() {
         model.activityLevel,
       );
 
+      final expectedMacros = MacronutrientCalculator.calculateGramsFromTDEE(expectedTDEE);
+
       expect(result.userId, model.userId);
       expect(result.bmr, closeTo(expectedBMR, 0.01));
       expect(result.tdee, closeTo(expectedTDEE, 0.01));
+      expect(result.proteinGrams, closeTo(expectedMacros['proteinGrams']!, 0.01));
+      expect(result.carbsGrams, closeTo(expectedMacros['carbsGrams']!, 0.01));
+      expect(result.fatGrams, closeTo(expectedMacros['fatGrams']!, 0.01));
       expect(result.timestamp, isA<DateTime>());
     });
   });

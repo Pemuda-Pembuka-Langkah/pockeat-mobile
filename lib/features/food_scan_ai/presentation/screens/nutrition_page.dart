@@ -1,6 +1,8 @@
 // Dart imports:
 //
 
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 // Dart imports:
 import 'dart:io';
 
@@ -129,6 +131,7 @@ class _NutritionPageState extends State<NutritionPage> {
     //print('Calories: ${correctedResult.nutritionInfo.calories}');
     //print('Health Score: ${correctedResult.healthScore}');
     //print('Vitamins: ${correctedResult.nutritionInfo.vitaminsAndMinerals}');
+
     //print('========================================');    // Use the health score from the API response
     double calculatedHealthScore = correctedResult.healthScore;
     String healthCategory = "Fair"; // Default medium category

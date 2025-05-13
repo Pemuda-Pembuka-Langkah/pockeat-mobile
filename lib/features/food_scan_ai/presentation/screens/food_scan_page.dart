@@ -107,32 +107,32 @@ class ScanFoodPageState extends State<ScanFoodPage>
 
   @override
   Widget build(BuildContext context) {
+    // Calculate a consistent shift value to use for all elements
+    final double verticalShift = MediaQuery.of(context).size.height * 0.05;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Camera Preview
-          Positioned.fill(
+          // Camera Preview - Shifted upward
+          Positioned(
+            left: 0,
+            right: 0,
+            top: -verticalShift, // Shift camera up by 5%
+            bottom: verticalShift, // Add extra space at bottom
             child: _isCameraReady
-                ? FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: widget.cameraController.value.previewSize!.height,
-                      height: widget.cameraController.value.previewSize!.width,
-                      child: Center(
-                        child: AspectRatio(
-                          aspectRatio:
-                              1 / widget.cameraController.value.aspectRatio,
-                          child: CameraPreview(widget.cameraController),
-                        ),
-                      ),
-                    ),
+                ? Center(
+                    child: CameraPreview(widget.cameraController),
                   )
                 : const Center(child: CircularProgressIndicator()),
           ),
 
-          // Scanning Animation
-          Center(
+          // Scanning Animation - Also shifted upward to match camera
+          Positioned(
+            left: 0,
+            right: 0,
+            // Position it at the center but shifted up like the camera view
+            top: MediaQuery.of(context).size.height * 0.5 - verticalShift,
             child: AnimatedBuilder(
               animation: _scanLineController,
               builder: (context, child) {
@@ -157,83 +157,91 @@ class ScanFoodPageState extends State<ScanFoodPage>
             ),
           ),
 
-          // Scanner Frame
-          Center(
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.transparent,
-                  width: 0.5,
+          // Scanner Frame - Also shifted upward to match camera
+          Positioned(
+            left: 0,
+            right: 0,
+            // Position it at the center but shifted up like the camera view
+            top: MediaQuery.of(context).size.height * 0.5 -
+                140 -
+                verticalShift, // Center height (50%) - half frame height (140px) - shift
+            child: Center(
+              child: Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Colors.transparent,
+                    width: 0.5,
+                  ),
                 ),
-              ),
-              child: Stack(
-                children: [
-                  // Top Left Corner
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(color: primaryGreen, width: 3),
-                          top: BorderSide(color: primaryGreen, width: 3),
+                child: Stack(
+                  children: [
+                    // Top Left Corner
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(color: primaryGreen, width: 3),
+                            top: BorderSide(color: primaryGreen, width: 3),
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  // Top Right Corner
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: BorderSide(color: primaryGreen, width: 3),
-                          top: BorderSide(color: primaryGreen, width: 3),
+                    // Top Right Corner
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            right: BorderSide(color: primaryGreen, width: 3),
+                            top: BorderSide(color: primaryGreen, width: 3),
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  // Bottom Left Corner
-                  Positioned(
-                    left: 0,
-                    bottom: 0,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          left: BorderSide(color: primaryGreen, width: 3),
-                          bottom: BorderSide(color: primaryGreen, width: 3),
+                    // Bottom Left Corner
+                    Positioned(
+                      left: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            left: BorderSide(color: primaryGreen, width: 3),
+                            bottom: BorderSide(color: primaryGreen, width: 3),
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  // Bottom Right Corner
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: BorderSide(color: primaryGreen, width: 3),
-                          bottom: BorderSide(color: primaryGreen, width: 3),
+                    // Bottom Right Corner
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            right: BorderSide(color: primaryGreen, width: 3),
+                            bottom: BorderSide(color: primaryGreen, width: 3),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

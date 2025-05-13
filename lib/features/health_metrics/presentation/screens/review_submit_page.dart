@@ -93,6 +93,7 @@ class ReviewSubmitPage extends StatelessWidget {
             fitnessGoal: goalsDisplay,
             bmi: state.bmi ?? 0,
             bmiCategory: state.bmiCategory ?? "-",
+            desiredWeight: state.desiredWeight ?? 0,
           );
 
           final result = caloricService.analyze(
@@ -100,7 +101,11 @@ class ReviewSubmitPage extends StatelessWidget {
             model: healthMetrics,
           );
 
-          final macros = _calculateMacros(result.tdee);
+          final macros = {
+            'Protein': result.proteinGrams,
+            'Carbs': result.carbsGrams,
+            'Fat': result.fatGrams,
+          };
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -241,23 +246,13 @@ class ReviewSubmitPage extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("${e.key}:"),
-              const SizedBox(width: 8),
-              Expanded(
-                child: LinearProgressIndicator(
-                  value: e.value,
-                  minHeight: 8,
-                  backgroundColor: Colors.grey.shade300,
-                  color: e.key == 'Protein'
-                      ? Colors.blue
-                      : e.key == 'Carbs'
-                          ? Colors.orange
-                          : Colors.green,
-                ),
+              Text(
+                "${e.key}:",
+                style: const TextStyle(fontWeight: FontWeight.w500),
               ),
-              const SizedBox(width: 8),
-              Text("${(e.value * 100).toStringAsFixed(0)}%"),
+              Text("${e.value.toStringAsFixed(0)} g"),
             ],
           ),
         );
@@ -328,16 +323,5 @@ class ReviewSubmitPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Map<String, double> _calculateMacros(double tdee) {
-    const proteinPercent = 0.3;
-    const carbsPercent = 0.4;
-    const fatPercent = 0.3;
-    return {
-      'Protein': proteinPercent,
-      'Carbs': carbsPercent,
-      'Fat': fatPercent,
-    };
   }
 }

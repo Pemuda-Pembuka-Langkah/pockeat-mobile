@@ -2,24 +2,27 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
+import '../../services/calorie_calculator.dart';
 import 'personal_data_reminder.dart';
 import 'time_selection_widget.dart';
 
 class SwimmingForm extends StatefulWidget {
   final Color primaryPink;
-  final Function(int, double, String, Duration)
-      onCalculate; // laps, poolLength, stroke, duration
+  final Function(int, double, String, Duration) onCalculate;
+  final HealthMetricsModel healthMetrics;
 
   const SwimmingForm({
     super.key,
     required this.primaryPink,
     required this.onCalculate,
+    required this.healthMetrics,
   });
 
-  double calculateCalories() {
+  double calculateCalories(HealthMetricsModel healthMetrics) {
     final state = (key as GlobalKey<SwimmingFormState>).currentState;
     if (state is SwimmingFormState) {
-      return state._calculateFormCalories();
+      return state._calculateFormCalories(healthMetrics);
     }
     return 0.0;
   }
@@ -44,7 +47,7 @@ class SwimmingFormState extends State<SwimmingForm> {
   DateTime selectedEndTime = DateTime.now().add(const Duration(minutes: 30));
 
   // Menghitung kalori berdasarkan data form
-  double _calculateFormCalories() {
+  double _calculateFormCalories(HealthMetricsModel healthMetrics) {
     try {
       Duration duration = selectedEndTime.difference(selectedStartTime);
 
@@ -53,11 +56,12 @@ class SwimmingFormState extends State<SwimmingForm> {
         return 0.0;
       }
 
-      return widget.onCalculate(
-        selectedLaps,
-        customPoolLength,
-        selectedStroke,
-        duration,
+      return CalorieCalculator.calculateSwimmingCalories(
+        laps: selectedLaps,
+        poolLength: customPoolLength,
+        stroke: selectedStroke,
+        duration: duration,
+        healthMetrics: healthMetrics,
       );
     } catch (e) {
       debugPrint('Error calculating swimming calories: $e');

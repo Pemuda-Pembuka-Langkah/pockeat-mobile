@@ -1,6 +1,10 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 // Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
@@ -13,6 +17,9 @@ import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/week_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
 
+// Firebase imports:
+
+// coverage:ignore-start
 class WeightProgressWidget extends StatefulWidget {
   const WeightProgressWidget({super.key});
 
@@ -34,6 +41,10 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
   bool _isLoadingCalorieData = true;
   List<CalorieData> _calorieData = [];
   double _totalCalories = 0;
+  String _currentWeight = "0";
+  bool _isLoadingWeight = true;
+  String _currentBMI = "0";
+  bool _isLoadingBMI = true;
 
   // Service instance
   late final FoodLogDataService _foodLogDataService;
@@ -61,9 +72,10 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     super.initState();
     _foodLogDataService = getIt<FoodLogDataService>();
     _loadCalorieData();
+    _loadCurrentWeight();
+    _loadCurrentBMI();
   }
 
-// coverage:ignore-start
   Future<void> _loadCalorieData() async {
     if (!mounted) return;
 
@@ -121,6 +133,113 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     }
   }
 
+  Future<void> _loadCurrentWeight() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingWeight = true;
+    });
+
+    try {
+      // Get the current user ID
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No authenticated user found');
+      }
+
+      // Query the user's weight entry directly since each userId has a unique record
+      final snapshot = await FirebaseFirestore.instance
+          .collection('health_metrics')
+          .where('userId', isEqualTo: user.uid)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final data = snapshot.docs.first.data();
+        final weight = data['weight'];
+
+        if (mounted) {
+          setState(() {
+            _currentWeight = "$weight";
+            _isLoadingWeight = false;
+          });
+        }
+      } else {
+        // No weight data found
+        if (mounted) {
+          setState(() {
+            _currentWeight = "N/A";
+            _isLoadingWeight = false;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading weight data: $e');
+      if (mounted) {
+        setState(() {
+          _currentWeight = "Error";
+          _isLoadingWeight = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadCurrentBMI() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingBMI = true;
+    });
+
+    try {
+      // Get the current user ID
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No authenticated user found');
+      }
+
+      // Query the user's BMI entry
+      final snapshot = await FirebaseFirestore.instance
+          .collection('health_metrics')
+          .where('userId', isEqualTo: user.uid)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final data = snapshot.docs.first.data();
+        final bmi = data['bmi'];
+
+        // Format to 2 decimal places
+        final formattedBMI = bmi is double
+            ? bmi.toStringAsFixed(2)
+            : double.parse(bmi.toString()).toStringAsFixed(2);
+
+        if (mounted) {
+          setState(() {
+            _currentBMI = formattedBMI;
+            _isLoadingBMI = false;
+          });
+        }
+      } else {
+        // No BMI data found
+        if (mounted) {
+          setState(() {
+            _currentBMI = "N/A";
+            _isLoadingBMI = false;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading BMI data: $e');
+      if (mounted) {
+        setState(() {
+          _currentBMI = "Error";
+          _isLoadingBMI = false;
+        });
+      }
+    }
+  }
+
   List<CalorieData> _getDefaultCalorieData() {
     return selectedPeriod == '1 Month'
         ? [
@@ -155,6 +274,8 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
               primaryGreen: primaryGreen,
               primaryYellow: primaryYellow,
               primaryPink: primaryPink,
+              bmiValue: _currentBMI,
+              isLoading: _isLoadingBMI,
             ),
             const SizedBox(height: 24),
             PeriodSelectionTabs(
@@ -196,7 +317,6 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
       ),
     );
   }
-// coverage:ignore-end
 
   Widget _buildCurrentWeightIndicators() {
     return Row(
@@ -214,7 +334,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
         Expanded(
           child: CircularIndicatorWidget(
             label: "Current Weight",
-            value: "78 kg",
+            value: _isLoadingWeight ? "Loading..." : "$_currentWeight kg",
             icon: Icons.scale,
             color: primaryPink,
           ),
@@ -223,3 +343,4 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     );
   }
 }
+// coverage:ignore-end

@@ -75,6 +75,8 @@ class FoodLogDataService {
     }).toList();
   }
 
+  // Filter logs for the current week (legacy method kept for compatibility)
+
   // Get calorie data for current month (grouped by weeks)
   Future<List<CalorieData>> getMonthCalorieData() async {
     try {
@@ -124,9 +126,9 @@ class FoodLogDataService {
 
     // Process each log entry
     for (var log in logs) {
-      // Adjust timestamp for GMT+7 (adjust for Indonesia timezone)
-      final adjustedTime = log.timestamp.add(const Duration(hours: 7));
-      final dayOfWeek = dayNames[adjustedTime.weekday % 7];
+      // Use timestamp directly without timezone adjustment
+      final logDateTime = log.timestamp;
+      final dayOfWeek = dayNames[logDateTime.weekday % 7];
 
       // Extract macronutrient values directly from FoodLogHistoryItem properties
       final protein = log.protein?.toDouble() ?? 0;
@@ -195,11 +197,11 @@ class FoodLogDataService {
 
     // Process each log entry
     for (var log in logs) {
-      // Adjusted time for GMT+7 (adjust for Indonesia timezone)
-      final adjustedTime = log.timestamp.add(const Duration(hours: 7));
+      // Use timestamp directly without timezone adjustment
+      final logDateTime = log.timestamp;
 
       // Calculate week number (1-4)
-      final weekOfMonth = ((adjustedTime.day - 1) / 7).floor() + 1;
+      final weekOfMonth = ((logDateTime.day - 1) / 7).floor() + 1;
       final weekNumber = weekOfMonth.clamp(1, 4);
 
       // Extract macronutrient values

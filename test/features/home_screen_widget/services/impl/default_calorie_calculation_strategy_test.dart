@@ -141,6 +141,7 @@ void main() {
         fitnessGoal: 'maintain',
         bmi: 22.9,
         bmiCategory: 'Normal',
+        desiredWeight: 69.0,
       );
 
       final mockRequirementResult = CaloricRequirementModel(
@@ -148,6 +149,9 @@ void main() {
         bmr: 1700.0,
         tdee: 2500.0,
         timestamp: DateTime.now(),
+        proteinGrams: 150.0,
+        carbsGrams: 200.0,
+        fatGrams: 66.7,
       );
 
       when(mockHealthMetricsRepository.getHealthMetrics(any))
@@ -199,12 +203,16 @@ void main() {
         fitnessGoal: 'maintain',
         bmi: 22.9,
         bmiCategory: 'Normal',
+        desiredWeight: 69.0,
       );
 
       final mockRequirementResult = CaloricRequirementModel(
         userId: testUserId,
         bmr: 1700.5,
         tdee: 2550.7,
+        proteinGrams: 150.0,
+        carbsGrams: 200.0,
+        fatGrams: 66.7,
         timestamp: DateTime.now(),
       );
 

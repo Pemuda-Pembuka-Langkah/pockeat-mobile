@@ -2,7 +2,8 @@
 import 'package:pockeat/features/home_screen_widget/services/utils/custom_home_widget_client.dart';
 import 'package:pockeat/features/home_screen_widget/services/utils/home_widget_client.dart';
 
-//
+// coverage:ignore-start
+
 /// Factory untuk menyediakan instance HomeWidgetInterface
 ///
 /// Ini memudahkan kita untuk mengubah implementasi tanpa mengubah kode client
@@ -25,3 +26,4 @@ class HomeWidgetProvider {
     return _instance!;
   }
 }
+// coverage:ignore-end

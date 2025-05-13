@@ -1,5 +1,8 @@
 //coverage: ignore-file
 
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -70,7 +73,8 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
 
       return _convertToFoodAnalysisResults(response);
     } catch (e) {
-      //debugPrint('Error searching foods: $e');
+      debugPrint('Error searching foods: $e');
+
       return [];
     }
   }
