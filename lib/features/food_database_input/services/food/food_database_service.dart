@@ -507,13 +507,11 @@ class NutritionDatabaseService implements NutritionDatabaseServiceInterface {
         totalVitaminsAndMinerals[key] =
             (totalVitaminsAndMinerals[key] ?? 0) + value;
       });
-    }
-
-    // Calculate average nutrition density without intermediate rounding
+    } // Calculate average nutrition density without intermediate rounding
     double avgNutritionDensity = 0;
     if (components.isNotEmpty) {
       avgNutritionDensity =
-          components.fold(0.0, (sum, comp) => sum + comp.nutritionDensity) /
+          components.fold(0.0, (acc, comp) => acc + comp.nutritionDensity) /
               components.length;
     }
 

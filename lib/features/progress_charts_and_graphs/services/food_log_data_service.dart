@@ -75,13 +75,6 @@ class FoodLogDataService {
     }).toList();
   }
 
-  // Filter logs for the current week (legacy method kept for compatibility)
-  List<FoodLogHistoryItem> _filterLogsForCurrentWeek(
-      List<FoodLogHistoryItem> logs, DateTime startDate) {
-    final endDate = startDate.add(const Duration(days: 7));
-    return _filterLogsForSpecificWeek(logs, startDate, endDate);
-  }
-
   // Get calorie data for current month (grouped by weeks)
   Future<List<CalorieData>> getMonthCalorieData() async {
     try {

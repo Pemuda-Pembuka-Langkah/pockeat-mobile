@@ -47,7 +47,6 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
   late Future<FoodAnalysisResult?> _foodFuture;
   bool _isLoading = false;
   bool _isSaved = false;
-  String? _savedMealId;
 
   // Colors
   final Color primaryGreen = const Color(0xFF4CAF50);
@@ -337,11 +336,9 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
         debugPrint("FoodDetailPage: Meal saved with ID: ${savedMeal.id}");
 
         if (!mounted) return;
-
         setState(() {
           _isLoading = false;
           _isSaved = true;
-          _savedMealId = savedMeal.id;
         });
 
         // Show success message

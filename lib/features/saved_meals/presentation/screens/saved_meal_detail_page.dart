@@ -33,9 +33,7 @@ class SavedMealDetailPage extends StatefulWidget {
 }
 
 class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
-  final bool _isScrolledToTop = true;
   bool _isLoading = true;
-  bool _hasError = false;
   bool _isSaving = false;
   String _foodName = 'Loading...';
   double _calories = 0;
@@ -62,7 +60,6 @@ class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
     try {
       setState(() {
         _isLoading = true;
-        _hasError = false;
       });
 
       final result =
@@ -71,8 +68,17 @@ class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
       if (result == null) {
         setState(() {
           _isLoading = false;
-          _hasError = true;
         });
+
+        // Show error snackbar instead of using flag
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Meal not found'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
         return;
       }
 
@@ -84,8 +90,17 @@ class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _hasError = true;
       });
+
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading meal: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

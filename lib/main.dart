@@ -623,8 +623,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
         '/food-text-input': (context) =>
             const AuthWrapper(child: FoodTextInputPage()),
-        '/food-analysis': (context) =>
-            const AuthWrapper(child: AIAnalysisScreen()),
         '/add-exercise': (context) =>
             const AuthWrapper(child: ExerciseInputPage()),
         '/weightlifting-input': (context) =>
