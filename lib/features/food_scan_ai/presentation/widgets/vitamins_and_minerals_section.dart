@@ -10,11 +10,11 @@ class VitaminsAndMineralsSection extends StatelessWidget {
   final Color primaryColor;
 
   const VitaminsAndMineralsSection({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.food,
     required this.primaryColor,
-  }) : super(key: key);
+  });
 
   String formatNutrientName(String name) {
     // Format nutrient name for better readability
@@ -133,7 +133,7 @@ class VitaminsAndMineralsSection extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(Icons.info_outline, color: Colors.grey),
+              const Icon(Icons.info_outline, color: Colors.grey),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

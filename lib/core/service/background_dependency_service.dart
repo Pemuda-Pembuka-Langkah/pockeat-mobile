@@ -8,8 +8,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository_impl.dart';
-import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
@@ -17,6 +15,7 @@ import 'package:pockeat/config/production.dart';
 import 'package:pockeat/config/staging.dart';
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:pockeat/features/authentication/services/login_service_impl.dart';
+import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository_impl.dart';
 import 'package:pockeat/features/calorie_stats/domain/repositories/calorie_stats_repository.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
@@ -31,6 +30,7 @@ import 'package:pockeat/features/home_screen_widget/services/impl/default_nutrie
 import 'package:pockeat/features/home_screen_widget/services/impl/detailed_food_tracking_widget_service.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/simple_food_tracking_widget_service.dart';
 import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
+import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
@@ -49,7 +49,7 @@ class BackgroundDependencyService {
 
     // Setup widget dependencies
     await setupWidgetDependencies(services);
-    
+
     return services;
   }
 
@@ -111,7 +111,6 @@ class BackgroundDependencyService {
       GetIt.instance
           .registerSingleton<FoodLogHistoryService>(foodLogHistoryService);
 
-
       // Get Firestore instance for repositories
       final firestore = FirebaseFirestore.instance;
       services['firestore'] = firestore;
@@ -166,25 +165,23 @@ class BackgroundDependencyService {
   /// Setup dependencies needed for home screen widgets
   static Future<void> setupWidgetDependencies(
       Map<String, dynamic> services) async {
-
-    
     try {
       // Widget services for home screen widgets
       services['simpleWidgetService'] = SimpleFoodTrackingWidgetService(
         widgetName: HomeWidgetConfig.simpleWidgetName.value,
         appGroupId: HomeWidgetConfig.appGroupId.value,
-      );      
+      );
       services['detailedWidgetService'] = DetailedFoodTrackingWidgetService(
         widgetName: HomeWidgetConfig.detailedWidgetName.value,
         appGroupId: HomeWidgetConfig.appGroupId.value,
-      );      
+      );
       services['nutrientCalculationStrategy'] =
-          DefaultNutrientCalculationStrategy();      
+          DefaultNutrientCalculationStrategy();
       services['caloricRequirementRepository'] =
           CaloricRequirementRepositoryImpl();
-      
+
       services['caloricStatsRepository'] = CalorieStatsRepositoryImpl();
-      
+
       services['caloricStatsService'] = CalorieStatsServiceImpl(
           repository:
               services['caloricStatsRepository'] as CalorieStatsRepositoryImpl,
@@ -192,7 +189,6 @@ class BackgroundDependencyService {
               as ExerciseLogHistoryService,
           foodService:
               services['foodLogHistoryService'] as FoodLogHistoryService);
-      
     } catch (e) {
       final errorMsg = 'Failed to setup widget dependencies: $e';
       debugPrint(errorMsg);

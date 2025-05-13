@@ -15,6 +15,7 @@ import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/screens/nutrition_page.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/additional_nutrients_section.dart';
+import 'package:pockeat/features/food_scan_ai/presentation/widgets/bottom_action_bar.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/calorie_summary_card.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/diet_tags_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/food_analysis_error.dart';
@@ -25,7 +26,6 @@ import 'package:pockeat/features/food_scan_ai/presentation/widgets/ingredients_s
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutrition_app_bar.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/nutritional_info_section.dart';
 import 'package:pockeat/features/food_scan_ai/presentation/widgets/vitamins_and_minerals_section.dart';
-import 'package:pockeat/features/food_scan_ai/presentation/widgets/bottom_action_bar.dart';
 
 class MockFoodScanPhotoService extends Mock implements FoodScanPhotoService {}
 

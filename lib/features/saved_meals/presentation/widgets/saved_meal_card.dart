@@ -11,10 +11,10 @@ class SavedMealCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const SavedMealCard({
-    Key? key,
+    super.key,
     required this.savedMeal,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

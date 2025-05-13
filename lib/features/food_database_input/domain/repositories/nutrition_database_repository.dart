@@ -1,6 +1,7 @@
 // Project imports:
 //coverage: ignore-file
 
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/firebase/firebase_repository.dart';
 

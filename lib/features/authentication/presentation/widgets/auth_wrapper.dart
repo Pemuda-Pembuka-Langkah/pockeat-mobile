@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
+
 /// A wrapper widget that handles authentication state
 /// and redirects users to the appropriate screens
 class AuthWrapper extends StatefulWidget {
@@ -60,21 +61,22 @@ class _AuthWrapperState extends State<AuthWrapper> {
       } else {
         // Login
         if (widget.requireAuth) {
-          final healthMetricsCheckService = GetIt.instance<HealthMetricsCheckService>();
-          final isOnboardingCompleted = await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
+          final healthMetricsCheckService =
+              GetIt.instance<HealthMetricsCheckService>();
+          final isOnboardingCompleted =
+              await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
           if (!mounted) {
             return;
           }
           debugPrint('isOnboardingCompleted: $isOnboardingCompleted');
-          if(!isOnboardingCompleted){
+          if (!isOnboardingCompleted) {
             Navigator.of(context).pushReplacementNamed('/height-weight');
-          } else{
+          } else {
             setState(() {
               _isAuthenticated = true;
               _isChecking = false;
             });
           }
-         
         } else {
           _redirect(widget.redirectUrlIfLoggedIn, replace: true);
         }

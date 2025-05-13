@@ -69,15 +69,15 @@ class _OverviewSectionState extends State<OverviewSection> {
 
   Widget _buildCaloriesToday() {
     // Wrap with ErrorBoundaryWidget to catch errors in testing
-    return ErrorBoundaryWidget(
-      child: const CaloriesTodayWidget(),
+    return const ErrorBoundaryWidget(
+      child: CaloriesTodayWidget(),
     );
   }
 
   Widget _buildFitnessTrackerSection() {
     // Wrap with ErrorBoundaryWidget to catch errors in testing
-    return ErrorBoundaryWidget(
-      child: const HealthConnectWidget(),
+    return const ErrorBoundaryWidget(
+      child: HealthConnectWidget(),
     );
   }
 

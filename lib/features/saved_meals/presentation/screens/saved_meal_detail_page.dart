@@ -1,5 +1,7 @@
 // Flutter imports:
 //
+
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 // Project imports:
@@ -21,17 +23,17 @@ class SavedMealDetailPage extends StatefulWidget {
   final SavedMealService savedMealService;
 
   const SavedMealDetailPage({
-    Key? key,
+    super.key,
     required this.savedMealId,
     required this.savedMealService,
-  }) : super(key: key);
+  });
 
   @override
   _SavedMealDetailPageState createState() => _SavedMealDetailPageState();
 }
 
 class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
-  bool _isScrolledToTop = true;
+  final bool _isScrolledToTop = true;
   bool _isLoading = true;
   bool _hasError = false;
   bool _isSaving = false;

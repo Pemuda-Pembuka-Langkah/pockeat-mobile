@@ -1,12 +1,13 @@
 // Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-//
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+
+//
 
 class SavedMealBottomActionBar extends StatelessWidget {
   final bool isLoading;
@@ -157,7 +158,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
               style: TextStyle(color: Colors.black87),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               '• "This has 300 calories, not 400"\n• "It contains less sugar, about 5g"\n• "Add broccoli as an ingredient"',
               style: TextStyle(color: Colors.black54, fontSize: 13),
             ),
@@ -224,7 +225,7 @@ class SavedMealBottomActionBar extends StatelessWidget {
               SizedBox(
                 width: 20,
                 height: 20,
-                child: const CircularProgressIndicator(
+                child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),

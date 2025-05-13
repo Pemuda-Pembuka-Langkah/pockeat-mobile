@@ -116,7 +116,7 @@ class BottomActionBar extends StatelessWidget {
                           barrierDismissible: false,
                           builder: (BuildContext context) {
                             return const Center(
-                              child: const CircularProgressIndicator(),
+                              child: CircularProgressIndicator(),
                             );
                           },
                         );

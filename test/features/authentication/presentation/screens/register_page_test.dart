@@ -16,8 +16,8 @@ import 'package:mockito/mockito.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
-import 'package:pockeat/features/authentication/services/register_service.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
+import 'package:pockeat/features/authentication/services/register_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 import 'register_page_test.mocks.dart';
 

@@ -42,7 +42,7 @@ class FoodLogDataService {
       final weekLogs = _filterLogsForSpecificWeek(foodLogs, startDate, endDate);
 
       debugPrint(
-          'Found ${weekLogs.length} food logs for week (${weeksAgo} weeks ago)');
+          'Found ${weekLogs.length} food logs for week ($weeksAgo weeks ago)');
 
       // Debugdebugprint each food log
 
@@ -55,8 +55,7 @@ class FoodLogDataService {
       // Group entries by day and calculate macronutrient totals
       return _processLogsToCalorieData(weekLogs, startDate);
     } catch (e) {
-      debugPrint(
-          'Error fetching week calorie data (${weeksAgo} weeks ago): $e');
+      debugPrint('Error fetching week calorie data ($weeksAgo weeks ago): $e');
 
       return _getDefaultWeekData();
     }

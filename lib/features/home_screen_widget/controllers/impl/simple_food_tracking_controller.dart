@@ -16,8 +16,7 @@ class SimpleFoodTrackingController implements FoodTrackingWidgetController {
   SimpleFoodTrackingController({
     required WidgetDataService<SimpleFoodTracking> widgetService,
     required CalorieStatsService calorieStatsService,
-  })
-      : _widgetService = widgetService,
+  })  : _widgetService = widgetService,
         _calorieStatsService = calorieStatsService;
 
   /// Inisialisasi controller
@@ -45,7 +44,8 @@ class SimpleFoodTrackingController implements FoodTrackingWidgetController {
       // Hitung total kalori hari ini menggunakan CalorieStatsService
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      final dailyStats = await _calorieStatsService.getStatsByDate(userId, today);
+      final dailyStats =
+          await _calorieStatsService.getStatsByDate(userId, today);
       final consumedCalories = dailyStats.caloriesConsumed;
 
       // Target kalori sekarang dihitung oleh client controller dan diberikan sebagai parameter

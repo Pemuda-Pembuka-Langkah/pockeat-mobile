@@ -18,7 +18,8 @@ class HealthScoreSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading || !nutritionData.containsKey('healthScore')) {
-      return const SizedBox.shrink(); // Don't show if loading or data not available
+      return const SizedBox
+          .shrink(); // Don't show if loading or data not available
     }
 
     final double healthScore = nutritionData['healthScore'] ?? 0.0;

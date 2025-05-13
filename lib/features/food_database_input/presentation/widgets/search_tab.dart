@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 class SearchTab extends StatelessWidget {
@@ -12,7 +15,7 @@ class SearchTab extends StatelessWidget {
   final Color primaryGreen;
 
   const SearchTab({
-    Key? key,
+    super.key,
     required this.searchController,
     required this.onSearch,
     required this.searchResults,
@@ -21,7 +24,7 @@ class SearchTab extends StatelessWidget {
     required this.primaryYellow,
     required this.primaryPink,
     required this.primaryGreen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

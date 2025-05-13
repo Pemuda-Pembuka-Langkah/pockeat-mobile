@@ -1,5 +1,7 @@
 // Dart imports:
 //
+
+// Dart imports:
 import 'dart:io';
 
 // Flutter imports:
@@ -134,18 +136,16 @@ class _NutritionPageState extends State<NutritionPage> {
     String healthCategory = "Fair"; // Default medium category
 
     // Use healthScore to determine category if available
-    if (correctedResult.healthScore != null) {
-      if (calculatedHealthScore >= 8)
-        healthCategory = "Excellent";
-      else if (calculatedHealthScore >= 6)
-        healthCategory = "Good";
-      else if (calculatedHealthScore >= 4)
-        healthCategory = "Fair";
-      else if (calculatedHealthScore >= 2)
-        healthCategory = "Poor";
-      else
-        healthCategory = "Very Poor";
-    }
+    if (calculatedHealthScore >= 8) {
+      healthCategory = "Excellent";
+    } else if (calculatedHealthScore >= 6) {
+      healthCategory = "Good";
+    } else if (calculatedHealthScore >= 4) {
+      healthCategory = "Fair";
+    } else if (calculatedHealthScore >= 2) {
+      healthCategory = "Poor";
+    } else
+      healthCategory = "Very Poor";
 
     // Ensure state update is synchronous and complete
     setState(() {

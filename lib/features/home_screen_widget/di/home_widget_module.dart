@@ -48,7 +48,7 @@ class HomeWidgetModule {
     getIt.registerLazySingleton<DetailedFoodTrackingController>(
       () => DetailedFoodTrackingController(
         widgetService: getIt<WidgetDataService<DetailedFoodTracking>>(),
-        calorieStatsService: getIt<CalorieStatsService>(), 
+        calorieStatsService: getIt<CalorieStatsService>(),
         foodLogHistoryService: getIt<FoodLogHistoryService>(),
       ),
     );

@@ -1,6 +1,7 @@
 // Project imports:
 //coverage: ignore-file
 
+// Project imports:
 import 'package:pockeat/features/food_log_history/domain/models/food_log_history_item.dart';
 
 //coverage: ignore-file

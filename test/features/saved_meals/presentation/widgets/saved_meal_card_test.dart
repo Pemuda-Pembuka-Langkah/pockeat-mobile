@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
+
+// Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/saved_meals/domain/models/saved_meal.dart';
 import 'package:pockeat/features/saved_meals/presentation/widgets/saved_meal_card.dart';
