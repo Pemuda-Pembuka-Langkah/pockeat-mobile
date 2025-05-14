@@ -13,9 +13,6 @@ import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calori
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/circular_indicator_widget.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
 
-// Firebase imports:
-
-
 // Mocks
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
@@ -63,11 +60,20 @@ class TestWeightIndicator extends StatefulWidget {
 class _TestWeightIndicatorState extends State<TestWeightIndicator> {
   bool isLoadingWeight = true;
   String currentWeight = "0";
+  bool isLoadingWeightGoal = true;
+  String weightGoal = "0";
 
   void updateWeight(String weight, bool isLoading) {
     setState(() {
       currentWeight = weight;
       isLoadingWeight = isLoading;
+    });
+  }
+
+  void updateWeightGoal(String goal, bool isLoading) {
+    setState(() {
+      weightGoal = goal;
+      isLoadingWeightGoal = isLoading;
     });
   }
 
@@ -81,7 +87,7 @@ class _TestWeightIndicatorState extends State<TestWeightIndicator> {
             Expanded(
               child: CircularIndicatorWidget(
                 label: "Weight Goal",
-                value: "74 kg",
+                value: isLoadingWeightGoal ? "Loading..." : "$weightGoal kg",
                 icon: Icons.flag_outlined,
                 color: const Color(0xFF4ECDC4), // primaryGreen
               ),
@@ -132,15 +138,11 @@ void main() {
 
   // Test the simpler test widget first to verify the indicator works
   group('Weight Indicator Widget', () {
-    testWidgets('shows weight goal indicator correctly', (WidgetTester tester) async {
+    testWidgets('shows loading state initially for both indicators', (WidgetTester tester) async {
       await tester.pumpWidget(const TestWeightIndicator());
+      expect(find.text('Loading...'), findsNWidgets(2));
       expect(find.text('Weight Goal'), findsOneWidget);
-      expect(find.text('74 kg'), findsOneWidget);
-    });
-
-    testWidgets('shows loading state in weight indicator', (WidgetTester tester) async {
-      await tester.pumpWidget(const TestWeightIndicator());
-      expect(find.text('Loading...'), findsOneWidget);
+      expect(find.text('Current Weight'), findsOneWidget);
     });
 
     testWidgets('updates to show current weight', (WidgetTester tester) async {
@@ -152,6 +154,21 @@ void main() {
       await tester.pump();
       
       expect(find.text('80 kg'), findsOneWidget);
+      // Weight Goal should still be Loading...
+      expect(find.text('Loading...'), findsOneWidget);
+    });
+    
+    testWidgets('updates to show weight goal', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWeightIndicator());
+      
+      // Get state and update it
+      final state = tester.state<_TestWeightIndicatorState>(find.byType(TestWeightIndicator));
+      state.updateWeightGoal('65', false);
+      await tester.pump();
+      
+      expect(find.text('65 kg'), findsOneWidget);
+      // Current Weight should still be Loading...
+      expect(find.text('Loading...'), findsOneWidget);
     });
     
     testWidgets('shows "N/A kg" when weight data is not available', (WidgetTester tester) async {
@@ -159,6 +176,16 @@ void main() {
       
       final state = tester.state<_TestWeightIndicatorState>(find.byType(TestWeightIndicator));
       state.updateWeight('N/A', false);
+      await tester.pump();
+      
+      expect(find.text('N/A kg'), findsOneWidget);
+    });
+    
+    testWidgets('shows "N/A kg" when weight goal is not available', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWeightIndicator());
+      
+      final state = tester.state<_TestWeightIndicatorState>(find.byType(TestWeightIndicator));
+      state.updateWeightGoal('N/A', false);
       await tester.pump();
       
       expect(find.text('N/A kg'), findsOneWidget);
@@ -172,6 +199,29 @@ void main() {
       await tester.pump();
       
       expect(find.text('Error kg'), findsOneWidget);
+    });
+    
+    testWidgets('shows "Error kg" when there is an error loading weight goal', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWeightIndicator());
+      
+      final state = tester.state<_TestWeightIndicatorState>(find.byType(TestWeightIndicator));
+      state.updateWeightGoal('Error', false);
+      await tester.pump();
+      
+      expect(find.text('Error kg'), findsOneWidget);
+    });
+    
+    testWidgets('updates both weight and weight goal correctly', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWeightIndicator());
+      
+      final state = tester.state<_TestWeightIndicatorState>(find.byType(TestWeightIndicator));
+      state.updateWeight('78', false);
+      state.updateWeightGoal('70', false);
+      await tester.pump();
+      
+      expect(find.text('78 kg'), findsOneWidget);
+      expect(find.text('70 kg'), findsOneWidget);
+      expect(find.text('Loading...'), findsNothing);
     });
   });
 }

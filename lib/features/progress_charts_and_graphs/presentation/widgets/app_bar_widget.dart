@@ -20,15 +20,17 @@ class AppBarWidget extends StatelessWidget {
       pinned: true,
       floating: false,
       automaticallyImplyLeading: false,
-      backgroundColor: colors.primaryYellow,
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black87,
       elevation: 0,
+      centerTitle: true,
       toolbarHeight: 60,
       title: const Text(
         'Progress',
         style: TextStyle(
+          fontWeight: FontWeight.bold,
           color: Colors.black87,
           fontSize: 18,
-          fontWeight: FontWeight.w600,
         ),
       ),
     );
