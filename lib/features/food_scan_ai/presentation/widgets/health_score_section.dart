@@ -40,13 +40,37 @@ class HealthScoreSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Health Score',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
+          Row(
+            children: [
+              const Text(
+                'Health Score',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(width: 8),
+              //coverage:ignore-start
+              Tooltip(
+                message: _getHealthScoreCalculationExplanation(),
+                triggerMode: TooltipTriggerMode.tap,
+                showDuration: const Duration(seconds: 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                textStyle: const TextStyle(color: Colors.white, fontSize: 14),
+                padding: const EdgeInsets.all(12),
+                preferBelow: true,
+                child: Icon(
+                  Icons.info_outline,
+                  size: 20,
+                  color: Colors.grey[600],
+                ),
+              ),
+              //coverage:ignore-end
+            ],
           ),
           const SizedBox(height: 12),
           Container(
@@ -139,4 +163,22 @@ class HealthScoreSection extends StatelessWidget {
         return "No health score information available for this food.";
     }
   }
+
+//coverage:ignore-start
+  String _getHealthScoreCalculationExplanation() {
+    return 'How the Health Score is Calculated:\n\n'
+        '• Base score starts at 7.5 out of 10\n\n'
+        'Deductions:\n'
+        '• High sodium (>500mg): up to -3.0 points\n'
+        '• High sugar (>20g): up to -2.5 points\n'
+        '• High fat (>15g): up to -1.5 points\n'
+        '• High saturated fat ratio: up to -1.0 point\n'
+        '• High cholesterol (>200mg): up to -1.0 point\n\n'
+        'Bonuses:\n'
+        '• Protein content: up to +1.5 points\n'
+        '• Fiber content: up to +1.0 point\n'
+        '• Nutrition density: up to +1.0 point\n\n'
+        'Final score is rounded to nearest 0.5 and clamped between 1.0 and 10.0';
+  }
 }
+//coverage:ignore-end
