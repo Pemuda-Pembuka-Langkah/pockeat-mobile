@@ -230,11 +230,13 @@ void main() {
 
       // Render widget
       await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle(); // Find text for this feature
-      expect(find.text('Hitung Kalori Terbakar'), findsOneWidget);
+      await tester.pumpAndSettle(); 
+      
+      // Find text for this feature - Updated to English text
+      expect(find.text('Count Burned Calories'), findsOneWidget);
       expect(
           find.text(
-              'Kalori terbakar akan ditambahkan ke sisa kalori harian Anda'),
+              'Burned calories will be added to your daily remaining calories'),
           findsOneWidget);
 
       // Toggle should exist and be ON
@@ -250,11 +252,13 @@ void main() {
 
       // Render widget
       await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle(); // Find text for this feature
-      expect(find.text('Rollover Kalori'), findsOneWidget);
+      await tester.pumpAndSettle(); 
+      
+      // Find text for this feature - Updated to English text
+      expect(find.text('Rollover Calories'), findsOneWidget);
       expect(
           find.text(
-              'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya (maks 1000)'),
+              'Unused calories will be accumulated to the next day (max 1000)'),
           findsOneWidget);
 
       // Toggle should exist and be ON
@@ -753,9 +757,11 @@ void main() {
 
       // Render widget
       await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle(); // Verify both toggles exist
-      expect(find.text('Hitung Kalori Terbakar'), findsOneWidget);
-      expect(find.text('Rollover Kalori'), findsOneWidget);
+      await tester.pumpAndSettle(); 
+      
+      // Verify both toggles exist - Updated to English text
+      expect(find.text('Count Burned Calories'), findsOneWidget);
+      expect(find.text('Rollover Calories'), findsOneWidget);
 
       // Find all switches and toggle them
       final switches = find.byType(Switch);
@@ -796,17 +802,17 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // The test should handle both English and Indonesian text
-      // Check for either version of the text
+      // The test should now look for English text only since the app has been updated
+      // Check for English versions of the text
       final exerciseCalorieText = find.byWidgetPredicate((widget) =>
           widget is Text &&
-          (widget.data?.contains('Exercise Calorie') == true ||
-              widget.data?.contains('Hitung Kalori Terbakar') == true));
+          (widget.data?.contains('Count Burned Calories') == true ||
+              widget.data?.contains('Burned calories will be added') == true));
 
       final rolloverCaloriesText = find.byWidgetPredicate((widget) =>
           widget is Text &&
-          (widget.data?.contains('Rollover') == true ||
-              widget.data?.contains('rollover') == true));
+          (widget.data?.contains('Rollover Calories') == true ||
+              widget.data?.contains('Unused calories will be accumulated') == true));
 
       expect(exerciseCalorieText, findsAtLeastNWidgets(1));
       expect(rolloverCaloriesText, findsAtLeastNWidgets(1));
