@@ -142,8 +142,8 @@ class _ProfilePageState extends State<ProfilePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(value
-                ? 'Kalori dari olahraga akan dikompensasi dalam sisa kalori'
-                : 'Kalori dari olahraga tidak diperhitungkan dalam sisa kalori'),
+                ? 'Burned calories will be compensated in your remaining calories'
+                : 'Burned calories will not be counted in your remaining calories'),
             backgroundColor: primaryGreen,
             behavior: SnackBarBehavior.floating,
           ),
@@ -156,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal mengubah pengaturan: ${e.toString()}'),
+            content: Text('Failed to change settings: ${e.toString()}'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -183,13 +183,12 @@ class _ProfilePageState extends State<ProfilePage> {
         // No need to wait for this result, just trigger the calculation
         _preferencesService.getRolloverCalories();
       }
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(value
-                ? 'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya'
-                : 'Kalori yang tidak terpakai tidak akan diakumulasikan'),
+                ? 'Unused calories will be accumulated to the next day'
+                : 'Unused calories will not be accumulated'),
             backgroundColor: primaryGreen,
             behavior: SnackBarBehavior.floating,
           ),
@@ -202,7 +201,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal mengubah pengaturan: ${e.toString()}'),
+            content: Text('Failed to change settings: ${e.toString()}'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -715,7 +714,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  /// Widget untuk pengaturan kalori
+  /// Widget for calorie tracking preferences
   Widget _buildCalorieSettings() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -737,7 +736,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 16, bottom: 8),
             child: Text(
-              'Pengaturan Kalori',
+              'Calorie Tracking Preferences',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -763,7 +762,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Hitung Kalori Terbakar',
+                            'Count Burned Calories',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -774,7 +773,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Kalori terbakar akan ditambahkan ke sisa kalori harian Anda',
+                        'Burned calories will be added to your daily remaining calories',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
@@ -827,7 +826,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Rollover Kalori',
+                            'Rollover Calories',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -838,7 +837,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya (maks 1000)',
+                        'Unused calories will be accumulated to the next day (max 1000)',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
