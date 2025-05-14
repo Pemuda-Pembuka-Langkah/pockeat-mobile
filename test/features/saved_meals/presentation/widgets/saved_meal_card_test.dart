@@ -90,7 +90,6 @@ void main() {
     expect(find.text('C: 30g'), findsOneWidget); // Carbs
     expect(find.text('F: 10g'), findsOneWidget); // Fat
   });
-
   testWidgets('SavedMealCard displays calories and health score',
       (WidgetTester tester) async {
     // Arrange - Create a widget test
@@ -106,11 +105,10 @@ void main() {
     );
 
     // Assert - Check that calories and health score are displayed
-    expect(find.text('8'), findsOneWidget); // Rounded health score
-    expect(find.text('250 Cal'), findsOneWidget); // Calories
+    expect(find.text('Health: 7.5'), findsOneWidget); // Health score with decimal
+    expect(find.text('250 cal'), findsOneWidget); // Calories
   });
-
-  testWidgets('SavedMealCard displays ingredients preview',
+  testWidgets('SavedMealCard displays icon with star badge',
       (WidgetTester tester) async {
     // Arrange - Create a widget test
     await tester.pumpWidget(
@@ -124,10 +122,9 @@ void main() {
       ),
     );
 
-    // Assert - Check that ingredients preview is displayed (first 3 ingredients with ellipsis)
-    expect(
-        find.text('Ingredients: Ingredient 1, Ingredient 2, Ingredient 3...'),
-        findsOneWidget);
+    // Assert - Check that the icon and star badge are displayed
+    expect(find.byIcon(Icons.fastfood), findsOneWidget);
+    expect(find.byIcon(Icons.star), findsOneWidget);
   });
 
   testWidgets('SavedMealCard handles tap event', (WidgetTester tester) async {
@@ -154,17 +151,16 @@ void main() {
     // Assert - Check that the tap event was triggered
     expect(tapped, isTrue);
   });
-
-  testWidgets('SavedMealCard handles empty ingredients list',
+  testWidgets('SavedMealCard displays date in proper format',
       (WidgetTester tester) async {
-    // Arrange - Create a saved meal with no ingredients
-    final emptyIngredientsMeal = SavedMeal(
+    // Arrange - Create a saved meal with a fixed date
+    final fixedDateMeal = SavedMeal(
       id: 'test-id',
       userId: 'user123',
       name: 'Test Meal Name',
-      foodAnalysis: foodAnalysis.copyWith(ingredients: []),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+      foodAnalysis: foodAnalysis,
+      createdAt: DateTime(2023, 5, 15), // May 15, 2023
+      updatedAt: DateTime(2023, 5, 15),
     );
 
     // Act - Build the widget
@@ -172,14 +168,14 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: SavedMealCard(
-            savedMeal: emptyIngredientsMeal,
+            savedMeal: fixedDateMeal,
             onTap: () {},
           ),
         ),
       ),
     );
 
-    // Assert - Check that no ingredients section is shown
-    expect(find.textContaining('Ingredients:'), findsNothing);
+    // Assert - Check that date is formatted correctly
+    expect(find.text('15 May'), findsOneWidget);
   });
 }
