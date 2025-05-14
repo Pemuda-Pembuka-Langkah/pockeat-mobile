@@ -307,6 +307,7 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // Prevent resizing when keyboard appears
       appBar: AppBar(
         title: const Text('Nutrition Database'),
         elevation: 0,
