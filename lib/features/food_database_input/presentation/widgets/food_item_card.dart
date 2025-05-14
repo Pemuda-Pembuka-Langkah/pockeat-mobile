@@ -25,6 +25,19 @@ class FoodItemCard extends StatelessWidget {
     required this.primaryGreen,
     required this.primaryPink,
   });
+  // Helper method to build marker labels
+  Widget _buildMarker(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 10,
+        color: Colors.grey[600],
+        fontWeight: text == '10g' || text == '500g'
+            ? FontWeight.bold
+            : FontWeight.normal,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,68 +188,86 @@ class FoodItemCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 8),
-
-            // Portion slider
-            SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                activeTrackColor: primaryGreen,
-                inactiveTrackColor: primaryGreen.withOpacity(0.2),
-                thumbColor: primaryGreen,
-                overlayColor: primaryGreen.withOpacity(0.3),
-                trackHeight: 4.0,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+            const SizedBox(
+                height:
+                    12), // Centered slider (improved touch target with fixed center thumb)
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4.0),
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.withOpacity(0.1)),
               ),
-              child: Slider(
-                min: 10,
-                max: 500,
-                divisions: 49,
-                value: portion,
-                onChanged: (value) => onPortionChanged(index, value),
+              child: Column(
+                children: [
+                  // Slider usage hint
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      'Hold and Drag slider to adjust portion',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ), // Standard Flutter Slider with enhanced appearance
+                  SliderTheme(
+                    data: const SliderThemeData(
+                      trackHeight: 4.0,
+                      thumbShape: RoundSliderThumbShape(
+                        enabledThumbRadius: 12.0,
+                        pressedElevation: 8.0,
+                      ),
+                      overlayShape: RoundSliderOverlayShape(
+                        overlayRadius: 24.0,
+                      ),
+                      tickMarkShape: RoundSliderTickMarkShape(
+                        tickMarkRadius: 2.0,
+                      ),
+                      showValueIndicator: ShowValueIndicator.always,
+                      valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+                      valueIndicatorTextStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    child: Slider(
+                      min: 10,
+                      max: 500,
+                      value: portion,
+                      divisions: 49,
+                      activeColor: primaryGreen,
+                      inactiveColor: primaryGreen.withOpacity(0.2),
+                      label: '${portion.toStringAsFixed(0)}g',
+                      onChanged: (value) => onPortionChanged(index, value),
+                    ),
+                  ),
+
+                  // Key markers for better understanding of the scale
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 4.0, left: 12.0, right: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildMarker('10g'),
+                        _buildMarker('100g'),
+                        _buildMarker('250g'),
+                        _buildMarker('400g'),
+                        _buildMarker('500g'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
 
-            // Portion size indicators
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '10g',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                  ),
-                ),
-                Text(
-                  '100g',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                    fontWeight: portion <= 150 && portion >= 50
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                ),
-                Text(
-                  '250g',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                    fontWeight: portion <= 300 && portion >= 200
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                ),
-                Text(
-                  '500g',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                  ),
-                ),
-              ],
-            ),
+            const SizedBox(height: 4),
           ],
         ),
       ),
