@@ -1,8 +1,9 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 /// A reusable onboarding progress indicator widget that shows the user's
 /// current position in a multi-step onboarding flow using a linear progress bar.
-/// 
+///
 /// This implementation is optimized for flows with many steps (10+) where
 /// individual step indicators would become too crowded.
 class OnboardingProgressIndicator extends StatelessWidget {
@@ -37,7 +38,8 @@ class OnboardingProgressIndicator extends StatelessWidget {
     super.key,
     required this.totalSteps,
     required this.currentStep,
-    this.activeColor = const Color(0xFF4ECDC4), // Default to PockEat's primary green
+    this.activeColor =
+        const Color(0xFF4ECDC4), // Default to PockEat's primary green
     this.inactiveColor = const Color(0xFFE0E0E0),
     this.barHeight = 6.0,
     this.showPercentage = true,
@@ -58,7 +60,7 @@ class OnboardingProgressIndicator extends StatelessWidget {
       color: Colors.black87,
       fontWeight: FontWeight.w500,
     );
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
@@ -80,9 +82,9 @@ class OnboardingProgressIndicator extends StatelessWidget {
                 ),
             ],
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Progress bar
           Stack(
             children: [
@@ -95,7 +97,7 @@ class OnboardingProgressIndicator extends StatelessWidget {
                   borderRadius: BorderRadius.circular(borderRadius),
                 ),
               ),
-              
+
               // Active progress bar
               AnimatedFractionallySizedBox(
                 duration: animationDuration,

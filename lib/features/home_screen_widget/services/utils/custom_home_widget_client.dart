@@ -6,6 +6,7 @@ import 'package:pockeat/features/home_screen_widget/domain/constants/widget_conf
 import 'home_widget_client.dart';
 
 // coverage:ignore-start
+
 /// Implementasi custom HomeWidgetInterface menggunakan MethodChannel langsung
 /// Ini memberikan kontrol lebih dan memudahkan debugging
 class CustomHomeWidgetClient implements HomeWidgetInterface {

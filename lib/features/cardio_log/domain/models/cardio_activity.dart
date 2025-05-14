@@ -1,6 +1,9 @@
 // Package imports:
 import 'package:uuid/uuid.dart';
 
+// Project imports:
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
+
 /// Enum untuk tipe aktivitas kardio
 enum CardioType { running, cycling, swimming }
 
@@ -29,6 +32,12 @@ abstract class CardioActivity {
   /// Metode untuk konversi ke Map (untuk penyimpanan)
   Map<String, dynamic> toMap();
 
-  /// Metode untuk menghitung kalori yang terbakar
-  double calculateCalories();
+  /// Metode untuk menghitung kalori yang terbakar dengan health metrics
+  double calculateCaloriesWithHealthMetrics(HealthMetricsModel healthMetrics);
+
+  /// Legacy method untuk backward compatibility (deprecated)
+  double calculateCalories() {
+    // Return the already stored calories or 0 if not calculated
+    return caloriesBurned;
+  }
 }

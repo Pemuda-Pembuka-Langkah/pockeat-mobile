@@ -12,6 +12,7 @@ import 'package:pockeat/features/food_log_history/services/food_log_history_serv
 import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'package:pockeat/features/pet_companion/domain/model/pet_information.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import 'package:get_it/get_it.dart';
 
 class HomePage extends StatefulWidget {
@@ -29,18 +30,25 @@ class _HomePageState extends State<HomePage>
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
 
-   // Services
+  // Services
   final PetService _petService = GetIt.instance<PetService>();
-  final CalorieStatsService _calorieStatsService = GetIt.instance<CalorieStatsService>();
-  final FoodLogHistoryService _foodLogHistoryService = GetIt.instance<FoodLogHistoryService>();
+  final CalorieStatsService _calorieStatsService =
+      GetIt.instance<CalorieStatsService>();
+  final FoodLogHistoryService _foodLogHistoryService =
+      GetIt.instance<FoodLogHistoryService>();
   final userId = GetIt.instance<FirebaseAuth>().currentUser?.uid ?? '';
-  final caloricRequirementRepository = GetIt.instance<CaloricRequirementRepository>();
+  final caloricRequirementRepository =
+      GetIt.instance<CaloricRequirementRepository>();
+  final preferencesService = GetIt.instance<UserPreferencesService>();
 
   // Futures
   late Future<PetInformation> _petInformation;
   late Future<DailyCalorieStats> _statsFuture;
   late Future<int> _dayStreak;
   late Future<int> _targetCalories;
+  late Future<bool> _isCalorieCompensationEnabledFuture;
+  late Future<bool> _isRolloverCaloriesEnabledFuture;
+  late Future<int> _rolloverCaloriesFuture;
 
   @override
   void initState() {
@@ -51,8 +59,16 @@ class _HomePageState extends State<HomePage>
   void _loadData() {
     _petInformation = _petService.getPetInformation(userId);
     _dayStreak = _foodLogHistoryService.getFoodStreakDays(userId);
-    _statsFuture = _calorieStatsService.calculateStatsForDate(userId, DateTime.now());
-    _targetCalories = caloricRequirementRepository.getCaloricRequirement(userId).then((value) => value?.tdee.toInt() ?? 0);
+    _statsFuture =
+        _calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+    _targetCalories = caloricRequirementRepository
+        .getCaloricRequirement(userId)
+        .then((value) => value?.tdee.toInt() ?? 0);
+    _rolloverCaloriesFuture = preferencesService.getRolloverCalories();
+    _isCalorieCompensationEnabledFuture =
+        preferencesService.isExerciseCalorieCompensationEnabled();
+    _isRolloverCaloriesEnabledFuture =
+        preferencesService.isRolloverCaloriesEnabled();
   }
 
   @override
@@ -86,21 +102,35 @@ class _HomePageState extends State<HomePage>
             ),
           ],
           body: FutureBuilder<List<dynamic>>(
-            future: Future.wait([_petInformation, _statsFuture, _dayStreak, _targetCalories]),
+            future: Future.wait([
+              _petInformation,
+              _statsFuture,
+              _dayStreak,
+              _targetCalories,
+              _isCalorieCompensationEnabledFuture,
+              _isRolloverCaloriesEnabledFuture,
+              _rolloverCaloriesFuture,
+            ]),
             builder: (context, snapshot) {
               return ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
                 children: [
                   PetHomepageSection(
-                    isLoading: snapshot.connectionState == ConnectionState.waiting,
+                    isLoading:
+                        snapshot.connectionState == ConnectionState.waiting,
                     petInfo: snapshot.data?[0] as PetInformation?,
                     stats: snapshot.data?[1] as DailyCalorieStats?,
                     streakDays: snapshot.data?[2] as int?,
                   ),
                   OverviewSection(
-                    isLoading: snapshot.connectionState == ConnectionState.waiting,
+                    isLoading:
+                        snapshot.connectionState == ConnectionState.waiting,
                     stats: snapshot.data?[1] as DailyCalorieStats?,
                     targetCalories: snapshot.data?[3] as int?,
+                    isCalorieCompensationEnabled: snapshot.data?[4] as bool?,
+                    isRolloverCaloriesEnabled: snapshot.data?[5] as bool?,
+                    rolloverCalories: snapshot.data?[6] as int?,
                   ),
                 ],
               );

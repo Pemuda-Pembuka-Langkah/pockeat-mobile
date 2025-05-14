@@ -12,6 +12,7 @@ import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 // Widget Manager Screen is now accessed via named route
 
@@ -40,9 +41,17 @@ class _ProfilePageState extends State<ProfilePage> {
   late final LoginService _loginService;
   late final LogoutService _logoutService;
   late final BugReportService _bugReportService;
+  late final UserPreferencesService _preferencesService;
   UserModel? _currentUser;
   bool _isLoading = true;
   String? _errorMessage;
+  late Future<bool> _exerciseCalorieCompensationEnabled;
+  late Future<bool> _rolloverCaloriesEnabled;
+  bool _loadingExerciseCompensation =
+      false; // Separate loading state for exercise toggle
+  bool _loadingRolloverCalories =
+      false; // Separate loading state for rollover toggle
+  bool _loadingPreferences = true; // Initial loading state for both preferences
 
   // Getter for FirebaseAuth access
   FirebaseAuth get _auth => widget.firebaseAuth ?? FirebaseAuth.instance;
@@ -53,7 +62,9 @@ class _ProfilePageState extends State<ProfilePage> {
     _loginService = GetIt.instance<LoginService>();
     _logoutService = GetIt.instance<LogoutService>();
     _bugReportService = GetIt.instance<BugReportService>();
+    _preferencesService = GetIt.instance<UserPreferencesService>();
     _loadUserData();
+    _loadPreferences();
   }
 
   /// Load user data
@@ -74,6 +85,129 @@ class _ProfilePageState extends State<ProfilePage> {
         _errorMessage = 'Failed to load profile: ${e.toString()}';
         _isLoading = false;
       });
+    }
+  }
+
+  // Method to load user preferences
+  Future<void> _loadPreferences() async {
+    setState(() {
+      _loadingPreferences = true;
+    });
+
+    try {
+      _exerciseCalorieCompensationEnabled =
+          _preferencesService.isExerciseCalorieCompensationEnabled();
+      _rolloverCaloriesEnabled =
+          _preferencesService.isRolloverCaloriesEnabled();
+
+      // Wait for preferences to load before setting _loadingPreferences to false
+      await Future.wait([
+        _exerciseCalorieCompensationEnabled,
+        _rolloverCaloriesEnabled,
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _loadingPreferences = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loadingPreferences = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load preferences: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Method to toggle exercise calorie compensation
+  Future<void> _toggleExerciseCalorieCompensation(bool value) async {
+    setState(() {
+      _loadingExerciseCompensation = true; // Only set exercise loading state
+    });
+
+    try {
+      await _preferencesService.setExerciseCalorieCompensationEnabled(value);
+      setState(() {
+        _exerciseCalorieCompensationEnabled = Future.value(value);
+        _loadingExerciseCompensation = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value
+                ? 'Kalori dari olahraga akan dikompensasi dalam sisa kalori'
+                : 'Kalori dari olahraga tidak diperhitungkan dalam sisa kalori'),
+            backgroundColor: primaryGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _loadingExerciseCompensation = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal mengubah pengaturan: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  // Method to toggle calorie rollover
+  Future<void> _toggleCalorieRollover(bool value) async {
+    setState(() {
+      _loadingRolloverCalories = true; // Only set rollover loading state
+    });
+
+    try {
+      await _preferencesService.setRolloverCaloriesEnabled(value);
+      setState(() {
+        _rolloverCaloriesEnabled = Future.value(value);
+        _loadingRolloverCalories = false;
+      });
+
+      // If rollover calories are enabled, we should also call getRolloverCalories to update UI
+      if (value) {
+        // No need to wait for this result, just trigger the calculation
+        _preferencesService.getRolloverCalories();
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value
+                ? 'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya'
+                : 'Kalori yang tidak terpakai tidak akan diakumulasikan'),
+            backgroundColor: primaryGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _loadingRolloverCalories = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal mengubah pengaturan: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -217,6 +351,8 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildProfileHeader(),
           const SizedBox(height: 16),
           _buildProfileStats(),
+          const SizedBox(height: 16),
+          _buildCalorieSettings(),
           const SizedBox(height: 16),
           _buildProfileActions(),
           const SizedBox(height: 20),
@@ -576,6 +712,170 @@ class _ProfilePageState extends State<ProfilePage> {
       height: 40,
       width: 1,
       color: Colors.grey.withOpacity(0.2),
+    );
+  }
+
+  /// Widget untuk pengaturan kalori
+  Widget _buildCalorieSettings() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 20, top: 16, bottom: 8),
+            child: Text(
+              'Pengaturan Kalori',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.local_fire_department_outlined,
+                            color: primaryGreen,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Hitung Kalori Terbakar',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Kalori terbakar akan ditambahkan ke sisa kalori harian Anda',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _loadingPreferences
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : _loadingExerciseCompensation // Check exercise-specific loading state
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : FutureBuilder<bool>(
+                            future: _exerciseCalorieCompensationEnabled,
+                            builder: (context, snapshot) {
+                              final isEnabled = snapshot.data ?? false;
+                              return Switch(
+                                value: isEnabled,
+                                onChanged: _toggleExerciseCalorieCompensation,
+                                activeColor: primaryGreen,
+                              );
+                            },
+                          ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.update,
+                            color: primaryGreen,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Rollover Kalori',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya (maks 1000)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _loadingPreferences
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : _loadingRolloverCalories // Check rollover-specific loading state
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : FutureBuilder<bool>(
+                            future: _rolloverCaloriesEnabled,
+                            builder: (context, snapshot) {
+                              final isEnabled = snapshot.data ?? false;
+                              return Switch(
+                                value: isEnabled,
+                                onChanged: _toggleCalorieRollover,
+                                activeColor: primaryGreen,
+                              );
+                            },
+                          ),
+              ],
+            ),
+          ),
+          _buildDivider(),
+        ],
+      ),
     );
   }
 

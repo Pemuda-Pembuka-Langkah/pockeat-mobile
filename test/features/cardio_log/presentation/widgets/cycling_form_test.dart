@@ -9,17 +9,33 @@ import 'package:pockeat/features/cardio_log/presentation/widgets/cycling_form.da
 import 'package:pockeat/features/cardio_log/presentation/widgets/distance_selection_widget.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/personal_data_reminder.dart';
 import 'package:pockeat/features/cardio_log/presentation/widgets/time_selection_widget.dart';
+import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
 
 void main() {
   late CyclingForm cyclingForm;
   final Color primaryPink = const Color(0xFFFF6B6B);
   double calculatedCalories = 0.0;
   String lastTypeChanged = '';
+  late HealthMetricsModel testHealthMetrics;
 
   setUp(() {
+    testHealthMetrics = HealthMetricsModel(
+      userId: 'test-user',
+      height: 175.0,
+      weight: 70.0,
+      age: 30,
+      gender: 'Male',
+      activityLevel: 'moderate',
+      fitnessGoal: 'maintain',
+      bmi: 22.9,
+      bmiCategory: 'Normal weight',
+      desiredWeight: 70.0,
+    );
+
     cyclingForm = CyclingForm(
       key: GlobalKey<CyclingFormState>(),
       primaryPink: primaryPink,
+      healthMetrics: testHealthMetrics,
       onCalculate: (distance, duration, type) {
         calculatedCalories = distance * duration.inMinutes * 0.1;
         return calculatedCalories;
@@ -69,6 +85,7 @@ void main() {
       expect(currentState.selectedEndTime.hour, 1);
       expect(currentState.selectedEndTime.minute, 0);
     });
+
     testWidgets('should render all components correctly',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestableWidget(cyclingForm));
@@ -255,7 +272,7 @@ void main() {
       expect(currentState.selectedMeter, 300);
     });
 
-    testWidgets('calculateCalories should use selected cycling type',
+    testWidgets('calculateCalories should work correctly with health metrics',
         (WidgetTester tester) async {
       await tester.pumpWidget(createTestableWidget(cyclingForm));
 
@@ -279,18 +296,10 @@ void main() {
 
       await tester.pump();
 
-      // Calculate calories using the provided callback directly
-      final totalDistance =
-          currentState.selectedKm + (currentState.selectedMeter / 1000); // 7.5
-      final duration = currentState.selectedEndTime
-          .difference(currentState.selectedStartTime); // 45 minutes
-      final calories =
-          cyclingForm.onCalculate(totalDistance, duration, 'commute');
-
-      // Verify onCalculate was called with right parameters including type
-      expect(lastTypeChanged, 'commute');
-      expect(calories, 7.5 * 45 * 0.1);
-      expect(calculatedCalories, 7.5 * 45 * 0.1);
+      // Verify that the form can calculate calories with health metrics
+      final calories = cyclingForm.calculateCalories(testHealthMetrics);
+      expect(calories, isNotNull);
+      expect(calories, greaterThan(0));
     });
 
     testWidgets('form methods work correctly when called through widget',

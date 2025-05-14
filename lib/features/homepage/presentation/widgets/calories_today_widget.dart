@@ -9,11 +9,17 @@ import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats
 class CaloriesTodayWidget extends StatefulWidget {
   final int targetCalories;
   final DailyCalorieStats? stats;
+  final bool isCalorieCompensationEnabled;
+  final bool isRolloverCaloriesEnabled;
+  final int rolloverCalories;
 
   const CaloriesTodayWidget({
     super.key,
     required this.targetCalories,
     required this.stats,
+    required this.isCalorieCompensationEnabled,
+    required this.isRolloverCaloriesEnabled,
+    required this.rolloverCalories,
   });
 
   @override
@@ -26,10 +32,24 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
   @override
   Widget build(BuildContext context) {
     // Default values if data is not provided
+    int adjustedTargetCalories = 0;
     int caloriesConsumed = widget.stats?.caloriesConsumed ?? 0;
-    int remainingCalories = widget.targetCalories - caloriesConsumed;
-    double completionPercentage = widget.targetCalories > 0
-        ? caloriesConsumed / widget.targetCalories
+    int caloriesBurned = widget.stats?.caloriesBurned ?? 0;
+
+    adjustedTargetCalories = widget.targetCalories;
+
+    if (widget.isCalorieCompensationEnabled) {
+      adjustedTargetCalories += caloriesBurned;
+    }
+
+    if (widget.isRolloverCaloriesEnabled) {
+      adjustedTargetCalories += widget.rolloverCalories;
+    }
+
+    int remainingCalories = adjustedTargetCalories - caloriesConsumed;
+
+    double completionPercentage = adjustedTargetCalories > 0
+        ? caloriesConsumed / adjustedTargetCalories
         : 0.0;
 
     // Ensure values are within reasonable bounds

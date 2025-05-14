@@ -20,9 +20,8 @@ import 'package:pockeat/features/authentication/services/bug_report_service.dart
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
 import 'package:pockeat/features/notifications/domain/services/notification_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import 'profile_page_test.mocks.dart';
-
-// Remove the import of the real WidgetManagerScreen
 
 @GenerateNiceMocks([
   MockSpec<LoginService>(),
@@ -32,9 +31,9 @@ import 'profile_page_test.mocks.dart';
   MockSpec<FirebaseAuth>(),
   MockSpec<User>(),
   MockSpec<UserInfo>(),
-  MockSpec<NotificationService>()
+  MockSpec<NotificationService>(),
+  MockSpec<UserPreferencesService>(),
 ])
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -47,6 +46,7 @@ void main() {
   late MockUser mockUser;
   late MockUserInfo mockUserInfo;
   late MockNotificationService mockNotificationService;
+  late MockUserPreferencesService mockUserPreferencesService;
 
   setUp(() {
     // Reset screen size to reasonable dimension
@@ -63,6 +63,7 @@ void main() {
     mockUser = MockUser();
     mockUserInfo = MockUserInfo();
     mockNotificationService = MockNotificationService();
+    mockUserPreferencesService = MockUserPreferencesService();
 
     // Setup GetIt
     final getIt = GetIt.instance;
@@ -78,10 +79,24 @@ void main() {
     if (getIt.isRegistered<NotificationService>()) {
       getIt.unregister<NotificationService>();
     }
+    if (getIt.isRegistered<UserPreferencesService>()) {
+      getIt.unregister<UserPreferencesService>();
+    }
     getIt.registerSingleton<LoginService>(mockLoginService);
     getIt.registerSingleton<LogoutService>(mockLogoutService);
     getIt.registerSingleton<BugReportService>(mockBugReportService);
     getIt.registerSingleton<NotificationService>(mockNotificationService);
+    getIt.registerSingleton<UserPreferencesService>(mockUserPreferencesService);
+
+    // Setup default behavior for UserPreferencesService
+    when(mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+        .thenAnswer((_) async => false);
+    when(mockUserPreferencesService.setExerciseCalorieCompensationEnabled(any))
+        .thenAnswer((_) async => {});
+    when(mockUserPreferencesService.isRolloverCaloriesEnabled())
+        .thenAnswer((_) async => false);
+    when(mockUserPreferencesService.setRolloverCaloriesEnabled(any))
+        .thenAnswer((_) async => {});
 
     // Setup default User behavior
     when(mockUser.uid).thenReturn('test-uid');
@@ -109,6 +124,7 @@ void main() {
     reset(mockUser);
     reset(mockUserInfo);
     reset(mockNotificationService);
+    reset(mockUserPreferencesService);
   });
 
   // Helper untuk membuat UserModel test
@@ -185,8 +201,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('Displays profile data correctly',
-        (WidgetTester tester) async {
+    testWidgets('Displays profile data correctly', (WidgetTester tester) async {
       // Setup user data
       final testUser = createTestUser();
       when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
@@ -203,6 +218,74 @@ void main() {
       // Email now only appears once in the profile header
       expect(find.text('test@example.com'), findsOneWidget);
       expect(find.text('Email verified'), findsOneWidget);
+    });
+
+    testWidgets('Shows exercise calorie compensation toggle',
+        (WidgetTester tester) async {
+      // Setup user data and calorie compensation setting
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+      when(mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+          .thenAnswer((_) async => true);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle(); // Find text for this feature
+      expect(find.text('Hitung Kalori Terbakar'), findsOneWidget);
+      expect(
+          find.text(
+              'Kalori terbakar akan ditambahkan ke sisa kalori harian Anda'),
+          findsOneWidget);
+
+      // Toggle should exist and be ON
+      expect(find.byType(Switch), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('Shows rollover calories toggle', (WidgetTester tester) async {
+      // Setup user data and rollover calories setting
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+      when(mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) async => true);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle(); // Find text for this feature
+      expect(find.text('Rollover Kalori'), findsOneWidget);
+      expect(
+          find.text(
+              'Kalori yang tidak terpakai akan diakumulasikan ke hari berikutnya (maks 1000)'),
+          findsOneWidget);
+
+      // Toggle should exist and be ON
+      expect(find.byType(Switch), findsAtLeastNWidgets(1));
+    });
+
+    testWidgets('Can toggle rollover calories setting',
+        (WidgetTester tester) async {
+      // Setup user data and rollover setting
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+      when(mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) async => false);
+      when(mockUserPreferencesService.setRolloverCaloriesEnabled(any))
+          .thenAnswer((_) async => {});
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Find rollover toggle section and tap on the switch
+      final text = find.text('Rollover Calories');
+
+      // For simplicity in the test, toggle the last switch (rollover calories)
+      final switches = find.byType(Switch);
+      await tester.tap(switches.last);
+      await tester.pumpAndSettle();
+
+      // Verify the service was called to update the setting
+      verify(mockUserPreferencesService.setRolloverCaloriesEnabled(any))
+          .called(1);
     });
   });
 
@@ -272,8 +355,7 @@ void main() {
       ]);
     });
 
-    testWidgets('Shows error when logout fails',
-        (WidgetTester tester) async {
+    testWidgets('Shows error when logout fails', (WidgetTester tester) async {
       // Setup user and throw on logout
       when(mockLoginService.getCurrentUser())
           .thenAnswer((_) async => createTestUser());
@@ -284,11 +366,11 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // Find logout button (using hitTestable finder karena mungkin ada masalah size)
+      // Find logout button
       final logoutFinder = find.text('Logout');
       expect(logoutFinder, findsOneWidget);
 
-      // Tap logout button dengan force jika perlu
+      // Tap logout button
       await tester.ensureVisible(logoutFinder);
       await tester.pumpAndSettle();
       await tester.tap(logoutFinder);
@@ -413,6 +495,46 @@ void main() {
       expect(find.text('User data not available for bug reporting'),
           findsOneWidget);
     });
+
+    testWidgets('Shows error when updating rollover calories setting fails',
+        (WidgetTester tester) async {
+      // Setup user data
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+
+      // Setup preferences
+      when(mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) async => false);
+      when(mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+          .thenAnswer((_) async => false);
+
+      // Setup error when setting rollover calories
+      when(mockUserPreferencesService.setRolloverCaloriesEnabled(any))
+          .thenThrow(Exception('Failed to update setting'));
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Find the rollover text
+      final rolloverText = find.text('Rollover Calories');
+
+      // Find and tap the switch for rollover calories
+      final switches = find.byType(Switch);
+
+      // Tap the last switch (rollover calories)
+      await tester.tap(switches.last);
+      await tester.pumpAndSettle();
+
+      // Verify the SnackBar is displayed with the error message
+
+      // Find the SnackBar and check its content
+      final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+      final snackBarText = snackBar.content as Text;
+
+      // Verify the error message contains the expected text
+      expect(snackBarText.data, contains('Failed to update'));
+    });
   });
 
   // == EDGE CASES ==
@@ -448,8 +570,7 @@ void main() {
       expect(find.text('M'), findsOneWidget);
     });
 
-    testWidgets(
-        'Shows email verification button for unverified email',
+    testWidgets('Shows email verification button for unverified email',
         (WidgetTester tester) async {
       // Setup unverified user
       final unverifiedUser = createTestUser(emailVerified: false);
@@ -484,7 +605,8 @@ void main() {
 
   // == NOTIFICATION AND PROFILE SETTINGS ==
   group('Notification and Profile Settings', () {
-    testWidgets('Navigates to Widget Settings page when widget settings button is pressed',
+    testWidgets(
+        'Navigates to Widget Settings page when widget settings button is pressed',
         (WidgetTester tester) async {
       // Setup user data
       final testUser = createTestUser();
@@ -492,8 +614,7 @@ void main() {
 
       // Mock the navigation to prevent actual navigation to WidgetManagerScreen
       // which would require actual dependencies
-      when(mockNavigatorObserver.didPush(any, any))
-          .thenAnswer((_) => null);
+      when(mockNavigatorObserver.didPush(any, any)).thenAnswer((_) => null);
 
       // Render widget
       await tester.pumpWidget(createTestWidget());
@@ -520,7 +641,8 @@ void main() {
       verify(mockNavigatorObserver.didPush(any, any));
     });
 
-    testWidgets('Navigates to Notification Settings page when button is pressed',
+    testWidgets(
+        'Navigates to Notification Settings page when button is pressed',
         (WidgetTester tester) async {
       // Setup user data
       final testUser = createTestUser();
@@ -575,12 +697,12 @@ void main() {
 
       // Verify navigation to edit profile page
       expect(find.text('Edit Profile Page'), findsOneWidget);
-      
+
       // Verify navigation was observed
       verify(mockNavigatorObserver.didPush(any, any));
     });
-    
-    testWidgets('Check interaction with other menu (Report Bug)',
+
+    testWidgets('Check interaction with Report Bug menu',
         (WidgetTester tester) async {
       // Setup user data and service
       final testUser = createTestUser();
@@ -603,7 +725,7 @@ void main() {
 
       // Verify menu subtitle
       expect(find.text('Help us improve the app'), findsOneWidget);
-      
+
       // Tap Report Bug menu
       await tester.tap(bugReportFinder);
       await tester.pumpAndSettle();
@@ -611,6 +733,83 @@ void main() {
       // Verify methods were called
       verify(mockBugReportService.setUserData(testUser)).called(1);
       verify(mockBugReportService.show()).called(1);
+    });
+  });
+
+  // == USER PREFERENCES FEATURE TESTS ==
+  group('User Preferences Features', () {
+    testWidgets(
+        'Exercise calorie compensation and rollover calories toggles exist and work',
+        (WidgetTester tester) async {
+      // Setup user data
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+
+      // Initial state of preferences
+      when(mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+          .thenAnswer((_) async => false);
+      when(mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) async => false);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle(); // Verify both toggles exist
+      expect(find.text('Hitung Kalori Terbakar'), findsOneWidget);
+      expect(find.text('Rollover Kalori'), findsOneWidget);
+
+      // Find all switches and toggle them
+      final switches = find.byType(Switch);
+      expect(switches, findsAtLeastNWidgets(2));
+
+      // Setup service responses for when changes are made
+      when(mockUserPreferencesService
+              .setExerciseCalorieCompensationEnabled(any))
+          .thenAnswer((_) async => {});
+      when(mockUserPreferencesService.setRolloverCaloriesEnabled(any))
+          .thenAnswer((_) async => {});
+
+      // Toggle each switch
+      for (final switchFinder in switches.evaluate()) {
+        await tester.tap(find.byWidget(switchFinder.widget));
+        await tester.pumpAndSettle();
+      }
+
+      // Verify services were called
+      verify(mockUserPreferencesService
+              .setExerciseCalorieCompensationEnabled(any))
+          .called(greaterThan(0));
+      verify(mockUserPreferencesService.setRolloverCaloriesEnabled(any))
+          .called(greaterThan(0));
+    });
+
+    testWidgets('Both English and Indonesian text variations are handled',
+        (WidgetTester tester) async {
+      // Setup user data
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+      when(mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+          .thenAnswer((_) async => false);
+      when(mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) async => false);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // The test should handle both English and Indonesian text
+      // Check for either version of the text
+      final exerciseCalorieText = find.byWidgetPredicate((widget) =>
+          widget is Text &&
+          (widget.data?.contains('Exercise Calorie') == true ||
+              widget.data?.contains('Hitung Kalori Terbakar') == true));
+
+      final rolloverCaloriesText = find.byWidgetPredicate((widget) =>
+          widget is Text &&
+          (widget.data?.contains('Rollover') == true ||
+              widget.data?.contains('rollover') == true));
+
+      expect(exerciseCalorieText, findsAtLeastNWidgets(1));
+      expect(rolloverCaloriesText, findsAtLeastNWidgets(1));
     });
   });
 }

@@ -106,7 +106,7 @@ class LoginServiceImpl implements LoginService {
       if (userData == null) {
         return null;
       }
-      
+
       // Override emailVerified with the value from Firebase Auth
       // This ensures we always have the most up-to-date verification status
       return userData.copyWith(emailVerified: firebaseUser.emailVerified);

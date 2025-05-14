@@ -61,6 +61,7 @@ import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart'
 import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
 import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 final getIt = GetIt.instance;
 // coverage:ignore-start
@@ -208,6 +209,11 @@ Future<void> setupDependencies() async {
       repository: getIt<SavedMealsRepository>(),
       textAnalysisService: getIt<FoodTextAnalysisService>(),
     ),
+  );
+
+  // Register UserPreferencesService
+  getIt.registerSingleton<UserPreferencesService>(
+    UserPreferencesService(),
   );
 
   // Register additional services
