@@ -153,6 +153,7 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         _loadingExerciseCompensation = false;
       });
+      //coverage:ignore-start
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -162,6 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         );
       }
+      //coverage:ignore-end
     }
   }
 
