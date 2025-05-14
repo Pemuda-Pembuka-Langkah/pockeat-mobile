@@ -1,0 +1,11 @@
+#!/bin/sh
+# Define common Git paths for Windows
+if [ -n "$WINDIR" ]; then
+  # Ensure Git binaries are in PATH
+  export PATH="/mingw64/bin:/usr/bin:/c/Program Files/Git/bin:/c/Program Files/Git/usr/bin:$PATH"
+  
+  # Use Git Bash if available
+  if [ -z "$BASH" ] && [ -x "/bin/bash" ]; then
+    exec /bin/bash "$0" "$@"
+  fi
+fi
