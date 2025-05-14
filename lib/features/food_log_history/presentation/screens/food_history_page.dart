@@ -448,7 +448,6 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
   //
   // UI filter-related methods
   //
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -458,6 +457,13 @@ class _FoodHistoryPageState extends State<FoodHistoryPage> {
         elevation: 0,
       ),
       backgroundColor: bgColor,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/add-food');
+        },
+        backgroundColor: primaryGreen,
+        child: const Icon(Icons.add),
+      ),
       body: Column(
         children: [
           // Search bar
