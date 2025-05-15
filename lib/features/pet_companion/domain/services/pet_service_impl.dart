@@ -1,6 +1,7 @@
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
+import 'package:flutter/foundation.dart';
 
 // Project imports:
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
@@ -36,39 +37,97 @@ class PetServiceImpl implements PetService {
 
   @override
   Future<int> getPetHeart(String userId) async {
-    final stats =
-        await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+    try {
+      // Validate input
+      if (userId.isEmpty) {
+        throw ArgumentError('userId cannot be empty');
+      }
 
-    final targetCalories =
-        await firestore.collection('caloric_requirements').doc(userId).get();
-
-    final percentage = stats.caloriesConsumed / targetCalories.data()!['tdee'];
-
-    if (percentage > 0.75) {
-      return 4;
-    } else if (percentage > 0.5) {
-      return 3;
-    } else if (percentage > 0.25) {
-      return 2;
-    } else if (percentage > 0) {
-      return 1;
-    } else {
+      final stats = 
+          await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+      
+      final targetCaloriesDoc = 
+          await firestore.collection('caloric_requirements').doc(userId).get();
+      
+      // Check if document exists
+      if (!targetCaloriesDoc.exists) {
+        throw Exception('Caloric requirements not found for user $userId');
+      }
+      
+      // Get data with null safety
+      final data = targetCaloriesDoc.data();
+      if (data == null || !data.containsKey('tdee')) {
+        throw Exception('TDEE value not found in caloric requirements');
+      }
+      
+      final tdee = data['tdee'] as num;
+      
+      // Avoid division by zero
+      if (tdee <= 0) {
+        throw Exception('TDEE must be greater than zero');
+      }
+      
+      final percentage = stats.caloriesConsumed / tdee;
+      
+      if (percentage > 0.75) {
+        return 4;
+      } else if (percentage > 0.5) {
+        return 3;
+      } else if (percentage > 0.25) {
+        return 2;
+      } else if (percentage > 0) {
+        return 1;
+      } else {
+        return 0;
+      }
+    } catch (e) {
+      // Log error
+      debugPrint('Error in getPetHeart: $e');
+      
+      // Return a default value for graceful degradation
       return 0;
     }
   }
 
   @override
   Future<bool> getIsPetCalorieOverTarget(String userId) async {
-    final stats =
-        await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+    try {
+      // Validate input
+      if (userId.isEmpty) {
+        throw ArgumentError('userId cannot be empty');
+      }
 
-    final caloriesConsumed = stats.caloriesConsumed;
-    final caloricRequirement =
-        await firestore.collection('caloric_requirements').doc(userId).get();
+      // Get calories consumed
+      final stats = await calorieStatsService.calculateStatsForDate(
+          userId, DateTime.now());
+      final caloriesConsumed = stats.caloriesConsumed;
 
-    final targetCalories = caloricRequirement.data()!['tdee'];
+      // Get caloric requirement
+      final caloricRequirementDoc =
+          await firestore.collection('caloric_requirements').doc(userId).get();
 
-    return (caloriesConsumed - targetCalories) > targetCalories * 0.2;
+      // Check if document exists
+      if (!caloricRequirementDoc.exists) {
+        throw Exception('Caloric requirements not found for user $userId');
+      }
+
+      // Get data with null safety
+      final data = caloricRequirementDoc.data();
+      if (data == null || !data.containsKey('tdee')) {
+        throw Exception('TDEE value not found in caloric requirements');
+      }
+
+      final targetCalories = data['tdee'] as num;
+
+      return (caloriesConsumed - targetCalories) > 0;
+    } catch (e) {
+      // Log the error (you may want to add proper logging)
+      debugPrint('Error in getIsPetCalorieOverTarget: $e');
+
+      // Return a default value for graceful degradation
+      // Assuming false (not over target) is the safe default
+      return false;
+    }
   }
 
   @override

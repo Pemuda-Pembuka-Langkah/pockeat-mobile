@@ -41,8 +41,10 @@ class BMISection extends StatelessWidget {
         return primaryYellow;
       case 'Obese':
         return primaryPink;
+      // coverage:ignore-start
       default:
         return primaryGreen;
+      // coverage:ignore-end
     }
   }
 

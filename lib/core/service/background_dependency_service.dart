@@ -157,6 +157,8 @@ class BackgroundDependencyService {
       services['calorieStatsService'] = calorieStatsService;
       GetIt.instance
           .registerSingleton<CalorieStatsService>(calorieStatsService);
+      GetIt.instance.registerSingleton<FirebaseFirestore>(firestore);
+      
 
       // Now we can create the real PetService since all dependencies are registered
       services['petService'] = PetServiceImpl();

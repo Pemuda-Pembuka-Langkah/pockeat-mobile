@@ -61,6 +61,8 @@ class CyclingFormState extends State<CyclingForm> {
           .split('.')
           .last; // 'mountain', 'commute', or 'stationary'
 
+      widget.onCalculate(totalDistance, duration, type);
+      
       return CalorieCalculator.calculateCyclingCalories(
         distanceKm: totalDistance,
         duration: duration,

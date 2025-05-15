@@ -1,18 +1,30 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 
 // Project imports:
 import 'package:pockeat/features/homepage/presentation/widgets/calories_today_widget.dart';
+import 'package:pockeat/features/homepage/presentation/loading_skeleton/health_connect_skeleton.dart';
 import 'package:pockeat/features/sync_fitness_tracker/widgets/health_connect_widget.dart';
+import 'package:pockeat/features/homepage/presentation/loading_skeleton/calories_today_skeleton.dart';
+import 'package:pockeat/features/homepage/presentation/loading_skeleton/nutrient_card_skeleton.dart';
 
 class OverviewSection extends StatefulWidget {
-  final bool foodStreakMaintained;
-  final int foodStreakDays;
+  final DailyCalorieStats? stats;
+  final int? targetCalories;
+  final bool isLoading;
+  final bool? isCalorieCompensationEnabled;
+  final bool? isRolloverCaloriesEnabled;
+  final int? rolloverCalories;
 
   const OverviewSection({
     super.key,
-    this.foodStreakMaintained = true,
-    this.foodStreakDays = 5,
+    this.isLoading = false,
+    this.stats,
+    this.targetCalories,
+    this.isCalorieCompensationEnabled,
+    this.isRolloverCaloriesEnabled,
+    this.rolloverCalories,
   });
 
   @override
@@ -68,17 +80,21 @@ class _OverviewSectionState extends State<OverviewSection> {
   }
 
   Widget _buildCaloriesToday() {
-    // Wrap with ErrorBoundaryWidget to catch errors in testing
-    return const ErrorBoundaryWidget(
-      child: CaloriesTodayWidget(),
-    );
+    return widget.isLoading
+        ? const CaloriesTodaySkeleton()
+        : CaloriesTodayWidget(
+            stats: widget.stats,
+            targetCalories: widget.targetCalories ?? 0,
+            isCalorieCompensationEnabled: widget.isCalorieCompensationEnabled ?? false,
+            isRolloverCaloriesEnabled: widget.isRolloverCaloriesEnabled ?? false,
+            rolloverCalories: widget.rolloverCalories ?? 0,
+          );
   }
 
   Widget _buildFitnessTrackerSection() {
-    // Wrap with ErrorBoundaryWidget to catch errors in testing
-    return const ErrorBoundaryWidget(
-      child: HealthConnectWidget(),
-    );
+    return widget.isLoading
+        ? const HealthConnectSkeleton()
+        : const HealthConnectWidget();
   }
 
   Widget _buildNutrientCard({
@@ -89,68 +105,70 @@ class _OverviewSectionState extends State<OverviewSection> {
     required Color iconColor,
     required Color bgColor,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 5,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: bgColor,
-                  borderRadius: BorderRadius.circular(8),
+    return widget.isLoading
+        ? const NutrientCardSkeleton()
+        : Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 5,
+                  offset: Offset(0, 2),
                 ),
-                child: Icon(icon, color: iconColor, size: 12),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.black54,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          RichText(
-            text: TextSpan(
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextSpan(
-                  text: current,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(icon, color: iconColor, size: 12),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
-                TextSpan(
-                  text: '/$target',
-                  style: const TextStyle(
-                    color: Colors.black38,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                const SizedBox(height: 12),
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: current,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: '/$target',
+                        style: const TextStyle(
+                          color: Colors.black38,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
   }
 
   @override
@@ -206,11 +224,11 @@ class _OverviewSectionState extends State<OverviewSection> {
               Expanded(
                 child: _buildNutrientCard(
                   title: 'Fat',
-                  current: '25',
+                  current: '32',
                   target: '65g',
                   icon: Icons.water_drop_outlined,
-                  iconColor: const Color(0xFFFFB946),
-                  bgColor: const Color(0xFFFFB946).withOpacity(0.1),
+                  iconColor: primaryYellow,
+                  bgColor: primaryYellow.withOpacity(0.1),
                 ),
               ),
             ],

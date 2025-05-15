@@ -16,6 +16,8 @@ import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/period_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/week_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_goal_page.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_weight_page.dart';
 
 // Firebase imports:
 
@@ -45,6 +47,8 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
   bool _isLoadingWeight = true;
   String _currentBMI = "0";
   bool _isLoadingBMI = true;
+  String _weightGoal = "0";
+  bool _isLoadingWeightGoal = true;
 
   // Service instance
   late final FoodLogDataService _foodLogDataService;
@@ -74,6 +78,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     _loadCalorieData();
     _loadCurrentWeight();
     _loadCurrentBMI();
+    _loadWeightGoal();
   }
 
   Future<void> _loadCalorieData() async {
@@ -240,6 +245,54 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     }
   }
 
+  Future<void> _loadWeightGoal() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoadingWeightGoal = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No authenticated user found');
+      }
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('health_metrics')
+          .where('userId', isEqualTo: user.uid)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final data = snapshot.docs.first.data();
+        final desiredWeight = data['desiredWeight'];
+
+        if (mounted) {
+          setState(() {
+            _weightGoal = "$desiredWeight";
+            _isLoadingWeightGoal = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _weightGoal = "N/A";
+            _isLoadingWeightGoal = false;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading weight goal: $e');
+      if (mounted) {
+        setState(() {
+          _weightGoal = "Error";
+          _isLoadingWeightGoal = false;
+        });
+      }
+    }
+  }
+
   List<CalorieData> _getDefaultCalorieData() {
     return selectedPeriod == '1 Month'
         ? [
@@ -325,22 +378,60 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
         Expanded(
           child: CircularIndicatorWidget(
             label: "Weight Goal",
-            value: "74 kg",
-            icon: Icons.flag_outlined,
-            color: primaryGreen,
-          ),
+          value: _isLoadingWeightGoal ? "Loading..." : "$_weightGoal kg",
+          icon: Icons.flag_outlined,
+          color: primaryGreen,
+          onTap: _isLoadingWeightGoal 
+              ? null 
+              : () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UpdateGoalPage(initialGoalWeight: _weightGoal),
+                    ),
+                  );
+                  
+                  // Jika berhasil update, refresh data
+                  if (result != null) {
+                    setState(() {
+                      _weightGoal = result;
+                      _isLoadingWeightGoal = false;
+                    });
+                  }
+                },
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: CircularIndicatorWidget(
-            label: "Current Weight",
-            value: _isLoadingWeight ? "Loading..." : "$_currentWeight kg",
-            icon: Icons.scale,
-            color: primaryPink,
-          ),
+      ),
+      const SizedBox(width: 16),
+      Expanded(
+        child: CircularIndicatorWidget(
+          label: "Current Weight",
+          value: _isLoadingWeight ? "Loading..." : "$_currentWeight kg",
+          icon: Icons.scale,
+          color: primaryPink,
+          onTap: _isLoadingWeight 
+              ? null 
+              : () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UpdateWeightPage(initialCurrentWeight: _currentWeight),
+                    ),
+                  );
+                  
+                  // Refresh data if successfully updated
+                  if (result != null) {
+                    setState(() {
+                      _currentWeight = result;
+                      _isLoadingWeight = false;
+                    });
+                    // Also reload BMI since weight affects it
+                    _loadCurrentBMI();
+                  }
+                },
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 }
 // coverage:ignore-end
