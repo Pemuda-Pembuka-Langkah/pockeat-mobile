@@ -167,28 +167,95 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
           (tdeValue % 1 >= 0.5) ? tdeValue.ceil() : tdeValue.floor();
       debugPrint('TDE: $tde');
 
-      // Get yesterday's date as a string in format YYYY-MM-DD
-      final now = DateTime.now();
-      final yesterday = DateTime(now.year, now.month, now.day - 1);
-      final dateString =
-          "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
-
-      debugPrint(
-          'Looking for stats between: $dateString and ${DateTime.now()}');
-
-      // Query documents by date string
-      final statsDoc = await _firestore
+      // Get all stats documents for this user, sorted by date
+      final statsAllDocs = await _firestore
           .collection('calorie_stats')
           .where('userId', isEqualTo: userId)
-          .where('date', isEqualTo: dateString)
-          .limit(1)
-          .get();
+          .orderBy('date', descending: true)
+          .limit(10) // Get more docs to ensure yesterday is included
+          .get(); // Calculate yesterday's date
+      final now = DateTime.now();
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      debugPrint(
+          'Looking for stats from yesterday: ${yesterday.toIso8601String()}'); // Find all documents that match yesterday's date
+      List<DocumentSnapshot> yesterdayDocs = [];
+      for (var doc in statsAllDocs.docs) {
+        DateTime docDate;
+        final dateField = doc.data()['date'];
 
-      debugPrint('Stats Document: ${statsDoc.docs}');
-      if (statsDoc.docs.isEmpty) return 0;
+        // Handle both Timestamp and String date formats
+        if (dateField is Timestamp) {
+          docDate = dateField.toDate();
+        } else if (dateField is String) {
+          // Parse date string in the format YYYY-MM-DD
+          final parts = dateField.split('-');
+          if (parts.length == 3) {
+            try {
+              docDate = DateTime(
+                int.parse(parts[0]),
+                int.parse(parts[1]),
+                int.parse(parts[2]),
+              );
+            } catch (e) {
+              debugPrint('Error parsing date string: $e');
+              continue;
+            }
+          } else {
+            continue;
+          }
+        } else {
+          debugPrint('Unsupported date format: ${dateField.runtimeType}');
+          continue;
+        }
 
-      final caloriesConsumed =
-          statsDoc.docs.first.data()['caloriesConsumed'] as int? ?? 0;
+        debugPrint('Comparing with doc date: ${docDate.toIso8601String()}');
+
+        // Compare only year, month, and day
+        if (docDate.year == yesterday.year &&
+            docDate.month == yesterday.month &&
+            docDate.day == yesterday.day) {
+          yesterdayDocs.add(doc);
+          debugPrint('Found yesterday\'s document: ${doc.id}');
+        }
+      }
+
+      // If no document found for yesterday, return default value
+      if (yesterdayDocs.isEmpty) {
+        debugPrint('No stats document found for yesterday');
+        return 0; // Default rollover calories when no data exists
+      }
+
+      // If multiple documents found for yesterday, select the most relevant one
+      DocumentSnapshot yesterdayDoc;
+      if (yesterdayDocs.length > 1) {
+        debugPrint(
+            'Found ${yesterdayDocs.length} documents for yesterday, selecting most relevant');
+
+        // Look for document with non-zero values
+        DocumentSnapshot? nonZeroDoc;
+        for (var doc in yesterdayDocs) {
+          final data = doc.data() as Map<String, dynamic>;
+          final caloriesConsumed = data['caloriesConsumed'] as int? ?? 0;
+          final caloriesBurned = data['caloriesBurned'] as int? ?? 0;
+
+          if (caloriesConsumed > 0 || caloriesBurned > 0) {
+            nonZeroDoc = doc;
+            debugPrint(
+                'Selected document with non-zero values: calories consumed=$caloriesConsumed, calories burned=$caloriesBurned');
+            break;
+          }
+        }
+
+        // Use the document with non-zero values if found, otherwise use the first one
+        yesterdayDoc = nonZeroDoc ?? yesterdayDocs.first;
+      } else {
+        yesterdayDoc = yesterdayDocs.first;
+      }
+
+      // Get calories consumed from yesterday's document
+      final caloriesConsumed = (yesterdayDoc.data()
+              as Map<String, dynamic>)['caloriesConsumed'] as int? ??
+          0;
       debugPrint('Calories Consumed: $caloriesConsumed');
 
       // Calculate rollover calories: TDE - caloriesConsumed

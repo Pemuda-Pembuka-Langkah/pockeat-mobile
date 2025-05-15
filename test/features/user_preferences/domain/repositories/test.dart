@@ -55,7 +55,7 @@ void main() {
     mockQuerySnapshot = MockQuerySnapshot();
     mockQueryDocs = [MockQueryDocumentSnapshot()];
 
-    // Setup mock behavior for Firestore
+    // Setup basic mock behavior for Firestore
     when(() => mockFirestore.collection('users')).thenReturn(mockCollectionRef);
     when(() => mockCollectionRef.doc(testUserId)).thenReturn(mockDocRef);
     when(() => mockFirestore.collection('caloric_requirements'))
@@ -367,12 +367,11 @@ void main() {
       when(() => mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
       when(() => mockQuerySnapshot.docs).thenReturn(mockQueryDocs);
       when(() => mockQueryDocs[0].data()).thenReturn({
-        'tde': 2500.2,
-        'userId': testUserId
+        'tde': 2500.2
       }); // TDE with decimal part      // Setup calorie stats mocks
       final yesterday = DateTime.now().subtract(const Duration(days: 1));
-      // Use Timestamp for the date field since that's what the repository expects from Firestore
-      final yesterdayTimestamp = Timestamp.fromDate(yesterday);
+      final dateString =
+          "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
 
       when(() => mockCalorieStatsRef.where('userId',
           isEqualTo: any(named: 'isEqualTo'))).thenReturn(mockQuery);
@@ -381,14 +380,14 @@ void main() {
       when(() => mockQuery.limit(any())).thenReturn(mockQuery);
       when(() => mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
       when(() => mockQuerySnapshot.docs).thenReturn(mockQueryDocs);
-      when(() => mockQueryDocs[0].data()).thenReturn({
-        'caloriesConsumed': 2000,
-        'date': yesterdayTimestamp,
-        'userId': testUserId
-      });
+      when(() => mockQueryDocs[0].data()).thenReturn(
+          {'caloriesConsumed': 2000, 'date': dateString, 'userId': testUserId});
 
       // Act
       final result = await repository.calculateRolloverCalories(testUserId);
+
+      // Assert - TDE (2500.2 rounded to 2500) - consumed (2000) = 500
+      expect(result, 500);
     });
 
     test('selects document with non-zero values over documents with all zeros',
@@ -411,11 +410,13 @@ void main() {
       final mockTdeDoc = MockQueryDocumentSnapshot();
       when(() => mockTdeQuery.get()).thenAnswer((_) async => mockTdeSnapshot);
       when(() => mockTdeSnapshot.docs).thenReturn([mockTdeDoc]);
-      when(() => mockTdeDoc.data())
-          .thenReturn({'tde': 2000.0, 'userId': testUserId});
-      // Setup yesterday date as Timestamp
+      when(() => mockTdeDoc.data()).thenReturn({'tde': 2000.0});
+
+      // Setup multiple documents for yesterday with different values
       final yesterday = DateTime.now().subtract(const Duration(days: 1));
-      final yesterdayTimestamp = Timestamp.fromDate(yesterday);
+      // Format date as YYYY-MM-DD string for testing
+      final yesterdayFormatted =
+          "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
 
       // Setup mock for stats query
       final mockStatsQuery = MockQuery();
@@ -428,29 +429,27 @@ void main() {
       // Create multiple documents with different values
       final mockDoc1 = MockQueryDocumentSnapshot();
       final mockDoc2 = MockQueryDocumentSnapshot();
-      final mockDoc3 =
-          MockQueryDocumentSnapshot(); // First doc with zero values
+      final mockDoc3 = MockQueryDocumentSnapshot();
+
+      // First doc with zero values
       when(() => mockDoc1.data()).thenReturn({
-        'date': yesterdayTimestamp,
+        'date': yesterdayFormatted,
         'caloriesConsumed': 0,
-        'caloriesBurned': 0,
-        'userId': testUserId
+        'caloriesBurned': 0
       });
 
       // Second doc with non-zero values - should be selected
       when(() => mockDoc2.data()).thenReturn({
-        'date': yesterdayTimestamp,
+        'date': yesterdayFormatted,
         'caloriesConsumed': 1500,
-        'caloriesBurned': 0,
-        'userId': testUserId
+        'caloriesBurned': 0
       });
 
       // Third doc with zero values
       when(() => mockDoc3.data()).thenReturn({
-        'date': yesterdayTimestamp,
+        'date': yesterdayFormatted,
         'caloriesConsumed': 0,
-        'caloriesBurned': 0,
-        'userId': testUserId
+        'caloriesBurned': 0
       });
 
       final mockStatsSnapshot = MockQuerySnapshot();
@@ -458,6 +457,12 @@ void main() {
           .thenAnswer((_) async => mockStatsSnapshot);
       when(() => mockStatsSnapshot.docs)
           .thenReturn([mockDoc1, mockDoc2, mockDoc3]);
+
+      // Act
+      final result = await repository.calculateRolloverCalories(testUserId);
+
+      // Assert - TDE (2000) - consumed (1500) = 500
+      expect(result, 500);
     });
 
     test('caps rollover calories at 1000', () async {
@@ -474,28 +479,31 @@ void main() {
       when(() => mockQuery.limit(1)).thenReturn(mockQuery);
       when(() => mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
       when(() => mockQuerySnapshot.docs).thenReturn(mockQueryDocs);
-      when(() => mockQueryDocs[0].data()).thenReturn({
-        'tde': 3000,
-        'userId': testUserId
-      }); // High TDE value      // Setup calorie stats mocks
+      when(() => mockQueryDocs[0].data())
+          .thenReturn({'tde': 3000}); // High TDE value
+
+      // Setup calorie stats mocks
       final yesterday = DateTime.now().subtract(const Duration(days: 1));
-      final yesterdayTimestamp = Timestamp.fromDate(yesterday);
+      final dateString =
+          "${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}";
 
       when(() => mockCalorieStatsRef.where('userId',
           isEqualTo: any(named: 'isEqualTo'))).thenReturn(mockQuery);
+      when(() => mockQuery.where('date', isEqualTo: any(named: 'isEqualTo')))
+          .thenReturn(mockQuery);
       when(() => mockQuery.orderBy('date', descending: true))
           .thenReturn(mockQuery);
       when(() => mockQuery.limit(any())).thenReturn(mockQuery);
       when(() => mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
       when(() => mockQuerySnapshot.docs).thenReturn(mockQueryDocs);
-      when(() => mockQueryDocs[0].data()).thenReturn({
-        'caloriesConsumed': 1000,
-        'date': yesterdayTimestamp,
-        'userId': testUserId
-      });
+      when(() => mockQueryDocs[0].data())
+          .thenReturn({'caloriesConsumed': 1000, 'date': dateString});
 
       // Act
       final result = await repository.calculateRolloverCalories(testUserId);
+
+      // Assert - TDE (3000) - consumed (1000) = 2000, but capped at 1000
+      expect(result, 1000);
     });
 
     test('returns 0 when no caloric requirements document exists', () async {
@@ -535,12 +543,13 @@ void main() {
       when(() => mockQuery.limit(1)).thenReturn(mockQuery);
       when(() => mockQuery.get()).thenAnswer((_) async => mockQuerySnapshot);
       when(() => mockQuerySnapshot.docs).thenReturn(mockQueryDocs);
-      when(() => mockQueryDocs[0].data())
-          .thenReturn({'tde': 2500, 'userId': testUserId});
+      when(() => mockQueryDocs[0].data()).thenReturn({'tde': 2500});
 
       // Setup empty stats query result
       when(() => mockCalorieStatsRef.where('userId',
           isEqualTo: any(named: 'isEqualTo'))).thenReturn(mockQuery);
+      when(() => mockQuery.where('date', isEqualTo: any(named: 'isEqualTo')))
+          .thenReturn(mockQuery);
       when(() => mockQuery.orderBy('date', descending: true))
           .thenReturn(mockQuery);
       when(() => mockQuery.limit(any())).thenReturn(mockQuery);
@@ -549,6 +558,9 @@ void main() {
 
       // Act
       final result = await repository.calculateRolloverCalories(testUserId);
+
+      // Assert - should return 0 when no stats doc
+      expect(result, 0);
     });
   });
 }

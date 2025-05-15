@@ -61,6 +61,7 @@ import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart'
 import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
 import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+import 'package:pockeat/features/sync_fitness_tracker/di/sync_fitness_tracker_module.dart';
 import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 final getIt = GetIt.instance;
@@ -185,11 +186,13 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<UserActivityService>(
     UserActivityServiceImpl(),
   );
-
   // Register feature modules first (before services that depend on them)
   FoodLogHistoryModule.register();
   ExerciseLogHistoryModule.register();
   CalorieStatsModule.register();
+
+  // Register SyncFitnessTrackerModule for Health Connect integration
+  SyncFitnessTrackerModule.register();
 
   // Now register NotificationService which depends on FoodLogHistoryService and UserActivityService
   getIt.registerSingleton<NotificationService>(

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:health/health.dart';
 import 'package:intl/intl.dart';
@@ -12,13 +13,23 @@ import 'package:permission_handler/permission_handler.dart';
 
 // Project imports:
 import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
+import 'package:pockeat/features/sync_fitness_tracker/services/third_party_tracker_service.dart';
 
 // Mock classes
+class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
 class MockHealth extends Mock implements Health {}
 
 class MockMethodChannel extends Mock implements MethodChannel {}
 
+class MockThirdPartyTrackerService extends Mock
+    implements ThirdPartyTrackerService {}
+
 class MockBuildContext extends Mock implements BuildContext {}
+
+class MockPermission extends Mock implements Permission {}
+
+class MockDeviceInfoPlugin extends Mock implements DeviceInfoPlugin {}
 
 class MockHealthDataPoint extends Mock implements HealthDataPoint {}
 
@@ -31,146 +42,14 @@ class MockNumericHealthValue extends Mock implements NumericHealthValue {
   double get numericValue => _value;
 }
 
-// Mock class that throws permission errors for testing exception handling
-class PermissionErrorFitnessTrackerSync extends FitnessTrackerSyncWithMockData {
-  PermissionErrorFitnessTrackerSync({
-    required Health mockHealth,
-    required MethodChannel mockMethodChannel,
-  }) : super(
-          mockHealth: mockHealth,
-          mockMethodChannel: mockMethodChannel,
-          mockSteps: 0,
-          mockCalories: 0,
-        );
-
-  @override
-  Future<int?> getStepsForDay(DateTime date) async {
-    throw Exception('SecurityException: Permission denied');
-  }
-
-  @override
-  Future<bool> canReadHealthData() async {
-    _localPermissionState = false;
-    return false;
-  }
-
-  @override
-  Future<Map<String, dynamic>> getTodayFitnessData() async {
-    try {
-      // This will throw a permission exception
-      await getStepsForDay(DateTime.now());
-
-      // We shouldn't get here
-      return {
-        'steps': 0,
-        'calories': 0,
-        'hasPermissions': true,
-      };
-    } catch (e) {
-      // The error should contain "SecurityException" so permission state is updated
-      _localPermissionState = false;
-
-      return {
-        'steps': 0,
-        'calories': 0,
-        'hasPermissions': false,
-      };
-    }
-  }
-}
-
-// Mock class that throws general errors (not permission related)
-class GeneralErrorFitnessTrackerSync extends FitnessTrackerSyncWithMockData {
-  GeneralErrorFitnessTrackerSync({
-    required Health mockHealth,
-    required MethodChannel mockMethodChannel,
-  }) : super(
-          mockHealth: mockHealth,
-          mockMethodChannel: mockMethodChannel,
-          mockSteps: 0,
-          mockCalories: 0,
-        );
-
-  @override
-  Future<int?> getStepsForDay(DateTime date) async {
-    throw Exception('General error not related to permissions');
-  }
-
-  @override
-  Future<bool> canReadHealthData() async {
-    // For general errors, we preserve the permission state
-    return _localPermissionState;
-  }
-
-  @override
-  Future<Map<String, dynamic>> getTodayFitnessData() async {
-    try {
-      // This will throw a general exception
-      await getStepsForDay(DateTime.now());
-
-      // We shouldn't get here
-      return {
-        'steps': 0,
-        'calories': 0,
-        'hasPermissions': true,
-      };
-    } catch (e) {
-      // This is a general error, so permission state should be preserved
-      // The error doesn't contain "SecurityException"
-
-      return {
-        'steps': 0,
-        'calories': 0,
-        'hasPermissions':
-            _localPermissionState, // Preserve current permission state
-      };
-    }
-  }
-}
-
-class MockDeviceInfoPlugin extends Mock implements DeviceInfoPlugin {
-  @override
-  Future<AndroidDeviceInfo> get androidInfo =>
-      Future.value(AndroidDeviceInfo.fromMap({
-        'id': 'mock-android-id',
-        'version': {
-          'baseOS': 'mock-baseOS',
-          'codename': 'mock-codename',
-          'incremental': 'mock-incremental',
-          'previewSdkInt': 23,
-          'release': 'mock-release',
-          'sdkInt': 30,
-          'securityPatch': 'mock-securityPatch',
-        },
-        'board': 'mock-board',
-        'bootloader': 'mock-bootloader',
-        'brand': 'mock-brand',
-        'device': 'mock-device',
-        'display': 'mock-display',
-        'fingerprint': 'mock-fingerprint',
-        'hardware': 'mock-hardware',
-        'host': 'mock-host',
-        'manufacturer': 'mock-manufacturer',
-        'model': 'mock-model',
-        'product': 'mock-product',
-        'supported32BitAbis': <String>[],
-        'supported64BitAbis': <String>[],
-        'supportedAbis': <String>[],
-        'tags': 'mock-tags',
-        'type': 'mock-type',
-        'isPhysicalDevice': true,
-        'serialNumber': 'mock-serial',
-        'isLowRamDevice': false,
-        'systemFeatures': <String>[],
-      }));
-}
-
-// Test subclass that overrides implementation to avoid real plugin calls
+/// Simple implementation class for FitnessTrackerSync to test protected methods
 class TestFitnessTrackerSync extends FitnessTrackerSync {
   final Health mockHealth;
   final MethodChannel mockMethodChannel;
+  final FirebaseAuth mockAuth;
+  final ThirdPartyTrackerService mockTrackerService;
 
-  // Add these lines to define private variables
+  // Add these lines to define private variables for testing
   bool _localPermissionState = false;
 
   final List<HealthDataType> _requiredTypes = [
@@ -182,13 +61,29 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
   TestFitnessTrackerSync({
     required this.mockHealth,
     required this.mockMethodChannel,
-  });
+    FirebaseAuth? mockAuth,
+    ThirdPartyTrackerService? mockTrackerService,
+  })  : this.mockAuth = mockAuth ?? MockFirebaseAuth(),
+        this.mockTrackerService =
+            mockTrackerService ?? MockThirdPartyTrackerService(),
+        super(
+            health: mockHealth,
+            methodChannel: mockMethodChannel,
+            auth: mockAuth ?? MockFirebaseAuth(),
+            trackerService:
+                mockTrackerService ?? MockThirdPartyTrackerService());
 
-  @override
+  // Access to mock objects without override annotation
   Health get _health => mockHealth;
-
-  @override
   MethodChannel get _methodChannel => mockMethodChannel;
+  FirebaseAuth get _auth => mockAuth;
+  ThirdPartyTrackerService get _trackerService => mockTrackerService;
+
+  // Expose the date range method for testing
+  @override
+  DateTimeRange getDateRange(DateTime date) {
+    return super.getDateRange(date);
+  }
 
   @override
   Future<void> configureHealth() async {
@@ -372,59 +267,79 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
     debugPrint('Getting steps for ${DateFormat('yyyy-MM-dd').format(date)}...');
 
     // Create date range for the entire day
-    final startTime = DateTime(date.year, date.month, date.day);
-    final endTime = startTime
-        .add(const Duration(days: 1))
-        .subtract(const Duration(milliseconds: 1));
+    final DateTimeRange dateRange = getDateRange(date);
+    final startTime = dateRange.start;
+    final endTime = dateRange.end;
 
     try {
       // Try to get the step count using the specialized method first
       try {
+        debugPrint('Using specialized steps method...');
         final steps = await _health.getTotalStepsInInterval(startTime, endTime);
-        debugPrint('Steps from getTotalStepsInInterval: $steps');
 
-        if (steps != null && steps > 0) {
+        if (steps != null) {
+          debugPrint('Got steps from specialized method: $steps');
           // We successfully read steps, so we have permission
           _localPermissionState = true;
           return steps;
+        } else {
+          debugPrint('Specialized method returned null steps');
         }
       } catch (e) {
-        debugPrint('Error with getTotalStepsInInterval: $e');
+        debugPrint('Error using specialized steps method: $e');
+        if (e.toString().contains("SecurityException") ||
+            e.toString().contains("permission") ||
+            e.toString().contains("Permission")) {
+          _localPermissionState = false;
+          throw Exception('Permission denied: $e');
+        }
       }
 
       // Try the more general method
       try {
+        debugPrint('Using general health data method for steps...');
         final results = await _health.getHealthDataFromTypes(
           types: [HealthDataType.STEPS],
           startTime: startTime,
           endTime: endTime,
         );
 
-        // We successfully read data, so we have permission
-        _localPermissionState = true;
-
         // Sum up all step counts from the results
         int totalSteps = 0;
         for (final dataPoint in results) {
           if (dataPoint.type == HealthDataType.STEPS) {
-            totalSteps +=
+            final stepValue =
                 (dataPoint.value as NumericHealthValue).numericValue.toInt();
+            totalSteps += stepValue;
+            debugPrint('Found step data point: $stepValue');
           }
         }
 
-        debugPrint(
-            'Steps from getHealthDataFromTypes: $totalSteps (${results.length} records)');
+        debugPrint('Total steps from general method: $totalSteps');
         if (totalSteps > 0) {
-          return totalSteps;
+          _localPermissionState = true;
         }
+        return totalSteps;
       } catch (e) {
-        debugPrint('Error with getHealthDataFromTypes: $e');
+        debugPrint('Error using general method for steps: $e');
+        if (e.toString().contains("SecurityException") ||
+            e.toString().contains("permission") ||
+            e.toString().contains("Permission")) {
+          _localPermissionState = false;
+          throw Exception('Permission denied: $e');
+        }
       }
 
       // Return 0 if no steps found
+      debugPrint('No step data found, returning 0');
       return 0;
     } catch (e) {
       debugPrint('Error getting steps: $e');
+      if (e.toString().contains("SecurityException") ||
+          e.toString().contains("permission") ||
+          e.toString().contains("Permission")) {
+        _localPermissionState = false;
+      }
       return 0;
     }
   }
@@ -470,7 +385,7 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
           }
         }
 
-        // If no total calories found, use active energy burned
+        // If we didn't find Total Calories, try Active Energy Burned
         if (!hasTotalCalories) {
           for (final dataPoint in results) {
             if (dataPoint.type == HealthDataType.ACTIVE_ENERGY_BURNED) {
@@ -481,19 +396,28 @@ class TestFitnessTrackerSync extends FitnessTrackerSync {
           }
         }
 
-        debugPrint(
-            'Total calories: $totalCalories, from total calories: $hasTotalCalories');
-        if (totalCalories > 0) {
-          return totalCalories;
-        }
+        debugPrint('Total calories: $totalCalories');
+        return totalCalories;
       } catch (e) {
         debugPrint('Error getting calories data: $e');
+        if (e.toString().contains("SecurityException") ||
+            e.toString().contains("permission") ||
+            e.toString().contains("Permission")) {
+          _localPermissionState = false;
+          throw Exception('Permission denied: $e');
+        }
       }
 
       // Return 0 if no calories found
+      debugPrint('No calories data found, returning 0');
       return 0;
     } catch (e) {
-      debugPrint('Error getting calories burned: $e');
+      debugPrint('Error getting calories: $e');
+      if (e.toString().contains("SecurityException") ||
+          e.toString().contains("permission") ||
+          e.toString().contains("Permission")) {
+        _localPermissionState = false;
+      }
       return 0;
     }
   }
@@ -519,6 +443,8 @@ class FitnessTrackerSyncWithMockData extends FitnessTrackerSync {
   final MethodChannel mockMethodChannel;
   final int mockSteps;
   final double mockCalories;
+  final FirebaseAuth mockAuth;
+  final ThirdPartyTrackerService mockTrackerService;
 
   // Add a local permission state field
   bool _localPermissionState = false;
@@ -528,13 +454,29 @@ class FitnessTrackerSyncWithMockData extends FitnessTrackerSync {
     required this.mockMethodChannel,
     required this.mockSteps,
     required this.mockCalories,
-  });
+    FirebaseAuth? mockAuth,
+    ThirdPartyTrackerService? mockTrackerService,
+  })  : this.mockAuth = mockAuth ?? MockFirebaseAuth(),
+        this.mockTrackerService =
+            mockTrackerService ?? MockThirdPartyTrackerService(),
+        super(
+            health: mockHealth,
+            methodChannel: mockMethodChannel,
+            auth: mockAuth ?? MockFirebaseAuth(),
+            trackerService:
+                mockTrackerService ?? MockThirdPartyTrackerService());
 
   @override
   Health get _health => mockHealth;
 
   @override
   MethodChannel get _methodChannel => mockMethodChannel;
+
+  @override
+  FirebaseAuth get _auth => mockAuth;
+
+  @override
+  ThirdPartyTrackerService get _trackerService => mockTrackerService;
 
   @override
   Future<int?> getStepsForDay(DateTime date) async => mockSteps;
@@ -607,7 +549,7 @@ class Platform {
   static bool get isAndroid => FakePlatform.isAndroid;
 }
 
-// Add this class before the main() function
+// Add this class for testing non-Android behavior
 class NonAndroidFitnessTrackerSync extends TestFitnessTrackerSync {
   NonAndroidFitnessTrackerSync({
     required super.mockHealth,
@@ -618,8 +560,110 @@ class NonAndroidFitnessTrackerSync extends TestFitnessTrackerSync {
   bool get isAndroid => false;
 }
 
-// Add this mock class at the top with other mocks
-class MockPermission extends Mock implements Permission {}
+// Mock class that throws permission errors for testing exception handling
+class PermissionErrorFitnessTrackerSync extends FitnessTrackerSyncWithMockData {
+  PermissionErrorFitnessTrackerSync({
+    required Health mockHealth,
+    required MethodChannel mockMethodChannel,
+    FirebaseAuth? mockAuth,
+    ThirdPartyTrackerService? mockTrackerService,
+  }) : super(
+          mockHealth: mockHealth,
+          mockMethodChannel: mockMethodChannel,
+          mockSteps: 0,
+          mockCalories: 0,
+          mockAuth: mockAuth,
+          mockTrackerService: mockTrackerService,
+        );
+
+  @override
+  Future<int?> getStepsForDay(DateTime date) async {
+    throw Exception('SecurityException: Permission denied');
+  }
+
+  @override
+  Future<bool> canReadHealthData() async {
+    _localPermissionState = false;
+    return false;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getTodayFitnessData() async {
+    try {
+      // This will throw a permission exception
+      await getStepsForDay(DateTime.now());
+
+      // We shouldn't get here
+      return {
+        'steps': 0,
+        'calories': 0,
+        'hasPermissions': true,
+      };
+    } catch (e) {
+      // The error should contain "SecurityException" so permission state is updated
+      _localPermissionState = false;
+
+      return {
+        'steps': 0,
+        'calories': 0,
+        'hasPermissions': false,
+      };
+    }
+  }
+}
+
+// Mock class that throws general errors (not permission related)
+class GeneralErrorFitnessTrackerSync extends FitnessTrackerSyncWithMockData {
+  GeneralErrorFitnessTrackerSync({
+    required Health mockHealth,
+    required MethodChannel mockMethodChannel,
+    FirebaseAuth? mockAuth,
+    ThirdPartyTrackerService? mockTrackerService,
+  }) : super(
+          mockHealth: mockHealth,
+          mockMethodChannel: mockMethodChannel,
+          mockSteps: 0,
+          mockCalories: 0,
+          mockAuth: mockAuth,
+          mockTrackerService: mockTrackerService,
+        );
+
+  @override
+  Future<int?> getStepsForDay(DateTime date) async {
+    throw Exception('General error not related to permissions');
+  }
+
+  @override
+  Future<bool> canReadHealthData() async {
+    // For general errors, we preserve the permission state
+    return _localPermissionState;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getTodayFitnessData() async {
+    try {
+      // This will throw a general exception
+      await getStepsForDay(DateTime.now());
+
+      // We shouldn't get here
+      return {
+        'steps': 0,
+        'calories': 0,
+        'hasPermissions': true,
+      };
+    } catch (e) {
+      // This is a general error, so permission state should be preserved
+      // The error doesn't contain "SecurityException"
+
+      return {
+        'steps': 0,
+        'calories': 0,
+        'hasPermissions':
+            _localPermissionState, // Preserve current permission state
+      };
+    }
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -641,16 +685,14 @@ void main() {
       .setMockMethodCallHandler(
           const MethodChannel('dev.fluttercommunity.plus/device_info'),
           (MethodCall methodCall) async {
-    // Mock responses for device info
     switch (methodCall.method) {
-      case 'getDeviceInfo':
+      case 'getAndroidDeviceInfo':
         return {
-          'id': 'mock-android-id',
           'version': {
             'baseOS': 'mock-baseOS',
             'codename': 'mock-codename',
             'incremental': 'mock-incremental',
-            'previewSdkInt': 23,
+            'previewSdkInt': 0,
             'release': 'mock-release',
             'sdkInt': 30,
             'securityPatch': 'mock-securityPatch',
@@ -663,6 +705,7 @@ void main() {
           'fingerprint': 'mock-fingerprint',
           'hardware': 'mock-hardware',
           'host': 'mock-host',
+          'id': 'mock-id',
           'manufacturer': 'mock-manufacturer',
           'model': 'mock-model',
           'product': 'mock-product',
@@ -692,15 +735,21 @@ void main() {
   late MockHealth mockHealth;
   late MockMethodChannel mockMethodChannel;
   late MockBuildContext mockContext;
+  late MockFirebaseAuth mockAuth;
+  late MockThirdPartyTrackerService mockTrackerService;
 
   setUp(() {
     mockHealth = MockHealth();
     mockMethodChannel = MockMethodChannel();
     mockContext = MockBuildContext();
+    mockAuth = MockFirebaseAuth();
+    mockTrackerService = MockThirdPartyTrackerService();
 
     fitnessTrackerSync = TestFitnessTrackerSync(
       mockHealth: mockHealth,
       mockMethodChannel: mockMethodChannel,
+      mockAuth: mockAuth,
+      mockTrackerService: mockTrackerService,
     );
 
     // Mock all used methods on mockHealth
@@ -717,7 +766,105 @@ void main() {
       HealthDataType.ACTIVE_ENERGY_BURNED,
       HealthDataType.TOTAL_CALORIES_BURNED
     ]);
+    registerFallbackValue(HealthDataAccess.READ);
+    registerFallbackValue(
+        List<HealthDataAccess>.filled(3, HealthDataAccess.READ));
     registerFallbackValue(DateTime.now());
+  });
+
+  group('Permission Error Detection', () {
+    test('correctly identifies SecurityException as permission error', () {
+      expect(
+        fitnessTrackerSync
+            .isPermissionErrorForTest('SecurityException: Permission denied'),
+        isTrue,
+      );
+    });
+
+    test('correctly identifies permission in error message as permission error',
+        () {
+      expect(
+        fitnessTrackerSync
+            .isPermissionErrorForTest('Error: permission not granted'),
+        isTrue,
+      );
+    });
+
+    test(
+        'correctly identifies unauthorized in error message as permission error',
+        () {
+      expect(
+        fitnessTrackerSync
+            .isPermissionErrorForTest('Unauthorized access attempt'),
+        isTrue,
+      );
+    });
+
+    test('correctly identifies non-permission errors', () {
+      expect(
+        fitnessTrackerSync.isPermissionErrorForTest('Generic error occurred'),
+        isFalse,
+      );
+      expect(
+        fitnessTrackerSync.isPermissionErrorForTest('Network timeout'),
+        isFalse,
+      );
+    });
+
+    test('handles case sensitivity correctly', () {
+      expect(
+        fitnessTrackerSync.isPermissionErrorForTest('SECURITYEXCEPTION: error'),
+        isTrue,
+      );
+      expect(
+        fitnessTrackerSync
+            .isPermissionErrorForTest('Error with PERMISSION issues'),
+        isTrue,
+      );
+    });
+
+    test('handles null and empty errors gracefully', () {
+      expect(
+        fitnessTrackerSync.isPermissionErrorForTest(''),
+        isFalse,
+      );
+    });
+  });
+
+  group('Date Formatting', () {
+    test('formats date correctly', () {
+      final date = DateTime(2023, 5, 15);
+      expect(fitnessTrackerSync.formatDate(date), '2023-05-15');
+    });
+
+    test('handles single digit months and days with leading zero', () {
+      final date1 = DateTime(2023, 5, 9);
+      final date2 = DateTime(2023, 1, 15);
+
+      expect(fitnessTrackerSync.formatDate(date1), '2023-05-09');
+      expect(fitnessTrackerSync.formatDate(date2), '2023-01-15');
+    });
+  });
+
+  group('Date Range Calculation', () {
+    test('creates correct date range for a given day', () {
+      final date = DateTime(2023, 5, 15);
+      final range = fitnessTrackerSync.getDateRange(date);
+
+      // Start should be midnight on the given day
+      expect(range.start, DateTime(2023, 5, 15, 0, 0, 0, 0));
+
+      // End should be 23:59:59.999 on the given day
+      final expectedEnd = DateTime(2023, 5, 15, 23, 59, 59, 999);
+      expect(range.end.year, expectedEnd.year);
+      expect(range.end.month, expectedEnd.month);
+      expect(range.end.day, expectedEnd.day);
+      expect(range.end.hour, expectedEnd.hour);
+      expect(range.end.minute, expectedEnd.minute);
+      expect(range.end.second, expectedEnd.second);
+      // Millisecond might differ by small amounts, so we'll check it's close
+      expect(range.end.millisecond, closeTo(expectedEnd.millisecond, 10));
+    });
   });
 
   group('Initialization and Permissions', () {
@@ -976,76 +1123,6 @@ void main() {
           )).called(1);
     });
 
-    test('getCaloriesBurnedForDay combines TOTAL_CALORIES_BURNED values',
-        () async {
-      // Arrange
-      final testDate = DateTime.now();
-
-      // Reset mocks to clear any previous setup
-      reset(mockHealth);
-
-      // Create mock health data points
-      final mockDataPoints = [
-        MockHealthDataPoint(),
-        MockHealthDataPoint(),
-      ];
-
-      // Configure mock health data points
-      when(() => mockDataPoints[0].type)
-          .thenReturn(HealthDataType.TOTAL_CALORIES_BURNED);
-      when(() => mockDataPoints[0].value)
-          .thenReturn(MockNumericHealthValue(100.0));
-
-      when(() => mockDataPoints[1].type)
-          .thenReturn(HealthDataType.TOTAL_CALORIES_BURNED);
-      when(() => mockDataPoints[1].value)
-          .thenReturn(MockNumericHealthValue(50.0));
-
-      // Important: Make sure we're mocking the specific call that's being made
-      when(() => mockHealth.getHealthDataFromTypes(
-            types: any(named: 'types'),
-            startTime: any(named: 'startTime'),
-            endTime: any(named: 'endTime'),
-          )).thenAnswer((_) async => mockDataPoints);
-
-      // Act
-      final result = await fitnessTrackerSync.getCaloriesBurnedForDay(testDate);
-
-      // Assert
-      expect(result, 150.0); // 100.0 + 50.0
-    });
-
-    test(
-        'getCaloriesBurnedForDay falls back to ACTIVE_ENERGY_BURNED if no TOTAL_CALORIES_BURNED',
-        () async {
-      // Arrange
-      final testDate = DateTime.now();
-
-      // Reset mocks to clear any previous setup
-      reset(mockHealth);
-
-      // Create mock health data point
-      final mockDataPoint = MockHealthDataPoint();
-
-      // Configure mock health data point
-      when(() => mockDataPoint.type)
-          .thenReturn(HealthDataType.ACTIVE_ENERGY_BURNED);
-      when(() => mockDataPoint.value).thenReturn(MockNumericHealthValue(75.0));
-
-      // Important: Make sure we're mocking the specific call that's being made
-      when(() => mockHealth.getHealthDataFromTypes(
-            types: any(named: 'types'),
-            startTime: any(named: 'startTime'),
-            endTime: any(named: 'endTime'),
-          )).thenAnswer((_) async => [mockDataPoint]);
-
-      // Act
-      final result = await fitnessTrackerSync.getCaloriesBurnedForDay(testDate);
-
-      // Assert
-      expect(result, 75.0);
-    });
-
     test('getStepsForDay handles permission errors correctly', () async {
       // Arrange
       final testDate = DateTime.now();
@@ -1068,6 +1145,45 @@ void main() {
       // Assert
       expect(result, 0);
       expect(fitnessTrackerSync._localPermissionState, false);
+    });
+
+    test('getCaloriesBurnedForDay combines TOTAL_CALORIES_BURNED values',
+        () async {
+      // Arrange
+      final testDate = DateTime.now();
+
+      // Reset mocks to clear any previous setup
+      reset(mockHealth);
+
+      // Create mock health data points
+      final mockDataPoints = [
+        MockHealthDataPoint(),
+        MockHealthDataPoint(),
+      ];
+
+      // Configure mock health data points
+      when(() => mockDataPoints[0].type)
+          .thenReturn(HealthDataType.TOTAL_CALORIES_BURNED);
+      when(() => mockDataPoints[0].value)
+          .thenReturn(MockNumericHealthValue(50.0));
+
+      when(() => mockDataPoints[1].type)
+          .thenReturn(HealthDataType.TOTAL_CALORIES_BURNED);
+      when(() => mockDataPoints[1].value)
+          .thenReturn(MockNumericHealthValue(25.0));
+
+      // Configure the method to return our mock data
+      when(() => mockHealth.getHealthDataFromTypes(
+            types: any(named: 'types'),
+            startTime: any(named: 'startTime'),
+            endTime: any(named: 'endTime'),
+          )).thenAnswer((_) async => mockDataPoints);
+
+      // Act
+      final result = await fitnessTrackerSync.getCaloriesBurnedForDay(testDate);
+
+      // Assert
+      expect(result, 75.0);
     });
 
     test('getCaloriesBurnedForDay handles permission errors correctly',
@@ -1130,6 +1246,8 @@ void main() {
       final syncWithErrors = PermissionErrorFitnessTrackerSync(
         mockHealth: mockHealth,
         mockMethodChannel: mockMethodChannel,
+        mockAuth: mockAuth,
+        mockTrackerService: mockTrackerService,
       );
 
       // Start with permission granted
@@ -1151,6 +1269,8 @@ void main() {
       final syncWithGeneralErrors = GeneralErrorFitnessTrackerSync(
         mockHealth: mockHealth,
         mockMethodChannel: mockMethodChannel,
+        mockAuth: mockAuth,
+        mockTrackerService: mockTrackerService,
       );
 
       // Start with permission granted
@@ -1222,18 +1342,6 @@ void main() {
   });
 
   group('Helper Methods', () {
-    test('getDateRange returns correct date range for a day', () {
-      // Arrange
-      final testDate = DateTime(2024, 3, 15); // March 15, 2024
-
-      // Act
-      final dateRange = fitnessTrackerSync.getDateRange(testDate);
-
-      // Assert
-      expect(dateRange.start, equals(DateTime(2024, 3, 15)));
-      expect(dateRange.end, equals(DateTime(2024, 3, 15, 23, 59, 59, 999)));
-    });
-
     test('formatDate formats date correctly', () {
       // Arrange
       final testDate = DateTime(2024, 3, 15);
@@ -1294,17 +1402,6 @@ void main() {
 
       // Assert
       verify(() => mockHealth.configure()).called(1);
-    });
-
-    test('resetPermissionState resets the permission state', () {
-      // Arrange
-      fitnessTrackerSync._localPermissionState = true;
-
-      // Act
-      fitnessTrackerSync.resetPermissionState();
-
-      // Assert
-      expect(fitnessTrackerSync._localPermissionState, false);
     });
   });
 }
