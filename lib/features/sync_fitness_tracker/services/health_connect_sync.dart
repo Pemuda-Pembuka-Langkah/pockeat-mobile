@@ -57,6 +57,10 @@ class FitnessTrackerSync {
         errorString.contains("unauthorized");
   }
 
+  /// Exposed for testing
+  @visibleForTesting
+  bool isPermissionErrorForTest(dynamic error) => _isPermissionError(error);
+
   /// The required data types
   final List<HealthDataType> _requiredTypes = [
     HealthDataType.STEPS,

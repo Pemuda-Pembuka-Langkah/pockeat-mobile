@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/sync_fitness_tracker/services/third_party_tracker_service.dart';
 
 /// Module for registering sync_fitness_tracker dependencies
+//coverage:ignore-start
 class SyncFitnessTrackerModule {
   /// Register all dependencies for the sync_fitness_tracker feature
   static void register() {
@@ -25,3 +26,4 @@ class SyncFitnessTrackerModule {
     }
   }
 }
+//coverage:ignore-end

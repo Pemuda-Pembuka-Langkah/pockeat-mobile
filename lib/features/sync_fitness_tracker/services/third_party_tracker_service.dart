@@ -25,6 +25,14 @@ class ThirdPartyTrackerService {
     FirebaseFirestore? firestore,
   }) : _firestore = firestore ?? FirebaseFirestore.instance;
 
+  // These methods are used only for testing
+  @visibleForTesting
+  String formatDateForTest(DateTime date) => _formatDate(date);
+
+  @visibleForTesting
+  void handleErrorForTest(String operation, dynamic error) =>
+      _handleError(operation, error);
+
   /// Helper method to handle errors
   void _handleError(String operation, dynamic error) {
     debugPrint('Error $operation: $error');
