@@ -200,7 +200,7 @@ class _HeardAboutPageState extends State<HeardAboutPage> with SingleTickerProvid
                                         final prefs = await SharedPreferences.getInstance();
                                         await prefs.setString('heardAboutPockEat', _selectedOption!);
                                         if (context.mounted) {
-                                          Navigator.pushNamed(context, '/review');
+                                          Navigator.pushNamed(context, '/sync-fitness-tracker');
                                         }
                                       }
                                     : null, // Disabled if no selection

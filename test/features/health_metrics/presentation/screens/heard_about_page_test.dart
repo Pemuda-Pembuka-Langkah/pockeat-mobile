@@ -24,6 +24,7 @@ void main() {
       return MaterialApp(
         routes: {
           '/review': (_) => const Scaffold(body: Center(child: Text('Review Page'))),
+          '/sync-fitness-tracker': (_) => const Scaffold(body: Center(child: Text('Sync Fitness Tracker Page'))),
         },
         home: const HeardAboutPage(),
       );
@@ -207,8 +208,8 @@ void main() {
       await tester.tap(continueButtonFinder, warnIfMissed: false);
       await tester.pumpAndSettle();
 
-      // Check if navigated to review page
-      expect(find.text('Review Page'), findsOneWidget);
+      // Check if navigated to sync fitness tracker page
+      expect(find.text('Sync Fitness Tracker Page'), findsOneWidget);
 
       // Verify preference was saved
       expect(prefs.getString('heardAboutPockEat'), 'Google Search');
