@@ -56,6 +56,8 @@ class RunningFormState extends State<RunningForm> {
         return 0.0;
       }
 
+      widget.onCalculate(totalDistance, duration);
+
       return CalorieCalculator.calculateRunningCalories(
         distanceKm: totalDistance,
         duration: duration,
