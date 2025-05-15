@@ -22,7 +22,8 @@ class HeardAboutPage extends StatefulWidget {
   State<HeardAboutPage> createState() => _HeardAboutPageState();
 }
 
-class _HeardAboutPageState extends State<HeardAboutPage> with SingleTickerProviderStateMixin {
+class _HeardAboutPageState extends State<HeardAboutPage>
+    with SingleTickerProviderStateMixin {
   // Colors from the app's design system
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
@@ -31,11 +32,11 @@ class _HeardAboutPageState extends State<HeardAboutPage> with SingleTickerProvid
   final Color textLightColor = Colors.black54;
 
   String? _selectedOption;
-  
+
   // Animation controller
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -115,7 +116,7 @@ class _HeardAboutPageState extends State<HeardAboutPage> with SingleTickerProvid
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-                
+
                 // Onboarding progress indicator
                 const OnboardingProgressIndicator(
                   totalSteps: 16,
@@ -123,9 +124,9 @@ class _HeardAboutPageState extends State<HeardAboutPage> with SingleTickerProvid
                   barHeight: 6.0,
                   showPercentage: true,
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Title with modern style
                 const Text(
                   "How You Found Us",
@@ -146,9 +147,9 @@ class _HeardAboutPageState extends State<HeardAboutPage> with SingleTickerProvid
                     height: 1.3,
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Main content in a white container with shadow
                 Expanded(
                   child: Container(
@@ -188,19 +189,23 @@ class _HeardAboutPageState extends State<HeardAboutPage> with SingleTickerProvid
                                 ),
                               ),
                             ),
-                            
+
                             const SizedBox(height: 16),
-                            
+
                             // Continue button at the bottom of the container
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: _selectedOption != null
                                     ? () async {
-                                        final prefs = await SharedPreferences.getInstance();
-                                        await prefs.setString('heardAboutPockEat', _selectedOption!);
+                                        final prefs = await SharedPreferences
+                                            .getInstance();
+                                        await prefs.setString(
+                                            'heardAboutPockEat',
+                                            _selectedOption!);
                                         if (context.mounted) {
-                                          Navigator.pushNamed(context, '/review');
+                                          Navigator.pushNamed(
+                                              context, '/review');
                                         }
                                       }
                                     : null, // Disabled if no selection
@@ -213,7 +218,8 @@ class _HeardAboutPageState extends State<HeardAboutPage> with SingleTickerProvid
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   elevation: _selectedOption != null ? 2 : 0,
                                 ),
                                 child: const Text(
@@ -231,7 +237,7 @@ class _HeardAboutPageState extends State<HeardAboutPage> with SingleTickerProvid
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
               ],
             ),
@@ -262,8 +268,8 @@ class _HeardAboutPageState extends State<HeardAboutPage> with SingleTickerProvid
             ),
             boxShadow: [
               BoxShadow(
-                color: selected 
-                    ? primaryGreen.withOpacity(0.1) 
+                color: selected
+                    ? primaryGreen.withOpacity(0.1)
                     : Colors.black.withOpacity(0.02),
                 blurRadius: 8,
                 offset: const Offset(0, 3),

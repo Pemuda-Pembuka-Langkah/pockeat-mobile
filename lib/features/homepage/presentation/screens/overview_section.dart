@@ -1,13 +1,13 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 
 // Project imports:
-import 'package:pockeat/features/homepage/presentation/widgets/calories_today_widget.dart';
-import 'package:pockeat/features/homepage/presentation/loading_skeleton/health_connect_skeleton.dart';
-import 'package:pockeat/features/sync_fitness_tracker/widgets/health_connect_widget.dart';
+import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/homepage/presentation/loading_skeleton/calories_today_skeleton.dart';
+import 'package:pockeat/features/homepage/presentation/loading_skeleton/health_connect_skeleton.dart';
 import 'package:pockeat/features/homepage/presentation/loading_skeleton/nutrient_card_skeleton.dart';
+import 'package:pockeat/features/homepage/presentation/widgets/calories_today_widget.dart';
+import 'package:pockeat/features/sync_fitness_tracker/widgets/health_connect_widget.dart';
 
 class OverviewSection extends StatefulWidget {
   final DailyCalorieStats? stats;
@@ -85,8 +85,10 @@ class _OverviewSectionState extends State<OverviewSection> {
         : CaloriesTodayWidget(
             stats: widget.stats,
             targetCalories: widget.targetCalories ?? 0,
-            isCalorieCompensationEnabled: widget.isCalorieCompensationEnabled ?? false,
-            isRolloverCaloriesEnabled: widget.isRolloverCaloriesEnabled ?? false,
+            isCalorieCompensationEnabled:
+                widget.isCalorieCompensationEnabled ?? false,
+            isRolloverCaloriesEnabled:
+                widget.isRolloverCaloriesEnabled ?? false,
             rolloverCalories: widget.rolloverCalories ?? 0,
           );
   }

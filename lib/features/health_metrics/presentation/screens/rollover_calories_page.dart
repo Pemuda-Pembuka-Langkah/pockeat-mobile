@@ -16,7 +16,8 @@ class RolloverCaloriesPage extends StatefulWidget {
   State<RolloverCaloriesPage> createState() => _RolloverCaloriesPageState();
 }
 
-class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with SingleTickerProviderStateMixin {
+class _RolloverCaloriesPageState extends State<RolloverCaloriesPage>
+    with SingleTickerProviderStateMixin {
   // Colors from the app's design system
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
@@ -25,11 +26,11 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
   final Color textLightColor = Colors.black54;
 
   bool? _rolloverCalories;
-  
+
   // Animation controller
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -109,7 +110,7 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-                
+
                 // Onboarding progress indicator
                 const OnboardingProgressIndicator(
                   totalSteps: 16,
@@ -117,9 +118,9 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                   barHeight: 6.0,
                   showPercentage: true,
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Title with modern style
                 const Text(
                   "Rollover Calories",
@@ -140,9 +141,9 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                     height: 1.3,
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Main content in a white container with shadow
                 Expanded(
                   child: Container(
@@ -196,7 +197,8 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         const Text(
                                           "What this means",
@@ -208,7 +210,7 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          "If you choose 'Yes', up to 200 unused calories will roll over to your next day's calorie budget, helping you maintain a flexible diet.", 
+                                          "If you choose 'Yes', up to 200 unused calories will roll over to your next day's calorie budget, helping you maintain a flexible diet.",
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: Colors.grey.shade700,
@@ -221,9 +223,9 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                 ],
                               ),
                             ),
-                            
+
                             const SizedBox(height: 32),
-                            
+
                             // Option buttons - modern switch style
                             Container(
                               decoration: BoxDecoration(
@@ -239,19 +241,27 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                   // No option
                                   Expanded(
                                     child: GestureDetector(
-                                      onTap: () => setState(() => _rolloverCalories = false),
+                                      onTap: () => setState(
+                                          () => _rolloverCalories = false),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
                                         decoration: BoxDecoration(
-                                          color: _rolloverCalories == false ? primaryGreen : Colors.transparent,
-                                          borderRadius: BorderRadius.horizontal(left: Radius.circular(15)),
+                                          color: _rolloverCalories == false
+                                              ? primaryGreen
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              const BorderRadius.horizontal(
+                                                  left: Radius.circular(15)),
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             if (_rolloverCalories == false)
                                               Container(
-                                                padding: const EdgeInsets.all(4),
+                                                padding:
+                                                    const EdgeInsets.all(4),
                                                 decoration: const BoxDecoration(
                                                   color: Colors.white,
                                                   shape: BoxShape.circle,
@@ -262,13 +272,17 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                                   size: 14,
                                                 ),
                                               ),
-                                            if (_rolloverCalories == false) const SizedBox(width: 8),
+                                            if (_rolloverCalories == false)
+                                              const SizedBox(width: 8),
                                             Text(
                                               "No",
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
-                                                color: _rolloverCalories == false ? Colors.white : Colors.black87,
+                                                color:
+                                                    _rolloverCalories == false
+                                                        ? Colors.white
+                                                        : Colors.black87,
                                               ),
                                             ),
                                           ],
@@ -276,23 +290,31 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                       ),
                                     ),
                                   ),
-                                  
+
                                   // Yes option
                                   Expanded(
                                     child: GestureDetector(
-                                      onTap: () => setState(() => _rolloverCalories = true),
+                                      onTap: () => setState(
+                                          () => _rolloverCalories = true),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
                                         decoration: BoxDecoration(
-                                          color: _rolloverCalories == true ? primaryGreen : Colors.transparent,
-                                          borderRadius: BorderRadius.horizontal(right: Radius.circular(15)),
+                                          color: _rolloverCalories == true
+                                              ? primaryGreen
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              const BorderRadius.horizontal(
+                                                  right: Radius.circular(15)),
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             if (_rolloverCalories == true)
                                               Container(
-                                                padding: const EdgeInsets.all(4),
+                                                padding:
+                                                    const EdgeInsets.all(4),
                                                 decoration: const BoxDecoration(
                                                   color: Colors.white,
                                                   shape: BoxShape.circle,
@@ -303,13 +325,16 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                                   size: 14,
                                                 ),
                                               ),
-                                            if (_rolloverCalories == true) const SizedBox(width: 8),
+                                            if (_rolloverCalories == true)
+                                              const SizedBox(width: 8),
                                             Text(
                                               "Yes",
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
-                                                color: _rolloverCalories == true ? Colors.white : Colors.black87,
+                                                color: _rolloverCalories == true
+                                                    ? Colors.white
+                                                    : Colors.black87,
                                               ),
                                             ),
                                           ],
@@ -320,20 +345,23 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                 ],
                               ),
                             ),
-                          
-                            
+
                             const Spacer(),
-                            
+
                             // Continue button
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: _rolloverCalories != null
                                     ? () async {
-                                        final prefs = await SharedPreferences.getInstance();
-                                        await prefs.setBool('rolloverCaloriesEnabled', _rolloverCalories!);
+                                        final prefs = await SharedPreferences
+                                            .getInstance();
+                                        await prefs.setBool(
+                                            'rolloverCaloriesEnabled',
+                                            _rolloverCalories!);
                                         if (context.mounted) {
-                                          Navigator.pushNamed(context, '/used-other-apps');
+                                          Navigator.pushNamed(
+                                              context, '/used-other-apps');
                                         }
                                       }
                                     : null,
@@ -345,7 +373,8 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   elevation: 2,
                                 ),
                                 child: const Text(

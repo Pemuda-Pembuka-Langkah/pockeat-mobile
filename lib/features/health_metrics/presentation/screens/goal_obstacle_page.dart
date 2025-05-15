@@ -10,8 +10,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'form_cubit.dart';
 import '../widgets/onboarding_progress_indicator.dart';
+import 'form_cubit.dart';
 
 /// A page that asks users what obstacles they face in reaching their goals.
 class GoalObstaclePage extends StatefulWidget {
@@ -32,7 +32,8 @@ class GoalObstaclePage extends StatefulWidget {
   State<GoalObstaclePage> createState() => _GoalObstaclePageState();
 }
 
-class _GoalObstaclePageState extends State<GoalObstaclePage> with SingleTickerProviderStateMixin {
+class _GoalObstaclePageState extends State<GoalObstaclePage>
+    with SingleTickerProviderStateMixin {
   // Colors from the app's design system
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
@@ -96,8 +97,8 @@ class _GoalObstaclePageState extends State<GoalObstaclePage> with SingleTickerPr
             ),
             boxShadow: [
               BoxShadow(
-                color: selected 
-                    ? primaryGreen.withOpacity(0.1) 
+                color: selected
+                    ? primaryGreen.withOpacity(0.1)
                     : Colors.black.withOpacity(0.02),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
@@ -110,8 +111,8 @@ class _GoalObstaclePageState extends State<GoalObstaclePage> with SingleTickerPr
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: selected 
-                      ? primaryGreen.withOpacity(0.1) 
+                  color: selected
+                      ? primaryGreen.withOpacity(0.1)
                       : Colors.grey.shade50,
                   shape: BoxShape.circle,
                 ),
@@ -280,19 +281,22 @@ class _GoalObstaclePageState extends State<GoalObstaclePage> with SingleTickerPr
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Expanded(
-                              child: BlocBuilder<HealthMetricsFormCubit, HealthMetricsFormState>(
+                              child: BlocBuilder<HealthMetricsFormCubit,
+                                  HealthMetricsFormState>(
                                 builder: (context, state) {
                                   return SingleChildScrollView(
                                     child: Column(
                                       children: [
                                         // Removed goal info section as it's redundant
-                                        
+
                                         // Obstacle options
-                                        for (final obstacle in GoalObstaclePage.obstacles)
+                                        for (final obstacle
+                                            in GoalObstaclePage.obstacles)
                                           _buildObstacleOption(
                                             context,
                                             obstacle,
-                                            selected: state.dietType == obstacle,
+                                            selected:
+                                                state.dietType == obstacle,
                                           ),
                                       ],
                                     ),
@@ -300,18 +304,23 @@ class _GoalObstaclePageState extends State<GoalObstaclePage> with SingleTickerPr
                                 },
                               ),
                             ),
-                            
+
                             // Continue button within the white container
-                            BlocBuilder<HealthMetricsFormCubit, HealthMetricsFormState>(
+                            BlocBuilder<HealthMetricsFormCubit,
+                                HealthMetricsFormState>(
                               builder: (context, state) {
                                 return SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
                                     onPressed: state.dietType != null
                                         ? () async {
-                                            final prefs = await SharedPreferences.getInstance();
-                                            await prefs.setBool('onboardingInProgress', true);
-                                            Navigator.pushNamed(context, '/diet');
+                                            final prefs =
+                                                await SharedPreferences
+                                                    .getInstance();
+                                            await prefs.setBool(
+                                                'onboardingInProgress', true);
+                                            Navigator.pushNamed(
+                                                context, '/diet');
                                           }
                                         : null,
                                     style: ElevatedButton.styleFrom(
@@ -319,11 +328,13 @@ class _GoalObstaclePageState extends State<GoalObstaclePage> with SingleTickerPr
                                           ? primaryGreen
                                           : primaryGreenDisabled,
                                       foregroundColor: Colors.white,
-                                      minimumSize: const Size(double.infinity, 56),
+                                      minimumSize:
+                                          const Size(double.infinity, 56),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),
                                       ),
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16),
                                       elevation: state.dietType != null ? 2 : 0,
                                     ),
                                     child: const Text(
@@ -343,7 +354,7 @@ class _GoalObstaclePageState extends State<GoalObstaclePage> with SingleTickerPr
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
               ],
             ),
@@ -352,6 +363,6 @@ class _GoalObstaclePageState extends State<GoalObstaclePage> with SingleTickerPr
       ),
     );
   }
-  
+
   // Goal info section removed as it's redundant
 }
