@@ -26,15 +26,23 @@ class _SyncFitnessTrackerOptionPageState
   final Color bgColor = const Color(0xFFF9F9F9);
   final Color textDarkColor = Colors.black87;
   final Color textLightColor = Colors.black54;
+  
+  // User preference state
+  bool? _syncFitnessTracker;
+  
+  // Key for the sync fitness tracker setting
+  static const String _syncFitnessTrackerKey = 'sync_fitness_tracker_enabled';
 
   // Animation controller
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
-
   @override
   void initState() {
     super.initState();
+    // Load saved preference
+    _loadSyncFitnessTrackerPreference();
+    
     // Setup animation
     _animationController = AnimationController(
       vsync: this,
@@ -59,6 +67,45 @@ class _SyncFitnessTrackerOptionPageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
     });
+  }
+  
+  /// Load sync fitness tracker preference
+  Future<void> _loadSyncFitnessTrackerPreference() async {
+    try {
+      // Try getting setting from local storage
+      final prefs = await SharedPreferences.getInstance();
+      final localSetting = prefs.getBool(_syncFitnessTrackerKey);
+
+      setState(() {
+        _syncFitnessTracker = localSetting;
+      });
+    } catch (e) {
+      debugPrint('Error loading sync fitness tracker setting: $e');
+    }
+  }
+
+  /// Save sync fitness tracker setting to SharedPreferences
+  Future<void> _saveSyncFitnessTrackerSetting(bool value) async {
+    try {
+      // Save to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_syncFitnessTrackerKey, value);
+
+      setState(() {
+        _syncFitnessTracker = value;
+      });
+    } catch (e) {
+      debugPrint('Error saving sync fitness tracker setting: $e');
+      // Show error to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to save preference'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -248,15 +295,12 @@ class _SyncFitnessTrackerOptionPageState
                             // Connect button
                             SizedBox(
                               width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  await prefs.setBool(
-                                      'syncHealthTracker', true);
+                              child: ElevatedButton(                                onPressed: () async {
+                                  // Save preference that user wants to sync fitness tracker
+                                  await _saveSyncFitnessTrackerSetting(true);
                                   if (context.mounted) {
                                     Navigator.pushNamed(
-                                        context, '/pet-onboard');
+                                        context, '/thank-you');
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -285,15 +329,12 @@ class _SyncFitnessTrackerOptionPageState
                             // Skip button
                             SizedBox(
                               width: double.infinity,
-                              child: TextButton(
-                                onPressed: () async {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  await prefs.setBool(
-                                      'syncHealthTracker', false);
+                              child: TextButton(                                onPressed: () async {
+                                  // Save preference that user does not want to sync fitness tracker
+                                  await _saveSyncFitnessTrackerSetting(false);
                                   if (context.mounted) {
                                     Navigator.pushNamed(
-                                        context, '/pet-onboard');
+                                        context, '/thank-you');
                                   }
                                 },
                                 style: TextButton.styleFrom(

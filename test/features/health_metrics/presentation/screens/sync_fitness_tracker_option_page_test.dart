@@ -18,11 +18,10 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
   });
-
   Widget createTestWidget() {
     return MaterialApp(
       routes: {
-        '/pet-onboard': (_) => const Scaffold(body: Center(child: Text('Pet Onboarding Page'))),
+        '/thank-you': (_) => const Scaffold(body: Center(child: Text('Thank You Page'))),
       },
       home: const SyncFitnessTrackerOptionPage(),
     );
@@ -101,10 +100,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(continueButton, warnIfMissed: false);
       await tester.pumpAndSettle();
-      
-      // Verify navigation and preference
-      expect(find.text('Pet Onboarding Page'), findsOneWidget);
-      expect(prefs.getBool('syncHealthTracker'), isTrue);
+        // Verify navigation and preference
+      expect(find.text('Thank You Page'), findsOneWidget);
+      expect(prefs.getBool('sync_fitness_tracker_enabled'), isTrue);
     });
     
     testWidgets('tapping Not Now saves preference and navigates', (tester) async {
@@ -119,10 +117,9 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(notNowButton, warnIfMissed: false);
       await tester.pumpAndSettle();
-      
-      // Verify navigation and preference
-      expect(find.text('Pet Onboarding Page'), findsOneWidget);
-      expect(prefs.getBool('syncHealthTracker'), isFalse);
+        // Verify navigation and preference
+      expect(find.text('Thank You Page'), findsOneWidget);
+      expect(prefs.getBool('sync_fitness_tracker_enabled'), isFalse);
     });
     
     testWidgets('back button has modern shadow styling', (tester) async {
