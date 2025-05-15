@@ -222,13 +222,13 @@ void main() {
       verify(mockFirebaseFirestore.collection('caloric_requirements')).called(1);
     });
 
-    test('should return false when calories are below 120% of target', () async {
+    test('should return false when calories are below 100% of target', () async {
       // Arrange
       when(mockCalorieStatsService.calculateStatsForDate(testUserId, any))
           .thenAnswer((_) async => DailyCalorieStats(
                 userId: testUserId,
                 date: DateTime.now(),
-                caloriesConsumed: 2300, // 115% of 2000
+                caloriesConsumed: 1995,
                 caloriesBurned: 0,
               ));
 

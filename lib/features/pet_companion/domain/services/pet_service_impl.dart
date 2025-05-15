@@ -68,7 +68,7 @@ class PetServiceImpl implements PetService {
 
     final targetCalories = caloricRequirement.data()!['tdee'];
 
-    return (caloriesConsumed - targetCalories) > targetCalories * 0.2;
+    return (caloriesConsumed - targetCalories) > 0;
   }
 
   @override
