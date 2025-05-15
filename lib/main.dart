@@ -71,6 +71,7 @@ import 'package:pockeat/features/health_metrics/presentation/screens/health_metr
 import 'package:pockeat/features/health_metrics/presentation/screens/health_value_proposition_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/sync_fitness_tracker_option_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/pet_onboard_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/rollover_calories_page.dart';
@@ -591,6 +592,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/thank-you': (context) => const ThankYouPage(),
         '/used-other-apps': (context) => const UsedOtherAppsPage(),
         '/sync-fitness-tracker': (context) => const SyncFitnessTrackerOptionPage(),
+        '/pet-onboard': (context) => const PetOnboardPage(),
         '/review': (context) => BlocProvider.value(
               value: context.read<HealthMetricsFormCubit>(),
               child: const ReviewSubmitPage(),
