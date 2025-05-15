@@ -205,7 +205,7 @@ class _HeardAboutPageState extends State<HeardAboutPage>
                                             _selectedOption!);
                                         if (context.mounted) {
                                           Navigator.pushNamed(
-                                              context, '/review');
+                                              context, '/sync-fitness-tracker');
                                         }
                                       }
                                     : null, // Disabled if no selection
