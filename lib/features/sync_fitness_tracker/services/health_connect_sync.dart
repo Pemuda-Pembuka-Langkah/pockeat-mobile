@@ -9,9 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
 import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+// Project imports:
+import 'package:pockeat/features/sync_fitness_tracker/services/third_party_tracker_service.dart';
 
 //
 
@@ -22,13 +27,23 @@ class FitnessTrackerSync {
   /// Method channel for platform interactions
   final MethodChannel _methodChannel;
 
+  /// Firebase Auth instance
+  final FirebaseAuth _auth;
+
+  /// Third-party tracker service
+  final ThirdPartyTrackerService _trackerService;
+
   // Constructor with dependency injection
   FitnessTrackerSync({
     Health? health,
     MethodChannel? methodChannel,
+    FirebaseAuth? auth,
+    ThirdPartyTrackerService? trackerService,
   })  : _health = health ?? Health(),
         _methodChannel =
-            methodChannel ?? const MethodChannel('com.pockeat/health_connect');
+            methodChannel ?? const MethodChannel('com.pockeat/health_connect'),
+        _auth = auth ?? FirebaseAuth.instance,
+        _trackerService = trackerService ?? ThirdPartyTrackerService();
 
   /// The required data types
   final List<HealthDataType> _requiredTypes = [
@@ -349,7 +364,6 @@ class FitnessTrackerSync {
           'Known to have no Health Connect permissions, returning default data');
       return todayData;
     }
-
     try {
       // Get steps
       final steps = await getStepsForDay(today);
@@ -364,6 +378,18 @@ class FitnessTrackerSync {
       // If we successfully got data, update permission state
       _localPermissionState = true;
       todayData['hasPermissions'] = true;
+
+      // Save data to Firebase if we have valid data and a logged-in user
+      final userId = _auth.currentUser?.uid;
+      if (userId != null && userId.isNotEmpty) {
+        await _trackerService.saveTrackerData(
+          userId: userId,
+          steps: steps ?? 0,
+          caloriesBurned: calories ?? 0.0,
+        );
+        debugPrint(
+            'Saved fitness data to third-party tracker for user: $userId');
+      }
 
       return todayData;
     } catch (e) {
@@ -577,6 +603,15 @@ class FitnessTrackerSync {
   @protected
   void setPermissionGranted() {
     _localPermissionState = true;
+  }
+
+  /// Reset tracker data when disconnected
+  Future<void> resetTrackerData() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId != null && userId.isNotEmpty) {
+      await _trackerService.resetTrackerData(userId);
+      debugPrint('Reset tracker data for user: $userId');
+    }
   }
   //coverage:ignore-end
 

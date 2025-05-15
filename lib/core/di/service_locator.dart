@@ -50,6 +50,7 @@ import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_se
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/sync_fitness_tracker/di/sync_fitness_tracker_module.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
@@ -185,11 +186,13 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<UserActivityService>(
     UserActivityServiceImpl(),
   );
-
   // Register feature modules first (before services that depend on them)
   FoodLogHistoryModule.register();
   ExerciseLogHistoryModule.register();
   CalorieStatsModule.register();
+
+  // Register SyncFitnessTrackerModule for Health Connect integration
+  SyncFitnessTrackerModule.register();
 
   // Now register NotificationService which depends on FoodLogHistoryService and UserActivityService
   getIt.registerSingleton<NotificationService>(

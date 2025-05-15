@@ -18,6 +18,7 @@ import 'package:pockeat/features/authentication/services/login_service_impl.dart
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository_impl.dart';
 import 'package:pockeat/features/calorie_stats/domain/repositories/calorie_stats_repository.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
+import 'package:pockeat/features/sync_fitness_tracker/services/third_party_tracker_service.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
@@ -140,13 +141,19 @@ class BackgroundDependencyService {
 
       // Create CalorieStatsRepository
       final calorieStatsRepository = CalorieStatsRepositoryImpl();
-      services['calorieStatsRepository'] = calorieStatsRepository;
+      services['calorieStatsRepository'] =
+          calorieStatsRepository; // Register ThirdPartyTrackerService
+      final thirdPartyTrackerService = ThirdPartyTrackerService();
+      services['thirdPartyTrackerService'] = thirdPartyTrackerService;
+      GetIt.instance.registerSingleton<ThirdPartyTrackerService>(
+          thirdPartyTrackerService);
 
       // Create CalorieStatsService required for PetService
       final calorieStatsService = CalorieStatsServiceImpl(
           repository: calorieStatsRepository,
           exerciseService: exerciseService,
-          foodService: foodLogHistoryService);
+          foodService: foodLogHistoryService,
+          trackerService: thirdPartyTrackerService);
       services['calorieStatsService'] = calorieStatsService;
       GetIt.instance
           .registerSingleton<CalorieStatsService>(calorieStatsService);
@@ -181,14 +188,15 @@ class BackgroundDependencyService {
           CaloricRequirementRepositoryImpl();
 
       services['caloricStatsRepository'] = CalorieStatsRepositoryImpl();
-
       services['caloricStatsService'] = CalorieStatsServiceImpl(
           repository:
               services['caloricStatsRepository'] as CalorieStatsRepositoryImpl,
           exerciseService: services['exerciseLogHistoryService']
               as ExerciseLogHistoryService,
           foodService:
-              services['foodLogHistoryService'] as FoodLogHistoryService);
+              services['foodLogHistoryService'] as FoodLogHistoryService,
+          trackerService:
+              services['thirdPartyTrackerService'] as ThirdPartyTrackerService);
     } catch (e) {
       final errorMsg = 'Failed to setup widget dependencies: $e';
       debugPrint(errorMsg);
