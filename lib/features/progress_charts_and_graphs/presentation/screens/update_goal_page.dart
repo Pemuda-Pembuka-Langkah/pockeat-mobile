@@ -1,4 +1,6 @@
 // Flutter imports:
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -304,7 +306,6 @@ class WeightSliderPainter extends CustomPainter {
 
     // Tentukan interval berat
     final double totalWeightRange = maxWeight - minWeight;
-    final double pixelsPerKg = size.width / totalWeightRange;
 
     // Jumlah garis indikator (10 garis per kg)
     final int totalMarks = (totalWeightRange * 10).toInt();
