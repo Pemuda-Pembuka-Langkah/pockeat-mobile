@@ -18,7 +18,6 @@ import 'package:pockeat/features/authentication/services/login_service_impl.dart
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository_impl.dart';
 import 'package:pockeat/features/calorie_stats/domain/repositories/calorie_stats_repository.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
-import 'package:pockeat/features/sync_fitness_tracker/services/third_party_tracker_service.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository.dart';
 import 'package:pockeat/features/cardio_log/domain/repositories/cardio_repository_impl.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
@@ -33,6 +32,7 @@ import 'package:pockeat/features/home_screen_widget/services/impl/simple_food_tr
 import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository_impl.dart';
+import 'package:pockeat/features/sync_fitness_tracker/services/third_party_tracker_service.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
 

@@ -79,7 +79,7 @@ class SavedMealCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.star,
                         color: Colors.amber,
                         size: 12,

@@ -50,7 +50,6 @@ import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_se
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
-import 'package:pockeat/features/sync_fitness_tracker/di/sync_fitness_tracker_module.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
@@ -62,6 +61,7 @@ import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart'
 import 'package:pockeat/features/pet_companion/domain/services/pet_service_impl.dart';
 import 'package:pockeat/features/saved_meals/domain/repositories/saved_meals_repository.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+import 'package:pockeat/features/sync_fitness_tracker/di/sync_fitness_tracker_module.dart';
 import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 final getIt = GetIt.instance;

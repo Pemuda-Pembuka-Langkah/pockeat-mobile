@@ -11,7 +11,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
 // Project imports:
-import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
 
@@ -639,15 +638,15 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.local_fire_department,
                 size: 18,
                 color: Colors.black54,
               ),
-              const SizedBox(width: 6),
-              const Expanded(
+              SizedBox(width: 6),
+              Expanded(
                 child: Text(
                   'Calories Burned',
                   style: TextStyle(
@@ -689,14 +688,14 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
                   children: [
                     Icon(Icons.fitness_center,
                         size: 12,
-                        color: Color(0xFF4ECDC4)
+                        color: const Color(0xFF4ECDC4)
                             .withOpacity(_exerciseCalories > 0 ? 1.0 : 0.5)),
                     const SizedBox(width: 3),
                     Text(
                       '${_exerciseCalories.toInt()}',
                       style: TextStyle(
                         fontSize: 13,
-                        color: Color(0xFF4ECDC4)
+                        color: const Color(0xFF4ECDC4)
                             .withOpacity(_exerciseCalories > 0 ? 1.0 : 0.5),
                         fontWeight: FontWeight.w500,
                       ),

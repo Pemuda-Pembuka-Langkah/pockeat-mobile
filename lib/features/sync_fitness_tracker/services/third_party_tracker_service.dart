@@ -5,6 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
+// Constants
+const String _collectionName = 'third_party_tracker';
+const String _dateFormat = 'yyyy-MM-dd';
+
 /// Service to manage data from third-party fitness trackers
 ///
 /// Handles storing and retrieving health data from third-party sources
@@ -21,6 +25,16 @@ class ThirdPartyTrackerService {
     FirebaseFirestore? firestore,
   }) : _firestore = firestore ?? FirebaseFirestore.instance;
 
+  /// Helper method to handle errors
+  void _handleError(String operation, dynamic error) {
+    debugPrint('Error $operation: $error');
+  }
+
+  /// Format date as YYYY-MM-DD
+  String _formatDate(DateTime date) {
+    return DateFormat(_dateFormat).format(date);
+  }
+
   /// Save tracker data for the current day
   Future<void> saveTrackerData({
     required String userId,
@@ -32,11 +46,11 @@ class ThirdPartyTrackerService {
     try {
       // Format today's date as YYYY-MM-DD
       final today = DateTime.now();
-      final dateString = DateFormat('yyyy-MM-dd').format(today);
+      final dateString = _formatDate(today);
 
       // Check if a document already exists for this user and date
       final querySnapshot = await _firestore
-          .collection('third_party_tracker')
+          .collection(_collectionName)
           .where('userId', isEqualTo: userId)
           .where('date', isEqualTo: dateString)
           .get();
@@ -44,7 +58,7 @@ class ThirdPartyTrackerService {
       if (querySnapshot.docs.isNotEmpty) {
         // Update existing document
         await _firestore
-            .collection('third_party_tracker')
+            .collection(_collectionName)
             .doc(querySnapshot.docs.first.id)
             .update({
           'steps': steps,
@@ -54,7 +68,7 @@ class ThirdPartyTrackerService {
         debugPrint('Updated tracker data for user: $userId');
       } else {
         // Create new document
-        await _firestore.collection('third_party_tracker').add({
+        await _firestore.collection(_collectionName).add({
           'userId': userId,
           'date': dateString,
           'steps': steps,
@@ -64,7 +78,7 @@ class ThirdPartyTrackerService {
         debugPrint('Saved new tracker data for user: $userId');
       }
     } catch (e) {
-      debugPrint('Error saving tracker data: $e');
+      _handleError('saving tracker data', e);
     }
   }
 
@@ -74,7 +88,7 @@ class ThirdPartyTrackerService {
 
     try {
       final querySnapshot = await _firestore
-          .collection('third_party_tracker')
+          .collection(_collectionName)
           .where('userId', isEqualTo: userId)
           .get();
 
@@ -94,7 +108,7 @@ class ThirdPartyTrackerService {
       await batch.commit();
       debugPrint('Reset tracker data for user: $userId');
     } catch (e) {
-      debugPrint('Error resetting tracker data: $e');
+      _handleError('resetting tracker data', e);
     }
   }
 
@@ -107,10 +121,10 @@ class ThirdPartyTrackerService {
 
     try {
       // Format date as YYYY-MM-DD
-      final dateString = DateFormat('yyyy-MM-dd').format(date);
+      final dateString = _formatDate(date);
 
       final querySnapshot = await _firestore
-          .collection('third_party_tracker')
+          .collection(_collectionName)
           .where('userId', isEqualTo: userId)
           .where('date', isEqualTo: dateString)
           .get();
@@ -123,7 +137,7 @@ class ThirdPartyTrackerService {
         };
       }
     } catch (e) {
-      debugPrint('Error getting tracker data: $e');
+      _handleError('getting tracker data', e);
     }
 
     // Return default values if no data or error

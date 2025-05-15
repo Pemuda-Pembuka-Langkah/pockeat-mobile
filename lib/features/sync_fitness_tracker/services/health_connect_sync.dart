@@ -10,13 +10,15 @@ import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:get_it/get_it.dart';
 import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 // Project imports:
 import 'package:pockeat/features/sync_fitness_tracker/services/third_party_tracker_service.dart';
+
+// Constants
+const String _dateFormat = 'yyyy-MM-dd';
 
 //
 
@@ -44,6 +46,16 @@ class FitnessTrackerSync {
             methodChannel ?? const MethodChannel('com.pockeat/health_connect'),
         _auth = auth ?? FirebaseAuth.instance,
         _trackerService = trackerService ?? ThirdPartyTrackerService();
+
+  /// Helper method to handle permission-related exceptions
+  /// Returns true if the error is permission related
+  @protected
+  bool _isPermissionError(dynamic error) {
+    final errorString = error.toString().toLowerCase();
+    return errorString.contains("securityexception") ||
+        errorString.contains("permission") ||
+        errorString.contains("unauthorized");
+  }
 
   /// The required data types
   final List<HealthDataType> _requiredTypes = [
@@ -190,9 +202,7 @@ class FitnessTrackerSync {
         return true;
       } catch (e) {
         debugPrint('Error reading steps: $e');
-        if (e.toString().contains("SecurityException") ||
-            e.toString().contains("permission") ||
-            e.toString().contains("Permission")) {
+        if (_isPermissionError(e)) {
           _localPermissionState = false;
           return false;
         }
@@ -212,9 +222,7 @@ class FitnessTrackerSync {
         return true;
       } catch (e) {
         debugPrint('Error reading health data: $e');
-        if (e.toString().contains("SecurityException") ||
-            e.toString().contains("permission") ||
-            e.toString().contains("Permission")) {
+        if (_isPermissionError(e)) {
           _localPermissionState = false;
           return false;
         }
@@ -394,9 +402,7 @@ class FitnessTrackerSync {
       return todayData;
     } catch (e) {
       debugPrint('Error getting fitness data: $e');
-      if (e.toString().contains("SecurityException") ||
-          e.toString().contains("permission") ||
-          e.toString().contains("Permission")) {
+      if (_isPermissionError(e)) {
         todayData['hasPermissions'] = false;
         _localPermissionState = false;
       }
@@ -429,9 +435,7 @@ class FitnessTrackerSync {
         }
       } catch (e) {
         debugPrint('Error using specialized steps method: $e');
-        if (e.toString().contains("SecurityException") ||
-            e.toString().contains("permission") ||
-            e.toString().contains("Permission")) {
+        if (_isPermissionError(e)) {
           _localPermissionState = false;
           throw Exception('Permission denied: $e');
         }
@@ -464,9 +468,7 @@ class FitnessTrackerSync {
         return totalSteps;
       } catch (e) {
         debugPrint('Error using general method for steps: $e');
-        if (e.toString().contains("SecurityException") ||
-            e.toString().contains("permission") ||
-            e.toString().contains("Permission")) {
+        if (_isPermissionError(e)) {
           _localPermissionState = false;
           throw Exception('Permission denied: $e');
         }
@@ -477,9 +479,7 @@ class FitnessTrackerSync {
       return 0;
     } catch (e) {
       debugPrint('Error getting steps: $e');
-      if (e.toString().contains("SecurityException") ||
-          e.toString().contains("permission") ||
-          e.toString().contains("Permission")) {
+      if (_isPermissionError(e)) {
         _localPermissionState = false;
         throw Exception('Permission denied: $e');
       }
@@ -546,9 +546,7 @@ class FitnessTrackerSync {
         return totalCalories;
       } catch (e) {
         debugPrint('Error getting calories data: $e');
-        if (e.toString().contains("SecurityException") ||
-            e.toString().contains("permission") ||
-            e.toString().contains("Permission")) {
+        if (_isPermissionError(e)) {
           _localPermissionState = false;
           throw Exception('Permission denied: $e');
         }
@@ -559,9 +557,7 @@ class FitnessTrackerSync {
       return 0;
     } catch (e) {
       debugPrint('Error getting calories: $e');
-      if (e.toString().contains("SecurityException") ||
-          e.toString().contains("permission") ||
-          e.toString().contains("Permission")) {
+      if (_isPermissionError(e)) {
         _localPermissionState = false;
         throw Exception('Permission denied: $e');
       }
@@ -617,6 +613,6 @@ class FitnessTrackerSync {
 
   /// Format readable date
   String formatDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd').format(date);
+    return DateFormat(_dateFormat).format(date);
   }
 }
