@@ -8,8 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'form_cubit.dart';
 import '../widgets/onboarding_progress_indicator.dart';
+import 'form_cubit.dart';
 
 /// A page that allows users to select their weekly physical activity level.
 ///
@@ -62,7 +62,8 @@ class ActivityLevelPage extends StatefulWidget {
   State<ActivityLevelPage> createState() => _ActivityLevelPageState();
 }
 
-class _ActivityLevelPageState extends State<ActivityLevelPage> with SingleTickerProviderStateMixin {
+class _ActivityLevelPageState extends State<ActivityLevelPage>
+    with SingleTickerProviderStateMixin {
   // Colors from the app's design system
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
@@ -212,7 +213,8 @@ class _ActivityLevelPageState extends State<ActivityLevelPage> with SingleTicker
                           begin: const Offset(0, 0.1),
                           end: Offset.zero,
                         ).animate(_fadeAnimation),
-                        child: BlocBuilder<HealthMetricsFormCubit, HealthMetricsFormState>(
+                        child: BlocBuilder<HealthMetricsFormCubit,
+                            HealthMetricsFormState>(
                           builder: (context, state) {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -221,22 +223,24 @@ class _ActivityLevelPageState extends State<ActivityLevelPage> with SingleTicker
                                   child: SingleChildScrollView(
                                     child: Column(
                                       children: [
-                                        for (final level in ActivityLevelPage.activityLevels)
+                                        for (final level
+                                            in ActivityLevelPage.activityLevels)
                                           _buildActivityOption(
                                             context,
                                             level["value"]!,
                                             level["label"]!,
                                             level["description"]!,
                                             level["icon"] as IconData,
-                                            selected: state.activityLevel == level["value"],
+                                            selected: state.activityLevel ==
+                                                level["value"],
                                           ),
                                       ],
                                     ),
                                   ),
                                 ),
-                                
+
                                 const SizedBox(height: 16),
-                                
+
                                 // Continue button at the bottom of the container
                                 SizedBox(
                                   width: double.infinity,
@@ -244,22 +248,30 @@ class _ActivityLevelPageState extends State<ActivityLevelPage> with SingleTicker
                                     onPressed: state.activityLevel != null
                                         ? () async {
                                             // Mark onboarding as in progress and navigate
-                                            final prefs = await SharedPreferences.getInstance();
-                                            await prefs.setBool('onboardingInProgress', true);
-                                            Navigator.pushNamed(context, '/speed');
+                                            final prefs =
+                                                await SharedPreferences
+                                                    .getInstance();
+                                            await prefs.setBool(
+                                                'onboardingInProgress', true);
+                                            Navigator.pushNamed(
+                                                context, '/speed');
                                           }
                                         : null, // Disabled if no selection
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: state.activityLevel != null
-                                          ? primaryGreen
-                                          : primaryGreenDisabled,
+                                      backgroundColor:
+                                          state.activityLevel != null
+                                              ? primaryGreen
+                                              : primaryGreenDisabled,
                                       foregroundColor: Colors.white,
-                                      minimumSize: const Size(double.infinity, 56),
+                                      minimumSize:
+                                          const Size(double.infinity, 56),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),
                                       ),
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
-                                      elevation: state.activityLevel != null ? 2 : 0,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16),
+                                      elevation:
+                                          state.activityLevel != null ? 2 : 0,
                                     ),
                                     child: const Text(
                                       'Continue',
@@ -278,7 +290,7 @@ class _ActivityLevelPageState extends State<ActivityLevelPage> with SingleTicker
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
               ],
             ),
@@ -317,8 +329,8 @@ class _ActivityLevelPageState extends State<ActivityLevelPage> with SingleTicker
             ),
             boxShadow: [
               BoxShadow(
-                color: selected 
-                    ? primaryGreen.withOpacity(0.1) 
+                color: selected
+                    ? primaryGreen.withOpacity(0.1)
                     : Colors.black.withOpacity(0.02),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
@@ -332,8 +344,8 @@ class _ActivityLevelPageState extends State<ActivityLevelPage> with SingleTicker
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: selected 
-                      ? primaryGreen.withOpacity(0.1) 
+                  color: selected
+                      ? primaryGreen.withOpacity(0.1)
                       : Colors.grey.shade50,
                   shape: BoxShape.circle,
                 ),
@@ -352,7 +364,8 @@ class _ActivityLevelPageState extends State<ActivityLevelPage> with SingleTicker
                       label,
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight:
+                            selected ? FontWeight.w600 : FontWeight.w500,
                         color: Colors.black87,
                       ),
                     ),

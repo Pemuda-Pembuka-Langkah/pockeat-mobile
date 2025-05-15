@@ -16,23 +16,29 @@ class RolloverCaloriesPage extends StatefulWidget {
   State<RolloverCaloriesPage> createState() => _RolloverCaloriesPageState();
 }
 
-class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with SingleTickerProviderStateMixin {
+class _RolloverCaloriesPageState extends State<RolloverCaloriesPage>
+    with SingleTickerProviderStateMixin {
   // Colors from the app's design system
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
   final Color bgColor = const Color(0xFFF9F9F9);
   final Color textDarkColor = Colors.black87;
   final Color textLightColor = Colors.black54;
-
   bool? _rolloverCalories;
-  
+
+  // Key for the rollover calories setting
+  static const String _rolloverCaloriesKey = 'rollover_calories_enabled';
+
   // Animation controller
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   @override
   void initState() {
     super.initState();
+    // Load saved preference
+    _loadRolloverCaloriesPreference();
+
     // Setup animation
     _animationController = AnimationController(
       vsync: this,
@@ -50,6 +56,45 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
     });
+  }
+
+  /// Load rollover calories preference
+  Future<void> _loadRolloverCaloriesPreference() async {
+    try {
+      // Try getting setting from local storage
+      final prefs = await SharedPreferences.getInstance();
+      final localSetting = prefs.getBool(_rolloverCaloriesKey);
+
+      setState(() {
+        _rolloverCalories = localSetting;
+      });
+    } catch (e) {
+      debugPrint('Error loading rollover calories setting: $e');
+    }
+  }
+
+  /// Save rollover calories setting to SharedPreferences
+  Future<void> _saveRolloverCaloriesSetting(bool value) async {
+    try {
+      // Save to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_rolloverCaloriesKey, value);
+
+      setState(() {
+        _rolloverCalories = value;
+      });
+    } catch (e) {
+      debugPrint('Error saving rollover calories setting: $e');
+      // Show error to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to save preference'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -91,61 +136,58 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
         ),
       ),
       body: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.white,
-                bgColor,
-              ],
-              stops: const [0.0, 0.6],
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 20),
+
+                  // Onboarding progress indicator
+                  OnboardingProgressIndicator(
+                    totalSteps: 16,
+                    currentStep: 11, // This is the 12th step (0-indexed)
+                    barHeight: 6.0,
+                    showPercentage: true,
+                  ),
+
+                  SizedBox(height: 20),
+
+                  // Title with modern style
+                  Text(
+                    "Rollover Calories",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  SizedBox(height: 8),
+
+                  Text(
+                    "Would you like to roll over your unused calories to the next day?",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                      height: 1.3,
+                    ),
+                  ),
+
+                  SizedBox(height: 32),
+                ],
+              ),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 20),
-                
-                // Onboarding progress indicator
-                const OnboardingProgressIndicator(
-                  totalSteps: 16,
-                  currentStep: 11, // This is the 12th step (0-indexed)
-                  barHeight: 6.0,
-                  showPercentage: true,
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Title with modern style
-                const Text(
-                  "Rollover Calories",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
 
-                const SizedBox(height: 8),
-
-                const Text(
-                  "Would you like to roll over your unused calories to the next day?",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
-                    height: 1.3,
-                  ),
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // Main content in a white container with shadow
-                Expanded(
+            // Main content in a white container with shadow - using Expanded + ScrollView
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Container(
+                    margin: const EdgeInsets.only(bottom: 24),
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -167,6 +209,7 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                         ).animate(_fadeAnimation),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             // Explanation card
                             Container(
@@ -196,7 +239,8 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         const Text(
                                           "What this means",
@@ -208,7 +252,7 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          "If you choose 'Yes', up to 200 unused calories will roll over to your next day's calorie budget, helping you maintain a flexible diet.", 
+                                          "If you choose 'Yes', up to 1000 unused calories will roll over to your next day's calorie budget, helping you maintain a flexible diet.",
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: Colors.grey.shade700,
@@ -221,9 +265,9 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                 ],
                               ),
                             ),
-                            
+
                             const SizedBox(height: 32),
-                            
+
                             // Option buttons - modern switch style
                             Container(
                               decoration: BoxDecoration(
@@ -239,19 +283,29 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                   // No option
                                   Expanded(
                                     child: GestureDetector(
-                                      onTap: () => setState(() => _rolloverCalories = false),
+                                      onTap: () async {
+                                        await _saveRolloverCaloriesSetting(
+                                            false);
+                                      },
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
                                         decoration: BoxDecoration(
-                                          color: _rolloverCalories == false ? primaryGreen : Colors.transparent,
-                                          borderRadius: BorderRadius.horizontal(left: Radius.circular(15)),
+                                          color: _rolloverCalories == false
+                                              ? primaryGreen
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              const BorderRadius.horizontal(
+                                                  left: Radius.circular(15)),
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             if (_rolloverCalories == false)
                                               Container(
-                                                padding: const EdgeInsets.all(4),
+                                                padding:
+                                                    const EdgeInsets.all(4),
                                                 decoration: const BoxDecoration(
                                                   color: Colors.white,
                                                   shape: BoxShape.circle,
@@ -262,13 +316,17 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                                   size: 14,
                                                 ),
                                               ),
-                                            if (_rolloverCalories == false) const SizedBox(width: 8),
+                                            if (_rolloverCalories == false)
+                                              const SizedBox(width: 8),
                                             Text(
                                               "No",
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
-                                                color: _rolloverCalories == false ? Colors.white : Colors.black87,
+                                                color:
+                                                    _rolloverCalories == false
+                                                        ? Colors.white
+                                                        : Colors.black87,
                                               ),
                                             ),
                                           ],
@@ -276,23 +334,33 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                       ),
                                     ),
                                   ),
-                                  
+
                                   // Yes option
                                   Expanded(
                                     child: GestureDetector(
-                                      onTap: () => setState(() => _rolloverCalories = true),
+                                      onTap: () async {
+                                        await _saveRolloverCaloriesSetting(
+                                            true);
+                                      },
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 16),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
                                         decoration: BoxDecoration(
-                                          color: _rolloverCalories == true ? primaryGreen : Colors.transparent,
-                                          borderRadius: BorderRadius.horizontal(right: Radius.circular(15)),
+                                          color: _rolloverCalories == true
+                                              ? primaryGreen
+                                              : Colors.transparent,
+                                          borderRadius:
+                                              const BorderRadius.horizontal(
+                                                  right: Radius.circular(15)),
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             if (_rolloverCalories == true)
                                               Container(
-                                                padding: const EdgeInsets.all(4),
+                                                padding:
+                                                    const EdgeInsets.all(4),
                                                 decoration: const BoxDecoration(
                                                   color: Colors.white,
                                                   shape: BoxShape.circle,
@@ -303,13 +371,16 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                                   size: 14,
                                                 ),
                                               ),
-                                            if (_rolloverCalories == true) const SizedBox(width: 8),
+                                            if (_rolloverCalories == true)
+                                              const SizedBox(width: 8),
                                             Text(
                                               "Yes",
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
-                                                color: _rolloverCalories == true ? Colors.white : Colors.black87,
+                                                color: _rolloverCalories == true
+                                                    ? Colors.white
+                                                    : Colors.black87,
                                               ),
                                             ),
                                           ],
@@ -320,20 +391,23 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                 ],
                               ),
                             ),
-                          
-                            
-                            const Spacer(),
-                            
+
+                            const SizedBox(
+                                height: 40), // Fixed height instead of Expanded
+
                             // Continue button
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: _rolloverCalories != null
                                     ? () async {
-                                        final prefs = await SharedPreferences.getInstance();
-                                        await prefs.setBool('rolloverCaloriesEnabled', _rolloverCalories!);
+                                        if (_rolloverCalories != null) {
+                                          await _saveRolloverCaloriesSetting(
+                                              _rolloverCalories!);
+                                        }
                                         if (context.mounted) {
-                                          Navigator.pushNamed(context, '/used-other-apps');
+                                          Navigator.pushNamed(
+                                              context, '/used-other-apps');
                                         }
                                       }
                                     : null,
@@ -345,7 +419,8 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   elevation: 2,
                                 ),
                                 child: const Text(
@@ -363,10 +438,9 @@ class _RolloverCaloriesPageState extends State<RolloverCaloriesPage> with Single
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

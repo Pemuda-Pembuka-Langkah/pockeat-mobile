@@ -6,8 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'form_cubit.dart';
 import '../widgets/onboarding_progress_indicator.dart';
+import 'form_cubit.dart';
 
 class HealthMetricsGoalsPage extends StatefulWidget {
   const HealthMetricsGoalsPage({super.key});
@@ -43,7 +43,8 @@ class HealthMetricsGoalsPage extends StatefulWidget {
   State<HealthMetricsGoalsPage> createState() => _HealthMetricsGoalsPageState();
 }
 
-class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> with SingleTickerProviderStateMixin {
+class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage>
+    with SingleTickerProviderStateMixin {
   // Colors from the app's design system
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
@@ -182,9 +183,11 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> with Si
                     ),
                     child: FadeTransition(
                       opacity: _fadeAnimation,
-                      child: BlocBuilder<HealthMetricsFormCubit, HealthMetricsFormState>(
+                      child: BlocBuilder<HealthMetricsFormCubit,
+                          HealthMetricsFormState>(
                         builder: (context, state) {
-                          final isOtherSelected = state.selectedGoals.contains("Other");
+                          final isOtherSelected =
+                              state.selectedGoals.contains("Other");
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -203,36 +206,49 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> with Si
                                         ),
                                       ),
                                       const SizedBox(height: 16),
-                                      
+
                                       // Goal options
-                                      for (final option in HealthMetricsGoalsPage.options)
+                                      for (final option
+                                          in HealthMetricsGoalsPage.options)
                                         _buildOption(
                                           context,
                                           option,
-                                          selected: state.selectedGoals.contains(option["title"]),
-                                          disabled: isOtherSelected && option["title"] != "Other" ||
+                                          selected: state.selectedGoals
+                                              .contains(option["title"]),
+                                          disabled: isOtherSelected &&
+                                                  option["title"] != "Other" ||
                                               (!isOtherSelected &&
                                                   option["title"] == "Other" &&
-                                                  state.selectedGoals.isNotEmpty),
+                                                  state.selectedGoals
+                                                      .isNotEmpty),
                                         ),
-                                      
+
                                       // Text field for Other option
                                       if (isOtherSelected)
                                         Padding(
-                                          padding: const EdgeInsets.only(top: 16),
+                                          padding:
+                                              const EdgeInsets.only(top: 16),
                                           child: TextField(
                                             decoration: InputDecoration(
                                               labelText: 'Please specify',
-                                              labelStyle: TextStyle(color: Colors.black54),
+                                              labelStyle: const TextStyle(
+                                                  color: Colors.black54),
                                               border: OutlineInputBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                                borderSide: BorderSide(color: Colors.grey.shade300),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                borderSide: BorderSide(
+                                                    color:
+                                                        Colors.grey.shade300),
                                               ),
                                               focusedBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.circular(12),
-                                                borderSide: BorderSide(color: primaryGreen, width: 2),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                                borderSide: BorderSide(
+                                                    color: primaryGreen,
+                                                    width: 2),
                                               ),
-                                              contentPadding: const EdgeInsets.symmetric(
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
                                                 horizontal: 16,
                                                 vertical: 14,
                                               ),
@@ -247,36 +263,47 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> with Si
                                   ),
                                 ),
                               ),
-                              
+
                               const SizedBox(height: 16),
-                              
+
                               // Continue button at the bottom of the container
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   onPressed: state.selectedGoals.isNotEmpty &&
                                           (!isOtherSelected ||
-                                              (state.otherGoalReason?.isNotEmpty ?? false))
+                                              (state.otherGoalReason
+                                                      ?.isNotEmpty ??
+                                                  false))
                                       ? () async {
-                                          final prefs = await SharedPreferences.getInstance();
-                                          await prefs.setBool('onboardingInProgress', true);
+                                          final prefs = await SharedPreferences
+                                              .getInstance();
+                                          await prefs.setBool(
+                                              'onboardingInProgress', true);
                                           if (!context.mounted) return;
-                                          Navigator.pushNamed(context, '/activity-level');
+                                          Navigator.pushNamed(
+                                              context, '/activity-level');
                                         }
                                       : null,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: state.selectedGoals.isNotEmpty &&
-                                            (!isOtherSelected ||
-                                                (state.otherGoalReason?.isNotEmpty ?? false))
-                                        ? primaryGreen
-                                        : primaryGreenDisabled,
+                                    backgroundColor:
+                                        state.selectedGoals.isNotEmpty &&
+                                                (!isOtherSelected ||
+                                                    (state.otherGoalReason
+                                                            ?.isNotEmpty ??
+                                                        false))
+                                            ? primaryGreen
+                                            : primaryGreenDisabled,
                                     foregroundColor: Colors.white,
-                                    minimumSize: const Size(double.infinity, 56),
+                                    minimumSize:
+                                        const Size(double.infinity, 56),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
-                                    elevation: state.selectedGoals.isNotEmpty ? 2 : 0,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
+                                    elevation:
+                                        state.selectedGoals.isNotEmpty ? 2 : 0,
                                   ),
                                   child: const Text(
                                     'Continue',
@@ -294,7 +321,7 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage> with Si
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
               ],
             ),

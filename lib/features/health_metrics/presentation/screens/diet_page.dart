@@ -8,8 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'form_cubit.dart';
 import '../widgets/onboarding_progress_indicator.dart';
+import 'form_cubit.dart';
 
 class DietPage extends StatefulWidget {
   const DietPage({super.key});
@@ -18,14 +18,16 @@ class DietPage extends StatefulWidget {
   State<DietPage> createState() => _DietPageState();
 }
 
-class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin {
+class _DietPageState extends State<DietPage>
+    with SingleTickerProviderStateMixin {
   // Adding a ScrollController to fix the error
   final ScrollController _scrollController = ScrollController();
-  
+
   final List<Map<String, dynamic>> _options = [
     {
       'title': 'No specific diet',
-      'description': 'You eat a general diet without any specific restrictions.',
+      'description':
+          'You eat a general diet without any specific restrictions.',
       'icon': Icons.restaurant,
     },
     {
@@ -66,15 +68,15 @@ class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
   final Color bgColor = const Color(0xFFF9F9F9);
-  
+
   // Animation controllers
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     // Setup animation
     _animationController = AnimationController(
       vsync: this,
@@ -97,13 +99,14 @@ class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin
   @override
   void dispose() {
     _animationController.dispose();
-    _scrollController.dispose(); // Dispose the ScrollController when the widget is disposed
+    _scrollController
+        .dispose(); // Dispose the ScrollController when the widget is disposed
     super.dispose();
   }
 
   Widget _buildDietOption(Map<String, dynamic> option) {
     final bool isSelected = _selected == option['title'];
-    
+
     return InkWell(
       onTap: () {
         setState(() => _selected = option['title']);
@@ -121,8 +124,8 @@ class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin
           ),
           boxShadow: [
             BoxShadow(
-              color: isSelected 
-                  ? primaryGreen.withOpacity(0.1) 
+              color: isSelected
+                  ? primaryGreen.withOpacity(0.1)
                   : Colors.black.withOpacity(0.02),
               blurRadius: 8,
               offset: const Offset(0, 3),
@@ -136,8 +139,8 @@ class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? primaryGreen.withOpacity(0.1) 
+                color: isSelected
+                    ? primaryGreen.withOpacity(0.1)
                     : Colors.grey.shade50,
                 shape: BoxShape.circle,
               ),
@@ -157,7 +160,8 @@ class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin
                     option['title'],
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
                       color: Colors.black87,
                     ),
                   ),
@@ -206,7 +210,8 @@ class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin
                 ),
               ],
             ),
-            child: const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+            child:
+                const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
           ),
           onPressed: () async {
             final prefs = await SharedPreferences.getInstance();
@@ -306,13 +311,15 @@ class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin
                                 radius: const Radius.circular(8),
                                 child: ListView(
                                   controller: _scrollController,
-                                  children: _options.map((option) => _buildDietOption(option)).toList(),
+                                  children: _options
+                                      .map((option) => _buildDietOption(option))
+                                      .toList(),
                                 ),
                               ),
                             ),
-                            
+
                             const SizedBox(height: 16),
-                            
+
                             // Continue button at the bottom of the container
                             SizedBox(
                               width: double.infinity,
@@ -323,7 +330,8 @@ class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin
                                         context
                                             .read<HealthMetricsFormCubit>()
                                             .setDietType(_selected!);
-                                        Navigator.pushNamed(context, '/onboarding/goal');
+                                        Navigator.pushNamed(
+                                            context, '/onboarding/goal');
                                       },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: _selected != null
@@ -334,7 +342,8 @@ class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   elevation: _selected != null ? 2 : 0,
                                 ),
                                 child: const Text(
@@ -352,7 +361,7 @@ class _DietPageState extends State<DietPage> with SingleTickerProviderStateMixin
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
               ],
             ),
