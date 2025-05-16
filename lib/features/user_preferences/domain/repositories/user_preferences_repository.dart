@@ -22,6 +22,12 @@ abstract class UserPreferencesRepository {
 
   /// Calculate rollover calories from previous day
   Future<int> calculateRolloverCalories(String userId);
+
+  /// Check if sync fitness tracker is enabled
+  Future<bool> isSyncFitnessTrackerEnabled(String userId);
+
+  /// Set sync fitness tracker setting
+  Future<void> setSyncFitnessTrackerEnabled(String userId, bool enabled);
 }
 
 /// Implementation of UserPreferencesRepository using Firebase and SharedPreferences
@@ -34,6 +40,9 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
 
   // Key for the rollover calories setting
   static const String _rolloverCaloriesKey = 'rollover_calories_enabled';
+
+  // Key for the sync fitness tracker setting
+  static const String _syncFitnessTrackerKey = 'sync_fitness_tracker_enabled';
 
   UserPreferencesRepositoryImpl({
     FirebaseFirestore? firestore,
@@ -268,6 +277,52 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
     } catch (e) {
       debugPrint('Error calculating rollover calories: $e');
       return 0;
+    }
+  }
+
+  @override
+  Future<bool> isSyncFitnessTrackerEnabled(String userId) async {
+    if (userId.isEmpty) return false;
+
+    try {
+      // Try getting setting from local storage first for fast access
+      final prefs = await SharedPreferences.getInstance();
+      final localSetting = prefs.getBool('${_syncFitnessTrackerKey}_$userId');
+
+      if (localSetting != null) return localSetting;
+
+      // If not in local storage, get from Firestore
+      final doc = await _firestore.collection('users').doc(userId).get();
+
+      final setting =
+          doc.data()?['preferences']?[_syncFitnessTrackerKey] as bool? ?? false;
+
+      // Cache in local storage for faster access next time
+      await prefs.setBool('${_syncFitnessTrackerKey}_$userId', setting);
+
+      return setting;
+    } catch (e) {
+      debugPrint('Error fetching sync fitness tracker setting: $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<void> setSyncFitnessTrackerEnabled(String userId, bool enabled) async {
+    if (userId.isEmpty) return;
+
+    try {
+      // Update Firestore
+      await _firestore.collection('users').doc(userId).set({
+        'preferences': {_syncFitnessTrackerKey: enabled}
+      }, SetOptions(merge: true));
+
+      // Update local cache
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('${_syncFitnessTrackerKey}_$userId', enabled);
+    } catch (e) {
+      debugPrint('Error saving sync fitness tracker setting: $e');
+      throw Exception('Failed to save preference: $e');
     }
   }
 }

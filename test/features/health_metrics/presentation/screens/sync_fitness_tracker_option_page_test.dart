@@ -104,11 +104,9 @@ void main() {
       await tester.ensureVisible(continueButton);
       await tester.pumpAndSettle();
       await tester.tap(continueButton, warnIfMissed: false);
-      await tester.pumpAndSettle();
-
-      // Verify navigation and preference
+      await tester.pumpAndSettle(); // Verify navigation and preference
       expect(find.text('Pet Onboarding Page'), findsOneWidget);
-      expect(prefs.getBool('syncHealthTracker'), isTrue);
+      expect(prefs.getBool('sync_fitness_tracker_enabled'), isTrue);
     });
 
     testWidgets('tapping Not Now saves preference and navigates',
@@ -123,11 +121,9 @@ void main() {
       await tester.ensureVisible(notNowButton);
       await tester.pumpAndSettle();
       await tester.tap(notNowButton, warnIfMissed: false);
-      await tester.pumpAndSettle();
-
-      // Verify navigation and preference
+      await tester.pumpAndSettle(); // Verify navigation and preference
       expect(find.text('Pet Onboarding Page'), findsOneWidget);
-      expect(prefs.getBool('syncHealthTracker'), isFalse);
+      expect(prefs.getBool('sync_fitness_tracker_enabled'), isFalse);
     });
 
     testWidgets('back button has modern shadow styling', (tester) async {
@@ -195,6 +191,55 @@ void main() {
         expect(find.descendant(of: row, matching: find.byType(Text)),
             findsOneWidget);
       }
+    });
+
+    testWidgets('loads preference from SharedPreferences and reflects in UI',
+        (tester) async {
+      // Set a preference value before widget is created
+      SharedPreferences.setMockInitialValues(
+          {'sync_fitness_tracker_enabled': true});
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Verify Continue button has a check icon for previously set preference
+      final checkIcon = find.descendant(
+        of: find.widgetWithText(ElevatedButton, 'Continue'),
+        matching: find.byIcon(Icons.check_circle),
+      );
+      expect(checkIcon, findsOneWidget);
+
+      // Also check that Continue button has a special style for selected state
+      final continueButton = tester.widget<ElevatedButton>(
+          find.widgetWithText(ElevatedButton, 'Continue'));
+      final buttonStyle = continueButton.style as ButtonStyle;
+      expect(buttonStyle.elevation?.resolve({}),
+          equals(3)); // Higher elevation for selected
+    });
+
+    testWidgets(
+        'loads preference with "false" from SharedPreferences and reflects in UI',
+        (tester) async {
+      // Set a preference value to false before widget is created
+      SharedPreferences.setMockInitialValues(
+          {'sync_fitness_tracker_enabled': false});
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Verify Not Now button has a close icon for previously set preference
+      final closeIcon = find.descendant(
+        of: find.widgetWithText(TextButton, 'Not Now'),
+        matching: find.byIcon(Icons.close_rounded),
+      );
+      expect(closeIcon, findsOneWidget);
+
+      // And verify the Continue button does NOT have the check icon
+      final checkIcon = find.descendant(
+        of: find.widgetWithText(ElevatedButton, 'Continue'),
+        matching: find.byIcon(Icons.check_circle),
+      );
+      expect(checkIcon, findsNothing);
     });
   });
 }
