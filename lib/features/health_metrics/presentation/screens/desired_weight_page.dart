@@ -8,8 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'form_cubit.dart';
 import '../widgets/onboarding_progress_indicator.dart';
+import 'form_cubit.dart';
 
 class DesiredWeightPage extends StatefulWidget {
   const DesiredWeightPage({super.key});
@@ -18,7 +18,8 @@ class DesiredWeightPage extends StatefulWidget {
   State<DesiredWeightPage> createState() => _DesiredWeightPageState();
 }
 
-class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTickerProviderStateMixin {
+class _DesiredWeightPageState extends State<DesiredWeightPage>
+    with SingleTickerProviderStateMixin {
   // Default weight value for the slider
   int _selectedWeight = 65;
 
@@ -52,7 +53,7 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
     // Start animation after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
-      
+
       // Initialize weight from the cubit if available
       final cubit = context.read<HealthMetricsFormCubit>();
       if (cubit.state.desiredWeight != null) {
@@ -192,17 +193,23 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                                 child: Column(
                                   children: [
                                     // Current weight info
-                                    BlocBuilder<HealthMetricsFormCubit, HealthMetricsFormState>(
+                                    BlocBuilder<HealthMetricsFormCubit,
+                                        HealthMetricsFormState>(
                                       builder: (context, state) {
-                                        if (state.weight == null) return const SizedBox.shrink();
-                                        
+                                        if (state.weight == null) {
+                                          return const SizedBox.shrink();
+                                        }
+
                                         return Container(
                                           padding: const EdgeInsets.all(16),
                                           decoration: BoxDecoration(
-                                            color: primaryGreen.withOpacity(0.05),
-                                            borderRadius: BorderRadius.circular(12),
+                                            color:
+                                                primaryGreen.withOpacity(0.05),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
                                             border: Border.all(
-                                              color: primaryGreen.withOpacity(0.2),
+                                              color:
+                                                  primaryGreen.withOpacity(0.2),
                                             ),
                                           ),
                                           child: Row(
@@ -211,7 +218,8 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                                                 width: 40,
                                                 height: 40,
                                                 decoration: BoxDecoration(
-                                                  color: primaryGreen.withOpacity(0.1),
+                                                  color: primaryGreen
+                                                      .withOpacity(0.1),
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: Icon(
@@ -223,22 +231,25 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                                               const SizedBox(width: 12),
                                               Expanded(
                                                 child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     const Text(
                                                       "Your current weight",
                                                       style: TextStyle(
                                                         fontSize: 14,
-                                                        fontWeight: FontWeight.w600,
+                                                        fontWeight:
+                                                            FontWeight.w600,
                                                         color: Colors.black87,
                                                       ),
                                                     ),
                                                     const SizedBox(height: 2),
                                                     Text(
-                                                      "${state.weight} kg", 
+                                                      "${state.weight} kg",
                                                       style: TextStyle(
                                                         fontSize: 16,
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                         color: primaryGreen,
                                                       ),
                                                     ),
@@ -250,22 +261,23 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                                         );
                                       },
                                     ),
-                                    
+
                                     const SizedBox(height: 32),
-                                    
+
                                     // Target weight slider container
                                     Container(
                                       width: double.infinity,
                                       padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                        horizontal: 16),
+                                          vertical: 16, horizontal: 16),
                                       decoration: BoxDecoration(
                                         color: Colors.grey.shade50,
                                         borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: Colors.grey.shade300),
+                                        border: Border.all(
+                                            color: Colors.grey.shade300),
                                       ),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           // Weight label
                                           const Text(
@@ -279,7 +291,8 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
 
                                           // Weight display
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
                                             children: [
                                               Text(
                                                 '$_selectedWeight',
@@ -306,13 +319,17 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                                           SliderTheme(
                                             data: SliderThemeData(
                                               activeTrackColor: primaryGreen,
-                                              inactiveTrackColor: Colors.grey.shade300,
+                                              inactiveTrackColor:
+                                                  Colors.grey.shade300,
                                               thumbColor: Colors.white,
-                                              overlayColor: primaryGreen.withOpacity(0.2),
-                                              thumbShape: const RoundSliderThumbShape(
+                                              overlayColor:
+                                                  primaryGreen.withOpacity(0.2),
+                                              thumbShape:
+                                                  const RoundSliderThumbShape(
                                                 enabledThumbRadius: 12,
                                               ),
-                                              overlayShape: const RoundSliderOverlayShape(
+                                              overlayShape:
+                                                  const RoundSliderOverlayShape(
                                                 overlayRadius: 24,
                                               ),
                                               trackHeight: 4,
@@ -324,7 +341,8 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                                               divisions: 120,
                                               onChanged: (value) {
                                                 setState(() {
-                                                  _selectedWeight = value.round();
+                                                  _selectedWeight =
+                                                      value.round();
                                                 });
                                               },
                                             ),
@@ -332,17 +350,22 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
 
                                           // Min-max labels
                                           Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8),
                                             child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
-                                                Text('30 kg',
+                                                Text(
+                                                  '30 kg',
                                                   style: TextStyle(
                                                     fontSize: 12,
                                                     color: Colors.grey.shade600,
                                                   ),
                                                 ),
-                                                Text('150 kg',
+                                                Text(
+                                                  '150 kg',
                                                   style: TextStyle(
                                                     fontSize: 12,
                                                     color: Colors.grey.shade600,
@@ -356,7 +379,8 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
 
                                           // + and - buttons for fine adjustment
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
                                             children: [
                                               // Minus button
                                               InkWell(
@@ -372,8 +396,12 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                                                   height: 42,
                                                   decoration: BoxDecoration(
                                                     color: Colors.white,
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    border: Border.all(color: Colors.grey.shade300),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    border: Border.all(
+                                                        color: Colors
+                                                            .grey.shade300),
                                                   ),
                                                   child: const Icon(
                                                     Icons.remove,
@@ -396,8 +424,12 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                                                   height: 42,
                                                   decoration: BoxDecoration(
                                                     color: Colors.white,
-                                                    borderRadius: BorderRadius.circular(8),
-                                                    border: Border.all(color: Colors.grey.shade300),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    border: Border.all(
+                                                        color: Colors
+                                                            .grey.shade300),
                                                   ),
                                                   child: const Icon(
                                                     Icons.add,
@@ -410,16 +442,16 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                                         ],
                                       ),
                                     ),
-                                    
+
                                     const SizedBox(height: 24),
-                                    
+
                                     // Space at the bottom for padding
                                     const SizedBox(height: 8),
                                   ],
                                 ),
                               ),
                             ),
-                            
+
                             // Continue button within the white container
                             SizedBox(
                               width: double.infinity,
@@ -432,7 +464,8 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   elevation: 2,
                                 ),
                                 child: const Text(
@@ -450,7 +483,7 @@ class _DesiredWeightPageState extends State<DesiredWeightPage> with SingleTicker
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
               ],
             ),

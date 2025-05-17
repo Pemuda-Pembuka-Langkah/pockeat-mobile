@@ -1,19 +1,21 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
+// Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+
 // Project imports:
 import 'package:pockeat/component/navigation.dart';
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
-import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
-import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
-import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
+import 'package:pockeat/features/homepage/presentation/screens/overview_section.dart';
+import 'package:pockeat/features/homepage/presentation/screens/pet_homepage_section.dart';
 import 'package:pockeat/features/pet_companion/domain/model/pet_information.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pockeat/features/pet_companion/domain/services/pet_service.dart';
 import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
-import 'package:get_it/get_it.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

@@ -1,12 +1,17 @@
 // Import packages for testing
+
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:mockito/annotations.dart';
+
+// Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_weight_page.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 
+// Project imports:
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_weight_page.dart';
 import 'update_weight_page_test.mocks.dart';
 
 // Generate mock classes with proper generic types

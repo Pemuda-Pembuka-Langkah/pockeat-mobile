@@ -3,16 +3,15 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
-
 // Project imports:
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
+import 'package:pockeat/features/homepage/presentation/loading_skeleton/heart_bar_skeleton.dart';
+import 'package:pockeat/features/homepage/presentation/loading_skeleton/pet_companion_skeleton.dart';
+import 'package:pockeat/features/homepage/presentation/loading_skeleton/streak_counter_skeleton.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/heart_bar_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/pet_companion_widget.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/streak_counter_widget.dart';
 import 'package:pockeat/features/pet_companion/domain/model/pet_information.dart';
-import 'package:pockeat/features/homepage/presentation/loading_skeleton/heart_bar_skeleton.dart';
-import 'package:pockeat/features/homepage/presentation/loading_skeleton/pet_companion_skeleton.dart';
-import 'package:pockeat/features/homepage/presentation/loading_skeleton/streak_counter_skeleton.dart';
 
 class PetHomepageSection extends StatelessWidget {
   final String petName;
@@ -54,7 +53,8 @@ class PetHomepageSection extends StatelessWidget {
                     petImagePath: petInfo?.mood == 'happy'
                         ? 'assets/images/panda_happy.json'
                         : 'assets/images/panda_sad.json',
-                    calorieProgress: ((stats?.caloriesConsumed ?? 0) / 2000).clamp(0.0, 1.0),
+                    calorieProgress:
+                        ((stats?.caloriesConsumed ?? 0) / 2000).clamp(0.0, 1.0),
                   ),
           ),
           const SizedBox(height: 24),

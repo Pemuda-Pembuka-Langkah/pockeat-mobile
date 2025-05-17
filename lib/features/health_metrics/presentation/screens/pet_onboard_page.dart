@@ -217,7 +217,8 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                         borderRadius: BorderRadius.circular(20),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: primaryGreen.withOpacity(0.1),
+                                            color:
+                                                primaryGreen.withOpacity(0.1),
                                             blurRadius: 10,
                                             offset: const Offset(0, 4),
                                           ),
@@ -235,21 +236,26 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                           filled: true,
                                           fillColor: Colors.white,
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(20),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                             borderSide: BorderSide(
-                                              color: primaryGreen.withOpacity(0.3),
+                                              color:
+                                                  primaryGreen.withOpacity(0.3),
                                               width: 1.5,
                                             ),
                                           ),
                                           enabledBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(20),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                             borderSide: BorderSide(
-                                              color: Colors.grey.withOpacity(0.3),
+                                              color:
+                                                  Colors.grey.withOpacity(0.3),
                                               width: 1.5,
                                             ),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(20),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                             borderSide: BorderSide(
                                               color: primaryGreen,
                                               width: 2,
@@ -260,7 +266,8 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                             color: primaryGreen,
                                             size: 22,
                                           ),
-                                          contentPadding: const EdgeInsets.symmetric(
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
                                             horizontal: 16,
                                             vertical: 16,
                                           ),
@@ -290,21 +297,25 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: _petNameController.text.trim().isNotEmpty
+                                onPressed: _petNameController.text
+                                        .trim()
+                                        .isNotEmpty
                                     ? () async {
-                                        final prefs =
-                                            await SharedPreferences.getInstance();
-                                        await prefs.setString(
-                                            'petName', _petNameController.text.trim());
+                                        final prefs = await SharedPreferences
+                                            .getInstance();
+                                        await prefs.setString('petName',
+                                            _petNameController.text.trim());
                                         if (context.mounted) {
-                                          Navigator.pushNamed(context, '/review');
+                                          Navigator.pushNamed(
+                                              context, '/review');
                                         }
                                       }
                                     : null, // Disabled if no pet name
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: _petNameController.text.trim().isNotEmpty
-                                      ? primaryGreen
-                                      : primaryGreenDisabled,
+                                  backgroundColor:
+                                      _petNameController.text.trim().isNotEmpty
+                                          ? primaryGreen
+                                          : primaryGreenDisabled,
                                   foregroundColor: Colors.white,
                                   minimumSize: const Size(double.infinity, 56),
                                   shape: RoundedRectangleBorder(
@@ -312,7 +323,10 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                   ),
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 16),
-                                  elevation: _petNameController.text.trim().isNotEmpty ? 4 : 0,
+                                  elevation:
+                                      _petNameController.text.trim().isNotEmpty
+                                          ? 4
+                                          : 0,
                                   shadowColor: primaryGreen.withOpacity(0.5),
                                 ),
                                 child: const Text(

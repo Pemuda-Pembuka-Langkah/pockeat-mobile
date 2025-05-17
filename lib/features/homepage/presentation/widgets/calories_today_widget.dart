@@ -1,10 +1,10 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
 
-// Package imports:
-
 // Project imports:
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
+
+// Package imports:
 
 class CaloriesTodayWidget extends StatefulWidget {
   final int targetCalories;
