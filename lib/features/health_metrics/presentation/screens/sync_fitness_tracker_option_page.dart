@@ -307,7 +307,9 @@ class _SyncFitnessTrackerOptionPageState
                                   await _saveSyncFitnessTrackerSetting(true);
 
                                   // Create an instance of FitnessTrackerSync to request permissions
-                                  final fitnessSync = FitnessTrackerSync();
+                                  // Use GetIt to allow mocking in tests
+                                  final fitnessSync =
+                                      GetIt.instance<FitnessTrackerSync>();
 
                                   try {
                                     // Check if Health Connect is available

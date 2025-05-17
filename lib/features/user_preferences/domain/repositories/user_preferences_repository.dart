@@ -282,47 +282,20 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
 
   @override
   Future<bool> isSyncFitnessTrackerEnabled(String userId) async {
-    if (userId.isEmpty) return false;
-
-    try {
-      // Try getting setting from local storage first for fast access
-      final prefs = await SharedPreferences.getInstance();
-      final localSetting = prefs.getBool('${_syncFitnessTrackerKey}_$userId');
-
-      if (localSetting != null) return localSetting;
-
-      // If not in local storage, get from Firestore
-      final doc = await _firestore.collection('users').doc(userId).get();
-
-      final setting =
-          doc.data()?['preferences']?[_syncFitnessTrackerKey] as bool? ?? false;
-
-      // Cache in local storage for faster access next time
-      await prefs.setBool('${_syncFitnessTrackerKey}_$userId', setting);
-
-      return setting;
-    } catch (e) {
-      debugPrint('Error fetching sync fitness tracker setting: $e');
-      return false;
-    }
+    // This is a placeholder method to satisfy the interface
+    // Fitness tracker settings are only stored locally in the app
+    // and should be accessed via SharedPreferences directly
+    debugPrint('isSyncFitnessTrackerEnabled repository method called (NO-OP)');
+    return false;
   }
 
   @override
   Future<void> setSyncFitnessTrackerEnabled(String userId, bool enabled) async {
-    if (userId.isEmpty) return;
-
-    try {
-      // Update Firestore
-      await _firestore.collection('users').doc(userId).set({
-        'preferences': {_syncFitnessTrackerKey: enabled}
-      }, SetOptions(merge: true));
-
-      // Update local cache
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('${_syncFitnessTrackerKey}_$userId', enabled);
-    } catch (e) {
-      debugPrint('Error saving sync fitness tracker setting: $e');
-      throw Exception('Failed to save preference: $e');
-    }
+    // This is a placeholder method to satisfy the interface
+    // Fitness tracker settings are only stored locally in the app
+    // and should be accessed via SharedPreferences directly
+    debugPrint(
+        'setSyncFitnessTrackerEnabled repositorjy method called (NO-OP)');
+    return;
   }
 }
