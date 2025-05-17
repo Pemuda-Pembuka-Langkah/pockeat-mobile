@@ -13,6 +13,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/calorie_calculation_loading_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/free_trials_page.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -597,6 +599,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               value: context.read<HealthMetricsFormCubit>(),
               child: const ReviewSubmitPage(),
             ),
+        '/free-trial': (context) => const FreeTrialPage(),
+        '/calorie-loading': (context) => const CalorieCalculationLoadingPage(),
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),
