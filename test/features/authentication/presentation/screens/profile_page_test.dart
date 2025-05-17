@@ -291,6 +291,48 @@ void main() {
       verify(mockUserPreferencesService.setRolloverCaloriesEnabled(any))
           .called(1);
     });
+
+    testWidgets('Pull-to-refresh reloads user data', (WidgetTester tester) async {
+      // Setup initial user data
+      final initialUser = createTestUser(displayName: 'Initial User');
+      final updatedUser = createTestUser(displayName: 'Updated User');
+      
+      // Use a more reliable approach with explicit mock reset between calls
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => initialUser);
+      
+      // Setup default preferences
+      when(mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+          .thenAnswer((_) async => false);
+      when(mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) async => false);
+      
+      // Render widget with initial user
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+      
+      // Verify initial user is displayed
+      expect(find.text('Initial User'), findsOneWidget);
+      
+      // Reset the mock to return the updated user for the next call
+      reset(mockLoginService);
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => updatedUser);
+      
+      // Find a scrollable widget to drag
+      final scrollable = find.byType(SingleChildScrollView).first;
+      
+      // Simulate pull-to-refresh gesture with a larger offset
+      await tester.drag(scrollable, const Offset(0, 500));
+      
+      // Allow the refresh indicator to appear
+      await tester.pump();
+      
+      // Wait for the async refresh to complete
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      
+      // Verify updated user data is displayed after refresh
+      expect(find.text('Updated User'), findsOneWidget);
+    });
   });
 
   // == NEGATIVE CASES ==
