@@ -312,60 +312,76 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
           ];
   }
 
+  // Add this method to handle refresh all data
+  Future<void> _refreshAllData() async {
+    // Load all data concurrently for faster refresh
+    await Future.wait([
+      _loadCalorieData(),
+      _loadCurrentWeight(),
+      _loadCurrentBMI(),
+      _loadWeightGoal(),
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCurrentWeightIndicators(),
-            const SizedBox(height: 24),
-            BMISection(
-              primaryBlue: primaryBlue,
-              primaryGreen: primaryGreen,
-              primaryYellow: primaryYellow,
-              primaryPink: primaryPink,
-              bmiValue: _currentBMI,
-              isLoading: _isLoadingBMI,
-            ),
-            const SizedBox(height: 24),
-            PeriodSelectionTabs(
-              selectedPeriod: selectedPeriod,
-              onPeriodSelected: (period) {
-                setState(() {
-                  selectedPeriod = period;
-                });
-                _loadCalorieData();
-              },
-              primaryColor: primaryPink,
-            ),
-            const SizedBox(height: 24),
-            GoalProgressChart(
-              displayData: selectedPeriod == '1 Month' ? monthData : weekData,
-              primaryGreen: primaryGreen,
-            ),
-            const SizedBox(height: 24),
-            if (selectedPeriod != 'All time') ...[
-              WeekSelectionTabs(
-                selectedWeek: selectedWeek,
-                onWeekSelected: (week) {
+    return RefreshIndicator(
+      onRefresh: _refreshAllData,
+      color: primaryPink,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator to work
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildCurrentWeightIndicators(),
+              const SizedBox(height: 24),
+              BMISection(
+                primaryBlue: primaryBlue,
+                primaryGreen: primaryGreen,
+                primaryYellow: primaryYellow,
+                primaryPink: primaryPink,
+                bmiValue: _currentBMI,
+                isLoading: _isLoadingBMI,
+              ),
+              const SizedBox(height: 24),
+              PeriodSelectionTabs(
+                selectedPeriod: selectedPeriod,
+                onPeriodSelected: (period) {
                   setState(() {
-                    selectedWeek = week;
+                    selectedPeriod = period;
                   });
                   _loadCalorieData();
                 },
                 primaryColor: primaryPink,
               ),
-              const SizedBox(height: 16),
-              CaloriesChart(
-                calorieData: _calorieData,
-                totalCalories: _totalCalories,
-                isLoading: _isLoadingCalorieData,
+              const SizedBox(height: 24),
+              GoalProgressChart(
+                displayData: selectedPeriod == '1 Month' ? monthData : weekData,
+                primaryGreen: primaryGreen,
               ),
+              const SizedBox(height: 24),
+              if (selectedPeriod != 'All time') ...[
+                WeekSelectionTabs(
+                  selectedWeek: selectedWeek,
+                  onWeekSelected: (week) {
+                    setState(() {
+                      selectedWeek = week;
+                    });
+                    _loadCalorieData();
+                  },
+                  primaryColor: primaryPink,
+                ),
+                const SizedBox(height: 16),
+                CaloriesChart(
+                  calorieData: _calorieData,
+                  totalCalories: _totalCalories,
+                  isLoading: _isLoadingCalorieData,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
