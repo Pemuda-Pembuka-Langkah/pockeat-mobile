@@ -25,19 +25,20 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           'Saved Meals',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black87,
+            fontSize: 18,
           ),
         ),
-        backgroundColor: primaryYellow,
+        backgroundColor: Colors.white,
         elevation: 0,
       ),
       body: Column(
@@ -123,7 +124,8 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
                             //coverage:ignore-start
                             onPressed: () {
                               // Navigate to food input page
-                              Navigator.pushNamed(context, '/add-food');
+                              Navigator.of(context).pushNamed('/analytic',
+                                  arguments: {'initialTabIndex': 1});
                               //coverage:ignore-end
                             },
                             style: ElevatedButton.styleFrom(
@@ -133,7 +135,7 @@ class _SavedMealsPageState extends State<SavedMealsPage> {
                                 vertical: 12,
                               ),
                             ),
-                            child: const Text('Add your first meal'),
+                            child: const Text('Save your first meal!'),
                           ),
                         ],
                       ],

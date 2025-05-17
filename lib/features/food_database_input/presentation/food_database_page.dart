@@ -309,9 +309,16 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
     return Scaffold(
       resizeToAvoidBottomInset: false, // Prevent resizing when keyboard appears
       appBar: AppBar(
-        title: const Text('Nutrition Database'),
+        title: const Text(
+          'Nutrition Database',
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         elevation: 0,
-        backgroundColor: primaryYellow,
+        backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         actions: const [],
         bottom: TabBar(

@@ -41,7 +41,6 @@ class _NutritionPageState extends State<NutritionPage> {
   List<String> _warnings = [];
   List<Ingredient> _ingredients = [];
   late FoodAnalysisResult? food;
-
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
@@ -114,39 +113,53 @@ class _NutritionPageState extends State<NutritionPage> {
     }
 
     if (_hasError) {
-      return Scaffold(
-        body: FoodTextInputAnalysisError(
-          primaryPink: primaryPink,
-          primaryYellow: primaryYellow,
-          onRetry: _analyzeFoodText,
-          onBack: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
-          },
+      return WillPopScope(
+        onWillPop: () async {
+          // Just pop once to go back to the input form
+          Navigator.pop(context);
+          return false;
+        },
+        child: Scaffold(
+          body: FoodTextInputAnalysisError(
+            primaryPink: primaryPink,
+            primaryYellow: primaryYellow,
+            onRetry: _analyzeFoodText,
+            onBack: () {
+              // Just pop once to go back to the input form
+              Navigator.pop(context);
+            },
+          ),
         ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: _buildAnalysisResultContent(),
-      bottomSheet: TextBottomActionBar(
-          isLoading: _isLoading || _isSaving,
-          food: food,
-          foodTextInputService: widget.foodTextInputService,
-          primaryYellow: primaryYellow,
-          primaryPink: primaryPink,
-          primaryGreen: primaryGreen,
-          onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
-            setState(() {
-              _updateFoodData(correctedResult, isCorrection: true);
-            });
-          },
-          onSavingStateChange: (bool saving) {
-            setState(() {
-              _isSaving = saving;
-            });
-          }),
+    return WillPopScope(
+      onWillPop: () async {
+        // Just pop once to go back to the input form
+        Navigator.pop(context);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: _buildAnalysisResultContent(),
+        bottomSheet: TextBottomActionBar(
+            isLoading: _isLoading || _isSaving,
+            food: food,
+            foodTextInputService: widget.foodTextInputService,
+            primaryYellow: primaryYellow,
+            primaryPink: primaryPink,
+            primaryGreen: primaryGreen,
+            onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
+              setState(() {
+                _updateFoodData(correctedResult, isCorrection: true);
+              });
+            },
+            onSavingStateChange: (bool saving) {
+              setState(() {
+                _isSaving = saving;
+              });
+            }),
+      ),
     );
   }
 
@@ -161,15 +174,19 @@ class _NutritionPageState extends State<NutritionPage> {
         return true;
       },
       child: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            backgroundColor: primaryYellow,
+        slivers: [          SliverAppBar(
+            backgroundColor: Colors.white,
             title: const Text(
               'Nutrition Analysis',
               style: TextStyle(
                 color: Colors.black87,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
+            ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black87, size: 20),
+              onPressed: () => Navigator.of(context).pop(),
             ),
             floating: true,
             pinned: true,

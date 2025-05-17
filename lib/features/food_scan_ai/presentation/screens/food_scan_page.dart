@@ -110,132 +110,283 @@ class ScanFoodPageState extends State<ScanFoodPage>
     // Calculate a consistent shift value to use for all elements
     final double verticalShift = MediaQuery.of(context).size.height * 0.05;
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Camera Preview - Shifted upward
-          Positioned(
-            left: 0,
-            right: 0,
-            top: -verticalShift, // Shift camera up by 5%
-            bottom: verticalShift, // Add extra space at bottom
-            child: _isCameraReady
-                ? Center(
-                    child: CameraPreview(widget.cameraController),
-                  )
-                : const Center(child: CircularProgressIndicator()),
-          ),
+    return WillPopScope(
+      onWillPop: () async {
+        // Go back to food input page
+        Navigator.pop(context);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            // Camera Preview - Shifted upward
+            Positioned(
+              left: 0,
+              right: 0,
+              top: -verticalShift, // Shift camera up by 5%
+              bottom: verticalShift, // Add extra space at bottom
+              child: _isCameraReady
+                  ? Center(
+                      child: CameraPreview(widget.cameraController),
+                    )
+                  : const Center(child: CircularProgressIndicator()),
+            ),
 
-          // Scanning Animation - Also shifted upward to match camera
-          Positioned(
-            left: 0,
-            right: 0,
-            // Position it at the center but shifted up like the camera view
-            top: MediaQuery.of(context).size.height * 0.5 - verticalShift,
-            child: AnimatedBuilder(
-              animation: _scanLineController,
-              builder: (context, child) {
-                return Transform.translate(
-                  offset:
-                      Offset(0, sin(_scanLineController.value * 2 * pi) * 120),
-                  child: Container(
-                    width: 280,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          primaryGreen.withOpacity(0.8),
-                          Colors.transparent,
-                        ],
+            // Scanning Animation - Also shifted upward to match camera
+            Positioned(
+              left: 0,
+              right: 0,
+              // Position it at the center but shifted up like the camera view
+              top: MediaQuery.of(context).size.height * 0.5 - verticalShift,
+              child: AnimatedBuilder(
+                animation: _scanLineController,
+                builder: (context, child) {
+                  return Transform.translate(
+                    offset:
+                        Offset(0, sin(_scanLineController.value * 2 * pi) * 120),
+                    child: Container(
+                      width: 280,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.transparent,
+                            primaryGreen.withOpacity(0.8),
+                            Colors.transparent,
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
 
-          // Scanner Frame - Also shifted upward to match camera
-          Positioned(
-            left: 0,
-            right: 0,
-            // Position it at the center but shifted up like the camera view
-            top: MediaQuery.of(context).size.height * 0.5 -
-                140 -
-                verticalShift, // Center height (50%) - half frame height (140px) - shift
-            child: Center(
-              child: Container(
-                width: 280,
-                height: 280,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.transparent,
-                    width: 0.5,
+            // Scanner Frame - Also shifted upward to match camera
+            Positioned(
+              left: 0,
+              right: 0,
+              // Position it at the center but shifted up like the camera view
+              top: MediaQuery.of(context).size.height * 0.5 -
+                  140 -
+                  verticalShift, // Center height (50%) - half frame height (140px) - shift
+              child: Center(
+                child: Container(
+                  width: 280,
+                  height: 280,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.transparent,
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      // Top Left Corner
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              left: BorderSide(color: primaryGreen, width: 3),
+                              top: BorderSide(color: primaryGreen, width: 3),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Top Right Corner
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              right: BorderSide(color: primaryGreen, width: 3),
+                              top: BorderSide(color: primaryGreen, width: 3),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Bottom Left Corner
+                      Positioned(
+                        left: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              left: BorderSide(color: primaryGreen, width: 3),
+                              bottom: BorderSide(color: primaryGreen, width: 3),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Bottom Right Corner
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              right: BorderSide(color: primaryGreen, width: 3),
+                              bottom: BorderSide(color: primaryGreen, width: 3),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Stack(
+              ),
+            ),
+
+            // Top Bar with Modes
+            SafeArea(
+              child: Column(
+                children: [
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildCircularButton(
+                          CupertinoIcons.xmark,
+                          onTap: () => Navigator.pop(context),
+                        ),
+                        Row(
+                          children: [
+                            _buildModeButton('Food', 0),
+                            const SizedBox(width: 8),
+                            _buildModeButton('Label', 1),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            // Help Button
+                            _buildCircularButton(
+                              Icons.help_outline,
+                              key: 'help_button',
+                              onTap: _showHelpDialog,
+                            ),
+                            const SizedBox(width: 8),
+                            // Flash Button
+                            _buildCircularButton(
+                              widget.cameraController.value.flashMode ==
+                                      FlashMode.off
+                                  ? Icons.flash_off
+                                  : Icons.flash_on,
+                              onTap: () {
+                                setState(() {
+                                  if (widget.cameraController.value.flashMode ==
+                                      FlashMode.off) {
+                                    widget.cameraController
+                                        .setFlashMode(FlashMode.torch);
+                                  } else {
+                                    widget.cameraController
+                                        .setFlashMode(FlashMode.off);
+                                  }
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Bottom Controls
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(30)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Top Left Corner
-                    Positioned(
-                      left: 0,
-                      top: 0,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: BorderSide(color: primaryGreen, width: 3),
-                            top: BorderSide(color: primaryGreen, width: 3),
-                          ),
-                        ),
+                    // Status Message
+                    Text(
+                      _currentMode == 0
+                          ? 'Make sure your food is clearly visible'
+                          : 'Position the nutrition label in the frame',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
+                      textAlign: TextAlign.center,
                     ),
+                    const SizedBox(height: 24),
 
-                    // Top Right Corner
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            right: BorderSide(color: primaryGreen, width: 3),
-                            top: BorderSide(color: primaryGreen, width: 3),
+                    // Camera Button
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryGreen.withOpacity(0.3),
+                            blurRadius: 12,
+                            spreadRadius: 2,
                           ),
-                        ),
+                        ],
                       ),
-                    ),
-
-                    // Bottom Left Corner
-                    Positioned(
-                      left: 0,
-                      bottom: 0,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: BorderSide(color: primaryGreen, width: 3),
-                            bottom: BorderSide(color: primaryGreen, width: 3),
+                      child: InkWell(
+                        key: const Key('camera_button'),
+                        onTap: () async {
+                          try {
+                            final image =
+                                await widget.cameraController.takePicture();
+                            if (mounted) {
+                              if (_currentMode == 1) {
+                                // Jika mode label scan, tampilkan popup untuk serving size
+                                // ignore: use_build_context_synchronously
+                                _showServingSizeDialog(context, image.path);
+                              } else {
+                                // Jika mode food scan, langsung navigasi ke NutritionPage
+                                // ignore: use_build_context_synchronously
+                                _navigateToNutritionPage(context, image.path);
+                              }
+                            }
+                          } catch (e) {
+                            // Handle picture taking error
+                          }
+                        },
+                        customBorder: const CircleBorder(),
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: primaryGreen,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 3),
                           ),
-                        ),
-                      ),
-                    ),
-
-                    // Bottom Right Corner
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            right: BorderSide(color: primaryGreen, width: 3),
-                            bottom: BorderSide(color: primaryGreen, width: 3),
+                          child: Icon(
+                            _currentMode == 0
+                                ? Icons.camera_alt
+                                : Icons.document_scanner,
+                            color: Colors.white,
+                            size: 36,
                           ),
                         ),
                       ),
@@ -244,152 +395,8 @@ class ScanFoodPageState extends State<ScanFoodPage>
                 ),
               ),
             ),
-          ),
-
-          // Top Bar with Modes
-          SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildCircularButton(
-                        CupertinoIcons.xmark,
-                        onTap: () => Navigator.pop(context),
-                      ),
-                      Row(
-                        children: [
-                          _buildModeButton('Food', 0),
-                          const SizedBox(width: 8),
-                          _buildModeButton('Label', 1),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          // Help Button
-                          _buildCircularButton(
-                            Icons.help_outline,
-                            key: 'help_button',
-                            onTap: _showHelpDialog,
-                          ),
-                          const SizedBox(width: 8),
-                          // Flash Button
-                          _buildCircularButton(
-                            widget.cameraController.value.flashMode ==
-                                    FlashMode.off
-                                ? Icons.flash_off
-                                : Icons.flash_on,
-                            onTap: () {
-                              setState(() {
-                                if (widget.cameraController.value.flashMode ==
-                                    FlashMode.off) {
-                                  widget.cameraController
-                                      .setFlashMode(FlashMode.torch);
-                                } else {
-                                  widget.cameraController
-                                      .setFlashMode(FlashMode.off);
-                                }
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Bottom Controls
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(30)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Status Message
-                  Text(
-                    _currentMode == 0
-                        ? 'Make sure your food is clearly visible'
-                        : 'Position the nutrition label in the frame',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Camera Button
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryGreen.withOpacity(0.3),
-                          blurRadius: 12,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      key: const Key('camera_button'),
-                      onTap: () async {
-                        try {
-                          final image =
-                              await widget.cameraController.takePicture();
-                          if (mounted) {
-                            if (_currentMode == 1) {
-                              // Jika mode label scan, tampilkan popup untuk serving size
-                              // ignore: use_build_context_synchronously
-                              _showServingSizeDialog(context, image.path);
-                            } else {
-                              // Jika mode food scan, langsung navigasi ke NutritionPage
-                              // ignore: use_build_context_synchronously
-                              _navigateToNutritionPage(context, image.path);
-                            }
-                          }
-                        } catch (e) {
-                          // Handle picture taking error
-                        }
-                      },
-                      customBorder: const CircleBorder(),
-                      child: Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: primaryGreen,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 3),
-                        ),
-                        child: Icon(
-                          _currentMode == 0
-                              ? Icons.camera_alt
-                              : Icons.document_scanner,
-                          color: Colors.white,
-                          size: 36,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

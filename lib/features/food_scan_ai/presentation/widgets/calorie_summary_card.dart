@@ -22,7 +22,7 @@ class CalorieSummaryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: primaryYellow.withOpacity(0.15),
+          color: Colors.grey.withOpacity(0.15),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(

@@ -22,14 +22,14 @@ class NutritionAppBar extends StatelessWidget {
     return SliverAppBar(
       expandedHeight: 300,
       pinned: true,
-      backgroundColor: isScrolledToTop ? Colors.transparent : primaryYellow,
+      backgroundColor: isScrolledToTop ? Colors.transparent : Colors.white,
       elevation: 0,
       title: Text(
         'Nutrition Analysis',
         style: TextStyle(
           color: isScrolledToTop ? Colors.white : Colors.black87,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
         ),
       ),
       leading: CupertinoButton(
@@ -38,7 +38,14 @@ class NutritionAppBar extends StatelessWidget {
           color: isScrolledToTop ? Colors.white : Colors.black87,
           size: 20,
         ),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () {
+          // Navigate to the food input page instead of just popping
+          Navigator.pushNamedAndRemoveUntil(
+            context, 
+            '/add-food', 
+            (route) => route.isFirst, // Remove all routes except the first (home) route
+          );
+        },
       ),
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(

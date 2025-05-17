@@ -201,39 +201,68 @@ class _NutritionPageState extends State<NutritionPage> {
     }
 
     if (_hasError) {
-      return Scaffold(
-        body: FoodAnalysisError(
-          errorMessage: _errorMessage,
-          primaryPink: primaryPink,
-          primaryYellow: primaryYellow,
-          onRetry: _retryPhotoCapture,
-          onBack: () => Navigator.pop(context),
+      return WillPopScope(
+        onWillPop: () async {
+          // Handle back button press by navigating to food input page
+          Navigator.pushNamedAndRemoveUntil(
+            context, 
+            '/add-food', 
+            (route) => route.isFirst,
+          );
+          return false; // Prevent default back button behavior
+        },
+        child: Scaffold(
+          body: FoodAnalysisError(
+            errorMessage: _errorMessage,
+            primaryPink: primaryPink,
+            primaryYellow: primaryYellow,
+            onRetry: _retryPhotoCapture,
+            onBack: () {
+              // Navigate back to food input page instead of the previous screen
+              Navigator.pushNamedAndRemoveUntil(
+                context, 
+                '/add-food', 
+                (route) => route.isFirst,
+              );
+            },
+          ),
         ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: _buildAnalysisResultContent(),
-      bottomSheet: BottomActionBar(
-        isLoading: _isLoading || _isCorrectingAnalysis,
-        food: food,
-        foodScanPhotoService: widget.foodScanPhotoService,
-        primaryYellow: primaryYellow,
-        primaryPink: primaryPink,
-        primaryGreen: primaryGreen,
-        isLabelScan: widget.isLabelScan,
-        servingSize: widget.servingSize,
-        onAnalysisCorrected: (correctedResult) {
-          setState(() {
-            _isCorrectingAnalysis = true;
-          });
+    return WillPopScope(
+      onWillPop: () async {
+        // Handle back button press by navigating to food input page
+        Navigator.pushNamedAndRemoveUntil(
+          context, 
+          '/add-food', 
+          (route) => route.isFirst,
+        );
+        return false; // Prevent default back button behavior
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: _buildAnalysisResultContent(),
+        bottomSheet: BottomActionBar(
+          isLoading: _isLoading || _isCorrectingAnalysis,
+          food: food,
+          foodScanPhotoService: widget.foodScanPhotoService,
+          primaryYellow: primaryYellow,
+          primaryPink: primaryPink,
+          primaryGreen: primaryGreen,
+          isLabelScan: widget.isLabelScan,
+          servingSize: widget.servingSize,
+          onAnalysisCorrected: (correctedResult) {
+            setState(() {
+              _isCorrectingAnalysis = true;
+            });
 
-          // Process the correction asynchronously and update UI when done
-          Future.delayed(Duration.zero, () {
-            _handleAnalysisCorrected(correctedResult);
-          });
-        },
+            // Process the correction asynchronously and update UI when done
+            Future.delayed(Duration.zero, () {
+              _handleAnalysisCorrected(correctedResult);
+            });
+          },
+        ),
       ),
     );
   }
