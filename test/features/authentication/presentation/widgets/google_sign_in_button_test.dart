@@ -13,9 +13,10 @@ import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import 'google_sign_in_button_test.mocks.dart';
 
-@GenerateMocks([GoogleSignInService, UserCredential, AnalyticsService, User, HealthMetricsFormCubit])
+@GenerateMocks([GoogleSignInService, UserCredential, AnalyticsService, User, HealthMetricsFormCubit, UserPreferencesService])
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
@@ -26,6 +27,7 @@ void main() {
   late MockAnalyticsService mockAnalyticsService;
   late MockUser mockUser;
   late MockHealthMetricsFormCubit mockHealthMetricsFormCubit;
+  late MockUserPreferencesService mockUserPreferencesService;
 
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +40,7 @@ void main() {
     mockAnalyticsService = MockAnalyticsService();
     mockUser = MockUser();
     mockHealthMetricsFormCubit = MockHealthMetricsFormCubit();
+    mockUserPreferencesService = MockUserPreferencesService();
 
     // Set up mock user
     when(mockUser.uid).thenReturn('test-uid');
@@ -47,10 +50,15 @@ void main() {
     when(mockHealthMetricsFormCubit.setUserId(any)).thenReturn(null);
     when(mockHealthMetricsFormCubit.submit()).thenAnswer((_) async {});
 
+    // Set up UserPreferencesService
+    when(mockUserPreferencesService.synchronizePreferencesAfterLogin())
+        .thenAnswer((_) async {});
+
     // Reset GetIt before registering to ensure clean environment
     GetIt.I.reset();
     GetIt.I.registerSingleton<GoogleSignInService>(mockGoogleSignInService);
     GetIt.I.registerSingleton<AnalyticsService>(mockAnalyticsService);
+    GetIt.I.registerSingleton<UserPreferencesService>(mockUserPreferencesService);
   });
 
   testWidgets('renders correctly with Google text',
@@ -123,6 +131,9 @@ void main() {
     verify(mockAnalyticsService.logEvent(
         name: 'google_sign_in_success',
         parameters: {'uid': 'test-uid'})).called(1);
+        
+    // Verify UserPreferencesService method was called
+    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin()).called(1);
   });
 
   testWidgets('shows error snackbar when sign in fails',
@@ -224,6 +235,9 @@ void main() {
         name: 'google_sign_in_success',
         parameters: {'uid': 'test-uid'})).called(1);
 
+    // Verify UserPreferencesService method was called
+    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin()).called(1);
+        
     // Verify we're on the Home Page after navigation
     expect(find.text('Home Page'), findsOneWidget);
   });
@@ -290,5 +304,8 @@ void main() {
     // Verify analytics event was logged for registration attempt
     verify(mockAnalyticsService.logEvent(
         name: 'google_sign_up_attempt', parameters: null)).called(1);
+        
+    // Verify UserPreferencesService method was called
+    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin()).called(1);
   });
 }

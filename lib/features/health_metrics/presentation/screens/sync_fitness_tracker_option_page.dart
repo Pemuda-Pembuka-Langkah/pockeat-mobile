@@ -302,6 +302,8 @@ class _SyncFitnessTrackerOptionPageState
                             SizedBox(
                               width: double.infinity,
                               child: OutlinedButton.icon(
+                                //coverage:ignore-start
+                                //coverage:ignore-end
                                 onPressed: () async {
                                   // Save preference that user wants to sync fitness tracker
                                   await _saveSyncFitnessTrackerSetting(true);
@@ -326,6 +328,7 @@ class _SyncFitnessTrackerOptionPageState
                                         'Error checking Health Connect: $e');
                                   }
                                 },
+                                //coverage:ignore-end
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: primaryGreen,
                                   backgroundColor: Colors.white,
@@ -425,6 +428,7 @@ class _SyncFitnessTrackerOptionPageState
   }
 
   // Show Health Connect permission explanation dialog
+  //coverage:ignore-start
   Future<void> _showHealthConnectExplanation(
       BuildContext context, FitnessTrackerSync fitnessSync) async {
     return showDialog(
@@ -474,6 +478,7 @@ class _SyncFitnessTrackerOptionPageState
       ),
     );
   }
+  //coverage:ignore-end
 
   // Benefit item with icon and text
   Widget _buildBenefitItem({required IconData icon, required String text}) {

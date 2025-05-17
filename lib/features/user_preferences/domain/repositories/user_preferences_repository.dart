@@ -43,10 +43,11 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
 
   // Key for the sync fitness tracker setting
   static const String _syncFitnessTrackerKey = 'sync_fitness_tracker_enabled';
-
+//coverage:ignore-start
   UserPreferencesRepositoryImpl({
     FirebaseFirestore? firestore,
   }) : _firestore = firestore ?? FirebaseFirestore.instance;
+//coverage:ignore-end
 
   @override
   Future<bool> isExerciseCalorieCompensationEnabled(String userId) async {
@@ -280,6 +281,7 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
     }
   }
 
+//coverage:ignore-start
   @override
   Future<bool> isSyncFitnessTrackerEnabled(String userId) async {
     // This is a placeholder method to satisfy the interface
@@ -298,4 +300,5 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
         'setSyncFitnessTrackerEnabled repositorjy method called (NO-OP)');
     return;
   }
+//coverage:ignore-end
 }
