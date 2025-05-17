@@ -193,7 +193,7 @@ class TextBottomActionBar extends StatelessWidget {
             try {
               Navigator.of(context).pop();
               showSnackBarMessage(context, 'Processing correction...',
-                  backgroundColor: const Color(0xFFFF6B6B));
+                  backgroundColor: Colors.amber.shade700);
               final correctedResult = await foodTextInputService
                   .correctFoodAnalysis(food!, userComment);
               if (onAnalysisCorrected != null) {

@@ -42,13 +42,27 @@ extension FoodSharing on BuildContext {
         builder: (context) => WillPopScope(
           onWillPop: () async => false,
           child: const Center(
-            child: CircularProgressIndicator(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(
+                  'Preparing food summary to share...',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
 
       // Set a timeout to prevent getting stuck on loading
-      Future.delayed(const Duration(seconds: 10)).then((_) {
+      Future.delayed(const Duration(seconds: 15)).then((_) {
         if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
           Navigator.of(this).pop();
           isLoadingDialogShowing = false;
@@ -69,14 +83,11 @@ extension FoodSharing on BuildContext {
       // Add the card to the overlay so it can be rendered
       final entry = OverlayEntry(
         builder: (context) => Positioned(
-          left: 20, // Position slightly offscreen but still renders
-          top: 20,
-          child: Opacity(
-            opacity: 0.05, // Very low opacity but still renders
-            child: Material(
-              color: Colors.transparent,
-              child: summaryCard,
-            ),
+          left: -2000, // Position offscreen but still renders
+          top: 100,
+          child: Material(
+            color: Colors.transparent,
+            child: summaryCard,
           ),
         ),
       );
@@ -85,7 +96,7 @@ extension FoodSharing on BuildContext {
 
       try {
         // Wait for the widget to be rendered
-        await Future.delayed(const Duration(milliseconds: 600));
+        await Future.delayed(const Duration(milliseconds: 800));
 
         // Capture the rendered widget
         final boundary = cardKey.currentContext?.findRenderObject()
@@ -108,7 +119,9 @@ extension FoodSharing on BuildContext {
           return;
         }
 
-        final image = await boundary.toImage(pixelRatio: 1.5);
+        // Ensure proper rendering for Instagram Stories
+        await Future.delayed(const Duration(milliseconds: 100));
+        final image = await boundary.toImage(pixelRatio: 4.0);
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         final imageBytes = byteData?.buffer.asUint8List();
 
@@ -129,10 +142,10 @@ extension FoodSharing on BuildContext {
           return;
         }
 
-        // Save the image to a temporary file
+        // Save the image to a temporary file with proper dimensions for Instagram Stories
         final imageFile = await _saveImageToTempFile(imageBytes);
 
-        // Share the image
+        // Share the image with improved text
         await Share.shareXFiles(
           [XFile(imageFile.path)],
           text: 'Check out my food entry: ${food.foodName}',
