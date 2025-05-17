@@ -21,14 +21,7 @@ class PersonalizedMessageWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.blue.withOpacity(0.2),
-            Colors.purple.withOpacity(0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -37,6 +30,10 @@ class PersonalizedMessageWidget extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color: Colors.grey.shade100,
+          width: 1.0,
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

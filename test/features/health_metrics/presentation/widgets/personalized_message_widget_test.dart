@@ -151,10 +151,11 @@ void main() {
         equals(textDarkColor.withOpacity(0.7).value),
       );
       
-      // Verify the container uses a gradient in its decoration
+      // Verify the container uses a white background and border in its decoration
       final outerContainer = tester.widget<Container>(find.byType(Container).first);
       final decoration = outerContainer.decoration as BoxDecoration;
-      expect(decoration.gradient, isA<LinearGradient>());
+      expect(decoration.color, equals(Colors.white));
+      expect(decoration.border, isA<Border>());
     });
 
     testWidgets('should have proper layout structure', (WidgetTester tester) async {
@@ -182,10 +183,11 @@ void main() {
       expect(find.byType(Column), findsOneWidget);
       expect(find.byType(Expanded), findsOneWidget);
       
-      // Verify the container has a BoxDecoration with gradient
+      // Verify the container has a BoxDecoration with white background and border
       final outerContainer = tester.widget<Container>(find.byType(Container).first);
       final decoration = outerContainer.decoration as BoxDecoration;
-      expect(decoration.gradient, isA<LinearGradient>());
+      expect(decoration.color, equals(Colors.white));
+      expect(decoration.border, isA<Border>());
       expect(decoration.borderRadius, isA<BorderRadius>());
       expect(decoration.boxShadow, isNotNull);
     });
