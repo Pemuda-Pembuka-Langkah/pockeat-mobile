@@ -8,8 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'form_cubit.dart';
 import '../widgets/onboarding_progress_indicator.dart';
+import 'form_cubit.dart';
 
 class GenderPage extends StatefulWidget {
   const GenderPage({super.key});
@@ -23,7 +23,8 @@ class GenderPage extends StatefulWidget {
   State<GenderPage> createState() => _GenderPageState();
 }
 
-class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateMixin {
+class _GenderPageState extends State<GenderPage>
+    with SingleTickerProviderStateMixin {
   // Colors from the app's design system
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
@@ -61,7 +62,8 @@ class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  Widget _buildGenderOption(BuildContext context, String label, IconData icon, {required bool selected}) {
+  Widget _buildGenderOption(BuildContext context, String label, IconData icon,
+      {required bool selected}) {
     final cubit = context.read<HealthMetricsFormCubit>();
 
     return Padding(
@@ -80,8 +82,8 @@ class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateM
             ),
             boxShadow: [
               BoxShadow(
-                color: selected 
-                    ? primaryGreen.withOpacity(0.2) 
+                color: selected
+                    ? primaryGreen.withOpacity(0.2)
                     : Colors.black.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
@@ -94,8 +96,8 @@ class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateM
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: selected 
-                      ? primaryGreen.withOpacity(0.1) 
+                  color: selected
+                      ? primaryGreen.withOpacity(0.1)
                       : Colors.grey.shade50,
                   shape: BoxShape.circle,
                 ),
@@ -235,7 +237,8 @@ class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateM
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Expanded(
-                              child: BlocBuilder<HealthMetricsFormCubit, HealthMetricsFormState>(
+                              child: BlocBuilder<HealthMetricsFormCubit,
+                                  HealthMetricsFormState>(
                                 builder: (context, state) {
                                   return SingleChildScrollView(
                                     child: Column(
@@ -252,15 +255,17 @@ class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateM
                                           Icons.female_rounded,
                                           selected: state.gender == 'Female',
                                         ),
-                                        
+
                                         // Info message similar to birthdate page
                                         const SizedBox(height: 24),
                                         Container(
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
                                             color: Colors.grey.shade50,
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: Colors.grey.shade200),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            border: Border.all(
+                                                color: Colors.grey.shade200),
                                           ),
                                           child: Row(
                                             children: [
@@ -268,11 +273,13 @@ class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateM
                                                 width: 40,
                                                 height: 40,
                                                 decoration: BoxDecoration(
-                                                  color: primaryGreen.withOpacity(0.1),
+                                                  color: primaryGreen
+                                                      .withOpacity(0.1),
                                                   shape: BoxShape.circle,
                                                 ),
-                                                child: Icon(Icons.info_outline, 
-                                                    color: primaryGreen, size: 20),
+                                                child: Icon(Icons.info_outline,
+                                                    color: primaryGreen,
+                                                    size: 20),
                                               ),
                                               const SizedBox(width: 12),
                                               const Expanded(
@@ -294,18 +301,23 @@ class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateM
                                 },
                               ),
                             ),
-                            
+
                             // Continue button within the white container
-                            BlocBuilder<HealthMetricsFormCubit, HealthMetricsFormState>(
+                            BlocBuilder<HealthMetricsFormCubit,
+                                HealthMetricsFormState>(
                               builder: (context, state) {
                                 return SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
                                     onPressed: state.gender != null
                                         ? () async {
-                                            final prefs = await SharedPreferences.getInstance();
-                                            await prefs.setBool('onboardingInProgress', true);
-                                            Navigator.pushNamed(context, '/desired-weight');
+                                            final prefs =
+                                                await SharedPreferences
+                                                    .getInstance();
+                                            await prefs.setBool(
+                                                'onboardingInProgress', true);
+                                            Navigator.pushNamed(
+                                                context, '/desired-weight');
                                           }
                                         : null,
                                     style: ElevatedButton.styleFrom(
@@ -313,11 +325,13 @@ class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateM
                                           ? primaryGreen
                                           : primaryGreenDisabled,
                                       foregroundColor: Colors.white,
-                                      minimumSize: const Size(double.infinity, 56),
+                                      minimumSize:
+                                          const Size(double.infinity, 56),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),
                                       ),
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 16),
                                       elevation: state.gender != null ? 2 : 0,
                                     ),
                                     child: const Text(
@@ -337,7 +351,7 @@ class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateM
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
               ],
             ),
@@ -347,4 +361,3 @@ class _GenderPageState extends State<GenderPage> with SingleTickerProviderStateM
     );
   }
 }
-

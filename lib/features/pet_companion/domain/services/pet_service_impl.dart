@@ -1,7 +1,9 @@
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
-import 'package:flutter/foundation.dart';
 
 // Project imports:
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
@@ -43,32 +45,32 @@ class PetServiceImpl implements PetService {
         throw ArgumentError('userId cannot be empty');
       }
 
-      final stats = 
-          await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
-      
-      final targetCaloriesDoc = 
+      final stats = await calorieStatsService.calculateStatsForDate(
+          userId, DateTime.now());
+
+      final targetCaloriesDoc =
           await firestore.collection('caloric_requirements').doc(userId).get();
-      
+
       // Check if document exists
       if (!targetCaloriesDoc.exists) {
         throw Exception('Caloric requirements not found for user $userId');
       }
-      
+
       // Get data with null safety
       final data = targetCaloriesDoc.data();
       if (data == null || !data.containsKey('tdee')) {
         throw Exception('TDEE value not found in caloric requirements');
       }
-      
+
       final tdee = data['tdee'] as num;
-      
+
       // Avoid division by zero
       if (tdee <= 0) {
         throw Exception('TDEE must be greater than zero');
       }
-      
+
       final percentage = stats.caloriesConsumed / tdee;
-      
+
       if (percentage > 0.75) {
         return 4;
       } else if (percentage > 0.5) {
@@ -83,7 +85,7 @@ class PetServiceImpl implements PetService {
     } catch (e) {
       // Log error
       debugPrint('Error in getPetHeart: $e');
-      
+
       // Return a default value for graceful degradation
       return 0;
     }

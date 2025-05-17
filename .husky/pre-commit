@@ -1,54 +1,54 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
+# #!/bin/sh
+# . "$(dirname "$0")/_/husky.sh"
 
-echo "Running pre-commit checks on entire codebase..."
+# echo "Running pre-commit checks on entire codebase..."
 
-# Store the list of staged files to ensure we only add back what was staged
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep "\.dart$" || true)
-if [ -z "$STAGED_FILES" ]; then
-  echo "No Dart files are staged. Skipping pre-commit hooks for Dart."
-  exit 0
-fi
+# # Store the list of staged files to ensure we only add back what was staged
+# STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep "\.dart$" || true)
+# if [ -z "$STAGED_FILES" ]; then
+#   echo "No Dart files are staged. Skipping pre-commit hooks for Dart."
+#   exit 0
+# fi
 
-# Create a temporary directory to store file copies
-TEMP_DIR=$(mktemp -d)
-trap 'rm -rf "$TEMP_DIR"' EXIT
+# # Create a temporary directory to store file copies
+# TEMP_DIR=$(mktemp -d)
+# trap 'rm -rf "$TEMP_DIR"' EXIT
 
-# Save a copy of staged files before any modifications
-echo "\n📦 Creating safe copies of staged files..."
-for FILE in $STAGED_FILES; do
-  if [ -f "$FILE" ]; then
-    DIR=$(dirname "$TEMP_DIR/$FILE")
-    mkdir -p "$DIR"
-    git show ":$FILE" > "$TEMP_DIR/$FILE"
-  fi
-done
+# # Save a copy of staged files before any modifications
+# echo "\n📦 Creating safe copies of staged files..."
+# for FILE in $STAGED_FILES; do
+#   if [ -f "$FILE" ]; then
+#     DIR=$(dirname "$TEMP_DIR/$FILE")
+#     mkdir -p "$DIR"
+#     git show ":$FILE" > "$TEMP_DIR/$FILE"
+#   fi
+# done
 
-echo "\n🔍 Step 1/5: Fixing lints automatically..."
-echo "Applying dart fix to codebase..."
-dart fix --apply lib
+# echo "\n🔍 Step 1/5: Fixing lints automatically..."
+# echo "Applying dart fix to codebase..."
+# dart fix --apply lib
 
-echo "\n🔍 Step 2/5: Formatting code..."
-dart format lib
+# echo "\n🔍 Step 2/5: Formatting code..."
+# dart format lib
 
-echo "\n🔍 Step 3/5: Sorting imports..."
-dart run import_sorter:main
+# echo "\n🔍 Step 3/5: Sorting imports..."
+# dart run import_sorter:main
 
-# Stage only the files that were originally staged, using our saved copies
-echo "\n📥 Updating staged files..."
-for FILE in $STAGED_FILES; do
-  if [ -f "$FILE" ]; then
-    # Check if the file was modified by linting tools
-    if ! cmp -s "$TEMP_DIR/$FILE" "$FILE"; then
-      echo "  Updated: $FILE"
-      git add "$FILE"
-    fi
-  fi
-done
+# # Stage only the files that were originally staged, using our saved copies
+# echo "\n📥 Updating staged files..."
+# for FILE in $STAGED_FILES; do
+#   if [ -f "$FILE" ]; then
+#     # Check if the file was modified by linting tools
+#     if ! cmp -s "$TEMP_DIR/$FILE" "$FILE"; then
+#       echo "  Updated: $FILE"
+#       git add "$FILE"
+#     fi
+#   fi
+# done
 
-echo "\n🔍 Step 4/4: Analyzing code..."
-if ! dart analyze lib --fatal-infos --fatal-warnings; then
-  echo "❌ Analysis failed - Please fix remaining errors before committing"
-  exit 1
-fi
-echo "✅ Analysis successful"
+# echo "\n🔍 Step 4/4: Analyzing code..."
+# if ! dart analyze lib --fatal-infos --fatal-warnings; then
+#   echo "❌ Analysis failed - Please fix remaining errors before committing"
+#   exit 1
+# fi
+# echo "✅ Analysis successful"

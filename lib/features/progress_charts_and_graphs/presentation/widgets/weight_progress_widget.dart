@@ -9,6 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/calorie_data.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/domain/models/weight_data.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_goal_page.dart';
+import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_weight_page.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/bmi_section.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/calories_chart.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/circular_indicator_widget.dart';
@@ -16,8 +18,6 @@ import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/period_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/presentation/widgets/week_selection_tabs.dart';
 import 'package:pockeat/features/progress_charts_and_graphs/services/food_log_data_service.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_goal_page.dart';
-import 'package:pockeat/features/progress_charts_and_graphs/presentation/screens/update_weight_page.dart';
 
 // Firebase imports:
 
@@ -394,60 +394,62 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
         Expanded(
           child: CircularIndicatorWidget(
             label: "Weight Goal",
-          value: _isLoadingWeightGoal ? "Loading..." : "$_weightGoal kg",
-          icon: Icons.flag_outlined,
-          color: primaryGreen,
-          onTap: _isLoadingWeightGoal 
-              ? null 
-              : () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => UpdateGoalPage(initialGoalWeight: _weightGoal),
-                    ),
-                  );
-                  
-                  // Jika berhasil update, refresh data
-                  if (result != null) {
-                    setState(() {
-                      _weightGoal = result;
-                      _isLoadingWeightGoal = false;
-                    });
-                  }
-                },
+            value: _isLoadingWeightGoal ? "Loading..." : "$_weightGoal kg",
+            icon: Icons.flag_outlined,
+            color: primaryGreen,
+            onTap: _isLoadingWeightGoal
+                ? null
+                : () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            UpdateGoalPage(initialGoalWeight: _weightGoal),
+                      ),
+                    );
+
+                    // Jika berhasil update, refresh data
+                    if (result != null) {
+                      setState(() {
+                        _weightGoal = result;
+                        _isLoadingWeightGoal = false;
+                      });
+                    }
+                  },
+          ),
         ),
-      ),
-      const SizedBox(width: 16),
-      Expanded(
-        child: CircularIndicatorWidget(
-          label: "Current Weight",
-          value: _isLoadingWeight ? "Loading..." : "$_currentWeight kg",
-          icon: Icons.scale,
-          color: primaryPink,
-          onTap: _isLoadingWeight 
-              ? null 
-              : () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => UpdateWeightPage(initialCurrentWeight: _currentWeight),
-                    ),
-                  );
-                  
-                  // Refresh data if successfully updated
-                  if (result != null) {
-                    setState(() {
-                      _currentWeight = result;
-                      _isLoadingWeight = false;
-                    });
-                    // Also reload BMI since weight affects it
-                    _loadCurrentBMI();
-                  }
-                },
+        const SizedBox(width: 16),
+        Expanded(
+          child: CircularIndicatorWidget(
+            label: "Current Weight",
+            value: _isLoadingWeight ? "Loading..." : "$_currentWeight kg",
+            icon: Icons.scale,
+            color: primaryPink,
+            onTap: _isLoadingWeight
+                ? null
+                : () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UpdateWeightPage(
+                            initialCurrentWeight: _currentWeight),
+                      ),
+                    );
+
+                    // Refresh data if successfully updated
+                    if (result != null) {
+                      setState(() {
+                        _currentWeight = result;
+                        _isLoadingWeight = false;
+                      });
+                      // Also reload BMI since weight affects it
+                      _loadCurrentBMI();
+                    }
+                  },
+          ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
 }
 // coverage:ignore-end

@@ -391,4 +391,79 @@ void main() {
       expect(result, 0);
     });
   });
+
+  group('UserPreferencesService - synchronizePreferencesAfterLogin', () {
+    test('should sync local preferences to Firebase after login', () async {
+      // Arrange - set up local preferences in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('exercise_calorie_compensation_enabled', true);
+      await prefs.setBool('rollover_calories_enabled', true);
+
+      // Act
+      await preferencesService.synchronizePreferencesAfterLogin();
+
+      // Assert - check if values were synced to Firestore
+      final docSnapshot =
+          await fakeFirestore.collection('users').doc('test-user-id').get();
+      expect(docSnapshot.exists, true);
+
+      final preferencesData = docSnapshot.data()?['preferences'];
+      expect(preferencesData, isNotNull);
+      expect(preferencesData['exercise_calorie_compensation_enabled'], true);
+      expect(preferencesData['rollover_calories_enabled'], true);
+    });
+
+    test('should not sync when user is not logged in', () async {
+      // Arrange - user not logged in
+      when(() => mockAuth.currentUser).thenReturn(null);
+
+      // Set local preferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('exercise_calorie_compensation_enabled', true);
+      await prefs.setBool('rollover_calories_enabled', true);
+
+      // Act
+      await preferencesService.synchronizePreferencesAfterLogin();
+
+      // Assert - no documents should be created
+      final snapshot = await fakeFirestore.collection('users').get();
+      expect(snapshot.docs.isEmpty, true);
+    });
+
+    test('should handle missing local preferences gracefully', () async {
+      // Arrange - clear SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
+      // Act - should not throw exceptions
+      await preferencesService.synchronizePreferencesAfterLogin();
+
+      // Assert - document should exist but preferences should not be set
+      final docSnapshot =
+          await fakeFirestore.collection('users').doc('test-user-id').get();
+      expect(
+          docSnapshot.exists, false); // The method doesn't create the document
+    });
+
+    test('should sync only existing preferences', () async {
+      // Arrange - set only one preference
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      await prefs.setBool('exercise_calorie_compensation_enabled', true);
+      // Deliberately not setting rollover_calories_enabled
+
+      // Act
+      await preferencesService.synchronizePreferencesAfterLogin();
+
+      // Assert - only the set preference should be synced
+      final docSnapshot =
+          await fakeFirestore.collection('users').doc('test-user-id').get();
+      expect(docSnapshot.exists, true);
+
+      final preferencesData = docSnapshot.data()?['preferences'];
+      expect(preferencesData, isNotNull);
+      expect(preferencesData['exercise_calorie_compensation_enabled'], true);
+      expect(preferencesData.containsKey('rollover_calories_enabled'), false);
+    });
+  });
 }
