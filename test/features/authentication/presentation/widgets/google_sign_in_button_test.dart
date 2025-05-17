@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
@@ -275,8 +276,7 @@ void main() {
     expect(find.text('Register with Google'), findsOneWidget);
     expect(find.text('G'), findsOneWidget);
   });
-
-  testWidgets('logs analytics events for registration without form submission',
+  testWidgets('logs analytics events for registration with form submission',
       (WidgetTester tester) async {
     // Set up mock to return UserCredential
     when(mockGoogleSignInService.signInWithGoogle())
@@ -285,15 +285,23 @@ void main() {
             name: anyNamed('name'), parameters: anyNamed('parameters')))
         .thenAnswer((_) async {});
 
-    // Build our widget with isRegister = true
+    // Set up mockHealthMetricsFormCubit to handle stream for BlocProvider
+    final mockStream = Stream<HealthMetricsFormState>.empty();
+    when(mockHealthMetricsFormCubit.stream).thenAnswer((_) => mockStream);
+    when(mockHealthMetricsFormCubit.state).thenReturn(HealthMetricsFormState());
+
+    // Build our widget with isRegister = true and provide BlocProvider for FormCubit
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: GoogleSignInButton(
-              isUnderTest: true,
-              isRegister: true,
-              googleAuthService: mockGoogleSignInService,
+        home: BlocProvider<HealthMetricsFormCubit>.value(
+          value: mockHealthMetricsFormCubit,
+          child: Scaffold(
+            body: Center(
+              child: GoogleSignInButton(
+                isUnderTest: true,
+                isRegister: true,
+                googleAuthService: mockGoogleSignInService,
+              ),
             ),
           ),
         ),
@@ -318,6 +326,10 @@ void main() {
     verify(mockAnalyticsService.logEvent(
             name: 'google_sign_up_attempt', parameters: null))
         .called(1);
+
+    // Verify FormCubit methods were called
+    verify(mockHealthMetricsFormCubit.setUserId('test-uid')).called(1);
+    verify(mockHealthMetricsFormCubit.submit()).called(1);
 
     // Verify UserPreferencesService method was called
     verify(mockUserPreferencesService.synchronizePreferencesAfterLogin())
