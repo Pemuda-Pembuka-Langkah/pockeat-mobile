@@ -62,16 +62,32 @@ class _UpdateWeightPageState extends State<UpdateWeightPage> {
           .get();
 
       if (snapshot.docs.isNotEmpty) {
+        // Get existing data to retrieve height for BMI calculation
+        final existingData = snapshot.docs.first.data();
+        final double height = existingData['height']?.toDouble() ?? 170.0;
+
+        // Calculate BMI
+        final double bmi =
+            _calculateBMI(height: height, weight: _currentWeight);
+
         // Update dokumen yang sudah ada
         await snapshot.docs.first.reference.update({
           'weight': _currentWeight,
+          'bmi': bmi, // Add BMI update
           'updatedAt': FieldValue.serverTimestamp(),
         });
       } else {
         // Buat dokumen baru jika belum ada
+        // Using default height since we don't have one yet
+        const double defaultHeight = 170.0;
+        final double bmi =
+            _calculateBMI(height: defaultHeight, weight: _currentWeight);
+
         await FirebaseFirestore.instance.collection('health_metrics').add({
           'userId': user.uid,
           'weight': _currentWeight,
+          'bmi': bmi, // Add BMI field
+          'height': defaultHeight, // Add default height
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
@@ -97,6 +113,13 @@ class _UpdateWeightPageState extends State<UpdateWeightPage> {
         });
       }
     }
+  }
+
+  // BMI calculation function
+  double _calculateBMI({required double height, required double weight}) {
+    // height dalam cm → ubah ke meter
+    final heightInMeter = height / 100;
+    return weight / (heightInMeter * heightInMeter);
   }
 
   void _handleDragStart(DragStartDetails details) {
