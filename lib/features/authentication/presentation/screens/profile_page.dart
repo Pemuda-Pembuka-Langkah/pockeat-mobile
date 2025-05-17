@@ -287,13 +287,6 @@ class _ProfilePageState extends State<ProfilePage> {
           foregroundColor: Colors.black87,
           elevation: 0,
           automaticallyImplyLeading: false,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _loadUserData,
-              tooltip: 'Refresh',
-            ),
-          ],
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -346,18 +339,42 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Widget to display profile view
   Widget _buildProfileView() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _buildProfileHeader(),
-          const SizedBox(height: 16),
-          _buildProfileStats(),
-          const SizedBox(height: 16),
-          _buildCalorieSettings(),
-          const SizedBox(height: 16),
-          _buildProfileActions(),
-          const SizedBox(height: 20),
-        ],
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Reload profile data
+        setState(() {
+          // Add code to refresh user data, stats, settings, etc.
+          _loadUserData(); // Assuming this method exists to load user data
+        });
+        return Future.delayed(const Duration(milliseconds: 500));
+      },
+      color: const Color(0xFFFF6B6B), // Using primary pink color
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Get the available height to ensure there's enough scrollable space
+          final availableHeight = MediaQuery.of(context).size.height - 100;
+          
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(), // Ensure it's scrollable even with little content
+            child: Container(
+              constraints: BoxConstraints(
+                minHeight: availableHeight, // Make sure content takes up enough space for scrolling
+              ),
+              child: Column(
+                children: [
+                  _buildProfileHeader(),
+                  const SizedBox(height: 16),
+                  _buildProfileStats(),
+                  const SizedBox(height: 16),
+                  _buildCalorieSettings(),
+                  const SizedBox(height: 16),
+                  _buildProfileActions(),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          );
+        }
       ),
     );
   }

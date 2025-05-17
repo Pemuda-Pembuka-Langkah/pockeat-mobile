@@ -23,10 +23,12 @@ class MainTabsWidget extends StatelessWidget {
           labelColor: colors.primaryPink,
           unselectedLabelColor: Colors.black54,
           labelStyle: const TextStyle(
+            fontFamily: 'PlusJakartaSans',
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
           unselectedLabelStyle: const TextStyle(
+            fontFamily: 'PlusJakartaSans',
             fontSize: 15,
             fontWeight: FontWeight.w400,
           ),
