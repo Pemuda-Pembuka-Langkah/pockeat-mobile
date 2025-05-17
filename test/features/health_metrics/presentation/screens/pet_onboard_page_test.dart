@@ -26,8 +26,8 @@ void main() {
       MaterialApp(
         home: const PetOnboardPage(),
         routes: {
-          '/review': (context) => const Scaffold(
-                body: Center(child: Text('Review Page')),
+          '/calorie-loading': (context) => const Scaffold(
+                body: Center(child: Text('Calorie Loading Page')),
               ),
         },
       ),
@@ -69,8 +69,8 @@ void main() {
       MaterialApp(
         home: const PetOnboardPage(),
         routes: {
-          '/review': (context) => const Scaffold(
-                body: Center(child: Text('Review Page')),
+          '/calorie-loading': (context) => const Scaffold(
+                body: Center(child: Text('Calorie Loading Page')),
               ),
         },
       ),
@@ -92,8 +92,8 @@ void main() {
       MaterialApp(
         home: const PetOnboardPage(),
         routes: {
-          '/review': (context) => const Scaffold(
-                body: Center(child: Text('Review Page')),
+          '/calorie-loading': (context) => const Scaffold(
+                body: Center(child: Text('Calorie Loading Page')),
               ),
         },
       ),
@@ -112,7 +112,7 @@ void main() {
     expect(button.enabled, isTrue);
   });
 
-  testWidgets('Continue button navigates to review page and saves pet name',
+  testWidgets('Continue button navigates to calorie loading page and saves pet name',
       (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
     
@@ -121,8 +121,8 @@ void main() {
       MaterialApp(
         home: const PetOnboardPage(),
         routes: {
-          '/review': (context) => const Scaffold(
-                body: Center(child: Text('Review Page')),
+          '/calorie-loading': (context) => const Scaffold(
+                body: Center(child: Text('Calorie Loading Page')),
               ),
         },
       ),
@@ -136,8 +136,8 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'Continue'));
     await tester.pumpAndSettle();
 
-    // Check if navigated to review page
-    expect(find.text('Review Page'), findsOneWidget);
+    // Check if navigated to calorie loading page
+    expect(find.text('Calorie Loading Page'), findsOneWidget);
 
     // Verify preference was saved
     final prefs = await SharedPreferences.getInstance();

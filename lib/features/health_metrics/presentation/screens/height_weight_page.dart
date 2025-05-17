@@ -33,6 +33,7 @@ class _HeightWeightPageState extends State<HeightWeightPage>
   final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
   final Color bgColor = const Color(0xFFF9F9F9);
   final Color errorColor = const Color(0xFFFF6B6B);
+  final Color textDarkColor = Colors.black87;
 
   // Controller untuk tracking input height
   final TextEditingController _heightController = TextEditingController();
@@ -95,6 +96,29 @@ class _HeightWeightPageState extends State<HeightWeightPage>
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: bgColor,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+            ),
+            onPressed: () async {
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
         body: SafeArea(
             child: Container(
                 decoration: BoxDecoration(
