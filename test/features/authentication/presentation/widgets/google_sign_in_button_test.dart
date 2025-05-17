@@ -16,8 +16,14 @@ import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.
 import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import 'google_sign_in_button_test.mocks.dart';
 
-@GenerateMocks([GoogleSignInService, UserCredential, AnalyticsService, User, HealthMetricsFormCubit, UserPreferencesService])
-
+@GenerateMocks([
+  GoogleSignInService,
+  UserCredential,
+  AnalyticsService,
+  User,
+  HealthMetricsFormCubit,
+  UserPreferencesService
+])
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
 void main() {
@@ -58,7 +64,8 @@ void main() {
     GetIt.I.reset();
     GetIt.I.registerSingleton<GoogleSignInService>(mockGoogleSignInService);
     GetIt.I.registerSingleton<AnalyticsService>(mockAnalyticsService);
-    GetIt.I.registerSingleton<UserPreferencesService>(mockUserPreferencesService);
+    GetIt.I
+        .registerSingleton<UserPreferencesService>(mockUserPreferencesService);
   });
 
   testWidgets('renders correctly with Google text',
@@ -124,16 +131,18 @@ void main() {
 
     // Verify the methods were called
     verify(mockGoogleSignInService.signInWithGoogle()).called(1);
-    
+
     // Verify analytics events were logged
     verify(mockAnalyticsService.logEvent(
-        name: 'google_sign_in_attempt', parameters: null)).called(1);
+            name: 'google_sign_in_attempt', parameters: null))
+        .called(1);
     verify(mockAnalyticsService.logEvent(
         name: 'google_sign_in_success',
         parameters: {'uid': 'test-uid'})).called(1);
-        
+
     // Verify UserPreferencesService method was called
-    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin()).called(1);
+    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin())
+        .called(1);
   });
 
   testWidgets('shows error snackbar when sign in fails',
@@ -172,8 +181,9 @@ void main() {
 
     // Verify analytics attempt event was logged
     verify(mockAnalyticsService.logEvent(
-        name: 'google_sign_in_attempt', parameters: null)).called(1);
-    
+            name: 'google_sign_in_attempt', parameters: null))
+        .called(1);
+
     // Verify error snackbar appears
     expect(find.byType(SnackBar), findsOneWidget);
     expect(find.textContaining('Error:'), findsOneWidget);
@@ -181,7 +191,7 @@ void main() {
     // Verify snackbar styling
     final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
     expect(snackBar.backgroundColor, Colors.red);
-    
+
     // Verify success event was not logged
     verifyNever(mockAnalyticsService.logEvent(
         name: 'google_sign_in_success', parameters: anyNamed('parameters')));
@@ -227,22 +237,25 @@ void main() {
 
     // Verify the method was called
     verify(mockGoogleSignInService.signInWithGoogle()).called(1);
-    
+
     // Verify analytics events were logged
     verify(mockAnalyticsService.logEvent(
-        name: 'google_sign_in_attempt', parameters: null)).called(1);
+            name: 'google_sign_in_attempt', parameters: null))
+        .called(1);
     verify(mockAnalyticsService.logEvent(
         name: 'google_sign_in_success',
         parameters: {'uid': 'test-uid'})).called(1);
 
     // Verify UserPreferencesService method was called
-    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin()).called(1);
-        
+    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin())
+        .called(1);
+
     // Verify we're on the Home Page after navigation
     expect(find.text('Home Page'), findsOneWidget);
   });
 
-  testWidgets('renders register button with correct text when isRegister is true',
+  testWidgets(
+      'renders register button with correct text when isRegister is true',
       (WidgetTester tester) async {
     // Build our widget dengan isUnderTest = true dan isRegister = true
     await tester.pumpWidget(
@@ -263,7 +276,7 @@ void main() {
     expect(find.text('G'), findsOneWidget);
   });
 
-  testWidgets('logs analytics events for registration without form submission', 
+  testWidgets('logs analytics events for registration without form submission',
       (WidgetTester tester) async {
     // Set up mock to return UserCredential
     when(mockGoogleSignInService.signInWithGoogle())
@@ -300,12 +313,14 @@ void main() {
 
     // Verify methods were called
     verify(mockGoogleSignInService.signInWithGoogle()).called(1);
-    
+
     // Verify analytics event was logged for registration attempt
     verify(mockAnalyticsService.logEvent(
-        name: 'google_sign_up_attempt', parameters: null)).called(1);
-        
+            name: 'google_sign_up_attempt', parameters: null))
+        .called(1);
+
     // Verify UserPreferencesService method was called
-    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin()).called(1);
+    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin())
+        .called(1);
   });
 }

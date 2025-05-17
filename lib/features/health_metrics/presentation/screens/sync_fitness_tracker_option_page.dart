@@ -303,7 +303,6 @@ class _SyncFitnessTrackerOptionPageState
                               width: double.infinity,
                               child: OutlinedButton.icon(
                                 //coverage:ignore-start
-                                //coverage:ignore-end
                                 onPressed: () async {
                                   // Save preference that user wants to sync fitness tracker
                                   await _saveSyncFitnessTrackerSetting(true);
