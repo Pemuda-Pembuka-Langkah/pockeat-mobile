@@ -490,6 +490,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       navigatorKey: navigatorKey,
       title: 'Pockeat',
       theme: ThemeData(
+        fontFamily: 'PlusJakartaSans',
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
           brightness: Brightness.light,
@@ -501,6 +502,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           elevation: 0,
           iconTheme: IconThemeData(color: Colors.black),
           titleTextStyle: TextStyle(
+            fontFamily: 'PlusJakartaSans',
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,

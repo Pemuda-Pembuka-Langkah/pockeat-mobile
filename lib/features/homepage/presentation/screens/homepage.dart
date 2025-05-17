@@ -83,19 +83,25 @@ class _HomePageState extends State<HomePage>
             SliverAppBar(
               pinned: true,
               floating: false,
-              backgroundColor: primaryYellow,
+              backgroundColor: Colors.white,
               elevation: 0,
               toolbarHeight: 60,
               automaticallyImplyLeading: false,
-              title: const Row(
+              title: Row(
                 children: [
-                  Text(
-                    'Pockeat',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  // Text(
+                  //   'Pockeat',
+                  //   style: TextStyle(
+                  //     color: Colors.black87,
+                  //     fontSize: 24,
+                  //     fontFamily: 'PlusJakartaSans',
+                  //     fontWeight: FontWeight.w700,
+                  //   ),
+                  // ),
+                  Image.asset(
+                    'assets/icons/LogoPanjang_PockEat_draft_transparent.png',
+                    width: 100,
+                    height: 100,
                   ),
                 ],
               ),
