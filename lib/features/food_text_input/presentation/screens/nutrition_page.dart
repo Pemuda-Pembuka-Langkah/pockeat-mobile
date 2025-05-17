@@ -103,21 +103,35 @@ class _NutritionPageState extends State<NutritionPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
-        body: FoodAnalysisLoading(
-          primaryYellow: primaryYellow,
-          primaryPink: primaryPink,
-          message: 'Analyzing Food',
+      return WillPopScope(
+        onWillPop: () async {
+          // Handle back button press by navigating to food input page
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/add-food',
+            (route) => route.isFirst,
+          );
+          return false; // Prevent default back button behavior
+        },
+        child: Scaffold(
+          body: FoodAnalysisLoading(
+            primaryYellow: primaryYellow,
+            primaryPink: primaryPink,
+            message: 'Analyzing Food',
+          ),
         ),
       );
     }
-
     if (_hasError) {
       return WillPopScope(
         onWillPop: () async {
-          // Just pop once to go back to the input form
-          Navigator.pop(context);
-          return false;
+          // Handle back button press by navigating to food input page
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/add-food',
+            (route) => route.isFirst,
+          );
+          return false; // Prevent default back button behavior
         },
         child: Scaffold(
           body: FoodTextInputAnalysisError(
@@ -125,19 +139,26 @@ class _NutritionPageState extends State<NutritionPage> {
             primaryYellow: primaryYellow,
             onRetry: _analyzeFoodText,
             onBack: () {
-              // Just pop once to go back to the input form
-              Navigator.pop(context);
+              // Navigate to food input page instead of popping twice
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/add-food',
+                (route) => route.isFirst,
+              );
             },
           ),
         ),
       );
     }
-
     return WillPopScope(
       onWillPop: () async {
-        // Just pop once to go back to the input form
-        Navigator.pop(context);
-        return false;
+        // Handle back button press by navigating to food input page
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/add-food',
+          (route) => route.isFirst,
+        );
+        return false; // Prevent default back button behavior
       },
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -174,7 +195,8 @@ class _NutritionPageState extends State<NutritionPage> {
         return true;
       },
       child: CustomScrollView(
-        slivers: [          SliverAppBar(
+        slivers: [
+          SliverAppBar(
             backgroundColor: Colors.white,
             title: const Text(
               'Nutrition Analysis',
@@ -185,8 +207,13 @@ class _NutritionPageState extends State<NutritionPage> {
               ),
             ),
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.black87, size: 20),
-              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back_ios,
+                  color: Colors.black87, size: 20),
+              onPressed: () {
+                // Navigate to food input page instead of just popping
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/add-food', (route) => route.isFirst);
+              },
             ),
             floating: true,
             pinned: true,

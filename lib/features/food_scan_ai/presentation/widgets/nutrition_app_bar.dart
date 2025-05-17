@@ -38,14 +38,7 @@ class NutritionAppBar extends StatelessWidget {
           color: isScrolledToTop ? Colors.white : Colors.black87,
           size: 20,
         ),
-        onPressed: () {
-          // Navigate to the food input page instead of just popping
-          Navigator.pushNamedAndRemoveUntil(
-            context, 
-            '/add-food', 
-            (route) => route.isFirst, // Remove all routes except the first (home) route
-          );
-        },
+        onPressed: () => Navigator.pop(context),
       ),
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(

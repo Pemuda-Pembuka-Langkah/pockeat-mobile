@@ -205,8 +205,8 @@ class _NutritionPageState extends State<NutritionPage> {
         onWillPop: () async {
           // Handle back button press by navigating to food input page
           Navigator.pushNamedAndRemoveUntil(
-            context, 
-            '/add-food', 
+            context,
+            '/add-food',
             (route) => route.isFirst,
           );
           return false; // Prevent default back button behavior
@@ -220,8 +220,8 @@ class _NutritionPageState extends State<NutritionPage> {
             onBack: () {
               // Navigate back to food input page instead of the previous screen
               Navigator.pushNamedAndRemoveUntil(
-                context, 
-                '/add-food', 
+                context,
+                '/add-food',
                 (route) => route.isFirst,
               );
             },
@@ -234,8 +234,8 @@ class _NutritionPageState extends State<NutritionPage> {
       onWillPop: () async {
         // Handle back button press by navigating to food input page
         Navigator.pushNamedAndRemoveUntil(
-          context, 
-          '/add-food', 
+          context,
+          '/add-food',
           (route) => route.isFirst,
         );
         return false; // Prevent default back button behavior
