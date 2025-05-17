@@ -192,9 +192,9 @@ class _SyncFitnessTrackerOptionPageState
                                         color: primaryGreen,
                                       ),
                                     ),
-                
+
                                     const SizedBox(height: 24),
-                
+
                                     // Title
                                     const Text(
                                       "Connect to Health Tracker",
@@ -205,9 +205,9 @@ class _SyncFitnessTrackerOptionPageState
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
-                
+
                                     const SizedBox(height: 16),
-                
+
                                     // Description
                                     Text(
                                       "PockEat can automatically import activity data from Apple Health, Google Fit, Fitbit, and other popular trackers.",
@@ -218,32 +218,33 @@ class _SyncFitnessTrackerOptionPageState
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
-                
+
                                     const SizedBox(height: 16),
-                
+
                                     // Benefits
                                     _buildBenefitItem(
                                       icon: Icons.autorenew,
-                                      text: "Automatic exercise calorie adjustment",
+                                      text:
+                                          "Automatic exercise calorie adjustment",
                                     ),
-                
+
                                     _buildBenefitItem(
                                       icon: Icons.trending_up,
                                       text: "More accurate weight tracking",
                                     ),
-                
+
                                     _buildBenefitItem(
                                       icon: Icons.insights,
                                       text: "Better insights on your progress",
                                     ),
-                                    
+
                                     // Add bottom padding for scrollable area
                                     const SizedBox(height: 16),
                                   ],
                                 ),
                               ),
                             ),
-                            
+
                             // Fix buttons at the bottom
                             // Connect button
                             SizedBox(

@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'skeleton_loading.dart';
 
 class PetCompanionSkeleton extends StatelessWidget {
@@ -7,12 +10,14 @@ class PetCompanionSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Column(children: [
-      SkeletonLoading(width: double.infinity, height: 350, borderRadius: 45,),
-
+      SkeletonLoading(
+        width: double.infinity,
+        height: 350,
+        borderRadius: 45,
+      ),
       SizedBox(
         height: 20,
       ),
-
       SizedBox(
         height: 30,
         width: double.infinity,
