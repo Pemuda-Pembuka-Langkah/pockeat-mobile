@@ -9,10 +9,12 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 //
 
@@ -41,13 +43,63 @@ class _HealthConnectWidgetState extends State<HealthConnectWidget>
   bool _isConnected = false;
   bool _isHealthConnectAvailable = true;
   bool _hasAttemptedConnection = false;
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkAvailabilityAndPermissions();
+    _loadPreferenceAndCheckPermissions();
     _loadExerciseCalories();
+  }
+
+  // Check if the user opted in for fitness tracking during onboarding
+  Future<bool> _hasUserOptedIn() async {
+    try {
+      final userPreferencesService = GetIt.instance<UserPreferencesService>();
+      bool optedIn = await userPreferencesService.isSyncFitnessTrackerEnabled();
+
+      // For backward compatibility, also check legacy key if needed
+      if (!optedIn) {
+        final prefs = await SharedPreferences.getInstance();
+        bool? legacyOptedIn = prefs.getBool('syncHealthTracker');
+        if (legacyOptedIn == true) {
+          // If found in legacy key, update to new format
+          await userPreferencesService.setSyncFitnessTrackerEnabled(true);
+          return true;
+        }
+      }
+
+      return optedIn;
+    } catch (e) {
+      debugPrint('Error reading fitness tracker preference: $e');
+      return false;
+    }
+  }
+
+  Future<void> _loadPreferenceAndCheckPermissions() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // First check if user opted in during onboarding
+      final userOptedIn = await _hasUserOptedIn();
+
+      if (userOptedIn) {
+        // Only check permissions if user opted in
+        await _checkAvailabilityAndPermissions();
+      } else {
+        setState(() {
+          _isLoading = false;
+          _isConnected = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error checking fitness tracker preferences: $e');
+      setState(() {
+        _isLoading = false;
+        _isConnected = false;
+      });
+    }
   }
 
   @override

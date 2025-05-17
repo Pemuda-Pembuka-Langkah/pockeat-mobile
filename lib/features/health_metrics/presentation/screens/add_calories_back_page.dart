@@ -24,8 +24,11 @@ class _AddCaloriesBackPageState extends State<AddCaloriesBackPage>
   final Color bgColor = const Color(0xFFF9F9F9);
   final Color textDarkColor = Colors.black87;
   final Color textLightColor = Colors.black54;
-
   bool? _addCaloriesBack;
+
+  // Key for the exercise calorie compensation setting - same as in UserPreferencesRepository
+  static const String _exerciseCalorieCompensationKey =
+      'exercise_calorie_compensation_enabled';
 
   // Animation controller
   late AnimationController _animationController;
@@ -34,6 +37,9 @@ class _AddCaloriesBackPageState extends State<AddCaloriesBackPage>
   @override
   void initState() {
     super.initState();
+    // Load saved preference
+    _loadExerciseCalorieCompensationPreference();
+
     // Setup animation
     _animationController = AnimationController(
       vsync: this,
@@ -51,6 +57,45 @@ class _AddCaloriesBackPageState extends State<AddCaloriesBackPage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
     });
+  }
+
+  /// Load exercise calorie compensation preference
+  Future<void> _loadExerciseCalorieCompensationPreference() async {
+    try {
+      // Try getting setting from local storage
+      final prefs = await SharedPreferences.getInstance();
+      final localSetting = prefs.getBool(_exerciseCalorieCompensationKey);
+
+      setState(() {
+        _addCaloriesBack = localSetting;
+      });
+    } catch (e) {
+      debugPrint('Error loading exercise calorie compensation setting: $e');
+    }
+  }
+
+  /// Save exercise calorie compensation setting to SharedPreferences
+  Future<void> _saveExerciseCalorieCompensationSetting(bool value) async {
+    try {
+      // Save to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_exerciseCalorieCompensationKey, value);
+
+      setState(() {
+        _addCaloriesBack = value;
+      });
+    } catch (e) {
+      debugPrint('Error saving exercise calorie compensation setting: $e');
+      // Show error to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to save preference'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -236,8 +281,10 @@ class _AddCaloriesBackPageState extends State<AddCaloriesBackPage>
                                           // No option
                                           Expanded(
                                             child: GestureDetector(
-                                              onTap: () => setState(() =>
-                                                  _addCaloriesBack = false),
+                                              onTap: () async {
+                                                await _saveExerciseCalorieCompensationSetting(
+                                                    false);
+                                              },
                                               child: Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -301,8 +348,10 @@ class _AddCaloriesBackPageState extends State<AddCaloriesBackPage>
                                           // Yes option
                                           Expanded(
                                             child: GestureDetector(
-                                              onTap: () => setState(() =>
-                                                  _addCaloriesBack = true),
+                                              onTap: () async {
+                                                await _saveExerciseCalorieCompensationSetting(
+                                                    true);
+                                              },
                                               child: Container(
                                                 padding:
                                                     const EdgeInsets.symmetric(
@@ -367,20 +416,16 @@ class _AddCaloriesBackPageState extends State<AddCaloriesBackPage>
                                       ),
                                     ),
 
-                                    const Spacer(),
-
-                                    // Continue button
+                                    const Spacer(), // Continue button
                                     SizedBox(
                                       width: double.infinity,
                                       child: ElevatedButton(
                                         onPressed: _addCaloriesBack != null
                                             ? () async {
-                                                final prefs =
-                                                    await SharedPreferences
-                                                        .getInstance();
-                                                await prefs.setBool(
-                                                    'addCaloriesBack',
-                                                    _addCaloriesBack!);
+                                                if (_addCaloriesBack != null) {
+                                                  await _saveExerciseCalorieCompensationSetting(
+                                                      _addCaloriesBack!);
+                                                }
                                                 if (context.mounted) {
                                                   Navigator.pushNamed(context,
                                                       '/rollover-calories');

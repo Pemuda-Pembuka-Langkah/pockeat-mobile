@@ -306,8 +306,7 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                         await prefs.setString('petName',
                                             _petNameController.text.trim());
                                         if (context.mounted) {
-                                          Navigator.pushNamed(
-                                              context, '/review');
+                                          Navigator.pushNamed(context, '/calorie-loading');
                                         }
                                       }
                                     : null, // Disabled if no pet name

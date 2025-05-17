@@ -93,10 +93,7 @@ class _UpdateWeightPageState extends State<UpdateWeightPage> {
         });
       }
 
-      // Add mounted check before using BuildContext after await
-      if (mounted) {
-        Navigator.pop(context, _currentWeight.toString());
-      }
+      Navigator.pop(context, _currentWeight.toString());
     } catch (e) {
       // Add mounted check before using BuildContext after await
       if (mounted) {
@@ -336,6 +333,7 @@ class WeightSliderPainter extends CustomPainter {
 
     // Tentukan interval berat
     final double totalWeightRange = maxWeight - minWeight;
+    final double pixelsPerKg = size.width / totalWeightRange;
 
     // Jumlah garis indikator (10 garis per kg)
     final int totalMarks = (totalWeightRange * 10).toInt();

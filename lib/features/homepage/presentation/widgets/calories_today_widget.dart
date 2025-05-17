@@ -6,6 +6,8 @@ import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats
 
 // Package imports:
 
+// Package imports:
+
 class CaloriesTodayWidget extends StatefulWidget {
   final int targetCalories;
   final DailyCalorieStats? stats;

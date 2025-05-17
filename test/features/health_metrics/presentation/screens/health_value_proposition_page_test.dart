@@ -10,15 +10,14 @@ import 'package:pockeat/features/health_metrics/presentation/widgets/onboarding_
 
 void main() {
   group('HealthValuePropositionPage', () {
-    testWidgets('renders without back button in AppBar', (WidgetTester tester) async {
+    testWidgets('renders with back button in AppBar', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: HealthValuePropositionPage()),
       );
 
-      // AppBar should exist but shouldn't have a back button
+      // AppBar should exist and have a back button
       expect(find.byType(AppBar), findsOneWidget);
-      expect(find.byType(BackButton), findsNothing);
-      expect(find.byIcon(Icons.arrow_back), findsNothing);
+      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
     });
 
     testWidgets('displays the onboarding progress indicator with correct values',
