@@ -91,29 +91,25 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
     try {
       List<CalorieData> calorieData;
 
-      if (selectedPeriod == '1 Month') {
-        calorieData = await _foodLogDataService.getMonthCalorieData();
-      } else {
-        // Handle different week selections
-        switch (selectedWeek) {
-          case 'This week':
-            calorieData = await _foodLogDataService.getWeekCalorieData();
-            break;
-          case 'Last week':
-            calorieData =
-                await _foodLogDataService.getWeekCalorieData(weeksAgo: 1);
-            break;
-          case '2 wks. ago':
-            calorieData =
-                await _foodLogDataService.getWeekCalorieData(weeksAgo: 2);
-            break;
-          case '3 wks. ago':
-            calorieData =
-                await _foodLogDataService.getWeekCalorieData(weeksAgo: 3);
-            break;
-          default:
-            calorieData = await _foodLogDataService.getWeekCalorieData();
-        }
+      // Handle different week selections regardless of period selection
+      switch (selectedWeek) {
+        case 'This week':
+          calorieData = await _foodLogDataService.getWeekCalorieData();
+          break;
+        case 'Last week':
+          calorieData =
+              await _foodLogDataService.getWeekCalorieData(weeksAgo: 1);
+          break;
+        case '2 wks. ago':
+          calorieData =
+              await _foodLogDataService.getWeekCalorieData(weeksAgo: 2);
+          break;
+        case '3 wks. ago':
+          calorieData =
+              await _foodLogDataService.getWeekCalorieData(weeksAgo: 3);
+          break;
+        default:
+          calorieData = await _foodLogDataService.getWeekCalorieData();
       }
 
       final totalCalories =
@@ -353,7 +349,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
                   setState(() {
                     selectedPeriod = period;
                   });
-                  _loadCalorieData();
+                  // Removed _loadCalorieData() call here so period selection doesn't affect calories chart
                 },
                 primaryColor: primaryPink,
               ),
@@ -363,24 +359,23 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
                 primaryGreen: primaryGreen,
               ),
               const SizedBox(height: 24),
-              if (selectedPeriod != 'All time') ...[
-                WeekSelectionTabs(
-                  selectedWeek: selectedWeek,
-                  onWeekSelected: (week) {
-                    setState(() {
-                      selectedWeek = week;
-                    });
-                    _loadCalorieData();
-                  },
-                  primaryColor: primaryPink,
-                ),
-                const SizedBox(height: 16),
-                CaloriesChart(
-                  calorieData: _calorieData,
-                  totalCalories: _totalCalories,
-                  isLoading: _isLoadingCalorieData,
-                ),
-              ],
+              // Always show week selection and calories chart regardless of period selection
+              WeekSelectionTabs(
+                selectedWeek: selectedWeek,
+                onWeekSelected: (week) {
+                  setState(() {
+                    selectedWeek = week;
+                  });
+                  _loadCalorieData(); // This is the only place we call _loadCalorieData()
+                },
+                primaryColor: primaryPink,
+              ),
+              const SizedBox(height: 16),
+              CaloriesChart(
+                calorieData: _calorieData,
+                totalCalories: _totalCalories,
+                isLoading: _isLoadingCalorieData,
+              ),
             ],
           ),
         ),
