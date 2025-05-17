@@ -1,12 +1,16 @@
 // sync_fitness_tracker_option_page.dart
 
+// ignore_for_file: use_build_context_synchronously
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_it/get_it.dart';
 
 // Project imports:
+import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import '../widgets/onboarding_progress_indicator.dart';
 
 class SyncFitnessTrackerOptionPage extends StatefulWidget {
@@ -26,15 +30,25 @@ class _SyncFitnessTrackerOptionPageState
   final Color bgColor = const Color(0xFFF9F9F9);
   final Color textDarkColor = Colors.black87;
   final Color textLightColor = Colors.black54;
+  // User preference state
+  bool? _syncFitnessTracker;
+
+  // Service for managing user preferences
+  late UserPreferencesService _userPreferencesService;
 
   // Animation controller
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
-
   @override
   void initState() {
     super.initState();
+    // Initialize services
+    _userPreferencesService = GetIt.instance<UserPreferencesService>();
+
+    // Load saved preference
+    _loadSyncFitnessTrackerPreference();
+
     // Setup animation
     _animationController = AnimationController(
       vsync: this,
@@ -59,6 +73,44 @@ class _SyncFitnessTrackerOptionPageState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
     });
+  }
+
+  /// Load sync fitness tracker preference
+  Future<void> _loadSyncFitnessTrackerPreference() async {
+    try {
+      // Get setting from UserPreferencesService
+      final enabled =
+          await _userPreferencesService.isSyncFitnessTrackerEnabled();
+
+      setState(() {
+        _syncFitnessTracker = enabled;
+      });
+    } catch (e) {
+      debugPrint('Error loading sync fitness tracker setting: $e');
+    }
+  }
+
+  /// Save sync fitness tracker setting using UserPreferencesService
+  Future<void> _saveSyncFitnessTrackerSetting(bool value) async {
+    try {
+      // Save using UserPreferencesService
+      await _userPreferencesService.setSyncFitnessTrackerEnabled(value);
+
+      setState(() {
+        _syncFitnessTracker = value;
+      });
+    } catch (e) {
+      debugPrint('Error saving sync fitness tracker setting: $e');
+      // Show error to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to save preference'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -210,7 +262,7 @@ class _SyncFitnessTrackerOptionPageState
 
                                     // Description
                                     Text(
-                                      "PockEat can automatically import activity data from Apple Health, Google Fit, Fitbit, and other popular trackers.",
+                                      "PockEat can automatically import activity data from the most popular third party tracker which is Health Connect!",
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: textLightColor,
@@ -230,7 +282,7 @@ class _SyncFitnessTrackerOptionPageState
 
                                     _buildBenefitItem(
                                       icon: Icons.trending_up,
-                                      text: "More accurate weight tracking",
+                                      text: "Integrated tracking",
                                     ),
 
                                     _buildBenefitItem(
@@ -246,33 +298,58 @@ class _SyncFitnessTrackerOptionPageState
                             ),
 
                             // Fix buttons at the bottom
-                            // Connect button
+
+                            const SizedBox(
+                                height: 16), // Connect to Health Connect button
                             SizedBox(
                               width: double.infinity,
-                              child: ElevatedButton(
+                              child: OutlinedButton.icon(
+                                //coverage:ignore-start
                                 onPressed: () async {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  await prefs.setBool(
-                                      'syncHealthTracker', true);
-                                  if (context.mounted) {
-                                    Navigator.pushNamed(
-                                        context, '/pet-onboard');
+                                  // Save preference that user wants to sync fitness tracker
+                                  await _saveSyncFitnessTrackerSetting(true);
+
+                                  // Create an instance of FitnessTrackerSync to request permissions
+                                  // Use GetIt to allow mocking in tests
+                                  final fitnessSync =
+                                      GetIt.instance<FitnessTrackerSync>();
+
+                                  try {
+                                    // Check if Health Connect is available
+                                    final isAvailable = await fitnessSync
+                                        .isHealthConnectAvailable();
+
+                                    // Add mounted check before using context after async operation
+                                    if (!mounted) return;
+
+                                    if (isAvailable) {
+                                      // Show explanation dialog
+                                      await _showHealthConnectExplanation(
+                                          context, fitnessSync);
+                                    }
+                                  } catch (e) {
+                                    debugPrint(
+                                        'Error checking Health Connect: $e');
                                   }
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: primaryGreen,
-                                  foregroundColor: Colors.white,
+                                //coverage:ignore-end
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: primaryGreen,
+                                  backgroundColor: Colors.white,
                                   minimumSize: const Size(double.infinity, 56),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
+                                    side: BorderSide(
+                                      color: primaryGreen,
+                                      width: 1.5,
+                                    ),
                                   ),
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 16),
-                                  elevation: 2,
                                 ),
-                                child: const Text(
-                                  'Continue',
+                                icon: const Icon(Icons.fitness_center),
+                                label: const Text(
+                                  'Open Health Connect',
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -288,10 +365,8 @@ class _SyncFitnessTrackerOptionPageState
                               width: double.infinity,
                               child: TextButton(
                                 onPressed: () async {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  await prefs.setBool(
-                                      'syncHealthTracker', false);
+                                  // Save preference that user does not want to sync fitness tracker
+                                  await _saveSyncFitnessTrackerSetting(false);
                                   if (context.mounted) {
                                     Navigator.pushNamed(
                                         context, '/pet-onboard');
@@ -303,19 +378,40 @@ class _SyncFitnessTrackerOptionPageState
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                     side: BorderSide(
-                                      color: Colors.grey.shade300,
-                                      width: 1,
+                                      color: _syncFitnessTracker == false
+                                          ? primaryGreen.withOpacity(0.5)
+                                          : Colors.grey.shade300,
+                                      width:
+                                          _syncFitnessTracker == false ? 2 : 1,
                                     ),
                                   ),
+                                  backgroundColor: _syncFitnessTracker == false
+                                      ? Colors.grey.shade50
+                                      : null,
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 16),
                                 ),
-                                child: const Text(
-                                  'Not Now',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (_syncFitnessTracker == false)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 8.0),
+                                        child: Icon(
+                                          Icons.close_rounded,
+                                          color: textDarkColor,
+                                          size: 18,
+                                        ),
+                                      ),
+                                    const Text(
+                                      'Not Now',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -334,6 +430,59 @@ class _SyncFitnessTrackerOptionPageState
       ),
     );
   }
+
+  // Show Health Connect permission explanation dialog
+  //coverage:ignore-start
+  Future<void> _showHealthConnectExplanation(
+      BuildContext context, FitnessTrackerSync fitnessSync) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Connect to Health Connect'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.health_and_safety,
+              size: 48,
+              color: Color(0xFF4ECDC4),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'We need to access your fitness data from Health Connect.',
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8),
+            Text(
+              'When Health Connect opens, please select "Allow" for Steps, Active energy burned, and Total calories burned.',
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Not Now'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Request authorization directly
+              fitnessSync.requestAuthorization();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryGreen,
+            ),
+            child: const Text('Open Health Connect'),
+          ),
+        ],
+      ),
+    );
+  }
+  //coverage:ignore-end
 
   // Benefit item with icon and text
   Widget _buildBenefitItem({required IconData icon, required String text}) {

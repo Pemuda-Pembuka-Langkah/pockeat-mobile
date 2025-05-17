@@ -197,8 +197,25 @@ class _HealthValuePropositionPageState extends State<HealthValuePropositionPage>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        automaticallyImplyLeading: false, // Removes the back button
-        toolbarHeight: 0, // Minimizes the AppBar height
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child: Icon(Icons.arrow_back, color: textDarkColor, size: 20),
+          ),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       backgroundColor: bgColor,
       body: SafeArea(

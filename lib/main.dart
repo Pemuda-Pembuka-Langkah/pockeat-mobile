@@ -62,9 +62,11 @@ import 'package:pockeat/features/health_metrics/domain/repositories/health_metri
 import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/calorie_calculation_loading_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/desired_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/diet_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/free_trials_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
@@ -490,6 +492,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       navigatorKey: navigatorKey,
       title: 'Pockeat',
       theme: ThemeData(
+        fontFamily: 'PlusJakartaSans',
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
           brightness: Brightness.light,
@@ -501,6 +504,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           elevation: 0,
           iconTheme: IconThemeData(color: Colors.black),
           titleTextStyle: TextStyle(
+            fontFamily: 'PlusJakartaSans',
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -598,6 +602,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               value: context.read<HealthMetricsFormCubit>(),
               child: const ReviewSubmitPage(),
             ),
+        '/free-trial': (context) => const FreeTrialPage(),
+        '/calorie-loading': (context) => const CalorieCalculationLoadingPage(),
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
                 SmartExerciseLogPage(repository: smartExerciseLogRepository)),

@@ -307,7 +307,7 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                             _petNameController.text.trim());
                                         if (context.mounted) {
                                           Navigator.pushNamed(
-                                              context, '/review');
+                                              context, '/calorie-loading');
                                         }
                                       }
                                     : null, // Disabled if no pet name

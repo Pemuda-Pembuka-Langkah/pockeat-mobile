@@ -14,64 +14,79 @@ void main() {
 
   group('AddCaloriesBackPage', () {
     setUp(() {
-      SharedPreferences.setMockInitialValues({}); // Reset prefs before each test
+      SharedPreferences.setMockInitialValues(
+          {}); // Reset prefs before each test
     });
 
-    testWidgets('renders with proper modern UI components', (WidgetTester tester) async {
+    testWidgets('renders with proper modern UI components',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: AddCaloriesBackPage()));
       await tester.pump(); // Complete animations from initState
 
       // Main title and subtitle
       expect(find.text('Exercise Calories'), findsOneWidget);
-      expect(find.text('Would you like to add calories burned from exercise back to your daily calorie goal?'), findsOneWidget);
-      
+      expect(
+          find.text(
+              'Would you like to add calories burned from exercise back to your daily calorie goal?'),
+          findsOneWidget);
+
       // Core UI components
       expect(find.byType(OnboardingProgressIndicator), findsOneWidget);
       expect(find.text('Continue'), findsOneWidget);
-      
+
       // Info container elements
       expect(find.text('What this means'), findsOneWidget);
-      
+
       // Button options
       expect(find.text('No'), findsOneWidget);
       expect(find.text('Yes'), findsOneWidget);
     });
 
-    testWidgets('progress indicator shows correct step', (WidgetTester tester) async {
+    testWidgets('progress indicator shows correct step',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: AddCaloriesBackPage()));
       await tester.pump();
 
       final progressIndicator = tester.widget<OnboardingProgressIndicator>(
-        find.byType(OnboardingProgressIndicator)
-      );
-      
+          find.byType(OnboardingProgressIndicator));
+
       expect(progressIndicator.totalSteps, 16);
-      expect(progressIndicator.currentStep, 10); // Should be step 11 (0-indexed)
+      expect(
+          progressIndicator.currentStep, 10); // Should be step 11 (0-indexed)
       expect(progressIndicator.showPercentage, isTrue);
     });
 
-    testWidgets('info card displays explanation about exercise calories', (WidgetTester tester) async {
+    testWidgets('info card displays explanation about exercise calories',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: AddCaloriesBackPage()));
       await tester.pump();
 
-      expect(find.text('If you choose \'Yes\', calories burned during exercise will be added to your daily target, allowing you to eat more on active days.'), findsOneWidget);
+      expect(
+          find.text(
+              'If you choose \'Yes\', calories burned during exercise will be added to your daily target, allowing you to eat more on active days.'),
+          findsOneWidget);
     });
 
-    testWidgets('continue button is disabled initially', (WidgetTester tester) async {
+    testWidgets('continue button is disabled initially',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: AddCaloriesBackPage()));
 
-      final continueButtonFinder = find.widgetWithText(ElevatedButton, 'Continue');
+      final continueButtonFinder =
+          find.widgetWithText(ElevatedButton, 'Continue');
       expect(continueButtonFinder, findsOneWidget);
-      
-      final continueButton = tester.widget<ElevatedButton>(continueButtonFinder);
-      expect(continueButton.onPressed, isNull); // Button should be disabled initially
-      
+
+      final continueButton =
+          tester.widget<ElevatedButton>(continueButtonFinder);
+      expect(continueButton.onPressed,
+          isNull); // Button should be disabled initially
+
       // Check button styling for disabled state
       final buttonStyle = continueButton.style;
       expect(buttonStyle, isNotNull);
     });
 
-    testWidgets('tapping Yes enables continue button and shows selection UI', (WidgetTester tester) async {
+    testWidgets('tapping Yes enables continue button and shows selection UI',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: AddCaloriesBackPage()));
 
       // Tap Yes
@@ -79,14 +94,16 @@ void main() {
       await tester.pump();
 
       // Check button is enabled
-      final continueButton = tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, 'Continue'));
+      final continueButton = tester.widget<ElevatedButton>(
+          find.widgetWithText(ElevatedButton, 'Continue'));
       expect(continueButton.onPressed, isNotNull);
-      
+
       // Check for visual selection indicators (check icon appears)
       expect(find.byIcon(Icons.check), findsOneWidget);
     });
 
-    testWidgets('tapping No enables continue button and shows selection UI', (WidgetTester tester) async {
+    testWidgets('tapping No enables continue button and shows selection UI',
+        (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: AddCaloriesBackPage()));
 
       // Tap No
@@ -94,21 +111,23 @@ void main() {
       await tester.pump();
 
       // Check button is enabled
-      final continueButton = tester.widget<ElevatedButton>(find.widgetWithText(ElevatedButton, 'Continue'));
+      final continueButton = tester.widget<ElevatedButton>(
+          find.widgetWithText(ElevatedButton, 'Continue'));
       expect(continueButton.onPressed, isNotNull);
-      
+
       // Check for visual selection indicators (close icon appears)
       expect(find.byIcon(Icons.close), findsOneWidget);
     });
-
-    testWidgets('pressing continue after choosing Yes saves true and navigates', (WidgetTester tester) async {
+    testWidgets('pressing continue after choosing Yes saves true and navigates',
+        (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
 
       await tester.pumpWidget(
         MaterialApp(
           home: const AddCaloriesBackPage(),
           routes: {
-            '/rollover-calories': (_) => const Scaffold(body: Text('Rollover Calories Page')),
+            '/rollover-calories': (_) =>
+                const Scaffold(body: Text('Rollover Calories Page')),
           },
         ),
       );
@@ -117,26 +136,30 @@ void main() {
       await tester.tap(find.text('Yes'));
       await tester.pump();
 
-      // Press Continue
-      await tester.tap(find.text('Continue'));
+      // Ensure Continue button is visible and tap it
+      final continueButton = find.widgetWithText(ElevatedButton, 'Continue');
+      await tester.ensureVisible(continueButton);
+      await tester.pumpAndSettle();
+      await tester.tap(continueButton, warnIfMissed: false);
       await tester.pumpAndSettle();
 
       // Check if navigated
       expect(find.text('Rollover Calories Page'), findsOneWidget);
 
-      // Check SharedPreferences
+      // Check SharedPreferences with the correct key
       final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getBool('addCaloriesBack'), isTrue);
+      expect(prefs.getBool('exercise_calorie_compensation_enabled'), isTrue);
     });
-
-    testWidgets('pressing continue after choosing No saves false and navigates', (WidgetTester tester) async {
+    testWidgets('pressing continue after choosing No saves false and navigates',
+        (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues({});
 
       await tester.pumpWidget(
         MaterialApp(
           home: const AddCaloriesBackPage(),
           routes: {
-            '/rollover-calories': (_) => const Scaffold(body: Text('Rollover Calories Page')),
+            '/rollover-calories': (_) =>
+                const Scaffold(body: Text('Rollover Calories Page')),
           },
         ),
       );
@@ -145,29 +168,52 @@ void main() {
       await tester.tap(find.text('No'));
       await tester.pump();
 
-      // Press Continue
-      await tester.tap(find.text('Continue'));
+      // Ensure Continue button is visible and tap it
+      final continueButton = find.widgetWithText(ElevatedButton, 'Continue');
+      await tester.ensureVisible(continueButton);
+      await tester.pumpAndSettle();
+      await tester.tap(continueButton, warnIfMissed: false);
       await tester.pumpAndSettle();
 
       // Check if navigated
       expect(find.text('Rollover Calories Page'), findsOneWidget);
 
-      // Check SharedPreferences
+      // Check SharedPreferences with the correct key
       final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getBool('addCaloriesBack'), isFalse);
+      expect(prefs.getBool('exercise_calorie_compensation_enabled'), isFalse);
     });
-    
-    testWidgets('animations are properly initialized', (WidgetTester tester) async {
+
+    testWidgets('loads preference from SharedPreferences',
+        (WidgetTester tester) async {
+      // Set a preference value before widget is created
+      SharedPreferences.setMockInitialValues(
+          {'exercise_calorie_compensation_enabled': true});
+
       await tester.pumpWidget(const MaterialApp(home: AddCaloriesBackPage()));
-      
+      await tester.pumpAndSettle();
+
+      // Verify Yes option is selected (check icon visible)
+      expect(find.byIcon(Icons.check), findsOneWidget);
+
+      // Continue button should be enabled
+      final continueButton = tester.widget<ElevatedButton>(
+          find.widgetWithText(ElevatedButton, 'Continue'));
+      expect(continueButton.onPressed, isNotNull);
+    });
+
+    testWidgets('animations are properly initialized',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const MaterialApp(home: AddCaloriesBackPage()));
+
       // Initial frame before animations
       expect(find.byType(FadeTransition), findsOneWidget);
       expect(find.byType(SlideTransition), findsOneWidget);
-      
+
       // Let animations play
       await tester.pump(const Duration(milliseconds: 300)); // Mid-animation
-      await tester.pump(const Duration(milliseconds: 400)); // Animation complete
-      
+      await tester
+          .pump(const Duration(milliseconds: 400)); // Animation complete
+
       // Content should now be visible
       expect(find.text('What this means'), findsOneWidget);
     });
