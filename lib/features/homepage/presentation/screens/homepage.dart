@@ -89,15 +89,6 @@ class _HomePageState extends State<HomePage>
               automaticallyImplyLeading: false,
               title: Row(
                 children: [
-                  // Text(
-                  //   'Pockeat',
-                  //   style: TextStyle(
-                  //     color: Colors.black87,
-                  //     fontSize: 24,
-                  //     fontFamily: 'PlusJakartaSans',
-                  //     fontWeight: FontWeight.w700,
-                  //   ),
-                  // ),
                   Image.asset(
                     'assets/icons/LogoPanjang_PockEat_draft_transparent.png',
                     width: 100,
@@ -118,27 +109,36 @@ class _HomePageState extends State<HomePage>
               _rolloverCaloriesFuture,
             ]),
             builder: (context, snapshot) {
-              return ListView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
-                children: [
-                  PetHomepageSection(
-                    isLoading:
-                        snapshot.connectionState == ConnectionState.waiting,
-                    petInfo: snapshot.data?[0] as PetInformation?,
-                    stats: snapshot.data?[1] as DailyCalorieStats?,
-                    streakDays: snapshot.data?[2] as int?,
-                  ),
-                  OverviewSection(
-                    isLoading:
-                        snapshot.connectionState == ConnectionState.waiting,
-                    stats: snapshot.data?[1] as DailyCalorieStats?,
-                    targetCalories: snapshot.data?[3] as int?,
-                    isCalorieCompensationEnabled: snapshot.data?[4] as bool?,
-                    isRolloverCaloriesEnabled: snapshot.data?[5] as bool?,
-                    rolloverCalories: snapshot.data?[6] as int?,
-                  ),
-                ],
+              return RefreshIndicator(
+                onRefresh: () async {
+                  setState(() {
+                    _loadData(); // Reload all the data
+                  });
+                },
+                color: primaryPink, // Use app color theme
+                backgroundColor: Colors.white,
+                child: ListView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+                  children: [
+                    PetHomepageSection(
+                      isLoading:
+                          snapshot.connectionState == ConnectionState.waiting,
+                      petInfo: snapshot.data?[0] as PetInformation?,
+                      stats: snapshot.data?[1] as DailyCalorieStats?,
+                      streakDays: snapshot.data?[2] as int?,
+                    ),
+                    OverviewSection(
+                      isLoading:
+                          snapshot.connectionState == ConnectionState.waiting,
+                      stats: snapshot.data?[1] as DailyCalorieStats?,
+                      targetCalories: snapshot.data?[3] as int?,
+                      isCalorieCompensationEnabled: snapshot.data?[4] as bool?,
+                      isRolloverCaloriesEnabled: snapshot.data?[5] as bool?,
+                      rolloverCalories: snapshot.data?[6] as int?,
+                    ),
+                  ],
+                ),
               );
             },
           ),

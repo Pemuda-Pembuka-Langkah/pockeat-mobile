@@ -165,8 +165,10 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           isSelected: navigationProvider.currentIndex == 0,
                           onPressed: () {
                             navigationProvider.closeMenu();
-                            navigationProvider.setIndex(0);
-                            Navigator.pushReplacementNamed(context, '/');
+                            if (navigationProvider.currentIndex != 0) {
+                              navigationProvider.setIndex(0);
+                              Navigator.pushReplacementNamed(context, '/');
+                            }
                           },
                         ),
                       ),
@@ -177,9 +179,11 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           isSelected: navigationProvider.currentIndex == 1,
                           onPressed: () {
                             navigationProvider.closeMenu();
-                            navigationProvider.setIndex(1);
-                            Navigator.pushReplacementNamed(
-                                context, '/analytic');
+                            if (navigationProvider.currentIndex != 1) {
+                              navigationProvider.setIndex(1);
+                              Navigator.pushReplacementNamed(
+                                  context, '/analytic');
+                            }
                           },
                         ),
                       ),
@@ -190,8 +194,10 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                           isSelected: navigationProvider.currentIndex == 4,
                           onPressed: () {
                             navigationProvider.closeMenu();
-                            navigationProvider.setIndex(4);
-                            Navigator.pushReplacementNamed(context, '/profile');
+                            if (navigationProvider.currentIndex != 4) {
+                              navigationProvider.setIndex(4);
+                              Navigator.pushReplacementNamed(context, '/profile');
+                            }
                           },
                         ),
                       ),
