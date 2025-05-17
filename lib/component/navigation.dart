@@ -196,7 +196,8 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
                             navigationProvider.closeMenu();
                             if (navigationProvider.currentIndex != 4) {
                               navigationProvider.setIndex(4);
-                              Navigator.pushReplacementNamed(context, '/profile');
+                              Navigator.pushReplacementNamed(
+                                  context, '/profile');
                             }
                           },
                         ),

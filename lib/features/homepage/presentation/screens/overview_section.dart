@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Project imports:
+import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/homepage/presentation/loading_skeleton/calories_today_skeleton.dart';
 import 'package:pockeat/features/homepage/presentation/loading_skeleton/health_connect_skeleton.dart';
@@ -16,6 +17,8 @@ class OverviewSection extends StatefulWidget {
   final bool? isCalorieCompensationEnabled;
   final bool? isRolloverCaloriesEnabled;
   final int? rolloverCalories;
+  final Map<String, int>? currentMacros;
+  final CaloricRequirementModel? targetMacros;
 
   const OverviewSection({
     super.key,
@@ -25,6 +28,8 @@ class OverviewSection extends StatefulWidget {
     this.isCalorieCompensationEnabled,
     this.isRolloverCaloriesEnabled,
     this.rolloverCalories,
+    this.currentMacros,
+    this.targetMacros,
   });
 
   @override
@@ -106,7 +111,13 @@ class _OverviewSectionState extends State<OverviewSection> {
     required IconData icon,
     required Color iconColor,
     required Color bgColor,
+    bool isExceeded = false,
   }) {
+    const Color warningColor = Colors.red;
+    final displayIcon = isExceeded ? Icons.warning_amber_rounded : icon;
+    final displayIconColor = isExceeded ? warningColor : iconColor;
+    final displayBgColor = isExceeded ? warningColor.withOpacity(0.1) : bgColor;
+
     return widget.isLoading
         ? const NutrientCardSkeleton()
         : Container(
@@ -130,17 +141,20 @@ class _OverviewSectionState extends State<OverviewSection> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: bgColor,
+                        color: displayBgColor,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(icon, color: iconColor, size: 12),
+                      child:
+                          Icon(displayIcon, color: displayIconColor, size: 12),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.black54,
+                      style: TextStyle(
+                        color: isExceeded ? warningColor : Colors.black54,
                         fontSize: 12,
+                        fontWeight:
+                            isExceeded ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
                   ],
@@ -151,8 +165,8 @@ class _OverviewSectionState extends State<OverviewSection> {
                     children: [
                       TextSpan(
                         text: current,
-                        style: const TextStyle(
-                          color: Colors.black87,
+                        style: TextStyle(
+                          color: isExceeded ? warningColor : Colors.black87,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
@@ -175,6 +189,20 @@ class _OverviewSectionState extends State<OverviewSection> {
 
   @override
   Widget build(BuildContext context) {
+    // Get current and target macronutrient values
+    final currentProtein = widget.currentMacros?['protein'] ?? 0;
+    final currentCarbs = widget.currentMacros?['carbs'] ?? 0;
+    final currentFat = widget.currentMacros?['fat'] ?? 0;
+
+    final targetProtein = widget.targetMacros?.proteinGrams.toInt() ?? 120;
+    final targetCarbs = widget.targetMacros?.carbsGrams.toInt() ?? 250;
+    final targetFat = widget.targetMacros?.fatGrams.toInt() ?? 65;
+
+    // Check if any values exceed their targets
+    final isProteinExceeded = currentProtein > targetProtein;
+    final isCarbsExceeded = currentCarbs > targetCarbs;
+    final isFatExceeded = currentFat > targetFat;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Column(
@@ -197,40 +225,43 @@ class _OverviewSectionState extends State<OverviewSection> {
             ],
           ),
 
-          // Nutrients Grid
+          // Nutrients Grid - now using dynamic values
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
                 child: _buildNutrientCard(
                   title: 'Protein',
-                  current: '45',
-                  target: '120g',
+                  current: '$currentProtein',
+                  target: '${targetProtein}g',
                   icon: Icons.egg_outlined,
                   iconColor: primaryPink,
                   bgColor: primaryPink.withOpacity(0.1),
+                  isExceeded: isProteinExceeded,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildNutrientCard(
                   title: 'Carbs',
-                  current: '156',
-                  target: '250g',
+                  current: '$currentCarbs',
+                  target: '${targetCarbs}g',
                   icon: Icons.grain,
                   iconColor: primaryGreen,
                   bgColor: primaryGreen.withOpacity(0.1),
+                  isExceeded: isCarbsExceeded,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildNutrientCard(
                   title: 'Fat',
-                  current: '32',
-                  target: '65g',
+                  current: '$currentFat',
+                  target: '${targetFat}g',
                   icon: Icons.water_drop_outlined,
                   iconColor: primaryYellow,
                   bgColor: primaryYellow.withOpacity(0.1),
+                  isExceeded: isFatExceeded,
                 ),
               ),
             ],

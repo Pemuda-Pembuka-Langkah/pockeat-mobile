@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:get_it/get_it.dart';
 
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
@@ -15,8 +15,8 @@ import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repo
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
-import 'food_detail_page_test.mocks.dart';
 import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
+import 'food_detail_page_test.mocks.dart';
 
 @GenerateMocks([
   FoodScanRepository, 

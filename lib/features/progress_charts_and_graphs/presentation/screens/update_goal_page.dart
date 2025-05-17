@@ -79,14 +79,20 @@ class _UpdateGoalPageState extends State<UpdateGoalPage> {
 
       Navigator.pop(context, _goalWeight.toString());
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update weight goal')),
-      );
+      // Add mounted check before using BuildContext after await
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update weight goal')),
+        );
+      }
       debugPrint('Error saving weight goal: $e');
     } finally {
-      setState(() {
-        _isSaving = false;
-      });
+      // Add mounted check before using setState after await
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
   }
 

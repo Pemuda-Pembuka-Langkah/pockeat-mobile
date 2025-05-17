@@ -19,6 +19,7 @@ class PetHomepageSection extends StatelessWidget {
   final DailyCalorieStats? stats;
   final int? streakDays;
   final bool isLoading;
+  final int? targetCalories;
 
   const PetHomepageSection({
     super.key,
@@ -27,10 +28,21 @@ class PetHomepageSection extends StatelessWidget {
     this.stats,
     this.streakDays,
     this.isLoading = false,
+    this.targetCalories,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveTargetCalories =
+        (targetCalories != null && targetCalories! > 0)
+            ? targetCalories!
+            : 2000;
+
+    // Calculate calorie progress
+    final calorieProgress =
+        ((stats?.caloriesConsumed ?? 0) / effectiveTargetCalories)
+            .clamp(0.0, 1.1);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       child: Column(
@@ -53,8 +65,7 @@ class PetHomepageSection extends StatelessWidget {
                     petImagePath: petInfo?.mood == 'happy'
                         ? 'assets/images/panda_happy.json'
                         : 'assets/images/panda_sad.json',
-                    calorieProgress:
-                        ((stats?.caloriesConsumed ?? 0) / 2000).clamp(0.0, 1.0),
+                    calorieProgress: calorieProgress,
                   ),
           ),
           const SizedBox(height: 24),

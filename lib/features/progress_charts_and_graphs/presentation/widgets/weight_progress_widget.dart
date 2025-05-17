@@ -329,7 +329,8 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
       onRefresh: _refreshAllData,
       color: primaryPink,
       child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator to work
+        physics:
+            const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator to work
         child: Container(
           padding: const EdgeInsets.all(16),
           child: Column(
