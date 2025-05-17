@@ -11,6 +11,7 @@ enum ChatBubbleType {
   reminder,
   almostFinished,
   completed,
+  exceeded, // Added new type for exceeded calories
 }
 
 class PetChatBubble extends StatefulWidget {
@@ -63,8 +64,13 @@ class _PetChatBubbleState extends State<PetChatBubble>
     // Start animation
     _controller.forward();
 
-    if (widget.autoDismissAfter != Duration.zero) {
-      _autoDismissTimer = Timer(widget.autoDismissAfter, () {
+    // Set auto-dismiss timer duration based on bubble type
+    final dismissDuration = widget.type == ChatBubbleType.exceeded
+        ? const Duration(seconds: 10) // Longer time for exceeded messages
+        : widget.autoDismissAfter;
+
+    if (dismissDuration != Duration.zero) {
+      _autoDismissTimer = Timer(dismissDuration, () {
         if (mounted) _dismissBubble();
       });
     }
@@ -94,6 +100,8 @@ class _PetChatBubbleState extends State<PetChatBubble>
         return const Color(0xFF4ECDC4); // Green for progress
       case ChatBubbleType.completed:
         return const Color(0xFFFF6B6B); // Pink for celebration
+      case ChatBubbleType.exceeded:
+        return const Color(0xFFE53935); // Red for exceeded calories
     }
   }
 
@@ -101,15 +109,27 @@ class _PetChatBubbleState extends State<PetChatBubble>
   Color _getTextColor() {
     switch (widget.type) {
       case ChatBubbleType.reminder:
-        return Colors.black87;
+        return const Color(0xFF000000).withOpacity(0.87); // Black87
       case ChatBubbleType.almostFinished:
       case ChatBubbleType.completed:
-        return Colors.white;
+      case ChatBubbleType.exceeded:
+        return const Color(0xFFFFFFFF); // White
     }
+  }
+
+  // Get icon for the bubble
+  IconData? _getBubbleIcon() {
+    // Only show icon for exceeded type
+    if (widget.type == ChatBubbleType.exceeded) {
+      return Icons.warning_amber_rounded;
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final bubbleIcon = _getBubbleIcon();
+
     return FadeTransition(
       opacity: _opacityAnimation,
       child: ScaleTransition(
@@ -134,6 +154,16 @@ class _PetChatBubbleState extends State<PetChatBubble>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start, // Align to top
               children: [
+                // Optional icon
+                if (bubbleIcon != null) ...[
+                  Icon(
+                    bubbleIcon,
+                    color: _getTextColor(),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                ],
+
                 // Expanded to ensure text wraps properly and uses available space
                 Expanded(
                   child: Text(

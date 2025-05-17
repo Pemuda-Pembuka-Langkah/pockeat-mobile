@@ -6,6 +6,8 @@ import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats
 
 // Package imports:
 
+// Package imports:
+
 class CaloriesTodayWidget extends StatefulWidget {
   final int targetCalories;
   final DailyCalorieStats? stats;
@@ -46,15 +48,26 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
       adjustedTargetCalories += widget.rolloverCalories;
     }
 
-    int remainingCalories = adjustedTargetCalories - caloriesConsumed;
+    // Calculate calories difference (can be positive for remaining or negative for exceeded)
+    int caloriesDifference = adjustedTargetCalories - caloriesConsumed;
 
+    // Check if calories are exceeded and calculate exceeded amount if needed
+    bool isExceeded = caloriesDifference < 0;
+    int exceededCalories = isExceeded
+        ? -caloriesDifference
+        : 0; // Convert negative difference to positive number
+    int remainingCalories = isExceeded ? 0 : caloriesDifference;
+
+    // Calculate percentage without clamping to determine if exceeded
     double completionPercentage = adjustedTargetCalories > 0
         ? caloriesConsumed / adjustedTargetCalories
         : 0.0;
 
+    // For display, clamp the percentage to 1.0 max for the circular indicator
+    double displayPercentage =
+        completionPercentage > 1.0 ? 1.0 : completionPercentage;
+
     // Ensure values are within reasonable bounds
-    if (remainingCalories < 0) remainingCalories = 0;
-    if (completionPercentage > 1.0) completionPercentage = 1.0;
     if (completionPercentage < 0.0) completionPercentage = 0.0;
 
     return Container(
@@ -73,91 +86,24 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '$remainingCalories',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -1,
-                    ),
-                  ),
-                  const Text(
-                    'Remaining Calories',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
+              Text(
+                isExceeded ? '$exceededCalories' : '$remainingCalories',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -1,
+                ),
               ),
-              Row(
-                children: [
-                  // Show exercise compensation bonus if enabled
-                  if (widget.isCalorieCompensationEnabled && caloriesBurned > 0)
-                    Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.local_fire_department,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '+$caloriesBurned',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  // Show rollover calories bonus if enabled
-                  if (widget.isRolloverCaloriesEnabled &&
-                      widget.rolloverCalories > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.update, // Different icon for rollover
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '+${widget.rolloverCalories}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
+              const SizedBox(width: 8),
+              Text(
+                isExceeded ? 'Exceeded Calories' : 'Remaining Calories',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ],
           ),
@@ -173,27 +119,32 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
                     width: 160,
                     height: 160,
                     child: CircularProgressIndicator(
-                      value: completionPercentage,
+                      value: displayPercentage,
                       backgroundColor: Colors.white.withOpacity(0.2),
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          isExceeded ? Colors.amber : Colors.white),
                       strokeWidth: 12,
                     ),
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      // Show double exclamation mark or percentage based on whether calories are exceeded
                       Text(
-                        '${(completionPercentage * 100).round()}%',
-                        style: const TextStyle(
+                        isExceeded
+                            ? '!!'
+                            : '${(completionPercentage * 100).round()}%',
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 32,
+                          fontSize: isExceeded
+                              ? 40
+                              : 32, // Larger font for exclamation marks
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text(
-                        'Completed',
-                        style: TextStyle(
+                      Text(
+                        isExceeded ? 'Exceeded' : 'Completed',
+                        style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 14,
                         ),

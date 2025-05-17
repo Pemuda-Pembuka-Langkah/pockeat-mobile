@@ -349,33 +349,33 @@ class _ProfilePageState extends State<ProfilePage> {
         return Future.delayed(const Duration(milliseconds: 500));
       },
       color: const Color(0xFFFF6B6B), // Using primary pink color
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Get the available height to ensure there's enough scrollable space
-          final availableHeight = MediaQuery.of(context).size.height - 100;
-          
-          return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(), // Ensure it's scrollable even with little content
-            child: Container(
-              constraints: BoxConstraints(
-                minHeight: availableHeight, // Make sure content takes up enough space for scrolling
-              ),
-              child: Column(
-                children: [
-                  _buildProfileHeader(),
-                  const SizedBox(height: 16),
-                  _buildProfileStats(),
-                  const SizedBox(height: 16),
-                  _buildCalorieSettings(),
-                  const SizedBox(height: 16),
-                  _buildProfileActions(),
-                  const SizedBox(height: 20),
-                ],
-              ),
+      child: LayoutBuilder(builder: (context, constraints) {
+        // Get the available height to ensure there's enough scrollable space
+        final availableHeight = MediaQuery.of(context).size.height - 100;
+
+        return SingleChildScrollView(
+          physics:
+              const AlwaysScrollableScrollPhysics(), // Ensure it's scrollable even with little content
+          child: Container(
+            constraints: BoxConstraints(
+              minHeight:
+                  availableHeight, // Make sure content takes up enough space for scrolling
             ),
-          );
-        }
-      ),
+            child: Column(
+              children: [
+                _buildProfileHeader(),
+                const SizedBox(height: 16),
+                _buildProfileStats(),
+                const SizedBox(height: 16),
+                _buildCalorieSettings(),
+                const SizedBox(height: 16),
+                _buildProfileActions(),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+      }),
     );
   }
 
