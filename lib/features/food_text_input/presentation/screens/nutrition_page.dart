@@ -115,7 +115,7 @@ class _NutritionPageState extends State<NutritionPage> {
         },
         child: Scaffold(
           body: FoodAnalysisLoading(
-            primaryYellow: primaryYellow,
+            primaryYellow: Colors.grey[100]!,
             primaryPink: primaryPink,
             message: 'Analyzing Food',
           ),
@@ -136,7 +136,7 @@ class _NutritionPageState extends State<NutritionPage> {
         child: Scaffold(
           body: FoodTextInputAnalysisError(
             primaryPink: primaryPink,
-            primaryYellow: primaryYellow,
+            primaryYellow: Colors.grey[100]!,
             onRetry: _analyzeFoodText,
             onBack: () {
               // Navigate to food input page instead of popping twice
@@ -167,7 +167,7 @@ class _NutritionPageState extends State<NutritionPage> {
             isLoading: _isLoading || _isSaving,
             food: food,
             foodTextInputService: widget.foodTextInputService,
-            primaryYellow: primaryYellow,
+            primaryYellow: Colors.grey[100]!,
             primaryPink: primaryPink,
             primaryGreen: primaryGreen,
             onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
@@ -203,12 +203,12 @@ class _NutritionPageState extends State<NutritionPage> {
               style: TextStyle(
                 color: Colors.black87,
                 fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios,
-                  color: Colors.black87, size: 20),
+              icon:
+                  const Icon(Icons.arrow_back, color: Colors.black87, size: 24),
               onPressed: () {
                 // Navigate to food input page instead of just popping
                 Navigator.pushNamedAndRemoveUntil(
@@ -217,13 +217,14 @@ class _NutritionPageState extends State<NutritionPage> {
             ),
             floating: true,
             pinned: true,
-            elevation: _isScrolledToTop ? 0 : 4,
+            elevation: _isScrolledToTop ? 0 : 2,
+            shadowColor: Colors.black26,
           ),
           SliverToBoxAdapter(
             child: ClipRRect(
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
               ),
               child: Container(
                 color: Colors.white,
@@ -241,7 +242,7 @@ class _NutritionPageState extends State<NutritionPage> {
                     CalorieSummaryCard(
                       isLoading: _isLoading,
                       calories: _calories,
-                      primaryYellow: primaryYellow,
+                      primaryYellow: Colors.grey[100]!,
                       primaryPink: primaryPink,
                     ),
                     // Add Health Score Section
@@ -262,7 +263,7 @@ class _NutritionPageState extends State<NutritionPage> {
                       isLoading: _isLoading,
                       nutritionData: _nutritionData,
                       calories: _calories,
-                      primaryYellow: primaryYellow,
+                      primaryYellow: Colors.grey[100]!,
                     ),
                     IngredientsSection(
                       ingredients: _ingredients,
@@ -280,9 +281,9 @@ class _NutritionPageState extends State<NutritionPage> {
                       primaryGreen: primaryGreen,
                       warningYellow: warningYellow,
                     ),
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 80),
                     const Padding(
-                      padding: EdgeInsets.only(bottom: 50),
+                      padding: EdgeInsets.only(bottom: 80),
                       child: SizedBox(),
                     ),
                   ],

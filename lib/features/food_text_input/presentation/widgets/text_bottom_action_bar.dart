@@ -51,20 +51,29 @@ class TextBottomActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, -3),
+          )
+        ],
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Material(
             color: Colors.transparent,
             child: InkWell(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
               onTap: isLoading ? null : () => _showCorrectionDialog(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   border: Border.all(color: primaryPink.withOpacity(0.8)),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -92,10 +101,10 @@ class TextBottomActionBar extends StatelessWidget {
                 flex: 2,
                 child: Material(
                   color: primaryPink,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     key: const Key('add_to_log_button'),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                     onTap: () async {
                       if (!isLoading && food != null) {
                         onSavingStateChange?.call(true);
@@ -145,16 +154,18 @@ class TextBottomActionBar extends StatelessWidget {
                       }
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: const Row(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(CupertinoIcons.plus,
                               color: Colors.white, size: 20),
-                          SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Text('Add to Log',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 16)),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
@@ -174,7 +185,7 @@ class TextBottomActionBar extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return CorrectionDialog(
-          primaryYellow: primaryYellow,
+          primaryYellow: Colors.grey[100]!,
           primaryPink: primaryPink,
           primaryGreen: primaryGreen,
           foodAnalysisResult: food!,

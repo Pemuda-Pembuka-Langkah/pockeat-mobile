@@ -32,10 +32,12 @@ class BottomBar extends StatelessWidget {
           onPressed: onSaveWorkout,
           style: ElevatedButton.styleFrom(
             backgroundColor: onSaveWorkout == null ? Colors.grey : primaryGreen,
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            elevation: 0,
           ),
           child: onSaveWorkout == null
               ? const Row(
