@@ -344,7 +344,7 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
                         }
                       },
                       child: const Text(
-                        "Continue",
+                        "Let's Get Started",
                         style: TextStyle(
                           fontSize: 18, 
                           fontWeight: FontWeight.bold
