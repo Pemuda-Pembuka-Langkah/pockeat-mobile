@@ -28,7 +28,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
-  // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
@@ -52,7 +51,6 @@ class _HomePageState extends State<HomePage>
   late Future<bool> _isCalorieCompensationEnabledFuture;
   late Future<bool> _isRolloverCaloriesEnabledFuture;
   late Future<int> _rolloverCaloriesFuture;
-  // New futures for macronutrient data
   late Future<Map<String, int>> _currentMacrosFuture;
   late Future<CaloricRequirementModel?> _caloricRequirementModelFuture;
 
