@@ -5,6 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
 // coverage:ignore-start
+/// A widget that displays a shareable card with food analysis information.
+///
+/// This card is designed to be rendered offscreen and captured as an image for sharing.
+/// It displays the food name in multiple places (header and image overlay), so when testing,
+/// use `findsWidgets` instead of `findsOneWidget` when searching for food name text.
+///
+/// All Row widgets that contain Text should use Expanded with overflow: TextOverflow.ellipsis
+/// to prevent layout overflow errors when text is too long.
 class FoodSummaryCard extends StatelessWidget {
   final FoodAnalysisResult food;
   final GlobalKey cardKey;
@@ -362,12 +370,15 @@ class FoodSummaryCard extends StatelessWidget {
             size: 18,
           ),
           const SizedBox(width: 8),
-          Text(
-            'Health Score: ${food.healthScore.toStringAsFixed(1)} - $scoreLabel',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: scoreColor,
+          Expanded(
+            child: Text(
+              'Health Score: ${food.healthScore.toStringAsFixed(1)} - $scoreLabel',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: scoreColor,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -593,12 +604,15 @@ class FoodSummaryCard extends StatelessWidget {
             size: 14,
           ),
           const SizedBox(width: 6),
-          Text(
-            '$name: $formattedValue',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: value > 0 ? color : color.withOpacity(0.5),
+          Expanded(
+            child: Text(
+              '$name: $formattedValue',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: value > 0 ? color : color.withOpacity(0.5),
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -671,12 +685,15 @@ class FoodSummaryCard extends StatelessWidget {
             size: 16,
           ),
           const SizedBox(width: 8),
-          Text(
-            '$count nutritional warnings',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.amber.shade900,
-              fontWeight: FontWeight.w500,
+          Expanded(
+            child: Text(
+              '$count nutritional warnings',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.amber.shade900,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

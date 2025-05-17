@@ -29,6 +29,7 @@ class ExerciseSummaryCard extends StatelessWidget {
       key: cardKey,
       child: Container(
         width: 350,
+        height: 600, // Fixed height to prevent overflow
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -51,144 +52,150 @@ class ExerciseSummaryCard extends StatelessWidget {
               _buildExerciseHeader(),
 
               // Content padding
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // PockEat branding
-                    Row(
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.asset(
-                          'assets/icons/Logo_PockEat_draft_transparent.png',
-                          height: 32,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
+                        // PockEat branding
+                        Row(
+                          children: [
+                            Image.asset(
+                              'assets/icons/Logo_PockEat_draft_transparent.png',
                               height: 32,
-                              width: 32,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF4CAF50).withOpacity(0.1),
-                                shape: BoxShape.circle,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  height: 32,
+                                  width: 32,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF4CAF50)
+                                        .withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.fitness_center,
+                                      color: Color(0xFF4CAF50),
+                                      size: 16,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'PockEat',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF4CAF50),
                               ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.fitness_center,
-                                  color: Color(0xFF4CAF50),
-                                  size: 16,
-                                ),
-                              ),
-                            );
-                          },
+                            ),
+                            const Spacer(),
+                            _buildActivityBadge(),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'PockEat',
-                          style: TextStyle(
-                            fontSize: 16,
+                        const SizedBox(height: 16),
+
+                        // Exercise title and info
+                        Text(
+                          _getExerciseTitle(),
+                          style: const TextStyle(
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF4CAF50),
+                            color: Colors.black87,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const Spacer(),
-                        _buildActivityBadge(),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Exercise title and info
-                    Text(
-                      _getExerciseTitle(),
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.calendar_today,
-                            size: 14, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            _formatTimestamp(),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Exercise stats
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey[200]!),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          // Main stats row
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: _buildMainStats(),
-                            ),
-                          ),
-                          if (_getAdditionalStats().isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            const Divider(height: 1),
-                            const SizedBox(height: 12),
-                            // Additional stats
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: _getAdditionalStats(),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(Icons.calendar_today,
+                                size: 14, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                _formatTimestamp(),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
                             ),
                           ],
-                        ],
-                      ),
-                    ),
-
-                    // Exercise intensity visualization
-                    if (_shouldShowIntensityBar()) _buildIntensityBar(),
-
-                    // Footer branding
-                    const SizedBox(height: 16),
-                    const Center(
-                      child: Text(
-                        'tracked with PockEat',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                          fontStyle: FontStyle.italic,
                         ),
-                      ),
+                        const SizedBox(height: 16),
+
+                        // Exercise stats
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.grey[200]!),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.02),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              // Main stats row
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: _buildMainStats(),
+                                ),
+                              ),
+                              if (_getAdditionalStats().isNotEmpty) ...[
+                                const SizedBox(height: 12),
+                                const Divider(height: 1),
+                                const SizedBox(height: 12),
+                                // Additional stats
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 4.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: _getAdditionalStats(),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+
+                        // Exercise intensity visualization
+                        if (_shouldShowIntensityBar()) _buildIntensityBar(),
+
+                        // Footer branding
+                        const SizedBox(height: 16),
+                        const Center(
+                          child: Text(
+                            'tracked with PockEat',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
