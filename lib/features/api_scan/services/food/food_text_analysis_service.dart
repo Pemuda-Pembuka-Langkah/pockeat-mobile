@@ -2,6 +2,7 @@
 //coverage: ignore-file
 
 // Project imports:
+import 'package:flutter/foundation.dart';
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service.dart';
 import 'package:pockeat/features/api_scan/services/base/api_service_interface.dart';
@@ -52,7 +53,7 @@ class FoodTextAnalysisService {
         },
       );
 
-      //print('Response data: $responseData');
+      debugPrint('Response data: $responseData');
 
       final foodResult = FoodAnalysisResult.fromJson(responseData);
 

@@ -31,7 +31,7 @@ class RecommendationsSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: primaryYellow.withOpacity(0.15),
+              color: Colors.grey.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(

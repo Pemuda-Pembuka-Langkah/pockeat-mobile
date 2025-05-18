@@ -102,14 +102,14 @@ void main() {
       final containerFinder = find.descendant(
         of: find.byType(TextBottomActionBar),
         matching: find.byType(Container).first,
-      );
-
-      // Verify container exists
+      ); // Verify container exists
       expect(containerFinder, findsOneWidget);
 
       final container = tester.widget<Container>(containerFinder);
       expect(container.padding, equals(const EdgeInsets.all(16)));
-      expect(container.color, equals(Colors.white));
+      // Check the decoration's color instead of direct container color
+      final BoxDecoration decoration = container.decoration as BoxDecoration;
+      expect(decoration.color, equals(Colors.white));
 
       // Verify correct analysis button exists
       expect(find.text('Correct Analysis'), findsOneWidget);
@@ -118,16 +118,15 @@ void main() {
       // Verify add to log button exists
       expect(find.byKey(const Key('add_to_log_button')), findsOneWidget);
       expect(find.text('Add to Log'), findsOneWidget);
-      expect(find.byIcon(CupertinoIcons.plus), findsOneWidget);
-
-      // Verify correct analysis button has InkWell with borderRadius
+      expect(find.byIcon(CupertinoIcons.plus),
+          findsOneWidget); // Verify correct analysis button has InkWell with borderRadius
       final inkWellFinder = find.ancestor(
         of: find.text('Correct Analysis'),
         matching: find.byType(InkWell),
       );
       expect(inkWellFinder, findsOneWidget);
       final inkWell = tester.widget<InkWell>(inkWellFinder);
-      expect(inkWell.borderRadius, equals(BorderRadius.circular(8)));
+      expect(inkWell.borderRadius, equals(BorderRadius.circular(12)));
     });
 
     testWidgets('correction button opens dialog when tapped',
@@ -378,19 +377,13 @@ void main() {
       // Verify service was not called
       expect(serviceWasCalled, isFalse);
     });
-
     testWidgets('shows SnackBar messages during the save process',
         (WidgetTester tester) async {
       // Replace Future.delayed with a cancelable timer we can control
-      final successMessage = 'Food analysis saved successfully';
       final completer = Completer<String>();
 
       when(() => mockFoodTextInputService.saveFoodAnalysis(any()))
           .thenAnswer((_) => completer.future);
-
-      // Override the addPostFrameCallback to prevent scheduling timers we can't track
-      bool navigateToAnalytics = false;
-      Function(BuildContext)? capturedContextCallback;
 
       // Create a key we can use to find the widget later
       final testScaffoldKey = GlobalKey<ScaffoldState>();
@@ -627,15 +620,11 @@ void main() {
       await tester.pumpWidget(Container());
       await tester.pump(const Duration(milliseconds: 1000));
     });
-
     testWidgets('shows error message when saving fails',
         (WidgetTester tester) async {
       // Setup mock to throw exception
       when(() => mockFoodTextInputService.saveFoodAnalysis(any()))
           .thenThrow(Exception('Failed to save food analysis'));
-
-      // Build a widget with dialog visibility capture
-      bool dialogWasShown = false;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -661,7 +650,7 @@ void main() {
             }
             return null;
           },
-          // Intercept dialog navigation to detect error dialog
+          // Add navigator observer
           navigatorObservers: [
             NavigatorObserver(),
           ],

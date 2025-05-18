@@ -52,8 +52,8 @@ class _WorkoutFormWidgetState extends State<WorkoutFormWidget> {
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
-            blurRadius: 5,
-            offset: Offset(0, 2),
+            blurRadius: 10,
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -105,11 +105,13 @@ class _WorkoutFormWidgetState extends State<WorkoutFormWidget> {
               onPressed: widget.isLoading ? null : _validateAndSubmit,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF9B6BFF),
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 disabledBackgroundColor: Colors.grey,
+                elevation: 0,
               ),
               child: widget.isLoading
                   ? const SizedBox(

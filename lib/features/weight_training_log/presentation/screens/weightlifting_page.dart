@@ -27,8 +27,10 @@ class WeightliftingPage extends StatefulWidget {
 }
 
 class _WeightliftingPageState extends State<WeightliftingPage> {
+  // Theme colors - matching homepage style
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryGreen = const Color(0xFF4ECDC4);
+  final Color primaryPink = const Color(0xFFFF6B6B);
 
   // Repository instance
   late final WeightLiftingRepository _exerciseRepository;
@@ -267,7 +269,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('weightliftingPage'),
-      backgroundColor: primaryYellow,
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(),
       body: _buildBody(),
       bottomNavigationBar:
@@ -280,13 +282,17 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   AppBar _buildAppBar() {
     return AppBar(
       key: const Key('appBar'),
-      backgroundColor: primaryYellow,
+      backgroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context)),
       title: const Text('Weightlifting',
-          style: TextStyle(fontWeight: FontWeight.w600)),
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          )),
       actions: [
         Opacity(
           opacity: 0.0,
@@ -394,7 +400,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     );
   }
 
-  // Updated to use the saveWorkout method
+  // Updated to use the consistent styling
   Widget _buildBottomBar() => BottomBar(
         key: const Key('bottomBar'),
         totalVolume: calculateTotalVolume(exercises),

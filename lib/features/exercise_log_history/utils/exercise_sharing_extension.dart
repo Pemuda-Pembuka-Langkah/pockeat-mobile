@@ -47,7 +47,7 @@ extension ExerciseSharing on BuildContext {
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
                 Text(
-                  'Preparing to share...',
+                  'Preparing exercise summary to share...',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -61,7 +61,7 @@ extension ExerciseSharing on BuildContext {
       );
 
       // Set a timeout to prevent getting stuck loading
-      Future.delayed(const Duration(seconds: 10)).then((_) {
+      Future.delayed(const Duration(seconds: 15)).then((_) {
         if (isLoadingDialogShowing && Navigator.of(this).canPop()) {
           Navigator.of(this).pop();
           isLoadingDialogShowing = false;
@@ -83,14 +83,11 @@ extension ExerciseSharing on BuildContext {
       final overlayState = Overlay.of(this);
       final entry = OverlayEntry(
         builder: (context) => Positioned(
-          left: 20, // Place slightly off-screen but still rendered
-          top: 20,
-          child: Opacity(
-            opacity: 0.05, // Almost invisible, but still rendered
-            child: Material(
-              color: Colors.transparent,
-              child: summaryCard,
-            ),
+          left: -2000, // Place offscreen but still rendered
+          top: 100,
+          child: Material(
+            color: Colors.transparent,
+            child: summaryCard,
           ),
         ),
       );
@@ -122,8 +119,9 @@ extension ExerciseSharing on BuildContext {
           return;
         }
 
-        // Capture the image
-        final image = await boundary.toImage(pixelRatio: 2.0);
+        // Ensure proper rendering for Instagram Stories
+        await Future.delayed(const Duration(milliseconds: 100));
+        final image = await boundary.toImage(pixelRatio: 4.0);
         final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         final imageBytes = byteData?.buffer.asUint8List();
 
@@ -145,13 +143,14 @@ extension ExerciseSharing on BuildContext {
           return;
         }
 
-        // Save the image to a temporary file
+        // Save the image to a temporary file with proper dimensions for Instagram Stories
         final imageFile = await _saveImageToTempFile(imageBytes);
 
-        // Share the image
+        // Share the image with improved text
+        final exerciseType = _getExerciseTypeText(activityType, exercise);
         await Share.shareXFiles(
           [XFile(imageFile.path)],
-          text: 'Check out my exercise!',
+          text: 'Check out my $exerciseType workout with PockEat!',
           subject: 'PockEat - Exercise Summary',
         );
       } catch (e) {
@@ -176,6 +175,31 @@ extension ExerciseSharing on BuildContext {
       ScaffoldMessenger.of(this).showSnackBar(
         SnackBar(content: Text('Error sharing exercise: ${e.toString()}')),
       );
+    }
+  }
+
+  // Helper to get exercise type text for sharing message
+  String _getExerciseTypeText(String activityType, dynamic exercise) {
+    try {
+      switch (activityType) {
+        case 'cardio':
+          if (exercise.runtimeType.toString().contains('Running')) {
+            return 'running';
+          } else if (exercise.runtimeType.toString().contains('Cycling')) {
+            return 'cycling';
+          } else if (exercise.runtimeType.toString().contains('Swimming')) {
+            return 'swimming';
+          }
+          return 'cardio';
+        case 'weightlifting':
+          return 'weight training';
+        case 'smart_exercise':
+          return 'workout';
+        default:
+          return 'exercise';
+      }
+    } catch (_) {
+      return 'exercise';
     }
   }
 }

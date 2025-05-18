@@ -31,30 +31,42 @@ class ExerciseOptionCard extends StatelessWidget {
               Navigator.pushNamed(context, route);
             }
           },
+          splashColor: color.withOpacity(0.1),
+          highlightColor: color.withOpacity(0.05),
           borderRadius: BorderRadius.circular(16),
           child: Ink(
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: color.withOpacity(0.15), width: 1.5),
               boxShadow: [
                 BoxShadow(
-                  color: color.withOpacity(0.2),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               child: Row(
                 children: [
                   // Icon Container
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(12),
+                      color: color.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                          color: Colors.white.withOpacity(0.2), width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Icon(
                       icon,
@@ -62,7 +74,7 @@ class ExerciseOptionCard extends StatelessWidget {
                       size: 24,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 18),
                   // Text Content
                   Expanded(
                     child: Column(
@@ -72,7 +84,7 @@ class ExerciseOptionCard extends StatelessWidget {
                         Text(
                           title,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 17,
                             fontWeight: FontWeight.w600,
                             color: Colors.black87,
                           ),
@@ -84,7 +96,9 @@ class ExerciseOptionCard extends StatelessWidget {
                           subtitle,
                           style: const TextStyle(
                             fontSize: 14,
+                            fontWeight: FontWeight.w400,
                             color: Colors.black54,
+                            height: 1.3,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
