@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 
@@ -939,6 +940,16 @@ class _ProfilePageState extends State<ProfilePage> {
               }
             },
           ),
+          _buildDivider(),
+          _buildActionTile(
+            title: 'Edit Health Information',
+            subtitle: 'Edit your health information',
+            icon: Icons.monitor_weight_outlined,
+            onTap: () {
+              // Navigate to height-weight page
+              Navigator.of(context).pushNamed('/height-weight');
+            },
+          ),
           if (!isGoogleLogin) ...[
             _buildDivider(),
             _buildActionTile(
@@ -976,32 +987,68 @@ class _ProfilePageState extends State<ProfilePage> {
             subtitle: 'Help us improve the app',
             icon: Icons.bug_report_outlined,
             onTap: () async {
-              // Ensure user data is set correctly before showing bug reporting UI
+              // Get current user data for the email body
+              String emailBody = '';
               if (_currentUser != null) {
-                // Set current user data for context in the bug report
-                await _bugReportService.setUserData(_currentUser!);
+                emailBody = 'User ID: ${_currentUser?.uid}\n';
+                emailBody += 'Email: ${_currentUser?.email}\n';
+                emailBody += 'Device Info: ${await _getDeviceInfo()}\n\n';
+                emailBody += 'Please describe the issue below:\n';
+                emailBody += '--------------------------------\n';
+              }
 
-                // Show the bug reporting UI
-                final result = await _bugReportService.show();
-
-                if (!result && mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Failed to open bug reporting'),
-                      behavior: SnackBarBehavior.floating,
-                      backgroundColor: Colors.red,
-                    ),
+              // Email address and subject for bug report
+              const String emailAddress = 'pockeat.service@gmail.com';
+              const String subject = 'Bug Report - Pockeat App';
+              
+              try {
+                // Create a properly structured mailto Uri with query parameters
+                final Uri emailUri = Uri(
+                  scheme: 'mailto',
+                  path: emailAddress,
+                  query: 'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(emailBody)}',
+                );
+                
+                if (await canLaunchUrl(emailUri)) {
+                  await launchUrl(emailUri, mode: LaunchMode.platformDefault);
+                } else {
+                  // Try alternate approach with just the email address
+                  final Uri simpleUri = Uri(
+                    scheme: 'mailto',
+                    path: emailAddress,
                   );
+                  
+                  if (await canLaunchUrl(simpleUri)) {
+                    await launchUrl(simpleUri, mode: LaunchMode.platformDefault);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Email app opened. Please add "Bug Report - Pockeat App" as the subject.'),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } else {
+                    // If both approaches fail, show manual instructions
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Could not open email app. Please manually send an email to pockeat.service@gmail.com'),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
                 }
-              } else {
-                // Handle case when user data is not available
+              } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content:
-                          Text('User data not available for bug reporting'),
+                    SnackBar(
+                      content: Text('Error: ${e.toString()}'),
                       behavior: SnackBarBehavior.floating,
-                      backgroundColor: Colors.orange,
+                      backgroundColor: Colors.red,
                     ),
                   );
                 }
@@ -1097,20 +1144,35 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Helper untuk mendapatkan inisial dari nama pengguna
   String _getInitials() {
-    final name = _currentUser?.displayName;
-    if (name == null || name.isEmpty) {
-      return 'P'; // Default for Pockeat User
+    final displayName = _currentUser?.displayName;
+    if (displayName == null || displayName.isEmpty) {
+      return 'P'; // Default untuk Pockeat
     }
 
-    final nameParts = name.trim().split(' ');
-    if (nameParts.length >= 2) {
-      // Get initials from first and last name
-      return '${nameParts[0][0]}${nameParts[1][0]}';
-    } else if (nameParts.isNotEmpty) {
-      // If only one word, use the first letter
-      return nameParts[0][0];
+    final nameParts = displayName.trim().split(' ');
+    if (nameParts.length > 1) {
+      return '${nameParts[0][0]}${nameParts[1][0]}'; // Inisial dari 2 kata pertama
     } else {
-      return 'P';
+      return nameParts[0][0]; // Inisial dari kata pertama saja
+    }
+  }
+
+  /// Helper to encode query parameters for email URI
+  String encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+  }
+
+  /// Helper to get basic device information for bug reports
+  Future<String> _getDeviceInfo() async {
+    try {
+      // Get platform information from Theme
+      final platform = Theme.of(context).platform;
+      return 'Platform: ${platform.toString().split('.').last}\n';
+    } catch (e) {
+      return 'Platform information not available';
     }
   }
 }
