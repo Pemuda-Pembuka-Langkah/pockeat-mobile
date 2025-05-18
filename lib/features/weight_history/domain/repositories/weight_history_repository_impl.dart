@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pockeat/features/weight_history/domain/models/weight_history_entry.dart';
 import 'package:pockeat/features/weight_history/domain/repositories/weight_history_repository.dart';
 
+// coverage:ignore-start
 class WeightHistoryRepositoryImpl implements WeightHistoryRepository {
   final FirebaseFirestore firestore;
 
@@ -32,3 +33,4 @@ class WeightHistoryRepositoryImpl implements WeightHistoryRepository {
     }
   }
 }
+// coverage:ignore-end

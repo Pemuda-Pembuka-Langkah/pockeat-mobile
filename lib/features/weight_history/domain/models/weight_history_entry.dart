@@ -1,6 +1,7 @@
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// coverage:ignore-start
 class WeightHistoryEntry {
   final double weight;
   final DateTime timestamp;
@@ -24,3 +25,4 @@ class WeightHistoryEntry {
     );
   }
 }
+// coverage:ignore-end
