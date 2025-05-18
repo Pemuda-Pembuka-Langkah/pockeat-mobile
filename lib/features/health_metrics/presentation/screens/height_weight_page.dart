@@ -112,7 +112,8 @@ class _HeightWeightPageState extends State<HeightWeightPage>
                   ),
                 ],
               ),
-              child: Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+              child:
+                  const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
             ),
             onPressed: () async {
               Navigator.of(context).pop();

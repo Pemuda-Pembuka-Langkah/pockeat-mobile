@@ -35,9 +35,11 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
   // Key for the rollover calories setting
   static const String _rolloverCaloriesKey = 'rollover_calories_enabled';
 
+//coverage:ignore-start
   UserPreferencesRepositoryImpl({
     FirebaseFirestore? firestore,
   }) : _firestore = firestore ?? FirebaseFirestore.instance;
+//coverage:ignore-end
 
   @override
   Future<bool> isExerciseCalorieCompensationEnabled(String userId) async {

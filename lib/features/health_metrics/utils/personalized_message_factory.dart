@@ -1,34 +1,34 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 /// A class that provides personalized messages based on user goals
 class PersonalizedMessageFactory {
   /// Creates a personalized message data based on user goals
-  /// 
+  ///
   /// Returns a [PersonalizedMessageData] containing title, message and icon
   static PersonalizedMessageData createFromGoals(List<String> goals) {
     String message;
     IconData iconData;
     String title;
-    
+
     if (goals.any((goal) => goal.toLowerCase().contains('lose'))) {
       title = "Weight Loss Journey";
       message = "You're on your way to a healthier, lighter you! Your plan is designed for sustainable results.";
       iconData = Icons.monitor_weight_outlined;
     } else if (goals.any((goal) => goal.toLowerCase().contains('gain'))) {
       title = "Building Strength";
-      message = "Get ready to build strength and energy! Your nutrition plan supports your muscle growth goals.";
+      message =
+          "Get ready to build strength and energy! Your nutrition plan supports your muscle growth goals.";
       iconData = Icons.fitness_center;
     } else {
       title = "Maintaining Balance";
-      message = "Let's maintain your awesome progress! Your balanced nutrition plan will help you stay on track.";
+      message =
+          "Let's maintain your awesome progress! Your balanced nutrition plan will help you stay on track.";
       iconData = Icons.balance;
     }
-    
+
     return PersonalizedMessageData(
-      title: title, 
-      message: message, 
-      iconData: iconData
-    );
+        title: title, message: message, iconData: iconData);
   }
 }
 
@@ -37,7 +37,7 @@ class PersonalizedMessageData {
   final String title;
   final String message;
   final IconData iconData;
-  
+
   const PersonalizedMessageData({
     required this.title,
     required this.message,

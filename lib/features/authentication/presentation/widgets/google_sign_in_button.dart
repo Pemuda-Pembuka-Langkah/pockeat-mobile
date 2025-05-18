@@ -9,6 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 class GoogleSignInButton extends StatelessWidget {
   final bool isUnderTest;
@@ -46,6 +47,13 @@ class GoogleSignInButton extends StatelessWidget {
               formCubit.setUserId(uid);
               await formCubit.submit();
             }
+
+            // If we have a successful login, synchronize preferences
+            if (result.user != null) {
+              final userPreferencesService = GetIt.I<UserPreferencesService>();
+              await userPreferencesService.synchronizePreferencesAfterLogin();
+            }
+
             // Log successful authentication
             if (context.mounted) {
               final analyticsService = GetIt.I<AnalyticsService>();

@@ -1,6 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
+
+// Project imports:
 import 'package:pockeat/features/health_metrics/presentation/screens/free_trials_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/widgets/pricing_option.dart';
 import 'package:pockeat/features/health_metrics/presentation/widgets/timeline_item.dart';

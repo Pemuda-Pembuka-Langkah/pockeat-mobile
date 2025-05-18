@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
@@ -13,10 +14,17 @@ import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import 'google_sign_in_button_test.mocks.dart';
 
-@GenerateMocks([GoogleSignInService, UserCredential, AnalyticsService, User, HealthMetricsFormCubit])
-
+@GenerateMocks([
+  GoogleSignInService,
+  UserCredential,
+  AnalyticsService,
+  User,
+  HealthMetricsFormCubit,
+  UserPreferencesService
+])
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
 void main() {
@@ -26,6 +34,7 @@ void main() {
   late MockAnalyticsService mockAnalyticsService;
   late MockUser mockUser;
   late MockHealthMetricsFormCubit mockHealthMetricsFormCubit;
+  late MockUserPreferencesService mockUserPreferencesService;
 
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +47,7 @@ void main() {
     mockAnalyticsService = MockAnalyticsService();
     mockUser = MockUser();
     mockHealthMetricsFormCubit = MockHealthMetricsFormCubit();
+    mockUserPreferencesService = MockUserPreferencesService();
 
     // Set up mock user
     when(mockUser.uid).thenReturn('test-uid');
@@ -47,10 +57,16 @@ void main() {
     when(mockHealthMetricsFormCubit.setUserId(any)).thenReturn(null);
     when(mockHealthMetricsFormCubit.submit()).thenAnswer((_) async {});
 
+    // Set up UserPreferencesService
+    when(mockUserPreferencesService.synchronizePreferencesAfterLogin())
+        .thenAnswer((_) async {});
+
     // Reset GetIt before registering to ensure clean environment
     GetIt.I.reset();
     GetIt.I.registerSingleton<GoogleSignInService>(mockGoogleSignInService);
     GetIt.I.registerSingleton<AnalyticsService>(mockAnalyticsService);
+    GetIt.I
+        .registerSingleton<UserPreferencesService>(mockUserPreferencesService);
   });
 
   testWidgets('renders correctly with Google text',
@@ -116,13 +132,18 @@ void main() {
 
     // Verify the methods were called
     verify(mockGoogleSignInService.signInWithGoogle()).called(1);
-    
+
     // Verify analytics events were logged
     verify(mockAnalyticsService.logEvent(
-        name: 'google_sign_in_attempt', parameters: null)).called(1);
+            name: 'google_sign_in_attempt', parameters: null))
+        .called(1);
     verify(mockAnalyticsService.logEvent(
         name: 'google_sign_in_success',
         parameters: {'uid': 'test-uid'})).called(1);
+
+    // Verify UserPreferencesService method was called
+    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin())
+        .called(1);
   });
 
   testWidgets('handles sign in failure gracefully',
@@ -161,10 +182,11 @@ void main() {
 
     // Verify analytics attempt event was logged
     verify(mockAnalyticsService.logEvent(
-        name: 'google_sign_in_attempt', parameters: null)).called(1);
-    
+            name: 'google_sign_in_attempt', parameters: null))
+        .called(1);
+
     // No longer checking for SnackBar since it's been removed from implementation
-    
+
     // Verify success event was not logged
     verifyNever(mockAnalyticsService.logEvent(
         name: 'google_sign_in_success', parameters: anyNamed('parameters')));
@@ -210,19 +232,25 @@ void main() {
 
     // Verify the method was called
     verify(mockGoogleSignInService.signInWithGoogle()).called(1);
-    
+
     // Verify analytics events were logged
     verify(mockAnalyticsService.logEvent(
-        name: 'google_sign_in_attempt', parameters: null)).called(1);
+            name: 'google_sign_in_attempt', parameters: null))
+        .called(1);
     verify(mockAnalyticsService.logEvent(
         name: 'google_sign_in_success',
         parameters: {'uid': 'test-uid'})).called(1);
+
+    // Verify UserPreferencesService method was called
+    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin())
+        .called(1);
 
     // Verify we're on the Home Page after navigation
     expect(find.text('Home Page'), findsOneWidget);
   });
 
-  testWidgets('renders register button with correct text when isRegister is true',
+  testWidgets(
+      'renders register button with correct text when isRegister is true',
       (WidgetTester tester) async {
     // Build our widget dengan isUnderTest = true dan isRegister = true
     await tester.pumpWidget(
@@ -242,8 +270,7 @@ void main() {
     expect(find.text('Register with Google'), findsOneWidget);
     expect(find.text('G'), findsOneWidget);
   });
-
-  testWidgets('logs analytics events for registration without form submission', 
+  testWidgets('logs analytics events for registration with form submission',
       (WidgetTester tester) async {
     // Set up mock to return UserCredential
     when(mockGoogleSignInService.signInWithGoogle())
@@ -252,15 +279,23 @@ void main() {
             name: anyNamed('name'), parameters: anyNamed('parameters')))
         .thenAnswer((_) async {});
 
-    // Build our widget with isRegister = true
+    // Set up mockHealthMetricsFormCubit to handle stream for BlocProvider
+    final mockStream = Stream<HealthMetricsFormState>.empty();
+    when(mockHealthMetricsFormCubit.stream).thenAnswer((_) => mockStream);
+    when(mockHealthMetricsFormCubit.state).thenReturn(HealthMetricsFormState());
+
+    // Build our widget with isRegister = true and provide BlocProvider for FormCubit
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: GoogleSignInButton(
-              isUnderTest: true,
-              isRegister: true,
-              googleAuthService: mockGoogleSignInService,
+        home: BlocProvider<HealthMetricsFormCubit>.value(
+          value: mockHealthMetricsFormCubit,
+          child: Scaffold(
+            body: Center(
+              child: GoogleSignInButton(
+                isUnderTest: true,
+                isRegister: true,
+                googleAuthService: mockGoogleSignInService,
+              ),
             ),
           ),
         ),
@@ -280,9 +315,18 @@ void main() {
 
     // Verify methods were called
     verify(mockGoogleSignInService.signInWithGoogle()).called(1);
-    
+
     // Verify analytics event was logged for registration attempt
     verify(mockAnalyticsService.logEvent(
-        name: 'google_sign_up_attempt', parameters: null)).called(1);
+            name: 'google_sign_up_attempt', parameters: null))
+        .called(1);
+
+    // Verify FormCubit methods were called
+    verify(mockHealthMetricsFormCubit.setUserId('test-uid')).called(1);
+    verify(mockHealthMetricsFormCubit.submit()).called(1);
+
+    // Verify UserPreferencesService method was called
+    verify(mockUserPreferencesService.synchronizePreferencesAfterLogin())
+        .called(1);
   });
 }

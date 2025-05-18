@@ -8,8 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
-import 'form_cubit.dart';
 import '../widgets/onboarding_progress_indicator.dart';
+import 'form_cubit.dart';
 
 class SpeedSelectionPage extends StatefulWidget {
   const SpeedSelectionPage({super.key});
@@ -18,6 +18,8 @@ class SpeedSelectionPage extends StatefulWidget {
   State<SpeedSelectionPage> createState() => _SpeedSelectionPageState();
 }
 
+class _SpeedSelectionPageState extends State<SpeedSelectionPage>
+    with SingleTickerProviderStateMixin {
 class _SpeedSelectionPageState extends State<SpeedSelectionPage>
     with SingleTickerProviderStateMixin {
   double _weeklyGoal = 0.5; // kg/week
@@ -29,6 +31,7 @@ class _SpeedSelectionPageState extends State<SpeedSelectionPage>
   final Color bgColor = const Color(0xFFF9F9F9);
   final Color textDarkColor = Colors.black87;
   final Color textLightColor = Colors.black54;
+
 
   // Animation controller
   late AnimationController _animationController;

@@ -2,6 +2,8 @@
 
 // Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:intl/intl.dart';
 
 // Project imports:
@@ -15,7 +17,8 @@ class FreeTrialPage extends StatefulWidget {
   State<FreeTrialPage> createState() => _FreeTrialPageState();
 }
 
-class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProviderStateMixin {
+class _FreeTrialPageState extends State<FreeTrialPage>
+    with SingleTickerProviderStateMixin {
   // Colors based on app design
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryBlue = const Color(0xFF2A7FFF);
@@ -24,23 +27,24 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
   final Color orangeColor = const Color(0xFFFF9F40);
   final Color purpleColor = const Color(0xFF5E60CE);
   final Color redColor = const Color(0xFFFF6B6B);
-  
+
   // Animation controller
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   // Calculate trial and billing dates
   DateTime get todayDate => DateTime.now();
   DateTime get reminderDate => todayDate.add(const Duration(days: 5));
   DateTime get billingDate => todayDate.add(const Duration(days: 7));
-  
+
   // Pricing constants
   final int monthlyPrice = 15000;
-  final int yearlyPrice = (15000 * 12 * 0.67).toInt(); // 33% discount for yearly
-  
+  final int yearlyPrice =
+      (15000 * 12 * 0.67).toInt(); // 33% discount for yearly
+
   // Track selected pricing option
   bool _isMonthlySelected = true;
-  
+
   @override
   void initState() {
     super.initState();
@@ -48,14 +52,14 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeOut,
       ),
     );
-    
+
     _animationController.forward();
   }
 
@@ -64,7 +68,7 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
     _animationController.dispose();
     super.dispose();
   }
-  
+
   // Format for displaying dates
   String formatDate(DateTime date) {
     return DateFormat('dd MMM yyyy').format(date);
@@ -102,7 +106,7 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                 ),
               ),
             ),
-            
+
             // Content
             FadeTransition(
               opacity: _fadeAnimation,
@@ -129,14 +133,15 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                                 ),
                               ],
                             ),
-                            child: Icon(Icons.arrow_back, color: textDarkColor, size: 20),
+                            child: Icon(Icons.arrow_back,
+                                color: textDarkColor, size: 20),
                           ),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 30),
-                      
+
                       // Trial Header
                       Text(
                         'Start your 7-day FREE\ntrial to continue.',
@@ -147,9 +152,9 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                           color: textDarkColor,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 20),
-                      
+
                       // Subheader
                       Text(
                         'Experience all features without limits.',
@@ -160,9 +165,9 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                           height: 1.4,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 50),
-                      
+
                       // Timeline items with cards
                       Container(
                         padding: const EdgeInsets.all(24),
@@ -181,22 +186,23 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                           children: [
                             _buildTimelineItem(
                               day: 'Today',
-                              message: 'Access all app features like AI, pet companion, and more',
+                              message:
+                                  'Access all app features like AI, pet companion, and more',
                               icon: Icons.check_circle,
                               color: orangeColor,
                               isFirst: true,
                             ),
-                            
                             _buildTimelineItem(
                               day: 'In 5 Days - Reminder',
-                              message: 'You\'ll receive a friendly notification',
+                              message:
+                                  'You\'ll receive a friendly notification',
                               icon: Icons.notifications_active,
                               color: purpleColor,
                             ),
-                            
                             _buildTimelineItem(
                               day: 'In 7 Days - Billing Starts',
-                              message: 'You\'ll be charged on ${formatDate(billingDate)}',
+                              message:
+                                  'You\'ll be charged on ${formatDate(billingDate)}',
                               icon: Icons.calendar_today,
                               color: redColor,
                               isLast: true,
@@ -204,9 +210,9 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(height: 40),
-                      
+
                       // Pricing options
                       Text(
                         'Choose Your Plan',
@@ -217,9 +223,9 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                           color: textDarkColor,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       Row(
                         children: [
                           Expanded(
@@ -254,12 +260,13 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // No Payment text
                       Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 16),
                         decoration: BoxDecoration(
                           color: Colors.green.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -284,9 +291,9 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(height: 30),
-                      
+
                       // Start Trial Button with glow effect
                       Container(
                         decoration: BoxDecoration(
@@ -311,7 +318,8 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                           ),
                           onPressed: () {
                             // Start free trial logic here
-                            Navigator.pushReplacementNamed(context, '/register');
+                            Navigator.pushReplacementNamed(
+                                context, '/register');
                           },
                           child: const Text(
                             'Start My 7-Day Free Trial',
@@ -322,9 +330,9 @@ class _FreeTrialPageState extends State<FreeTrialPage> with SingleTickerProvider
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 20),
-                      
+
                       // Terms text
                       Center(
                         child: Padding(

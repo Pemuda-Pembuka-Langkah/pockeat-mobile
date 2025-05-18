@@ -57,12 +57,12 @@ class SwimmingFormState extends State<SwimmingForm> {
       }
 
       widget.onCalculate(
-              selectedLaps,
-              customPoolLength,
-              selectedStroke,
-              duration,
-            );
-            
+        selectedLaps,
+        customPoolLength,
+        selectedStroke,
+        duration,
+      );
+
       return CalorieCalculator.calculateSwimmingCalories(
         laps: selectedLaps,
         poolLength: customPoolLength,

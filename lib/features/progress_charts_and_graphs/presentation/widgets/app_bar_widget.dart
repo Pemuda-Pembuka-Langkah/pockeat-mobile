@@ -16,7 +16,7 @@ class AppBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverAppBar(
+    return const SliverAppBar(
       pinned: true,
       floating: false,
       automaticallyImplyLeading: false,
@@ -25,7 +25,7 @@ class AppBarWidget extends StatelessWidget {
       elevation: 0,
       centerTitle: true,
       toolbarHeight: 60,
-      title: const Text(
+      title: Text(
         'Progress',
         style: TextStyle(
           fontWeight: FontWeight.bold,

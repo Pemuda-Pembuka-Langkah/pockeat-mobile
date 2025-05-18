@@ -1,5 +1,4 @@
 // Flutter imports:
-import 'package:flutter/foundation.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,9 +28,6 @@ class FoodLogDataService {
 
       final endDate = startDate.add(const Duration(days: 7));
 
-      debugPrint(
-          'Fetching data for week starting ${startDate.toString()} to ${endDate.toString()}');
-
       // Get user ID from Firebase Auth
       final userId = await _getUserId();
 
@@ -41,41 +37,25 @@ class FoodLogDataService {
       // Filter logs for the requested week
       final weekLogs = _filterLogsForSpecificWeek(foodLogs, startDate, endDate);
 
-      debugPrint(
-          'Found ${weekLogs.length} food logs for week ($weeksAgo weeks ago)');
-
-      // Debugdebugprint each food log
-
-      for (var log in weekLogs) {
-        final day = _getDayName(log.timestamp.add(const Duration(hours: 7)));
-        debugPrint('Food log on $day: ${log.title}, Calories: ${log.calories}, '
-            'Protein: ${log.protein}, Carbs: ${log.carbs}, Fat: ${log.fat}');
-      }
-
       // Group entries by day and calculate macronutrient totals
       return _processLogsToCalorieData(weekLogs, startDate);
     } catch (e) {
-      debugPrint('Error fetching week calorie data ($weeksAgo weeks ago): $e');
-
       return _getDefaultWeekData();
     }
-  }
-
-  String _getDayName(DateTime date) {
-    final dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return dayNames[date.weekday % 7];
   }
 
   // Filter logs for a specific week
   List<FoodLogHistoryItem> _filterLogsForSpecificWeek(
       List<FoodLogHistoryItem> logs, DateTime startDate, DateTime endDate) {
     return logs.where((log) {
-      return log.timestamp.isAfter(startDate) &&
-          log.timestamp.isBefore(endDate);
+      // Adjust timestamp by subtracting 7 hours to match local time zone
+      final adjustedTimestamp =
+          log.timestamp.subtract(const Duration(hours: 7));
+
+      return adjustedTimestamp.isAfter(startDate) &&
+          adjustedTimestamp.isBefore(endDate);
     }).toList();
   }
-
-  // Filter logs for the current week (legacy method kept for compatibility)
 
   // Get calorie data for current month (grouped by weeks)
   Future<List<CalorieData>> getMonthCalorieData() async {
@@ -91,12 +71,9 @@ class FoodLogDataService {
       // Filter logs for current month
       final monthLogs = _filterLogsForCurrentMonth(foodLogs, firstDayOfMonth);
 
-      debugPrint('Found ${monthLogs.length} food logs for current month');
-
       // Process logs into weekly data
       return _processLogsToWeeklyCalorieData(monthLogs, firstDayOfMonth);
     } catch (e) {
-      debugPrint('Error fetching month calorie data: $e');
       return _getDefaultMonthData();
     }
   }
@@ -126,8 +103,8 @@ class FoodLogDataService {
 
     // Process each log entry
     for (var log in logs) {
-      // Use timestamp directly without timezone adjustment
-      final logDateTime = log.timestamp;
+      // Adjust for timezone by subtracting 7 hours
+      final logDateTime = log.timestamp.subtract(const Duration(hours: 7));
       final dayOfWeek = dayNames[logDateTime.weekday % 7];
 
       // Extract macronutrient values directly from FoodLogHistoryItem properties
@@ -149,18 +126,6 @@ class FoodLogDataService {
       // Add calories
       dailyCalories[dayOfWeek] = (dailyCalories[dayOfWeek] ?? 0) + calories;
     }
-
-    // Debug print daily macros and calories
-    double weekTotal = 0;
-    for (var dayName in dayNames) {
-      final dayCalories = dailyCalories[dayName] ?? 0;
-      weekTotal += dayCalories;
-      debugPrint('$dayName - Protein: ${dailyMacros[dayName]!['protein']}, '
-          'Carbs: ${dailyMacros[dayName]!['carbs']}, '
-          'Fats: ${dailyMacros[dayName]!['fats']}, '
-          'Calories: $dayCalories');
-    }
-    debugPrint('Total calories for week: $weekTotal');
 
     // Convert to CalorieData list
     List<CalorieData> result = [];
@@ -197,8 +162,8 @@ class FoodLogDataService {
 
     // Process each log entry
     for (var log in logs) {
-      // Use timestamp directly without timezone adjustment
-      final logDateTime = log.timestamp;
+      // Use timestamp with timezone adjustment
+      final logDateTime = log.timestamp.subtract(const Duration(hours: 7));
 
       // Calculate week number (1-4)
       final weekOfMonth = ((logDateTime.day - 1) / 7).floor() + 1;
@@ -222,14 +187,6 @@ class FoodLogDataService {
 
       // Add calories for this week
       weeklyCalories[weekNumber] = (weeklyCalories[weekNumber] ?? 0) + calories;
-    }
-
-    // Debug print weekly macros and calories
-    for (int i = 1; i <= 4; i++) {
-      debugPrint('Week $i - Protein: ${weeklyMacros[i]!['protein']}, '
-          'Carbs: ${weeklyMacros[i]!['carbs']}, '
-          'Fats: ${weeklyMacros[i]!['fats']}, '
-          'Calories: ${weeklyCalories[i]}');
     }
 
     // Convert to CalorieData list
@@ -276,7 +233,6 @@ class FoodLogDataService {
     for (var data in calorieData) {
       total += data.calories;
     }
-    debugPrint('Total calories from CalorieData: $total');
     return total;
   }
 
@@ -292,8 +248,12 @@ class FoodLogDataService {
         59);
 
     return logs.where((log) {
-      return log.timestamp.isAfter(firstDayOfMonth) &&
-          log.timestamp.isBefore(lastDayOfMonth);
+      // Adjust timestamp by subtracting 7 hours to match local time zone
+      final adjustedTimestamp =
+          log.timestamp.subtract(const Duration(hours: 7));
+
+      return adjustedTimestamp.isAfter(firstDayOfMonth) &&
+          adjustedTimestamp.isBefore(lastDayOfMonth);
     }).toList();
   }
 }

@@ -36,10 +36,10 @@ class CardioInputPageState extends State<CardioInputPage> {
   bool _isSaving = false;
   bool _isLoadingHealthMetrics = true;
   HealthMetricsModel? _healthMetrics;
-
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
+  final Color primaryGreen = const Color(0xFF4ECDC4);
 
   // Repository to store data
   late CardioRepository _repository;
@@ -121,13 +121,21 @@ class CardioInputPageState extends State<CardioInputPage> {
   Widget build(BuildContext context) {
     if (_isLoadingHealthMetrics) {
       return Scaffold(
-        backgroundColor: primaryYellow,
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: primaryYellow,
+          backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black87),
             onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            _getAppBarTitle(),
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         body: const Center(
@@ -135,11 +143,10 @@ class CardioInputPageState extends State<CardioInputPage> {
         ),
       );
     }
-
     return Scaffold(
-      backgroundColor: primaryYellow,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: primaryYellow,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),

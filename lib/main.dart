@@ -13,8 +13,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/calorie_calculation_loading_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/free_trials_page.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -64,20 +62,22 @@ import 'package:pockeat/features/health_metrics/domain/repositories/health_metri
 import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/calorie_calculation_loading_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/desired_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/diet_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/free_trials_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_value_proposition_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/sync_fitness_tracker_option_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/pet_onboard_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/pet_onboard_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/rollover_calories_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/sync_fitness_tracker_option_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/thank_you_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/used_other_apps_page.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
@@ -499,6 +499,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         NavigationObserver(navigationProvider),
       ],
       theme: ThemeData(
+        fontFamily: 'PlusJakartaSans',
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
           brightness: Brightness.light,
@@ -510,6 +511,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           elevation: 0,
           iconTheme: IconThemeData(color: Colors.black),
           titleTextStyle: TextStyle(
+            fontFamily: 'PlusJakartaSans',
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -600,7 +602,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/rollover-calories': (context) => const RolloverCaloriesPage(),
         '/thank-you': (context) => const ThankYouPage(),
         '/used-other-apps': (context) => const UsedOtherAppsPage(),
-        '/sync-fitness-tracker': (context) => const SyncFitnessTrackerOptionPage(),
+        '/sync-fitness-tracker': (context) =>
+            const SyncFitnessTrackerOptionPage(),
         '/pet-onboard': (context) => const PetOnboardPage(),
         '/review': (context) => BlocProvider.value(
               value: context.read<HealthMetricsFormCubit>(),

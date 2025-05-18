@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:intl/intl.dart';
 
 class PricingOption extends StatelessWidget {
@@ -26,7 +29,7 @@ class PricingOption extends StatelessWidget {
     // Format price with thousand separator
     final formatter = NumberFormat('#,###', 'id_ID');
     final formattedPrice = formatter.format(price);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -51,7 +54,7 @@ class PricingOption extends StatelessWidget {
             ),
         ],
       ),
-      child: Container(
+      child: SizedBox(
         // Fixed height to ensure consistent sizing
         height: 120,
         child: Column(
@@ -59,25 +62,26 @@ class PricingOption extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Always reserve space for the POPULAR label
-            Container(
+            SizedBox(
               height: 26, // Fixed height for the label area
               child: isSelected
-                ? Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: primaryGreen,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'POPULAR',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: primaryGreen,
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    ),
-                  )
-                : Container(), // Empty container to reserve space
+                      child: const Text(
+                        'POPULAR',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : Container(), // Empty container to reserve space
             ),
             const SizedBox(height: 4),
             Text(
@@ -111,28 +115,29 @@ class PricingOption extends StatelessWidget {
               ],
             ),
             // Always reserve space for the discount tag
-            Container(
+            SizedBox(
               height: 24, // Fixed height for the discount area
               child: discount != null
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: primaryGreen.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'Save $discount',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: primaryGreen,
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: primaryGreen.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'Save $discount',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: primaryGreen,
+                          ),
                         ),
                       ),
-                    ),
-                  )
-                : Container(), // Empty container to reserve space
+                    )
+                  : Container(), // Empty container to reserve space
             ),
           ],
         ),

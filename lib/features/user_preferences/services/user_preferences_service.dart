@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'package:pockeat/features/user_preferences/domain/repositories/user_preferences_repository.dart';
@@ -24,12 +25,17 @@ class UserPreferencesService {
   /// Check if exercise calorie compensation is enabled
   Future<bool> isExerciseCalorieCompensationEnabled() async {
     final userId = _auth.currentUser?.uid ?? '';
-    if (userId.isEmpty) {
-      return false;
-    }
 
     try {
-      return await _repository.isExerciseCalorieCompensationEnabled(userId);
+      // If user is logged in, use repository to get the setting
+      if (userId.isNotEmpty) {
+        return await _repository.isExerciseCalorieCompensationEnabled(userId);
+      }
+      // If not logged in, check the onboarding preference directly
+      else {
+        final prefs = await SharedPreferences.getInstance();
+        return prefs.getBool('exercise_calorie_compensation_enabled') ?? false;
+      }
     } catch (e) {
       debugPrint('Error checking exercise calorie compensation setting: $e');
       return false;
@@ -39,12 +45,17 @@ class UserPreferencesService {
   /// Set exercise calorie compensation setting
   Future<void> setExerciseCalorieCompensationEnabled(bool enabled) async {
     final userId = _auth.currentUser?.uid ?? '';
-    if (userId.isEmpty) {
-      return;
-    }
 
     try {
-      await _repository.setExerciseCalorieCompensationEnabled(userId, enabled);
+      // Always update local preferences for consistent access
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('exercise_calorie_compensation_enabled', enabled);
+
+      // Only update Firebase if user is logged in
+      if (userId.isNotEmpty) {
+        await _repository.setExerciseCalorieCompensationEnabled(
+            userId, enabled);
+      }
     } catch (e) {
       debugPrint('Error setting exercise calorie compensation setting: $e');
       throw Exception('Failed to update setting: $e');
@@ -54,12 +65,17 @@ class UserPreferencesService {
   /// Check if rollover calories feature is enabled
   Future<bool> isRolloverCaloriesEnabled() async {
     final userId = _auth.currentUser?.uid ?? '';
-    if (userId.isEmpty) {
-      return false;
-    }
 
     try {
-      return await _repository.isRolloverCaloriesEnabled(userId);
+      // If user is logged in, use repository to get the setting
+      if (userId.isNotEmpty) {
+        return await _repository.isRolloverCaloriesEnabled(userId);
+      }
+      // If not logged in, check the onboarding preference directly
+      else {
+        final prefs = await SharedPreferences.getInstance();
+        return prefs.getBool('rollover_calories_enabled') ?? false;
+      }
     } catch (e) {
       debugPrint('Error checking rollover calories setting: $e');
       return false;
@@ -69,17 +85,21 @@ class UserPreferencesService {
   /// Set rollover calories setting
   Future<void> setRolloverCaloriesEnabled(bool enabled) async {
     final userId = _auth.currentUser?.uid ?? '';
-    if (userId.isEmpty) {
-      return;
-    }
 
     try {
-      await _repository.setRolloverCaloriesEnabled(userId, enabled);
+      // Always update local preferences for consistent access
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('rollover_calories_enabled', enabled);
 
-      // If the feature is being enabled, immediately calculate rollover
-      // to ensure data is available in the UI
-      if (enabled) {
-        await getRolloverCalories();
+      // Only update Firebase if user is logged in
+      if (userId.isNotEmpty) {
+        await _repository.setRolloverCaloriesEnabled(userId, enabled);
+
+        // If the feature is being enabled, immediately calculate rollover
+        // to ensure data is available in the UI
+        if (enabled) {
+          await getRolloverCalories();
+        }
       }
     } catch (e) {
       debugPrint('Error setting rollover calories setting: $e');
@@ -106,6 +126,69 @@ class UserPreferencesService {
     } catch (e) {
       debugPrint('Error calculating rollover calories: $e');
       return 0;
+    }
+  }
+
+  /// Check if sync fitness tracker is enabled
+  /// This preference is only stored locally, not in Firebase
+  Future<bool> isSyncFitnessTrackerEnabled() async {
+    try {
+      // Always check the local preference directly
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool('sync_fitness_tracker_enabled') ?? false;
+    } catch (e) {
+      debugPrint('Error checking sync fitness tracker setting: $e');
+      return false;
+    }
+  }
+
+  /// Set sync fitness tracker setting
+  /// This preference is only stored locally, not in Firebase
+  Future<void> setSyncFitnessTrackerEnabled(bool enabled) async {
+    try {
+      // Only update local preferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('sync_fitness_tracker_enabled', enabled);
+      debugPrint('Saved sync fitness tracker setting locally: $enabled');
+    } catch (e) {
+      debugPrint('Error setting sync fitness tracker setting: $e');
+      throw Exception('Failed to update setting: $e');
+    }
+  }
+
+  /// Synchronize user preferences from SharedPreferences to Firebase after login
+  /// Call this method when a user logs in to ensure their preferences are synced
+  Future<void> synchronizePreferencesAfterLogin() async {
+    final userId = _auth.currentUser?.uid;
+
+    // Only proceed if user is logged in
+    if (userId == null || userId.isEmpty) {
+      debugPrint('Cannot synchronize preferences: No user logged in');
+      return;
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Sync exercise calorie compensation preference
+      final exerciseCalorieCompensation =
+          prefs.getBool('exercise_calorie_compensation_enabled');
+      if (exerciseCalorieCompensation != null) {
+        debugPrint(
+            'Syncing exercise calorie compensation: $exerciseCalorieCompensation');
+        await _repository.setExerciseCalorieCompensationEnabled(
+            userId, exerciseCalorieCompensation);
+      } // Sync rollover calories preference
+      final rolloverCalories = prefs.getBool('rollover_calories_enabled');
+      if (rolloverCalories != null) {
+        debugPrint('Syncing rollover calories: $rolloverCalories');
+        await _repository.setRolloverCaloriesEnabled(userId, rolloverCalories);
+      }
+      // No need to sync fitness tracker preference to Firebase - handled locally only
+
+      debugPrint('Successfully synchronized user preferences after login');
+    } catch (e) {
+      debugPrint('Error synchronizing preferences after login: $e');
     }
   }
 }

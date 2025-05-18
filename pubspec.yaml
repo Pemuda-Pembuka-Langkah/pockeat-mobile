@@ -112,6 +112,46 @@ flutter:
     - assets/animations/
     - .env
 
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlusJakartaSans-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-Light.ttf
+          weight: 300
+        - asset: assets/fonts/PlusJakartaSans-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlusJakartaSans-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/PlusJakartaSans-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/PlusJakartaSans-ExtraLightItalic.ttf
+          weight: 200
+          style: italic
+
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -152,3 +192,5 @@ flutter_launcher_icons:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  

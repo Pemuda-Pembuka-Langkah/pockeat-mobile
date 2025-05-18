@@ -11,6 +11,7 @@ import 'package:get_it/get_it.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 /// Login page for existing users
 ///
@@ -77,6 +78,10 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+
+      // Synchronize user preferences from local storage to Firebase
+      final userPreferencesService = GetIt.instance<UserPreferencesService>();
+      await userPreferencesService.synchronizePreferencesAfterLogin();
 
       setState(() {
         _isLoading = false;

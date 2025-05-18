@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/health_metrics/utils/personalized_message_factory.dart';
 
 class PersonalizedMessageWidget extends StatelessWidget {

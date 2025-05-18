@@ -107,11 +107,21 @@ class _SavedMealDetailPageState extends State<SavedMealDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Saved Meal Detail'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Saved Meal Detail',
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete),
+            icon: const Icon(Icons.delete, color: Colors.black87),
             onPressed: _showDeleteConfirmationDialog,
             tooltip: 'Delete meal',
           ),

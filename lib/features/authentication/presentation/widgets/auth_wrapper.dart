@@ -43,7 +43,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
   Future<void> _checkAuth() async {
     if (!mounted) return;
-    
+
     try {
       final user = await _loginService.getCurrentUser();
 
@@ -59,11 +59,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
       } else {
         // Logged in
         if (widget.requireAuth) {
-          final healthMetricsCheckService = GetIt.instance<HealthMetricsCheckService>();
-          final isOnboardingCompleted = await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
-          
+          final healthMetricsCheckService =
+              GetIt.instance<HealthMetricsCheckService>();
+          final isOnboardingCompleted =
+              await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
+
           if (!mounted) return;
-          
+
           if (!isOnboardingCompleted) {
             _redirect('/height-weight', replace: true);
           } else {
@@ -76,7 +78,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
     } catch (e) {
       debugPrint('Error during auth check: $e');
       if (!mounted) return;
-      
+
       if (widget.requireAuth) {
         _redirect(widget.redirectUrlIfNotLoggedIn, replace: true);
       } else {
@@ -85,13 +87,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
     }
   }
 
-  void _redirect(String route, {bool removeUntil = false, bool replace = false}) {
+  void _redirect(String route,
+      {bool removeUntil = false, bool replace = false}) {
     if (!mounted) return;
-    
+
     // Schedule navigation for after the current frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       if (removeUntil) {
         Navigator.of(context).pushNamedAndRemoveUntil(route, (route) => false);
       } else if (replace) {

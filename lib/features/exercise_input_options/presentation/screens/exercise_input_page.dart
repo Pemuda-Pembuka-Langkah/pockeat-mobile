@@ -19,9 +19,9 @@ class ExerciseInputPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: primaryYellow,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: primaryYellow,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
@@ -42,20 +42,20 @@ class ExerciseInputPage extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'What type of exercise\ndid you do?',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
                   height: 1.3,
                   color: Colors.black87,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 36),
 
               // Running Option
               ExerciseOptionCard(
@@ -66,7 +66,7 @@ class ExerciseInputPage extends StatelessWidget {
                 route: '/cardio',
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Weightlifting Option
               ExerciseOptionCard(
@@ -77,7 +77,7 @@ class ExerciseInputPage extends StatelessWidget {
                 route: '/weightlifting-input',
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Smart Workout Log Option
               ExerciseOptionCard(
