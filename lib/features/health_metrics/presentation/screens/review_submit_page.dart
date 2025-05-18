@@ -33,12 +33,17 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
     with SingleTickerProviderStateMixin {
   // Colors from the app's design system
   final Color primaryGreen = const Color(0xFF4ECDC4);
+  final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color bgColor = const Color(0xFFF9F9F9);
   final Color textDarkColor = Colors.black87;
   
   late AnimationController _animationController;
   late Animation<double> _animation;
+  
+  // Scroll controller to track if user has reached the bottom
+  final ScrollController _scrollController = ScrollController();
+  bool _hasScrolledToBottom = false;
 
   @override
   void initState() {
@@ -56,11 +61,26 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
       ),
     );
 
+    // Add scroll listener to detect when user reaches the bottom
+    _scrollController.addListener(_onScroll);
+    
     _animationController.forward();
+  }
+  
+  // Check if user has scrolled to bottom (or near bottom)
+  void _onScroll() {
+    if (!_hasScrolledToBottom &&
+        _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 80) {
+      setState(() {
+        _hasScrolledToBottom = true;
+      });
+    }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -231,6 +251,7 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
                     
                     Expanded(
                       child: SingleChildScrollView(
+                        controller: _scrollController,
                         child: Column(
                           children: [
                             // Animated info card
@@ -309,42 +330,46 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
                     // Continue button with improved design
                     Container(
                       decoration: BoxDecoration(
-                        boxShadow: [
+                        boxShadow: _hasScrolledToBottom ? [
                           BoxShadow(
                             color: primaryGreen.withOpacity(0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 6),
                           ),
-                        ],
+                        ] : [],
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryGreen,
+                          backgroundColor: _hasScrolledToBottom 
+                              ? primaryGreen 
+                              : primaryGreenDisabled,
                           foregroundColor: Colors.white,
                           minimumSize: const Size(double.infinity, 58),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          elevation: 0,
+                          elevation: _hasScrolledToBottom ? 4 : 0,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
-                      onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool('onboardingInProgress', false);
-                        final loginService = GetIt.instance<LoginService>();
-                        final user = await loginService.getCurrentUser();
-                        if (user != null) {
-                          final formCubit = context.read<HealthMetricsFormCubit>();
-                          formCubit.setUserId(user.uid);
-                          await formCubit.submit();
-                          Navigator.pushReplacementNamed(context, '/');
-                        } else {
-                          Navigator.pushNamed(context, '/register');
-                        }
-                      },
+                      onPressed: _hasScrolledToBottom 
+                          ? () async {
+                              final prefs = await SharedPreferences.getInstance();
+                              await prefs.setBool('onboardingInProgress', false);
+                              final loginService = GetIt.instance<LoginService>();
+                              final user = await loginService.getCurrentUser();
+                              if (user != null) {
+                                final formCubit = context.read<HealthMetricsFormCubit>();
+                                formCubit.setUserId(user.uid);
+                                await formCubit.submit();
+                                Navigator.pushReplacementNamed(context, '/');
+                              } else {
+                                Navigator.pushNamed(context, '/register');
+                              }
+                            } 
+                          : null,
                       child: const Text(
-                        "Let's Get Started",
+                        "Continue",
                         style: TextStyle(
                           fontSize: 18, 
                           fontWeight: FontWeight.bold
