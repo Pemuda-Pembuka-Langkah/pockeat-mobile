@@ -40,6 +40,9 @@ void main() {
     ];
 
     final Color testGreenColor = Colors.green;
+    
+    // Nilai default untuk currentWeight di test
+    const double testCurrentWeight = 75.0;
 
     // Fungsi untuk membuat widget untuk pengujian UI dasar saja
     Widget createBasicTestWidget() {
@@ -50,6 +53,7 @@ void main() {
             child: GoalProgressChart(
               displayData: testData,
               primaryGreen: testGreenColor,
+              currentWeight: testCurrentWeight, // Tambahkan parameter yang hilang
             ),
           ),
         ),
@@ -82,6 +86,7 @@ void main() {
             child: GoalProgressChart(
               displayData: testData,
               primaryGreen: customColor,
+              currentWeight: testCurrentWeight, // Tambahkan parameter yang hilang
             ),
           ),
         ),
@@ -127,6 +132,7 @@ void main() {
             child: GoalProgressChart(
               displayData: [],
               primaryGreen: testGreenColor,
+              currentWeight: testCurrentWeight, // Tambahkan parameter yang hilang
             ),
           ),
         ),
@@ -161,6 +167,7 @@ void main() {
       final chart = GoalProgressChart(
         displayData: testData,
         primaryGreen: testGreenColor,
+        currentWeight: testCurrentWeight, // Tambahkan parameter yang hilang
       );
       
       final columnWidget = chart.build(TestWidgetsFlutterBinding.ensureInitialized().rootElement as BuildContext) as Column;
@@ -172,8 +179,9 @@ void main() {
       expect(sfChart.primaryXAxis.majorGridLines.width, 0);
       
       expect(sfChart.primaryYAxis, isA<NumericAxis>());
-      expect((sfChart.primaryYAxis as NumericAxis).minimum, 73);
-      expect((sfChart.primaryYAxis as NumericAxis).maximum, 79);
+      // Update expected values to match new calculation based on currentWeight
+      expect((sfChart.primaryYAxis as NumericAxis).minimum, 72);
+      expect((sfChart.primaryYAxis as NumericAxis).maximum, 78);
       expect((sfChart.primaryYAxis as NumericAxis).interval, 1);
       
       // Verify series configuration

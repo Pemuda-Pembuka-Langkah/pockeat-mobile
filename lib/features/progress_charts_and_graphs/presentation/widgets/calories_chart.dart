@@ -331,6 +331,17 @@ class CaloriesChart extends StatelessWidget {
   }
 
   List<Map<String, dynamic>> _calculateProportionalData() {
+    // Definisikan urutan hari yang benar (Senin-Minggu)
+    final dayOrder = {
+      'Mon': 0,
+      'Tue': 1,
+      'Wed': 2,
+      'Thu': 3,
+      'Fri': 4,
+      'Sat': 5,
+      'Sun': 6
+    };
+
     List<Map<String, dynamic>> result = [];
 
     for (var data in calorieData) {
@@ -355,6 +366,12 @@ class CaloriesChart extends StatelessWidget {
         fatCalories = data.fats * 9;
       }
 
+      final dayOrderValue = data.day.startsWith('Week')
+          ? int.parse(data.day.split(' ')[1]) *
+              10 // Untuk 'Week X', gunakan nilai tinggi
+          : dayOrder[data.day] ??
+              999; // Default tinggi untuk data yang tidak dikenal
+
       result.add({
         'day': data.day,
         'calories': dailyCalories,
@@ -365,8 +382,14 @@ class CaloriesChart extends StatelessWidget {
         'protein': data.protein.toStringAsFixed(1),
         'carbs': data.carbs.toStringAsFixed(1),
         'fats': data.fats.toStringAsFixed(1),
+        // Tambahkan nilai urutan hari untuk pengurutan
+        'dayOrder': dayOrderValue,
       });
     }
+
+    // Urutkan hasil berdasarkan urutan hari yang kita definisikan
+    result
+        .sort((a, b) => (a['dayOrder'] as int).compareTo(b['dayOrder'] as int));
 
     return result;
   }

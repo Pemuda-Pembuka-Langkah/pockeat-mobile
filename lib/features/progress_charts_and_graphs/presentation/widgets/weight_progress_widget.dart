@@ -677,6 +677,8 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
                       displayData:
                           selectedPeriod == '1 Month' ? _monthData : _weekData,
                       primaryGreen: primaryGreen,
+                      currentWeight: double.tryParse(_currentWeight) ??
+                          0.0, // Tambahkan parameter ini
                     ),
               const SizedBox(height: 24),
               WeekSelectionTabs(

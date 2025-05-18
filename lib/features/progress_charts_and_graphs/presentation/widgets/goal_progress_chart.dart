@@ -1,3 +1,6 @@
+// Dart imports:
+import 'dart:math' as math;
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 
@@ -11,15 +14,21 @@ import 'package:pockeat/features/progress_charts_and_graphs/domain/models/weight
 class GoalProgressChart extends StatelessWidget {
   final List<WeightData> displayData;
   final Color primaryGreen;
+  final double currentWeight; // Parameter baru untuk berat saat ini
 
   const GoalProgressChart({
     super.key,
     required this.displayData,
     required this.primaryGreen,
+    required this.currentWeight, // Tambahkan parameter ini
   });
 
   @override
   Widget build(BuildContext context) {
+    // Hitung minimum dan maximum untuk y-axis berdasarkan berat saat ini
+    final double yAxisMinimum = _calculateYAxisMinimum();
+    final double yAxisMaximum = _calculateYAxisMaximum();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -65,9 +74,10 @@ class GoalProgressChart extends StatelessWidget {
               axisLine: AxisLine(width: 0),
             ),
             primaryYAxis: NumericAxis(
-              minimum: 73,
-              maximum: 79,
-              interval: 1,
+              // Gunakan nilai yang dihitung secara dinamis
+              minimum: yAxisMinimum,
+              maximum: yAxisMaximum,
+              interval: 1, // Interval tetap 1 sesuai permintaan
               majorGridLines: MajorGridLines(
                 width: 1,
                 color: Colors.grey[300],
@@ -188,6 +198,58 @@ class GoalProgressChart extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  // Method untuk menghitung minimum y-axis dengan hasil bilangan bulat
+  double _calculateYAxisMinimum() {
+    // Bulatkan currentWeight ke bilangan bulat terdekat
+    double roundedCurrentWeight = (currentWeight + 0.5).floor().toDouble();
+
+    // Default ke roundedCurrentWeight - 3 (selalu bilangan bulat)
+    double minValue = roundedCurrentWeight - 3;
+
+    // Cari nilai terendah dalam data yang ditampilkan
+    if (displayData.isNotEmpty) {
+      final lowestWeight = displayData
+          .map((data) => data.weight)
+          .where((weight) => weight > 0) // Abaikan nilai 0 atau negatif
+          .fold<double>(double.infinity, (a, b) => a < b ? a : b);
+
+      // Jika ada nilai terendah yang valid dan lebih rendah dari default
+      if (lowestWeight < double.infinity && lowestWeight < minValue) {
+        // Bulatkan ke bawah ke bilangan bulat terdekat
+        minValue = lowestWeight.floor().toDouble();
+      }
+    }
+
+    // Pastikan rentang minimum tidak kurang dari 30
+    return math.max(30.0, minValue); // Menggunakan math.max (huruf kecil)
+  }
+
+  // Method untuk menghitung maximum y-axis dengan hasil bilangan bulat
+  double _calculateYAxisMaximum() {
+    // Bulatkan currentWeight ke bilangan bulat terdekat
+    double roundedCurrentWeight = (currentWeight + 0.5).floor().toDouble();
+
+    // Default ke roundedCurrentWeight + 3 (selalu bilangan bulat)
+    double maxValue = roundedCurrentWeight + 3;
+
+    // Cari nilai tertinggi dalam data yang ditampilkan
+    if (displayData.isNotEmpty) {
+      final highestWeight = displayData
+          .map((data) => data.weight)
+          .where((weight) => weight > 0) // Abaikan nilai 0 atau negatif
+          .fold<double>(0, (a, b) => a > b ? a : b);
+
+      // Jika ada nilai tertinggi yang valid dan lebih tinggi dari default
+      if (highestWeight > 0 && highestWeight > maxValue) {
+        // Bulatkan ke atas ke bilangan bulat terdekat
+        maxValue = highestWeight.ceil().toDouble();
+      }
+    }
+
+    // Pastikan rentang maksimum tidak melebihi 300
+    return math.min(300.0, maxValue); // Menggunakan math.min (huruf kecil)
   }
 
   // Helper method to convert abbreviated day names to full names
