@@ -7,6 +7,7 @@ import 'package:get_it/get_it.dart';
 
 // Project imports:
 import 'package:pockeat/component/navigation.dart';
+import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 import 'package:pockeat/features/caloric_requirement/domain/repositories/caloric_requirement_repository.dart';
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
@@ -27,7 +28,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
-  // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
@@ -51,6 +51,8 @@ class _HomePageState extends State<HomePage>
   late Future<bool> _isCalorieCompensationEnabledFuture;
   late Future<bool> _isRolloverCaloriesEnabledFuture;
   late Future<int> _rolloverCaloriesFuture;
+  late Future<Map<String, int>> _currentMacrosFuture;
+  late Future<CaloricRequirementModel?> _caloricRequirementModelFuture;
 
   @override
   void initState() {
@@ -71,6 +73,38 @@ class _HomePageState extends State<HomePage>
         preferencesService.isExerciseCalorieCompensationEnabled();
     _isRolloverCaloriesEnabledFuture =
         preferencesService.isRolloverCaloriesEnabled();
+
+    // Initialize the new futures
+    _caloricRequirementModelFuture =
+        caloricRequirementRepository.getCaloricRequirement(userId);
+    _currentMacrosFuture = _calculateCurrentMacros();
+  }
+
+  // New method to calculate current macronutrients consumed today
+  Future<Map<String, int>> _calculateCurrentMacros() async {
+    try {
+      final logs = await _foodLogHistoryService.getFoodLogsByDate(
+          userId, DateTime.now());
+
+      int proteinTotal = 0;
+      int carbsTotal = 0;
+      int fatTotal = 0;
+
+      for (var log in logs) {
+        proteinTotal += (log.protein ?? 0).round();
+        carbsTotal += (log.carbs ?? 0).round();
+        fatTotal += (log.fat ?? 0).round();
+      }
+
+      return {
+        'protein': proteinTotal,
+        'carbs': carbsTotal,
+        'fat': fatTotal,
+      };
+    } catch (e) {
+      debugPrint('Error calculating macros: $e');
+      return {'protein': 0, 'carbs': 0, 'fat': 0};
+    }
   }
 
   @override
@@ -106,6 +140,8 @@ class _HomePageState extends State<HomePage>
               _isCalorieCompensationEnabledFuture,
               _isRolloverCaloriesEnabledFuture,
               _rolloverCaloriesFuture,
+              _currentMacrosFuture,
+              _caloricRequirementModelFuture,
             ]),
             builder: (context, snapshot) {
               return RefreshIndicator(
@@ -126,6 +162,7 @@ class _HomePageState extends State<HomePage>
                       petInfo: snapshot.data?[0] as PetInformation?,
                       stats: snapshot.data?[1] as DailyCalorieStats?,
                       streakDays: snapshot.data?[2] as int?,
+                      targetCalories: snapshot.data?[3] as int?,
                     ),
                     OverviewSection(
                       isLoading:
@@ -135,6 +172,9 @@ class _HomePageState extends State<HomePage>
                       isCalorieCompensationEnabled: snapshot.data?[4] as bool?,
                       isRolloverCaloriesEnabled: snapshot.data?[5] as bool?,
                       rolloverCalories: snapshot.data?[6] as int?,
+                      currentMacros: snapshot.data?[7] as Map<String, int>?,
+                      targetMacros:
+                          snapshot.data?[8] as CaloricRequirementModel?,
                     ),
                   ],
                 ),

@@ -49,6 +49,7 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
     ChatBubbleType.reminder: false,
     ChatBubbleType.almostFinished: false,
     ChatBubbleType.completed: false,
+    ChatBubbleType.exceeded: false,
   };
 
   // Messages for each type
@@ -67,6 +68,12 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
       "You crushed your daily goal, great job! Let's celebrate with some well-deserved rest.",
       "Goal achieved! You're absolutely crushing it today! So proud of you!",
       "Mission accomplished! Your consistent effort is really paying off!",
+    ],
+    ChatBubbleType.exceeded: [
+      "Whoa there! You've exceeded your calorie target for today. Maybe go for a walk?",
+      "Calorie target exceeded! Consider balancing with some exercise today.",
+      "You've gone over your calorie goal - it's okay! Want to log a workout to balance things?",
+      "Target exceeded - we all have those days! Let's try to make healthier choices for the next meal.",
     ],
   };
 
@@ -101,6 +108,12 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
     if (oldWidget.calorieProgress != widget.calorieProgress) {
       _determineChatBubble();
     }
+
+    // Show exceeded bubble when crossing the threshold
+    if (oldWidget.calorieProgress <= 1.0 && widget.calorieProgress > 1.0) {
+      _showExceededBubble();
+      _shownToday[ChatBubbleType.exceeded] = true;
+    }
   }
 
   Future<void> loadBackground() async {
@@ -121,9 +134,23 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
 
   // Determine which bubble to show based on calorie progress
   void _determineChatBubble() {
-    // For goal completion (100%)
-    if (widget.calorieProgress >= 1.0 &&
+    // Debug print to see what's happening
+    debugPrint('Current calorieProgress: ${widget.calorieProgress}');
+
+    // Check for exceeded calories first (highest priority)
+    if (widget.calorieProgress > 1.0 &&
+        !_shownToday[ChatBubbleType.exceeded]!) {
+      debugPrint('Showing exceeded bubble');
+      _showExceededBubble();
+      _shownToday[ChatBubbleType.exceeded] = true;
+      return; // Stop here if we're showing exceeded
+    }
+
+    // For goal completion (approximately 100%)
+    if (widget.calorieProgress >= 0.99 &&
+        widget.calorieProgress <= 1.0 &&
         !_shownToday[ChatBubbleType.completed]!) {
+      debugPrint('Showing completed bubble');
       _showCelebrationBubble();
       _shownToday[ChatBubbleType.completed] = true;
       return; // Stop here if we're showing completion
@@ -131,14 +158,13 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
 
     // For almost there (75-90%)
     if (widget.calorieProgress >= 0.75 &&
-        widget.calorieProgress < 1.0 &&
+        widget.calorieProgress < 0.99 &&
         !_shownToday[ChatBubbleType.almostFinished]!) {
+      debugPrint('Showing almost finished bubble');
       _showAlmostFinishedBubble();
       _shownToday[ChatBubbleType.almostFinished] = true;
       return; // Stop here if we're showing almost finished
     }
-
-    // Don't add any more conditions here so we don't override priority messages
   }
 
   // Check if we need to show a meal time reminder
@@ -181,6 +207,15 @@ class _PetCompanionWidgetState extends State<PetCompanionWidget> {
       _showChatBubble = true;
       _currentBubbleType = ChatBubbleType.completed;
       _currentMessage = _getRandomMessage(ChatBubbleType.completed);
+    });
+  }
+
+  // Show exceeded bubble with warning
+  void _showExceededBubble() {
+    setState(() {
+      _showChatBubble = true;
+      _currentBubbleType = ChatBubbleType.exceeded;
+      _currentMessage = _getRandomMessage(ChatBubbleType.exceeded);
     });
   }
 
