@@ -19,6 +19,12 @@ class GoogleSignInServiceImpl implements GoogleSignInService {
   @override
   Future<UserCredential> signInWithGoogle() async {
     try {
+      // Check if a user is already signed in
+      final bool isSignedIn = await _googleSignIn.isSignedIn();
+      if (isSignedIn) {
+        // Sign out first if a user is already signed in
+        await _googleSignIn.signOut();
+      }
       
       // Trigger Google Sign In flow with prompt to select account
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();

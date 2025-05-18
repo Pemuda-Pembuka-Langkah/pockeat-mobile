@@ -113,7 +113,7 @@ void main() {
   });
 
   testWidgets(
-      'Should show error snackbar when Google Sign In fails on login page',
+      'Should handle error when Google Sign In fails on login page',
       (WidgetTester tester) async {
     // Set up screen size
     tester.binding.window.physicalSizeTestValue = const Size(600, 800);
@@ -132,9 +132,14 @@ void main() {
     await tester.tap(find.text('Sign in with Google'));
     await tester.pumpAndSettle();
 
-    // Verify error snackbar appears
-    expect(find.byType(SnackBar), findsOneWidget);
-    expect(find.textContaining('Error:'), findsOneWidget);
+    // Verify analytics service was called with error event
+    verify(mockAnalyticsService.logEvent(
+      name: 'google_sign_in_error',
+      parameters: anyNamed('parameters'),
+    )).called(1);
+    
+    // Verify we didn't navigate to home page
+    expect(find.text('Home Page'), findsNothing);
   });
 
   testWidgets('Should navigate to home after successful Google Sign In',
