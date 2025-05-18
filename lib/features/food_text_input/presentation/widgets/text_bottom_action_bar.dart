@@ -155,12 +155,12 @@ class TextBottomActionBar extends StatelessWidget {
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(CupertinoIcons.plus,
                               color: Colors.white, size: 20),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Text('Add to Log',
                               style: TextStyle(
                                   color: Colors.white,

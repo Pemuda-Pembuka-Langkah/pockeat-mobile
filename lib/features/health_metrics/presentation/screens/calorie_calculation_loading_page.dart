@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 // Project imports:
 import '../widgets/circular_loading_indicator.dart';
-import '../widgets/feature_loading_item.dart';
 import '../widgets/decorative_dot.dart';
+import '../widgets/feature_loading_item.dart';
 
 class CalorieCalculationLoadingPage extends StatefulWidget {
   const CalorieCalculationLoadingPage({super.key});
@@ -233,7 +233,7 @@ class _CalorieCalculationLoadingPageState
                                 primaryColor: primaryGreen,
                                 textDarkColor: textDarkColor,
                               );
-                            }).toList(),
+                            }),
                           ],
                         ),
                       ),

@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
 
 class UserInformationCard extends StatelessWidget {
@@ -63,7 +66,7 @@ class UserInformationCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          
+
           // Goals section
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +99,7 @@ class UserInformationCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Body measurements
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,7 +170,7 @@ class UserInformationCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Activity & Diet
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,7 +211,7 @@ class UserInformationCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Target goals
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,

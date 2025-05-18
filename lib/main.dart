@@ -13,8 +13,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/calorie_calculation_loading_page.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/free_trials_page.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -64,9 +62,11 @@ import 'package:pockeat/features/health_metrics/domain/repositories/health_metri
 import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/calorie_calculation_loading_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/desired_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/diet_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/free_trials_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';

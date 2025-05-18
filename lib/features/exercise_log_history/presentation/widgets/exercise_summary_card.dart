@@ -207,7 +207,7 @@ class ExerciseSummaryCard extends StatelessWidget {
 
   // New method to display exercise header image
   Widget _buildExerciseHeader() {
-    return Container(
+    return SizedBox(
       height: 160,
       child: Container(
         decoration: BoxDecoration(
