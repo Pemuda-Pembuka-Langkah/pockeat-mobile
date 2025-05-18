@@ -1,5 +1,5 @@
 // Dart imports:
-import 'dart:math';
+import 'dart:math' as math;
 
 // Flutter imports:
 import 'package:flutter/material.dart';
@@ -59,6 +59,10 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
   List<WeightData> _monthData = [];
   bool _isLoadingWeightData = true;
 
+  // New variables
+  double? _initialWeight; // Store initial weight from first history record
+  double? _goalWeight; // Store goal weight from desiredWeight field
+
   // Service instance
   late final FoodLogDataService _foodLogDataService;
 
@@ -101,7 +105,18 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
       final healthMetricsDoc = snapshot.docs.first;
       final healthMetricsRef = healthMetricsDoc.reference;
 
-      // Get user creation date to know start date for weight tracking
+      // Get goal weight (desiredWeight) from health_metrics
+      final dynamic goalWeightValue = healthMetricsDoc.data()['desiredWeight'];
+      final double? goalWeight = goalWeightValue is int
+          ? goalWeightValue.toDouble()
+          : goalWeightValue is double
+              ? goalWeightValue
+              : null;
+
+      debugPrint(
+          'Found goal weight from health_metrics: ${goalWeight ?? "null"} kg');
+
+      // Get user creation date
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
@@ -115,140 +130,144 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
       final userCreationDate = createdAt?.toDate() ??
           DateTime.now().subtract(const Duration(days: 30));
 
-      // Format user creation date as YYYY-MM-DD for the document ID
-      final userCreationDateStr =
-          DateFormat('yyyy-MM-dd').format(userCreationDate);
-      debugPrint('User creation date: $userCreationDateStr');
-
-      // Current weight value from health metrics (HANYA untuk hari ini)
-      final currentWeight = healthMetricsDoc.data()['weight'] as double? ?? 0.0;
-
-      // Tanggal hari ini dalam format yyyy-MM-dd
-      final String todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      // Current weight value from health metrics - ensure it's a double
+      final dynamic weightValue = healthMetricsDoc.data()['weight'];
+      final currentWeight = weightValue is int
+          ? weightValue.toDouble()
+          : weightValue is double
+              ? weightValue
+              : 0.0;
 
       // Load ALL weight history from the weight_history subcollection
-      // PENTING: Urutkan berdasarkan date (bukan updatedAt) untuk mendapatkan urutan kronologis yang tepat
-      final weightHistoryQuery = await FirebaseFirestore.instance
-          .collection('health_metrics')
-          .doc(healthMetricsDoc.id)
+      final weightHistoryQuery = await healthMetricsRef
           .collection('weight_history')
           .orderBy('date')
           .get();
 
-      // BARU: Cek apakah ada riwayat berat badan
-      if (weightHistoryQuery.docs.isEmpty) {
-        debugPrint(
-            'No weight history found, creating initial entry for user creation date');
+      // Find the initial weight (first entry in weight history)
+      double? initialWeight;
+      if (weightHistoryQuery.docs.isNotEmpty) {
+        // Sort by date to ensure we get the earliest record
+        final sortedDocs = weightHistoryQuery.docs.toList()
+          ..sort((a, b) => (a.data()['date'] as String)
+              .compareTo(b.data()['date'] as String));
 
-        // 1. Tambahkan entri pada tanggal pembuatan akun
-        await healthMetricsRef
-            .collection('weight_history')
-            .doc(userCreationDateStr)
-            .set({
-          'weight': currentWeight,
-          'date': userCreationDateStr,
-          'createdAt': createdAt ?? FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-
-        debugPrint(
-            'Created initial weight history entry for date: $userCreationDateStr with weight: $currentWeight');
-
-        // 2. Jika tanggal pembuatan akun bukan hari ini, tambahkan entri untuk hari ini juga
-        if (userCreationDateStr != todayStr) {
-          await healthMetricsRef
-              .collection('weight_history')
-              .doc(todayStr)
-              .set({
-            'weight': currentWeight,
-            'date': todayStr,
-            'createdAt': FieldValue.serverTimestamp(),
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
+        if (sortedDocs.isNotEmpty) {
+          final firstEntry = sortedDocs.first;
+          final dynamic initialWeightValue = firstEntry.data()['weight'];
+          initialWeight = initialWeightValue is int
+              ? initialWeightValue.toDouble()
+              : initialWeightValue is double
+                  ? initialWeightValue
+                  : null;
 
           debugPrint(
-              'Created today\'s weight history entry for date: $todayStr with weight: $currentWeight');
-        }
-
-        // Verifikasi pembuatan entri-entri di atas
-        final updatedWeightHistoryQuery = await healthMetricsRef
-            .collection('weight_history')
-            .orderBy('date')
-            .get();
-
-        if (updatedWeightHistoryQuery.docs.isEmpty) {
-          debugPrint(
-              'WARNING: Still no weight history found after creating initial entries!');
-        } else {
-          debugPrint(
-              'Successfully created initial weight history, found ${updatedWeightHistoryQuery.docs.length} entries.');
+              'Found initial weight from earliest record (${firstEntry.data()['date']}): ${initialWeight ?? "null"} kg');
         }
       }
 
-      // ======= PERUBAHAN UTAMA: PEMISAHAN PEMROSESAN DATA HISTORIS =======
-
-      // Langkah 1: Map untuk menyimpan data historis HANYA dari weight_history
-      // Kunci: String tanggal yyyy-MM-dd, Nilai: berat pada tanggal tersebut
+      // Map to store historical weights
       final Map<String, double> historicalWeights = {};
 
-      // Isi map dengan semua data dari weight_history
+      // Fill map with existing data - ensure proper type casting
       for (var doc in weightHistoryQuery.docs) {
         final date = doc.data()['date'] as String? ?? '';
-        final weight = doc.data()['weight']?.toDouble() ?? 0.0;
+
+        // Fix: Handle different number types safely
+        final dynamic weight = doc.data()['weight'];
+        final double weightDouble = weight is int
+            ? weight.toDouble()
+            : weight is double
+                ? weight
+                : 0.0;
 
         if (date.isNotEmpty) {
-          historicalWeights[date] = weight;
-          debugPrint('Loaded historical weight for $date: $weight kg');
+          historicalWeights[date] = weightDouble;
+          debugPrint('Loaded historical weight for $date: $weightDouble kg');
         }
       }
 
-      // Langkah 2: Periksa apakah ada data untuk hari ini di weight_history
-      bool hasTodayEntry = historicalWeights.containsKey(todayStr);
+      // Generate all dates from user creation to today
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final todayStr = DateFormat('yyyy-MM-dd').format(today); // Add this line
+      final List<DateTime> allDates = [];
 
-      // Langkah 3: Jika tidak ada entri untuk hari ini, buat entri baru di weight_history
-      if (!hasTodayEntry) {
-        // Tambahkan entri untuk hari ini dengan nilai dari dokumen utama
-        await healthMetricsRef.collection('weight_history').doc(todayStr).set({
-          'weight': currentWeight,
-          'date': todayStr,
+      // Start from user creation date, normalized to start of day
+      DateTime currentDate = DateTime(
+        userCreationDate.year,
+        userCreationDate.month,
+        userCreationDate.day,
+      );
+
+      // Generate all dates up to today
+      while (
+          currentDate.isBefore(today) || currentDate.isAtSameMomentAs(today)) {
+        allDates.add(currentDate);
+        currentDate = currentDate.add(const Duration(days: 1));
+      }
+
+      debugPrint(
+          'Generated ${allDates.length} dates from ${DateFormat('yyyy-MM-dd').format(allDates.first)} to ${DateFormat('yyyy-MM-dd').format(allDates.last)}');
+
+      // Process dates to fill missing entries
+      double lastKnownWeight = currentWeight;
+      final List<String> newEntryDates = [];
+      final batch = FirebaseFirestore.instance.batch();
+
+      for (int i = 0; i < allDates.length; i++) {
+        final date = allDates[i];
+        final dateStr = DateFormat('yyyy-MM-dd').format(date);
+
+        // If we have data for this date, update the last known weight
+        if (historicalWeights.containsKey(dateStr)) {
+          lastKnownWeight = historicalWeights[dateStr]!;
+          continue;
+        }
+
+        // Otherwise create a new entry with the last known weight
+        final docRef =
+            healthMetricsRef.collection('weight_history').doc(dateStr);
+        batch.set(docRef, {
+          'weight': lastKnownWeight, // Store as double
+          'date': dateStr,
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
 
-        debugPrint(
-            'Created missing today\'s entry in weight_history with weight: $currentWeight');
-
-        // Update map data historis juga
-        historicalWeights[todayStr] = currentWeight;
-      } else {
-        // Jika ada entri hari ini, periksa apakah perlu diupdate dengan nilai terbaru
-        final todayHistoricalWeight = historicalWeights[todayStr]!;
-        if (todayHistoricalWeight != currentWeight) {
-          // Update entri hari ini dengan nilai terbaru dari dokumen utama
-          await healthMetricsRef
-              .collection('weight_history')
-              .doc(todayStr)
-              .update({
-            'weight': currentWeight,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-
-          debugPrint(
-              'Updated today\'s entry in weight_history from $todayHistoricalWeight to $currentWeight');
-
-          // Update map data historis juga
-          historicalWeights[todayStr] = currentWeight;
-        }
+        // Update our map with this new entry
+        historicalWeights[dateStr] = lastKnownWeight;
+        newEntryDates.add(dateStr);
       }
 
-      // Langkah 4: Buat struktur data untuk chart dengan menghormati prioritas data
+      // Execute batch if there are any new entries
+      if (newEntryDates.isNotEmpty) {
+        await batch.commit();
+        debugPrint(
+            'Created ${newEntryDates.length} new weight history entries for missing dates');
+      }
+
+      // Special check for today's date - ensure it has the current weight
+      if (historicalWeights.containsKey(todayStr) &&
+          historicalWeights[todayStr] != currentWeight) {
+        // Update today's entry with current weight if it differs
+        await healthMetricsRef
+            .collection('weight_history')
+            .doc(todayStr)
+            .update({
+          'weight': currentWeight, // Store as double
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        debugPrint(
+            'Updated today\'s entry with current weight: $currentWeight kg');
+        historicalWeights[todayStr] = currentWeight;
+      }
+
       // Generate week data (last 7 days) - dimulai dari Senin
       final weekData = <WeightData>[];
-      final now = DateTime.now();
 
       // Hitung hari pertama dari minggu ini (Senin)
-      // Rumus: Kurangi hari saat ini dengan (weekday - 1)
-      // Senin = 1, Selasa = 2, ..., Minggu = 7 dalam sistem DateTime.weekday
       final int daysFromMonday = now.weekday - 1;
       final DateTime thisWeekMonday =
           DateTime(now.year, now.month, now.day - daysFromMonday);
@@ -261,123 +280,124 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
         final date = DateTime(
             thisWeekMonday.year, thisWeekMonday.month, thisWeekMonday.day + i);
         final dateStr = DateFormat('yyyy-MM-dd').format(date);
-        final dayOfWeek = weekDayLabels[i]; // Indeks 0 = Senin, 1 = Selasa, dst
+        final dayOfWeek = weekDayLabels[i];
 
-        double? weightValue;
+        // Check if the date is in the future (after today)
+        if (date.isAfter(today)) {
+          // For future days, keep the label but set weight to 0
+          // This will make the chart show a gap but keep the x-axis label
+          weekData.add(WeightData(dayOfWeek, 0));
+          debugPrint('Future day $dayOfWeek ($dateStr): Setting weight to 0');
+        } else {
+          // For past or current days, use the historical weight or current weight
+          double weightValue = currentWeight; // Default to current weight
 
-        // Prioritas 1: Cari data untuk tanggal tersebut di historicalWeights
-        if (historicalWeights.containsKey(dateStr)) {
-          weightValue = historicalWeights[dateStr];
+          // Get weight from historical data if available
+          if (historicalWeights.containsKey(dateStr)) {
+            weightValue = historicalWeights[dateStr]!;
+          }
+
+          weekData.add(WeightData(dayOfWeek, weightValue));
           debugPrint(
-              'Using weight history data for $dateStr ($dayOfWeek): $weightValue kg');
+              'Past/Current day $dayOfWeek ($dateStr): Weight $weightValue kg');
         }
-        // Prioritas 2: Jika tidak ada, cari data terdekat sebelumnya
-        else {
-          // Cari tanggal terbaru sebelum dateStr yang memiliki data
-          final sortedDates = historicalWeights.keys.toList()..sort();
-          String? latestPriorDate;
-
-          for (var histDate in sortedDates) {
-            if (histDate.compareTo(dateStr) < 0 &&
-                (latestPriorDate == null ||
-                    histDate.compareTo(latestPriorDate) > 0)) {
-              latestPriorDate = histDate;
-            }
-          }
-
-          if (latestPriorDate != null) {
-            weightValue = historicalWeights[latestPriorDate];
-            debugPrint(
-                'Using prior weight from $latestPriorDate: $weightValue kg for $dateStr ($dayOfWeek)');
-          } else {
-            // Prioritas 3: Jika tidak ada data sebelumnya, gunakan data terdekat setelahnya
-            for (var histDate in sortedDates) {
-              if (histDate.compareTo(dateStr) > 0) {
-                weightValue = historicalWeights[histDate];
-                debugPrint(
-                    'Using future weight from $histDate: $weightValue kg for $dateStr ($dayOfWeek) (no prior data)');
-                break;
-              }
-            }
-          }
-        }
-
-        // Jika masih tidak ada data, gunakan nilai default (berat saat ini)
-        weightValue ??= currentWeight;
-
-        weekData.add(WeightData(dayOfWeek, weightValue));
       }
 
-      // Generate month data (4 weeks of current month) dengan pendekatan yang sama
+      // Generate month data - Week 1 dimulai dari tanggal user register (createdAt)
       final monthData = <WeightData>[];
-      final currentMonth = now.month;
-      final currentYear = now.year;
 
-      // Calculate week boundaries for the current month
-      final lastDayOfMonth = DateTime(currentYear, currentMonth + 1, 0);
+      // Hitung Monday pertama dari minggu saat user dibuat (untuk penentuan minggu)
+      final int daysFromMondayCreation = userCreationDate.weekday - 1;
+      final DateTime firstWeekMonday = DateTime(
+          userCreationDate.year,
+          userCreationDate.month,
+          userCreationDate.day - daysFromMondayCreation);
 
-      final totalDaysInMonth = lastDayOfMonth.day;
-      final weeksInMonth = (totalDaysInMonth / 7).ceil();
+      // Hitung berapa minggu yang telah berlalu sejak user dibuat
+      final int weeksSinceCreation =
+          (now.difference(firstWeekMonday).inDays / 7).ceil();
 
-      for (int weekNum = 0; weekNum < min(weeksInMonth, 4); weekNum++) {
-        final weekLabel = 'Week ${weekNum + 1}';
+      debugPrint(
+          'First Monday after creation: ${DateFormat('yyyy-MM-dd').format(firstWeekMonday)}');
+      debugPrint('Weeks since creation: $weeksSinceCreation');
 
-        // Calculate middle day of this week for getting weight
-        final startDay = weekNum * 7 + 1;
-        final endDay = min((weekNum + 1) * 7, totalDaysInMonth);
-        final middleDay = ((startDay + endDay) / 2).floor();
+      // Kita selalu tampilkan 4 minggu, dimulai dari Week 1
+      // Jika user baru (kurang dari 4 minggu), tampilkan Week 1-4
+      // Jika user sudah lebih dari 4 minggu, tampilkan 4 minggu terakhir
+      int startWeek = math.max(
+          1, weeksSinceCreation - 3); // Mulai dari Week 1 atau current-3
+      int endWeek =
+          math.max(4, weeksSinceCreation); // Tampilkan minimal 4 minggu
 
-        // Target date for this week's weight
-        final targetDate = DateTime(currentYear, currentMonth, middleDay);
-        final targetDateStr = DateFormat('yyyy-MM-dd').format(targetDate);
+      debugPrint('Displaying weeks $startWeek to $endWeek');
 
-        double? weightValue;
+      // Siapkan data untuk setiap minggu
+      for (int weekNum = startWeek; weekNum <= endWeek; weekNum++) {
+        // Hitung tanggal awal minggu ini (Senin dari minggu ke-weekNum setelah firstWeekMonday)
+        final DateTime weekStartDate =
+            firstWeekMonday.add(Duration(days: (weekNum - 1) * 7));
+        final DateTime weekEndDate =
+            weekStartDate.add(const Duration(days: 6)); // Minggu
 
-        // Prioritas 1: Cari data untuk tanggal tersebut di historicalWeights
-        if (historicalWeights.containsKey(targetDateStr)) {
-          weightValue = historicalWeights[targetDateStr];
-        }
-        // Prioritas 2: Jika tidak ada, cari data terdekat sebelumnya
-        else {
-          // Cari tanggal terbaru sebelum targetDateStr yang memiliki data
-          final sortedDates = historicalWeights.keys.toList()..sort();
-          String? latestPriorDate;
+        double weekAverage;
 
-          for (var histDate in sortedDates) {
-            if (histDate.compareTo(targetDateStr) < 0 &&
-                (latestPriorDate == null ||
-                    histDate.compareTo(latestPriorDate) > 0)) {
-              latestPriorDate = histDate;
+        // Cek jika minggu ini di masa depan
+        if (weekStartDate.isAfter(now)) {
+          // Untuk minggu di masa depan, set nilai 0.00
+          weekAverage = 0.00;
+          debugPrint(
+              'Week $weekNum (${DateFormat('yyyy-MM-dd').format(weekStartDate)} to ${DateFormat('yyyy-MM-dd').format(weekEndDate)}): '
+              'Future week, using 0.00 kg');
+        } else {
+          // Untuk minggu saat ini atau di masa lalu, hitung rata-rata
+          double totalWeight = 0;
+          int daysWithData = 0;
+
+          // Iterate through each day in the week
+          for (int day = 0; day < 7; day++) {
+            final date = weekStartDate.add(Duration(days: day));
+
+            // Skip future days
+            if (date.isAfter(now)) {
+              continue;
+            }
+
+            // Skip days before the user creation date
+            if (date.isBefore(userCreationDate)) {
+              continue;
+            }
+
+            // Get the weight data for this day
+            final dateStr = DateFormat('yyyy-MM-dd').format(date);
+            if (historicalWeights.containsKey(dateStr)) {
+              totalWeight += historicalWeights[dateStr]!;
+              daysWithData++;
             }
           }
 
-          if (latestPriorDate != null) {
-            weightValue = historicalWeights[latestPriorDate];
-          } else {
-            // Jika tidak ada data sebelumnya, cari data terdekat setelahnya
-            for (var histDate in sortedDates) {
-              if (histDate.compareTo(targetDateStr) > 0) {
-                weightValue = historicalWeights[histDate];
-                break;
-              }
-            }
-          }
+          // Calculate average weight for this week with 2 decimal precision
+          weekAverage = daysWithData > 0
+              ? double.parse((totalWeight / daysWithData).toStringAsFixed(2))
+              : 0.00; // For weeks with no data, use 0.00
+
+          debugPrint(
+              'Week $weekNum (${DateFormat('yyyy-MM-dd').format(weekStartDate)} to ${DateFormat('yyyy-MM-dd').format(weekEndDate)}): '
+              'Avg weight ${weekAverage.toStringAsFixed(2)}kg from $daysWithData days');
         }
 
-        // Jika masih tidak ada data, gunakan nilai default
-        weightValue ??= currentWeight;
-
-        monthData.add(WeightData(weekLabel, weightValue));
+        // Add data point - use week number as label
+        monthData.add(WeightData('Week $weekNum', weekAverage));
       }
 
-      // Debugging info
-      debugPrint('Generated ${weekData.length} entries for week data chart');
-      debugPrint('Generated ${monthData.length} entries for month data chart');
+      // Debugging output
+      debugPrint('Generated ${monthData.length} entries for month chart');
 
       if (mounted) {
         setState(() {
           _weekData = weekData;
           _monthData = monthData;
+          _initialWeight = initialWeight; // Store the initial weight
+          _goalWeight = goalWeight; // Store the goal weight
           _isLoadingWeightData = false;
         });
       }
@@ -385,7 +405,6 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
       debugPrint('Error loading weight progress data: $e');
       if (mounted) {
         setState(() {
-          // Mengubah array default agar konsisten dengan urutan hari Senin-Minggu
           _weekData = List.generate(
               7,
               (index) => WeightData(
@@ -630,6 +649,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
   Future<void> _refreshAllData() async {
     // Load all data concurrently for faster refresh
     await Future.wait([
+      // Proper syntax with list brackets
       _loadCalorieData(),
       _loadCurrentWeight(),
       _loadCurrentBMI(),
@@ -679,6 +699,8 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
                       primaryGreen: primaryGreen,
                       currentWeight: double.tryParse(_currentWeight) ??
                           0.0, // Tambahkan parameter ini
+                      initialWeight: _initialWeight, // Add initialWeight
+                      goalWeight: _goalWeight, // Add goalWeight
                     ),
               const SizedBox(height: 24),
               WeekSelectionTabs(
@@ -707,7 +729,8 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
   Widget _buildCurrentWeightIndicators() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
+      children: <Widget>[
+        // Tambahkan tipe explicit untuk children
         Expanded(
           child: CircularIndicatorWidget(
             label: "Weight Goal",
@@ -735,7 +758,8 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
                   },
           ),
         ),
-        const SizedBox(width: 16),
+        // Gunakan SizedBox dengan kedua properti width dan height
+        const SizedBox(width: 16, height: null),
         Expanded(
           child: CircularIndicatorWidget(
             label: "Current Weight",

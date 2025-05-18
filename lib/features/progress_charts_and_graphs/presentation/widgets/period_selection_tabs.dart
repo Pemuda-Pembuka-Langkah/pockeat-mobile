@@ -26,13 +26,13 @@ class PeriodSelectionTabs extends StatelessWidget {
       child: Row(
         children: [
           PeriodTabWidget(
-            title: 'Weekly',
+            title: 'Daily',
             isSelected: selectedPeriod == '1 Week',
             selectedColor: primaryColor,
             onTap: () => onPeriodSelected('1 Week'),
           ),
           PeriodTabWidget(
-            title: 'Monthly',
+            title: 'Weekly',
             isSelected: selectedPeriod == '1 Month',
             selectedColor: primaryColor,
             onTap: () => onPeriodSelected('1 Month'),

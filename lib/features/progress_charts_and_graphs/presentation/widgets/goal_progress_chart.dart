@@ -14,20 +14,84 @@ import 'package:pockeat/features/progress_charts_and_graphs/domain/models/weight
 class GoalProgressChart extends StatelessWidget {
   final List<WeightData> displayData;
   final Color primaryGreen;
-  final double currentWeight; // Parameter baru untuk berat saat ini
+  final double currentWeight;
+  final double? goalWeight; // Add parameter for goal weight
+  final double? initialWeight; // Add parameter for initial weight
 
   const GoalProgressChart({
     super.key,
     required this.displayData,
     required this.primaryGreen,
-    required this.currentWeight, // Tambahkan parameter ini
+    required this.currentWeight,
+    this.goalWeight, // Make it optional for backward compatibility
+    this.initialWeight, // Make it optional for backward compatibility
   });
+
+  // Calculate goal progress percentage
+  String _calculateGoalPercentage() {
+    // Debug log for input values
+    debugPrint('Goal Progress Calculation - Inputs:');
+    debugPrint('  Current Weight: $currentWeight kg');
+    debugPrint('  Goal Weight: ${goalWeight ?? "null"} kg');
+    debugPrint('  Initial Weight: ${initialWeight ?? "null"} kg');
+
+    // If any of the required values is missing, return a default value
+    if (goalWeight == null ||
+        initialWeight == null ||
+        initialWeight == goalWeight) {
+      debugPrint(
+          'Goal Progress Calculation - Missing values or initial weight equals goal weight');
+      debugPrint('  Returning default: 0.0% of goal');
+      return '0.0% of goal';
+    }
+
+    // Calculate progress percentage:
+    // (initialWeight - currentWeight) / (initialWeight - goalWeight) * 100
+    double progressPercentage =
+        (initialWeight! - currentWeight) / (initialWeight! - goalWeight!) * 100;
+
+    debugPrint('Goal Progress Calculation - Raw result:');
+    debugPrint(
+        '  Formula: (${initialWeight!} - $currentWeight) / (${initialWeight!} - ${goalWeight!}) * 100');
+    debugPrint('  Raw Progress: $progressPercentage%');
+
+    // Handle edge cases
+    if (progressPercentage.isNaN || progressPercentage.isInfinite) {
+      debugPrint(
+          'Goal Progress Calculation - Invalid result (NaN or Infinite)');
+      debugPrint('  Returning default: 0.0% of goal');
+      return '0.0% of goal';
+    }
+
+    // Handle negative progress (gaining weight when goal is to lose weight, or vice versa)
+    if (progressPercentage < 0) {
+      debugPrint('Goal Progress Calculation - Negative progress detected');
+      debugPrint('  Capping at 0%');
+      progressPercentage = 0;
+    }
+
+    // Cap progress at 100%
+    if (progressPercentage > 100) {
+      debugPrint('Goal Progress Calculation - Progress exceeds 100%');
+      debugPrint('  Capping at 100%');
+      progressPercentage = 100;
+    }
+
+    // Round to 1 decimal place
+    String result = '${progressPercentage.toStringAsFixed(1)}% of goal';
+    debugPrint('Goal Progress Calculation - Final result: $result');
+
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
     // Hitung minimum dan maximum untuk y-axis berdasarkan berat saat ini
     final double yAxisMinimum = _calculateYAxisMinimum();
     final double yAxisMaximum = _calculateYAxisMaximum();
+
+    // Get the calculated goal percentage
+    final String goalPercentage = _calculateGoalPercentage();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,7 +100,7 @@ class GoalProgressChart extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'Goal Progress',
+              'Weight Progress',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -53,7 +117,7 @@ class GoalProgressChart extends StatelessWidget {
                   const Icon(Icons.flag, size: 16),
                   const SizedBox(width: 4),
                   Text(
-                    '2.5% of goal',
+                    goalPercentage, // Use the calculated goal percentage
                     style: TextStyle(
                       color: Colors.grey[800],
                       fontSize: 12,
@@ -74,10 +138,10 @@ class GoalProgressChart extends StatelessWidget {
               axisLine: AxisLine(width: 0),
             ),
             primaryYAxis: NumericAxis(
-              // Gunakan nilai yang dihitung secara dinamis
+              // Use dynamically calculated values
               minimum: yAxisMinimum,
               maximum: yAxisMaximum,
-              interval: 1, // Interval tetap 1 sesuai permintaan
+              interval: _calculateYAxisInterval(yAxisMinimum, yAxisMaximum),
               majorGridLines: MajorGridLines(
                 width: 1,
                 color: Colors.grey[300],
@@ -153,7 +217,7 @@ class GoalProgressChart extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'Weight: ${weightData.weight.toStringAsFixed(1)} kg',
+                              'Weight: ${weightData.weight.toStringAsFixed(2)} kg',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 13,
@@ -217,8 +281,8 @@ class GoalProgressChart extends StatelessWidget {
 
       // Jika ada nilai terendah yang valid dan lebih rendah dari default
       if (lowestWeight < double.infinity && lowestWeight < minValue) {
-        // Bulatkan ke bawah ke bilangan bulat terdekat
-        minValue = lowestWeight.floor().toDouble();
+        // Bulatkan ke bawah dan kurangi 1 untuk memastikan nilai data tidak berada di batas minimum
+        minValue = lowestWeight.floor() - 1.0;
       }
     }
 
@@ -243,13 +307,43 @@ class GoalProgressChart extends StatelessWidget {
 
       // Jika ada nilai tertinggi yang valid dan lebih tinggi dari default
       if (highestWeight > 0 && highestWeight > maxValue) {
-        // Bulatkan ke atas ke bilangan bulat terdekat
-        maxValue = highestWeight.ceil().toDouble();
+        // Bulatkan ke atas dan tambahkan 1 untuk memastikan nilai data tidak berada di batas maksimum
+        maxValue = highestWeight.ceil() + 1.0;
       }
     }
 
     // Pastikan rentang maksimum tidak melebihi 300
     return math.min(300.0, maxValue); // Menggunakan math.min (huruf kecil)
+  }
+
+  // Method baru untuk menghitung interval y-axis yang dinamis
+  double _calculateYAxisInterval(double min, double max) {
+    // Hitung range nilai
+    double range = max - min;
+
+    // Kita ingin sekitar 5-8 interval di y-axis
+    double idealDivisor = range / 6; // Target ~6 interval
+
+    // Pilih interval yang merupakan bilangan bulat dan membagi range dengan baik
+    {
+      if (idealDivisor <= 1) {
+        return 1; // Minimal interval 1
+      } else if (idealDivisor <= 2) {
+        return 2;
+      } else if (idealDivisor <= 5) {
+        return 5;
+      } else if (idealDivisor <= 10) {
+        return 10;
+      } else if (idealDivisor <= 20) {
+        return 20;
+      } else if (idealDivisor <= 25) {
+        return 25;
+      } else if (idealDivisor <= 50) {
+        return 50;
+      } else {
+        return 100;
+      }
+    }
   }
 
   // Helper method to convert abbreviated day names to full names

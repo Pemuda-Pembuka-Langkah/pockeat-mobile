@@ -43,6 +43,9 @@ void main() {
     
     // Nilai default untuk currentWeight di test
     const double testCurrentWeight = 75.0;
+    // Add initial weight and goal weight for proper percentage calculation
+    const double testInitialWeight = 80.0; // Starting weight
+    const double testGoalWeight = 70.0;    // Target weight
 
     // Fungsi untuk membuat widget untuk pengujian UI dasar saja
     Widget createBasicTestWidget() {
@@ -53,7 +56,9 @@ void main() {
             child: GoalProgressChart(
               displayData: testData,
               primaryGreen: testGreenColor,
-              currentWeight: testCurrentWeight, // Tambahkan parameter yang hilang
+              currentWeight: testCurrentWeight,
+              initialWeight: testInitialWeight,
+              goalWeight: testGoalWeight,
             ),
           ),
         ),
@@ -65,11 +70,12 @@ void main() {
       await tester.pumpWidget(createBasicTestWidget());
       await tester.pumpAndSettle(); // Tunggu animasi selesai
       
-      // Verify title text
-      expect(find.text('Goal Progress'), findsOneWidget);
+      // Verify title text - updated to match the actual implementation
+      expect(find.text('Weight Progress'), findsOneWidget);
       
-      // Verify goal percentage indicator
-      expect(find.text('2.5% of goal'), findsOneWidget);
+      // Verify goal percentage indicator - with the test values, this should be 50.0%
+      // (80.0 - 75.0) / (80.0 - 70.0) * 100 = 50.0%
+      expect(find.text('50.0% of goal'), findsOneWidget);
       
       // Verify flag icon
       expect(find.byIcon(Icons.flag), findsOneWidget);
@@ -86,7 +92,9 @@ void main() {
             child: GoalProgressChart(
               displayData: testData,
               primaryGreen: customColor,
-              currentWeight: testCurrentWeight, // Tambahkan parameter yang hilang
+              currentWeight: testCurrentWeight,
+              initialWeight: testInitialWeight,
+              goalWeight: testGoalWeight,
             ),
           ),
         ),
@@ -132,7 +140,9 @@ void main() {
             child: GoalProgressChart(
               displayData: [],
               primaryGreen: testGreenColor,
-              currentWeight: testCurrentWeight, // Tambahkan parameter yang hilang
+              currentWeight: testCurrentWeight,
+              initialWeight: testInitialWeight,
+              goalWeight: testGoalWeight,
             ),
           ),
         ),
@@ -141,6 +151,33 @@ void main() {
       
       // Chart should still render without errors
       expect(find.byType(SfCartesianChart), findsOneWidget);
+    });
+
+    // Test for goal progress percentage calculation
+    test('calculates goal progress percentage correctly', () {
+      // Create the widget and render it to check the displayed text
+      final widget = GoalProgressChart(
+        displayData: testData,
+        primaryGreen: testGreenColor,
+        currentWeight: 75.0,  
+        initialWeight: 80.0,  // Starting at 80 kg
+        goalWeight: 70.0,     // Goal is 70 kg
+      );
+      
+      // Create a test context to build the widget
+      final BuildContext context = TestWidgetsFlutterBinding.ensureInitialized().rootElement as BuildContext;
+      
+      // Build the widget to get the actual UI
+      final Column columnWidget = widget.build(context) as Column;
+      
+      // First row contains the goal percentage indicator
+      final Row row = columnWidget.children[0] as Row;
+      final Container container = row.children[1] as Container;
+      final Row innerRow = container.child as Row;
+      final Text text = innerRow.children[2] as Text;
+      
+      // Should be (80-75)/(80-70) * 100 = 50.0%
+      expect(text.data, '50.0% of goal');
     });
 
     // Alih-alih merender chart asli dan mengekstrak value mapper-nya,
@@ -167,7 +204,9 @@ void main() {
       final chart = GoalProgressChart(
         displayData: testData,
         primaryGreen: testGreenColor,
-        currentWeight: testCurrentWeight, // Tambahkan parameter yang hilang
+        currentWeight: testCurrentWeight,
+        initialWeight: testInitialWeight,
+        goalWeight: testGoalWeight,
       );
       
       final columnWidget = chart.build(TestWidgetsFlutterBinding.ensureInitialized().rootElement as BuildContext) as Column;
