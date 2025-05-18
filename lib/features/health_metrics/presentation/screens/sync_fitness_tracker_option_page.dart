@@ -1,7 +1,5 @@
 // sync_fitness_tracker_option_page.dart
 
-// ignore_for_file: use_build_context_synchronously
-
 // Flutter imports:
 import 'package:flutter/material.dart';
 
@@ -9,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
 // Project imports:
+import '../widgets/onboarding_progress_indicator.dart';
 import 'package:pockeat/features/sync_fitness_tracker/services/health_connect_sync.dart';
 import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
-import '../widgets/onboarding_progress_indicator.dart';
 
 class SyncFitnessTrackerOptionPage extends StatefulWidget {
   const SyncFitnessTrackerOptionPage({super.key});
@@ -318,9 +316,6 @@ class _SyncFitnessTrackerOptionPageState
                                     // Check if Health Connect is available
                                     final isAvailable = await fitnessSync
                                         .isHealthConnectAvailable();
-
-                                    // Add mounted check before using context after async operation
-                                    if (!mounted) return;
 
                                     if (isAvailable) {
                                       // Show explanation dialog
