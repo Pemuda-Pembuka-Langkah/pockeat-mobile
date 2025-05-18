@@ -313,11 +313,33 @@ class _SyncFitnessTrackerOptionPageState
                                   final fitnessSync =
                                       GetIt.instance<FitnessTrackerSync>();
                                   try {
-                                    // Show dialog for Health Connect
-                                    await _showHealthConnectExplanation(
-                                        context, fitnessSync);
-                                    debugPrint(
-                                        "Dialog handling completed, should already be navigating to pet page");
+                                    // Check if Health Connect is available
+                                    final isAvailable = await fitnessSync
+                                        .isHealthConnectAvailable();
+
+                                    // Add mounted check before using context after async operation
+                                    if (!context.mounted) return;
+
+                                    if (isAvailable) {
+                                      // Show explanation dialog
+                                      await _showHealthConnectExplanation(
+                                          context, fitnessSync);
+                                      debugPrint(
+                                          "Dialog handling completed, should navigate to pet page");
+                                    } else {
+                                      // Health Connect not available, show message
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Health Connect is not available on this device'),
+                                          backgroundColor: Colors.orange,
+                                          duration: Duration(seconds: 3),
+                                        ),
+                                      );
+                                      debugPrint(
+                                          "Health Connect not available, navigating to pet page anyway");
+                                    }
                                   } catch (e) {
                                     debugPrint(
                                         'Error checking Health Connect: $e');
