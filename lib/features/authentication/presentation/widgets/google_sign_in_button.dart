@@ -58,12 +58,12 @@ class GoogleSignInButton extends StatelessWidget {
             }
           } catch (e) {
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Error: ${e.toString()}'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(
+              //     content: Text('Error: ${e.toString()}'),
+              //     backgroundColor: Colors.red,
+              //   ),
+              // );
             }
           }
         },
