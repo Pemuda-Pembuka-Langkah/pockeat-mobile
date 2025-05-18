@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import '../widgets/macronutrient_bar.dart';
 
 class CalorieMacronutrientCard extends StatelessWidget {
@@ -45,7 +48,8 @@ class CalorieMacronutrientCard extends StatelessWidget {
                   color: primaryGreen.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.local_fire_department, color: primaryGreen, size: 24),
+                child: Icon(Icons.local_fire_department,
+                    color: primaryGreen, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(

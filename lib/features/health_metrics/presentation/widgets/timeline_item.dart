@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class TimelineItem extends StatelessWidget {
@@ -56,7 +57,7 @@ class TimelineItem extends StatelessWidget {
           ],
         ),
         const SizedBox(width: 16),
-        
+
         // Content
         Expanded(
           child: Column(

@@ -95,7 +95,7 @@ class HeartBarWidget extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Row(
+          title: const Row(
             children: [
               Icon(Icons.favorite, color: Colors.red),
               SizedBox(width: 8),
@@ -111,17 +111,17 @@ class HeartBarWidget extends StatelessWidget {
                   'How Hearts Work',
                   'Each heart represents 25% of your daily calorie goal:',
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 _buildHeartExplanation('0-25%', '1st heart'),
                 _buildHeartExplanation('25-50%', '2nd heart'),
                 _buildHeartExplanation('50-75%', '3rd heart'),
                 _buildHeartExplanation('75-100%', '4th heart'),
-                Divider(height: 24),
+                const Divider(height: 24),
                 _buildInfoSection(
                   'Keep Your Panda Happy',
                   'Log your meals regularly to keep your panda healthy and happy. Try to fill all hearts each day!',
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 _buildInfoSection(
                   'Avoid Overfeeding',
                   'If you exceed your daily calorie target, your panda will be too full and sad. The hearts will turn purple as a warning.',
@@ -132,7 +132,7 @@ class HeartBarWidget extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Got it!'),
+              child: const Text('Got it!'),
             ),
           ],
           shape: RoundedRectangleBorder(
@@ -149,15 +149,15 @@ class HeartBarWidget extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 15,
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           description,
-          style: TextStyle(fontSize: 14),
+          style: const TextStyle(fontSize: 14),
         ),
       ],
     );
@@ -168,9 +168,10 @@ class HeartBarWidget extends StatelessWidget {
       padding: const EdgeInsets.only(left: 16, bottom: 4),
       child: Row(
         children: [
-          Icon(Icons.favorite, color: Colors.red, size: 16),
-          SizedBox(width: 8),
-          Text('$percentage → $heartLabel', style: TextStyle(fontSize: 14)),
+          const Icon(Icons.favorite, color: Colors.red, size: 16),
+          const SizedBox(width: 8),
+          Text('$percentage → $heartLabel',
+              style: const TextStyle(fontSize: 14)),
         ],
       ),
     );

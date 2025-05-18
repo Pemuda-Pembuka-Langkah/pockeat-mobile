@@ -240,7 +240,7 @@ class FoodSummaryCard extends StatelessWidget {
       return _buildFoodImagePlaceholder();
     }
 
-    return Container(
+    return SizedBox(
       width: double.infinity,
       height: 180,
       child: Stack(

@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class MacronutrientBar extends StatelessWidget {
@@ -17,20 +18,21 @@ class MacronutrientBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Define colors for each macronutrient
-    final Map<String, Color> macroColors = customColors ?? {
-      'Protein': const Color(0xFF5E60CE), // Purple
-      'Carbs': const Color(0xFFFF6B6B),   // Pink
-      'Fat': const Color(0xFFFFC700),     // Yellow
-    };
-    
+    final Map<String, Color> macroColors = customColors ??
+        {
+          'Protein': const Color(0xFF5E60CE), // Purple
+          'Carbs': const Color(0xFFFF6B6B), // Pink
+          'Fat': const Color(0xFFFFC700), // Yellow
+        };
+
     // Calculate total for percentage
     final total = macros.values.fold(0.0, (sum, value) => sum + value);
-    
+
     return Column(
       children: macros.entries.map((e) {
         final percentage = total > 0 ? (e.value / total * 100) : 0.0;
         final color = macroColors[e.key] ?? defaultColor;
-        
+
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Column(
@@ -51,7 +53,7 @@ class MacronutrientBar extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        "${e.key}",
+                        e.key,
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
                           color: textDarkColor,
@@ -83,7 +85,10 @@ class MacronutrientBar extends StatelessWidget {
                   // Progress bar
                   Container(
                     height: 6,
-                    width: MediaQuery.of(context).size.width * percentage / 100 * 0.7, // Adjusted for padding
+                    width: MediaQuery.of(context).size.width *
+                        percentage /
+                        100 *
+                        0.7, // Adjusted for padding
                     decoration: BoxDecoration(
                       color: color,
                       borderRadius: BorderRadius.circular(3),

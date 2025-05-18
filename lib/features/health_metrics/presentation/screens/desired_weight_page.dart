@@ -196,8 +196,9 @@ class _DesiredWeightPageState extends State<DesiredWeightPage>
                                     BlocBuilder<HealthMetricsFormCubit,
                                         HealthMetricsFormState>(
                                       builder: (context, state) {
-                                        if (state.weight == null)
+                                        if (state.weight == null) {
                                           return const SizedBox.shrink();
+                                        }
 
                                         return Container(
                                           padding: const EdgeInsets.all(16),

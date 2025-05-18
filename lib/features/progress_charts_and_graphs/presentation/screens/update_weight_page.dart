@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+// Project imports:
+import 'package:pockeat/features/weight_history/services/weight_service.dart';
 
 // coverage:ignore-start
 class UpdateWeightPage extends StatefulWidget {
@@ -20,6 +22,7 @@ class UpdateWeightPage extends StatefulWidget {
 
 class _UpdateWeightPageState extends State<UpdateWeightPage> {
   final Color primaryPink = const Color(0xFFFF6B6B);
+  final WeightService _weightService = WeightService();
 
   late double _currentWeight;
   bool _isSaving = false;
@@ -54,51 +57,30 @@ class _UpdateWeightPageState extends State<UpdateWeightPage> {
         throw Exception('No authenticated user found');
       }
 
-      // Query untuk mendapatkan dokumen health metrics user
-      final snapshot = await FirebaseFirestore.instance
-          .collection('health_metrics')
-          .where('userId', isEqualTo: user.uid)
-          .limit(1)
-          .get();
+      debugPrint('Attempting to save weight: $_currentWeight kg');
 
-      if (snapshot.docs.isNotEmpty) {
-        // Get existing data to retrieve height for BMI calculation
-        final existingData = snapshot.docs.first.data();
-        final double height = existingData['height']?.toDouble() ?? 170.0;
+      // Gunakan WeightService untuk update berat badan
+      await _weightService.updateTodayWeight(user.uid, _currentWeight);
 
-        // Calculate BMI
-        final double bmi =
-            _calculateBMI(height: height, weight: _currentWeight);
+      // Verifikasi data tersimpan dengan mengambil data terbaru
+      final latestWeight = await _weightService.getLatestWeight(user.uid);
+      debugPrint('Verified latest weight after save: $latestWeight kg');
 
-        // Update dokumen yang sudah ada
-        await snapshot.docs.first.reference.update({
-          'weight': _currentWeight,
-          'bmi': bmi, // Add BMI update
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
-      } else {
-        // Buat dokumen baru jika belum ada
-        // Using default height since we don't have one yet
-        const double defaultHeight = 170.0;
-        final double bmi =
-            _calculateBMI(height: defaultHeight, weight: _currentWeight);
-
-        await FirebaseFirestore.instance.collection('health_metrics').add({
-          'userId': user.uid,
-          'weight': _currentWeight,
-          'bmi': bmi, // Add BMI field
-          'height': defaultHeight, // Add default height
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
+      // Add mounted check before using BuildContext after await
+      if (mounted) {
+        Navigator.pop(context, _currentWeight.toString());
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Weight updated successfully'),
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
-
-      Navigator.pop(context, _currentWeight.toString());
     } catch (e) {
       // Add mounted check before using BuildContext after await
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update current weight')),
+          SnackBar(content: Text('Failed to update weight: $e')),
         );
       }
       debugPrint('Error saving current weight: $e');
@@ -110,13 +92,6 @@ class _UpdateWeightPageState extends State<UpdateWeightPage> {
         });
       }
     }
-  }
-
-  // BMI calculation function
-  double _calculateBMI({required double height, required double weight}) {
-    // height dalam cm → ubah ke meter
-    final heightInMeter = height / 100;
-    return weight / (heightInMeter * heightInMeter);
   }
 
   void _handleDragStart(DragStartDetails details) {
@@ -333,7 +308,6 @@ class WeightSliderPainter extends CustomPainter {
 
     // Tentukan interval berat
     final double totalWeightRange = maxWeight - minWeight;
-    final double pixelsPerKg = size.width / totalWeightRange;
 
     // Jumlah garis indikator (10 garis per kg)
     final int totalMarks = (totalWeightRange * 10).toInt();
