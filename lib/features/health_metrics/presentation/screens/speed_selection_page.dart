@@ -20,8 +20,7 @@ class SpeedSelectionPage extends StatefulWidget {
 
 class _SpeedSelectionPageState extends State<SpeedSelectionPage>
     with SingleTickerProviderStateMixin {
-class _SpeedSelectionPageState extends State<SpeedSelectionPage>
-    with SingleTickerProviderStateMixin {
+
   double _weeklyGoal = 0.5; // kg/week
   bool _isMaintenanceMode = false; // true when current weight = desired weight
 
