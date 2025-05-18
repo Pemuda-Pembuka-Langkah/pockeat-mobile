@@ -488,9 +488,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final smartExerciseLogRepository =
         Provider.of<SmartExerciseLogRepository>(context);
 
+    // Get navigation provider for route observer
+    final navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
+    
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: 'Pockeat',
+      // Add observer to track route changes and update bottom navigation
+      navigatorObservers: [
+        NavigationObserver(navigationProvider),
+      ],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,

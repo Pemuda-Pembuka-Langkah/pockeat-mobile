@@ -7,12 +7,31 @@ import 'package:provider/provider.dart';
 // ignore: depend_on_referenced_packages
 
 // coverage:ignore-start
+// A RouteObserver that can be used to track route changes
+final navRouteObserver = RouteObserver<PageRoute>();
+
 class NavigationProvider extends ChangeNotifier {
   int _currentIndex = 0;
   bool _isMenuOpen = false;
 
   int get currentIndex => _currentIndex;
   bool get isMenuOpen => _isMenuOpen;
+
+  // Update the navigation index based on the current route
+  void updateIndexFromRoute(String routeName) {
+    switch (routeName) {
+      case '/':
+        setIndex(0);
+        break;
+      case '/analytic':
+        setIndex(1);
+        break;
+      case '/profile':
+        setIndex(4);
+        break;
+      // Add other routes as needed
+    }
+  }
 
   void setIndex(int index) {
     _currentIndex = index;
@@ -27,6 +46,45 @@ class NavigationProvider extends ChangeNotifier {
   void closeMenu() {
     _isMenuOpen = false;
     notifyListeners();
+  }
+}
+
+// RouteAware implementation for navigation synchronization
+class NavigationObserver extends RouteObserver<PageRoute<dynamic>> {
+  final NavigationProvider navigationProvider;
+
+  NavigationObserver(this.navigationProvider);
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPush(route, previousRoute);
+    if (route is PageRoute) {
+      _updateNavigationIndex(route);
+    }
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    if (newRoute is PageRoute) {
+      _updateNavigationIndex(newRoute);
+    }
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPop(route, previousRoute);
+    if (previousRoute is PageRoute && route is PageRoute) {
+      _updateNavigationIndex(previousRoute);
+    }
+  }
+
+  void _updateNavigationIndex(PageRoute<dynamic> route) {
+    // Extract the route name from settings
+    final routeName = route.settings.name;
+    if (routeName != null) {
+      navigationProvider.updateIndexFromRoute(routeName);
+    }
   }
 }
 
