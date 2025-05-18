@@ -213,10 +213,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        if (didPop) return;
-        // Jika user menekan tombol back, arahkan ke halaman login
-        // daripada ke halaman utama yang memerlukan auth
-        Navigator.pushReplacementNamed(context, '/login');
+        Navigator.of(context).pop();
       },
       child: Scaffold(
         backgroundColor: bgColor,
@@ -298,7 +295,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: primaryPink),
+                borderSide: BorderSide(color: primaryGreen),
               ),
             ),
             validator: (value) {
@@ -328,7 +325,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: primaryPink),
+                borderSide: BorderSide(color: primaryGreen),
               ),
             ),
             validator: (value) {
@@ -377,7 +374,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: primaryPink),
+                borderSide: BorderSide(color: primaryGreen),
               ),
             ),
             validator: (value) {
@@ -442,7 +439,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: primaryPink),
+                borderSide: BorderSide(color: primaryGreen),
               ),
             ),
             validator: (value) {
@@ -469,7 +466,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 height: 24,
                 width: 24,
                 child: Checkbox(
-                  activeColor: primaryPink,
+                  activeColor: primaryGreen,
                   value: _termsAccepted,
                   onChanged: (value) {
                     setState(() {
@@ -491,7 +488,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       TextSpan(
                         text: 'Terms and Conditions',
                         style: TextStyle(
-                          color: primaryPink,
+                          color: primaryGreen,
                           fontWeight: FontWeight.bold,
                         ),
                         recognizer: TapGestureRecognizer()
@@ -518,11 +515,11 @@ class _RegisterPageState extends State<RegisterPage> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _register,
               style: ElevatedButton.styleFrom(
-                backgroundColor: primaryPink,
+                backgroundColor: primaryGreen,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                disabledBackgroundColor: primaryPink.withOpacity(0.5),
+                disabledBackgroundColor: primaryGreen.withOpacity(0.5),
               ),
               child: _isLoading
                   ? const CircularProgressIndicator(
@@ -590,7 +587,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   TextSpan(
                     text: 'Sign In',
                     style: TextStyle(
-                      color: primaryPink,
+                      color: primaryGreen,
                       fontWeight: FontWeight.bold,
                     ),
                     recognizer: TapGestureRecognizer()
