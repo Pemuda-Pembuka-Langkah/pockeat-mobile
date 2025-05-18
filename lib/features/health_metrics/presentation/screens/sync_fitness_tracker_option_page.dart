@@ -369,8 +369,8 @@ class _SyncFitnessTrackerOptionPageState
                                 },
                                 //coverage:ignore-end
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: primaryGreen,
-                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: primaryGreen,
                                   minimumSize: const Size(double.infinity, 56),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
@@ -382,7 +382,7 @@ class _SyncFitnessTrackerOptionPageState
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 16),
                                 ),
-                                icon: const Icon(Icons.fitness_center),
+                                icon: const Icon(Icons.health_and_safety),
                                 label: const Text(
                                   'Open Health Connect',
                                   style: TextStyle(
