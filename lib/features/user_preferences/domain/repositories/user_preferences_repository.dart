@@ -22,12 +22,6 @@ abstract class UserPreferencesRepository {
 
   /// Calculate rollover calories from previous day
   Future<int> calculateRolloverCalories(String userId);
-
-  /// Check if sync fitness tracker is enabled
-  Future<bool> isSyncFitnessTrackerEnabled(String userId);
-
-  /// Set sync fitness tracker setting
-  Future<void> setSyncFitnessTrackerEnabled(String userId, bool enabled);
 }
 
 /// Implementation of UserPreferencesRepository using Firebase and SharedPreferences
@@ -40,8 +34,6 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
 
   // Key for the rollover calories setting
   static const String _rolloverCaloriesKey = 'rollover_calories_enabled';
-
-  // Removed the unused field _syncFitnessTrackerKey
 
 //coverage:ignore-start
   UserPreferencesRepositoryImpl({
@@ -280,25 +272,4 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
       return 0;
     }
   }
-
-//coverage:ignore-start
-  @override
-  Future<bool> isSyncFitnessTrackerEnabled(String userId) async {
-    // This is a placeholder method to satisfy the interface
-    // Fitness tracker settings are only stored locally in the app
-    // and should be accessed via SharedPreferences directly
-    debugPrint('isSyncFitnessTrackerEnabled repository method called (NO-OP)');
-    return false;
-  }
-
-  @override
-  Future<void> setSyncFitnessTrackerEnabled(String userId, bool enabled) async {
-    // This is a placeholder method to satisfy the interface
-    // Fitness tracker settings are only stored locally in the app
-    // and should be accessed via SharedPreferences directly
-    debugPrint(
-        'setSyncFitnessTrackerEnabled repositorjy method called (NO-OP)');
-    return;
-  }
-//coverage:ignore-end
 }

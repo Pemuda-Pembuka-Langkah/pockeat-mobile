@@ -54,7 +54,7 @@ class PetHomepageSection extends StatelessWidget {
                   heart: petInfo?.heart ?? 0,
                   isCalorieOverTarget: petInfo?.isCalorieOverTarget ?? false,
                 ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Pet Companion Widget
           Center(

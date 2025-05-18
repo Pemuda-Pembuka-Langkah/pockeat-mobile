@@ -32,9 +32,9 @@ class _FoodInputPageState extends State<FoodInputPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: primaryYellow,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: primaryYellow,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
@@ -45,7 +45,7 @@ class _FoodInputPageState extends State<FoodInputPage> {
           style: TextStyle(
             color: Colors.black87,
             fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -83,7 +83,7 @@ class _FoodInputPageState extends State<FoodInputPage> {
                 color: primaryGreen,
                 route: '/scan',
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Manual Text Input Option
               _buildInputOption(
@@ -94,7 +94,7 @@ class _FoodInputPageState extends State<FoodInputPage> {
                 color: primaryPink,
                 route: '/food-text-input',
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Database Option
               _buildInputOption(
@@ -105,7 +105,7 @@ class _FoodInputPageState extends State<FoodInputPage> {
                 color: Colors.blue,
                 route: '/nutrition-database',
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Saved Meals Option
               _buildInputOption(
@@ -134,7 +134,7 @@ class _FoodInputPageState extends State<FoodInputPage> {
     VoidCallback? onTap,
   }) {
     return SizedBox(
-      height: 100,
+      height: 110,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -182,11 +182,16 @@ class _FoodInputPageState extends State<FoodInputPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: color.withOpacity(0.5),
+                width: 1.5,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: color.withOpacity(0.2),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -195,8 +200,8 @@ class _FoodInputPageState extends State<FoodInputPage> {
               child: Row(
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 52,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: color,
                       borderRadius: BorderRadius.circular(12),
@@ -204,7 +209,7 @@ class _FoodInputPageState extends State<FoodInputPage> {
                     child: Icon(
                       icon,
                       color: Colors.white,
-                      size: 24,
+                      size: 26,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -235,7 +240,7 @@ class _FoodInputPageState extends State<FoodInputPage> {
                   Icon(
                     Icons.arrow_forward_ios,
                     color: color,
-                    size: 16,
+                    size: 18,
                   ),
                 ],
               ),

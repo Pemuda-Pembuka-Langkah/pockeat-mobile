@@ -17,13 +17,12 @@ class FoodTextInputPage extends StatelessWidget {
   final Color primaryGreen = const Color(0xFF4ECDC4);
 
   const FoodTextInputPage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: primaryYellow,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: primaryYellow,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
@@ -34,7 +33,7 @@ class FoodTextInputPage extends StatelessWidget {
           style: TextStyle(
             color: Colors.black87,
             fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
@@ -46,7 +45,7 @@ class FoodTextInputPage extends StatelessWidget {
             const Text(
               'Enter your food details',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 height: 1.3,
                 color: Colors.black87,
@@ -60,7 +59,7 @@ class FoodTextInputPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryPink.withOpacity(0.2),
+                      color: Colors.black.withOpacity(0.1),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),

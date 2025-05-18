@@ -33,7 +33,7 @@ class CorrectionButton extends StatelessWidget {
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryYellow.withOpacity(0.3),
+          backgroundColor: Colors.grey.withOpacity(0.2),
           foregroundColor: primaryPink,
           elevation: 0,
           shape: RoundedRectangleBorder(

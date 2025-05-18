@@ -24,6 +24,24 @@ class HeartBarSkeleton extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // Title skeleton
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SkeletonLoading(height: 16, width: 100),
+              const SizedBox(width: 8),
+              Container(
+                width: 18,
+                height: 18,
+                decoration: const BoxDecoration(
+                  color: Colors.grey,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Hearts row
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(
@@ -34,6 +52,9 @@ class HeartBarSkeleton extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 10),
+          // Skeleton for status text
+          const SkeletonLoading(height: 16, width: 160),
         ],
       ),
     );

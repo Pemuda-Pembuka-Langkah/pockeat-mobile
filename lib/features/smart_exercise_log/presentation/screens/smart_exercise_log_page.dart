@@ -28,9 +28,10 @@ class SmartExerciseLogPage extends StatefulWidget {
 }
 
 class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
-  // Consistent theme colors
+  // Theme colors - matching homepage style
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPurple = const Color(0xFF9B6BFF);
+  final Color primaryPink = const Color(0xFFFF6B6B);
 
   // State variables
   bool isAnalyzing = false;
@@ -200,9 +201,9 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: primaryYellow,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: primaryYellow,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),

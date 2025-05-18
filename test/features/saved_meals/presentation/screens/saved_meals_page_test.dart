@@ -154,7 +154,7 @@ void main() {
     expect(find.text('No saved meals yet'),
         findsOneWidget); // Updated to match actual implementation
     expect(find.byType(ElevatedButton), findsOneWidget);
-    expect(find.text('Add your first meal'), findsOneWidget);
+    expect(find.text('Save your first meal!'), findsOneWidget);
   });
 
   testWidgets('SavedMealsPage displays error state when error occurs',
