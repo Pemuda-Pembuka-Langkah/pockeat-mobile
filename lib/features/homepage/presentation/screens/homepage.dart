@@ -89,14 +89,11 @@ class _HomePageState extends State<HomePage>
               elevation: 0,
               toolbarHeight: 60,
               automaticallyImplyLeading: false,
-              title: Row(
-                children: [
-                  Image.asset(
-                    'assets/icons/LogoPanjang_PockEat_draft_transparent.png',
-                    width: 100,
-                    height: 100,
-                  ),
-                ],
+              centerTitle: true, // Tambahkan centerTitle: true
+              title: Image.asset(
+                'assets/icons/LogoPanjang_PockEat_draft_transparent.png',
+                width: 100,
+                height: 100,
               ),
             ),
           ],
