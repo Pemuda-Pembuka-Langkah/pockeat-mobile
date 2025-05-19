@@ -65,7 +65,7 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
                       
                       // Title
                       Text(
-                        'Complete Your Profile',
+                        'Complete Your Health Profile',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 28,
@@ -89,40 +89,8 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
                       
                       const SizedBox(height: 40),
                       
-                      // White card with features
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            _buildFeatureItem(
-                              icon: Icons.person_outline,
-                              text: 'Set your health goals',
-                            ),
-                            const Divider(height: 24),
-                            _buildFeatureItem(
-                              icon: Icons.fitness_center_outlined, 
-                              text: 'Define your activity level',
-                            ),
-                            const Divider(height: 24),
-                            _buildFeatureItem(
-                              icon: Icons.restaurant_outlined,
-                              text: 'Get a personalized PockEat experience',
-                            ),
-                          ],
-                        ),
-                      ),
+                      // Spacer instead of features
+                      const SizedBox(height: 20),
                       
                       const SizedBox(height: 40),
                       
@@ -131,7 +99,7 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.of(context).pushReplacementNamed('/onboarding');
+                            Navigator.of(context).pushNamed('/onboarding');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryGreen,
@@ -162,37 +130,6 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
     );
   }
 
-  // Helper method to build feature items
-  Widget _buildFeatureItem({required IconData icon, required String text}) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: primaryGreen.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: primaryGreen,
-            size: 24,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: 16,
-              color: textDark,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   // Show dialog confirming if user wants to exit the app
   // coverage:ignore-start
   Future<bool> _showExitConfirmationDialog(BuildContext context) async {
@@ -203,7 +140,7 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
         return AlertDialog(
           title: const Text('Exit App?'),
           content: const Text(
-            'You need to complete your profile to use Pockeat. '
+            'You need to complete your health profile to use Pockeat. '
             'Do you want to exit the app?'
           ),
           shape: RoundedRectangleBorder(

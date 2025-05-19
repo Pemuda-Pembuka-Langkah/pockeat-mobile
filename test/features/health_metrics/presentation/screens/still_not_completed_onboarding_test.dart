@@ -90,7 +90,7 @@ void main() {
       expect(find.byType(Container), findsAtLeastNWidgets(1));
       
       // Verify main title displayed
-      expect(find.text('Complete Your Profile'), findsOneWidget);
+      expect(find.text('Complete Your Health Profile'), findsOneWidget);
     });
     
     testWidgets('Page has Lottie animation displayed', (WidgetTester tester) async {
@@ -121,28 +121,7 @@ void main() {
       expect(sizedBox.width, 220);
     });
     
-    testWidgets('Page displays feature items with icons', (WidgetTester tester) async {
-      // Use a widget with a fixed size to prevent overflow during tests
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SizedBox(
-            width: 800,
-            height: 1200,
-            child: const StillNotCompletedOnboardingPage(),
-          ),
-        ),
-      );
-      
-      // Verify feature items text
-      expect(find.text('Set your health goals'), findsOneWidget);
-      expect(find.text('Define your activity level'), findsOneWidget);
-      expect(find.text('Get a personalized PockEat experience'), findsOneWidget);
-      
-      // Verify icons
-      expect(find.byIcon(Icons.person_outline), findsOneWidget);
-      expect(find.byIcon(Icons.fitness_center_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.restaurant_outlined), findsOneWidget);
-    });
+    // Feature items test removed as features were removed from the page
     
     testWidgets('Page has Start Now button with correct style', (WidgetTester tester) async {
       // Use a widget with a fixed size to prevent overflow during tests
@@ -182,7 +161,7 @@ void main() {
   
   // Group 3: Test Widget Design and Styling
   group('Widget Design and Styling Tests', () {
-    testWidgets('Feature card has correct styling', (WidgetTester tester) async {
+    testWidgets('Start Now button has correct styling', (WidgetTester tester) async {
       // Build the widget
       await tester.pumpWidget(
         MaterialApp(
@@ -194,24 +173,18 @@ void main() {
         ),
       );
       
-      // Find the feature card container
-      final cardFinder = find.ancestor(
-        of: find.text('Set your health goals'),
-        matching: find.byType(Container),
-      ).last;
+      // Find the button directly
+      final buttonFinder = find.widgetWithText(ElevatedButton, 'Start Now');
+      expect(buttonFinder, findsOneWidget);
       
-      expect(cardFinder, findsOneWidget);
+      // Verify button styling
+      final button = tester.widget<ElevatedButton>(buttonFinder);
+      final style = button.style;
       
-      // Verify the card styling
-      final container = tester.widget<Container>(cardFinder);
-      final decoration = container.decoration as BoxDecoration;
-      
-      expect(decoration.color, Colors.white);
-      expect(decoration.borderRadius, isA<BorderRadius>());
-      expect(decoration.boxShadow, isNotNull);
+      expect(style, isNotNull);
     });
     
-    testWidgets('Feature items have icon with accent color background', (WidgetTester tester) async {
+    testWidgets('Page layout has expected structure', (WidgetTester tester) async {
       // Build the widget
       await tester.pumpWidget(
         MaterialApp(
@@ -223,21 +196,12 @@ void main() {
         ),
       );
       
-      // Find a feature item icon container
-      final iconContainerFinder = find.ancestor(
-        of: find.byIcon(Icons.person_outline),
-        matching: find.byType(Container),
-      ).first;
-      
-      expect(iconContainerFinder, findsOneWidget);
-      
-      // Verify the icon container styling
-      final container = tester.widget<Container>(iconContainerFinder);
-      final decoration = container.decoration as BoxDecoration;
-      
-      // The color should be a semi-transparent version of the primary green
-      expect(decoration.color, isA<Color>());
-      expect(decoration.borderRadius, isA<BorderRadius>());
+      // Check for the main structural elements
+      expect(find.byType(Column), findsWidgets);
+      expect(find.byType(SizedBox), findsWidgets);
+      expect(find.byType(Lottie), findsOneWidget);
+      expect(find.text('Complete Your Health Profile'), findsOneWidget);
+      expect(find.text('Start Now'), findsOneWidget);
     });
   });
 }
