@@ -203,7 +203,7 @@ void main() {
         metValue: 0.0, // Empty MET value for unknown workout
         timestamp: DateTime.now(),
         originalInput: 'Exercise this morning',
-        missingInfo: ['type', 'duration', 'intensity'],
+        missingInfo: ['exercise_type', 'duration', 'intensity'],
         userId: 'test-user-123',
       );
 
