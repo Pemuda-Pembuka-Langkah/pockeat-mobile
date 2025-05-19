@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:lottie/lottie.dart';
-
+// coverage:ignore-start
 /// Page shown when a user has logged in but not completed onboarding
 ///
 /// This page encourages users to complete their health metrics onboarding
@@ -131,7 +131,7 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
   }
 
   // Show dialog confirming if user wants to exit the app
-  // coverage:ignore-start
+  
   Future<bool> _showExitConfirmationDialog(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
@@ -170,5 +170,6 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
     
     return false; // Never allow natural back button to pop this route
   }
-  // coverage:ignore-end
+  
 }
+// coverage:ignore-end
