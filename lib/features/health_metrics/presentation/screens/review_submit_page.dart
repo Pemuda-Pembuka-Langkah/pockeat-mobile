@@ -38,7 +38,7 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
 
   late AnimationController _animationController;
   late Animation<double> _animation;
-  
+
   // Scroll controller to track if user has reached the bottom
   final ScrollController _scrollController = ScrollController();
   bool _hasScrolledToBottom = false;
@@ -61,14 +61,15 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
 
     // Add scroll listener to detect when user reaches the bottom
     _scrollController.addListener(_onScroll);
-    
+
     _animationController.forward();
   }
-  
+
   // Check if user has scrolled to bottom (or near bottom)
   void _onScroll() {
     if (!_hasScrolledToBottom &&
-        _scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 80) {
+        _scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 80) {
       setState(() {
         _hasScrolledToBottom = true;
       });
@@ -217,173 +218,183 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
                     'Fat': result.fatGrams,
                   };
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-                    
-                    // Simplified header without line accent
-                    Column(
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Your Health Profile",
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: textDarkColor,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "Almost there! Review your information below.",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: textDarkColor.withOpacity(0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: _scrollController,
-                        child: Column(
+                        const SizedBox(height: 20),
+
+                        // Simplified header without line accent
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Animated info card
-                            AnimatedBuilder(
-                              animation: _animation,
-                              builder: (context, child) {
-                                return Transform.translate(
-                                  offset: Offset(0, 20 * (1 - _animation.value)),
-                                  child: Opacity(
-                                    opacity: _animation.value,
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: UserInformationCard(
-                                goalsDisplay: goalsDisplay,
-                                state: state,
-                                primaryGreen: primaryGreen,
-                                textDarkColor: textDarkColor,
-                                calculateAge: _calculateAge,
-                                formatActivityLevel: formatActivityLevel,
+                            Text(
+                              "Your Health Profile",
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: textDarkColor,
                               ),
                             ),
-                            
-                            const SizedBox(height: 24),
-                            
-                            // Animated calorie card
-                            AnimatedBuilder(
-                              animation: _animation,
-                              builder: (context, child) {
-                                return Transform.translate(
-                                  offset: Offset(0, 20 * (1 - _animation.value)),
-                                  child: Opacity(
-                                    opacity: _animation.value,
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: CalorieMacronutrientCard(
-                                tdee: result.tdee,
-                                macros: macros,
-                                primaryGreen: primaryGreen,
-                                textDarkColor: textDarkColor,
+                            const SizedBox(height: 6),
+                            Text(
+                              "Almost there! Review your information below.",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: textDarkColor.withOpacity(0.7),
                               ),
                             ),
-                            
-                            const SizedBox(height: 24),
-                            
-                            // Animated personal message
-                            AnimatedBuilder(
-                              animation: _animation,
-                              builder: (context, child) {
-                                return Transform.translate(
-                                  offset: Offset(0, 20 * (1 - _animation.value)),
-                                  child: Opacity(
-                                    opacity: _animation.value,
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: PersonalizedMessageWidget(
-                                goals: goals,
-                                primaryGreen: primaryGreen,
-                                textDarkColor: textDarkColor,
-                              ),
-                            ),
-                            
-                            const SizedBox(height: 12),
                           ],
                         ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 30),
-                    
-                    // Continue button with improved design
-                    Container(
-                      decoration: BoxDecoration(
-                        boxShadow: _hasScrolledToBottom ? [
-                          BoxShadow(
-                            color: primaryGreen.withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
+
+                        const SizedBox(height: 24),
+
+                        Expanded(
+                          child: SingleChildScrollView(
+                            controller: _scrollController,
+                            child: Column(
+                              children: [
+                                // Animated info card
+                                AnimatedBuilder(
+                                  animation: _animation,
+                                  builder: (context, child) {
+                                    return Transform.translate(
+                                      offset: Offset(
+                                          0, 20 * (1 - _animation.value)),
+                                      child: Opacity(
+                                        opacity: _animation.value,
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: UserInformationCard(
+                                    goalsDisplay: goalsDisplay,
+                                    state: state,
+                                    primaryGreen: primaryGreen,
+                                    textDarkColor: textDarkColor,
+                                    calculateAge: _calculateAge,
+                                    formatActivityLevel: formatActivityLevel,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 24),
+
+                                // Animated calorie card
+                                AnimatedBuilder(
+                                  animation: _animation,
+                                  builder: (context, child) {
+                                    return Transform.translate(
+                                      offset: Offset(
+                                          0, 20 * (1 - _animation.value)),
+                                      child: Opacity(
+                                        opacity: _animation.value,
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: CalorieMacronutrientCard(
+                                    tdee: result.tdee,
+                                    macros: macros,
+                                    primaryGreen: primaryGreen,
+                                    textDarkColor: textDarkColor,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 24),
+
+                                // Animated personal message
+                                AnimatedBuilder(
+                                  animation: _animation,
+                                  builder: (context, child) {
+                                    return Transform.translate(
+                                      offset: Offset(
+                                          0, 20 * (1 - _animation.value)),
+                                      child: Opacity(
+                                        opacity: _animation.value,
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: PersonalizedMessageWidget(
+                                    goals: goals,
+                                    primaryGreen: primaryGreen,
+                                    textDarkColor: textDarkColor,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 12),
+                              ],
+                            ),
                           ),
-                        ] : [],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _hasScrolledToBottom 
-                              ? primaryGreen 
-                              : primaryGreenDisabled,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 58),
-                          shape: RoundedRectangleBorder(
+                        ),
+
+                        const SizedBox(height: 30),
+
+                        // Continue button with improved design
+                        Container(
+                          decoration: BoxDecoration(
+                            boxShadow: _hasScrolledToBottom
+                                ? [
+                                    BoxShadow(
+                                      color: primaryGreen.withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ]
+                                : [],
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          elevation: _hasScrolledToBottom ? 4 : 0,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: _hasScrolledToBottom
+                                  ? primaryGreen
+                                  : primaryGreenDisabled,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(double.infinity, 58),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              elevation: _hasScrolledToBottom ? 4 : 0,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            onPressed: _hasScrolledToBottom
+                                ? () async {
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setBool(
+                                        'onboardingInProgress', false);
+                                    final loginService =
+                                        GetIt.instance<LoginService>();
+                                    final user =
+                                        await loginService.getCurrentUser();
+                                    if (user != null) {
+                                      final formCubit = context
+                                          .read<HealthMetricsFormCubit>();
+                                      formCubit.setUserId(user.uid);
+                                      await formCubit.submit();
+                                      Navigator.pushReplacementNamed(
+                                          context, '/');
+                                    } else {
+                                      Navigator.pushNamed(
+                                          context, '/free-trial');
+                                    }
+                                  }
+                                : null,
+                            child: const Text(
+                              "Continue",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
-                      onPressed: _hasScrolledToBottom 
-                          ? () async {
-                              final prefs = await SharedPreferences.getInstance();
-                              await prefs.setBool('onboardingInProgress', false);
-                              final loginService = GetIt.instance<LoginService>();
-                              final user = await loginService.getCurrentUser();
-                              if (user != null) {
-                                final formCubit = context.read<HealthMetricsFormCubit>();
-                                formCubit.setUserId(user.uid);
-                                await formCubit.submit();
-                                Navigator.pushReplacementNamed(context, '/');
-                              } else {
-                                Navigator.pushNamed(context, '/register');
-                              }
-                            } 
-                          : null,
-                      child: const Text(
-                        "Continue",
-                        style: TextStyle(
-                          fontSize: 18, 
-                          fontWeight: FontWeight.bold
-                        ),
-                      ),
+                        const SizedBox(height: 24),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
