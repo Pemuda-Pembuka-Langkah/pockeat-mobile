@@ -754,6 +754,8 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
                         _weightGoal = result;
                         _isLoadingWeightGoal = false;
                       });
+
+                      await _loadWeightProgressData();
                     }
                   },
           ),
