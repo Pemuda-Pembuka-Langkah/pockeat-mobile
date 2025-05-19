@@ -250,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
         await _logoutService.logout();
 
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/login');
+          Navigator.of(context).pushReplacementNamed('/welcome');
         }
       }
     } catch (e) {
