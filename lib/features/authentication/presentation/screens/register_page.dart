@@ -575,31 +575,7 @@ class _RegisterPageState extends State<RegisterPage> {
             isRegister: true, // Set to register mode
           ),
 
-          const SizedBox(height: 20),
-
-          // Link to login page
-          Center(
-            child: RichText(
-              text: TextSpan(
-                text: 'Already have an account? ',
-                style: TextStyle(color: Colors.grey[700]),
-                children: [
-                  TextSpan(
-                    text: 'Sign In',
-                    style: TextStyle(
-                      color: primaryGreen,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        // Navigate to login page
-                        Navigator.pushReplacementNamed(context, '/login');
-                      },
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Removed login link
         ],
       ),
     );
@@ -661,18 +637,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ),
 
-        const SizedBox(height: 16),
-
-        // Back to login button
-        TextButton(
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, '/login');
-          },
-          child: Text(
-            'Back to Sign In',
-            style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-          ),
-        ),
+        // Back to login button removed
       ],
     );
   }
