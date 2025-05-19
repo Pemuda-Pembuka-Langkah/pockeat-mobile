@@ -207,7 +207,7 @@ class AnalysisResultWidget extends StatelessWidget {
   Widget _buildMissingInfoSection() {
     final missingInfo = analysisResult.missingInfo!;
     final missingLabels = {
-      'type': 'Exercise type',
+      'exercise_type': 'Exercise type',
       'duration': 'Exercise duration',
       'intensity': 'Exercise intensity',
     };
