@@ -159,7 +159,7 @@ class _WelcomePageState extends State<WelcomePage> {
                               bottom: 30, // Adjusted position
                               left: -15,
                               child: Image.asset(
-                                'assets/images/panda_get_started.png',
+                                'assets/images/panda_get_started_commision.png',
                                 height: 120, // Reduced size
                                 width: 120, // Reduced size
                               ),
