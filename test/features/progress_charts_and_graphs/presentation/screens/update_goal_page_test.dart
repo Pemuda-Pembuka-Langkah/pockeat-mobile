@@ -23,6 +23,7 @@ import 'update_goal_page_test.mocks.dart';
   MockSpec<QuerySnapshot<Map<String, dynamic>>>(as: #MockQuerySnapshot),
   MockSpec<QueryDocumentSnapshot<Map<String, dynamic>>>(as: #MockDocumentSnapshot),
   MockSpec<CollectionReference<Map<String, dynamic>>>(as: #MockCollectionReference),
+  MockSpec<Query<Map<String, dynamic>>>(as: #MockQuery), // Added for where() method
 ])
 void main() {
   late MockFirebaseAuth mockFirebaseAuth;
@@ -32,6 +33,7 @@ void main() {
   late MockQuerySnapshot mockQuerySnapshot;
   late MockDocumentSnapshot mockDocumentSnapshot;
   late MockDocumentReference mockDocumentReference;
+  late MockQuery mockQuery; // Added for where() method
 
   setUp(() {
     // Initialize mocks
@@ -42,6 +44,7 @@ void main() {
     mockQuerySnapshot = MockQuerySnapshot();
     mockDocumentSnapshot = MockDocumentSnapshot();
     mockDocumentReference = MockDocumentReference();
+    mockQuery = MockQuery(); // Initialize the query mock
 
     // Set up mock behavior
     when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
@@ -51,10 +54,10 @@ void main() {
         .thenReturn(mockCollectionReference);
         
     when(mockCollectionReference.where('userId', isEqualTo: 'test-user-id'))
-        .thenReturn(mockCollectionReference);
+        .thenReturn(mockQuery); // Use mockQuery for where()
         
-    when(mockCollectionReference.limit(1)).thenReturn(mockCollectionReference);
-    when(mockCollectionReference.get())
+    when(mockQuery.limit(1)).thenReturn(mockQuery); // Chain limit() to query
+    when(mockQuery.get())
         .thenAnswer((_) async => mockQuerySnapshot);
         
     // Mock for snapshot with data
@@ -62,16 +65,22 @@ void main() {
     when(mockDocumentSnapshot.reference).thenReturn(mockDocumentReference);
     when(mockDocumentReference.update(any)).thenAnswer((_) async => Future<void>.value());
     
-    // Mock for adding new document - fix empty map issue
+    // Default empty data for document snapshot
+    when(mockDocumentSnapshot.data()).thenReturn({});
+    
+    // Mock for adding new document
     when(mockCollectionReference.add(any)).thenAnswer((_) async => mockDocumentReference);
   });
 
-  group('UpdateGoalPage Widget Tests', () {
+  group('UpdateGoalPage Basic UI Tests', () {
     testWidgets('renders correctly with valid initial weight', (WidgetTester tester) async {
       // Build our app and trigger a frame
       await tester.pumpWidget(MaterialApp(
         home: UpdateGoalPage(initialGoalWeight: '70'),
       ));
+
+      // Wait for async operations to complete
+      await tester.pumpAndSettle();
 
       // Verify the title is displayed
       expect(find.text('Update Weight Goal'), findsOneWidget);
@@ -88,6 +97,9 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: UpdateGoalPage(initialGoalWeight: 'N/A'),
       ));
+
+      // Wait for async operations to complete
+      await tester.pumpAndSettle();
 
       // Default to 60.0 when N/A
       expect(find.text('60.0'), findsOneWidget);
@@ -141,6 +153,9 @@ void main() {
         home: UpdateGoalPage(initialGoalWeight: '200'),
       ));
 
+      // Wait for async operations to complete
+      await tester.pumpAndSettle();
+
       // Should clamp to max value (150.0)
       expect(find.text('150.0'), findsOneWidget);
       
@@ -152,14 +167,178 @@ void main() {
       // Make sure the UI is fully updated
       await tester.pumpAndSettle();
       
-      // verify that the UI rebuilt successfully and doesn't contain the original value
-      expect(find.text('20.0'), findsNothing);
+      // Should clamp to min value (30.0)
+      expect(find.text('30.0'), findsOneWidget);
+    });
+  });
+
+  group('UpdateGoalPage Fitness Goal Validation Tests', () {
+    testWidgets('shows reminder text for invalid lose weight goal', (WidgetTester tester) async {
+      // Setup mock data for "Lose Weight" fitness goal
+      when(mockDocumentSnapshot.data()).thenReturn({
+        'fitnessGoal': 'Lose Weight',
+        'weight': 80.0,
+      });
+
+      await tester.pumpWidget(MaterialApp(
+        home: UpdateGoalPage(initialGoalWeight: '80'), // Equal to current weight (invalid)
+      ));
+
+      // Wait for async operations to complete
+      await tester.pumpAndSettle();
+
+      // Should show reminder text
+      expect(find.text('Your goal is to lose weight. Please set a target weight below your current weight of 80.0 kg.'), 
+          findsOneWidget);
       
-      // Verify that we have Text widgets in the UI (any Text will do)
-      expect(find.byType(Text), findsWidgets);
+      // Save button should be disabled (gray)
+      final buttonFinder = find.byType(ElevatedButton);
+      expect(buttonFinder, findsOneWidget);
       
-      // We know the value should be clamped to 30.0 based on the implementation,
-      // but the exact display format might vary
+      final ElevatedButton button = tester.widget(buttonFinder);
+      final ButtonStyle? style = button.style;
+      
+      // Method to check if the button uses grey color
+      // This is a simplistic check - in a real test you might need to compare the actual color values
+      expect(button.enabled, isFalse);
+    });
+
+    testWidgets('shows reminder text for invalid gain weight goal', (WidgetTester tester) async {
+      // Setup mock data for "Gain Weight" fitness goal
+      when(mockDocumentSnapshot.data()).thenReturn({
+        'fitnessGoal': 'Gain Weight',
+        'weight': 70.0,
+      });
+
+      await tester.pumpWidget(MaterialApp(
+        home: UpdateGoalPage(initialGoalWeight: '70'), // Equal to current weight (invalid)
+      ));
+
+      // Wait for async operations to complete
+      await tester.pumpAndSettle();
+
+      // Should show reminder text
+      expect(find.text('Your goal is to gain weight. Please set a target weight above your current weight of 70.0 kg.'), 
+          findsOneWidget);
+      
+      // Save button should be disabled
+      final buttonFinder = find.byType(ElevatedButton);
+      expect(buttonFinder, findsOneWidget);
+      
+      final ElevatedButton button = tester.widget(buttonFinder);
+      expect(button.enabled, isFalse);
+    });
+
+    testWidgets('validates lose weight goal correctly', (WidgetTester tester) async {
+      // Setup mock data for "Lose Weight" fitness goal
+      when(mockDocumentSnapshot.data()).thenReturn({
+        'fitnessGoal': 'Lose Weight',
+        'weight': 80.0,
+      });
+
+      await tester.pumpWidget(MaterialApp(
+        home: UpdateGoalPage(initialGoalWeight: '70'), // Valid (below current weight)
+      ));
+
+      // Wait for async operations to complete
+      await tester.pumpAndSettle();
+
+      // Should NOT show reminder text
+      expect(find.textContaining('Your goal is to lose weight'), findsNothing);
+      
+      // Save button should be enabled
+      final buttonFinder = find.byType(ElevatedButton);
+      expect(buttonFinder, findsOneWidget);
+      
+      final ElevatedButton button = tester.widget(buttonFinder);
+      expect(button.enabled, isTrue);
+    });
+
+    testWidgets('validates gain weight goal correctly', (WidgetTester tester) async {
+      // Setup mock data for "Gain Weight" fitness goal
+      when(mockDocumentSnapshot.data()).thenReturn({
+        'fitnessGoal': 'Gain Weight',
+        'weight': 70.0,
+      });
+
+      await tester.pumpWidget(MaterialApp(
+        home: UpdateGoalPage(initialGoalWeight: '80'), // Valid (above current weight)
+      ));
+
+      // Wait for async operations to complete
+      await tester.pumpAndSettle();
+
+      // Should NOT show reminder text
+      expect(find.textContaining('Your goal is to gain weight'), findsNothing);
+      
+      // Save button should be enabled
+      final buttonFinder = find.byType(ElevatedButton);
+      expect(buttonFinder, findsOneWidget);
+      
+      final ElevatedButton button = tester.widget(buttonFinder);
+      expect(button.enabled, isTrue);
+    });
+  });
+
+  group('UpdateGoalPage Save Functionality Tests', () {
+    testWidgets('saves changes successfully', (WidgetTester tester) async {
+      // Mock valid fitness goal data
+      when(mockDocumentSnapshot.data()).thenReturn({
+        'fitnessGoal': 'Lose Weight',
+        'weight': 80.0,
+      });
+      
+      // Verify update is called with correct data
+      when(mockDocumentReference.update(any)).thenAnswer((invocation) {
+        final Map<String, dynamic> data = invocation.positionalArguments[0] as Map<String, dynamic>;
+        expect(data.containsKey('desiredWeight'), true);
+        expect(data['desiredWeight'], 70.0);
+        return Future<void>.value();
+      });
+
+      await tester.pumpWidget(MaterialApp(
+        home: UpdateGoalPage(initialGoalWeight: '70'),
+      ));
+
+      // Wait for async operations to complete
+      await tester.pumpAndSettle();
+
+      // Tap the save button
+      await tester.tap(find.text('Save changes'));
+      await tester.pumpAndSettle();
+
+      // Verify success message is shown
+      expect(find.text('Goals updated successfully'), findsOneWidget);
+      
+      // Verify navigation happened (this is harder to test directly)
+      // In a more complete test, you would check that Navigator.pop was called
+      // For this simple test, we just verify the update was called
+      verify(mockDocumentReference.update(any)).called(1);
+    });
+
+    testWidgets('handles save failure gracefully', (WidgetTester tester) async {
+      // Mock valid fitness goal data
+      when(mockDocumentSnapshot.data()).thenReturn({
+        'fitnessGoal': 'Lose Weight',
+        'weight': 80.0,
+      });
+      
+      // Make update throw an error
+      when(mockDocumentReference.update(any)).thenThrow(Exception('Test error'));
+
+      await tester.pumpWidget(MaterialApp(
+        home: UpdateGoalPage(initialGoalWeight: '70'),
+      ));
+
+      // Wait for async operations to complete
+      await tester.pumpAndSettle();
+
+      // Tap the save button
+      await tester.tap(find.text('Save changes'));
+      await tester.pumpAndSettle();
+
+      // Verify error message is shown
+      expect(find.textContaining('Failed to update weight goal'), findsOneWidget);
     });
   });
 }
