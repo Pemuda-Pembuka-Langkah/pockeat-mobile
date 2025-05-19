@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 // Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
@@ -372,7 +373,17 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
                                       final formCubit = context
                                           .read<HealthMetricsFormCubit>();
                                       formCubit.setUserId(user.uid);
+
+                                      // Submit health metrics data
                                       await formCubit.submit();
+
+                                      // Synchronize user preferences from SharedPreferences to Firebase
+                                      final userPreferencesService = GetIt
+                                          .instance<UserPreferencesService>();
+                                      await userPreferencesService
+                                          .synchronizePreferencesAfterLogin();
+
+                                      // Navigate to the homepage
                                       Navigator.pushReplacementNamed(
                                           context, '/');
                                     } else {
