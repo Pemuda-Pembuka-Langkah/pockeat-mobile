@@ -274,6 +274,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return PopScope(
       canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          Navigator.of(context).pushReplacementNamed('/');
+        }
+      },
       child: Scaffold(
         backgroundColor: bgColor,
         appBar: AppBar(
