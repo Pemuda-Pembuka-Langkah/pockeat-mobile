@@ -311,20 +311,37 @@ class _SyncFitnessTrackerOptionPageState
                                   // Use GetIt to allow mocking in tests
                                   final fitnessSync =
                                       GetIt.instance<FitnessTrackerSync>();
-
                                   try {
-                                    // Check if Health Connect is available
-                                    final isAvailable = await fitnessSync
-                                        .isHealthConnectAvailable();
-
-                                    if (isAvailable) {
-                                      // Show explanation dialog
-                                      await _showHealthConnectExplanation(
-                                          context, fitnessSync);
-                                    }
+                                    // Show dialog for Health Connect
+                                    await _showHealthConnectExplanation(
+                                        context, fitnessSync);
+                                    debugPrint(
+                                        "Dialog handling completed, should already be navigating to pet page");
                                   } catch (e) {
                                     debugPrint(
                                         'Error checking Health Connect: $e');
+                                    // Show error message
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              'Error with Health Connect: ${e.toString()}'),
+                                          backgroundColor: Colors.red,
+                                          duration: const Duration(seconds: 3),
+                                        ),
+                                      );
+                                    }
+                                  } finally {
+                                    // ALWAYS navigate to the pet page, regardless of what happened with Health Connect
+                                    // Add a short delay to allow any SnackBar messages to be visible
+                                    Future.delayed(const Duration(seconds: 2),
+                                        () {
+                                      if (context.mounted) {
+                                        Navigator.pushNamed(
+                                            context, '/pet-onboard');
+                                      }
+                                    });
                                   }
                                 },
                                 //coverage:ignore-end
@@ -459,14 +476,40 @@ class _SyncFitnessTrackerOptionPageState
           TextButton(
             onPressed: () {
               Navigator.pop(context);
+              // Navigate to pet onboarding page
+              Navigator.pushNamed(context, '/pet-onboard');
             },
             child: const Text('Not Now'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
               // Request authorization directly
-              fitnessSync.requestAuthorization();
+              try {
+                await fitnessSync.requestAuthorization();
+                debugPrint("Authorization completed, navigating to pet page");
+              } catch (e) {
+                debugPrint("Error in authorization: $e");
+                // Show error message
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content:
+                          Text('Error with Health Connect: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                }
+              } finally {
+                // ALWAYS navigate to pet page, regardless of what happened with Health Connect
+                // Add a short delay to allow any SnackBar messages to be visible
+                Future.delayed(const Duration(seconds: 2), () {
+                  if (context.mounted) {
+                    Navigator.pushNamed(context, '/pet-onboard');
+                  }
+                });
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryGreen,
