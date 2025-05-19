@@ -7,6 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Project imports:
 import 'package:pockeat/features/health_metrics/presentation/screens/pet_onboard_page.dart';
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}

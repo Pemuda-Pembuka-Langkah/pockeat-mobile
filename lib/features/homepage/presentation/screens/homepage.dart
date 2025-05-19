@@ -107,6 +107,7 @@ class _HomePageState extends State<HomePage>
       return {'protein': 0, 'carbs': 0, 'fat': 0};
     }
   }
+
   // coverage:ignore-start
   // Show exit confirmation dialog
   Future<bool> _onWillPop() async {
@@ -135,89 +136,91 @@ class _HomePageState extends State<HomePage>
           ),
         ) ??
         false;
-    
+
     return shouldExit;
   }
+
   // coverage:ignore-end
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-      backgroundColor: Colors.white,
-      body: DefaultTabController(
-        length: 3,
-        child: NestedScrollView(
-          controller: _scrollController,
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverAppBar(
-              pinned: true,
-              floating: false,
-              backgroundColor: Colors.white,
-              elevation: 0,
-              toolbarHeight: 60,
-              automaticallyImplyLeading: false,
-              centerTitle: true, // Tambahkan centerTitle: true
-              title: Image.asset(
-                'assets/icons/LogoPanjang_PockEat_draft_transparent.png',
-                width: 100,
-                height: 100,
+        onWillPop: _onWillPop,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: DefaultTabController(
+            length: 3,
+            child: NestedScrollView(
+              controller: _scrollController,
+              headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                SliverAppBar(
+                  pinned: true,
+                  floating: false,
+                  backgroundColor: Colors.white,
+                  elevation: 0,
+                  toolbarHeight: 60,
+                  automaticallyImplyLeading: false,
+                  centerTitle: true, // Tambahkan centerTitle: true
+                  title: Image.asset(
+                    'assets/icons/LogoPanjang_PockEat_draft_transparent.png',
+                    width: 100,
+                    height: 100,
+                  ),
+                ),
+              ],
+              body: FutureBuilder<List<dynamic>>(
+                future: Future.wait([
+                  _petInformation,
+                  _statsFuture,
+                  _dayStreak,
+                  _targetCalories,
+                  _isCalorieCompensationEnabledFuture,
+                  _isRolloverCaloriesEnabledFuture,
+                  _rolloverCaloriesFuture,
+                  _currentMacrosFuture,
+                  _caloricRequirementModelFuture,
+                ]),
+                builder: (context, snapshot) {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      setState(() {
+                        _loadData(); // Reload all the data
+                      });
+                    },
+                    color: primaryPink, // Use app color theme
+                    backgroundColor: Colors.white,
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 20),
+                      children: [
+                        PetHomepageSection(
+                          isLoading: snapshot.connectionState ==
+                              ConnectionState.waiting,
+                          petInfo: snapshot.data?[0] as PetInformation?,
+                          stats: snapshot.data?[1] as DailyCalorieStats?,
+                          streakDays: snapshot.data?[2] as int?,
+                          targetCalories: snapshot.data?[3] as int?,
+                        ),
+                        OverviewSection(
+                          isLoading: snapshot.connectionState ==
+                              ConnectionState.waiting,
+                          stats: snapshot.data?[1] as DailyCalorieStats?,
+                          targetCalories: snapshot.data?[3] as int?,
+                          isCalorieCompensationEnabled:
+                              snapshot.data?[4] as bool?,
+                          isRolloverCaloriesEnabled: snapshot.data?[5] as bool?,
+                          rolloverCalories: snapshot.data?[6] as int?,
+                          currentMacros: snapshot.data?[7] as Map<String, int>?,
+                          targetMacros:
+                              snapshot.data?[8] as CaloricRequirementModel?,
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
-          ],
-          body: FutureBuilder<List<dynamic>>(
-            future: Future.wait([
-              _petInformation,
-              _statsFuture,
-              _dayStreak,
-              _targetCalories,
-              _isCalorieCompensationEnabledFuture,
-              _isRolloverCaloriesEnabledFuture,
-              _rolloverCaloriesFuture,
-              _currentMacrosFuture,
-              _caloricRequirementModelFuture,
-            ]),
-            builder: (context, snapshot) {
-              return RefreshIndicator(
-                onRefresh: () async {
-                  setState(() {
-                    _loadData(); // Reload all the data
-                  });
-                },
-                color: primaryPink, // Use app color theme
-                backgroundColor: Colors.white,
-                child: ListView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
-                  children: [
-                    PetHomepageSection(
-                      isLoading:
-                          snapshot.connectionState == ConnectionState.waiting,
-                      petInfo: snapshot.data?[0] as PetInformation?,
-                      stats: snapshot.data?[1] as DailyCalorieStats?,
-                      streakDays: snapshot.data?[2] as int?,
-                      targetCalories: snapshot.data?[3] as int?,
-                    ),
-                    OverviewSection(
-                      isLoading:
-                          snapshot.connectionState == ConnectionState.waiting,
-                      stats: snapshot.data?[1] as DailyCalorieStats?,
-                      targetCalories: snapshot.data?[3] as int?,
-                      isCalorieCompensationEnabled: snapshot.data?[4] as bool?,
-                      isRolloverCaloriesEnabled: snapshot.data?[5] as bool?,
-                      rolloverCalories: snapshot.data?[6] as int?,
-                      currentMacros: snapshot.data?[7] as Map<String, int>?,
-                      targetMacros:
-                          snapshot.data?[8] as CaloricRequirementModel?,
-                    ),
-                  ],
-                ),
-              );
-            },
           ),
-        ),
-      ),
-      bottomNavigationBar: const CustomBottomNavBar(),
-    ));
+          bottomNavigationBar: const CustomBottomNavBar(),
+        ));
   }
 }

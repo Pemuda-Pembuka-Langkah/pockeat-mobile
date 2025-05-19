@@ -118,15 +118,15 @@ class _PetOnboardPageState extends State<PetOnboardPage>
           child: Column(
             children: [
               // Fixed header with progress indicator
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 20),
-                    
+                    SizedBox(height: 20),
+
                     // Onboarding progress indicator
-                    const OnboardingProgressIndicator(
+                    OnboardingProgressIndicator(
                       totalSteps: 16,
                       currentStep: 15, // This is the 16th step (0-indexed)
                       barHeight: 6.0,
@@ -135,18 +135,19 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                   ],
                 ),
               ),
-              
+
               // Scrollable content area
               Expanded(
                 child: SingleChildScrollView(
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 20),
-                        
+
                         // Title with modern style
                         const Text(
                           "Meet Your Pet Companion",
@@ -156,9 +157,9 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                             color: Colors.black87,
                           ),
                         ),
-            
+
                         const SizedBox(height: 8),
-            
+
                         const Text(
                           "Your friendly panda companion will help motivate you throughout your health journey",
                           style: TextStyle(
@@ -167,9 +168,9 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                             height: 1.3,
                           ),
                         ),
-            
+
                         const SizedBox(height: 24),
-            
+
                         // Main content in a white container with shadow
                         FadeTransition(
                           opacity: _fadeAnimation,
@@ -177,7 +178,7 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                             scale: _scaleAnimation,
                             child: Container(
                               padding: const EdgeInsets.all(24),
-                              margin: EdgeInsets.only(
+                              margin: const EdgeInsets.only(
                                 bottom: 24,
                               ),
                               decoration: BoxDecoration(
@@ -244,21 +245,25 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                         filled: true,
                                         fillColor: Colors.white,
                                         border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
                                           borderSide: BorderSide(
-                                            color: primaryGreen.withOpacity(0.3),
+                                            color:
+                                                primaryGreen.withOpacity(0.3),
                                             width: 1.5,
                                           ),
                                         ),
                                         enabledBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
                                           borderSide: BorderSide(
                                             color: Colors.grey.withOpacity(0.3),
                                             width: 1.5,
                                           ),
                                         ),
                                         focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
                                           borderSide: BorderSide(
                                             color: primaryGreen,
                                             width: 2,
@@ -269,7 +274,8 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                           color: primaryGreen,
                                           size: 22,
                                         ),
-                                        contentPadding: const EdgeInsets.symmetric(
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
                                           horizontal: 16,
                                           vertical: 16,
                                         ),
@@ -285,7 +291,8 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                       },
                                       // Improve keyboard handling
                                       textInputAction: TextInputAction.done,
-                                      onEditingComplete: () => FocusScope.of(context).unfocus(),
+                                      onEditingComplete: () =>
+                                          FocusScope.of(context).unfocus(),
                                     ),
                                   ),
 
@@ -295,30 +302,45 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton(
-                                      onPressed: _petNameController.text.trim().isNotEmpty
+                                      onPressed: _petNameController.text
+                                              .trim()
+                                              .isNotEmpty
                                           ? () async {
                                               final prefs =
-                                                  await SharedPreferences.getInstance();
+                                                  await SharedPreferences
+                                                      .getInstance();
                                               await prefs.setString(
-                                                  'petName', _petNameController.text.trim());
+                                                  'petName',
+                                                  _petNameController.text
+                                                      .trim());
                                               if (context.mounted) {
-                                                Navigator.pushNamed(context, '/calorie-loading');
+                                                Navigator.pushNamed(context,
+                                                    '/calorie-loading');
                                               }
                                             }
                                           : null, // Disabled if no pet name
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: _petNameController.text.trim().isNotEmpty
+                                        backgroundColor: _petNameController.text
+                                                .trim()
+                                                .isNotEmpty
                                             ? primaryGreen
                                             : primaryGreenDisabled,
                                         foregroundColor: Colors.white,
-                                        minimumSize: const Size(double.infinity, 56),
+                                        minimumSize:
+                                            const Size(double.infinity, 56),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                         ),
-                                        padding:
-                                            const EdgeInsets.symmetric(vertical: 16),
-                                        elevation: _petNameController.text.trim().isNotEmpty ? 4 : 0,
-                                        shadowColor: primaryGreen.withOpacity(0.5),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        elevation: _petNameController.text
+                                                .trim()
+                                                .isNotEmpty
+                                            ? 4
+                                            : 0,
+                                        shadowColor:
+                                            primaryGreen.withOpacity(0.5),
                                       ),
                                       child: const Text(
                                         'Continue',

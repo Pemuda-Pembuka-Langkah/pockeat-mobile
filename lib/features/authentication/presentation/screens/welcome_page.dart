@@ -370,7 +370,7 @@ class _WelcomePageState extends State<WelcomePage> {
     );
   }
 
-  void  _navigateToOnboarding(BuildContext context) {
+  void _navigateToOnboarding(BuildContext context) {
     Navigator.pushNamed(context, '/onboarding');
   }
 

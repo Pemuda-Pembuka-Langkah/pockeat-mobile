@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import 'package:pockeat/component/navigation.dart';
@@ -1022,15 +1022,16 @@ class _ProfilePageState extends State<ProfilePage> {
               // Email address and subject for bug report
               const String emailAddress = 'pockeat.service@gmail.com';
               const String subject = 'Bug Report - Pockeat App';
-              
+
               try {
                 // Create a properly structured mailto Uri with query parameters
                 final Uri emailUri = Uri(
                   scheme: 'mailto',
                   path: emailAddress,
-                  query: 'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(emailBody)}',
+                  query:
+                      'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(emailBody)}',
                 );
-                
+
                 if (await canLaunchUrl(emailUri)) {
                   await launchUrl(emailUri, mode: LaunchMode.platformDefault);
                 } else {
@@ -1039,13 +1040,15 @@ class _ProfilePageState extends State<ProfilePage> {
                     scheme: 'mailto',
                     path: emailAddress,
                   );
-                  
+
                   if (await canLaunchUrl(simpleUri)) {
-                    await launchUrl(simpleUri, mode: LaunchMode.platformDefault);
+                    await launchUrl(simpleUri,
+                        mode: LaunchMode.platformDefault);
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Email app opened. Please add "Bug Report - Pockeat App" as the subject.'),
+                          content: Text(
+                              'Email app opened. Please add "Bug Report - Pockeat App" as the subject.'),
                           behavior: SnackBarBehavior.floating,
                           backgroundColor: Colors.green,
                         ),
@@ -1056,7 +1059,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Could not open email app. Please manually send an email to pockeat.service@gmail.com'),
+                          content: Text(
+                              'Could not open email app. Please manually send an email to pockeat.service@gmail.com'),
                           behavior: SnackBarBehavior.floating,
                           backgroundColor: Colors.red,
                         ),

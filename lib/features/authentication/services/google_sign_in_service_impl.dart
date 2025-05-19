@@ -25,7 +25,7 @@ class GoogleSignInServiceImpl implements GoogleSignInService {
         // Sign out first if a user is already signed in
         await _googleSignIn.signOut();
       }
-      
+
       // Trigger Google Sign In flow with prompt to select account
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
