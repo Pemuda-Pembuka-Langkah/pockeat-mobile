@@ -13,6 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/still_not_completed_onboarding.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -488,9 +489,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final smartExerciseLogRepository =
         Provider.of<SmartExerciseLogRepository>(context);
 
+    // Get navigation provider for route observer
+    final navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
+    
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: 'Pockeat',
+      // Add observer to track route changes and update bottom navigation
+      navigatorObservers: [
+        NavigationObserver(navigationProvider),
+      ],
       theme: ThemeData(
         fontFamily: 'PlusJakartaSans',
         colorScheme: ColorScheme.fromSeed(
@@ -575,6 +583,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
         },
         // Di main.dart pada bagian routes:
+        '/not-completed-onboarding': (context) => const StillNotCompletedOnboardingPage(),
         '/onboarding': (context) => const HealthValuePropositionPage(),
         '/onboarding/goal': (context) {
           return BlocProvider.value(

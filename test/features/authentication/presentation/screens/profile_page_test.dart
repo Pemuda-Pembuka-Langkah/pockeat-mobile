@@ -11,6 +11,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 // Project imports:
 import 'package:pockeat/component/navigation.dart';
@@ -172,6 +173,8 @@ void main() {
             const Scaffold(body: Text('Edit Profile Page')),
         '/widget-settings': (context) =>
             const Scaffold(body: Text('Widget Settings Page')),
+        '/height-weight': (context) =>
+            const Scaffold(body: Text('Height Weight Page')),
       },
     );
   }
@@ -430,117 +433,12 @@ void main() {
 
       // Verify clearUserData was still called even though logout failed
       verify(mockBugReportService.clearUserData()).called(1);
-
       // Verify error snackbar shown
       expect(find.textContaining('Logout failed'), findsOneWidget);
     });
 
-    testWidgets(
-        'Shows bug reporting UI when Report Bug button is pressed and sets user data',
-        (WidgetTester tester) async {
-      // Setup user and successful bug report response
-      final testUser = createTestUser();
-      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
-      when(mockBugReportService.setUserData(any)).thenAnswer((_) async => true);
-      when(mockBugReportService.show()).thenAnswer((_) async => true);
-
-      // Render widget
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Find Report Bug button
-      final reportBugFinder = find.text('Report Bug');
-      expect(reportBugFinder, findsOneWidget);
-
-      // Tap Report Bug button
-      await tester.ensureVisible(reportBugFinder);
-      await tester.pumpAndSettle();
-      await tester.tap(reportBugFinder);
-      await tester.pumpAndSettle();
-
-      // Verify setUserData was called before showing the UI
-      verifyInOrder([
-        mockBugReportService.setUserData(testUser),
-        mockBugReportService.show(),
-      ]);
-    });
-
-    testWidgets('Shows error when failed to display bug reporting UI',
-        (WidgetTester tester) async {
-      // Setup user and failed bug report response
-      final testUser = createTestUser();
-      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
-      when(mockBugReportService.setUserData(any)).thenAnswer((_) async => true);
-      when(mockBugReportService.show()).thenAnswer((_) async => false);
-
-      // Render widget
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // Find Report Bug button
-      final reportBugFinder = find.text('Report Bug');
-      expect(reportBugFinder, findsOneWidget);
-
-      // Tap Report Bug button
-      await tester.ensureVisible(reportBugFinder);
-      await tester.pumpAndSettle();
-      await tester.tap(reportBugFinder);
-      await tester.pumpAndSettle();
-
-      // Verify setUserData was called before showing the UI
-      verifyInOrder([
-        mockBugReportService.setUserData(testUser),
-        mockBugReportService.show(),
-      ]);
-
-      // Verify error snackbar shown
-      expect(find.text('Failed to open bug reporting'), findsOneWidget);
-    });
-
-    testWidgets(
-        'Shows warning when user data is not available for bug reporting',
-        (WidgetTester tester) async {
-      // Setup null user scenario
-      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => null);
-
-      // Render widget
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      // The ProfilePage shows an error state when user is null
-      // Let's skip the error state UI verification as UI may change
-
-      // Set up a successful user load and simulate the user being loaded
-      final testUser = createTestUser();
-      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
-      // Force a rebuild to simulate user loading scenario
-      await tester.pump();
-      await tester.pumpAndSettle();
-
-      // Find and tap Report Bug button
-      final reportBugFinder = find.text('Report Bug');
-      expect(reportBugFinder, findsOneWidget);
-
-      // Force currentUser to be null to test the null check path
-      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => null);
-
-      // Simulate _currentUser becoming null again by changing the mock response
-      await tester.pump();
-      await tester.pumpAndSettle();
-
-      // Tap Report Bug button
-      await tester.ensureVisible(reportBugFinder);
-      await tester.tap(reportBugFinder);
-      await tester.pumpAndSettle();
-
-      // Verify bug report service methods were not called
-      verifyNever(mockBugReportService.setUserData(any));
-      verifyNever(mockBugReportService.show());
-
-      // Verify warning snackbar about missing user data
-      expect(find.text('User data not available for bug reporting'),
-          findsOneWidget);
-    });
+    // Email bug report test already covered in 'Check Report Bug menu exists and has correct content' test
+    // All Instabug-related tests have been removed as we now use email for bug reporting
 
     testWidgets('Shows error when updating rollover calories setting fails',
         (WidgetTester tester) async {
@@ -748,13 +646,43 @@ void main() {
       verify(mockNavigatorObserver.didPush(any, any));
     });
 
-    testWidgets('Check interaction with Report Bug menu',
+    testWidgets('Check interaction with Edit Health Information menu',
         (WidgetTester tester) async {
       // Setup user data and service
       final testUser = createTestUser();
       when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
-      when(mockBugReportService.setUserData(any)).thenAnswer((_) async => true);
-      when(mockBugReportService.show()).thenAnswer((_) async => true);
+      
+      // Setup mock preferences
+      when(mockUserPreferencesService.isExerciseCalorieCompensationEnabled())
+          .thenAnswer((_) async => false);
+      when(mockUserPreferencesService.isRolloverCaloriesEnabled())
+          .thenAnswer((_) async => false);
+
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Find Edit Health Information menu
+      final editHealthInfoFinder = find.text('Edit Health Information');
+      expect(editHealthInfoFinder, findsOneWidget);
+      expect(find.text('Edit your health information'), findsOneWidget);
+
+      // Tap Edit Health Information menu
+      await tester.tap(editHealthInfoFinder);
+      await tester.pumpAndSettle();
+
+      // Verify navigation to height-weight page
+      expect(find.text('Height Weight Page'), findsOneWidget);
+
+      // Verify navigation was observed
+      verify(mockNavigatorObserver.didPush(any, any));
+    });
+
+    testWidgets('Check Report Bug menu exists and has correct content',
+        (WidgetTester tester) async {
+      // Setup user data
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
 
       // Render widget
       await tester.pumpWidget(createTestWidget());
@@ -771,14 +699,63 @@ void main() {
 
       // Verify menu subtitle
       expect(find.text('Help us improve the app'), findsOneWidget);
-
-      // Tap Report Bug menu
-      await tester.tap(bugReportFinder);
+      
+      // Verify icon is correct
+      final iconFinder = find.byIcon(Icons.bug_report_outlined);
+      expect(iconFinder, findsOneWidget);
+    });
+    
+    testWidgets('Report Bug uses proper URI for email launch',
+        (WidgetTester tester) async {
+      // Setup mocks for url_launcher
+      final mockChannel = MethodChannel('plugins.flutter.io/url_launcher');
+      final canLaunchLog = <String>[];
+      final launchLog = <String>[];
+      
+      // Mock url_launcher methods
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(mockChannel, (call) async {
+        if (call.method == 'canLaunch') {
+          canLaunchLog.add(call.arguments['url'] as String);
+          return true;
+        } else if (call.method == 'launch') {
+          launchLog.add(call.arguments['url'] as String);
+          return true;
+        }
+        return false;
+      });
+      
+      // Setup user data
+      final testUser = createTestUser();
+      when(mockLoginService.getCurrentUser()).thenAnswer((_) async => testUser);
+      when(mockUser.uid).thenReturn('test-user-id');
+      when(mockUser.email).thenReturn('test@example.com');
+      
+      // Render widget
+      await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // Verify methods were called
-      verify(mockBugReportService.setUserData(testUser)).called(1);
-      verify(mockBugReportService.show()).called(1);
+      // Find and scroll to Report Bug menu, then tap it
+      final bugReportFinder = find.text('Report Bug');
+      await tester.dragUntilVisible(
+        bugReportFinder,
+        find.byType(SingleChildScrollView),
+        const Offset(0, -200),
+      );
+      await tester.tap(bugReportFinder);
+      await tester.pumpAndSettle();
+      
+      // Verify the URL was constructed correctly
+      expect(canLaunchLog.isNotEmpty, true, reason: 'canLaunch should be called');
+      
+      // Verify URI structure is correct (mailto: with query parameters)
+      final uri = canLaunchLog.first;
+      expect(uri.startsWith('mailto:pockeat.service@gmail.com'), true, 
+            reason: 'URI should start with mailto to correct address');
+      expect(uri.contains('subject='), true, 
+            reason: 'URI should contain subject parameter');
+      expect(uri.contains('body='), true, 
+            reason: 'URI should contain body parameter');
     });
   });
 

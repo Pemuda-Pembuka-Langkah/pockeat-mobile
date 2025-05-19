@@ -133,7 +133,14 @@ class _ProgressPageState extends State<ProgressPage>
       );
     }
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          Navigator.of(context).pushReplacementNamed('/');
+        }
+      },
+      child: Scaffold(
       backgroundColor: Colors.white,
       body: NestedScrollView(
         controller: _scrollController,
@@ -159,7 +166,7 @@ class _ProgressPageState extends State<ProgressPage>
         ),
       ),
       bottomNavigationBar: const CustomBottomNavBar(),
-    );
+    ));
   }
 }
 // coverage:ignore-end

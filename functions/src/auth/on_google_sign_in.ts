@@ -39,7 +39,7 @@ export const onGoogleSignIn = functions.auth.user().onCreate(async (user) => {
         // Required fields
         email: user.email || null,
         emailVerified: user.emailVerified || false,
-        createdAt: userDoc.exists ? userDoc.data()?.createdAt?.toDate() : now,
+        createdAt: userDoc.exists && userDoc.data()?.createdAt ? userDoc.data()?.createdAt.toDate() : now,
         
         // Data dari Google
         displayName: googleUserData.displayName,

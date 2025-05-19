@@ -218,7 +218,7 @@ void main() {
       expect(find.text('Child Widget'), findsNothing);
     });
 
-    testWidgets('redirects to /height-weight if onboarding not completed',
+    testWidgets('redirects to /not-completed-onboarding if onboarding not completed',
         (tester) async {
       // Use the already setup mock services
       when(mockLoginService.getCurrentUser())
@@ -236,8 +236,8 @@ void main() {
                     body: Text('Home Page'),
                   ),
                 ),
-            '/height-weight': (_) => const Scaffold(
-                  body: Text('Height Weight Page'),
+            '/not-completed-onboarding': (_) => const Scaffold(
+                  body: Text('Not Completed Onboarding Page'),
                 ),
           },
         ),
@@ -245,8 +245,8 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // ✅ User should be redirected to /height-weight
-      expect(find.text('Height Weight Page'), findsOneWidget);
+      // ✅ User should be redirected to /not-completed-onboarding
+      expect(find.text('Not Completed Onboarding Page'), findsOneWidget);
       expect(find.text('Home Page'), findsNothing);
     });
 

@@ -42,11 +42,12 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 
   Future<void> _checkAuth() async {
+    debugPrint('Checking auth state...');
     if (!mounted) return;
 
     try {
       final user = await _loginService.getCurrentUser();
-
+      debugPrint('Active User: $user');
       if (!mounted) return;
 
       if (user == null) {
@@ -63,11 +64,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
               GetIt.instance<HealthMetricsCheckService>();
           final isOnboardingCompleted =
               await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
+              debugPrint('isOnboardingCompleted: $isOnboardingCompleted');
 
           if (!mounted) return;
 
           if (!isOnboardingCompleted) {
-            _redirect('/height-weight', replace: true);
+            // Redirect to the Not Completed Onboarding page instead of directly to height-weight
+            _redirect('/not-completed-onboarding', replace: true);
           } else {
             setState(() {});
           }

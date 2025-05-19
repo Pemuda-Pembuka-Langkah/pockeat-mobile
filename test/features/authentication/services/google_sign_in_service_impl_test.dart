@@ -48,6 +48,8 @@ void main() {
     // Setup default behavior
     when(mockGoogleSignIn.signIn())
         .thenAnswer((_) async => mockGoogleSignInAccount);
+    when(mockGoogleSignIn.isSignedIn()).thenAnswer((_) async => false);
+    when(mockGoogleSignIn.signOut()).thenAnswer((_) async => null);
     when(mockGoogleSignInAccount.authentication)
         .thenAnswer((_) async => mockGoogleSignInAuthentication);
     when(mockGoogleSignInAuthentication.accessToken)
@@ -75,12 +77,33 @@ void main() {
     });
 
     group('signInWithGoogle', () {
-      test('should successfully sign in with Google', () async {
+      test('should successfully sign in with Google when no user is signed in', () async {
+        // Arrange
+        when(mockGoogleSignIn.isSignedIn()).thenAnswer((_) async => false);
+
         // Act
         final result = await service.signInWithGoogle();
 
         // Assert
         expect(result, equals(mockUserCredential));
+        verify(mockGoogleSignIn.isSignedIn()).called(1);
+        verifyNever(mockGoogleSignIn.signOut());
+        verify(mockGoogleSignIn.signIn()).called(1);
+        verify(mockGoogleSignInAccount.authentication).called(1);
+        verify(mockAuth.signInWithCredential(any)).called(1);
+      });
+
+      test('should sign out first when a user is already signed in', () async {
+        // Arrange
+        when(mockGoogleSignIn.isSignedIn()).thenAnswer((_) async => true);
+
+        // Act
+        final result = await service.signInWithGoogle();
+
+        // Assert
+        expect(result, equals(mockUserCredential));
+        verify(mockGoogleSignIn.isSignedIn()).called(1);
+        verify(mockGoogleSignIn.signOut()).called(1);
         verify(mockGoogleSignIn.signIn()).called(1);
         verify(mockGoogleSignInAccount.authentication).called(1);
         verify(mockAuth.signInWithCredential(any)).called(1);
