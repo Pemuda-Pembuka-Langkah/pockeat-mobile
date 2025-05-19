@@ -23,6 +23,7 @@ class _UpdateGoalPageState extends State<UpdateGoalPage> {
 
   late double _goalWeight;
   bool _isSaving = false;
+  bool _isLoading = true; // Add loading state for initial data fetch
 
   final double _minWeight = 30.0;
   final double _maxWeight = 150.0;
@@ -33,6 +34,10 @@ class _UpdateGoalPageState extends State<UpdateGoalPage> {
   // Offset slider
   double _sliderOffset = 0.0;
 
+  // Add fitness goal and current weight variables
+  String? _fitnessGoal;
+  double? _currentWeight;
+
   @override
   void initState() {
     super.initState();
@@ -41,9 +46,103 @@ class _UpdateGoalPageState extends State<UpdateGoalPage> {
             60.0;
 
     _goalWeight = _goalWeight.clamp(_minWeight, _maxWeight);
+
+    // Fetch fitness goal and current weight when page loads
+    _fetchUserData();
+  }
+
+  // Add method to fetch user's fitness goal and current weight
+  Future<void> _fetchUserData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No authenticated user found');
+      }
+
+      // Query to get the health metrics document
+      final snapshot = await FirebaseFirestore.instance
+          .collection('health_metrics')
+          .where('userId', isEqualTo: user.uid)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final data = snapshot.docs.first.data();
+
+        // Get fitness goal
+        _fitnessGoal = data['fitnessGoal'] as String?;
+
+        // Get current weight
+        final dynamic weightValue = data['weight'];
+        _currentWeight = weightValue is int
+            ? weightValue.toDouble()
+            : weightValue is double
+                ? weightValue
+                : null;
+
+        debugPrint(
+            'Fetched user data: fitnessGoal=$_fitnessGoal, currentWeight=$_currentWeight');
+      }
+    } catch (e) {
+      debugPrint('Error fetching user data: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  // Method to check if the selected goal weight is valid based on fitness goal
+  bool _isGoalWeightValid() {
+    if (_currentWeight == null || _fitnessGoal == null) {
+      return true; // If we don't have all data, allow saving
+    }
+
+    // For "Lose Weight" goals, goal weight must be less than current weight
+    if (_fitnessGoal!.contains("Lose Weight") &&
+        _goalWeight >= _currentWeight!) {
+      return false;
+    }
+
+    // For "Gain Weight" goals, goal weight must be more than current weight
+    if (_fitnessGoal!.contains("Gain Weight") &&
+        _goalWeight <= _currentWeight!) {
+      return false;
+    }
+
+    return true;
+  }
+
+  // Get reminder text based on fitness goal
+  String? _getReminderText() {
+    if (_currentWeight == null || _fitnessGoal == null) {
+      return null;
+    }
+
+    if (_fitnessGoal!.contains("Lose Weight") &&
+        _goalWeight >= _currentWeight!) {
+      return "Your goal is to lose weight. Please set a target weight below your current weight of ${_currentWeight!.toStringAsFixed(1)} kg.";
+    }
+
+    if (_fitnessGoal!.contains("Gain Weight") &&
+        _goalWeight <= _currentWeight!) {
+      return "Your goal is to gain weight. Please set a target weight above your current weight of ${_currentWeight!.toStringAsFixed(1)} kg.";
+    }
+
+    return null;
   }
 
   Future<void> _saveChanges() async {
+    if (!_isGoalWeightValid()) {
+      return;
+    }
+
     setState(() {
       _isSaving = true;
     });
@@ -53,6 +152,8 @@ class _UpdateGoalPageState extends State<UpdateGoalPage> {
       if (user == null) {
         throw Exception('No authenticated user found');
       }
+
+      debugPrint('Attempting to save weight goal: $_goalWeight kg');
 
       // Query untuk mendapatkan dokumen health metrics user
       final snapshot = await FirebaseFirestore.instance
@@ -80,12 +181,18 @@ class _UpdateGoalPageState extends State<UpdateGoalPage> {
       // Add mounted check before using BuildContext after await
       if (mounted) {
         Navigator.pop(context, _goalWeight.toString());
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Goals updated successfully'),
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       // Add mounted check before using BuildContext after await
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to update weight goal')),
+          SnackBar(content: Text('Failed to update weight goal: $e')),
         );
       }
       debugPrint('Error saving weight goal: $e');
@@ -128,6 +235,10 @@ class _UpdateGoalPageState extends State<UpdateGoalPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if goal weight is valid based on fitness goal
+    final bool isGoalValid = _isGoalWeightValid();
+    final String? reminderText = _getReminderText();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -145,142 +256,173 @@ class _UpdateGoalPageState extends State<UpdateGoalPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 40),
-            Center(
-              child: Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  color: primaryGreen.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.flag_outlined,
-                  color: primaryGreen,
-                  size: 40,
-                ),
-              ),
-            ),
-            const SizedBox(height: 40),
-            // Weight goal label
-            const Text(
-              'Weight Goal',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Weight display
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  _goalWeight.toStringAsFixed(1),
-                  style: const TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 5),
-                const Text(
-                  'kg',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-            LayoutBuilder(builder: (context, constraints) {
-              final double pixelsPerKg = constraints.maxWidth / _visibleRange;
-
-              final double visibleMin = (_goalWeight - _visibleRange / 2)
-                  .clamp(_minWeight, _maxWeight);
-              final double visibleMax = (_goalWeight + _visibleRange / 2)
-                  .clamp(_minWeight, _maxWeight);
-
-              return Stack(
-                alignment: Alignment.center,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Area slider dengan gestur detection
-                  SizedBox(
-                    height: 100,
-                    width: constraints.maxWidth,
-                    child: GestureDetector(
-                      onHorizontalDragStart: _handleDragStart,
-                      onHorizontalDragUpdate: (details) =>
-                          _handleDragUpdate(details, pixelsPerKg),
-                      child: CustomPaint(
-                        painter: WeightSliderPainter(
-                          minWeight: visibleMin,
-                          maxWeight: visibleMax,
-                          offset: _sliderOffset,
-                        ),
-                        size: Size(constraints.maxWidth, 60),
+                  const SizedBox(height: 40),
+                  Center(
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: primaryGreen.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.flag_outlined,
+                        color: primaryGreen,
+                        size: 40,
                       ),
                     ),
                   ),
+                  const SizedBox(height: 40),
+                  // Weight goal label
+                  const Text(
+                    'Weight Goal',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Weight display
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        _goalWeight.toStringAsFixed(1),
+                        style: const TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      const Text(
+                        'kg',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
 
-                  // Garis indikator berat
-                  Container(
-                    height: 60,
-                    width: 2,
-                    color: Colors.black,
+                  const SizedBox(height: 30),
+                  LayoutBuilder(builder: (context, constraints) {
+                    final double pixelsPerKg =
+                        constraints.maxWidth / _visibleRange;
+
+                    final double visibleMin = (_goalWeight - _visibleRange / 2)
+                        .clamp(_minWeight, _maxWeight);
+                    final double visibleMax = (_goalWeight + _visibleRange / 2)
+                        .clamp(_minWeight, _maxWeight);
+
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Area slider dengan gestur detection
+                        SizedBox(
+                          height: 100,
+                          width: constraints.maxWidth,
+                          child: GestureDetector(
+                            onHorizontalDragStart: _handleDragStart,
+                            onHorizontalDragUpdate: (details) =>
+                                _handleDragUpdate(details, pixelsPerKg),
+                            child: CustomPaint(
+                              painter: WeightSliderPainter(
+                                minWeight: visibleMin,
+                                maxWeight: visibleMax,
+                                offset: _sliderOffset,
+                              ),
+                              size: Size(constraints.maxWidth, 60),
+                            ),
+                          ),
+                        ),
+
+                        // Garis indikator berat
+                        Container(
+                          height: 60,
+                          width: 2,
+                          color: Colors.black,
+                        ),
+                      ],
+                    );
+                  }),
+
+                  const Spacer(),
+
+                  // Show reminder text if needed
+                  if (reminderText != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.amber.shade300),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.info_outline, color: Colors.amber),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                reminderText,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  // Save button
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 30.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed:
+                            (_isSaving || !isGoalValid) ? null : _saveChanges,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              isGoalValid ? primaryGreen : Colors.grey,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 1,
+                        ),
+                        child: _isSaving
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Save changes',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w600),
+                              ),
+                      ),
+                    ),
                   ),
                 ],
-              );
-            }),
-
-            const Spacer(),
-
-            // Save button
-            Padding(
-              padding: const EdgeInsets.only(bottom: 30.0),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isSaving ? null : _saveChanges,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGreen,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 1,
-                  ),
-                  child: _isSaving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text(
-                          'Save changes',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600),
-                        ),
-                ),
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

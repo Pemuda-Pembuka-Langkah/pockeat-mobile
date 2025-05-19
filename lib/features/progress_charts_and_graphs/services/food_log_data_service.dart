@@ -18,9 +18,13 @@ class FoodLogDataService {
   // Get calorie data for a specific week (current week by default)
   Future<List<CalorieData>> getWeekCalorieData({int weeksAgo = 0}) async {
     try {
-      // Get the date range for the requested week (Sunday to Saturday)
+      // PERUBAHAN: Mengubah logika untuk dimulai dari hari Senin, bukan Minggu
       final now = DateTime.now();
-      final currentStartOfWeek = now.subtract(Duration(days: now.weekday % 7));
+
+      // Hitung Senin minggu ini: kurangi weekday-1 hari dari hari ini
+      // weekday: 1=Senin, 2=Selasa, ..., 7=Minggu
+      final int daysFromMonday = now.weekday - 1;
+      final currentStartOfWeek = now.subtract(Duration(days: daysFromMonday));
 
       // Calculate start date for the requested week (going back weeksAgo weeks)
       final startDate = DateTime(currentStartOfWeek.year,
@@ -94,8 +98,8 @@ class FoodLogDataService {
     Map<String, Map<String, double>> dailyMacros = {};
     Map<String, double> dailyCalories = {};
 
-    // Initialize all days of the week with zeros
-    final dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    // PERUBAHAN: Initialize all days of the week with zeros, Senin dulu
+    final dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     for (var day in dayNames) {
       dailyMacros[day] = {'protein': 0, 'carbs': 0, 'fats': 0};
       dailyCalories[day] = 0;
@@ -105,7 +109,12 @@ class FoodLogDataService {
     for (var log in logs) {
       // Adjust for timezone by subtracting 7 hours
       final logDateTime = log.timestamp.subtract(const Duration(hours: 7));
-      final dayOfWeek = dayNames[logDateTime.weekday % 7];
+
+      // PERUBAHAN: Convert to Monday-Sunday format
+      // weekday returns 1=Monday, 2=Tuesday, ..., 7=Sunday
+      final int weekdayIndex =
+          logDateTime.weekday - 1; // 0=Monday, 1=Tuesday, ..., 6=Sunday
+      final dayOfWeek = dayNames[weekdayIndex];
 
       // Extract macronutrient values directly from FoodLogHistoryItem properties
       final protein = log.protein?.toDouble() ?? 0;
@@ -207,13 +216,14 @@ class FoodLogDataService {
   // Default week data if fetch fails
   List<CalorieData> _getDefaultWeekData() {
     return [
-      CalorieData('Sun', 0, 0, 0),
+      // PERUBAHAN: Default data Monday-Sunday
       CalorieData('Mon', 0, 0, 0),
       CalorieData('Tue', 0, 0, 0),
       CalorieData('Wed', 0, 0, 0),
       CalorieData('Thu', 0, 0, 0),
       CalorieData('Fri', 0, 0, 0),
       CalorieData('Sat', 0, 0, 0),
+      CalorieData('Sun', 0, 0, 0),
     ];
   }
 
