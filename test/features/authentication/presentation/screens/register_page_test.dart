@@ -60,9 +60,7 @@ void main() {
 
   Widget createTestableWidget() {
     return MaterialApp(
-      routes: {
-        '/login': (context) => const Scaffold(body: Text('Login Page')),
-      },
+      // Login route removed as it's no longer needed
       home: BlocProvider<HealthMetricsFormCubit>(
         create: (_) => mockHealthMetricsFormCubit,
         child: const RegisterPage(),

@@ -146,7 +146,7 @@ void main() {
         .called(1);
   });
 
-  testWidgets('shows error snackbar when sign in fails',
+  testWidgets('handles sign in failure gracefully',
       (WidgetTester tester) async {
     // Set up mock to throw exception
     final testException = Exception('Sign in failed');
@@ -185,13 +185,7 @@ void main() {
             name: 'google_sign_in_attempt', parameters: null))
         .called(1);
 
-    // Verify error snackbar appears
-    expect(find.byType(SnackBar), findsOneWidget);
-    expect(find.textContaining('Error:'), findsOneWidget);
-
-    // Verify snackbar styling
-    final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
-    expect(snackBar.backgroundColor, Colors.red);
+    // No longer checking for SnackBar since it's been removed from implementation
 
     // Verify success event was not logged
     verifyNever(mockAnalyticsService.logEvent(

@@ -4,6 +4,6 @@
     "predeploy": [
       "npm run build"
     ],
-    "runtime": "nodejs22"
+    "runtime": "nodejs20"
   }
 } 

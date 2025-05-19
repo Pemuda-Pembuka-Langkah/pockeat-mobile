@@ -419,7 +419,7 @@ class _HealthValuePropositionPageState extends State<HealthValuePropositionPage>
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/height-weight');
+                      Navigator.pushNamed(context, '/height-weight');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryGreen,

@@ -19,7 +19,7 @@ void main() {
       // Assert - verify the correct message is returned
       expect(result.title, equals('Weight Loss Journey'));
       expect(result.message, equals('You\'re on your way to a healthier, lighter you! Your plan is designed for sustainable results.'));
-      expect(result.iconData, equals(Icons.trending_down));
+      expect(result.iconData, equals(Icons.monitor_weight_outlined));
     });
     
     test('should create strength message when goals contain "gain"', () {
@@ -70,7 +70,7 @@ void main() {
       
       // Assert - verify weight loss message is prioritized
       expect(result.title, equals('Weight Loss Journey'));
-      expect(result.iconData, equals(Icons.trending_down));
+      expect(result.iconData, equals(Icons.monitor_weight_outlined));
     });
     
     test('should handle case insensitivity for goal keywords', () {

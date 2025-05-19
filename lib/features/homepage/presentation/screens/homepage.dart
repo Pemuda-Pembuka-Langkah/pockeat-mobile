@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
@@ -106,10 +107,43 @@ class _HomePageState extends State<HomePage>
       return {'protein': 0, 'carbs': 0, 'fat': 0};
     }
   }
-
+  // coverage:ignore-start
+  // Show exit confirmation dialog
+  Future<bool> _onWillPop() async {
+    final shouldExit = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text('Exit App'),
+            content: const Text('Are you sure you want to exit?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                  // This will close the app
+                  SystemNavigator.pop();
+                },
+                child: const Text('Yes'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    
+    return shouldExit;
+  }
+  // coverage:ignore-end
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
       backgroundColor: Colors.white,
       body: DefaultTabController(
         length: 3,
@@ -184,6 +218,6 @@ class _HomePageState extends State<HomePage>
         ),
       ),
       bottomNavigationBar: const CustomBottomNavBar(),
-    );
+    ));
   }
 }

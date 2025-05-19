@@ -66,11 +66,12 @@ class GoogleSignInButton extends StatelessWidget {
             }
           } catch (e) {
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Error: ${e.toString()}'),
-                  backgroundColor: Colors.red,
-                ),
+              
+              // Log sign in error
+              final analyticsService = GetIt.I<AnalyticsService>();
+              analyticsService.logEvent(
+                name: isRegister ? 'google_sign_up_error' : 'google_sign_in_error',
+                parameters: {'error': e.toString()},
               );
             }
           }

@@ -1,6 +1,6 @@
 // Flutter imports:
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+// ignore: unnecessary_import
 import 'package:flutter/services.dart';
 
 // Package imports:
@@ -134,17 +134,25 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        SystemNavigator.pop();
-        return false; // Prevents the default back button behavior
+        // Check if the /welcome route exists in the route stack
+        bool welcomeExists = false;
+        Navigator.popUntil(context, (route) {
+          if (route.settings.name == '/welcome') {
+            welcomeExists = true;
+            return true;
+          }
+          return false;
+        });
+        
+        // If /welcome doesn't exist in the route stack, exit the app
+        if (!welcomeExists) {
+          // Exit the app
+          SystemNavigator.pop();
+        }
+        
+        // Always return false as we're handling navigation manually
+        return false;
       },
-      // onPopInvoked: (didPop) {
-      //   // coverage:ignore-start
-      //   if (didPop) return;
-      //   // Jika user menekan tombol back, keluar dari aplikasi
-      //   // daripada kembali ke halaman utama yang memerlukan auth
-      //   SystemNavigator.pop();
-      //   // coverage:ignore-end
-      // },
       child: Scaffold(
         backgroundColor: bgColor,
         body: SafeArea(
@@ -312,11 +320,11 @@ class _LoginPageState extends State<LoginPage> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _login,
               style: ElevatedButton.styleFrom(
-                backgroundColor: primaryPink,
+                backgroundColor: primaryGreen,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                disabledBackgroundColor: primaryPink.withOpacity(0.5),
+                disabledBackgroundColor: primaryGreen.withOpacity(0.5),
               ),
               child: _isLoading
                   ? const CircularProgressIndicator(
@@ -371,36 +379,6 @@ class _LoginPageState extends State<LoginPage> {
             height: 55, // Sama dengan button sign in
           ),
 
-          const SizedBox(height: 20),
-
-          // Link to registration page
-          Center(
-            child: RichText(
-              text: TextSpan(
-                text: 'Don\'t have an account? ',
-                style: TextStyle(color: Colors.grey[700]),
-                children: [
-                  TextSpan(
-                    text: 'Sign Up',
-                    style: TextStyle(
-                      color: primaryPink,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        // Navigate to registration page
-                        // coverage:ignore-line
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/welcome', // 👈 balik ke Welcome
-                          (route) => false,
-                        );
-                      },
-                  ),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );
