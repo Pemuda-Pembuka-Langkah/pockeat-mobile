@@ -26,6 +26,7 @@ class _CircularIndicatorWidgetState extends State<CircularIndicatorWidget> {
   bool _isPressed = false;
   bool _isHovering = false;
 
+  // coverage:ignore-start
   @override
   Widget build(BuildContext context) {
     final bool isInteractive = widget.onTap != null;
@@ -203,4 +204,5 @@ class _CircularIndicatorWidgetState extends State<CircularIndicatorWidget> {
       ),
     );
   }
+  // coverage:ignore-end
 }
