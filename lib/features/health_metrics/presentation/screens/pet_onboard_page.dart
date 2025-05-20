@@ -121,15 +121,15 @@ class _PetOnboardPageState extends State<PetOnboardPage>
           child: Column(
             children: [
               // Fixed header with progress indicator
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
                     
                     // Onboarding progress indicator
-                    const OnboardingProgressIndicator(
+                    OnboardingProgressIndicator(
                       totalSteps: 16,
                       currentStep: 15, // This is the 16th step (0-indexed)
                       barHeight: 6.0,
@@ -180,7 +180,7 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                             scale: _scaleAnimation,
                             child: Container(
                               padding: const EdgeInsets.all(24),
-                              margin: EdgeInsets.only(
+                              margin: const EdgeInsets.only(
                                 bottom: 24,
                               ),
                               decoration: BoxDecoration(
