@@ -203,7 +203,7 @@ void main() {
         metValue: 0.0, // Empty MET value for unknown workout
         timestamp: DateTime.now(),
         originalInput: 'Exercise this morning',
-        missingInfo: ['type', 'duration', 'intensity'],
+        missingInfo: ['exercise_type', 'duration', 'intensity'],
         userId: 'test-user-123',
       );
 
@@ -350,6 +350,72 @@ void main() {
       expect(find.text('Light Activity'), findsOneWidget);
       expect(find.text('15 minutes'), findsOneWidget);
       expect(find.text('0.0'), findsNothing); // MET value 0 should not be displayed
+    });
+
+    testWidgets('positive case: shows complete data with summary and valid MET', (WidgetTester tester) async {
+      final complete = ExerciseAnalysisResult(
+        exerciseType: 'Cycling',
+        duration: '60 minutes',
+        intensity: 'Medium',
+        estimatedCalories: 500,
+        metValue: 8.5,
+        summary: 'Moderate cycling session for endurance',
+        timestamp: DateTime.now(),
+        originalInput: 'Cycling 60 mins',
+        userId: 'positive-case-user',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnalysisResultWidget(
+              analysisResult: complete,
+              onRetry: () {},
+              onSave: () {},
+              onCorrect: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Cycling'), findsOneWidget);
+      expect(find.text('60 minutes'), findsOneWidget);
+      expect(find.text('500 kcal'), findsOneWidget);
+      expect(find.text('8.5'), findsOneWidget);
+      expect(find.text('Moderate cycling session for endurance'), findsOneWidget);
+      expect(find.text('Save Log'), findsOneWidget);
+    });
+
+      testWidgets('corner case: empty fields but considered complete', (WidgetTester tester) async {
+      final emptyComplete = ExerciseAnalysisResult(
+        exerciseType: '',
+        duration: '',
+        intensity: '',
+        estimatedCalories: 0,
+        metValue: 0.0,
+        summary: '',
+        timestamp: DateTime.now(),
+        originalInput: '',
+        userId: 'corner-case-user',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnalysisResultWidget(
+              analysisResult: emptyComplete,
+              onRetry: () {},
+              onSave: () {},
+              onCorrect: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      // Still should render the stat rows with empty strings
+      expect(find.text(''), findsNWidgets(4)); // exerciseType, duration, intensity, summary
+      expect(find.text('Save Log'), findsOneWidget); // considered complete
+      expect(find.text('Try Again'), findsOneWidget); // still allowed
     });
 
     // Tests for Correction Functionality
