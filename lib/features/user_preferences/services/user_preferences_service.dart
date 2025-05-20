@@ -129,6 +129,50 @@ class UserPreferencesService {
     }
   }
 
+  /// Get the user's pet name
+  /// Returns a default name 'Panda' if no pet name is set or user is not logged in
+  Future<String> getPetName() async {
+    final userId = _auth.currentUser?.uid ?? '';
+
+    try {
+      // If user is logged in, use repository to get the pet name
+      if (userId.isNotEmpty) {
+        return await _repository.getPetName(userId);
+      }
+      // If not logged in, check the local preference
+      else {
+        final prefs = await SharedPreferences.getInstance();
+        return prefs.getString('pet_name') ?? 'Panda';
+      }
+    } catch (e) {
+      debugPrint('Error fetching pet name: $e');
+      return 'Panda'; // Default name
+    }
+  }
+
+  /// Set the user's pet name
+  /// Falls back to default name 'Panda' if an empty name is provided
+  Future<void> setPetName(String petName) async {
+    final userId = _auth.currentUser?.uid ?? '';
+    final validPetName = petName.trim().isEmpty ? 'Panda' : petName.trim();
+
+    try {
+      // Always update local preferences for consistent access
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('pet_name', validPetName);
+
+      // If user is logged in, also update in repository
+      if (userId.isNotEmpty) {
+        await _repository.setPetName(userId, validPetName);
+      }
+
+      debugPrint('Pet name set to: $validPetName');
+    } catch (e) {
+      debugPrint('Error setting pet name: $e');
+      throw Exception('Failed to set pet name: $e');
+    }
+  }
+
   /// Check if sync fitness tracker is enabled
   /// This preference is only stored locally, not in Firebase
   Future<bool> isSyncFitnessTrackerEnabled() async {
@@ -178,12 +222,22 @@ class UserPreferencesService {
             'Syncing exercise calorie compensation: $exerciseCalorieCompensation');
         await _repository.setExerciseCalorieCompensationEnabled(
             userId, exerciseCalorieCompensation);
-      } // Sync rollover calories preference
+      }
+      
+      // Sync rollover calories preference
       final rolloverCalories = prefs.getBool('rollover_calories_enabled');
       if (rolloverCalories != null) {
         debugPrint('Syncing rollover calories: $rolloverCalories');
         await _repository.setRolloverCaloriesEnabled(userId, rolloverCalories);
       }
+      
+      // Sync pet name preference
+      final petName = prefs.getString('pet_name');
+      if (petName != null) {
+        debugPrint('Syncing pet name: $petName');
+        await _repository.setPetName(userId, petName);
+      }
+      
       // No need to sync fitness tracker preference to Firebase - handled locally only
 
       debugPrint('Successfully synchronized user preferences after login');
