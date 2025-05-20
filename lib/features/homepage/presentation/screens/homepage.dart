@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 // Project imports:
 import 'package:pockeat/component/navigation.dart';
@@ -61,24 +62,74 @@ class _HomePageState extends State<HomePage>
     _loadData();
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _loadData() {
-    _petInformation = _petService.getPetInformation(userId);
-    _dayStreak = _foodLogHistoryService.getFoodStreakDays(userId);
-    _statsFuture =
-        _calorieStatsService.calculateStatsForDate(userId, DateTime.now());
-    _targetCalories = caloricRequirementRepository
+    _petInformation = _measureFutureTime(
+      'Pet Information', 
+      _petService.getPetInformation(userId)
+    );
+
+    _dayStreak = _measureFutureTime(
+      'Day Streak', 
+      _foodLogHistoryService.getFoodStreakDays(userId)
+    );
+
+    _statsFuture = _measureFutureTime(
+      'Stats',
+      _calorieStatsService.calculateStatsForDate(userId, DateTime.now())
+    );
+
+    _targetCalories = _measureFutureTime(
+      'Target Calories',
+      caloricRequirementRepository
         .getCaloricRequirement(userId)
-        .then((value) => value?.tdee.toInt() ?? 0);
-    _rolloverCaloriesFuture = preferencesService.getRolloverCalories();
-    _isCalorieCompensationEnabledFuture =
-        preferencesService.isExerciseCalorieCompensationEnabled();
-    _isRolloverCaloriesEnabledFuture =
-        preferencesService.isRolloverCaloriesEnabled();
+        .then((value) => value?.tdee.toInt() ?? 0)
+    );
+
+    _rolloverCaloriesFuture = _measureFutureTime(
+      'Rollover Calories',
+      preferencesService.getRolloverCalories()
+    );
+
+    _isCalorieCompensationEnabledFuture = _measureFutureTime(
+      'Calorie Compensation Setting',
+      preferencesService.isExerciseCalorieCompensationEnabled()
+    );
+
+    _isRolloverCaloriesEnabledFuture = _measureFutureTime(
+      'Rollover Calories Setting',
+      preferencesService.isRolloverCaloriesEnabled()
+    );
 
     // Initialize the new futures
-    _caloricRequirementModelFuture =
-        caloricRequirementRepository.getCaloricRequirement(userId);
-    _currentMacrosFuture = _calculateCurrentMacros();
+    _caloricRequirementModelFuture = _measureFutureTime(
+      'Caloric Requirement Model',
+      caloricRequirementRepository.getCaloricRequirement(userId)
+    );
+
+    _currentMacrosFuture = _measureFutureTime(
+      'Current Macros',
+      _calculateCurrentMacros()
+    );
+  }
+
+  // Helper method to measure the time taken by a Future
+  Future<T> _measureFutureTime<T>(String name, Future<T> future) {
+    final stopwatch = Stopwatch()..start();
+    return future.then((value) {
+      stopwatch.stop();
+      debugPrint('⏱️ $name fetch completed in ${stopwatch.elapsed.inMilliseconds}ms');
+      return value;
+    }).catchError((error) {
+      stopwatch.stop();
+      debugPrint('❌ $name fetch failed after ${stopwatch.elapsed.inMilliseconds}ms: $error');
+      throw error;
+    });
   }
 
   // New method to calculate current macronutrients consumed today
@@ -107,6 +158,29 @@ class _HomePageState extends State<HomePage>
       return {'protein': 0, 'carbs': 0, 'fat': 0};
     }
   }
+
+  Future<List<dynamic>> _getHomePageFutures() async {
+    debugPrint('🕒 Homepage data fetch started at ${DateTime.now()}');
+    final stopwatch = Stopwatch()..start();
+    
+    final result = await Future.wait([
+      _petInformation,
+      _statsFuture,
+      _dayStreak,
+      _targetCalories,
+      _isCalorieCompensationEnabledFuture,
+      _isRolloverCaloriesEnabledFuture,
+      _rolloverCaloriesFuture,
+      _currentMacrosFuture,
+      _caloricRequirementModelFuture,
+    ]);
+    
+    stopwatch.stop();
+    debugPrint('⏱️ Homepage data fetch completed in ${stopwatch.elapsed.inMilliseconds}ms');
+    
+    return result;
+  }
+
   // coverage:ignore-start
   // Show exit confirmation dialog
   Future<bool> _onWillPop() async {
@@ -166,18 +240,11 @@ class _HomePageState extends State<HomePage>
             ),
           ],
           body: FutureBuilder<List<dynamic>>(
-            future: Future.wait([
-              _petInformation,
-              _statsFuture,
-              _dayStreak,
-              _targetCalories,
-              _isCalorieCompensationEnabledFuture,
-              _isRolloverCaloriesEnabledFuture,
-              _rolloverCaloriesFuture,
-              _currentMacrosFuture,
-              _caloricRequirementModelFuture,
-            ]),
+            future: _getHomePageFutures(),
             builder: (context, snapshot) {
+              // Use skeletonizer for loading state
+              final bool isLoading = snapshot.connectionState == ConnectionState.waiting;
+              
               return RefreshIndicator(
                 onRefresh: () async {
                   setState(() {
@@ -186,31 +253,39 @@ class _HomePageState extends State<HomePage>
                 },
                 color: primaryPink, // Use app color theme
                 backgroundColor: Colors.white,
-                child: ListView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
-                  children: [
-                    PetHomepageSection(
-                      isLoading:
-                          snapshot.connectionState == ConnectionState.waiting,
-                      petInfo: snapshot.data?[0] as PetInformation?,
-                      stats: snapshot.data?[1] as DailyCalorieStats?,
-                      streakDays: snapshot.data?[2] as int?,
-                      targetCalories: snapshot.data?[3] as int?,
-                    ),
-                    OverviewSection(
-                      isLoading:
-                          snapshot.connectionState == ConnectionState.waiting,
-                      stats: snapshot.data?[1] as DailyCalorieStats?,
-                      targetCalories: snapshot.data?[3] as int?,
-                      isCalorieCompensationEnabled: snapshot.data?[4] as bool?,
-                      isRolloverCaloriesEnabled: snapshot.data?[5] as bool?,
-                      rolloverCalories: snapshot.data?[6] as int?,
-                      currentMacros: snapshot.data?[7] as Map<String, int>?,
-                      targetMacros:
-                          snapshot.data?[8] as CaloricRequirementModel?,
-                    ),
-                  ],
+                child: Skeletonizer(
+                  enabled: isLoading,
+                  // Optimize skeletonizer for better performance
+                  effect: const ShimmerEffect(
+                    baseColor: Color(0xFFE0E0E0),
+                    highlightColor: Color(0xFFF5F5F5), 
+                    duration: Duration(milliseconds: 1500),
+                  ),
+                  // Ignore problematic widgets
+                  ignoreContainers: false,
+                  // Customize skeleton appearance
+                  justifyMultiLineText: true,
+                  containersColor: const Color(0xFFEEEEEE),
+                  child: ListView(
+                    padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+                    children: [
+                      PetHomepageSection(
+                        petInfo: snapshot.data?[0] as PetInformation?,
+                        stats: snapshot.data?[1] as DailyCalorieStats?,
+                        streakDays: snapshot.data?[2] as int?,
+                        targetCalories: snapshot.data?[3] as int?,
+                      ),
+                      OverviewSection(
+                        stats: snapshot.data?[1] as DailyCalorieStats?,
+                        targetCalories: snapshot.data?[3] as int?,
+                        isCalorieCompensationEnabled: snapshot.data?[4] as bool?,
+                        isRolloverCaloriesEnabled: snapshot.data?[5] as bool?,
+                        rolloverCalories: snapshot.data?[6] as int?,
+                        currentMacros: snapshot.data?[7] as Map<String, int>?,
+                        targetMacros: snapshot.data?[8] as CaloricRequirementModel?,
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

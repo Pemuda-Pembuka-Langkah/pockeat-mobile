@@ -4,16 +4,12 @@ import 'package:flutter/material.dart';
 // Project imports:
 import 'package:pockeat/features/caloric_requirement/domain/models/caloric_requirement_model.dart';
 import 'package:pockeat/features/calorie_stats/domain/models/daily_calorie_stats.dart';
-import 'package:pockeat/features/homepage/presentation/loading_skeleton/calories_today_skeleton.dart';
-import 'package:pockeat/features/homepage/presentation/loading_skeleton/health_connect_skeleton.dart';
-import 'package:pockeat/features/homepage/presentation/loading_skeleton/nutrient_card_skeleton.dart';
 import 'package:pockeat/features/homepage/presentation/widgets/calories_today_widget.dart';
 import 'package:pockeat/features/sync_fitness_tracker/widgets/health_connect_widget.dart';
 
 class OverviewSection extends StatefulWidget {
   final DailyCalorieStats? stats;
   final int? targetCalories;
-  final bool isLoading;
   final bool? isCalorieCompensationEnabled;
   final bool? isRolloverCaloriesEnabled;
   final int? rolloverCalories;
@@ -22,7 +18,6 @@ class OverviewSection extends StatefulWidget {
 
   const OverviewSection({
     super.key,
-    this.isLoading = false,
     this.stats,
     this.targetCalories,
     this.isCalorieCompensationEnabled,
@@ -85,23 +80,19 @@ class _OverviewSectionState extends State<OverviewSection> {
   }
 
   Widget _buildCaloriesToday() {
-    return widget.isLoading
-        ? const CaloriesTodaySkeleton()
-        : CaloriesTodayWidget(
-            stats: widget.stats,
-            targetCalories: widget.targetCalories ?? 0,
-            isCalorieCompensationEnabled:
-                widget.isCalorieCompensationEnabled ?? false,
-            isRolloverCaloriesEnabled:
-                widget.isRolloverCaloriesEnabled ?? false,
-            rolloverCalories: widget.rolloverCalories ?? 0,
-          );
+    return CaloriesTodayWidget(
+      stats: widget.stats,
+      targetCalories: widget.targetCalories ?? 0,
+      isCalorieCompensationEnabled:
+          widget.isCalorieCompensationEnabled ?? false,
+      isRolloverCaloriesEnabled:
+          widget.isRolloverCaloriesEnabled ?? false,
+      rolloverCalories: widget.rolloverCalories ?? 0,
+    );
   }
 
   Widget _buildFitnessTrackerSection() {
-    return widget.isLoading
-        ? const HealthConnectSkeleton()
-        : const HealthConnectWidget();
+    return const HealthConnectWidget();
   }
 
   Widget _buildNutrientCard({
@@ -118,73 +109,69 @@ class _OverviewSectionState extends State<OverviewSection> {
     final displayIconColor = isExceeded ? warningColor : iconColor;
     final displayBgColor = isExceeded ? warningColor.withOpacity(0.1) : bgColor;
 
-    return widget.isLoading
-        ? const NutrientCardSkeleton()
-        : Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 5,
-                  offset: Offset(0, 2),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: displayBgColor,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+                child: Icon(displayIcon, color: displayIconColor, size: 12),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                title,
+                style: TextStyle(
+                  color: isExceeded ? warningColor : Colors.black54,
+                  fontSize: 12,
+                  fontWeight: isExceeded ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          RichText(
+            text: TextSpan(
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: displayBgColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child:
-                          Icon(displayIcon, color: displayIconColor, size: 12),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: isExceeded ? warningColor : Colors.black54,
-                        fontSize: 12,
-                        fontWeight:
-                            isExceeded ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ],
+                TextSpan(
+                  text: current,
+                  style: TextStyle(
+                    color: isExceeded ? warningColor : Colors.black87,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: 12),
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: current,
-                        style: TextStyle(
-                          color: isExceeded ? warningColor : Colors.black87,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextSpan(
-                        text: '/$target',
-                        style: const TextStyle(
-                          color: Colors.black38,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                TextSpan(
+                  text: '/$target',
+                  style: const TextStyle(
+                    color: Colors.black38,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
-          );
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -225,7 +212,7 @@ class _OverviewSectionState extends State<OverviewSection> {
             ],
           ),
 
-          // Nutrients Grid - now using dynamic values
+          // Nutrients Grid
           const SizedBox(height: 16),
           Row(
             children: [
