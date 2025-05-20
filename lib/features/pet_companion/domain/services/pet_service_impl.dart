@@ -134,12 +134,52 @@ class PetServiceImpl implements PetService {
 
   @override
   Future<PetInformation> getPetInformation(String userId) async {
-    final isCalorieOverTarget = await getIsPetCalorieOverTarget(userId);
-    final heart = await getPetHeart(userId);
-    var mood = await getPetMood(userId);
+    final caloricRequirementDoc =
+        await firestore.collection('caloric_requirements').doc(userId).get();
+
+    final stats =
+        await calorieStatsService.calculateStatsForDate(userId, DateTime.now());
+
+    final today =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final isLogToday =
+        await foodLogHistoryService.getFoodLogsByDate(userId, today);
+
+    final data = caloricRequirementDoc.data();
+
+    final tdee = data?['tdee'] as num;
+
+    final caloriesConsumed = stats.caloriesConsumed;
+
+    final percentage = caloriesConsumed / tdee;
+
+    final isCalorieOverTarget = percentage > 1;
+
+    var heart = 0;
+    var mood = '';
+
+    if (percentage > 0.75) {
+      heart = 4;
+    } else if (percentage > 0.5) {
+      heart = 3;
+    } else if (percentage > 0.25) {
+      heart = 2;
+    } else if (percentage > 0) {
+      heart = 1;
+    } else {
+      heart = 0;
+    }
+
+    if (isLogToday.isNotEmpty) {
+      mood = 'happy';
+    } else {
+      mood = 'sad';
+    }
+
     if (isCalorieOverTarget) {
       mood = 'sad';
     }
+
     return PetInformation(
       isCalorieOverTarget: isCalorieOverTarget,
       heart: heart,
