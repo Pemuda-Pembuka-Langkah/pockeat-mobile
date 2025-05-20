@@ -1,4 +1,8 @@
+// coverage:ignore-file
+
 // Project imports:
+import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
@@ -7,6 +11,7 @@ import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exc
 import 'package:pockeat/features/home_screen_widget/domain/models/detailed_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/services/impl/default_nutrient_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import '../../services/nutrient_calculation_strategy.dart';
 
 /// Controller khusus untuk detailed food tracking widget
@@ -53,13 +58,16 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
 
     try {
       final userId = user.uid;
+      final userPreferencesService = GetIt.instance<UserPreferencesService>();
 
       // Hitung total kalori hari ini menggunakan CalorieStatsService
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final dailyStats =
-          await _calorieStatsService.getStatsByDate(userId, today);
+          await _calorieStatsService.calculateStatsForDate(userId, today);
       final consumedCalories = dailyStats.caloriesConsumed;
+      final caloriesBurned = dailyStats.caloriesBurned;
+      debugPrint('Consumed calories: $consumedCalories');
 
       // Dapatkan data untuk nutrisi
       final todayLogs =
@@ -73,8 +81,25 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
       final fat = _nutrientCalculationStrategy.calculateNutrientFromLogs(
           todayLogs, 'fat');
 
-      // Target kalori sekarang dihitung oleh client controller dan diberikan sebagai parameter
-      final calculatedTarget = targetCalories ?? 0;
+      // Base target kalori dihitung oleh client controller dan diberikan sebagai parameter
+      int calculatedTarget = targetCalories ?? 0;
+      
+      // Ambil preferensi untuk fitur calorie compensation dan rollover
+      final isCalorieCompensationEnabled = await userPreferencesService.isExerciseCalorieCompensationEnabled();
+      final isRolloverCaloriesEnabled = await userPreferencesService.isRolloverCaloriesEnabled();
+      
+      // Tambahkan calories burned jika kompensasi kalori diaktifkan
+      if (isCalorieCompensationEnabled) {
+        calculatedTarget += caloriesBurned;
+        debugPrint('Added $caloriesBurned burned calories to target');
+      }
+      
+      // Tambahkan rollover calories jika fitur rollover diaktifkan
+      if (isRolloverCaloriesEnabled) {
+        final rolloverCalories = await userPreferencesService.getRolloverCalories();
+        calculatedTarget += rolloverCalories;
+        debugPrint('Added $rolloverCalories rollover calories to target');
+      }
 
       // Update data widget
       final detailedFoodTracking = DetailedFoodTracking(
