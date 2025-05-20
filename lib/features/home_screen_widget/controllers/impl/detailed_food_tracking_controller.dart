@@ -65,7 +65,7 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
       final today = DateTime(now.year, now.month, now.day);
       final dailyStats =
           await _calorieStatsService.calculateStatsForDate(userId, today);
-      final consumedCalories = dailyStats.caloriesConsumed;
+      int consumedCalories = dailyStats.caloriesConsumed;
       final caloriesBurned = dailyStats.caloriesBurned;
       debugPrint('Consumed calories: $consumedCalories');
 
@@ -88,28 +88,45 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
       final isCalorieCompensationEnabled = await userPreferencesService.isExerciseCalorieCompensationEnabled();
       final isRolloverCaloriesEnabled = await userPreferencesService.isRolloverCaloriesEnabled();
       
-      // Tambahkan calories burned jika kompensasi kalori diaktifkan
+      // Tambahkan calories burned ke target jika kompensasi kalori diaktifkan
       if (isCalorieCompensationEnabled) {
         calculatedTarget += caloriesBurned;
         debugPrint('Added $caloriesBurned burned calories to target');
       }
       
-      // Tambahkan rollover calories jika fitur rollover diaktifkan
+      // Tambahkan rollover calories ke target jika fitur rollover diaktifkan
       if (isRolloverCaloriesEnabled) {
         final rolloverCalories = await userPreferencesService.getRolloverCalories();
         calculatedTarget += rolloverCalories;
         debugPrint('Added $rolloverCalories rollover calories to target');
       }
 
+      // Round target calories to nearest multiple of 5 for consistency
+      calculatedTarget = ((calculatedTarget + 2.5) ~/ 5) * 5;
+      
+      // Round consumed calories to nearest multiple of 5 for consistency
+      consumedCalories = ((consumedCalories + 2.5) ~/ 5) * 5;
+      
+      // Calculate remaining calories (just like in CaloriesTodayWidget)
+      int caloriesDifference = calculatedTarget - consumedCalories;
+      bool isExceeded = caloriesDifference < 0;
+      int remainingCalories = isExceeded ? 0 : caloriesDifference;
+      
+      // For simplicity, we'll report the consumed calories as (targetCalories - remainingCalories)
+      // This ensures the widget shows correct remaining calories
+      int adjustedConsumedCalories = calculatedTarget - remainingCalories;
+      
       // Update data widget
       final detailedFoodTracking = DetailedFoodTracking(
         caloriesNeeded: calculatedTarget,
-        currentCaloriesConsumed: consumedCalories,
+        currentCaloriesConsumed: adjustedConsumedCalories,
         currentProtein: protein,
         currentCarb: carbs,
         currentFat: fat,
         userId: userId,
       );
+      
+      debugPrint('Detailed widget - Target: $calculatedTarget, Consumed: $adjustedConsumedCalories, Remaining: $remainingCalories');
 
       await _widgetService.updateData(detailedFoodTracking);
       await _widgetService.updateWidget();
