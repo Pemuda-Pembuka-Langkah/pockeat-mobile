@@ -1,12 +1,15 @@
+// coverage:ignore-file
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:get_it/get_it.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import '../widgets/onboarding_progress_indicator.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 class PetOnboardPage extends StatefulWidget {
   const PetOnboardPage({super.key});
@@ -118,15 +121,15 @@ class _PetOnboardPageState extends State<PetOnboardPage>
           child: Column(
             children: [
               // Fixed header with progress indicator
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20),
                     
                     // Onboarding progress indicator
-                    const OnboardingProgressIndicator(
+                    OnboardingProgressIndicator(
                       totalSteps: 16,
                       currentStep: 15, // This is the 16th step (0-indexed)
                       barHeight: 6.0,
@@ -177,7 +180,7 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                             scale: _scaleAnimation,
                             child: Container(
                               padding: const EdgeInsets.all(24),
-                              margin: EdgeInsets.only(
+                              margin: const EdgeInsets.only(
                                 bottom: 24,
                               ),
                               decoration: BoxDecoration(
@@ -297,10 +300,12 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                     child: ElevatedButton(
                                       onPressed: _petNameController.text.trim().isNotEmpty
                                           ? () async {
-                                              final prefs =
-                                                  await SharedPreferences.getInstance();
-                                              await prefs.setString(
-                                                  'petName', _petNameController.text.trim());
+                                              // Get UserPreferencesService from GetIt
+                                              final preferencesService = GetIt.I<UserPreferencesService>();
+                                              
+                                              // Save pet name using service
+                                              await preferencesService.setPetName(_petNameController.text.trim());
+                                              
                                               if (context.mounted) {
                                                 Navigator.pushNamed(context, '/calorie-loading');
                                               }

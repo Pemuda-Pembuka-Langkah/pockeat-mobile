@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
@@ -138,6 +139,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       await _preferencesService.setExerciseCalorieCompensationEnabled(value);
+      final widgetController = GetIt.instance<FoodTrackingClientController>();
+      await widgetController.forceUpdate();
+      debugPrint('Home screen widgets updated with new exercise data');
       setState(() {
         _exerciseCalorieCompensationEnabled = Future.value(value);
         _loadingExerciseCompensation = false;
@@ -188,6 +192,9 @@ class _ProfilePageState extends State<ProfilePage> {
       if (value) {
         // No need to wait for this result, just trigger the calculation
         _preferencesService.getRolloverCalories();
+        final widgetController = GetIt.instance<FoodTrackingClientController>();
+        await widgetController.forceUpdate();
+        debugPrint('Home screen widgets updated with new exercise data');
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

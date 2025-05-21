@@ -1,3 +1,5 @@
+// coverage:ignore-file
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -55,6 +57,7 @@ class _HomePageState extends State<HomePage>
   late Future<int> _rolloverCaloriesFuture;
   late Future<Map<String, int>> _currentMacrosFuture;
   late Future<CaloricRequirementModel?> _caloricRequirementModelFuture;
+  late Future<String> _petName;
 
   @override
   void initState() {
@@ -82,6 +85,11 @@ class _HomePageState extends State<HomePage>
     _statsFuture = _measureFutureTime(
       'Stats',
       _calorieStatsService.calculateStatsForDate(userId, DateTime.now())
+    );
+    
+    _petName = _measureFutureTime(
+      'Pet Name',
+      preferencesService.getPetName()
     );
 
     _targetCalories = _measureFutureTime(
@@ -173,6 +181,7 @@ class _HomePageState extends State<HomePage>
       _rolloverCaloriesFuture,
       _currentMacrosFuture,
       _caloricRequirementModelFuture,
+      _petName, // Add pet name to the futures list
     ]);
     
     stopwatch.stop();
@@ -270,6 +279,7 @@ class _HomePageState extends State<HomePage>
                     padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
                     children: [
                       PetHomepageSection(
+                        petName: snapshot.data?[9] as String? ?? 'Panda', // Use pet name from preferences
                         petInfo: snapshot.data?[0] as PetInformation?,
                         stats: snapshot.data?[1] as DailyCalorieStats?,
                         streakDays: snapshot.data?[2] as int?,

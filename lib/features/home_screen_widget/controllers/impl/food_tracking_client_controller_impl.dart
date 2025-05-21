@@ -109,6 +109,8 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
         // No caloric requirement data, using default value 2000
       }
 
+      debugPrint('Target calories: $targetCalories');
+
       // Update both widgets dengan target calorie yang sama
       await Future.wait([
         _simpleController.updateWidgetData(user,

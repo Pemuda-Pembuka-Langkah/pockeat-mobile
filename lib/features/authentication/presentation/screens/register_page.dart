@@ -204,10 +204,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        Navigator.of(context).pop();
-      },
+      canPop: true,
       child: Scaffold(
         backgroundColor: bgColor,
         body: SafeArea(

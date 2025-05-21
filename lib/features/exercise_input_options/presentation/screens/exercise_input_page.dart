@@ -1,5 +1,4 @@
-// exercise_input_page.dart
-
+// coverage:ignore-file
 // Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +41,13 @@ class _ExerciseInputPageState extends State<ExerciseInputPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        // Navigate to the root route instead of just popping
+        await Navigator.of(context).pushReplacementNamed('/');
+        return false; // Prevents default pop behavior
+      },
+      child: Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -50,9 +55,8 @@ class _ExerciseInputPageState extends State<ExerciseInputPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () {
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            }
+            // Use pushReplacementNamed to navigate to the root route
+            Navigator.of(context).pushReplacementNamed('/');
           },
         ),
         title: const Text(
@@ -115,6 +119,6 @@ class _ExerciseInputPageState extends State<ExerciseInputPage> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

@@ -466,4 +466,120 @@ void main() {
       expect(preferencesData.containsKey('rollover_calories_enabled'), false);
     });
   });
+  
+  group('UserPreferencesService - Pet Name', () {
+    test('getPetName should return "Panda" by default', () async {
+      // Act
+      final result = await preferencesService.getPetName();
+
+      // Assert
+      expect(result, 'Panda');
+    });
+
+    test('getPetName should return value from Firestore', () async {
+      // Arrange
+      await fakeFirestore.collection('users').doc('test-user-id').set({
+        'preferences': {'pet_name': 'Fluffy'}
+      });
+
+      // Act
+      final result = await preferencesService.getPetName();
+
+      // Assert
+      expect(result, 'Fluffy');
+    });
+
+    test('setPetName should update value in Firestore', () async {
+      // Act
+      await preferencesService.setPetName('Buddy');
+
+      // Assert
+      final docSnapshot =
+          await fakeFirestore.collection('users').doc('test-user-id').get();
+
+      expect(docSnapshot.exists, true);
+      expect(docSnapshot.data()?['preferences']?['pet_name'], 'Buddy');
+    });
+
+    test('setPetName should use default name when empty string is provided', () async {
+      // Act
+      await preferencesService.setPetName('');
+
+      // Assert
+      final docSnapshot =
+          await fakeFirestore.collection('users').doc('test-user-id').get();
+
+      expect(docSnapshot.exists, true);
+      expect(docSnapshot.data()?['preferences']?['pet_name'], 'Panda');
+    });
+
+    test('getPetName should return "Panda" when user is not logged in', () async {
+      // Arrange
+      when(() => mockAuth.currentUser).thenReturn(null);
+
+      // Act
+      final result = await preferencesService.getPetName();
+
+      // Assert
+      expect(result, 'Panda');
+    });
+
+    test('setPetName should not update Firestore when user is not logged in', () async {
+      // Arrange
+      when(() => mockAuth.currentUser).thenReturn(null);
+
+      // Act
+      await preferencesService.setPetName('Charlie');
+
+      // Assert - should not throw and should not update Firestore
+      final snapshot = await fakeFirestore.collection('users').get();
+      expect(snapshot.docs.isEmpty, true);
+      
+      // But should still update local preferences
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('pet_name'), 'Charlie');
+    });
+
+    test('getPetName should cache result in SharedPreferences', () async {
+      // Arrange
+      await fakeFirestore.collection('users').doc('test-user-id').set({
+        'preferences': {'pet_name': 'Rex'}
+      });
+
+      // Act
+      await preferencesService.getPetName();
+
+      // Assert - check if value is cached in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('pet_name_test-user-id'), 'Rex');
+    });
+
+    test('getPetName should use cached value if available', () async {
+      // Arrange - set value in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('pet_name_test-user-id', 'Max');
+
+      // Act
+      final result = await preferencesService.getPetName();
+
+      // Assert - should return cached value without querying Firestore
+      expect(result, 'Max');
+    });
+  });
+  
+  group('UserPreferencesService - synchronizePreferencesAfterLogin', () {
+    test('synchronizePreferencesAfterLogin should sync pet name', () async {
+      // Arrange
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('pet_name', 'Whiskers');
+
+      // Act
+      await preferencesService.synchronizePreferencesAfterLogin();
+
+      // Assert
+      final docSnapshot =
+          await fakeFirestore.collection('users').doc('test-user-id').get();
+      expect(docSnapshot.data()?['preferences']?['pet_name'], 'Whiskers');
+    });
+  });
 }
