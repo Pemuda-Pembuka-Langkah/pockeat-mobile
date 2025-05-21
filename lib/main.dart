@@ -497,6 +497,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         Provider.of<NavigationProvider>(context, listen: false);
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
       title: 'Pockeat',
       // Add observer to track route changes and update bottom navigation
