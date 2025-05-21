@@ -12,11 +12,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/profile_service.dart';
 
-/// Halaman edit profil pengguna
+/// User profile edit page
 ///
-/// Menampilkan form untuk edit:
-/// - Nama pengguna (displayName)
-/// - Foto profil (photoURL)
+/// Displays form to edit:
+/// - User name (displayName)
+/// - Profile photo (photoURL)
 
 // coverage:ignore-start
 class EditProfilePage extends StatefulWidget {
@@ -34,7 +34,7 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  // Colors - sama dengan di profile page untuk konsistensi
+  // Colors - same as in profile page for consistency
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color bgColor = const Color(0xFFF9F9F9);
@@ -56,7 +56,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.initState();
     _profileService = GetIt.instance<ProfileService>();
 
-    // Inisialisasi dengan data dari initialUser jika ada
+    // Initialize with data from initialUser if available
     _currentUser = widget.initialUser;
     _displayNameController = TextEditingController(
       text: _currentUser?.displayName ?? '',
@@ -76,7 +76,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
-  /// Memuat data user jika initialUser tidak tersedia
+  /// Load user data if initialUser is not available
   Future<void> _loadUserData() async {
     setState(() {
       _isLoading = true;
@@ -94,12 +94,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Gagal memuat profil: ${e.toString()}';
+        _errorMessage = 'Failed to load profile: ${e.toString()}';
       });
     }
   }
 
-  /// Fungsi untuk memilih foto dari galeri
+  /// Function to pick photo from gallery
   Future<void> _pickImageFromGallery() async {
     try {
       final pickedFile = await _imagePicker.pickImage(
@@ -118,7 +118,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (widget.useScaffold && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal memilih gambar: ${e.toString()}'),
+            content: Text('Failed to select image: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -126,7 +126,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  /// Fungsi untuk mengambil foto dari kamera
+  /// Function to take photo from camera
   Future<void> _takePhoto() async {
     try {
       final pickedFile = await _imagePicker.pickImage(
@@ -145,7 +145,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (widget.useScaffold && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal mengambil foto: ${e.toString()}'),
+            content: Text('Failed to take photo: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -153,7 +153,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  /// Mengupload foto yang dipilih ke Firebase Storage
+  /// Upload selected photo to Firebase Storage
   Future<String?> _uploadSelectedImage() async {
     if (_selectedImageFile == null) return _photoURL;
 
@@ -181,7 +181,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (widget.useScaffold && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Gagal mengupload foto: ${e.toString()}'),
+            content: Text('Failed to upload photo: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -191,18 +191,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  /// Tampilkan dialog pilihan sumber foto (kamera/galeri)
+  /// Show image source selection dialog (camera/gallery)
   Future<void> _showImageSourceDialog() async {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Pilih Sumber Foto'),
+        title: const Text('Select Photo Source'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: Icon(Icons.photo_library, color: primaryPink),
-              title: const Text('Pilih dari Galeri'),
+              title: const Text('Choose from Gallery'),
               onTap: () {
                 Navigator.of(context).pop();
                 _pickImageFromGallery();
@@ -210,7 +210,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             ListTile(
               leading: Icon(Icons.camera_alt, color: primaryPink),
-              title: const Text('Ambil Foto'),
+              title: const Text('Take Photo'),
               onTap: () {
                 Navigator.of(context).pop();
                 _takePhoto();
@@ -222,22 +222,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             style: TextButton.styleFrom(foregroundColor: Colors.grey[600]),
-            child: const Text('Batal'),
+            child: const Text('Cancel'),
           ),
         ],
       ),
     );
   }
 
-  /// Menyimpan perubahan profil
+  /// Save profile changes
   Future<void> _saveChanges() async {
-    // Validasi input
+    // Validate input
     final displayName = _displayNameController.text.trim();
     if (displayName.isEmpty) {
       if (widget.useScaffold && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Nama tidak boleh kosong'),
+            content: Text('Name cannot be empty'),
             backgroundColor: Colors.red,
           ),
         );
@@ -251,20 +251,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
     });
 
     try {
-      // Upload foto jika ada foto yang dipilih
+      // Upload photo if a new one is selected
       String? finalPhotoURL = _photoURL;
       if (_selectedImageFile != null) {
         finalPhotoURL = await _uploadSelectedImage();
         if (finalPhotoURL == null && _selectedImageFile != null) {
           setState(() {
             _isSaving = false;
-            _errorMessage = 'Gagal mengupload foto profil';
+            _errorMessage = 'Failed to upload profile photo';
           });
           return;
         }
       }
 
-      // Update profil
+      // Update profile
       final success = await _profileService.updateUserProfile(
         displayName: displayName,
         photoURL: finalPhotoURL,
@@ -274,25 +274,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
         if (widget.useScaffold) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Profil berhasil diperbarui'),
+              content: const Text('Profile successfully updated'),
               backgroundColor: primaryGreen,
             ),
           );
         }
 
-        // Kembali ke halaman profil
+        // Return to profile page
         Navigator.of(context)
-            .pop(true); // true untuk memberi tahu perubahan berhasil
+            .pop(true); // true to indicate successful update
       } else if (mounted) {
         setState(() {
-          _errorMessage = 'Gagal memperbarui profil';
+          _errorMessage = 'Failed to update profile';
           _isSaving = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Terjadi kesalahan: ${e.toString()}';
+          _errorMessage = 'An error occurred: ${e.toString()}';
           _isSaving = false;
         });
       }
@@ -315,7 +315,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       backgroundColor: bgColor,
       appBar: AppBar(
         title: const Text(
-          'Edit Profil',
+          'Edit Profile',
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -333,7 +333,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  /// Widget untuk menampilkan pesan error
+  /// Widget to display error message
   Widget _buildErrorView() {
     return Center(
       child: Padding(
@@ -348,7 +348,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             const SizedBox(height: 16),
             Text(
-              _errorMessage ?? 'Terjadi kesalahan',
+              _errorMessage ?? 'An error occurred',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
@@ -367,7 +367,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: const Text('Coba Lagi'),
+              child: const Text('Try Again'),
             ),
           ],
         ),
@@ -375,7 +375,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  /// Widget untuk form edit profil
+  /// Widget for profile edit form
   Widget _buildProfileForm() {
     return SingleChildScrollView(
       child: Padding(
@@ -386,10 +386,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
             _buildProfilePicture(),
             const SizedBox(height: 24),
             _buildInputGroup(
-              label: 'Nama',
+              label: 'Name',
               icon: Icons.person_outline,
               controller: _displayNameController,
-              hintText: 'Masukkan nama Anda',
+              hintText: 'Enter your name',
             ),
             const SizedBox(height: 24),
             _buildEmailField(),
@@ -401,7 +401,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  /// Widget untuk menampilkan dan memilih foto profil
+  /// Widget to display and select profile photo
   Widget _buildProfilePicture() {
     return Center(
       child: Column(
@@ -460,7 +460,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Foto Profil',
+            'Profile Photo',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -480,7 +480,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 minimumSize: const Size(0, 0),
               ),
-              child: const Text('Batalkan foto baru'),
+              child: const Text('Cancel new photo'),
             ),
           ],
         ],
@@ -488,19 +488,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  /// Mendapatkan gambar profil (image provider) yang sesuai
+  /// Get appropriate profile image provider
   ImageProvider? _getProfileImage() {
     if (_selectedImageFile != null) {
-      // Gunakan file lokal jika ada foto yang baru dipilih
+      // Use local file if a new photo is selected
       return FileImage(_selectedImageFile!);
     } else if (_photoURL != null) {
-      // Gunakan URL jika ada foto yang sudah diupload sebelumnya
+      // Use URL if a photo has been previously uploaded
       return NetworkImage(_photoURL!);
     }
     return null;
   }
 
-  /// Widget untuk kelompok input dengan label dan ikon
+  /// Widget for input group with label and icon
   Widget _buildInputGroup({
     required String label,
     required IconData icon,
@@ -557,7 +557,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  /// Widget untuk menampilkan email (tidak dapat diedit)
+  /// Widget to display email (non-editable)
   Widget _buildEmailField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -599,56 +599,48 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
         const SizedBox(height: 8),
         Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Icon(
-              _currentUser?.emailVerified == true
-                  ? Icons.verified_user
-                  : Icons.warning,
-              size: 16,
-              color: _currentUser?.emailVerified == true
-                  ? primaryGreen
-                  : Colors.orange,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              _currentUser?.emailVerified == true
-                  ? 'Email terverifikasi'
-                  : 'Email belum terverifikasi',
-              style: TextStyle(
-                fontSize: 12,
-                color: _currentUser?.emailVerified == true
-                    ? primaryGreen
-                    : Colors.orange,
+            // Show verification status
+            if (_currentUser != null && !_currentUser!.emailVerified)
+              Row(
+                children: [
+                  const Icon(Icons.info_outline,
+                      size: 16, color: Colors.orange),
+                  const SizedBox(width: 4),
+                  const Text(
+                    'Email not verified',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: _isSaving ? null : _sendVerificationEmail,
+                    style: TextButton.styleFrom(
+                      foregroundColor: primaryPink,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 0),
+                      minimumSize: const Size(0, 0),
+                    ),
+                    child: const Text('Send verification email',
+                        style: TextStyle(fontSize: 12)),
+                  ),
+                ],
               ),
-            ),
-            if (_currentUser?.emailVerified != true) ...[
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: _sendVerificationEmail,
-                style: TextButton.styleFrom(
-                  foregroundColor: primaryPink,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  minimumSize: const Size(0, 0),
-                ),
-                child: const Text(
-                  'Kirim verifikasi',
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
-            ],
           ],
         ),
       ],
     );
   }
 
-  /// Widget tombol simpan
+  /// Save button widget
   Widget _buildSaveButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _isSaving || _isUploadingImage ? null : _saveChanges,
+        onPressed: _isSaving ? null : _saveChanges,
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryPink,
           foregroundColor: Colors.white,
@@ -656,78 +648,86 @@ class _EditProfilePageState extends State<EditProfilePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          elevation: 1,
+          elevation: 0,
         ),
         child: _isSaving
             ? const SizedBox(
                 height: 20,
                 width: 20,
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  strokeWidth: 2,
+                  color: Colors.white,
+                  strokeWidth: 3,
                 ),
               )
             : const Text(
-                'Simpan Perubahan',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                'Save Changes',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
       ),
     );
   }
 
-  /// Fungsi untuk mengirim email verifikasi
+  /// Function to send verification email
   Future<void> _sendVerificationEmail() async {
-    try {
-      final success = await _profileService.sendEmailVerification();
+    if (_currentUser == null) {
+      if (widget.useScaffold && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Email not found'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
 
-      if (success && mounted) {
-        if (widget.useScaffold) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Email verifikasi telah dikirim'),
-              backgroundColor: primaryGreen,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-        // Jika dalam test mode (useScaffold = false), kita lewati tampilan SnackBar
-      } else if (mounted) {
-        if (widget.useScaffold) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Gagal mengirim email verifikasi'),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+    try {
+      final sent = await _profileService.sendEmailVerification();
+
+      if (sent && mounted && widget.useScaffold) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Verification email sent to ${_currentUser!.email}. Please check your inbox.'),
+            backgroundColor: primaryGreen,
+          ),
+        );
+      } else if (mounted && widget.useScaffold) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to send verification email'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       if (mounted && widget.useScaffold) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Terjadi kesalahan: ${e.toString()}'),
+            content: Text('Error: ${e.toString()}'),
             backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
           ),
         );
       }
     }
   }
 
-  /// Helper untuk mendapatkan inisial dari nama pengguna
+  /// Helper to get initials from username
   String _getInitials() {
-    final name = _currentUser?.displayName;
-    if (name == null || name.isEmpty) {
-      return '?';
-    }
+    final name = _displayNameController.text.trim();
+    if (name.isEmpty) return '?';
 
     final nameParts = name.split(' ');
-    if (nameParts.length == 1) {
-      return nameParts[0][0].toUpperCase();
+    if (nameParts.length > 1) {
+      // Get initials for the first and last name
+      return '${nameParts.first[0]}${nameParts.last[0]}'.toUpperCase();
+    } else {
+      // Get the first character of the name
+      return name[0].toUpperCase();
     }
-
-    return '${nameParts[0][0]}${nameParts[1][0]}'.toUpperCase();
   }
 }
 // coverage:ignore-end
