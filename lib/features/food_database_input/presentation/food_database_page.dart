@@ -83,13 +83,10 @@ class _NutritionDatabasePageState extends State<NutritionDatabasePage>
 
   void _addFoodToSelection(FoodAnalysisResult food) {
     setState(() {
-      _selectedFoods.add(food);
-
-      // Initialize portion value for the new food
+      _selectedFoods.add(
+          food); // Initialize portion value for the new food - always use 100.0 grams
       final index = _selectedFoods.length - 1;
-      final initialPortion =
-          food.ingredients.isNotEmpty ? food.ingredients[0].servings : 100.0;
-      _portionValues[index] = initialPortion;
+      _portionValues[index] = 100.0;
 
       // Add a new component count controller
       _componentCountControllers.add(TextEditingController(text: "1"));

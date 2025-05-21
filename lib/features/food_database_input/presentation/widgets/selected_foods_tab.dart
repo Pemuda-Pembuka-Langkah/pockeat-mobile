@@ -115,12 +115,9 @@ class SelectedFoodsTab extends StatelessWidget {
                     : ListView.builder(
                         itemCount: selectedFoods.length,
                         itemBuilder: (context, index) {
-                          final food = selectedFoods[index];
-                          // coverage:ignore-line
-                          final portion = portionValues[index] ??
-                              (food.ingredients.isNotEmpty
-                                  ? food.ingredients[0].servings
-                                  : 100.0);
+                          final food = selectedFoods[
+                              index]; // Always default to 100.0 grams if no value exists
+                          final portion = portionValues[index] ?? 100.0;
 
                           return FoodItemCard(
                             food: food,
