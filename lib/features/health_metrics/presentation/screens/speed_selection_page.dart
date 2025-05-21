@@ -20,7 +20,6 @@ class SpeedSelectionPage extends StatefulWidget {
 
 class _SpeedSelectionPageState extends State<SpeedSelectionPage>
     with SingleTickerProviderStateMixin {
-
   double _weeklyGoal = 0.5; // kg/week
   bool _isMaintenanceMode = false; // true when current weight = desired weight
 
@@ -30,7 +29,6 @@ class _SpeedSelectionPageState extends State<SpeedSelectionPage>
   final Color bgColor = const Color(0xFFF9F9F9);
   final Color textDarkColor = Colors.black87;
   final Color textLightColor = Colors.black54;
-
 
   // Animation controller
   late AnimationController _animationController;
@@ -61,10 +59,11 @@ class _SpeedSelectionPageState extends State<SpeedSelectionPage>
       final currentWeight = cubit.state.weight;
       final desiredWeight = cubit.state.desiredWeight;
       final storedWeeklyGoal = cubit.state.weeklyGoal;
-      
+
       // Check if we're in maintenance mode (current weight = desired weight)
       if (currentWeight != null && desiredWeight != null) {
-        if ((currentWeight - desiredWeight).abs() < 0.1) { // Account for small floating point differences
+        if ((currentWeight - desiredWeight).abs() < 0.1) {
+          // Account for small floating point differences
           setState(() {
             _isMaintenanceMode = true;
             _weeklyGoal = 0.0; // Set to 0 for maintenance
@@ -73,7 +72,7 @@ class _SpeedSelectionPageState extends State<SpeedSelectionPage>
           // NOT in maintenance mode - ensure we have a proper weekly goal
           setState(() {
             _isMaintenanceMode = false;
-            
+
             // If user coming from maintenance mode (weeklyGoal was 0) or has no weeklyGoal,
             // set a reasonable default of 0.5 kg/week
             if (storedWeeklyGoal == null || storedWeeklyGoal <= 0.0) {
@@ -205,7 +204,7 @@ class _SpeedSelectionPageState extends State<SpeedSelectionPage>
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // Only show weight change info when NOT in maintenance mode
-                          if (!_isMaintenanceMode) ...[                          
+                          if (!_isMaintenanceMode) ...[
                             // Weekly weight change info container
                             Container(
                               padding: const EdgeInsets.all(16),
@@ -292,7 +291,8 @@ class _SpeedSelectionPageState extends State<SpeedSelectionPage>
                           // Clear, simplified maintenance mode notice when current weight = desired weight
                           if (_isMaintenanceMode)
                             Container(
-                              margin: const EdgeInsets.only(top: 10, bottom: 10),
+                              margin:
+                                  const EdgeInsets.only(top: 10, bottom: 10),
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 color: Colors.amber.shade50,
@@ -424,7 +424,8 @@ class _SpeedSelectionPageState extends State<SpeedSelectionPage>
                                 // If in maintenance mode, set weekly goal to 0
                                 context
                                     .read<HealthMetricsFormCubit>()
-                                    .setWeeklyGoal(_isMaintenanceMode ? 0.0 : _weeklyGoal);
+                                    .setWeeklyGoal(
+                                        _isMaintenanceMode ? 0.0 : _weeklyGoal);
                                 Navigator.pushNamed(
                                     context, '/add-calories-back');
                               },

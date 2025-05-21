@@ -1,6 +1,5 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-// ignore: unnecessary_import
 import 'package:flutter/services.dart';
 
 // Package imports:
@@ -12,6 +11,8 @@ import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
+
+// ignore: unnecessary_import
 
 /// Login page for existing users
 ///
@@ -143,13 +144,13 @@ class _LoginPageState extends State<LoginPage> {
           }
           return false;
         });
-        
+
         // If /welcome doesn't exist in the route stack, exit the app
         if (!welcomeExists) {
           // Exit the app
           SystemNavigator.pop();
         }
-        
+
         // Always return false as we're handling navigation manually
         return false;
       },
@@ -378,7 +379,6 @@ class _LoginPageState extends State<LoginPage> {
           const GoogleSignInButton(
             height: 55, // Sama dengan button sign in
           ),
-
         ],
       ),
     );

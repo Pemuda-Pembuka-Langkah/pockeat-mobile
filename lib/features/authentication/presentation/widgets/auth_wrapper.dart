@@ -64,7 +64,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
               GetIt.instance<HealthMetricsCheckService>();
           final isOnboardingCompleted =
               await healthMetricsCheckService.hasCompletedOnboarding(user.uid);
-              debugPrint('isOnboardingCompleted: $isOnboardingCompleted');
+          debugPrint('isOnboardingCompleted: $isOnboardingCompleted');
 
           if (!mounted) return;
 
