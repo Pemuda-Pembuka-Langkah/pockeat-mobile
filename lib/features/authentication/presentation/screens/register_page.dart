@@ -115,18 +115,11 @@ class _RegisterPageState extends State<RegisterPage> {
           formCubit.setUserId(uid);
           await formCubit.submit();
         }
-
-        setState(() {
-          _isRegistrationSuccess = true;
-        });
-
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                  'Registration successful! Please verify your email.'),
-              backgroundColor: primaryGreen,
-            ),
+          // Navigate to email verification page
+          Navigator.of(context).pushReplacementNamed(
+            '/email-verification',
+            arguments: {'email': _emailController.text.trim()},
           );
         }
       } else {
