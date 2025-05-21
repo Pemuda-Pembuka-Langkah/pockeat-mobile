@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
 
 // Project imports:
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
@@ -162,6 +164,10 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
 
       // Wait for all exercises to be saved
       await Future.wait(saveFutures);
+
+      final widgetController = GetIt.instance<FoodTrackingClientController>();
+      await widgetController.forceUpdate();
+      debugPrint('Home screen widgets updated with new exercise data');
 
       // Show success message
       if (mounted) {

@@ -29,4 +29,14 @@ abstract class LoginService {
   ///
   /// Returns JWT token string, or null if no authenticated user
   Future<String?> getIdToken();
+
+  /// Checks if the current user's email is verified
+  Future<bool> isEmailVerified();
+
+  /// Sends a verification email to the current user
+  Future<bool> sendEmailVerification();
+
+  /// Checks if user needs email verification
+  /// Returns true if there is a user and their email is not verified
+  Future<bool> needsEmailVerification();
 }

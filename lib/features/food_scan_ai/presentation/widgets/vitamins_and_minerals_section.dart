@@ -64,20 +64,6 @@ class VitaminsAndMineralsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.water_drop_outlined, color: primaryColor, size: 20),
-              const SizedBox(width: 8),
-              const Text(
-                'Vitamins & Minerals',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
           const SizedBox(height: 16),
           Container(
             width: double.infinity,
@@ -164,61 +150,19 @@ class VitaminsAndMineralsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ExpansionTile(
-            title: Text(
-              'Vitamins & Minerals Details',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+          // Show top 4 vitamins and minerals in a grid
+          Text(
+            'Top Nutrients',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
             ),
-            collapsedShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.withOpacity(0.2)),
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.grey.withOpacity(0.2)),
-            ),
-            backgroundColor: Colors.grey[50],
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: vitaminsAndMinerals.entries
-                      .where((entry) => entry.value > 0)
-                      .map((entry) => Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[50],
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.blue.withOpacity(0.3),
-                              ),
-                            ),
-                            child: Text(
-                              '${formatNutrientName(entry.key)}: ${entry.value.toStringAsFixed(1)}mg',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue[800],
-                              ),
-                            ),
-                          ))
-                      .toList(),
-                ),
-              ),
-            ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
 
-          // Show top 4 vitamins and minerals in a grid
+          // Grid showing top 4 most significant nutrients
           GridView.count(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -265,6 +209,61 @@ class VitaminsAndMineralsSection extends StatelessWidget {
                       ),
                     ))
                 .toList(),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Expansion tile showing all nutrients for detail view
+          ExpansionTile(
+            title: Text(
+              'View All Nutrients',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[800],
+              ),
+            ),
+            collapsedShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+            ),
+            backgroundColor: Colors.grey[50],
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: vitaminsAndMinerals.entries
+                      .where((entry) => entry.value > 0)
+                      .map((entry) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.blue[50],
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.blue.withOpacity(0.3),
+                              ),
+                            ),
+                            child: Text(
+                              '${formatNutrientName(entry.key)}: ${entry.value.toStringAsFixed(1)}mg',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue[800],
+                              ),
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ),
+            ],
           ),
         ],
       ),

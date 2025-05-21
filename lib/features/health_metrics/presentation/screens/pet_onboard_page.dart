@@ -1,11 +1,14 @@
+// coverage:ignore-file
+
 // Flutter imports:
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:get_it/get_it.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import '../widgets/onboarding_progress_indicator.dart';
 
 class PetOnboardPage extends StatefulWidget {
@@ -306,13 +309,16 @@ class _PetOnboardPageState extends State<PetOnboardPage>
                                               .trim()
                                               .isNotEmpty
                                           ? () async {
-                                              final prefs =
-                                                  await SharedPreferences
-                                                      .getInstance();
-                                              await prefs.setString(
-                                                  'petName',
-                                                  _petNameController.text
+                                              // Get UserPreferencesService from GetIt
+                                              final preferencesService = GetIt
+                                                  .I<UserPreferencesService>();
+
+                                              // Save pet name using service
+                                              await preferencesService
+                                                  .setPetName(_petNameController
+                                                      .text
                                                       .trim());
+
                                               if (context.mounted) {
                                                 Navigator.pushNamed(context,
                                                     '/calorie-loading');

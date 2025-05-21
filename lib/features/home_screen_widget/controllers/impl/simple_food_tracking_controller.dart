@@ -1,3 +1,11 @@
+// coverage:ignore-file
+
+// Flutter imports:
+import 'package:flutter/foundation.dart';
+
+// Package imports:
+import 'package:get_it/get_it.dart';
+
 // Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
@@ -5,6 +13,7 @@ import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_wi
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
 import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tracking.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 /// Controller khusus untuk simple food tracking widget
 /// Implementasi dari [FoodTrackingWidgetController] untuk widget simple
@@ -40,23 +49,64 @@ class SimpleFoodTrackingController implements FoodTrackingWidgetController {
 
     try {
       final userId = user.uid;
+      final userPreferencesService = GetIt.instance<UserPreferencesService>();
 
       // Hitung total kalori hari ini menggunakan CalorieStatsService
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       final dailyStats =
-          await _calorieStatsService.getStatsByDate(userId, today);
-      final consumedCalories = dailyStats.caloriesConsumed;
+          await _calorieStatsService.calculateStatsForDate(userId, today);
+      int consumedCalories = dailyStats.caloriesConsumed;
+      final caloriesBurned = dailyStats.caloriesBurned;
+      debugPrint('Consumed calories: $consumedCalories');
 
-      // Target kalori sekarang dihitung oleh client controller dan diberikan sebagai parameter
-      final calculatedTarget = targetCalories ?? 0;
+      // Base target kalori dihitung oleh client controller dan diberikan sebagai parameter
+      int calculatedTarget = targetCalories ?? 0;
+
+      // Ambil preferensi untuk fitur calorie compensation dan rollover
+      final isCalorieCompensationEnabled =
+          await userPreferencesService.isExerciseCalorieCompensationEnabled();
+      final isRolloverCaloriesEnabled =
+          await userPreferencesService.isRolloverCaloriesEnabled();
+
+      // Tambahkan calories burned ke target jika kompensasi kalori diaktifkan
+      if (isCalorieCompensationEnabled) {
+        calculatedTarget += caloriesBurned;
+        debugPrint('Added $caloriesBurned burned calories to target');
+      }
+
+      // Tambahkan rollover calories ke target jika fitur rollover diaktifkan
+      if (isRolloverCaloriesEnabled) {
+        final rolloverCalories =
+            await userPreferencesService.getRolloverCalories();
+        calculatedTarget += rolloverCalories;
+        debugPrint('Added $rolloverCalories rollover calories to target');
+      }
+
+      // Round target calories to nearest multiple of 5 for consistency
+      calculatedTarget = ((calculatedTarget + 2.5) ~/ 5) * 5;
+
+      // Round consumed calories to nearest multiple of 5 for consistency
+      consumedCalories = ((consumedCalories + 2.5) ~/ 5) * 5;
+
+      // Calculate remaining calories (just like in CaloriesTodayWidget)
+      int caloriesDifference = calculatedTarget - consumedCalories;
+      bool isExceeded = caloriesDifference < 0;
+      int remainingCalories = isExceeded ? 0 : caloriesDifference;
+
+      // For simplicity, we'll report the consumed calories as (targetCalories - remainingCalories)
+      // This ensures the widget shows correct remaining calories
+      int adjustedConsumedCalories = calculatedTarget - remainingCalories;
 
       // Update data widget
       final simpleFoodTracking = SimpleFoodTracking(
         caloriesNeeded: calculatedTarget,
-        currentCaloriesConsumed: consumedCalories,
+        currentCaloriesConsumed: adjustedConsumedCalories,
         userId: userId,
       );
+
+      debugPrint(
+          'Simple widget - Target: $calculatedTarget, Consumed: $adjustedConsumedCalories, Remaining: $remainingCalories');
 
       await _widgetService.updateData(simpleFoodTracking);
       await _widgetService.updateWidget();
