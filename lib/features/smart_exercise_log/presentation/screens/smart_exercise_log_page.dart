@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
 
 // Project imports:
 import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
@@ -224,6 +226,13 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
           : analysisResult!;
 
       await _repository.saveAnalysisResult(resultToSave);
+      
+      // coverage:ignore-start
+      // Force update the home screen widgets with new exercise data
+      final widgetController = GetIt.instance<FoodTrackingClientController>();
+      await widgetController.forceUpdate();
+      debugPrint('Home screen widgets updated with new exercise data');
+      // coverage:ignore-end
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

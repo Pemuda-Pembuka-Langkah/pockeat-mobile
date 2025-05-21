@@ -47,6 +47,10 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
     if (widget.isRolloverCaloriesEnabled) {
       adjustedTargetCalories += widget.rolloverCalories;
     }
+    
+    // Round down values to ensure consistent display
+    adjustedTargetCalories = (adjustedTargetCalories ~/ 5) * 5; // Round to nearest multiple of 5 down
+    caloriesConsumed = (caloriesConsumed ~/ 5) * 5; // Round to nearest multiple of 5 down
 
     // Calculate calories difference (can be positive for remaining or negative for exceeded)
     int caloriesDifference = adjustedTargetCalories - caloriesConsumed;
@@ -200,7 +204,7 @@ class _CaloriesTodayWidgetState extends State<CaloriesTodayWidget> {
                       Text(
                         isExceeded
                             ? '!!'
-                            : '${(completionPercentage * 100).round()}%',
+                            : '${(completionPercentage * 100).floor()}%', // Use floor instead of round for consistent percentages
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: isExceeded

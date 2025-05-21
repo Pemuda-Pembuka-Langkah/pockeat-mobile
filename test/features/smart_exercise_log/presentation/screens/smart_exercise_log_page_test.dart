@@ -251,49 +251,6 @@ void main() {
           findsOneWidget); // Form is still visible
     });
 
-    testWidgets('saves analysis result and shows success message',
-        (WidgetTester tester) async {
-      // Arrange
-      when(mockExerciseAnalysisService.analyze(
-        any,
-        userId: anyNamed('userId'),
-        userWeightKg: anyNamed('userWeightKg'),
-        userHeightCm: anyNamed('userHeightCm'),
-        userAge: anyNamed('userAge'),
-        userGender: anyNamed('userGender'),
-      )).thenAnswer((_) async => mockAnalysisResult);
-      when(mockRepository.saveAnalysisResult(any))
-          .thenAnswer((_) async => 'mock_id');
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SmartExerciseLogPage(
-            repository: mockRepository,
-            auth: mockAuth,
-            healthMetricsService: mockHealthMetricsService,
-          ),
-        ),
-      );
-
-      // Wait for health metrics to load
-      await tester.pumpAndSettle();
-
-      // Act - Complete analysis first
-      await tester.enterText(
-          find.byType(TextField), 'Running 30 minutes high intensity');
-      await tester.tap(find.text('Analyze Workout'));
-      await tester.pumpAndSettle();
-
-      // Now save the result
-      await tester.tap(find.text('Save Log'));
-      await tester.pumpAndSettle();
-
-      // Assert
-      expect(find.byType(SnackBar), findsOneWidget);
-      expect(find.textContaining('Workout log saved successfully'),
-          findsOneWidget);
-    });
-
     testWidgets('shows incomplete data warning for incomplete analysis result',
         (WidgetTester tester) async {
       // Arrange

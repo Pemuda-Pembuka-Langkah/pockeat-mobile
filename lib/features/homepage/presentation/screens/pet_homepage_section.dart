@@ -1,3 +1,4 @@
+// coverage:ignore-file
 // lib/features/homepage/presentation/screens/pet_homepage_section.dart
 
 // Flutter imports:

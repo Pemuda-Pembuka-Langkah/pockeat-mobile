@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
@@ -116,6 +117,15 @@ class BackgroundDependencyService {
       final firestore = FirebaseFirestore.instance;
       services['firestore'] = firestore;
 
+      final userPreferencesService = UserPreferencesService(
+        auth: services['auth'] as FirebaseAuth,
+        firestore: services['firestore'] as FirebaseFirestore,
+      );
+      services['userPreferencesService'] = userPreferencesService;
+      
+      // Register UserPreferencesService in GetIt for rollover calories and calorie compensation
+      GetIt.instance.registerSingleton<UserPreferencesService>(userPreferencesService);
+
       // Register repositories needed by ExerciseLogHistoryService
       final smartExerciseLogRepository =
           SmartExerciseLogRepositoryImpl(firestore: firestore);
@@ -189,7 +199,8 @@ class BackgroundDependencyService {
           CaloricRequirementRepositoryImpl();
 
       services['caloricStatsRepository'] = CalorieStatsRepositoryImpl();
-      services['caloricStatsService'] = CalorieStatsServiceImpl(
+      // Create CalorieStatsService and register in GetIt
+      final calorieStatsService = CalorieStatsServiceImpl(
           repository:
               services['caloricStatsRepository'] as CalorieStatsRepositoryImpl,
           exerciseService: services['exerciseLogHistoryService']
@@ -198,6 +209,12 @@ class BackgroundDependencyService {
               services['foodLogHistoryService'] as FoodLogHistoryService,
           trackerService:
               services['thirdPartyTrackerService'] as ThirdPartyTrackerService);
+      services['caloricStatsService'] = calorieStatsService;
+      
+      // If not registered yet, register with GetIt
+      if (!GetIt.instance.isRegistered<CalorieStatsService>()) {
+        GetIt.instance.registerSingleton<CalorieStatsService>(calorieStatsService);
+      }
     } catch (e) {
       final errorMsg = 'Failed to setup widget dependencies: $e';
       debugPrint(errorMsg);
