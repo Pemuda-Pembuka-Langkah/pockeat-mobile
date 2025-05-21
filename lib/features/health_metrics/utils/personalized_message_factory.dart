@@ -13,7 +13,8 @@ class PersonalizedMessageFactory {
 
     if (goals.any((goal) => goal.toLowerCase().contains('lose'))) {
       title = "Weight Loss Journey";
-      message = "You're on your way to a healthier, lighter you! Your plan is designed for sustainable results.";
+      message =
+          "You're on your way to a healthier, lighter you! Your plan is designed for sustainable results.";
       iconData = Icons.monitor_weight_outlined;
     } else if (goals.any((goal) => goal.toLowerCase().contains('gain'))) {
       title = "Building Strength";

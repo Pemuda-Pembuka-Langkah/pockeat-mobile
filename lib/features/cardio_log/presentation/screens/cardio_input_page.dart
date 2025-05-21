@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
-import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 
 // Project imports:
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import '../../../health_metrics/domain/models/health_metrics_model.dart';
 import '../../../health_metrics/domain/service/health_metrics_service.dart';
 import '../../domain/models/models.dart';

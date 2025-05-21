@@ -226,7 +226,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
           : analysisResult!;
 
       await _repository.saveAnalysisResult(resultToSave);
-      
+
       // coverage:ignore-start
       // Force update the home screen widgets with new exercise data
       final widgetController = GetIt.instance<FoodTrackingClientController>();

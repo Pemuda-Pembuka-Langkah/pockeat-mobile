@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:lottie/lottie.dart';
+
 // coverage:ignore-start
 /// Page shown when a user has logged in but not completed onboarding
 ///
@@ -37,7 +38,7 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             // Main content
             SafeArea(
               child: SingleChildScrollView(
@@ -48,7 +49,7 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 40),
-                      
+
                       // Panda animation
                       SizedBox(
                         height: 220,
@@ -60,9 +61,9 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
                           fit: BoxFit.contain,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 40),
-                      
+
                       // Title
                       Text(
                         'Complete Your Health Profile',
@@ -73,9 +74,9 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
                           color: textDark,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 20),
-                      
+
                       // Message
                       Text(
                         'We need a bit more information about your health profile to personalize your journey in PockEat and provide you with a tailored experience.',
@@ -86,14 +87,14 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
                           height: 1.5,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 40),
-                      
+
                       // Spacer instead of features
                       const SizedBox(height: 20),
-                      
+
                       const SizedBox(height: 40),
-                      
+
                       // Continue button
                       SizedBox(
                         width: double.infinity,
@@ -131,7 +132,7 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
   }
 
   // Show dialog confirming if user wants to exit the app
-  
+
   Future<bool> _showExitConfirmationDialog(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
@@ -140,16 +141,16 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
         return AlertDialog(
           title: const Text('Exit App?'),
           content: const Text(
-            'You need to complete your health profile to use Pockeat. '
-            'Do you want to exit the app?'
-          ),
+              'You need to complete your health profile to use Pockeat. '
+              'Do you want to exit the app?'),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(false); // Don't exit, stay on current page
+                Navigator.of(context)
+                    .pop(false); // Don't exit, stay on current page
               },
               child: const Text('No'),
             ),
@@ -167,9 +168,8 @@ class StillNotCompletedOnboardingPage extends StatelessWidget {
     if (result == true) {
       SystemNavigator.pop(); // Exit the app
     }
-    
+
     return false; // Never allow natural back button to pop this route
   }
-  
 }
 // coverage:ignore-end

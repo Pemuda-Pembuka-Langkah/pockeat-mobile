@@ -2,13 +2,12 @@
 
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 // Package imports:
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
-import '../widgets/pricing_option.dart';
 import '../widgets/timeline_item.dart';
 
 class FreeTrialPage extends StatefulWidget {
@@ -44,7 +43,7 @@ class _FreeTrialPageState extends State<FreeTrialPage>
       (15000 * 12 * 0.67).toInt(); // 33% discount for yearly
 
   // Track selected pricing option
-  bool _isMonthlySelected = true;
+  final bool _isMonthlySelected = true;
 
   @override
   void initState() {

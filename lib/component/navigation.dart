@@ -387,9 +387,9 @@ class _CustomBottomNavBarState extends State<CustomBottomNavBar> {
             child: Text(
               icon == Icons.fitness_center ? 'Exercise' : 'Food',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 14,
                 color: color,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

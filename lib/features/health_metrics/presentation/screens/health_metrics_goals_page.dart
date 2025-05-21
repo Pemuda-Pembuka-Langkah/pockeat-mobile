@@ -216,7 +216,7 @@ class _HealthMetricsGoalsPageState extends State<HealthMetricsGoalsPage>
                                           selected: state.selectedGoals
                                               .contains(option["title"]),
                                           disabled: (isOtherSelected &&
-                                                  option["title"] != "Other"),
+                                              option["title"] != "Other"),
                                         ),
 
                                       // Text field for Other option

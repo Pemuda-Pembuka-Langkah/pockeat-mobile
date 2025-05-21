@@ -1,8 +1,12 @@
 // coverage:ignore-file
 
-// Project imports:
+// Flutter imports:
 import 'package:flutter/foundation.dart';
+
+// Package imports:
 import 'package:get_it/get_it.dart';
+
+// Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/calorie_stats/services/calorie_stats_service.dart';
 import 'package:pockeat/features/food_log_history/services/food_log_history_service.dart';
@@ -83,39 +87,42 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
 
       // Base target kalori dihitung oleh client controller dan diberikan sebagai parameter
       int calculatedTarget = targetCalories ?? 0;
-      
+
       // Ambil preferensi untuk fitur calorie compensation dan rollover
-      final isCalorieCompensationEnabled = await userPreferencesService.isExerciseCalorieCompensationEnabled();
-      final isRolloverCaloriesEnabled = await userPreferencesService.isRolloverCaloriesEnabled();
-      
+      final isCalorieCompensationEnabled =
+          await userPreferencesService.isExerciseCalorieCompensationEnabled();
+      final isRolloverCaloriesEnabled =
+          await userPreferencesService.isRolloverCaloriesEnabled();
+
       // Tambahkan calories burned ke target jika kompensasi kalori diaktifkan
       if (isCalorieCompensationEnabled) {
         calculatedTarget += caloriesBurned;
         debugPrint('Added $caloriesBurned burned calories to target');
       }
-      
+
       // Tambahkan rollover calories ke target jika fitur rollover diaktifkan
       if (isRolloverCaloriesEnabled) {
-        final rolloverCalories = await userPreferencesService.getRolloverCalories();
+        final rolloverCalories =
+            await userPreferencesService.getRolloverCalories();
         calculatedTarget += rolloverCalories;
         debugPrint('Added $rolloverCalories rollover calories to target');
       }
 
       // Round target calories to nearest multiple of 5 for consistency
       calculatedTarget = ((calculatedTarget + 2.5) ~/ 5) * 5;
-      
+
       // Round consumed calories to nearest multiple of 5 for consistency
       consumedCalories = ((consumedCalories + 2.5) ~/ 5) * 5;
-      
+
       // Calculate remaining calories (just like in CaloriesTodayWidget)
       int caloriesDifference = calculatedTarget - consumedCalories;
       bool isExceeded = caloriesDifference < 0;
       int remainingCalories = isExceeded ? 0 : caloriesDifference;
-      
+
       // For simplicity, we'll report the consumed calories as (targetCalories - remainingCalories)
       // This ensures the widget shows correct remaining calories
       int adjustedConsumedCalories = calculatedTarget - remainingCalories;
-      
+
       // Update data widget
       final detailedFoodTracking = DetailedFoodTracking(
         caloriesNeeded: calculatedTarget,
@@ -125,8 +132,9 @@ class DetailedFoodTrackingController implements FoodTrackingWidgetController {
         currentFat: fat,
         userId: userId,
       );
-      
-      debugPrint('Detailed widget - Target: $calculatedTarget, Consumed: $adjustedConsumedCalories, Remaining: $remainingCalories');
+
+      debugPrint(
+          'Detailed widget - Target: $calculatedTarget, Consumed: $adjustedConsumedCalories, Remaining: $remainingCalories');
 
       await _widgetService.updateData(detailedFoodTracking);
       await _widgetService.updateWidget();

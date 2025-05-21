@@ -18,7 +18,6 @@ import 'package:pockeat/features/authentication/domain/repositories/user_reposit
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service_impl.dart';
-import 'package:pockeat/features/free_limit/services/free_limit_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
@@ -50,6 +49,7 @@ import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repo
 import 'package:pockeat/features/food_scan_ai/domain/services/food_scan_photo_service.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_text_input/domain/services/food_text_input_service.dart';
+import 'package:pockeat/features/free_limit/services/free_limit_service.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';

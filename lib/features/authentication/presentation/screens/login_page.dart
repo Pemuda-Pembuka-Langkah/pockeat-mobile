@@ -1,6 +1,5 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-// ignore: unnecessary_import
 import 'package:flutter/services.dart';
 
 // Package imports:
@@ -12,6 +11,8 @@ import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/presentation/widgets/google_sign_in_button.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
+
+// ignore: unnecessary_import
 
 /// Login page for existing users
 ///

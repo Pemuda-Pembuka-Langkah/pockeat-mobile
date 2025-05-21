@@ -1,11 +1,12 @@
-// Flutter imports:
+// Dart imports:
 import 'dart:async';
+
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 // Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
-import 'package:lottie/lottie.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/services/login_service.dart';

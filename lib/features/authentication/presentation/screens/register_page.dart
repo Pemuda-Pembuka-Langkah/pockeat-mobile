@@ -41,7 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _errorMessage;
 
   // State for registration flow
-  bool _isRegistrationSuccess = false;
+  final bool _isRegistrationSuccess = false;
 
   // Colors
   final Color primaryPink = const Color(0xFFFF6B6B);
@@ -618,7 +618,7 @@ class _RegisterPageState extends State<RegisterPage> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 18),
-        Text(
+        const Text(
           'It may take a while to receive the email. Please access the app through the link in your inbox.',
           style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.4),
           textAlign: TextAlign.center,

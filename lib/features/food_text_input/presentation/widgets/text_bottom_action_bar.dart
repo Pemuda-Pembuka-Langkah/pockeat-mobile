@@ -126,7 +126,8 @@ class TextBottomActionBar extends StatelessWidget {
                             final controller =
                                 GetIt.I<FoodTrackingClientController>();
                             await controller.forceUpdate();
-                            debugPrint('Home screen widget updated successfully');
+                            debugPrint(
+                                'Home screen widget updated successfully');
                           } catch (e) {
                             // Silently log error but continue - don't block navigation
                             debugPrint(

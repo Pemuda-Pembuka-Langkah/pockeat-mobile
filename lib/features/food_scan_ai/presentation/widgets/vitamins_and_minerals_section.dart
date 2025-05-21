@@ -63,7 +63,7 @@ class VitaminsAndMineralsSection extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [   
+        children: [
           const SizedBox(height: 16),
           Container(
             width: double.infinity,
@@ -159,9 +159,9 @@ class VitaminsAndMineralsSection extends StatelessWidget {
               color: Colors.grey[700],
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Grid showing top 4 most significant nutrients
           GridView.count(
             shrinkWrap: true,
@@ -210,9 +210,9 @@ class VitaminsAndMineralsSection extends StatelessWidget {
                     ))
                 .toList(),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Expansion tile showing all nutrients for detail view
           ExpansionTile(
             title: Text(

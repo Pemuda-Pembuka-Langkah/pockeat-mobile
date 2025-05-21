@@ -85,8 +85,7 @@ class _OverviewSectionState extends State<OverviewSection> {
       targetCalories: widget.targetCalories ?? 0,
       isCalorieCompensationEnabled:
           widget.isCalorieCompensationEnabled ?? false,
-      isRolloverCaloriesEnabled:
-          widget.isRolloverCaloriesEnabled ?? false,
+      isRolloverCaloriesEnabled: widget.isRolloverCaloriesEnabled ?? false,
       rolloverCalories: widget.rolloverCalories ?? 0,
     );
   }
