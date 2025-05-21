@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
@@ -370,6 +371,13 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
                                         GetIt.instance<LoginService>();
                                     final user =
                                         await loginService.getCurrentUser();
+                                    final healthMetricsService = GetIt.instance<
+                                        HealthMetricsCheckService>();
+                                    bool isPreviouslyCompletedOnboarding = false;
+                                    if(user != null){
+                                      isPreviouslyCompletedOnboarding = await healthMetricsService.hasCompletedOnboarding(user.uid);
+                                    }
+
                                     if (user != null) {
                                       final formCubit = context
                                           .read<HealthMetricsFormCubit>();
@@ -384,14 +392,18 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
                                       await userPreferencesService
                                           .synchronizePreferencesAfterLogin();
 
-                                      var widgetController = GetIt.instance<FoodTrackingClientController>();
+                                      var widgetController = GetIt.instance<
+                                          FoodTrackingClientController>();
                                       await widgetController.forceUpdate();
-                                      debugPrint('Home screen widgets updated with new exercise data');
-                                      
-
-                                      // Navigate to the homepage
-                                      Navigator.pushReplacementNamed(
-                                          context, '/');
+                                      debugPrint(
+                                          'Home screen widgets updated with new exercise data');
+                                      if(isPreviouslyCompletedOnboarding){
+                                        Navigator.pushReplacementNamed(
+                                            context, '/');
+                                      }else{
+                                        Navigator.pushNamed(
+                                          context, '/free-trial');
+                                      }
                                     } else {
                                       Navigator.pushNamed(
                                           context, '/free-trial');
