@@ -194,6 +194,36 @@ class TrialEndedScreen extends StatelessWidget {
           _buildBenefitItem('Early feature previews', primaryGreen),
           _buildBenefitItem('Direct feedback channel', primaryGreen),
           _buildBenefitItem('Help shape the app\'s future', primaryGreen),
+          const SizedBox(height: 16),
+
+          // Reassurance about data preservation
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: primaryBlue.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: primaryBlue,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Don't worry! All your progress and data will be preserved when you become a beta tester.",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
 
           // Apply button
