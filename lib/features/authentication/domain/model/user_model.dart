@@ -151,6 +151,16 @@ class UserModel {
     return DateTime.now().isBefore(freeTrialEndsAt!);
   }
 
+  /// Menghitung sisa hari free trial
+  int get daysLeftInFreeTrial {
+    if (freeTrialEndsAt == null) return 0;
+
+    final now = DateTime.now();
+    if (now.isAfter(freeTrialEndsAt!)) return 0;
+
+    return freeTrialEndsAt!.difference(now).inDays + 1; // +1 to include today
+  }
+
   @override
   String toString() {
     return 'UserModel(uid: $uid, email: $email, displayName: $displayName, emailVerified: $emailVerified, freeTrialEndsAt: $freeTrialEndsAt)';

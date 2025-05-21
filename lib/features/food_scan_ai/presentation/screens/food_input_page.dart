@@ -7,6 +7,7 @@ import 'package:get_it/get_it.dart';
 
 // Project imports:
 import 'package:pockeat/core/services/analytics_service.dart';
+import 'package:pockeat/features/free_limit/services/free_limit_service.dart';
 
 class FoodInputPage extends StatefulWidget {
   const FoodInputPage({super.key});
@@ -20,13 +21,28 @@ class _FoodInputPageState extends State<FoodInputPage> {
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   late final AnalyticsService _analyticsService;
+  late final FreeLimitService _freeLimitService;
 
   @override
   void initState() {
     super.initState();
+    // Initialize services
     _analyticsService = GetIt.instance<AnalyticsService>();
+    _freeLimitService = GetIt.instance<FreeLimitService>();
+
+    // Track analytics
     _analyticsService.logScreenView(
         screenName: 'food_input_page', screenClass: 'FoodInputPage');
+
+    // Check trial validity
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkTrialValidity();
+    });
+  }
+
+  // Check if user can access this feature
+  Future<void> _checkTrialValidity() async {
+    await _freeLimitService.checkAndRedirect(context);
   }
 
   @override

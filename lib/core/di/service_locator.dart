@@ -18,6 +18,7 @@ import 'package:pockeat/features/authentication/domain/repositories/user_reposit
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service_impl.dart';
+import 'package:pockeat/features/free_limit/services/free_limit_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
@@ -218,10 +219,14 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<UserPreferencesService>(
     UserPreferencesService(),
   );
-
   // Register additional services
   getIt.registerSingleton<LogoutService>(
     LogoutServiceImpl(),
+  );
+
+  // Register FreeLimitService for trial feature restrictions
+  getIt.registerSingleton<FreeLimitService>(
+    FreeLimitService(),
   );
 
   getIt.registerSingleton<ProfileService>(

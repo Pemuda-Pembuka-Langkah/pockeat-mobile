@@ -3,18 +3,42 @@
 // Flutter imports:
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 
 // Project imports:
 import 'package:pockeat/features/exercise_input_options/presentation/widgets/exercise_option_card.dart';
+import 'package:pockeat/features/free_limit/services/free_limit_service.dart';
 
-class ExerciseInputPage extends StatelessWidget {
+class ExerciseInputPage extends StatefulWidget {
+  const ExerciseInputPage({super.key});
+
+  @override
+  State<ExerciseInputPage> createState() => _ExerciseInputPageState();
+}
+
+class _ExerciseInputPageState extends State<ExerciseInputPage> {
   // Warna yang lebih kontras tapi tetap cute
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color pinkColor = const Color(0xFFFF6B6B);
   final Color greenColor = const Color(0xFF4ECDC4);
   final Color purpleColor = const Color(0xFF9B6BFF);
 
-  const ExerciseInputPage({super.key});
+  // Free limit service to check trial validity
+  final FreeLimitService _freeLimitService = GetIt.instance<FreeLimitService>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if trial is valid when the page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkTrialValidity();
+    });
+  }
+
+  // Check if user can access this feature
+  Future<void> _checkTrialValidity() async {
+    await _freeLimitService.checkAndRedirect(context);
+  }
 
   @override
   Widget build(BuildContext context) {

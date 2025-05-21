@@ -71,6 +71,8 @@ import 'package:pockeat/features/health_metrics/presentation/screens/free_trials
 import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
+import 'package:pockeat/features/free_limit/presentation/screens/free_trial_status_screen.dart';
+import 'package:pockeat/features/free_limit/presentation/screens/trial_ended_screen.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_value_proposition_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
@@ -490,8 +492,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         Provider.of<SmartExerciseLogRepository>(context);
 
     // Get navigation provider for route observer
-    final navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
-    
+    final navigationProvider =
+        Provider.of<NavigationProvider>(context, listen: false);
+
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: 'Pockeat',
@@ -583,7 +586,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
         },
         // Di main.dart pada bagian routes:
-        '/not-completed-onboarding': (context) => const StillNotCompletedOnboardingPage(),
+        '/not-completed-onboarding': (context) =>
+            const StillNotCompletedOnboardingPage(),
         '/onboarding': (context) => const HealthValuePropositionPage(),
         '/onboarding/goal': (context) {
           return BlocProvider.value(
@@ -612,6 +616,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               child: const ReviewSubmitPage(),
             ),
         '/free-trial': (context) => const FreeTrialPage(),
+        '/free-trial-status': (context) =>
+            const AuthWrapper(child: FreeTrialStatusScreen()),
+        '/trial-ended': (context) => const TrialEndedScreen(),
         '/calorie-loading': (context) => const CalorieCalculationLoadingPage(),
         '/smart-exercise-log': (context) => AuthWrapper(
             child:
