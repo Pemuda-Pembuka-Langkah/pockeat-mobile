@@ -132,7 +132,7 @@ class SelectedFoodsTab extends StatelessWidget {
                         },
                       ),
               ),
-
+//sigma
               const SizedBox(height: 16),
 
               // Action buttons
