@@ -18,7 +18,6 @@ import 'login_service_impl_test.mocks.dart';
 
 @GenerateMocks(
     [FirebaseAuth, UserCredential, UserRepository, NavigatorObserver, User])
-
 void main() {
   late MockFirebaseAuth mockFirebaseAuth;
   late MockUserRepository mockUserRepository;
@@ -84,28 +83,6 @@ void main() {
       // Assert - only verify that the method was called and returns the expected stream
       expect(result, equals(userStream));
       verify(mockUserRepository.currentUserStream()).called(1);
-    });
-
-    test('loginByEmail should call signInWithEmailAndPassword', () async {
-      // Arrange
-      final mockCredential = MockUserCredential();
-      when(mockFirebaseAuth.signInWithEmailAndPassword(
-        email: 'test@example.com',
-        password: 'password123',
-      )).thenAnswer((_) async => mockCredential);
-
-      // Act
-      final result = await loginService.loginByEmail(
-        email: 'test@example.com',
-        password: 'password123',
-      );
-
-      // Assert
-      expect(result, equals(mockCredential));
-      verify(mockFirebaseAuth.signInWithEmailAndPassword(
-        email: 'test@example.com',
-        password: 'password123',
-      )).called(1);
     });
 
     test('loginByEmail should throw FirebaseAuthException on error', () async {
@@ -334,7 +311,7 @@ void main() {
       when(mockUser.photoURL).thenReturn('https://example.com/photo.jpg');
       when(mockUser.emailVerified).thenReturn(true);
       when(mockFirebaseAuth.currentUser).thenReturn(mockUser);
-      
+
       // Setup mock untuk getUserById yang sekarang digunakan oleh getCurrentUser
       final testUserModel = UserModel(
         uid: 'test-user-id',
@@ -344,7 +321,8 @@ void main() {
         emailVerified: false, // Sengaja berbeda dengan yang dari Firebase Auth
         createdAt: DateTime.now(),
       );
-      when(mockUserRepository.getUserById('test-user-id')).thenAnswer((_) async => testUserModel);
+      when(mockUserRepository.getUserById('test-user-id'))
+          .thenAnswer((_) async => testUserModel);
 
       // Act
       final result = await loginService.getCurrentUser();

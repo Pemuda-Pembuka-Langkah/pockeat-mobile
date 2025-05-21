@@ -27,15 +27,31 @@ class ExerciseAnalysisService {
   }
   // coverage:ignore-end
 
-  Future<ExerciseAnalysisResult> analyze(String description,
-      {String userId = "", double? userWeightKg}) async {
+  Future<ExerciseAnalysisResult> analyze(
+    String description, {
+    String userId = "",
+    double? userWeightKg,
+    double? userHeightCm,
+    int? userAge,
+    String? userGender,
+  }) async {
     try {
       final Map<String, dynamic> requestBody = {
         'description': description,
       };
 
+      // Add health metrics if available
       if (userWeightKg != null) {
         requestBody['user_weight_kg'] = userWeightKg;
+      }
+      if (userHeightCm != null) {
+        requestBody['user_height_cm'] = userHeightCm;
+      }
+      if (userAge != null) {
+        requestBody['user_age'] = userAge;
+      }
+      if (userGender != null) {
+        requestBody['user_gender'] = userGender;
       }
 
       final responseData = await _apiService.postJsonRequest(
@@ -130,18 +146,33 @@ class ExerciseAnalysisService {
   }
 
   Future<ExerciseAnalysisResult> correctAnalysis(
-      ExerciseAnalysisResult previousResult, String userComment) async {
+    ExerciseAnalysisResult previousResult,
+    String userComment, {
+    double? userWeightKg,
+    double? userHeightCm,
+    int? userAge,
+    String? userGender,
+  }) async {
     try {
-      // Convert ExerciseAnalysisResult to API format
       final Map<String, dynamic> apiFormat =
           _exerciseResultToApiFormat(previousResult);
 
+      // Create request with health metrics
+      final Map<String, dynamic> requestBody = {
+        'previous_result': apiFormat,
+        'user_comment': userComment,
+        'original_input': apiFormat['original_input']
+      };
+
+      // Add health metrics if available
+      if (userWeightKg != null) requestBody['user_weight_kg'] = userWeightKg;
+      if (userHeightCm != null) requestBody['user_height_cm'] = userHeightCm;
+      if (userAge != null) requestBody['user_age'] = userAge;
+      if (userGender != null) requestBody['user_gender'] = userGender;
+
       final responseData = await _apiService.postJsonRequest(
         '/exercise/correct',
-        {
-          'previous_result': apiFormat,
-          'user_comment': userComment,
-        },
+        requestBody,
       );
 
       return parseCorrectionResponse(
@@ -224,7 +255,9 @@ class ExerciseAnalysisService {
       'calories_burned': result.estimatedCalories,
       'duration': result.duration, // Keep as string
       'intensity': intensityLowercase,
-      'user_comment': result.originalInput, // Include original input as comment
+      'met_value': result.metValue,
+      'original_input':
+          result.originalInput, // Include original input as comment
     };
   }
 }

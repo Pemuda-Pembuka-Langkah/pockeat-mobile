@@ -2,6 +2,7 @@
 
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Package imports:
 import 'package:intl/intl.dart';
@@ -106,195 +107,171 @@ class _FreeTrialPageState extends State<FreeTrialPage>
                 ),
               ),
             ),
-
             // Content
             FadeTransition(
               opacity: _fadeAnimation,
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Back button on top left
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: IconButton(
-                          icon: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Icon(Icons.arrow_back,
-                                color: textDarkColor, size: 20),
-                          ),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      // Trial Header
-                      Text(
-                        'Start your 7-day FREE\ntrial to continue.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: textDarkColor,
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Subheader
-                      Text(
-                        'Experience all features without limits.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: textLightColor,
-                          height: 1.4,
-                        ),
-                      ),
-
-                      const SizedBox(height: 50),
-
-                      // Timeline items with cards
+                      // Main explanation card
                       Container(
-                        padding: const EdgeInsets.all(24),
+                        margin: const EdgeInsets.only(top: 10, bottom: 32),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 32, horizontal: 20),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
+                              color: Colors.black.withOpacity(0.07),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
                             ),
                           ],
                         ),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            _buildTimelineItem(
-                              day: 'Today',
-                              message:
-                                  'Access all app features like AI, pet companion, and more',
-                              icon: Icons.check_circle,
-                              color: orangeColor,
-                              isFirst: true,
+                            Text(
+                              'This app is still in development.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: textDarkColor,
+                              ),
                             ),
-                            _buildTimelineItem(
-                              day: 'In 5 Days - Reminder',
-                              message:
-                                  'You\'ll receive a friendly notification',
-                              icon: Icons.notifications_active,
-                              color: purpleColor,
+                            const SizedBox(height: 18),
+                            Text(
+                              'You only get to access the app for 7 days.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: textLightColor,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                            _buildTimelineItem(
-                              day: 'In 7 Days - Billing Starts',
-                              message:
-                                  'You\'ll be charged on ${formatDate(billingDate)}',
-                              icon: Icons.calendar_today,
-                              color: redColor,
-                              isLast: true,
+                            const SizedBox(height: 18),
+                            Text(
+                              'To get full access, apply to be our beta tester so that we can publish the app.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: primaryBlue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 22),
+                            Center(
+                              child: Material(
+                                color: primaryBlue.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(12),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(12),
+                                  onTap: () async {
+                                    final url =
+                                        Uri.parse('https://pockeat.online');
+                                    if (await canLaunchUrl(url)) {
+                                      await launchUrl(url,
+                                          mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 18),
+                                    child: Text(
+                                      'pockeat.online',
+                                      style: TextStyle(
+                                        color: primaryBlue,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
-
-                      const SizedBox(height: 40),
-
-                      // Pricing options
-                      Text(
-                        'Choose Your Plan',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textDarkColor,
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      Row(
+                      // Timeline card with panda glued to it
+                      Stack(
+                        clipBehavior: Clip.none,
                         children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _isMonthlySelected = true;
-                                });
-                              },
-                              child: _buildPricingOption(
-                                title: 'Monthly',
-                                price: monthlyPrice,
-                                isSelected: _isMonthlySelected,
-                              ),
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                _buildTimelineItem(
+                                  day: 'Today',
+                                  message:
+                                      'Access all app features like AI, pet companion, and more',
+                                  icon: Icons.check_circle,
+                                  color: orangeColor,
+                                  isFirst: true,
+                                ),
+                                _buildTimelineItem(
+                                  day: 'During Trial',
+                                  message:
+                                      'You\'ll get a notification before your access ends',
+                                  icon: Icons.notifications_active,
+                                  color: purpleColor,
+                                ),
+                                _buildTimelineItem(
+                                  day: 'In 7 Days - Access Ends',
+                                  message:
+                                      'Your free access will end. Apply as a beta tester for more!',
+                                  icon: Icons.lock_outline,
+                                  color: redColor,
+                                  isLast: true,
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _isMonthlySelected = false;
-                                });
-                              },
-                              child: _buildPricingOption(
-                                title: 'Yearly',
-                                price: yearlyPrice,
-                                discount: '33%',
-                                isSelected: !_isMonthlySelected,
-                              ),
+                          Positioned(
+                            bottom: -48,
+                            left: -30,
+                            child: Image.asset(
+                              'assets/images/panda_pointing_commision.png',
+                              width: 110,
+                              height: 110,
                             ),
                           ),
                         ],
                       ),
-
-                      const SizedBox(height: 24),
-
-                      // No Payment text
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.check_circle,
-                              size: 20,
-                              color: Colors.green,
+                      const SizedBox(height: 40),
+                      // Beta tester call to action
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            'Apply at pockeat.online to become a beta tester.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: textLightColor,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
                             ),
-                            const SizedBox(width: 10),
-                            Text(
-                              'No Payment Due Now',
-                              style: TextStyle(
-                                color: Colors.green.shade800,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-
                       const SizedBox(height: 30),
-
-                      // Start Trial Button with glow effect
+                      // Start My Trial button
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
@@ -317,32 +294,14 @@ class _FreeTrialPageState extends State<FreeTrialPage>
                             elevation: 0,
                           ),
                           onPressed: () {
-                            // Start free trial logic here
-                            Navigator.pushNamed(
+                            Navigator.pushReplacementNamed(
                                 context, '/register');
                           },
                           child: const Text(
-                            'Start My 7-Day Free Trial',
+                            'Start My Trial',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Terms text
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Text(
-                            'By proceeding, you agree to our Terms of Service',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: textLightColor,
-                              fontSize: 13,
                             ),
                           ),
                         ),
@@ -373,23 +332,6 @@ class _FreeTrialPageState extends State<FreeTrialPage>
       color: color,
       isFirst: isFirst,
       isLast: isLast,
-      textDarkColor: textDarkColor,
-      textLightColor: textLightColor,
-    );
-  }
-
-  Widget _buildPricingOption({
-    required String title,
-    required int price,
-    String? discount,
-    required bool isSelected,
-  }) {
-    return PricingOption(
-      title: title,
-      price: price,
-      discount: discount,
-      isSelected: isSelected,
-      primaryGreen: primaryGreen,
       textDarkColor: textDarkColor,
       textLightColor: textLightColor,
     );

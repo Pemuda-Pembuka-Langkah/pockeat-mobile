@@ -13,16 +13,20 @@ import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analy
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/analysis_result_widget.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/widgets/workout_form_widget.dart';
+import '../../../health_metrics/domain/models/health_metrics_model.dart';
+import '../../../health_metrics/domain/service/health_metrics_service.dart';
 
 class SmartExerciseLogPage extends StatefulWidget {
   final SmartExerciseLogRepository repository;
   final FirebaseAuth?
       auth; // Add optional auth parameter for dependency injection
+  final HealthMetricsService healthMetricsService;
 
   const SmartExerciseLogPage({
     super.key,
     required this.repository,
     this.auth,
+    required this.healthMetricsService,
   });
 
   @override
@@ -30,6 +34,9 @@ class SmartExerciseLogPage extends StatefulWidget {
 }
 
 class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
+  late final HealthMetricsService _healthMetricsService;
+  HealthMetricsModel? _healthMetrics;
+  bool _isLoadingHealthMetrics = true;
   // Theme colors - matching homepage style
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPurple = const Color(0xFF9B6BFF);
@@ -43,13 +50,42 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
   final ExerciseAnalysisService _exerciseAnalysisService =
       getIt<ExerciseAnalysisService>();
   late final SmartExerciseLogRepository _repository;
-  late final FirebaseAuth _auth; // Instance for Firebase Auth
+  late final FirebaseAuth _auth;
 
   @override
   void initState() {
     super.initState();
     _repository = widget.repository;
-    _auth = widget.auth ?? FirebaseAuth.instance; // Initialize auth
+    _auth = widget.auth ?? FirebaseAuth.instance;
+    _healthMetricsService = widget.healthMetricsService;
+    _loadHealthMetrics();
+  }
+
+  Future<void> _loadHealthMetrics() async {
+    try {
+      setState(() => _isLoadingHealthMetrics = true);
+      _healthMetrics = await _healthMetricsService.getUserHealthMetrics();
+    } catch (e) {
+      debugPrint('Error loading health metrics: $e');
+      _healthMetrics = _getDefaultHealthMetrics();
+    } finally {
+      setState(() => _isLoadingHealthMetrics = false);
+    }
+  }
+
+  HealthMetricsModel _getDefaultHealthMetrics() {
+    return HealthMetricsModel(
+      userId: _getCurrentUserId(),
+      height: 175.0,
+      weight: 70.0,
+      age: 30,
+      gender: 'Male',
+      activityLevel: 'moderate',
+      fitnessGoal: 'maintain',
+      bmi: 22.9,
+      bmiCategory: 'Normal weight',
+      desiredWeight: 70.0,
+    );
   }
 
   // Get current user ID with a helper method
@@ -73,11 +109,22 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
     setState(() => isAnalyzing = true);
 
     try {
-      final result = await _exerciseAnalysisService.analyze(workoutDescription);
+      // Pass all health metrics to API
+      final result = await _exerciseAnalysisService.analyze(
+        workoutDescription,
+        userId: _getCurrentUserId(),
+        userWeightKg: _healthMetrics?.weight,
+        userHeightCm: _healthMetrics?.height,
+        userAge: _healthMetrics?.age,
+        userGender: _healthMetrics?.gender.toLowerCase(),
+      );
 
-      // Add user ID to the analysis result
+      // Get user ID
       final String userId = _getCurrentUserId();
-      final resultWithUserId = result.copyWith(userId: userId);
+
+      // Create result with user ID
+      final resultWithUserId =
+          result.userId.isEmpty ? result.copyWith(userId: userId) : result;
 
       setState(() {
         analysisResult = resultWithUserId;
@@ -105,19 +152,27 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
     setState(() => isCorrectingAnalysis = true);
 
     try {
-      // Use GeminiService for correcting analysis
+      // Embed original input within user comment
+      final fullComment =
+          "Original: ${analysisResult!.originalInput}. Koreksi: $userComment";
+
+      // Call API with combined comment
       final correctedResult = await _exerciseAnalysisService.correctAnalysis(
         analysisResult!,
-        userComment,
+        fullComment,
+        userWeightKg: _healthMetrics?.weight,
+        userHeightCm: _healthMetrics?.height,
+        userAge: _healthMetrics?.age,
+        userGender: _healthMetrics?.gender.toLowerCase(),
       );
 
-      // Ensure user ID is preserved in corrected result
-      final correctedResultWithUserId = correctedResult.userId.isEmpty
+      // Rest of the method remains the same
+      final finalCorrectedResult = correctedResult.userId.isEmpty
           ? correctedResult.copyWith(userId: _getCurrentUserId())
           : correctedResult;
 
       setState(() {
-        analysisResult = correctedResultWithUserId;
+        analysisResult = finalCorrectedResult;
         isCorrectingAnalysis = false;
       });
 
@@ -130,6 +185,7 @@ class _SmartExerciseLogPageState extends State<SmartExerciseLogPage> {
         );
       }
     } catch (e) {
+      // Error handling remains the same
       setState(() {
         isCorrectingAnalysis = false;
       });

@@ -18,6 +18,7 @@ import 'package:pockeat/features/authentication/domain/repositories/user_reposit
 import 'package:pockeat/features/authentication/domain/repositories/user_repository_impl.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service_impl.dart';
+import 'package:pockeat/features/free_limit/services/free_limit_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service.dart';
 import 'package:pockeat/features/authentication/services/change_password_deeplink_service_impl.dart';
 import 'package:pockeat/features/authentication/services/change_password_service.dart';
@@ -52,6 +53,7 @@ import 'package:pockeat/features/food_text_input/domain/services/food_text_input
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository_impl.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_check_service.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_service.dart';
 import 'package:pockeat/features/home_screen_widget/di/home_widget_module.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/notification_service_impl.dart';
 import 'package:pockeat/features/notifications/domain/services/impl/user_activity_service_impl.dart';
@@ -101,6 +103,12 @@ Future<void> setupDependencies() async {
 
   getIt.registerSingleton<HealthMetricsRepository>(
     HealthMetricsRepositoryImpl(),
+  );
+
+  getIt.registerSingleton<HealthMetricsService>(
+    HealthMetricsService(
+      repository: getIt<HealthMetricsRepository>(),
+    ),
   );
 
   // Register API Services that depend on TokenManager
@@ -218,10 +226,14 @@ Future<void> setupDependencies() async {
   getIt.registerSingleton<UserPreferencesService>(
     UserPreferencesService(),
   );
-
   // Register additional services
   getIt.registerSingleton<LogoutService>(
     LogoutServiceImpl(),
+  );
+
+  // Register FreeLimitService for trial feature restrictions
+  getIt.registerSingleton<FreeLimitService>(
+    FreeLimitService(),
   );
 
   getIt.registerSingleton<ProfileService>(

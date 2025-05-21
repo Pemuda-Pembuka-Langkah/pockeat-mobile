@@ -7,6 +7,7 @@ import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_cl
 import 'package:url_launcher/url_launcher.dart';
 import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:pockeat/component/navigation.dart';
@@ -39,6 +40,8 @@ class _ProfilePageState extends State<ProfilePage> {
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color bgColor = const Color(0xFFF9F9F9);
+  final Color redColor = const Color(0xFFFF4C4C);
+  final Color orangeColor = const Color(0xFFFFA500);
 
   late final LoginService _loginService;
   late final LogoutService _logoutService;
@@ -380,6 +383,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 16),
                 _buildProfileStats(),
                 const SizedBox(height: 16),
+                // Add free trial status section if user is in trial
+                if (_currentUser != null &&
+                    _currentUser!.freeTrialEndsAt != null)
+                  Column(
+                    children: [
+                      _buildFreeTrialStatus(),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 _buildCalorieSettings(),
                 const SizedBox(height: 16),
                 _buildProfileActions(),
@@ -390,6 +402,141 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       }),
     );
+  }
+
+  /// Widget to display free trial status
+  Widget _buildFreeTrialStatus() {
+    // Calculate days left
+    final daysLeft = _currentUser?.daysLeftInFreeTrial ?? 0;
+    final isInFreeTrial = _currentUser?.isInFreeTrial ?? false;
+
+    // Determine status color based on days left
+    final Color statusColor = !isInFreeTrial
+        ? redColor
+        : daysLeft <= 2
+            ? redColor
+            : daysLeft <= 4
+                ? orangeColor
+                : primaryGreen;
+
+    // Text to display
+    final statusText = !isInFreeTrial
+        ? 'Trial Expired'
+        : daysLeft == 1
+            ? 'Final day of trial'
+            : '$daysLeft days left in trial';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Free Trial Status',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    statusText,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (isInFreeTrial) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  // Progress bar for trial
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: 1 - (daysLeft / 7), // 7 day trial assumed
+                      backgroundColor: Colors.grey.withOpacity(0.2),
+                      valueColor: AlwaysStoppedAnimation(statusColor),
+                      minHeight: 8,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Started: ${formatDate(_currentUser?.createdAt)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      Text(
+                        'Ends: ${formatDate(_currentUser?.freeTrialEndsAt)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: statusColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+          _buildActionTile(
+            title: 'Free Trial Details',
+            subtitle: isInFreeTrial
+                ? 'Check your status and become a beta tester'
+                : 'Become a beta tester to regain access',
+            icon: Icons.access_time_filled,
+            iconColor: statusColor,
+            onTap: () {
+              Navigator.of(context).pushNamed('/free-trial-status');
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to format dates
+  String formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    return DateFormat('dd MMM yyyy').format(date);
   }
 
   /// Widget to display profile header
@@ -1029,15 +1176,16 @@ class _ProfilePageState extends State<ProfilePage> {
               // Email address and subject for bug report
               const String emailAddress = 'pockeat.service@gmail.com';
               const String subject = 'Bug Report - Pockeat App';
-              
+
               try {
                 // Create a properly structured mailto Uri with query parameters
                 final Uri emailUri = Uri(
                   scheme: 'mailto',
                   path: emailAddress,
-                  query: 'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(emailBody)}',
+                  query:
+                      'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(emailBody)}',
                 );
-                
+
                 if (await canLaunchUrl(emailUri)) {
                   await launchUrl(emailUri, mode: LaunchMode.platformDefault);
                 } else {
@@ -1046,13 +1194,15 @@ class _ProfilePageState extends State<ProfilePage> {
                     scheme: 'mailto',
                     path: emailAddress,
                   );
-                  
+
                   if (await canLaunchUrl(simpleUri)) {
-                    await launchUrl(simpleUri, mode: LaunchMode.platformDefault);
+                    await launchUrl(simpleUri,
+                        mode: LaunchMode.platformDefault);
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Email app opened. Please add "Bug Report - Pockeat App" as the subject.'),
+                          content: Text(
+                              'Email app opened. Please add "Bug Report - Pockeat App" as the subject.'),
                           behavior: SnackBarBehavior.floating,
                           backgroundColor: Colors.green,
                         ),
@@ -1063,7 +1213,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Could not open email app. Please manually send an email to pockeat.service@gmail.com'),
+                          content: Text(
+                              'Could not open email app. Please manually send an email to pockeat.service@gmail.com'),
                           behavior: SnackBarBehavior.floating,
                           backgroundColor: Colors.red,
                         ),
