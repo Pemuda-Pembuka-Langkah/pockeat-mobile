@@ -1,15 +1,14 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 // Package imports:
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
-import 'package:get_it/get_it.dart';
 
 class FreeTrialStatusScreen extends StatefulWidget {
   const FreeTrialStatusScreen({super.key});
@@ -66,7 +65,7 @@ class _FreeTrialStatusScreenState extends State<FreeTrialStatusScreen>
   // Trial progress percentage
   double get _trialProgressPercentage {
     // Assuming trial is 7 days
-    final totalDays = 7;
+    const totalDays = 7;
     final daysLeft = _daysLeft;
 
     if (daysLeft <= 0) return 1.0; // Trial ended (100% complete)

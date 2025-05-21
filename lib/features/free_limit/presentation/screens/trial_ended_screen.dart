@@ -1,9 +1,9 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 // Package imports:
 import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TrialEndedScreen extends StatelessWidget {
   const TrialEndedScreen({super.key});

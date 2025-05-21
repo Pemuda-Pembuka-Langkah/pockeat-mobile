@@ -35,6 +35,7 @@ class LoginServiceImpl implements LoginService {
   }
 
   /// Checks if user needs email verification - returns true if email is not verified
+  @override
   Future<bool> needsEmailVerification() async {
     try {
       final user = _auth.currentUser;

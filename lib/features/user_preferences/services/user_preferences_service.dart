@@ -223,21 +223,21 @@ class UserPreferencesService {
         await _repository.setExerciseCalorieCompensationEnabled(
             userId, exerciseCalorieCompensation);
       }
-      
+
       // Sync rollover calories preference
       final rolloverCalories = prefs.getBool('rollover_calories_enabled');
       if (rolloverCalories != null) {
         debugPrint('Syncing rollover calories: $rolloverCalories');
         await _repository.setRolloverCaloriesEnabled(userId, rolloverCalories);
       }
-      
+
       // Sync pet name preference
       final petName = prefs.getString('pet_name');
       if (petName != null) {
         debugPrint('Syncing pet name: $petName');
         await _repository.setPetName(userId, petName);
       }
-      
+
       // No need to sync fitness tracker preference to Firebase - handled locally only
 
       debugPrint('Successfully synchronized user preferences after login');

@@ -59,6 +59,8 @@ import 'package:pockeat/features/food_scan_ai/presentation/screens/food_input_pa
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
+import 'package:pockeat/features/free_limit/presentation/screens/free_trial_status_screen.dart';
+import 'package:pockeat/features/free_limit/presentation/screens/trial_ended_screen.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
 import 'package:pockeat/features/health_metrics/domain/service/health_metrics_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
@@ -72,8 +74,6 @@ import 'package:pockeat/features/health_metrics/presentation/screens/free_trials
 import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
-import 'package:pockeat/features/free_limit/presentation/screens/free_trial_status_screen.dart';
-import 'package:pockeat/features/free_limit/presentation/screens/trial_ended_screen.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_value_proposition_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
