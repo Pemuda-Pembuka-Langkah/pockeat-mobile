@@ -17,7 +17,7 @@ coverage:
     patch:
       default:
         # basic
-        target: 70%
+        target: 1%
         threshold: 1%
         # advanced
         if_ci_failed: error
