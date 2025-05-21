@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 // Project imports:
 import 'package:pockeat/features/weight_history/services/weight_service.dart';
@@ -46,6 +48,7 @@ class _UpdateWeightPageState extends State<UpdateWeightPage> {
     _currentWeight = _currentWeight.clamp(_minWeight, _maxWeight);
   }
 
+  // Update the _saveChanges method to also update caloric requirements
   Future<void> _saveChanges() async {
     setState(() {
       _isSaving = true;
@@ -59,10 +62,13 @@ class _UpdateWeightPageState extends State<UpdateWeightPage> {
 
       debugPrint('Attempting to save weight: $_currentWeight kg');
 
-      // Gunakan WeightService untuk update berat badan
+      // 1. Update weight using WeightService
       await _weightService.updateTodayWeight(user.uid, _currentWeight);
 
-      // Verifikasi data tersimpan dengan mengambil data terbaru
+      // 2. Update caloric requirements based on new weight
+      await _updateCaloricRequirements(user.uid, _currentWeight);
+
+      // Verify data was saved by getting the latest weight
       final latestWeight = await _weightService.getLatestWeight(user.uid);
       debugPrint('Verified latest weight after save: $latestWeight kg');
 
@@ -71,7 +77,8 @@ class _UpdateWeightPageState extends State<UpdateWeightPage> {
         Navigator.pop(context, _currentWeight.toString());
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Weight updated successfully'),
+            content:
+                Text('Weight and caloric requirements updated successfully'),
             duration: Duration(seconds: 2),
           ),
         );
@@ -91,6 +98,179 @@ class _UpdateWeightPageState extends State<UpdateWeightPage> {
           _isSaving = false;
         });
       }
+    }
+  }
+
+  // Updated method to update both health_metrics and caloric_requirements collections
+  Future<void> _updateCaloricRequirements(String userId, double weight) async {
+    try {
+      // Fetch user's existing health metrics
+      final healthSnapshot = await FirebaseFirestore.instance
+          .collection('health_metrics')
+          .where('userId', isEqualTo: userId)
+          .limit(1)
+          .get();
+
+      if (healthSnapshot.docs.isEmpty) {
+        debugPrint('No health metrics found for user');
+        return;
+      }
+
+      final healthDoc = healthSnapshot.docs.first;
+      final healthData = healthDoc.data();
+
+      // Get required data for caloric calculations
+      final age = healthData['age'] as int? ?? 30;
+      final heightCm = healthData['height'] as num? ?? 170;
+      final gender = healthData['gender'] as String? ?? 'male';
+      final activityLevel =
+          healthData['activityLevel'] as String? ?? 'moderatelyActive';
+
+      // Recalculate BMR (Basal Metabolic Rate) using the Mifflin-St Jeor Equation
+      double bmr;
+      if (gender == 'Male') {
+        bmr = (10 * weight) + (6.25 * heightCm) - (5 * age) + 5;
+      } else {
+        bmr = (10 * weight) + (6.25 * heightCm) - (5 * age) - 161;
+      }
+
+      // Calculate TDEE (Total Daily Energy Expenditure) based on activity level
+      double tdee;
+      switch (activityLevel) {
+        case 'sedentary':
+          tdee = bmr * 1.2;
+          break;
+        case 'lightlyActive':
+          tdee = bmr * 1.375;
+          break;
+        case 'moderatelyActive':
+          tdee = bmr * 1.55;
+          break;
+        case 'veryActive':
+          tdee = bmr * 1.725;
+          break;
+        case 'extraActive':
+          tdee = bmr * 1.9;
+          break;
+        default:
+          tdee = bmr * 1.55; // Default to moderately active
+      }
+
+      // Calculate BMI (Body Mass Index)
+      final heightM = heightCm / 100;
+      final bmi = weight / (heightM * heightM);
+
+      // Calculate target caloric intake based on user's goal
+      final goal = healthData['goal'] as String? ?? 'maintain';
+      double targetCalories;
+
+      switch (goal) {
+        case 'lose':
+          targetCalories = tdee - 500; // 500 calorie deficit for weight loss
+          break;
+        case 'gain':
+          targetCalories = tdee + 500; // 500 calorie surplus for weight gain
+          break;
+        case 'maintain':
+        default:
+          targetCalories = tdee; // Maintain current weight
+      }
+
+      // Calculate macronutrient distribution (default 40/30/30 - carbs/protein/fat)
+      // These values represent standard macro ratios for a balanced diet
+      double carbsPercent = 0.40; // 40% of calories from carbs
+      double proteinPercent = 0.30; // 30% of calories from protein
+      double fatPercent = 0.30; // 30% of calories from fat
+
+      // Get macro percentages from database if available
+      if (healthData.containsKey('carbsPercent') &&
+          healthData.containsKey('proteinPercent') &&
+          healthData.containsKey('fatPercent')) {
+        carbsPercent = (healthData['carbsPercent'] as num).toDouble() / 100;
+        proteinPercent = (healthData['proteinPercent'] as num).toDouble() / 100;
+        fatPercent = (healthData['fatPercent'] as num).toDouble() / 100;
+      }
+
+      // Calculate grams of each macronutrient
+      // Carbs and protein = 4 calories per gram, fat = 9 calories per gram
+      double carbsGrams = (targetCalories * carbsPercent) / 4;
+      double proteinGrams = (targetCalories * proteinPercent) / 4;
+      double fatGrams = (targetCalories * fatPercent) / 9;
+
+      // Round values to integers for cleaner display
+      final bmrRounded = bmr.round();
+      final tdeeRounded = tdee.round();
+      final targetCaloriesRounded = targetCalories.round();
+      final bmiRounded = double.parse(bmi.toStringAsFixed(2));
+
+      // Format macros to 2 decimal places
+      final carbsGramsFormatted = double.parse(carbsGrams.toStringAsFixed(2));
+      final proteinGramsFormatted =
+          double.parse(proteinGrams.toStringAsFixed(2));
+      final fatGramsFormatted = double.parse(fatGrams.toStringAsFixed(2));
+
+      debugPrint('Recalculated nutritional values:');
+      debugPrint('  BMR: $bmrRounded kcal');
+      debugPrint('  TDEE: $tdeeRounded kcal');
+      debugPrint('  Target Calories: $targetCaloriesRounded kcal');
+      debugPrint('  BMI: $bmiRounded');
+      debugPrint('  Carbs: $carbsGramsFormatted g');
+      debugPrint('  Protein: $proteinGramsFormatted g');
+      debugPrint('  Fat: $fatGramsFormatted g');
+
+      // 1. Update the health metrics document
+      final String formattedTimestamp = DateTime.now().toIso8601String();
+      await healthSnapshot.docs.first.reference.update({
+        'weight': weight,
+        'bmr': bmrRounded,
+        'tdee': tdeeRounded,
+        'dailyCalorieTarget': targetCaloriesRounded,
+        'bmi': bmiRounded,
+        'updatedAt':
+            formattedTimestamp, // Use string timestamp instead of server timestamp
+      });
+
+      // 2. Find and update the caloric_requirements document
+      final caloricReqSnapshot = await FirebaseFirestore.instance
+          .collection('caloric_requirements')
+          .where('userId', isEqualTo: userId)
+          .limit(1)
+          .get();
+
+      if (caloricReqSnapshot.docs.isNotEmpty) {
+        // Update existing document
+        await caloricReqSnapshot.docs.first.reference.update({
+          'bmr': bmrRounded,
+          'tdee': tdeeRounded,
+          'carbsGrams': carbsGramsFormatted,
+          'proteinGrams': proteinGramsFormatted,
+          'fatGrams': fatGramsFormatted,
+          'timestamp': formattedTimestamp, // Use string timestamp
+        });
+        debugPrint('Updated existing caloric_requirements document');
+      } else {
+        // Create new document if it doesn't exist
+        await FirebaseFirestore.instance
+            .collection('caloric_requirements')
+            .add({
+          'userId': userId,
+          'bmr': bmrRounded,
+          'tdee': tdeeRounded,
+          'carbsGrams': carbsGramsFormatted,
+          'proteinGrams': proteinGramsFormatted,
+          'fatGrams': fatGramsFormatted,
+          'timestamp': formattedTimestamp, // Use string timestamp
+          'timestampStr': DateFormat('yyyy-MM-dd')
+              .format(DateTime.now()), // Keep date string for compatibility
+        });
+        debugPrint('Created new caloric_requirements document');
+      }
+
+      debugPrint(
+          'Updated caloric requirements based on new weight: $weight kg');
+    } catch (e) {
+      debugPrint('Error updating caloric requirements: $e');
+      // Don't rethrow - we still want the weight update to succeed even if this fails
     }
   }
 

@@ -116,21 +116,34 @@ class ExerciseCard extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start, // Align items to the top
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.fitness_center, color: primaryGreen),
-                    const SizedBox(width: 12),
-                    Text(
-                      exercise.name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                // Wrap the exercise name in Flexible to handle long text
+                Flexible(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.fitness_center, color: primaryGreen),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          exercise.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                          overflow: TextOverflow
+                              .ellipsis, // Add ellipsis for overflow
+                          maxLines: 2, // Allow up to 2 lines
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                const SizedBox(
+                    width: 8), // Add some space between name and stats
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -138,7 +151,8 @@ class ExerciseCard extends StatelessWidget {
                     color: primaryGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
@@ -149,14 +163,19 @@ class ExerciseCard extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${calculateExerciseCalories(exercise).toStringAsFixed(2)} kcal',
-                        style: const TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      const SizedBox(height: 4),
+                      FutureBuilder<double>(
+                        future: calculateEstimatedCalories([exercise]),
+                        builder: (context, snapshot) {
+                          final calories = snapshot.data ?? 0.0;
+                          return Text(
+                              'Estimated ${calories.toStringAsFixed(1)} kcal',
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ));
+                        },
                       ),
                     ],
                   ),

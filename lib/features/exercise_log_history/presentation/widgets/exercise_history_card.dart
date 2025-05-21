@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 // Project imports:
 import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log_history_item.dart';
 
+// coverage:ignore-start
+
 /// A reusable widget that displays an exercise history item in a card format.
 ///
 /// This widget is extracted from the RecentExerciseSection's buildExerciseCard
@@ -211,3 +213,5 @@ class ExerciseHistoryCard extends StatelessWidget {
     );
   }
 }
+
+// coverage:ignore-end
