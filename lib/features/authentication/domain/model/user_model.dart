@@ -34,6 +34,9 @@ class UserModel {
   /// Waktu login terakhir
   final DateTime? lastLoginAt;
 
+  /// Waktu berakhirnya free trial
+  final DateTime? freeTrialEndsAt;
+
   UserModel({
     required this.uid,
     required this.email,
@@ -44,6 +47,7 @@ class UserModel {
     this.birthDate,
     required this.createdAt,
     this.lastLoginAt,
+    this.freeTrialEndsAt,
   });
 
   /// Membuat UserModel dari Firebase Auth User
@@ -53,6 +57,7 @@ class UserModel {
     DateTime? birthDate,
     DateTime? createdAt,
     DateTime? lastLoginAt,
+    DateTime? freeTrialEndsAt,
   }) {
     return UserModel(
       uid: firebaseUser.uid,
@@ -64,6 +69,7 @@ class UserModel {
       birthDate: birthDate,
       createdAt: createdAt ?? DateTime.now(),
       lastLoginAt: lastLoginAt ?? DateTime.now(),
+      freeTrialEndsAt: freeTrialEndsAt,
     );
   }
 
@@ -92,6 +98,9 @@ class UserModel {
       lastLoginAt: data['lastLoginAt'] != null
           ? (data['lastLoginAt'] as Timestamp).toDate()
           : null,
+      freeTrialEndsAt: data['freeTrialEndsAt'] != null
+          ? (data['freeTrialEndsAt'] as Timestamp).toDate()
+          : null,
     );
   }
 
@@ -107,6 +116,8 @@ class UserModel {
       'createdAt': Timestamp.fromDate(createdAt),
       'lastLoginAt':
           lastLoginAt != null ? Timestamp.fromDate(lastLoginAt!) : null,
+      'freeTrialEndsAt':
+          freeTrialEndsAt != null ? Timestamp.fromDate(freeTrialEndsAt!) : null,
     };
   }
 
@@ -118,6 +129,7 @@ class UserModel {
     String? gender,
     DateTime? birthDate,
     DateTime? lastLoginAt,
+    DateTime? freeTrialEndsAt,
   }) {
     return UserModel(
       uid: uid,
@@ -129,11 +141,18 @@ class UserModel {
       birthDate: birthDate ?? this.birthDate,
       createdAt: createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      freeTrialEndsAt: freeTrialEndsAt ?? this.freeTrialEndsAt,
     );
+  }
+
+  /// Memeriksa apakah user masih dalam masa free trial
+  bool get isInFreeTrial {
+    if (freeTrialEndsAt == null) return false;
+    return DateTime.now().isBefore(freeTrialEndsAt!);
   }
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, email: $email, displayName: $displayName, emailVerified: $emailVerified)';
+    return 'UserModel(uid: $uid, email: $email, displayName: $displayName, emailVerified: $emailVerified, freeTrialEndsAt: $freeTrialEndsAt)';
   }
 }

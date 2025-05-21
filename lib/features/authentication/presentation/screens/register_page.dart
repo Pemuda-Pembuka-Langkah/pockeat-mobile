@@ -587,57 +587,103 @@ class _RegisterPageState extends State<RegisterPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Panda image
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Image.asset(
+            'assets/images/panda_get_started_commision.png',
+            width: 110,
+            height: 110,
+          ),
+        ),
         // Icon
-        Icon(Icons.mark_email_read, size: 100, color: primaryGreen),
+        Icon(Icons.mark_email_read, size: 80, color: primaryGreen),
 
-        const SizedBox(height: 30),
+        const SizedBox(height: 24),
 
         // Title
         Text(
-          'Verify Your Email',
+          'Check Your Email',
           style: TextStyle(
-            fontSize: 28,
+            fontSize: 26,
             fontWeight: FontWeight.bold,
             color: primaryPink,
           ),
           textAlign: TextAlign.center,
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
 
         // Description
         Text(
-          'We have sent a verification email to ${_emailController.text}. Please check your inbox or spam folder to verify.',
+          'We\'ve sent a verification link to:',
           style: TextStyle(fontSize: 16, color: Colors.grey[700]),
           textAlign: TextAlign.center,
         ),
+        const SizedBox(height: 6),
+        Text(
+          _emailController.text,
+          style: TextStyle(
+              fontSize: 16, color: primaryGreen, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 18),
+        Text(
+          'It may take a while to receive the email. Please access the app through the link in your inbox.',
+          style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.4),
+          textAlign: TextAlign.center,
+        ),
 
-        const SizedBox(height: 40),
+        const SizedBox(height: 32),
 
         // Resend email verification button
         SizedBox(
-          height: 55,
+          height: 50,
           child: OutlinedButton(
             onPressed: _isLoading ? null : _resendVerificationEmail,
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: primaryPink),
+              side: BorderSide(color: primaryGreen),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
             child: Text(
-              'RESEND EMAIL',
+              'Resend Verification Email',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
-                color: primaryPink,
+                color: primaryGreen,
               ),
             ),
           ),
         ),
 
-        // Back to login button removed
+        const SizedBox(height: 18),
+
+        // Go Back button
+        SizedBox(
+          height: 50,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/welcome');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryPink,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Go Back',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
