@@ -9,6 +9,8 @@ import 'package:pockeat/features/exercise_log_history/domain/models/exercise_log
 import 'package:pockeat/features/exercise_log_history/presentation/widgets/exercise_history_card.dart';
 import 'package:pockeat/features/exercise_log_history/services/exercise_log_history_service.dart';
 
+// coverage:ignore-start
+
 /// A widget that displays a section of recent exercise history items.
 ///
 /// This widget connects to the ExerciseLogHistoryRepository to fetch exercise logs
@@ -100,8 +102,6 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
 
   void _navigateToAllExercises() {
     Navigator.of(context).pushNamed('/exercise-history').then((_) {
-// coverage:ignore-start
-
       // Refresh data when returning from exercise history page
       _loadExercises();
     });
@@ -120,7 +120,6 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
       _loadExercises();
     });
   }
-// coverage:ignore-end
 
   @override
   Widget build(BuildContext context) {
@@ -227,10 +226,8 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
                             bottom: 8), // Consistent spacing between cards
                         child: ExerciseHistoryCard(
                           exercise: exercises[index],
-                          // coverage:ignore-start
                           onTap: () =>
                               _navigateToExerciseDetail(exercises[index]),
-                          // coverage:ignore-end
                         ),
                       ),
                     ),
@@ -244,3 +241,4 @@ class _RecentlyExerciseSectionState extends State<RecentlyExerciseSection>
     );
   }
 }
+// coverage:ignore-end

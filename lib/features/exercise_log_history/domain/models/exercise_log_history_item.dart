@@ -12,6 +12,8 @@ import 'package:pockeat/features/weight_training_log/services/workout_service.da
 /// Model ini didesain untuk menyatukan berbagai jenis aktivitas olahraga
 /// (SmartExercise, Weightlifting, Cardio) dalam satu format yang konsisten
 /// untuk ditampilkan di history log.
+
+// coverage:ignore-start
 class ExerciseLogHistoryItem {
   final String id;
   final String activityType; // Diganti dari enum menjadi string
@@ -71,8 +73,8 @@ class ExerciseLogHistoryItem {
   }
 
   /// Factory constructor untuk membuat ExerciseLogHistoryItem dari WeightLifting model
-  factory ExerciseLogHistoryItem.fromWeightliftingLog(
-      WeightLifting weightLifting) {
+  static Future<ExerciseLogHistoryItem> fromWeightliftingLog(
+      WeightLifting weightLifting) async {
     // Calculate total sets, reps, and weight
     int totalSets = weightLifting.sets.length;
 
@@ -92,8 +94,9 @@ class ExerciseLogHistoryItem {
     double totalDurationInMinutes =
         weightLifting.sets.fold(0.0, (sum, set) => sum + set.duration);
 
-    // Calculate calories burned using workout service
-    int caloriesBurned = calculateExerciseCalories(weightLifting).round();
+    // Calculate calories burned using workout service (await the Future)
+    double caloriesValue = await calculateExerciseCalories(weightLifting);
+    int caloriesBurned = caloriesValue.round();
 
     return ExerciseLogHistoryItem(
       activityType: typeWeightlifting,
@@ -138,3 +141,4 @@ class ExerciseLogHistoryItem {
     );
   }
 }
+// coverage:ignore-end

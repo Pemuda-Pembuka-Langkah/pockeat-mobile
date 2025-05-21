@@ -320,15 +320,23 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           _buildExerciseQuickAdd(),
           const SizedBox(height: 24),
           if (exercises.isNotEmpty)
-            WorkoutSummary(
-              key: const Key('workoutSummary'),
-              exerciseCount: exercises.length,
-              totalSets: calculateTotalSets(exercises),
-              totalReps: calculateTotalReps(exercises),
-              totalVolume: calculateTotalVolume(exercises),
-              totalDuration: calculateTotalDuration(exercises),
-              estimatedCalories: calculateEstimatedCalories(exercises),
-              primaryGreen: primaryGreen,
+            FutureBuilder<double>(
+              future: calculateEstimatedCalories(exercises),
+              builder: (context, snapshot) {
+                // Use 0.0 as default value if data isn't available yet
+                final calories = snapshot.data ?? 0.0;
+                return WorkoutSummary(
+                  key: const Key('workoutSummary'),
+                  exerciseCount: exercises.length,
+                  totalSets: calculateTotalSets(exercises),
+                  totalReps: calculateTotalReps(exercises),
+                  totalVolume: calculateTotalVolume(exercises),
+                  totalDuration: calculateTotalDuration(exercises),
+                  estimatedCalories:
+                      calories, // Now passing a double, not a Future
+                  primaryGreen: primaryGreen,
+                );
+              },
             ),
           ...exercises.map((exercise) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),

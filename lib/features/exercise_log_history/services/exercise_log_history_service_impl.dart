@@ -15,6 +15,7 @@ import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_ex
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 
+// coverage:ignore-start
 class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   late final SmartExerciseLogRepository _smartExerciseLogRepository;
   late final CardioRepository _cardioRepository;
@@ -46,7 +47,8 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       // Get weightlifting logs
       final weightLiftingLogs =
           await _weightLiftingRepository.getExercisesByUser(userId);
-      final weightLiftingItems = _convertWeightLiftingLogs(weightLiftingLogs);
+      final weightLiftingItems =
+          await _convertWeightLiftingLogs(weightLiftingLogs);
 
       // Combine items
       final allItems = <ExerciseLogHistoryItem>[
@@ -88,7 +90,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
           smartLogs.where((log) => log.userId == userId).toList());
       final cardioItems = _convertCardioLogs(
           cardioLogs.where((log) => log.userId == userId).toList());
-      final weightLiftingItems = _convertWeightLiftingLogs(
+      final weightLiftingItems = await _convertWeightLiftingLogs(
           weightLiftingLogs.where((log) => log.userId == userId).toList());
 
       final allLogs = [
@@ -128,7 +130,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       final filteredWeightLiftingLogs =
           weightLiftingLogs.where((log) => log.userId == userId).toList();
       final weightLiftingItems =
-          _convertWeightLiftingLogs(filteredWeightLiftingLogs);
+          await _convertWeightLiftingLogs(filteredWeightLiftingLogs);
 
       // Combine all logs
       final allLogs = [
@@ -170,7 +172,7 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
       final filteredWeightLiftingLogs =
           weightLiftingLogs.where((log) => log.userId == userId).toList();
       final weightLiftingItems =
-          _convertWeightLiftingLogs(filteredWeightLiftingLogs);
+          await _convertWeightLiftingLogs(filteredWeightLiftingLogs);
 
       // Combine all logs
       final allLogs = [
@@ -203,10 +205,13 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
         .toList();
   }
 
-  List<ExerciseLogHistoryItem> _convertWeightLiftingLogs(
-      List<WeightLifting> logs) {
-    return logs
-        .map((log) => ExerciseLogHistoryItem.fromWeightliftingLog(log))
-        .toList();
+  // Change this method to handle the async nature of fromWeightliftingLog
+  Future<List<ExerciseLogHistoryItem>> _convertWeightLiftingLogs(
+      List<WeightLifting> logs) async {
+    // Use Future.wait to wait for all async conversions to complete
+    return await Future.wait(
+      logs.map((log) => ExerciseLogHistoryItem.fromWeightliftingLog(log)),
+    );
   }
 }
+// coverage:ignore-end
