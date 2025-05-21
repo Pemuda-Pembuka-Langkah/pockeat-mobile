@@ -13,7 +13,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/still_not_completed_onboarding.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -60,6 +59,7 @@ import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_pag
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
@@ -78,6 +78,7 @@ import 'package:pockeat/features/health_metrics/presentation/screens/pet_onboard
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/rollover_calories_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/still_not_completed_onboarding.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/sync_fitness_tracker_option_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/thank_you_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/used_other_apps_page.dart';
@@ -490,8 +491,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         Provider.of<SmartExerciseLogRepository>(context);
 
     // Get navigation provider for route observer
-    final navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
-    
+    final navigationProvider =
+        Provider.of<NavigationProvider>(context, listen: false);
+
     return MaterialApp(
       navigatorKey: navigatorKey,
       title: 'Pockeat',
@@ -583,7 +585,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
         },
         // Di main.dart pada bagian routes:
-        '/not-completed-onboarding': (context) => const StillNotCompletedOnboardingPage(),
+        '/not-completed-onboarding': (context) =>
+            const StillNotCompletedOnboardingPage(),
         '/onboarding': (context) => const HealthValuePropositionPage(),
         '/onboarding/goal': (context) {
           return BlocProvider.value(
@@ -614,8 +617,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/free-trial': (context) => const FreeTrialPage(),
         '/calorie-loading': (context) => const CalorieCalculationLoadingPage(),
         '/smart-exercise-log': (context) => AuthWrapper(
-            child:
-                SmartExerciseLogPage(repository: smartExerciseLogRepository)),
+                child: SmartExerciseLogPage(
+              repository: smartExerciseLogRepository,
+              healthMetricsService: getIt<HealthMetricsService>(),
+            )),
         '/scan': (context) => FutureBuilder<List<CameraDescription>>(
               future: availableCameras(),
               builder: (context, snapshot) {
