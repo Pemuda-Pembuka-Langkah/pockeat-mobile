@@ -74,40 +74,33 @@ class ExerciseLogHistoryServiceImpl implements ExerciseLogHistoryService {
   Future<List<ExerciseLogHistoryItem>> getExerciseLogsByDate(
       String userId, DateTime date) async {
     try {
-      // Get smart exercise logs for this date and user
-      final smartLogs =
-          await _smartExerciseLogRepository.getAnalysisResultsByDate(date);
-      final filteredSmartLogs =
-          smartLogs.where((log) => log.userId == userId).toList();
-      final smartItems = _convertSmartExerciseLogs(filteredSmartLogs);
+      final results = await Future.wait([
+        _smartExerciseLogRepository.getAnalysisResultsByDate(date),
+        _cardioRepository.filterByDate(date),
+        _weightLiftingRepository.filterByDate(date),
+      ]);
 
-      // Get cardio activities for this date
-      final cardioLogs = await _cardioRepository.filterByDate(date);
-      final filteredCardioLogs =
-          cardioLogs.where((log) => log.userId == userId).toList();
-      final cardioItems = _convertCardioLogs(filteredCardioLogs);
+      final smartLogs = results[0] as List<ExerciseAnalysisResult>;
+      final cardioLogs = results[1] as List<CardioActivity>;
+      final weightLiftingLogs = results[2] as List<WeightLifting>;
 
-      // Get weightlifting exercises for this date
-      final weightLiftingLogs =
-          await _weightLiftingRepository.filterByDate(date);
-      final filteredWeightLiftingLogs =
-          weightLiftingLogs.where((log) => log.userId == userId).toList();
-      final weightLiftingItems =
-          _convertWeightLiftingLogs(filteredWeightLiftingLogs);
+      final smartItems = _convertSmartExerciseLogs(
+          smartLogs.where((log) => log.userId == userId).toList());
+      final cardioItems = _convertCardioLogs(
+          cardioLogs.where((log) => log.userId == userId).toList());
+      final weightLiftingItems = _convertWeightLiftingLogs(
+          weightLiftingLogs.where((log) => log.userId == userId).toList());
 
-      // Combine all logs
       final allLogs = [
         ...smartItems,
         ...cardioItems,
         ...weightLiftingItems,
       ];
 
-      // Sort by timestamp (newest first)
       allLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       debugPrint("allLogs: $allLogs");
       return allLogs;
     } catch (e) {
-      // Return empty list instead of throwing
       return [];
     }
   }

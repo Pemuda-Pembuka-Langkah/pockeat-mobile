@@ -15,6 +15,7 @@ import 'package:pockeat/core/di/service_locator.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/caloric_requirement/domain/services/caloric_requirement_service.dart';
 import 'package:pockeat/features/health_metrics/domain/models/health_metrics_model.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 import '../widgets/calorie_macronutrient_card.dart';
 import '../widgets/personalized_message_widget.dart';
 import '../widgets/user_information_card.dart';
@@ -372,11 +373,22 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
                                       final formCubit = context
                                           .read<HealthMetricsFormCubit>();
                                       formCubit.setUserId(user.uid);
+
+                                      // Submit health metrics data
                                       await formCubit.submit();
+
+                                      // Synchronize user preferences from SharedPreferences to Firebase
+                                      final userPreferencesService = GetIt
+                                          .instance<UserPreferencesService>();
+                                      await userPreferencesService
+                                          .synchronizePreferencesAfterLogin();
+
+                                      // Navigate to the homepage
                                       Navigator.pushReplacementNamed(
                                           context, '/');
                                     } else {
-                                      Navigator.pushNamed(context, '/register');
+                                      Navigator.pushNamed(
+                                          context, '/free-trial');
                                     }
                                   }
                                 : null,

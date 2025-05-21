@@ -71,10 +71,6 @@ class CalorieStatsServiceImpl implements CalorieStatsService {
     // Get exercise logs for the day
     final exerciseLogs =
         await _exerciseService.getExerciseLogsByDate(userId, date);
-    for (var log in exerciseLogs) {
-      int caloriesBurned = log.caloriesBurned.toInt();
-      debugPrint("exerciseLog: $caloriesBurned");
-    }
 
     // Calculate calories burned from exercise logs
     final logCaloriesBurned = exerciseLogs.fold<int>(
