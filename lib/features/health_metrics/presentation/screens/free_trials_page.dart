@@ -318,7 +318,7 @@ class _FreeTrialPageState extends State<FreeTrialPage>
                           ),
                           onPressed: () {
                             // Start free trial logic here
-                            Navigator.pushReplacementNamed(
+                            Navigator.pushNamed(
                                 context, '/register');
                           },
                           child: const Text(

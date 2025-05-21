@@ -10,6 +10,7 @@ import 'package:mockito/mockito.dart';
 
 // Project imports:
 import 'package:pockeat/features/api_scan/services/exercise/exercise_analysis_service.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/models/exercise_analysis_result.dart';
 import 'package:pockeat/features/smart_exercise_log/domain/repositories/smart_exercise_log_repository.dart';
 import 'package:pockeat/features/smart_exercise_log/presentation/screens/smart_exercise_log_page.dart';
@@ -22,7 +23,8 @@ import 'smart_exercise_log_page_test.mocks.dart';
   ExerciseAnalysisService,
   SmartExerciseLogRepository,
   firebase_auth.FirebaseAuth,
-  firebase_auth.User
+  firebase_auth.User,
+  FoodTrackingClientController
 ])
 
 void main() {
@@ -31,6 +33,7 @@ void main() {
     late MockSmartExerciseLogRepository mockRepository;
     late MockFirebaseAuth mockAuth;
     late MockUser mockUser;
+    late MockFoodTrackingClientController mockFoodTrackingClientController;
     final getIt = GetIt.instance;
 
     // Sample exercise analysis result for testing
@@ -66,24 +69,35 @@ void main() {
       mockRepository = MockSmartExerciseLogRepository();
       mockAuth = MockFirebaseAuth();
       mockUser = MockUser();
+      mockFoodTrackingClientController = MockFoodTrackingClientController();
 
       // Configure mock auth
       when(mockAuth.currentUser).thenReturn(mockUser);
       when(mockUser.uid).thenReturn('test-user-123');
+
+      // Configure mock widget controller
+      when(mockFoodTrackingClientController.forceUpdate()).thenAnswer((_) async => {});
+
       // Reset GetIt before each test
       if (GetIt.I.isRegistered<ExerciseAnalysisService>()) {
         GetIt.I.unregister<ExerciseAnalysisService>();
       }
+      if (GetIt.I.isRegistered<FoodTrackingClientController>()) {
+        GetIt.I.unregister<FoodTrackingClientController>();
+      }
 
       // Register mock services in GetIt
-      getIt.registerSingleton<ExerciseAnalysisService>(
-          mockExerciseAnalysisService);
+      getIt.registerSingleton<ExerciseAnalysisService>(mockExerciseAnalysisService);
+      getIt.registerSingleton<FoodTrackingClientController>(mockFoodTrackingClientController);
     });
 
     tearDown(() {
       // Clean up GetIt after each test
       if (GetIt.I.isRegistered<ExerciseAnalysisService>()) {
         GetIt.I.unregister<ExerciseAnalysisService>();
+      }
+      if (GetIt.I.isRegistered<FoodTrackingClientController>()) {
+        GetIt.I.unregister<FoodTrackingClientController>();
       }
     });
 

@@ -45,6 +45,12 @@ class MockUserPreferencesService implements UserPreferencesService {
 
   @override
   Future<int> getRolloverCalories() async => 0;
+  
+  @override
+  Future<String> getPetName() async => 'Panda';
+  
+  @override
+  Future<void> setPetName(String petName) async {}
 
   @override
   Future<void> synchronizePreferencesAfterLogin() async {}

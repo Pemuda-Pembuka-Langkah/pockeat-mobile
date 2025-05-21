@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 
 // Project imports:
 import '../../../health_metrics/domain/models/health_metrics_model.dart';
@@ -546,6 +548,10 @@ class CardioInputPageState extends State<CardioInputPage> {
 
       // Save using repository
       await _repository.saveCardioActivity(activity!);
+
+      final widgetController = GetIt.instance<FoodTrackingClientController>();
+      await widgetController.forceUpdate();
+      debugPrint('Home screen widgets updated with new exercise data');
 
       // Show success message to user with navigation after SnackBar is dismissed
       if (mounted) {

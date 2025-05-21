@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
@@ -382,6 +383,11 @@ class _ReviewSubmitPageState extends State<ReviewSubmitPage>
                                           .instance<UserPreferencesService>();
                                       await userPreferencesService
                                           .synchronizePreferencesAfterLogin();
+
+                                      var widgetController = GetIt.instance<FoodTrackingClientController>();
+                                      await widgetController.forceUpdate();
+                                      debugPrint('Home screen widgets updated with new exercise data');
+                                      
 
                                       // Navigate to the homepage
                                       Navigator.pushReplacementNamed(
