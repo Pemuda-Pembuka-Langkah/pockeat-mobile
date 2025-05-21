@@ -662,10 +662,10 @@ void main() {
       await tester.pumpWidget(createTestWidget());
       await tester.pumpAndSettle();
 
-      // Find Edit Health Information menu
-      final editHealthInfoFinder = find.text('Edit Health Information');
+      // Find Edit Health and Information menu
+      final editHealthInfoFinder = find.text('Edit Health and Information');
       expect(editHealthInfoFinder, findsOneWidget);
-      expect(find.text('Edit your health information'), findsOneWidget);
+      expect(find.text('Edit your health and pet information'), findsOneWidget);
 
       // Tap Edit Health Information menu
       await tester.tap(editHealthInfoFinder);
