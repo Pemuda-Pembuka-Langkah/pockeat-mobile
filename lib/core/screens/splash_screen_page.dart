@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 // Package imports:
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
 // Project imports:
@@ -51,7 +52,20 @@ class _SplashScreenPageState extends State<SplashScreenPage>
 
     try {
       final user = await loginService.getCurrentUser();
-      _isAuthenticated = user != null;
+
+      if (user != null) {
+        // Check if email is verified
+        final isEmailVerified = await loginService.isEmailVerified();
+        if (!isEmailVerified) {
+          // If email is not verified, user should not be auto-logged in
+          await FirebaseAuth.instance.signOut();
+          _isAuthenticated = false;
+        } else {
+          _isAuthenticated = true;
+        }
+      } else {
+        _isAuthenticated = false;
+      }
 
       // Delay navigation for 5 seconds to show splash screen
       Future.delayed(const Duration(seconds: 5), () {
@@ -71,6 +85,8 @@ class _SplashScreenPageState extends State<SplashScreenPage>
   void _navigateBasedOnAuth() {
     if (!mounted) return;
 
+    // The AuthWrapper will handle redirects based on authentication state,
+    // including checking email verification status
     Navigator.of(context).pushReplacementNamed('/');
   }
 

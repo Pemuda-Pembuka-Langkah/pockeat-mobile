@@ -79,6 +79,25 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
 
+      // Check if email is verified
+      final isEmailVerified = await _loginService.isEmailVerified();
+
+      if (!isEmailVerified) {
+        // If email is not verified, show error and don't proceed with login
+        setState(() {
+          _isLoading = false;
+          _errorMessage =
+              'Please verify your email before logging in. Check your inbox for a verification link.';
+        });
+
+        // Navigate to email verification page
+        if (mounted) {
+          Navigator.pushNamed(context, '/email-verification',
+              arguments: {'email': _emailController.text.trim()});
+        }
+        return;
+      }
+
       // Synchronize user preferences from local storage to Firebase
       final userPreferencesService = GetIt.instance<UserPreferencesService>();
       await userPreferencesService.synchronizePreferencesAfterLogin();
@@ -122,12 +141,63 @@ class _LoginPageState extends State<LoginPage> {
           return 'Login with email and password is not allowed. Please use another login method.';
         case 'network-request-failed':
           return 'Network problem occurred. Please check your internet connection.';
+        case 'email-not-verified':
+          return 'Please verify your email before logging in. Check your inbox for a verification link or tap "Resend Verification Email" below.';
         default:
           return 'Login failed: ${error.message ?? error.code}';
       }
     }
 
     return 'An unexpected error occurred during login. Please try again later.';
+  }
+
+  // Function to handle resending verification email
+  Future<void> _resendVerificationEmail() async {
+    if (_emailController.text.isEmpty) {
+      setState(() {
+        _errorMessage =
+            'Please enter your email address to resend verification.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Try to sign in with the provided email to get a user object
+      await _loginService.loginByEmail(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      // If we get here, we have a user, so try to send verification email
+      final success = await _loginService.sendEmailVerification();
+
+      setState(() {
+        _isLoading = false;
+        if (success) {
+          _errorMessage =
+              'Verification email sent! Please check your inbox and spam folder.';
+        } else {
+          _errorMessage =
+              'Failed to send verification email. Please try again later.';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        if (e is FirebaseAuthException && e.code == 'email-not-verified') {
+          // This is fine - we want to send the verification email
+          _errorMessage =
+              'Verification email sent! Please check your inbox and spam folder.';
+        } else {
+          _errorMessage = _getErrorMessage(e);
+        }
+      });
+    }
   }
 
   @override
@@ -143,13 +213,13 @@ class _LoginPageState extends State<LoginPage> {
           }
           return false;
         });
-        
+
         // If /welcome doesn't exist in the route stack, exit the app
         if (!welcomeExists) {
           // Exit the app
           SystemNavigator.pop();
         }
-        
+
         // Always return false as we're handling navigation manually
         return false;
       },
@@ -371,16 +441,107 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ],
           ),
-
           const SizedBox(height: 20),
 
-          // Google Sign In Button
+          // Resend verification email button - only shown when there's an email verification error
+          if (_errorMessage != null &&
+              _errorMessage!.contains('verify your email'))
+            Column(
+              children: [
+                const SizedBox(height: 10),
+                OutlinedButton(
+                  onPressed: _resendVerificationEmail,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: primaryPink,
+                    side: BorderSide(color: primaryPink),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Resend Verification Email'),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ), // Google Sign In Button
           const GoogleSignInButton(
             height: 55, // Sama dengan button sign in
           ),
 
+          // Small space after Google button
+          const SizedBox(height: 16),
+
+          // Subtle "Start Over" button right under Google signin
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  // Double tap check to prevent accidental navigation
+                  final currentTime = DateTime.now();
+                  if (_lastTapTime != null &&
+                      currentTime.difference(_lastTapTime!).inMilliseconds <
+                          300) {
+                    // Show confirmation dialog
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                        title: Text('Start Over?',
+                            style: TextStyle(
+                                color: primaryPink,
+                                fontWeight: FontWeight.bold)),
+                        content: const Text('Return to the welcome screen?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              Navigator.pushReplacementNamed(
+                                  context, '/welcome');
+                            },
+                            child: const Text('Yes'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  _lastTapTime = currentTime;
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.refresh,
+                          size: 14, color: Colors.grey.shade500),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Start Over',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
+
+  // Used for double-tap detection
+  DateTime? _lastTapTime;
 }
