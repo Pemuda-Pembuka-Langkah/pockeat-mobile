@@ -14,8 +14,6 @@ import 'package:pockeat/features/user_preferences/services/user_preferences_serv
 
 // ignore: unnecessary_import
 
-
-
 /// Login page for existing users
 ///
 /// This page contains a form to input login credentials such as
