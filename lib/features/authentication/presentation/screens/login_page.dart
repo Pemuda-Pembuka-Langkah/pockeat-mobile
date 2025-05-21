@@ -473,76 +473,10 @@ class _LoginPageState extends State<LoginPage> {
           // Small space after Google button
           const SizedBox(height: 16),
 
-          // Subtle "Start Over" button right under Google signin
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  // Double tap check to prevent accidental navigation
-                  final currentTime = DateTime.now();
-                  if (_lastTapTime != null &&
-                      currentTime.difference(_lastTapTime!).inMilliseconds <
-                          300) {
-                    // Show confirmation dialog
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) => AlertDialog(
-                        title: Text('Start Over?',
-                            style: TextStyle(
-                                color: primaryPink,
-                                fontWeight: FontWeight.bold)),
-                        content: const Text('Return to the welcome screen?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              Navigator.pushReplacementNamed(
-                                  context, '/welcome');
-                            },
-                            child: const Text('Yes'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  _lastTapTime = currentTime;
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.refresh,
-                          size: 14, color: Colors.grey.shade500),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Start Over',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+         
         ],
       ),
     );
   }
 
-  // Used for double-tap detection
-  DateTime? _lastTapTime;
 }
