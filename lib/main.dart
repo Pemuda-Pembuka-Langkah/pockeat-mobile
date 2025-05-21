@@ -33,6 +33,7 @@ import 'package:pockeat/features/authentication/presentation/screens/change_pass
 import 'package:pockeat/features/authentication/presentation/screens/change_password_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/edit_profile_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/email_verification_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
@@ -58,7 +59,10 @@ import 'package:pockeat/features/food_scan_ai/presentation/screens/food_input_pa
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
+import 'package:pockeat/features/free_limit/presentation/screens/free_trial_status_screen.dart';
+import 'package:pockeat/features/free_limit/presentation/screens/trial_ended_screen.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
@@ -542,6 +546,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/welcome': (context) => const WelcomePage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
+        '/email-verification': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return EmailVerificationPage(
+            email: args?['email'] as String? ?? '',
+          );
+        },
         '/streak-celebration': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>?;
@@ -614,10 +625,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               child: const ReviewSubmitPage(),
             ),
         '/free-trial': (context) => const FreeTrialPage(),
+        '/free-trial-status': (context) =>
+            const AuthWrapper(child: FreeTrialStatusScreen()),
+        '/trial-ended': (context) => const TrialEndedScreen(),
         '/calorie-loading': (context) => const CalorieCalculationLoadingPage(),
         '/smart-exercise-log': (context) => AuthWrapper(
-            child:
-                SmartExerciseLogPage(repository: smartExerciseLogRepository)),
+                child: SmartExerciseLogPage(
+              repository: smartExerciseLogRepository,
+              healthMetricsService: getIt<HealthMetricsService>(),
+            )),
         '/scan': (context) => FutureBuilder<List<CameraDescription>>(
               future: availableCameras(),
               builder: (context, snapshot) {

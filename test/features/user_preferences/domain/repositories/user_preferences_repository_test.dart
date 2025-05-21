@@ -43,6 +43,7 @@ void main() {
   const String exerciseCompensationKey =
       'exercise_calorie_compensation_enabled_test-user-123';
   const String rolloverCaloriesKey = 'rollover_calories_enabled_test-user-123';
+  const String petNameKey = 'pet_name_test-user-123';
 
   setUp(() {
     mockFirestore = MockFirebaseFirestore();
@@ -549,6 +550,155 @@ void main() {
 
       // Act
       final result = await repository.calculateRolloverCalories(testUserId);
+    });
+  });
+  
+  group('getPetName', () {
+    test('returns "Panda" when userId is empty', () async {
+      // Act
+      final result = await repository.getPetName('');
+
+      // Assert
+      expect(result, 'Panda');
+    });
+
+    test('returns cached value when available in SharedPreferences', () async {
+      // Arrange
+      SharedPreferences.setMockInitialValues({
+        petNameKey: 'Fluffy',
+      });
+
+      // Act
+      final result = await repository.getPetName(testUserId);
+
+      // Assert
+      expect(result, 'Fluffy');
+
+      // Verify Firestore was not called
+      verifyNever(() => mockDocRef.get());
+    });
+
+    test('fetches from Firestore when no cached value exists and caches result',
+        () async {
+      // Arrange
+      SharedPreferences.setMockInitialValues({});
+      when(() => mockDocRef.get()).thenAnswer((_) async => mockDocSnapshot);
+      when(() => mockDocSnapshot.data()).thenReturn({
+        'preferences': {'pet_name': 'Rex'}
+      });
+
+      // Act
+      final result = await repository.getPetName(testUserId);
+
+      // Assert
+      expect(result, 'Rex');
+
+      // Verify Firestore was called
+      verify(() => mockDocRef.get()).called(1);
+
+      // Verify value was cached in SharedPreferences
+      expect(
+          await SharedPreferences.getInstance()
+              .then((prefs) => prefs.getString(petNameKey)),
+          'Rex');
+    });
+
+    test('returns "Panda" when preference is not found in Firestore', () async {
+      // Arrange
+      SharedPreferences.setMockInitialValues({});
+      when(() => mockDocRef.get()).thenAnswer((_) async => mockDocSnapshot);
+      // Return null data to simulate missing preference
+      when(() => mockDocSnapshot.data()).thenReturn({});
+
+      // Act
+      final result = await repository.getPetName(testUserId);
+
+      // Assert
+      expect(result, 'Panda');
+
+      // Verify default value was cached in SharedPreferences
+      expect(
+          await SharedPreferences.getInstance()
+              .then((prefs) => prefs.getString(petNameKey)),
+          'Panda');
+    });
+
+    test('returns "Panda" and handles exception when Firestore throws', () async {
+      // Arrange
+      SharedPreferences.setMockInitialValues({});
+      when(() => mockDocRef.get()).thenThrow(Exception('Firestore error'));
+
+      // Act
+      final result = await repository.getPetName(testUserId);
+
+      // Assert
+      expect(result, 'Panda');
+    });
+  });
+  
+  group('setPetName', () {
+    test('does nothing when userId is empty', () async {
+      // Act
+      await repository.setPetName('', 'Charlie');
+
+      // Assert - verify Firestore was not called
+      verifyNever(() => mockDocRef.set(any(), any()));
+    });
+
+    test('updates both Firestore and SharedPreferences when userId valid',
+        () async {
+      // Arrange
+      SharedPreferences.setMockInitialValues({});
+      when(() => mockDocRef.set(any(), any())).thenAnswer((_) async => {});
+
+      // Act
+      await repository.setPetName(testUserId, 'Buddy');
+
+      // Assert
+      // Verify Firestore was updated
+      verify(() => mockDocRef.set({
+            'preferences': {'pet_name': 'Buddy'}
+          }, any())).called(1);
+
+      // Verify SharedPreferences was updated
+      expect(
+          await SharedPreferences.getInstance()
+              .then((prefs) => prefs.getString(petNameKey)),
+          'Buddy');
+    });
+    
+    test('uses "Panda" as default when empty name is provided', () async {
+      // Arrange
+      SharedPreferences.setMockInitialValues({});
+      when(() => mockDocRef.set(any(), any())).thenAnswer((_) async => {});
+
+      // Act
+      await repository.setPetName(testUserId, '');
+
+      // Assert
+      // Verify Firestore was updated with default name
+      verify(() => mockDocRef.set({
+            'preferences': {'pet_name': 'Panda'}
+          }, any())).called(1);
+
+      // Verify SharedPreferences was updated with default name
+      expect(
+          await SharedPreferences.getInstance()
+              .then((prefs) => prefs.getString(petNameKey)),
+          'Panda');
+    });
+
+    test('throws exception when Firestore update fails', () async {
+      // Arrange
+      SharedPreferences.setMockInitialValues({});
+      when(() => mockDocRef.set(any(), any()))
+          .thenThrow(Exception('Firestore error'));
+
+      // Act & Assert
+      expect(
+          () => repository.setPetName(testUserId, 'Max'),
+          throwsA(isA<Exception>().having((e) => e.toString(), 'message',
+              contains('Failed to save pet name'))));
     });
   });
 }

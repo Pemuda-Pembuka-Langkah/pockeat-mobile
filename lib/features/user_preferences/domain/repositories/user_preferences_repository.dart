@@ -22,6 +22,12 @@ abstract class UserPreferencesRepository {
 
   /// Calculate rollover calories from previous day
   Future<int> calculateRolloverCalories(String userId);
+
+  /// Get the user's pet name
+  Future<String> getPetName(String userId);
+
+  /// Set the user's pet name
+  Future<void> setPetName(String userId, String petName);
 }
 
 /// Implementation of UserPreferencesRepository using Firebase and SharedPreferences
@@ -34,6 +40,9 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
 
   // Key for the rollover calories setting
   static const String _rolloverCaloriesKey = 'rollover_calories_enabled';
+
+  // Key for the pet name setting
+  static const String _petNameKey = 'pet_name';
 
 //coverage:ignore-start
   UserPreferencesRepositoryImpl({
@@ -270,6 +279,57 @@ class UserPreferencesRepositoryImpl implements UserPreferencesRepository {
     } catch (e) {
       debugPrint('Error calculating rollover calories: $e');
       return 0;
+    }
+  }
+
+  @override
+  Future<String> getPetName(String userId) async {
+    if (userId.isEmpty) return 'Panda';
+
+    try {
+      // Try getting pet name from local storage first for fast access
+      final prefs = await SharedPreferences.getInstance();
+      final localPetName = prefs.getString('${_petNameKey}_$userId');
+
+      if (localPetName != null) return localPetName;
+
+      // If not in local storage, get from Firestore
+      final doc = await _firestore.collection('users').doc(userId).get();
+
+      final petName =
+          doc.data()?['preferences']?[_petNameKey] as String? ?? 'Panda';
+
+      // Cache in local storage for faster access next time
+      await prefs.setString('${_petNameKey}_$userId', petName);
+
+      return petName;
+    } catch (e) {
+      debugPrint('Error fetching pet name: $e');
+      return 'Panda'; // Default pet name
+    }
+  }
+
+  @override
+  Future<void> setPetName(String userId, String petName) async {
+    if (userId.isEmpty) return;
+
+    try {
+      // Make sure pet name is not empty
+      final validPetName = petName.trim().isEmpty ? 'Panda' : petName;
+
+      // Update Firestore
+      await _firestore.collection('users').doc(userId).set({
+        'preferences': {_petNameKey: validPetName}
+      }, SetOptions(merge: true));
+
+      // Update local cache
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('${_petNameKey}_$userId', validPetName);
+
+      debugPrint('Pet name set to: $validPetName');
+    } catch (e) {
+      debugPrint('Error saving pet name: $e');
+      throw Exception('Failed to save pet name: $e');
     }
   }
 }
