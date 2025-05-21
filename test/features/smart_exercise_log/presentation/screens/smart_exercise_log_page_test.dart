@@ -665,7 +665,159 @@ void main() {
       // Assert
       expect(didPop, isTrue, reason: 'Navigator should have popped');
     });
+
+    testWidgets('handles health metrics loading failure gracefully', (WidgetTester tester) async {
+      // Arrange - Setup mock to throw error
+      when(mockHealthMetricsService.getUserHealthMetrics())
+        .thenThrow(Exception('Failed to load health metrics'));
+      
+      // Act - Build widget
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SmartExerciseLogPage(
+            repository: mockRepository,
+            auth: mockAuth,
+            healthMetricsService: mockHealthMetricsService,
+          ),
+        ),
+      );
+      
+      // Let the error be caught and handled
+      await tester.pumpAndSettle();
+      
+      // Assert - Page should still function with default metrics
+      expect(find.text('Smart Exercise Log'), findsOneWidget);
+      expect(find.byType(WorkoutFormWidget), findsOneWidget);
+      
+      // Complete an analysis to verify it works with default metrics
+      await tester.enterText(find.byType(TextField), 'Running 30 minutes');
+      await tester.tap(find.text('Analyze Workout'));
+      await tester.pumpAndSettle();
+      
+      // Verify analysis still works with default metrics
+      verify(mockExerciseAnalysisService.analyze(
+        any,
+        userId: anyNamed('userId'),
+        userWeightKg: 70.0, // Default value
+        userHeightCm: 175.0, // Default value
+        userAge: 30, // Default value
+        userGender: anyNamed('userGender'),
+      )).called(1);
+    });
+
+    // Test full correction flow with successful response
+    testWidgets('applies correction successfully when correction dialog is submitted',
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockExerciseAnalysisService.analyze(
+        any,
+        userId: anyNamed('userId'),
+        userWeightKg: anyNamed('userWeightKg'),
+        userHeightCm: anyNamed('userHeightCm'),
+        userAge: anyNamed('userAge'),
+        userGender: anyNamed('userGender'),
+      )).thenAnswer((_) async => mockAnalysisResult);
+
+      // Create a corrected result for testing
+      final correctedResult = ExerciseAnalysisResult(
+        exerciseType: 'Running',
+        duration: '45 minutes', // Changed duration
+        intensity: 'High',
+        estimatedCalories: 450, // Updated calories
+        metValue: 8.0,
+        summary: 'You performed Running for 45 minutes at High intensity, burning approximately 450 calories.',
+        timestamp: DateTime.now(),
+        originalInput: 'Running 30 minutes high intensity',
+        userId: 'test-user-123',
+      );
+
+      // Setup mock for correction with delayed response
+      when(mockExerciseAnalysisService.correctAnalysis(
+        any,
+        any,
+        userWeightKg: anyNamed('userWeightKg'),
+        userHeightCm: anyNamed('userHeightCm'),
+        userAge: anyNamed('userAge'),
+        userGender: anyNamed('userGender'),
+      )).thenAnswer((_) async {
+        // Add delay to test loading state
+        await Future.delayed(const Duration(milliseconds: 100));
+        return correctedResult;
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SmartExerciseLogPage(
+            repository: mockRepository,
+            auth: mockAuth,
+            healthMetricsService: mockHealthMetricsService,
+          ),
+        ),
+      );
+
+      // Complete initial analysis
+      await tester.enterText(
+          find.byType(TextField), 'Running 30 minutes high intensity');
+      await tester.tap(find.text('Analyze Workout'));
+      await tester.pumpAndSettle();
+
+      // Open correction dialog
+      await tester.tap(find.text('Correct Analysis'));
+      await tester.pumpAndSettle();
+
+      // Enter correction
+      await tester.enterText(
+          find.byType(TextField).last, 'I actually ran for 45 minutes');
+
+      // Submit correction
+      await tester.tap(find.text('Submit Correction'));
+      await tester.pump(); // Start correction process
+      
+      // Verify loading indicator appears
+      expect(find.text('Correcting analysis...'), findsOneWidget);
+      
+      // Complete the correction
+      await tester.pumpAndSettle();
+
+      // Verify the updated values appear in the UI
+      expect(find.text('45 minutes'), findsOneWidget); // Exact duration text
+      expect(find.text('450 kcal'), findsOneWidget); // Exact calories text
+      
+      // Verify success message
+      expect(find.text('Analysis corrected successfully!'), findsOneWidget);
+    });
+
+    // Test user ID handling when user is not logged in
+    testWidgets('handles missing user ID gracefully when not logged in',
+        (WidgetTester tester) async {
+      // Arrange - Set up mock auth to return null for current user
+      when(mockAuth.currentUser).thenReturn(null);
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SmartExerciseLogPage(
+            repository: mockRepository,
+            auth: mockAuth,
+            healthMetricsService: mockHealthMetricsService,
+          ),
+        ),
+      );
+      
+      await tester.pumpAndSettle();
+      
+      // Act - Try to analyze exercise
+      await tester.enterText(find.byType(TextField), 'Running 30 minutes');
+      await tester.tap(find.text('Analyze Workout'));
+      await tester.pumpAndSettle();
+      
+      // Assert
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.textContaining('User not logged in'), findsOneWidget);
+    });
+
   });
+
+
 }
 
 // Helper class for monitoring navigation

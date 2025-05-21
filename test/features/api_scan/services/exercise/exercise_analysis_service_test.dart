@@ -173,8 +173,7 @@ void main() {
   });
 
   group('ExerciseAnalysisService correction functionality', () {
-    test('should successfully correct exercise analysis based on user comment',
-        () async {
+    test('should successfully correct exercise analysis based on user comment', () async {
       // Arrange
       final previousResult = ExerciseAnalysisResult(
         exerciseType: 'Running',
@@ -182,23 +181,27 @@ void main() {
         intensity: 'Medium',
         estimatedCalories: 350,
         metValue: 8.5,
-        summary:
-            'You performed Running for 30 minutes at Medium intensity, burning approximately 350 calories.',
+        summary: 'You performed Running for 30 minutes at Medium intensity, burning approximately 350 calories.',
         timestamp: DateTime.now(),
         originalInput: 'Running 5km in 30 minutes',
         userId: 'test_user_id',
       );
 
-      // Create the expected API format map
-      final expectedApiFormat = {
-        'exercise_type': 'Running',
-        'calories_burned': 350,
-        'duration': '30 minutes', // Keep as string
-        'intensity': 'medium',
-        'user_comment': 'Running 5km in 30 minutes',
-      };
-
       const userComment = 'I actually ran for 45 minutes, not 30';
+
+      // The actual request sent by the service - includes original_input
+      final expectedRequest = {
+        'previous_result': {
+          'exercise_type': 'Running',
+          'calories_burned': 350,
+          'duration': '30 minutes',
+          'intensity': 'medium',
+          'met_value': 8.5,
+          'original_input': 'Running 5km in 30 minutes'
+        },
+        'user_comment': userComment,
+        'original_input': 'Running 5km in 30 minutes'
+      };
 
       final correctionJsonResponse = {
         "exercise_type": "Running",
@@ -206,17 +209,13 @@ void main() {
         "duration": "45 minutes",
         "intensity": "Medium",
         "met_value": 8.5,
-        "correction_applied":
-            "Updated duration from 30 to 45 minutes and recalculated calories"
+        "correction_applied": "Updated duration from 30 to 45 minutes and recalculated calories"
       };
 
-      // Set up mock with exact parameters the method will use
+      // Set up mock with the EXACT parameters format the method will use
       when(mockApiService.postJsonRequest(
         '/exercise/correct',
-        {
-          'previous_result': expectedApiFormat,
-          'user_comment': userComment,
-        },
+        expectedRequest,
       )).thenAnswer((_) async => correctionJsonResponse);
 
       // Act
@@ -229,18 +228,13 @@ void main() {
       expect(result.intensity, equals('Medium'));
       expect(result.metValue, equals(8.5));
       expect(result.originalInput, equals('Running 5km in 30 minutes'));
-      expect(result.summary!.contains('You performed Running for 45 minutes'),
-          isTrue);
-      expect(result.summary!.contains('Updated duration from 30 to 45 minutes'),
-          isTrue);
+      expect(result.summary!.contains('You performed Running for 45 minutes'), isTrue);
+      expect(result.summary!.contains('Updated duration from 30 to 45 minutes'), isTrue);
 
-      // Verify the API call was made with correct parameters
+      // Verify the API call
       verify(mockApiService.postJsonRequest(
         '/exercise/correct',
-        {
-          'previous_result': expectedApiFormat,
-          'user_comment': userComment,
-        },
+        expectedRequest,
       )).called(1);
     });
 
@@ -434,4 +428,151 @@ void main() {
     expect(() => service.correctAnalysis(previousResult, mockComment),
         throwsA(isA<ApiServiceException>()));
   });
+
+  test('should convert intensity to lowercase when sending correction API request', () async {
+    // Arrange
+    final previousResult = ExerciseAnalysisResult(
+      exerciseType: 'Running',
+      duration: '30 minutes',
+      intensity: 'HIGH', // Uppercase intensity
+      estimatedCalories: 250,
+      metValue: 7.0,
+      originalInput: 'Running 30 minutes high intensity',
+      userId: 'test-user-123',
+      timestamp: DateTime.now(),
+    );
+    
+    const userComment = 'Please correct this';
+    
+    // Expected request with lowercase intensity
+    final expectedRequest = {
+      'previous_result': {
+        'exercise_type': 'Running',
+        'calories_burned': 250,
+        'duration': '30 minutes',
+        'intensity': 'high', // Should be lowercase
+        'met_value': 7.0,
+        'original_input': 'Running 30 minutes high intensity'
+      },
+      'user_comment': userComment,
+      'original_input': 'Running 30 minutes high intensity'
+    };
+    
+    // Setup mock response with ALL required fields
+    final mockResponse = {
+      'exercise_type': 'Running',
+      'duration': '30 minutes',
+      'intensity': 'High',
+      'calories_burned': 250,
+      'met_value': 7.0,
+      'correction_applied': 'No changes needed'
+    };
+    
+    when(mockApiService.postJsonRequest(
+      '/exercise/correct',
+      expectedRequest,
+    )).thenAnswer((_) async => mockResponse);
+    
+    // Act
+    await service.correctAnalysis(previousResult, userComment);
+    
+    // Assert - verify API was called with correct parameters (intensity lowercase)
+    verify(mockApiService.postJsonRequest(
+      '/exercise/correct',
+      expectedRequest,
+    )).called(1);
+  });
+
+  test('analyze should correctly pass health metrics to API call', () async {
+    // Arrange
+    const exerciseDescription = 'Running 5km';
+    const userWeight = 70.0;
+    const userHeight = 175.0;
+    const userAge = 30;
+    const userGender = 'male';
+    
+    // Define a valid JSON response
+    final validJsonResponse = {
+      "exercise_type": "Running",
+      "calories_burned": 350,
+      "duration": "30 minutes",
+      "intensity": "Medium",
+      "met_value": 8.5
+    };
+    
+    // Expected API request body
+    final expectedRequestBody = {
+      'description': exerciseDescription,
+      'user_weight_kg': userWeight,
+      'user_height_cm': userHeight,
+      'user_age': userAge,
+      'user_gender': userGender,
+    };
+    
+    // Set up mock
+    when(mockApiService.postJsonRequest(
+      '/exercise/analyze',
+      expectedRequestBody,
+    )).thenAnswer((_) async => validJsonResponse);
+    
+    // Act
+    await service.analyze(
+      exerciseDescription,
+      userId: 'test-user',
+      userWeightKg: userWeight,
+      userHeightCm: userHeight,
+      userAge: userAge,
+      userGender: userGender,
+    );
+    
+    // Assert - verify API was called with correct parameters
+    verify(mockApiService.postJsonRequest(
+      '/exercise/analyze',
+      expectedRequestBody,
+    )).called(1);
+  });
+
+  // Test handling various response formats in parseCorrectionResponse
+  test('parseCorrectionResponse should handle different format modifications', () {
+    // Arrange
+    final previousResult = ExerciseAnalysisResult(
+      exerciseType: 'Running',
+      duration: '30 minutes',
+      intensity: 'Medium',
+      estimatedCalories: 250,
+      metValue: 7.0,
+      summary: 'Original summary',
+      timestamp: DateTime.now(),
+      originalInput: 'Running 30 minutes',
+      userId: 'test-user',
+    );
+    
+    // Test all fields modified
+    final responseText = jsonEncode({
+      'exercise_type': 'Jogging',
+      'duration': '45 minutes',
+      'intensity': 'high',
+      'calories_burned': 350,
+      'met_value': 8.0,
+      'correction_applied': 'All fields updated'
+    });
+    
+    // Act
+    final result = service.parseCorrectionResponse(
+      responseText,
+      previousResult,
+      'Correction comment'
+    );
+    
+    // Assert
+    expect(result.exerciseType, 'Jogging');
+    expect(result.duration, '45 minutes');
+    expect(result.intensity, 'High'); // Should be capitalized
+    expect(result.estimatedCalories, 350);
+    expect(result.metValue, 8.0);
+    expect(result.summary, contains('You performed Jogging for 45 minutes at High intensity'));
+    expect(result.summary, contains('burning approximately 350 calories'));
+    expect(result.summary, contains('All fields updated'));
+  });
+
 }
