@@ -1118,8 +1118,8 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           _buildDivider(),
           _buildActionTile(
-            title: 'Edit Health Information',
-            subtitle: 'Edit your health information',
+            title: 'Edit Health and Information',
+            subtitle: 'Edit your health and pet information',
             icon: Icons.monitor_weight_outlined,
             onTap: () {
               // Navigate to height-weight page
