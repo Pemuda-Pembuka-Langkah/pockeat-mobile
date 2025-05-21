@@ -283,13 +283,25 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
         final dayOfWeek = weekDayLabels[i];
 
         // Check if the date is in the future (after today)
-        if (date.isAfter(today)) {
-          // For future days, keep the label but set weight to 0
-          // This will make the chart show a gap but keep the x-axis label
+        // OR before user creation (but not ON the creation date)
+        bool isAfterToday = date.isAfter(today);
+        bool isCreationDayOrAfter = date.isAtSameMomentAs(DateTime(
+                userCreationDate.year,
+                userCreationDate.month,
+                userCreationDate.day)) ||
+            date.isAfter(userCreationDate);
+
+        if (isAfterToday || !isCreationDayOrAfter) {
+          // For future days or days before account creation, keep the label but set weight to 0
           weekData.add(WeightData(dayOfWeek, 0));
-          debugPrint('Future day $dayOfWeek ($dateStr): Setting weight to 0');
+          if (isAfterToday) {
+            debugPrint('Future day $dayOfWeek ($dateStr): Setting weight to 0');
+          } else {
+            debugPrint(
+                'Pre-registration day $dayOfWeek ($dateStr): Setting weight to 0');
+          }
         } else {
-          // For past or current days, use the historical weight or current weight
+          // For valid days (including creation date and after, up to today)
           double weightValue = currentWeight; // Default to current weight
 
           // Get weight from historical data if available
@@ -298,8 +310,7 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
           }
 
           weekData.add(WeightData(dayOfWeek, weightValue));
-          debugPrint(
-              'Past/Current day $dayOfWeek ($dateStr): Weight $weightValue kg');
+          debugPrint('Valid day $dayOfWeek ($dateStr): Weight $weightValue kg');
         }
       }
 
@@ -356,22 +367,36 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
           // Iterate through each day in the week
           for (int day = 0; day < 7; day++) {
             final date = weekStartDate.add(Duration(days: day));
+            final dateStr = DateFormat('yyyy-MM-dd').format(date);
+
+            // Check conditions for each date
+            bool isAfterToday = date.isAfter(today);
+
+            // Compare using the beginning of the day for both dates
+            DateTime dateStartOfDay = DateTime(date.year, date.month, date.day);
+            DateTime creationStartOfDay = DateTime(userCreationDate.year,
+                userCreationDate.month, userCreationDate.day);
+            bool isBeforeCreation = dateStartOfDay.isBefore(creationStartOfDay);
 
             // Skip future days
-            if (date.isAfter(now)) {
+            if (isAfterToday) {
               continue;
             }
 
-            // Skip days before the user creation date
-            if (date.isBefore(userCreationDate)) {
+            // Skip days before user creation (but NOT the creation date itself)
+            if (isBeforeCreation) {
               continue;
             }
 
-            // Get the weight data for this day
-            final dateStr = DateFormat('yyyy-MM-dd').format(date);
+            // Explicitly check if this date has weight data
             if (historicalWeights.containsKey(dateStr)) {
-              totalWeight += historicalWeights[dateStr]!;
-              daysWithData++;
+              final weight = historicalWeights[dateStr]!;
+
+              // Only count non-zero weights
+              if (weight > 0) {
+                totalWeight += weight;
+                daysWithData++;
+              }
             }
           }
 
@@ -380,9 +405,12 @@ class _WeightProgressWidgetState extends State<WeightProgressWidget> {
               ? double.parse((totalWeight / daysWithData).toStringAsFixed(2))
               : 0.00; // For weeks with no data, use 0.00
 
-          debugPrint(
-              'Week $weekNum (${DateFormat('yyyy-MM-dd').format(weekStartDate)} to ${DateFormat('yyyy-MM-dd').format(weekEndDate)}): '
-              'Avg weight ${weekAverage.toStringAsFixed(2)}kg from $daysWithData days');
+          // Only print week number 1 with detailed information
+          if (weekNum == 1) {
+            debugPrint(
+                'Week 1 (${DateFormat('yyyy-MM-dd').format(weekStartDate)} to ${DateFormat('yyyy-MM-dd').format(weekEndDate)}): '
+                'Avg weight ${weekAverage.toStringAsFixed(2)}kg from $daysWithData day(s) with data');
+          }
         }
 
         // Add data point - use week number as label
