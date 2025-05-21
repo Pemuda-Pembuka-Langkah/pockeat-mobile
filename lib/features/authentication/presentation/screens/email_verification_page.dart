@@ -29,7 +29,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   bool _isEmailSent = false;
   String? _errorMessage;
   Timer? _verificationTimer;
-  final int _checkInterval = 3; // seconds
+  final int _checkInterval = 300; // seconds (5 minutes)
   int _countdown = 60;
   bool _canResendEmail = false;
   late LoginService _loginService;
@@ -229,6 +229,34 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                           style: TextStyle(
                             color: Colors.blue[700],
                             fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Message about waiting time
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber.shade200),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.timer, color: Colors.amber[700], size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Sorry for the inconvenience, this may take a while. The page refreshes automatically every 5 minutes.',
+                            style: TextStyle(
+                              color: Colors.amber[800],
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ],

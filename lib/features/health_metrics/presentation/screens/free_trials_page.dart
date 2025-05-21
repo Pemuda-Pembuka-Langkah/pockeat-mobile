@@ -112,37 +112,13 @@ class _FreeTrialPageState extends State<FreeTrialPage>
               opacity: _fadeAnimation,
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Back button on top left
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: IconButton(
-                          icon: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Icon(Icons.arrow_back,
-                                color: textDarkColor, size: 20),
-                          ),
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ),
-                      const SizedBox(height: 30),
                       // Main explanation card
                       Container(
-                        margin: const EdgeInsets.only(top: 40, bottom: 32),
+                        margin: const EdgeInsets.only(top: 10, bottom: 32),
                         padding: const EdgeInsets.symmetric(
                             vertical: 32, horizontal: 20),
                         decoration: BoxDecoration(

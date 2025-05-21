@@ -236,6 +236,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
   // Login form
   Widget _buildLoginForm() {
     return Form(
@@ -244,60 +245,6 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Subtle start over button in top-right
-          Align(
-            alignment: Alignment.centerRight,
-            child: GestureDetector(
-              onTap: () {
-                // Navigate to welcome page (start over)
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Text('Start Over?', 
-                      style: TextStyle(color: primaryPink, fontWeight: FontWeight.bold)),
-                    content: const Text('Do you want to go back to the welcome screen?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.pushReplacementNamed(context, '/welcome');
-                        },
-                        child: const Text('Yes'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.refresh, size: 14, color: Colors.grey.shade600),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Start Over',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-          const SizedBox(height: 10),
-          
           // Title
           Text(
             'Welcome Back',
@@ -517,40 +464,84 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 20),
               ],
-            ),          // Google Sign In Button
+            ), // Google Sign In Button
           const GoogleSignInButton(
             height: 55, // Sama dengan button sign in
           ),
-          
-          // Extra space and a very subtle "hidden" reset button at the bottom
-          const SizedBox(height: 50),
-          
-          Center(
-            child: GestureDetector(
-              onTap: () {
-                // Double tap check to prevent accidental navigation
-                final currentTime = DateTime.now();
-                if (_lastTapTime != null && 
-                    currentTime.difference(_lastTapTime!).inMilliseconds < 300) {
-                  Navigator.pushReplacementNamed(context, '/welcome');
-                }
-                _lastTapTime = currentTime;
-              },
-              child: Text(
-                '· · ·',
-                style: TextStyle(
-                  fontSize: 10,
-                  letterSpacing: 2,
-                  color: Colors.grey.shade300,
+
+          // Small space after Google button
+          const SizedBox(height: 16),
+
+          // Subtle "Start Over" button right under Google signin
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  // Double tap check to prevent accidental navigation
+                  final currentTime = DateTime.now();
+                  if (_lastTapTime != null &&
+                      currentTime.difference(_lastTapTime!).inMilliseconds <
+                          300) {
+                    // Show confirmation dialog
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                        title: Text('Start Over?',
+                            style: TextStyle(
+                                color: primaryPink,
+                                fontWeight: FontWeight.bold)),
+                        content: const Text('Return to the welcome screen?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              Navigator.pushReplacementNamed(
+                                  context, '/welcome');
+                            },
+                            child: const Text('Yes'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  _lastTapTime = currentTime;
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.refresh,
+                          size: 14, color: Colors.grey.shade500),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Start Over',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         ],
       ),
     );
   }
-  
+
   // Used for double-tap detection
   DateTime? _lastTapTime;
 }
