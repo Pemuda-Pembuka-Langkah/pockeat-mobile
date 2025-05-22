@@ -61,7 +61,6 @@ class WidgetInstallationControllerImpl implements WidgetInstallationController {
   void startPeriodicTimer() {
     _statusCheckTimer = Timer.periodic(
       const Duration(seconds: 300),
-
       (_) => refreshWidgetStatus(),
     );
   }

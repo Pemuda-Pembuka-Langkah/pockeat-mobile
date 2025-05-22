@@ -27,75 +27,54 @@ void main() {
       );
     }
 
-    testWidgets('renders all three period options', (WidgetTester tester) async {
+    testWidgets('renders all period options', (WidgetTester tester) async {
       await tester.pumpWidget(createWidget());
 
-      // Verify all three options are rendered
-      expect(find.text('1 Week'), findsOneWidget);
-      expect(find.text('1 Month'), findsOneWidget);
-      expect(find.text('All time'), findsOneWidget);
+      // Verify the two options that actually exist in the widget
+      expect(find.text('Daily'), findsOneWidget);
+      expect(find.text('Weekly'), findsOneWidget);
     });
 
     testWidgets('has correct default selection based on props', (WidgetTester tester) async {
       await tester.pumpWidget(createWidget(selectedPeriod: '1 Week'));
 
-      // Verify the PeriodTabWidgets have correct isSelected value
-      final weekTab = tester.widget<PeriodTabWidget>(
+      // Verify PeriodTabWidgets have correct isSelected values
+      final dailyTab = tester.widget<PeriodTabWidget>(
         find.ancestor(
-          of: find.text('1 Week'),
+          of: find.text('Daily'),
           matching: find.byType(PeriodTabWidget),
         ),
       );
-      expect(weekTab.isSelected, true);
+      expect(dailyTab.isSelected, true);
 
-      final monthTab = tester.widget<PeriodTabWidget>(
+      final weeklyTab = tester.widget<PeriodTabWidget>(
         find.ancestor(
-          of: find.text('1 Month'),
+          of: find.text('Weekly'),
           matching: find.byType(PeriodTabWidget),
         ),
       );
-      expect(monthTab.isSelected, false);
-
-      final allTimeTab = tester.widget<PeriodTabWidget>(
-        find.ancestor(
-          of: find.text('All time'),
-          matching: find.byType(PeriodTabWidget),
-        ),
-      );
-      expect(allTimeTab.isSelected, false);
+      expect(weeklyTab.isSelected, false);
     });
 
     testWidgets('has correct selection when changed via props', (WidgetTester tester) async {
       await tester.pumpWidget(createWidget(selectedPeriod: '1 Month'));
 
-      // Verify the PeriodTabWidgets have correct isSelected value
-      final weekTab = tester.widget<PeriodTabWidget>(
+      // Verify PeriodTabWidgets have correct isSelected values
+      final dailyTab = tester.widget<PeriodTabWidget>(
         find.ancestor(
-          of: find.text('1 Week'),
+          of: find.text('Daily'),
           matching: find.byType(PeriodTabWidget),
         ),
       );
-      expect(weekTab.isSelected, false);
+      expect(dailyTab.isSelected, false);
 
-      final monthTab = tester.widget<PeriodTabWidget>(
+      final weeklyTab = tester.widget<PeriodTabWidget>(
         find.ancestor(
-          of: find.text('1 Month'),
+          of: find.text('Weekly'),
           matching: find.byType(PeriodTabWidget),
         ),
       );
-      expect(monthTab.isSelected, true);
-
-      // Check 'All time' tab with different selection
-      await tester.pumpWidget(createWidget(selectedPeriod: 'All time'));
-      await tester.pumpAndSettle();
-
-      final allTimeTab = tester.widget<PeriodTabWidget>(
-        find.ancestor(
-          of: find.text('All time'),
-          matching: find.byType(PeriodTabWidget),
-        ),
-      );
-      expect(allTimeTab.isSelected, true);
+      expect(weeklyTab.isSelected, true);
     });
 
     testWidgets('calls onPeriodSelected when tapping a tab', (WidgetTester tester) async {
@@ -108,22 +87,15 @@ void main() {
         },
       ));
 
-      // Tap the '1 Month' tab
-      await tester.tap(find.text('1 Month'));
+      // Tap the Weekly tab
+      await tester.tap(find.text('Weekly'));
       await tester.pump();
       
       // Verify callback was called and value was updated
       expect(selectedPeriod, '1 Month');
 
-      // Tap the 'All time' tab
-      await tester.tap(find.text('All time'));
-      await tester.pump();
-      
-      // Verify callback was called and value was updated again
-      expect(selectedPeriod, 'All time');
-
-      // Tap the '1 Week' tab to go back to initial state
-      await tester.tap(find.text('1 Week'));
+      // Tap the Daily tab to return to initial state
+      await tester.tap(find.text('Daily'));
       await tester.pump();
       
       // Verify callback was called and value was updated again
@@ -138,23 +110,23 @@ void main() {
         primaryColor: testColor,
       ));
 
-      // Verify the selected tab has correct color
-      final weekTab = tester.widget<PeriodTabWidget>(
+      // Verify the selected tab has the correct color
+      final dailyTab = tester.widget<PeriodTabWidget>(
         find.ancestor(
-          of: find.text('1 Week'),
+          of: find.text('Daily'),
           matching: find.byType(PeriodTabWidget),
         ),
       );
-      expect(weekTab.selectedColor, testColor);
+      expect(dailyTab.selectedColor, testColor);
       
-      // Verify another tab also has the same selected color configured
-      final monthTab = tester.widget<PeriodTabWidget>(
+      // Verify other tab also has the same color
+      final weeklyTab = tester.widget<PeriodTabWidget>(
         find.ancestor(
-          of: find.text('1 Month'),
+          of: find.text('Weekly'),
           matching: find.byType(PeriodTabWidget),
         ),
       );
-      expect(monthTab.selectedColor, testColor);
+      expect(weeklyTab.selectedColor, testColor);
     });
     
     testWidgets('container has correct decoration properties', (WidgetTester tester) async {
@@ -182,7 +154,7 @@ void main() {
       
       // Verify all PeriodTabWidgets are direct children of Row
       final row = tester.widget<Row>(find.byType(Row));
-      expect(row.children.length, 3);
+      expect(row.children.length, 2);
       expect(row.children.every((child) => child is PeriodTabWidget), true);
     });
   });

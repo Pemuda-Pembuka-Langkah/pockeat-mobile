@@ -1,5 +1,10 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:fl_chart/fl_chart.dart';
+
+// Project imports:
 import '../widgets/onboarding_progress_indicator.dart';
 
 class HealthValuePropositionPage extends StatefulWidget {
@@ -17,10 +22,10 @@ class _HealthValuePropositionPageState extends State<HealthValuePropositionPage>
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color bgColor = const Color(0xFFF9F9F9);
   final Color textDarkColor = Colors.black87;
-  
+
   late AnimationController _animationController;
   late Animation<double> _animation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -29,23 +34,23 @@ class _HealthValuePropositionPageState extends State<HealthValuePropositionPage>
       vsync: this,
       duration: const Duration(seconds: 2),
     );
-    
+
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeInOut,
       ),
     );
-    
+
     _animationController.forward();
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-  
+
   // Chart legend item
   Widget _buildChartLegendItem(String label, Color color) {
     return Row(
@@ -69,7 +74,7 @@ class _HealthValuePropositionPageState extends State<HealthValuePropositionPage>
       ],
     );
   }
-  
+
   // Build weight comparison chart
   Widget _buildWeightComparisonChart(double animationValue) {
     return Padding(
@@ -99,7 +104,7 @@ class _HealthValuePropositionPageState extends State<HealthValuePropositionPage>
                   } else if (value == 5) {
                     text = 'Month 6';
                   }
-  
+
                   return Padding(
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
@@ -192,8 +197,25 @@ class _HealthValuePropositionPageState extends State<HealthValuePropositionPage>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        automaticallyImplyLeading: false, // Removes the back button
-        toolbarHeight: 0, // Minimizes the AppBar height
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child: Icon(Icons.arrow_back, color: textDarkColor, size: 20),
+          ),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       backgroundColor: bgColor,
       body: SafeArea(
@@ -215,7 +237,7 @@ class _HealthValuePropositionPageState extends State<HealthValuePropositionPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-                
+
                 // Onboarding progress indicator
                 const OnboardingProgressIndicator(
                   totalSteps: 16,
@@ -223,173 +245,181 @@ class _HealthValuePropositionPageState extends State<HealthValuePropositionPage>
                   barHeight: 6.0,
                   showPercentage: true,
                 ),
-                
+
                 const SizedBox(height: 20),
-                
-                Expanded(child: SingleChildScrollView(
-                  child: Column(children: [
-                    // Title - plain text without gradient
-                Text(
-                  'PockEat Creates',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: textDarkColor,
-                  ),
-                ),
-                
-                const SizedBox(height: 4),
-                
-                Text(
-                  'Long Term Results',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: textDarkColor,
-                  ),
-                ),
-                
-                const SizedBox(height: 40),
-            
-                // Weight section with animated container
-                AnimatedBuilder(
-                  animation: _animation,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 20 * (1 - _animation.value)),
-                      child: Opacity(
-                        opacity: _animation.value,
-                        child: child,
+
+                Expanded(
+                    child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      // Title - plain text without gradient
+                      Text(
+                        'PockEat Creates',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: textDarkColor,
+                        ),
                       ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+
+                      const SizedBox(height: 4),
+
+                      Text(
+                        'Long Term Results',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: textDarkColor,
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Your Weight Transformation',
-                          style: TextStyle(
-                            color: textDarkColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        // Chart
-                        SizedBox(
-                          height: 180,
-                          child: AnimatedBuilder(
-                            animation: _animation,
-                            builder: (context, child) {
-                              return _buildWeightComparisonChart(_animation.value);
-                            },
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 16),
-                        
-                        // Chart labels
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildChartLegendItem('Traditional diet', primaryPink),
-                            const SizedBox(width: 24),
-                            _buildChartLegendItem('With PockEat', primaryGreen),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // Statistic with more creative wording
-                AnimatedBuilder(
-                  animation: _animation,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 20 * (1 - _animation.value)),
-                      child: Opacity(
-                        opacity: _animation.value,
-                        child: child,
                       ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
+
+                      const SizedBox(height: 40),
+
+                      // Weight section with animated container
+                      AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - _animation.value)),
+                            child: Opacity(
+                              opacity: _animation.value,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: primaryGreen.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              '80%',
-                              style: TextStyle(
-                                color: primaryGreen,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
                               ),
-                            ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Your Weight Transformation',
+                                style: TextStyle(
+                                  color: textDarkColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Chart
+                              SizedBox(
+                                height: 180,
+                                child: AnimatedBuilder(
+                                  animation: _animation,
+                                  builder: (context, child) {
+                                    return _buildWeightComparisonChart(
+                                        _animation.value);
+                                  },
+                                ),
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Chart labels
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildChartLegendItem(
+                                      'Traditional diet', primaryPink),
+                                  const SizedBox(width: 24),
+                                  _buildChartLegendItem(
+                                      'With PockEat', primaryGreen),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            'of PockEat users maintain their results, even 6 months later. Say goodbye to yo-yo dieting!',
-                            style: TextStyle(
-                              color: textDarkColor,
-                              fontSize: 14,
-                              height: 1.4,
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Statistic with more creative wording
+                      AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - _animation.value)),
+                            child: Opacity(
+                              opacity: _animation.value,
+                              child: child,
                             ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: primaryGreen.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    '80%',
+                                    style: TextStyle(
+                                      color: primaryGreen,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  'of PockEat users maintain their results, even 6 months later. Say goodbye to yo-yo dieting!',
+                                  style: TextStyle(
+                                    color: textDarkColor,
+                                    fontSize: 14,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ),
-                  ],),
                 )),
 
-                const SizedBox(height: 12,),
-                
+                const SizedBox(
+                  height: 12,
+                ),
+
                 // Continue button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/height-weight');
+                      Navigator.pushNamed(context, '/height-weight');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryGreen,
@@ -410,7 +440,7 @@ class _HealthValuePropositionPageState extends State<HealthValuePropositionPage>
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
               ],
             ),

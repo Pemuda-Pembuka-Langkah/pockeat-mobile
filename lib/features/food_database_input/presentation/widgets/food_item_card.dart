@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 // Project imports:
 import 'package:pockeat/features/api_scan/models/food_analysis.dart';
 
-class FoodItemCard extends StatelessWidget {
+class FoodItemCard extends StatefulWidget {
   final FoodAnalysisResult food;
   final int index;
   final double portion;
@@ -27,6 +27,48 @@ class FoodItemCard extends StatelessWidget {
   });
 
   @override
+  State<FoodItemCard> createState() => _FoodItemCardState();
+}
+
+class _FoodItemCardState extends State<FoodItemCard> {
+  // Controller for the portion input
+  late TextEditingController _portionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _portionController =
+        TextEditingController(text: widget.portion.toStringAsFixed(0));
+  }
+
+  @override
+  void didUpdateWidget(FoodItemCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.portion != widget.portion) {
+      _portionController.text = widget.portion.toStringAsFixed(0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _portionController.dispose();
+    super.dispose();
+  }
+
+  // Helper method to update the portion value
+  void _updatePortionValue() {
+    if (_portionController.text.isNotEmpty) {
+      int? intValue = int.tryParse(_portionController.text);
+      if (intValue != null && intValue >= 1 && intValue <= 1000) {
+        widget.onPortionChanged(widget.index, intValue.toDouble());
+      } else {
+        // Reset to valid value if entered value is invalid
+        _portionController.text = widget.portion.toStringAsFixed(0);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
@@ -42,11 +84,11 @@ class FoodItemCard extends StatelessWidget {
             // Food header with name and delete button
             Row(
               children: [
-                Icon(Icons.restaurant, size: 16, color: primaryGreen),
+                Icon(Icons.restaurant, size: 16, color: widget.primaryGreen),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    food.foodName,
+                    widget.food.foodName,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -56,8 +98,8 @@ class FoodItemCard extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.delete_outline, color: primaryPink),
-                  onPressed: () => onRemove(index),
+                  icon: Icon(Icons.delete_outline, color: widget.primaryPink),
+                  onPressed: () => widget.onRemove(widget.index),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   iconSize: 20,
@@ -77,7 +119,7 @@ class FoodItemCard extends StatelessWidget {
                     children: [
                       TextSpan(
                         text:
-                            '${food.nutritionInfo.calories.toStringAsFixed(0)} ',
+                            '${widget.food.nutritionInfo.calories.toStringAsFixed(0)} ',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
@@ -94,9 +136,9 @@ class FoodItemCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'P: ${food.nutritionInfo.protein.toStringAsFixed(1)}g • '
-                  'C: ${food.nutritionInfo.carbs.toStringAsFixed(1)}g • '
-                  'F: ${food.nutritionInfo.fat.toStringAsFixed(1)}g',
+                  'P: ${widget.food.nutritionInfo.protein.toStringAsFixed(1)}g • '
+                  'C: ${widget.food.nutritionInfo.carbs.toStringAsFixed(1)}g • '
+                  'F: ${widget.food.nutritionInfo.fat.toStringAsFixed(1)}g',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[700],
@@ -105,138 +147,144 @@ class FoodItemCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
-
-            // Portion row with count input
+            const SizedBox(height: 16), // Portion and count inputs in a row
             Row(
               children: [
-                Text(
-                  'Portion:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
+                // Count input
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Count:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        height: 40,
+                        child: TextFormField(
+                          controller: widget.countController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 8,
+                            ),
+                            isDense: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide:
+                                  BorderSide(color: widget.primaryGreen),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                  color: widget.primaryGreen, width: 2),
+                            ),
+                            counter: const SizedBox.shrink(),
+                          ),
+                          maxLength: 2,
+                          // No real-time updates - only update when editing is complete
+                          onEditingComplete: () {
+                            FocusScope.of(context).unfocus();
+                            // Calculation will happen when the focus is lost
+                          },
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 6),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: primaryGreen.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '${portion.toStringAsFixed(1)}g',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: primaryGreen,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  'Count:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                const SizedBox(width: 6),
-                SizedBox(
-                  width: 50,
-                  height: 32,
-                  child: TextFormField(
-                    controller: countController,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 6,
-                        horizontal: 8,
+
+                const SizedBox(width: 16),
+
+                // Portion input
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Portion (grams):',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
                       ),
-                      isDense: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide(color: primaryGreen),
+                      const SizedBox(height: 6),
+                      SizedBox(
+                        height: 40,
+                        child: TextFormField(
+                          controller: _portionController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 8,
+                            ),
+                            isDense: true,
+                            suffixText: 'g',
+                            suffixStyle: TextStyle(
+                              color: widget.primaryGreen,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide:
+                                  BorderSide(color: widget.primaryGreen),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                  color: widget.primaryGreen, width: 2),
+                            ),
+                            counter: const SizedBox.shrink(),
+                          ),
+                          maxLength: 4,
+                          // Update only when user is done editing
+                          onEditingComplete: () {
+                            FocusScope.of(context).unfocus();
+                            _updatePortionValue();
+                          },
+                          onFieldSubmitted: (_) {
+                            _updatePortionValue();
+                          },
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide(color: primaryGreen, width: 2),
-                      ),
-                      counter: const SizedBox.shrink(),
-                    ),
-                    maxLength: 2,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    ],
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 8),
-
-            // Portion slider
-            SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                activeTrackColor: primaryGreen,
-                inactiveTrackColor: primaryGreen.withOpacity(0.2),
-                thumbColor: primaryGreen,
-                overlayColor: primaryGreen.withOpacity(0.3),
-                trackHeight: 4.0,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-              ),
-              child: Slider(
-                min: 10,
-                max: 500,
-                divisions: 49,
-                value: portion,
-                onChanged: (value) => onPortionChanged(index, value),
+            // Helper text
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                'Enter portion size (1-1000 grams)',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
 
-            // Portion size indicators
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '10g',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                  ),
-                ),
-                Text(
-                  '100g',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                    fontWeight: portion <= 150 && portion >= 50
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                ),
-                Text(
-                  '250g',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                    fontWeight: portion <= 300 && portion >= 200
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                ),
-                Text(
-                  '500g',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[500],
-                  ),
-                ),
-              ],
-            ),
+            const SizedBox(height: 4),
           ],
         ),
       ),

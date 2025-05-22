@@ -131,23 +131,22 @@ class _NutritionPageState extends State<NutritionPage> {
     //print('Calories: ${correctedResult.nutritionInfo.calories}');
     //print('Health Score: ${correctedResult.healthScore}');
     //print('Vitamins: ${correctedResult.nutritionInfo.vitaminsAndMinerals}');
-    //print('========================================');
 
-    // Calculate health score if not provided by API response
+    //print('========================================');    // Use the health score from the API response
     double calculatedHealthScore = correctedResult.healthScore;
     String healthCategory = "Fair"; // Default medium category
-
-    // Use healthScore to determine category if available
+    // Use healthScore to determine category
     if (calculatedHealthScore >= 8) {
       healthCategory = "Excellent";
-    } else if (calculatedHealthScore >= 6)
+    } else if (calculatedHealthScore >= 6) {
       healthCategory = "Good";
-    else if (calculatedHealthScore >= 4)
+    } else if (calculatedHealthScore >= 4) {
       healthCategory = "Fair";
-    else if (calculatedHealthScore >= 2)
+    } else if (calculatedHealthScore >= 2) {
       healthCategory = "Poor";
-    else
+    } else {
       healthCategory = "Very Poor";
+    }
 
     // Ensure state update is synchronous and complete
     setState(() {
@@ -202,39 +201,68 @@ class _NutritionPageState extends State<NutritionPage> {
     }
 
     if (_hasError) {
-      return Scaffold(
-        body: FoodAnalysisError(
-          errorMessage: _errorMessage,
-          primaryPink: primaryPink,
-          primaryYellow: primaryYellow,
-          onRetry: _retryPhotoCapture,
-          onBack: () => Navigator.pop(context),
+      return WillPopScope(
+        onWillPop: () async {
+          // Handle back button press by navigating to food input page
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/add-food',
+            (route) => route.isFirst,
+          );
+          return false; // Prevent default back button behavior
+        },
+        child: Scaffold(
+          body: FoodAnalysisError(
+            errorMessage: _errorMessage,
+            primaryPink: primaryPink,
+            primaryYellow: primaryYellow,
+            onRetry: _retryPhotoCapture,
+            onBack: () {
+              // Navigate back to food input page instead of the previous screen
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/add-food',
+                (route) => route.isFirst,
+              );
+            },
+          ),
         ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: _buildAnalysisResultContent(),
-      bottomSheet: BottomActionBar(
-        isLoading: _isLoading || _isCorrectingAnalysis,
-        food: food,
-        foodScanPhotoService: widget.foodScanPhotoService,
-        primaryYellow: primaryYellow,
-        primaryPink: primaryPink,
-        primaryGreen: primaryGreen,
-        isLabelScan: widget.isLabelScan,
-        servingSize: widget.servingSize,
-        onAnalysisCorrected: (correctedResult) {
-          setState(() {
-            _isCorrectingAnalysis = true;
-          });
+    return WillPopScope(
+      onWillPop: () async {
+        // Handle back button press by navigating to food input page
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/add-food',
+          (route) => route.isFirst,
+        );
+        return false; // Prevent default back button behavior
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: _buildAnalysisResultContent(),
+        bottomSheet: BottomActionBar(
+          isLoading: _isLoading || _isCorrectingAnalysis,
+          food: food,
+          foodScanPhotoService: widget.foodScanPhotoService,
+          primaryYellow: primaryYellow,
+          primaryPink: primaryPink,
+          primaryGreen: primaryGreen,
+          isLabelScan: widget.isLabelScan,
+          servingSize: widget.servingSize,
+          onAnalysisCorrected: (correctedResult) {
+            setState(() {
+              _isCorrectingAnalysis = true;
+            });
 
-          // Process the correction asynchronously and update UI when done
-          Future.delayed(Duration.zero, () {
-            _handleAnalysisCorrected(correctedResult);
-          });
-        },
+            // Process the correction asynchronously and update UI when done
+            Future.delayed(Duration.zero, () {
+              _handleAnalysisCorrected(correctedResult);
+            });
+          },
+        ),
       ),
     );
   }

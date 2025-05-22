@@ -13,7 +13,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:instabug_flutter/instabug_flutter.dart';
-import 'package:pockeat/features/health_metrics/presentation/screens/health_value_proposition_page.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -27,7 +26,6 @@ import 'package:pockeat/core/screens/streak_celebration_page.dart';
 import 'package:pockeat/core/service/background_service_manager.dart';
 import 'package:pockeat/core/service/permission_service.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
-import 'package:pockeat/features/api_scan/presentation/pages/ai_analysis_page.dart';
 import 'package:pockeat/features/authentication/domain/model/deep_link_result.dart';
 import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/presentation/screens/account_activated_page.dart';
@@ -35,6 +33,7 @@ import 'package:pockeat/features/authentication/presentation/screens/change_pass
 import 'package:pockeat/features/authentication/presentation/screens/change_password_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/edit_profile_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/email_verification_failed_page.dart';
+import 'package:pockeat/features/authentication/presentation/screens/email_verification_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/login_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/profile_page.dart';
 import 'package:pockeat/features/authentication/presentation/screens/register_page.dart';
@@ -60,21 +59,30 @@ import 'package:pockeat/features/food_scan_ai/presentation/screens/food_input_pa
 import 'package:pockeat/features/food_scan_ai/presentation/screens/food_scan_page.dart';
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/food_text_input/presentation/screens/food_text_input_page.dart';
+import 'package:pockeat/features/free_limit/presentation/screens/free_trial_status_screen.dart';
+import 'package:pockeat/features/free_limit/presentation/screens/trial_ended_screen.dart';
 import 'package:pockeat/features/health_metrics/domain/repositories/health_metrics_repository.dart';
+import 'package:pockeat/features/health_metrics/domain/service/health_metrics_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/activity_level_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/add_calories_back_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/birthdate_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/calorie_calculation_loading_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/desired_weight_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/diet_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/free_trials_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/gender_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/goal_obstacle_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/health_metrics_goals_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/health_value_proposition_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/heard_about_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/height_weight_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/pet_onboard_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/review_submit_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/rollover_calories_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/speed_selection_page.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/still_not_completed_onboarding.dart';
+import 'package:pockeat/features/health_metrics/presentation/screens/sync_fitness_tracker_option_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/thank_you_page.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/used_other_apps_page.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
@@ -485,10 +493,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final smartExerciseLogRepository =
         Provider.of<SmartExerciseLogRepository>(context);
 
+    // Get navigation provider for route observer
+    final navigationProvider =
+        Provider.of<NavigationProvider>(context, listen: false);
+
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
       title: 'Pockeat',
+      // Add observer to track route changes and update bottom navigation
+      navigatorObservers: [
+        NavigationObserver(navigationProvider),
+      ],
       theme: ThemeData(
+        fontFamily: 'PlusJakartaSans',
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
           brightness: Brightness.light,
@@ -500,6 +518,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           elevation: 0,
           iconTheme: IconThemeData(color: Colors.black),
           titleTextStyle: TextStyle(
+            fontFamily: 'PlusJakartaSans',
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -528,6 +547,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/welcome': (context) => const WelcomePage(),
         '/register': (context) => const RegisterPage(),
         '/login': (context) => const LoginPage(),
+        '/email-verification': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
+          return EmailVerificationPage(
+            email: args?['email'] as String? ?? '',
+          );
+        },
         '/streak-celebration': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
               as Map<String, dynamic>?;
@@ -570,6 +596,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           );
         },
         // Di main.dart pada bagian routes:
+        '/not-completed-onboarding': (context) =>
+            const StillNotCompletedOnboardingPage(),
         '/onboarding': (context) => const HealthValuePropositionPage(),
         '/onboarding/goal': (context) {
           return BlocProvider.value(
@@ -590,13 +618,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/rollover-calories': (context) => const RolloverCaloriesPage(),
         '/thank-you': (context) => const ThankYouPage(),
         '/used-other-apps': (context) => const UsedOtherAppsPage(),
+        '/sync-fitness-tracker': (context) =>
+            const SyncFitnessTrackerOptionPage(),
+        '/pet-onboard': (context) => const PetOnboardPage(),
         '/review': (context) => BlocProvider.value(
               value: context.read<HealthMetricsFormCubit>(),
               child: const ReviewSubmitPage(),
             ),
+        '/free-trial': (context) => const FreeTrialPage(),
+        '/free-trial-status': (context) =>
+            const AuthWrapper(child: FreeTrialStatusScreen()),
+        '/trial-ended': (context) => const TrialEndedScreen(),
+        '/calorie-loading': (context) => const CalorieCalculationLoadingPage(),
         '/smart-exercise-log': (context) => AuthWrapper(
-            child:
-                SmartExerciseLogPage(repository: smartExerciseLogRepository)),
+                child: SmartExerciseLogPage(
+              repository: smartExerciseLogRepository,
+              healthMetricsService: getIt<HealthMetricsService>(),
+            )),
         '/scan': (context) => FutureBuilder<List<CameraDescription>>(
               future: availableCameras(),
               builder: (context, snapshot) {
@@ -635,8 +673,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         '/add-food': (context) => const AuthWrapper(child: FoodInputPage()),
         '/food-text-input': (context) =>
             const AuthWrapper(child: FoodTextInputPage()),
-        '/food-analysis': (context) =>
-            const AuthWrapper(child: AIAnalysisScreen()),
         '/add-exercise': (context) =>
             const AuthWrapper(child: ExerciseInputPage()),
         '/weightlifting-input': (context) =>

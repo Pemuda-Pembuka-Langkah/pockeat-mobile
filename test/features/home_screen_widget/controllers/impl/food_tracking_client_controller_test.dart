@@ -47,6 +47,9 @@ void main() {
       userId: testUserId,
       bmr: (tdee * 0.7).toDouble(), // Contoh nilai bmr
       tdee: tdee.toDouble(),
+      proteinGrams: 150.0,
+      carbsGrams: 200.0,
+      fatGrams: 66.7,
       timestamp: DateTime.now(),
     );
   }
@@ -283,6 +286,9 @@ void main() {
             bmr: 1260.0, // 70% of 1800
             tdee: 1800.0,
             timestamp: DateTime.now(),
+            proteinGrams: 150.0,
+            carbsGrams: 200.0,
+            fatGrams: 66.7,
           ));
           
       // Act - first update with original user
@@ -483,6 +489,9 @@ void main() {
             bmr: 1260.0,
             tdee: 1800.0,
             timestamp: DateTime.now(),
+            proteinGrams: 150.0,
+            carbsGrams: 200.0,
+            fatGrams: 66.7,
           ));
       
       // Gunakan completer untuk menunggu processUserStatusChange selesai

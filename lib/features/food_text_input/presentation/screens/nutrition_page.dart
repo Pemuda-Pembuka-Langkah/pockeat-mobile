@@ -41,7 +41,6 @@ class _NutritionPageState extends State<NutritionPage> {
   List<String> _warnings = [];
   List<Ingredient> _ingredients = [];
   late FoodAnalysisResult? food;
-
   // Theme colors
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryPink = const Color(0xFFFF6B6B);
@@ -104,49 +103,84 @@ class _NutritionPageState extends State<NutritionPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
-        body: FoodAnalysisLoading(
-          primaryYellow: primaryYellow,
-          primaryPink: primaryPink,
-          message: 'Analyzing Food',
+      return WillPopScope(
+        onWillPop: () async {
+          // Handle back button press by navigating to food input page
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/add-food',
+            (route) => route.isFirst,
+          );
+          return false; // Prevent default back button behavior
+        },
+        child: Scaffold(
+          body: FoodAnalysisLoading(
+            primaryYellow: Colors.grey[100]!,
+            primaryPink: primaryPink,
+            message: 'Analyzing Food',
+          ),
         ),
       );
     }
-
     if (_hasError) {
-      return Scaffold(
-        body: FoodTextInputAnalysisError(
-          primaryPink: primaryPink,
-          primaryYellow: primaryYellow,
-          onRetry: _analyzeFoodText,
-          onBack: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
-          },
+      return WillPopScope(
+        onWillPop: () async {
+          // Handle back button press by navigating to food input page
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/add-food',
+            (route) => route.isFirst,
+          );
+          return false; // Prevent default back button behavior
+        },
+        child: Scaffold(
+          body: FoodTextInputAnalysisError(
+            primaryPink: primaryPink,
+            primaryYellow: Colors.grey[100]!,
+            onRetry: _analyzeFoodText,
+            onBack: () {
+              // Navigate to food input page instead of popping twice
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/add-food',
+                (route) => route.isFirst,
+              );
+            },
+          ),
         ),
       );
     }
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: _buildAnalysisResultContent(),
-      bottomSheet: TextBottomActionBar(
-          isLoading: _isLoading || _isSaving,
-          food: food,
-          foodTextInputService: widget.foodTextInputService,
-          primaryYellow: primaryYellow,
-          primaryPink: primaryPink,
-          primaryGreen: primaryGreen,
-          onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
-            setState(() {
-              _updateFoodData(correctedResult, isCorrection: true);
-            });
-          },
-          onSavingStateChange: (bool saving) {
-            setState(() {
-              _isSaving = saving;
-            });
-          }),
+    return WillPopScope(
+      onWillPop: () async {
+        // Handle back button press by navigating to food input page
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/add-food',
+          (route) => route.isFirst,
+        );
+        return false; // Prevent default back button behavior
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: _buildAnalysisResultContent(),
+        bottomSheet: TextBottomActionBar(
+            isLoading: _isLoading || _isSaving,
+            food: food,
+            foodTextInputService: widget.foodTextInputService,
+            primaryYellow: Colors.grey[100]!,
+            primaryPink: primaryPink,
+            primaryGreen: primaryGreen,
+            onAnalysisCorrected: (FoodAnalysisResult correctedResult) {
+              setState(() {
+                _updateFoodData(correctedResult, isCorrection: true);
+              });
+            },
+            onSavingStateChange: (bool saving) {
+              setState(() {
+                _isSaving = saving;
+              });
+            }),
+      ),
     );
   }
 
@@ -163,23 +197,34 @@ class _NutritionPageState extends State<NutritionPage> {
       child: CustomScrollView(
         slivers: [
           SliverAppBar(
-            backgroundColor: primaryYellow,
+            backgroundColor: Colors.white,
             title: const Text(
               'Nutrition Analysis',
               style: TextStyle(
                 color: Colors.black87,
-                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
               ),
+            ),
+            leading: IconButton(
+              icon:
+                  const Icon(Icons.arrow_back, color: Colors.black87, size: 24),
+              onPressed: () {
+                // Navigate to food input page instead of just popping
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/add-food', (route) => route.isFirst);
+              },
             ),
             floating: true,
             pinned: true,
-            elevation: _isScrolledToTop ? 0 : 4,
+            elevation: _isScrolledToTop ? 0 : 2,
+            shadowColor: Colors.black26,
           ),
           SliverToBoxAdapter(
             child: ClipRRect(
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
               ),
               child: Container(
                 color: Colors.white,
@@ -197,7 +242,7 @@ class _NutritionPageState extends State<NutritionPage> {
                     CalorieSummaryCard(
                       isLoading: _isLoading,
                       calories: _calories,
-                      primaryYellow: primaryYellow,
+                      primaryYellow: Colors.grey[100]!,
                       primaryPink: primaryPink,
                     ),
                     // Add Health Score Section
@@ -218,7 +263,7 @@ class _NutritionPageState extends State<NutritionPage> {
                       isLoading: _isLoading,
                       nutritionData: _nutritionData,
                       calories: _calories,
-                      primaryYellow: primaryYellow,
+                      primaryYellow: Colors.grey[100]!,
                     ),
                     IngredientsSection(
                       ingredients: _ingredients,
@@ -236,9 +281,9 @@ class _NutritionPageState extends State<NutritionPage> {
                       primaryGreen: primaryGreen,
                       warningYellow: warningYellow,
                     ),
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 80),
                     const Padding(
-                      padding: EdgeInsets.only(bottom: 50),
+                      padding: EdgeInsets.only(bottom: 80),
                       child: SizedBox(),
                     ),
                   ],

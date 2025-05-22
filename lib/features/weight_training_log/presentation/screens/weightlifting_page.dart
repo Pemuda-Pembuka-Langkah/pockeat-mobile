@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
 
 // Project imports:
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/weight_training_log/domain/models/weight_lifting.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository.dart';
 import 'package:pockeat/features/weight_training_log/domain/repositories/weight_lifting_repository_impl.dart';
@@ -27,8 +29,10 @@ class WeightliftingPage extends StatefulWidget {
 }
 
 class _WeightliftingPageState extends State<WeightliftingPage> {
+  // Theme colors - matching homepage style
   final Color primaryYellow = const Color(0xFFFFE893);
   final Color primaryGreen = const Color(0xFF4ECDC4);
+  final Color primaryPink = const Color(0xFFFF6B6B);
 
   // Repository instance
   late final WeightLiftingRepository _exerciseRepository;
@@ -161,6 +165,10 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
       // Wait for all exercises to be saved
       await Future.wait(saveFutures);
 
+      final widgetController = GetIt.instance<FoodTrackingClientController>();
+      await widgetController.forceUpdate();
+      debugPrint('Home screen widgets updated with new exercise data');
+
       // Show success message
       if (mounted) {
         // Show success SnackBar
@@ -267,7 +275,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: const Key('weightliftingPage'),
-      backgroundColor: primaryYellow,
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(),
       body: _buildBody(),
       bottomNavigationBar:
@@ -280,13 +288,17 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
   AppBar _buildAppBar() {
     return AppBar(
       key: const Key('appBar'),
-      backgroundColor: primaryYellow,
+      backgroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context)),
       title: const Text('Weightlifting',
-          style: TextStyle(fontWeight: FontWeight.w600)),
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          )),
       actions: [
         Opacity(
           opacity: 0.0,
@@ -314,15 +326,23 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
           _buildExerciseQuickAdd(),
           const SizedBox(height: 24),
           if (exercises.isNotEmpty)
-            WorkoutSummary(
-              key: const Key('workoutSummary'),
-              exerciseCount: exercises.length,
-              totalSets: calculateTotalSets(exercises),
-              totalReps: calculateTotalReps(exercises),
-              totalVolume: calculateTotalVolume(exercises),
-              totalDuration: calculateTotalDuration(exercises),
-              estimatedCalories: calculateEstimatedCalories(exercises),
-              primaryGreen: primaryGreen,
+            FutureBuilder<double>(
+              future: calculateEstimatedCalories(exercises),
+              builder: (context, snapshot) {
+                // Use 0.0 as default value if data isn't available yet
+                final calories = snapshot.data ?? 0.0;
+                return WorkoutSummary(
+                  key: const Key('workoutSummary'),
+                  exerciseCount: exercises.length,
+                  totalSets: calculateTotalSets(exercises),
+                  totalReps: calculateTotalReps(exercises),
+                  totalVolume: calculateTotalVolume(exercises),
+                  totalDuration: calculateTotalDuration(exercises),
+                  estimatedCalories:
+                      calories, // Now passing a double, not a Future
+                  primaryGreen: primaryGreen,
+                );
+              },
             ),
           ...exercises.map((exercise) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
@@ -394,7 +414,7 @@ class _WeightliftingPageState extends State<WeightliftingPage> {
     );
   }
 
-  // Updated to use the saveWorkout method
+  // Updated to use the consistent styling
   Widget _buildBottomBar() => BottomBar(
         key: const Key('bottomBar'),
         totalVolume: calculateTotalVolume(exercises),

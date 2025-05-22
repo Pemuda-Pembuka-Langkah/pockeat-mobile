@@ -19,6 +19,7 @@ import 'package:pockeat/features/progress_charts_and_graphs/services/progress_ta
 class ProgressPage extends StatefulWidget {
   final ProgressTabsService service;
   final int initialTabIndex;
+
   final int initialSubTabIndex;
 
   // ignore: use_super_parameters
@@ -132,33 +133,40 @@ class _ProgressPageState extends State<ProgressPage>
       );
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: NestedScrollView(
-        controller: _scrollController,
-        headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          // App Bar dan Main Tabs tetap sama
-          AppBarWidget(
-            colors: _appColors,
-            onCalendarPressed: () {
-              // Calendar action - kept empty as in original
-            },
+    return PopScope(
+        canPop: false,
+        onPopInvoked: (didPop) {
+          if (!didPop) {
+            Navigator.of(context).pushReplacementNamed('/');
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: NestedScrollView(
+            controller: _scrollController,
+            headerSliverBuilder: (context, innerBoxIsScrolled) => [
+              // App Bar dan Main Tabs tetap sama
+              AppBarWidget(
+                colors: _appColors,
+                onCalendarPressed: () {
+                  // Calendar action - kept empty as in original
+                },
+              ),
+              MainTabsWidget(
+                tabController: _mainTabController,
+                colors: _appColors,
+              ),
+            ],
+            body: TabBarView(
+              controller: _mainTabController,
+              children: [
+                const WeightProgressWidget(),
+                LogHistoryPage(initialTabIndex: widget.initialSubTabIndex),
+              ],
+            ),
           ),
-          MainTabsWidget(
-            tabController: _mainTabController,
-            colors: _appColors,
-          ),
-        ],
-        body: TabBarView(
-          controller: _mainTabController,
-          children: [
-            const WeightProgressWidget(),
-            LogHistoryPage(initialTabIndex: widget.initialSubTabIndex),
-          ],
-        ),
-      ),
-      bottomNavigationBar: const CustomBottomNavBar(),
-    );
+          bottomNavigationBar: const CustomBottomNavBar(),
+        ));
   }
 }
 // coverage:ignore-end

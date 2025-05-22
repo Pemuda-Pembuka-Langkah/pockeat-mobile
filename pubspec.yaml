@@ -76,11 +76,12 @@ dependencies:
   firebase_analytics: ^10.10.7
   flutter_launcher_icons: ^0.14.3
   supabase_flutter: ^2.8.4
-
+  skeletonizer: ^1.1.0
   path: any
   logger: any
   confetti: ^0.8.0
   table_calendar: ^3.2.0
+  url_launcher: ^6.2.5
 dependency_overrides:
   analyzer: 7.3.0
 
@@ -99,10 +100,6 @@ dev_dependencies:
   import_sorter: ^4.6.0
   build_runner: ^2.3.3
 
-# Husky configuration
-# Kami menggunakan file konfigurasi manual di folder .husky
-husky:
-  skip_hooks: true
 
   # For information on the generic Dart part of this file, see the
   # following page: https://dart.dev/tools/pub/pubspec
@@ -114,6 +111,46 @@ flutter:
     - assets/icons/
     - assets/animations/
     - .env
+
+  fonts:
+    - family: PlusJakartaSans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/PlusJakartaSans-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-Light.ttf
+          weight: 300
+        - asset: assets/fonts/PlusJakartaSans-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlusJakartaSans-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/PlusJakartaSans-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/PlusJakartaSans-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/PlusJakartaSans-ExtraLightItalic.ttf
+          weight: 200
+          style: italic
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -155,3 +192,5 @@ flutter_launcher_icons:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  

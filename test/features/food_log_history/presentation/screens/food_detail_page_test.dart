@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -14,19 +15,34 @@ import 'package:pockeat/features/food_scan_ai/domain/repositories/food_scan_repo
 import 'package:pockeat/features/food_text_input/domain/repositories/food_text_input_repository.dart';
 import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
 import 'package:pockeat/features/home_screen_widget/domain/exceptions/widget_exceptions.dart';
+import 'package:pockeat/features/saved_meals/domain/services/saved_meal_service.dart';
 import 'food_detail_page_test.mocks.dart';
 
-@GenerateMocks([FoodScanRepository, FoodTextInputRepository, FoodTrackingClientController])
+@GenerateMocks([
+  FoodScanRepository, 
+  FoodTextInputRepository, 
+  FoodTrackingClientController,
+  SavedMealService
+])
 
 void main() {
   late MockFoodScanRepository mockRepository;
   late MockFoodTextInputRepository mockTextInputRepository;
   late MockFoodTrackingClientController mockFoodTrackingController;
+  late MockSavedMealService mockSavedMealService;
 
   setUp(() {
     mockRepository = MockFoodScanRepository();
     mockTextInputRepository = MockFoodTextInputRepository();
     mockFoodTrackingController = MockFoodTrackingClientController();
+    mockSavedMealService = MockSavedMealService();
+
+    // Setup GetIt for SavedMealService mock
+    final getIt = GetIt.instance;
+    if (getIt.isRegistered<SavedMealService>()) {
+      getIt.unregister<SavedMealService>();
+    }
+    getIt.registerSingleton<SavedMealService>(mockSavedMealService);
   });
 
   final testFood = FoodLogHistoryItem(
@@ -322,5 +338,45 @@ void main() {
       // Assert
       expect(find.text('No ingredients information available'), findsOneWidget);
     });
+
+    testWidgets('should mark meal as saved when it is already saved', 
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockRepository.getById(testFood.sourceId!))
+          .thenAnswer((_) async => testFoodAnalysis);
+      when(mockSavedMealService.isMealSaved(testFoodAnalysis.id))
+          .thenAnswer((_) async => true);
+
+      // Act
+      await tester.pumpWidget(createFoodDetailPage());
+      await tester.pumpAndSettle();
+
+      // Assert - The bookmark icon should be filled
+      final bookmarkIcon = find.byIcon(Icons.bookmark);
+      expect(bookmarkIcon, findsOneWidget);
+    });
+
+    testWidgets('should mark meal as not saved when it is not saved', 
+        (WidgetTester tester) async {
+      // Arrange
+      when(mockRepository.getById(testFood.sourceId!))
+          .thenAnswer((_) async => testFoodAnalysis);
+      when(mockSavedMealService.isMealSaved(testFoodAnalysis.id))
+          .thenAnswer((_) async => false);
+
+      // Act
+      await tester.pumpWidget(createFoodDetailPage());
+      await tester.pumpAndSettle();
+
+      // Assert - The bookmark outline icon should be shown
+      final bookmarkOutlineIcon = find.byIcon(Icons.bookmark_border);
+      expect(bookmarkOutlineIcon, findsOneWidget);
+    });
+  });
+
+  tearDown(() {
+    if (GetIt.instance.isRegistered<SavedMealService>()) {
+      GetIt.instance.unregister<SavedMealService>();
+    }
   });
 }

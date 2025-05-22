@@ -17,7 +17,6 @@ class PetStatusMessage {
 /// Factory class to create pet status messages based on mood, heart level, and calories
 class PetStatusMessageFactory {
   /// Creates appropriate messages based on pet status
-  ///
   /// [mood] - Pet mood ('happy' or 'sad')
   /// [heartLevel] - Pet heart level (0-4)
   /// [currentCalories] - Current calories consumed

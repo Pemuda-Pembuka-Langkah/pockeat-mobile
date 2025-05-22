@@ -36,168 +36,179 @@ class SelectedFoodsTab extends StatelessWidget {
     required this.primaryPink,
     required this.primaryGreen,
   });
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      // Using resizeToAvoidBottomInset: false in the parent Scaffold will ensure the keyboard overlays content
+      child: Stack(
         children: [
-          // Meal name input
-          Form(
-            key: formKey,
-            child: TextFormField(
-              controller: mealNameController,
-              decoration: InputDecoration(
-                labelText: 'Meal Name',
-                hintText: 'Enter a name for your meal',
-                prefixIcon: Icon(Icons.restaurant_menu, color: primaryGreen),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: primaryGreen),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: primaryGreen, width: 2),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-              ),
-              // coverage:ignore-line
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a meal name';
-                }
-                return null;
-              },
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Selected foods header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Main content
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Selected Foods',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
-                ),
-              ),
-              Text(
-                '${selectedFoods.length} items selected',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
+              // Empty space for the input field overlay
+              const SizedBox(height: 30),
 
-          const SizedBox(height: 8),
-
-          // Selected foods list
-          Expanded(
-            child: selectedFoods.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.no_food,
-                          size: 64,
-                          color: Colors.grey[300],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No foods selected yet',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton.icon(
-                          onPressed: onGoToSearchTab,
-                          icon: const Icon(Icons.search),
-                          label: const Text('Search Foods'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 16),
-                            backgroundColor: primaryGreen,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ],
+              // Selected foods header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Selected Foods',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: selectedFoods.length,
-                    itemBuilder: (context, index) {
-                      final food = selectedFoods[index];
-                      // coverage:ignore-line
-                      final portion = portionValues[index] ??
-                          (food.ingredients.isNotEmpty
-                              ? food.ingredients[0].servings
-                              : 100.0);
-
-                      return FoodItemCard(
-                        food: food,
-                        index: index,
-                        portion: portion,
-                        countController: componentCountControllers[index],
-                        onPortionChanged: onAdjustPortion,
-                        onRemove: onRemoveFood,
-                        primaryGreen: primaryGreen,
-                        primaryPink: primaryPink,
-                      );
-                    },
                   ),
-          ),
+                  Text(
+                    '${selectedFoods.length} items selected',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
 
-          const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
-          // Action buttons
-          Row(
-            children: [
+              // Selected foods list
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: selectedFoods.isEmpty ? null : onCreateMeal,
-                  icon: const Icon(Icons.create),
-                  label: const Text('Create Meal'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryGreen,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: selectedFoods.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.no_food,
+                              size: 64,
+                              color: Colors.grey[300],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No foods selected yet',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ElevatedButton.icon(
+                              onPressed: onGoToSearchTab,
+                              icon: const Icon(Icons.search),
+                              label: const Text('Search Foods'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12, horizontal: 16),
+                                backgroundColor: primaryGreen,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: selectedFoods.length,
+                        itemBuilder: (context, index) {
+                          final food = selectedFoods[
+                              index]; // Always default to 100.0 grams if no value exists
+                          final portion = portionValues[index] ?? 100.0;
+
+                          return FoodItemCard(
+                            food: food,
+                            index: index,
+                            portion: portion,
+                            countController: componentCountControllers[index],
+                            onPortionChanged: onAdjustPortion,
+                            onRemove: onRemoveFood,
+                            primaryGreen: primaryGreen,
+                            primaryPink: primaryPink,
+                          );
+                        },
+                      ),
+              ),
+//sigma
+              const SizedBox(height: 16),
+
+              // Action buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: selectedFoods.isEmpty ? null : onCreateMeal,
+                      icon: const Icon(Icons.create),
+                      label: const Text('Create Meal'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryGreen,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              OutlinedButton.icon(
-                onPressed: onClearAll,
-                icon: const Icon(Icons.clear),
-                label: const Text('Clear'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primaryPink,
-                  side: BorderSide(color: primaryPink),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  const SizedBox(width: 12),
+                  OutlinedButton.icon(
+                    onPressed: onClearAll,
+                    icon: const Icon(Icons.clear),
+                    label: const Text('Clear'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: primaryPink,
+                      side: BorderSide(color: primaryPink),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
+          ),
+
+          // Overlay meal name input at the top
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Form(
+              key: formKey,
+              child: TextFormField(
+                controller: mealNameController,
+                decoration: InputDecoration(
+                  labelText: 'Meal Name',
+                  hintText: 'Enter a name for your meal',
+                  prefixIcon: Icon(Icons.restaurant_menu, color: primaryGreen),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: primaryGreen),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: primaryGreen, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                // Enable scrolling to prevent pushing content
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
+                // coverage:ignore-line
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a meal name';
+                  }
+                  return null;
+                },
+              ),
+            ),
           ),
         ],
       ),

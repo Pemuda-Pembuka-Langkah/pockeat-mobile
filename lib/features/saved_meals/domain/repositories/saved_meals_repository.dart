@@ -25,6 +25,7 @@ class FoodAnalysisRepository
           toMap: (item) =>
               item.toJson(), // Direct serialization without nesting
           fromMap: (map, id) => FoodAnalysisResult.fromJson(map),
+
           firestore: firestore,
         );
 

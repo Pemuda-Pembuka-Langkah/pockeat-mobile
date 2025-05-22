@@ -60,6 +60,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color bgColor = const Color(0xFFF9F9F9);
+  final Color redColor = const Color(0xFFFF4C4C);
 
   late ChangePasswordService _changePasswordService;
 
@@ -89,7 +90,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
     if (email == null) {
       setState(() {
-        _errorMessage = 'Email tidak ditemukan. Silakan login ulang.';
+        _errorMessage = 'Email not found. Please login again.';
       });
       return;
     }
@@ -106,8 +107,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Email reset password telah dikirim ke $email'),
-            backgroundColor: Colors.green,
+            content: Text('Password reset email sent to $email'),
+            backgroundColor: primaryGreen,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -118,10 +120,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           _errorMessage = e.message;
         } else if (e.toString().contains('Email tidak ditemukan')) {
           // Handle specific error message for our test case
-          _errorMessage = 'Email tidak ditemukan. Silakan login ulang.';
+          _errorMessage = 'Email not found. Please login again.';
         } else {
           _errorMessage =
-              'Gagal mengirim email reset password. Silakan coba lagi.';
+              'Failed to send password reset email. Please try again.';
         }
       });
     } finally {
@@ -160,9 +162,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         // Tampilkan pesan sukses
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Password berhasil diubah. Silakan login kembali.'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('Password successfully changed. Please login again.'),
+              backgroundColor: primaryGreen,
+              behavior: SnackBarBehavior.floating,
             ),
           );
 
@@ -188,7 +191,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
         if (email == null) {
           setState(() {
-            _errorMessage = 'Email tidak ditemukan. Silakan login ulang.';
+            _errorMessage = 'Email not found. Please login again.';
           });
           throw Exception('Email tidak tersedia');
         }
@@ -204,14 +207,15 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         if (mounted) {
           setState(() {
             _showSuccessMessage = true;
-            _successMessage = 'Password berhasil diubah.';
+            _successMessage = 'Password successfully changed.';
             _isLoading = false;
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Password berhasil diubah.'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('Password successfully changed.'),
+              backgroundColor: primaryGreen,
+              behavior: SnackBarBehavior.floating,
             ),
           );
 
@@ -235,7 +239,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         _isLoading = false;
         _errorMessage = e is FirebaseAuthException
             ? e.message
-            : 'Terjadi kesalahan saat mengubah password.';
+            : 'An error occurred while changing your password.';
       });
     }
   }
@@ -243,12 +247,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: widget.showAppBar
           ? AppBar(
               title: Text(
-                  _isResetPasswordMode ? 'Reset Password' : 'Ubah Password'),
-              backgroundColor: Colors.pink,
-              foregroundColor: Colors.white,
+                  _isResetPasswordMode ? 'Reset Password' : 'Change Password',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  )),
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black87,
+              elevation: 0,
             )
           : null,
       body: SafeArea(
@@ -292,14 +301,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.green[50],
+                        color: primaryGreen.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.green),
+                        border: Border.all(color: primaryGreen),
                       ),
                       child: Text(
                         _successMessage,
-                        style: const TextStyle(
-                          color: Colors.green,
+                        style: TextStyle(
+                          color: primaryGreen,
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
@@ -312,8 +321,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       padding: const EdgeInsets.only(top: 10),
                       child: Text(
                         _errorMessage!,
-                        style: const TextStyle(
-                          color: Colors.red,
+                        style: TextStyle(
+                          color: redColor,
                           fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
@@ -327,8 +336,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         _isResetPasswordMode
                             ? 'Password reset successfully! Redirecting to login...'
                             : 'Password changed successfully! Redirecting to login...',
-                        style: const TextStyle(
-                          color: Colors.green,
+                        style: TextStyle(
+                          color: primaryGreen,
                           fontWeight: FontWeight.w500,
                         ),
                         textAlign: TextAlign.center,
@@ -343,8 +352,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       controller: _currentPasswordController,
                       obscureText: !_isCurrentPasswordVisible,
                       decoration: InputDecoration(
-                        labelText: 'Password Saat Ini',
-                        hintText: 'Masukkan password saat ini',
+                        labelText: 'Current Password',
+                        hintText: 'Enter your current password',
                         prefixIcon: const Icon(Icons.lock),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -365,7 +374,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Password saat ini tidak boleh kosong';
+                          return 'Current password is required';
                         }
                         return null;
                       },
@@ -377,10 +386,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: _isLoading ? null : _sendResetPasswordEmail,
-                        child: const Text(
-                          'Lupa Password?',
+                        child: Text(
+                          'Forgot Password?',
                           style: TextStyle(
-                            color: Colors.blue,
+                            color: primaryPink,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -394,8 +403,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     controller: _newPasswordController,
                     obscureText: !_isNewPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: 'Password Baru',
-                      hintText: 'Masukkan password baru',
+                      labelText: 'New Password',
+                      hintText: 'Enter your new password',
                       prefixIcon: const Icon(Icons.lock),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -415,25 +424,24 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Password baru tidak boleh kosong';
+                        return 'New password is required';
                       }
                       if (value.length < 6) {
-                        return 'Password harus minimal 6 karakter';
+                        return 'Password must be at least 6 characters';
                       }
                       return null;
                     },
                   ),
+                  const SizedBox(height: 15),
 
-                  const SizedBox(height: 20),
-
-                  // Confirm New Password
+                  // Confirm Password
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: !_isConfirmPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: 'Konfirmasi Password Baru',
-                      hintText: 'Konfirmasi password baru',
-                      prefixIcon: const Icon(Icons.lock_outline),
+                      labelText: 'Confirm Password',
+                      hintText: 'Re-enter your new password',
+                      prefixIcon: const Icon(Icons.lock_clock),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isConfirmPasswordVisible
@@ -453,41 +461,44 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Konfirmasi password tidak boleh kosong';
+                        return 'Confirm password is required';
                       }
                       if (value != _newPasswordController.text) {
-                        return 'Konfirmasi password tidak sesuai dengan password baru';
+                        return 'Passwords do not match';
                       }
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 30),
 
-                  // Change Password Button
-                  SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _changePassword,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : Text(
+                  // Submit Button
+                  _isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _changePassword,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryPink,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
                               _isResetPasswordMode
-                                  ? 'RESET PASSWORD'
-                                  : 'UBAH PASSWORD',
+                                  ? 'Reset Password'
+                                  : 'Change Password',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                    ),
-                  ),
+                          ),
+                        ),
                 ],
               ),
             ),

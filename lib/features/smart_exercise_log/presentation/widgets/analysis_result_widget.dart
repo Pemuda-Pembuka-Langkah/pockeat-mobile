@@ -31,8 +31,8 @@ class AnalysisResultWidget extends StatelessWidget {
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
-            blurRadius: 5,
-            offset: Offset(0, 2),
+            blurRadius: 10,
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -207,7 +207,7 @@ class AnalysisResultWidget extends StatelessWidget {
   Widget _buildMissingInfoSection() {
     final missingInfo = analysisResult.missingInfo!;
     final missingLabels = {
-      'type': 'Exercise type',
+      'exercise_type': 'Exercise type',
       'duration': 'Exercise duration',
       'intensity': 'Exercise intensity',
     };

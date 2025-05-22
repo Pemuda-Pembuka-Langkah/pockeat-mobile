@@ -6,8 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 // Project imports:
-import 'form_cubit.dart';
 import '../widgets/onboarding_progress_indicator.dart';
+import 'form_cubit.dart';
 
 class BirthdatePage extends StatefulWidget {
   const BirthdatePage({super.key});
@@ -16,7 +16,8 @@ class BirthdatePage extends StatefulWidget {
   State<BirthdatePage> createState() => _BirthdatePageState();
 }
 
-class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProviderStateMixin {
+class _BirthdatePageState extends State<BirthdatePage>
+    with SingleTickerProviderStateMixin {
   DateTime? _selectedDate;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   late DateTime _focusedDay;
@@ -29,11 +30,11 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color primaryGreenDisabled = const Color(0xFF4ECDC4).withOpacity(0.4);
   final Color bgColor = const Color(0xFFF9F9F9);
-  
+
   // Animation controller
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -42,28 +43,29 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
     _minDate = DateTime(_today.year - 100);
     _maxDate = DateTime(_today.year - 12, _today.month, _today.day);
     // Ensure _focusedDay is not after _maxDate to avoid the calendar assertion error
-    _focusedDay = DateTime(_today.year - 18, _today.month, 1); // Default to 18 years ago
+    _focusedDay =
+        DateTime(_today.year - 18, _today.month, 1); // Default to 18 years ago
     _currentYear = _focusedDay.year;
     _currentMonth = _focusedDay.month;
-    
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
-    
+
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.easeInOut,
       ),
     );
-    
+
     // Start animation after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
     });
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -80,6 +82,7 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
       });
     }
   }
+
   // coverage:ignore-start
   // Function to show year/month picker dialog
   void _showYearMonthPicker() {
@@ -89,8 +92,18 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
     ).reversed.toList();
 
     final months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
     ];
 
     int selectedYear = _currentYear;
@@ -100,7 +113,7 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Select Year and Month',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         content: SizedBox(
           width: double.maxFinite,
           child: Column(
@@ -123,10 +136,12 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
                     final isSelected = year == selectedYear;
                     return ListTile(
                       dense: true,
-                      title: Text(year.toString(),
+                      title: Text(
+                        year.toString(),
                         style: TextStyle(
                           color: isSelected ? primaryGreen : Colors.black87,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                       onTap: () {
@@ -138,7 +153,8 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Month', style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text('Month',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Container(
                 height: 200,
@@ -154,10 +170,12 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
                     final isSelected = monthNumber == selectedMonth;
                     return ListTile(
                       dense: true,
-                      title: Text(month,
+                      title: Text(
+                        month,
                         style: TextStyle(
                           color: isSelected ? primaryGreen : Colors.black87,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                       onTap: () {
@@ -174,7 +192,8 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey.shade700)),
+            child:
+                Text('Cancel', style: TextStyle(color: Colors.grey.shade700)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -188,17 +207,17 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
               Navigator.pop(context);
               // Determine the new focused day
               DateTime newFocusedDay = DateTime(selectedYear, selectedMonth, 1);
-              
+
               // Update state
               setState(() {
                 _currentYear = selectedYear;
                 _currentMonth = selectedMonth;
                 _focusedDay = newFocusedDay;
-                
+
                 // If selected date exists and is in a different month/year, clear it
-                if (_selectedDate != null && 
-                    (_selectedDate!.year != selectedYear || 
-                     _selectedDate!.month != selectedMonth)) {
+                if (_selectedDate != null &&
+                    (_selectedDate!.year != selectedYear ||
+                        _selectedDate!.month != selectedMonth)) {
                   _selectedDate = null;
                 }
               });
@@ -210,7 +229,7 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
     );
   }
   // coverage:ignore-end
-  
+
   // Function to check if a day is enabled
   bool _isDayEnabled(DateTime day) {
     return !day.isBefore(_minDate) && !day.isAfter(_maxDate);
@@ -220,6 +239,30 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child:
+                const Icon(Icons.arrow_back, color: Colors.black87, size: 20),
+          ),
+          onPressed: () async {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
       body: SafeArea(
         child: Container(
           decoration: BoxDecoration(
@@ -239,7 +282,7 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
-                
+
                 // Onboarding progress indicator
                 const OnboardingProgressIndicator(
                   totalSteps: 16,
@@ -247,9 +290,9 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
                   barHeight: 6.0,
                   showPercentage: true,
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Title with modern style
                 const Text(
                   "Your Birthday",
@@ -259,9 +302,9 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
                     color: Colors.black87,
                   ),
                 ),
-                
+
                 const SizedBox(height: 4),
-                
+
                 const Text(
                   "When were you born?",
                   style: TextStyle(
@@ -270,9 +313,9 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
                     height: 1.3,
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(24),
@@ -302,202 +345,239 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
                               child: SingleChildScrollView(
                                 child: Column(
                                   children: [
-                                    if (_selectedDate != null) ...[  
-                              Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                decoration: BoxDecoration(
-                                  color: primaryGreen.withOpacity(0.05),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: primaryGreen.withOpacity(0.2)),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Flexible(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            _formatDate(_selectedDate!),
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.black87,
+                                    if (_selectedDate != null) ...[
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12, horizontal: 16),
+                                        decoration: BoxDecoration(
+                                          color: primaryGreen.withOpacity(0.05),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                              color: primaryGreen
+                                                  .withOpacity(0.2)),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Flexible(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    _formatDate(_selectedDate!),
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Colors.black87,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    "Age: ${_calculateAge(_selectedDate!)} years",
+                                                    style: const TextStyle(
+                                                      fontSize: 13,
+                                                      color: Colors.black54,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            "Age: ${_calculateAge(_selectedDate!)} years",
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.black54,
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                color: primaryGreen
+                                                    .withOpacity(0.1),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              padding: const EdgeInsets.all(8),
+                                              child: Icon(
+                                                Icons.check,
+                                                color: primaryGreen,
+                                                size: 16,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
+                                    ],
+
+                                    const SizedBox(height: 16),
+
+                                    // Embedded calendar
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: primaryGreen.withOpacity(0.1),
-                                        shape: BoxShape.circle,
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                            color: Colors.grey.shade200),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.03),
+                                            blurRadius: 5,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
-                                      padding: const EdgeInsets.all(8),
-                                      child: Icon(
-                                        Icons.check,
-                                        color: primaryGreen,
-                                        size: 16,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                            
-                            const SizedBox(height: 16),
-                            
-                            // Embedded calendar
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey.shade200),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.03),
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                children: [
-                                  // Custom header with tap functionality
-                                  GestureDetector(
-                                    onTap: _showYearMonthPicker,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                      decoration: BoxDecoration(
-                                        color: primaryGreen.withOpacity(0.05),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                      child: Column(
                                         children: [
-                                          Text(
-                                            "${_getMonthName(_focusedDay.month)} ${_focusedDay.year}",
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
+                                          // Custom header with tap functionality
+                                          GestureDetector(
+                                            onTap: _showYearMonthPicker,
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 12,
+                                                      horizontal: 16),
+                                              decoration: BoxDecoration(
+                                                color: primaryGreen
+                                                    .withOpacity(0.05),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    "${_getMonthName(_focusedDay.month)} ${_focusedDay.year}",
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Icon(
+                                                    Icons.arrow_drop_down,
+                                                    color: primaryGreen,
+                                                    size: 20,
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                          const SizedBox(width: 4),
-                                          Icon(
-                                            Icons.arrow_drop_down,
-                                            color: primaryGreen,
-                                            size: 20,
+                                          const SizedBox(height: 8),
+                                          TableCalendar<DateTime>(
+                                            firstDay: _minDate,
+                                            lastDay: _maxDate,
+                                            focusedDay: _focusedDay,
+                                            calendarFormat: _calendarFormat,
+                                            selectedDayPredicate: (day) =>
+                                                isSameDay(_selectedDate, day),
+                                            onDaySelected: _onDaySelected,
+                                            onFormatChanged: (format) {
+                                              setState(() {
+                                                _calendarFormat = format;
+                                              });
+                                            },
+                                            headerVisible:
+                                                false, // Hide the default header
+                                            onPageChanged: (focusedDay) {
+                                              // Ensure the new focusedDay doesn't violate calendar constraints
+                                              setState(() {
+                                                if (focusedDay
+                                                    .isAfter(_maxDate)) {
+                                                  _focusedDay = _maxDate;
+                                                } else if (focusedDay
+                                                    .isBefore(_minDate)) {
+                                                  _focusedDay = _minDate;
+                                                } else {
+                                                  _focusedDay = focusedDay;
+                                                }
+                                                _currentMonth =
+                                                    _focusedDay.month;
+                                                _currentYear = _focusedDay.year;
+                                              });
+                                            },
+                                            calendarStyle: CalendarStyle(
+                                              defaultTextStyle: const TextStyle(
+                                                  color: Colors.black87),
+                                              weekendTextStyle: const TextStyle(
+                                                  color: Colors.black54),
+                                              outsideTextStyle: TextStyle(
+                                                  color: Colors.grey.shade400),
+                                              disabledTextStyle: TextStyle(
+                                                  color: Colors.grey.shade300),
+                                              selectedDecoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: primaryGreen,
+                                              ),
+                                              todayDecoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: primaryGreen
+                                                    .withOpacity(0.2),
+                                              ),
+                                              markersAlignment:
+                                                  Alignment.bottomCenter,
+                                            ),
+                                            headerStyle: const HeaderStyle(
+                                              formatButtonVisible: false,
+                                              titleCentered: true,
+                                              headerPadding: EdgeInsets.all(
+                                                  0), // Hide the default header completely
+                                            ),
+                                            enabledDayPredicate: _isDayEnabled,
                                           ),
                                         ],
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  TableCalendar<DateTime>(
-                                    firstDay: _minDate,
-                                    lastDay: _maxDate,
-                                    focusedDay: _focusedDay,
-                                    calendarFormat: _calendarFormat,
-                                    selectedDayPredicate: (day) => isSameDay(_selectedDate, day),
-                                    onDaySelected: _onDaySelected,
-                                    onFormatChanged: (format) {
-                                      setState(() {
-                                        _calendarFormat = format;
-                                      });
-                                    },
-                                    headerVisible: false, // Hide the default header
-                                    onPageChanged: (focusedDay) {
-                                      // Ensure the new focusedDay doesn't violate calendar constraints
-                                      setState(() {
-                                        if (focusedDay.isAfter(_maxDate)) {
-                                          _focusedDay = _maxDate;
-                                        } else if (focusedDay.isBefore(_minDate)) {
-                                          _focusedDay = _minDate;
-                                        } else {
-                                          _focusedDay = focusedDay;
-                                        }
-                                        _currentMonth = _focusedDay.month;
-                                        _currentYear = _focusedDay.year;
-                                      });
-                                    },
-                                    calendarStyle: CalendarStyle(
-                                      defaultTextStyle: const TextStyle(color: Colors.black87),
-                                      weekendTextStyle: const TextStyle(color: Colors.black54),
-                                      outsideTextStyle: TextStyle(color: Colors.grey.shade400),
-                                      disabledTextStyle: TextStyle(color: Colors.grey.shade300),
-                                      selectedDecoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: primaryGreen,
+                                    const SizedBox(height: 16),
+
+                                    // Personalization benefits
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade50,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                            color: Colors.grey.shade200),
                                       ),
-                                      todayDecoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: primaryGreen.withOpacity(0.2),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 40,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  primaryGreen.withOpacity(0.1),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(Icons.info_outline,
+                                                color: primaryGreen, size: 20),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          const Expanded(
+                                            child: Text(
+                                              "Your age helps us calculate the calories you need for optimal health.",
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54,
+                                                  height: 1.4),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      markersAlignment: Alignment.bottomCenter,
-                                ),
-                                    headerStyle: const HeaderStyle(
-                                      formatButtonVisible: false,
-                                      titleCentered: true,
-                                      headerPadding: EdgeInsets.all(0), // Hide the default header completely
                                     ),
-                                    enabledDayPredicate: _isDayEnabled,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            
-                            // Personalization benefits
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade50,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey.shade200),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: primaryGreen.withOpacity(0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(Icons.info_outline, color: primaryGreen, size: 20),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  const Expanded(
-                                    child: Text(
-                                      "Your age helps us calculate the calories you need for optimal health.",
-                                      style: TextStyle(fontSize: 13, color: Colors.black54, height: 1.4),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                                   ],
                                 ),
                               ),
                             ),
-                          
-                            
+
                             // Continue button
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: _selectedDate != null ? primaryGreen : primaryGreenDisabled,
+                                  backgroundColor: _selectedDate != null
+                                      ? primaryGreen
+                                      : primaryGreenDisabled,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 16),
                                   minimumSize: const Size(double.infinity, 56),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
@@ -534,25 +614,45 @@ class _BirthdatePageState extends State<BirthdatePage> with SingleTickerProvider
       ),
     );
   }
-  
+
   // Helper method to format date nicely
   String _formatDate(DateTime date) {
     final months = [
-      'January', 'February', 'March', 'April', 'May', 'June', 
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
-  
+
   // Helper method to get month name
   String _getMonthName(int month) {
     final months = [
-      'January', 'February', 'March', 'April', 'May', 'June', 
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
     ];
     return months[month - 1];
   }
-  
+
   // Calculate age from birthdate
   int _calculateAge(DateTime birthDate) {
     final today = DateTime.now();

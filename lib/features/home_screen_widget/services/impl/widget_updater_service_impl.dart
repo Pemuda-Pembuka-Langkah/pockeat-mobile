@@ -16,6 +16,7 @@ import 'package:pockeat/features/home_screen_widget/domain/models/simple_food_tr
 import 'package:pockeat/features/home_screen_widget/services/nutrient_calculation_strategy.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_data_service.dart';
 import 'package:pockeat/features/home_screen_widget/services/widget_updater_service.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 // Firebase imports:
 
@@ -39,18 +40,34 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
           as WidgetDataService<DetailedFoodTracking>;
 
       // 1. Calculate total calories consumed today
-      final int totalCalories =
-          await calculateConsumedCalories(services, userId);
+      int totalCalories = await calculateConsumedCalories(services, userId);
 
       // 2. Calculate target calories using the same service as client controller
-      final int targetCalories =
-          await calculateTargetCalories(services, userId);
+      int targetCalories = await calculateTargetCalories(services, userId);
+
+      // Round target calories to nearest multiple of 5 for consistency
+      targetCalories = ((targetCalories + 2.5) ~/ 5) * 5;
+
+      // Round consumed calories to nearest multiple of 5 for consistency
+      totalCalories = ((totalCalories + 2.5) ~/ 5) * 5;
+
+      // Calculate remaining calories (just like in CaloriesTodayWidget)
+      int caloriesDifference = targetCalories - totalCalories;
+      bool isExceeded = caloriesDifference < 0;
+      int remainingCalories = isExceeded ? 0 : caloriesDifference;
+
+      // For simplicity, we'll report the consumed calories as (targetCalories - remainingCalories)
+      // This ensures the widget shows correct remaining calories
+      int adjustedConsumedCalories = targetCalories - remainingCalories;
+
+      debugPrint(
+          'Widget updater - Target: $targetCalories, Consumed: $adjustedConsumedCalories, Remaining: $remainingCalories');
 
       // 3. Update simple widget
       await simpleWidgetService.updateData(SimpleFoodTracking(
         userId: userId,
         caloriesNeeded: targetCalories,
-        currentCaloriesConsumed: totalCalories,
+        currentCaloriesConsumed: adjustedConsumedCalories,
       ));
       await simpleWidgetService.updateWidget();
 
@@ -76,7 +93,7 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
       await detailedWidgetService.updateData(DetailedFoodTracking(
         userId: userId,
         caloriesNeeded: targetCalories,
-        currentCaloriesConsumed: totalCalories,
+        currentCaloriesConsumed: adjustedConsumedCalories,
         currentProtein: protein,
         currentCarb: carbs,
         currentFat: fat,
@@ -97,8 +114,9 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
       final today = DateTime.now();
 
       // Get daily stats for today
-      final stats = await calorieStatsService.getStatsByDate(userId, today);
-      final consumedCalories = stats.caloriesConsumed;
+      final stats =
+          await calorieStatsService.calculateStatsForDate(userId, today);
+      int consumedCalories = stats.caloriesConsumed;
 
       return consumedCalories;
     } catch (e) {
@@ -115,6 +133,10 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
       final caloricRequirementRepository =
           services['caloricRequirementRepository']
               as CaloricRequirementRepository;
+      final calorieStatsService =
+          services['caloricStatsService'] as CalorieStatsService;
+      final userPreferencesService =
+          services['userPreferencesService'] as UserPreferencesService;
 
       // Get caloric requirement for the user
       final caloricRequirement =
@@ -126,6 +148,33 @@ class WidgetUpdaterServiceImpl implements WidgetUpdaterService {
       if (caloricRequirement != null) {
         // TDEE is the total daily energy expenditure - calories needed per day
         targetCalories = caloricRequirement.tdee.toInt();
+      }
+
+      // Check user preferences for exercise calorie compensation
+      final isCalorieCompensationEnabled =
+          await userPreferencesService.isExerciseCalorieCompensationEnabled();
+
+      // Check user preferences for rollover calories
+      final isRolloverCaloriesEnabled =
+          await userPreferencesService.isRolloverCaloriesEnabled();
+
+      // Add burned calories if compensation is enabled
+      if (isCalorieCompensationEnabled) {
+        final today = DateTime.now();
+        final stats =
+            await calorieStatsService.calculateStatsForDate(userId, today);
+        final caloriesBurned = stats.caloriesBurned;
+        targetCalories += caloriesBurned;
+        debugPrint('Added $caloriesBurned burned calories to target in widget');
+      }
+
+      // Add rollover calories if enabled
+      if (isRolloverCaloriesEnabled) {
+        final rolloverCalories =
+            await userPreferencesService.getRolloverCalories();
+        targetCalories += rolloverCalories;
+        debugPrint(
+            'Added $rolloverCalories rollover calories to target in widget');
       }
 
       return targetCalories;

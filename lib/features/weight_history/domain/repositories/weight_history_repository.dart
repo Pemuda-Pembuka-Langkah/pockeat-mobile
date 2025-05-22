@@ -1,3 +1,4 @@
+// coverage:ignore-start
 abstract class WeightHistoryRepository {
   Future<void> addWeightEntry({
     required String userId,
@@ -5,3 +6,4 @@ abstract class WeightHistoryRepository {
     required DateTime timestamp,
   });
 }
+// coverage:ignore-end

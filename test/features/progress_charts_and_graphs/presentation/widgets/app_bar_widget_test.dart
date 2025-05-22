@@ -1,5 +1,4 @@
 // Flutter imports:
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -22,7 +21,7 @@ void main() {
       calendarPressed = false;
     });
 
-    testWidgets('should display correct title', (WidgetTester tester) async {
+    testWidgets('should display correct title with proper styling', (WidgetTester tester) async {
       // Arrange
       final colors = AppColors.defaultColors();
 
@@ -42,19 +41,17 @@ void main() {
         ),
       );
 
-      // Assert - Title changed from "Analytics" to "Progress" to match actual implementation
+      // Assert
       expect(find.text('Progress'), findsOneWidget);
-      expect(
-        find.byWidgetPredicate((widget) =>
-            widget is Text &&
-            widget.style?.fontSize == 18 &&
-            widget.style?.fontWeight == FontWeight.w600 &&
-            widget.style?.color == Colors.black87),
-        findsOneWidget,
-      );
+      
+      // Find the title text and verify its style matches the new implementation
+      final titleText = tester.widget<Text>(find.text('Progress'));
+      expect(titleText.style?.fontSize, 18);
+      expect(titleText.style?.fontWeight, FontWeight.bold);
+      expect(titleText.style?.color, Colors.black87);
     });
 
-    testWidgets('should use primaryYellow as background color', (WidgetTester tester) async {
+    testWidgets('should use white background with specified properties', (WidgetTester tester) async {
       // Arrange
       final colors = AppColors.defaultColors();
 
@@ -76,11 +73,15 @@ void main() {
 
       // Assert
       final sliverAppBar = tester.widget<SliverAppBar>(find.byType(SliverAppBar));
-      expect(sliverAppBar.backgroundColor, equals(colors.primaryYellow));
-      expect(sliverAppBar.elevation, equals(0));
-      expect(sliverAppBar.pinned, isTrue);
-      expect(sliverAppBar.floating, isFalse);
-      expect(sliverAppBar.toolbarHeight, equals(60));
+      
+      // Verify the styling matches the updated implementation
+      expect(sliverAppBar.backgroundColor, Colors.white);
+      expect(sliverAppBar.foregroundColor, Colors.black87);
+      expect(sliverAppBar.elevation, 0);
+      expect(sliverAppBar.pinned, true);
+      expect(sliverAppBar.floating, false);
+      expect(sliverAppBar.toolbarHeight, 60);
+      expect(sliverAppBar.centerTitle, true);
     });
 
     testWidgets('should have automaticallyImplyLeading set to false', (WidgetTester tester) async {
@@ -105,7 +106,7 @@ void main() {
 
       // Assert
       final sliverAppBar = tester.widget<SliverAppBar>(find.byType(SliverAppBar));
-      expect(sliverAppBar.automaticallyImplyLeading, isFalse);
+      expect(sliverAppBar.automaticallyImplyLeading, false);
     });
   });
 }

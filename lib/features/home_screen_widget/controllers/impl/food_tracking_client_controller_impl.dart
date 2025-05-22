@@ -61,7 +61,8 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
       // 2. Get current user and update if already logged in (will also setup auto-updates)
       _currentUser = await _loginService.getCurrentUser();
       if (_currentUser != null) {
-        debugPrint('User logged in during initialization: ${_currentUser!.email}');
+        debugPrint(
+            'User logged in during initialization: ${_currentUser!.email}');
         await processUserStatusChange(_currentUser);
       } else {
         debugPrint('No user logged in during initialization');
@@ -107,6 +108,8 @@ class FoodTrackingClientControllerImpl implements FoodTrackingClientController {
       } else {
         // No caloric requirement data, using default value 2000
       }
+
+      debugPrint('Target calories: $targetCalories');
 
       // Update both widgets dengan target calorie yang sama
       await Future.wait([

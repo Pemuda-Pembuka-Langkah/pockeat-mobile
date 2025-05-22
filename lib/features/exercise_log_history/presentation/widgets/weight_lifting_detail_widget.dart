@@ -150,12 +150,18 @@ class WeightLiftingDetailWidget extends StatelessWidget {
                 flex: 1,
               ),
               _buildVerticalDivider(),
-              _buildMetricItem(
-                icon: Icons.local_fire_department,
-                value: '${_calculateCalories().round()}',
-                label: 'Calories',
-                color: Colors.red,
-                flex: 1,
+              FutureBuilder<double>(
+                future: _calculateCalories(),
+                builder: (context, snapshot) {
+                  final calories = snapshot.data?.round() ?? 0;
+                  return _buildMetricItem(
+                    icon: Icons.local_fire_department,
+                    value: '$calories',
+                    label: 'Calories',
+                    color: Colors.red,
+                    flex: 1,
+                  );
+                },
               ),
             ],
           ),
@@ -269,8 +275,13 @@ class WeightLiftingDetailWidget extends StatelessWidget {
             _buildDetailDivider(),
             _buildDetailRow('Duration', _formatDuration(_getTotalDuration())),
             _buildDetailDivider(),
-            _buildDetailRow(
-                'Calories Burned', '${_calculateCalories().round()} kcal'),
+            FutureBuilder<double>(
+              future: _calculateCalories(),
+              builder: (context, snapshot) {
+                final calories = snapshot.data?.round() ?? 0;
+                return _buildDetailRow('Calories Burned', '$calories kcal');
+              },
+            ),
           ],
         ),
       ),
@@ -507,7 +518,7 @@ class WeightLiftingDetailWidget extends StatelessWidget {
     return '${minutes.toStringAsFixed(0)} min';
   }
 
-  double _calculateCalories() {
-    return calculateExerciseCalories(weightLifting);
+  Future<double> _calculateCalories() async {
+    return await calculateExerciseCalories(weightLifting);
   }
 }

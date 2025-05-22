@@ -9,6 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'package:pockeat/core/services/analytics_service.dart';
 import 'package:pockeat/features/authentication/services/google_sign_in_service.dart';
 import 'package:pockeat/features/health_metrics/presentation/screens/form_cubit.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 class GoogleSignInButton extends StatelessWidget {
   final bool isUnderTest;
@@ -46,6 +47,13 @@ class GoogleSignInButton extends StatelessWidget {
               formCubit.setUserId(uid);
               await formCubit.submit();
             }
+
+            // If we have a successful login, synchronize preferences
+            if (result.user != null) {
+              final userPreferencesService = GetIt.I<UserPreferencesService>();
+              await userPreferencesService.synchronizePreferencesAfterLogin();
+            }
+
             // Log successful authentication
             if (context.mounted) {
               final analyticsService = GetIt.I<AnalyticsService>();
@@ -58,11 +66,13 @@ class GoogleSignInButton extends StatelessWidget {
             }
           } catch (e) {
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Error: ${e.toString()}'),
-                  backgroundColor: Colors.red,
-                ),
+              // Log sign in error
+              final analyticsService = GetIt.I<AnalyticsService>();
+              analyticsService.logEvent(
+                name: isRegister
+                    ? 'google_sign_up_error'
+                    : 'google_sign_in_error',
+                parameters: {'error': e.toString()},
               );
             }
           }

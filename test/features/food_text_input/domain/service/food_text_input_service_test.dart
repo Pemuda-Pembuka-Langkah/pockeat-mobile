@@ -165,5 +165,34 @@ void main() {
       expect(results, equals(analysisResults));
       verify(mockFoodTextInputRepository.getAll()).called(1);
     });
+  
+      test('getAllFoodAnalysis should handle errors', () async {
+      when(mockFoodTextInputRepository.getAll())
+          .thenThrow(Exception('Fetch error'));
+
+      expect(() => foodTextInputService.getAllFoodAnalysis(),
+          throwsA(isA<Exception>()));
+
+      verify(mockFoodTextInputRepository.getAll()).called(1);
+    });
+
+    test('saveFoodAnalysis should save analysis with existing ID', () async {
+      final expectedAnalysisWithUserId = testFoodAnalysis.copyWith(userId: 'test-user-id');
+
+      when(mockFoodTextInputRepository.save(any, '123'))
+          .thenAnswer((_) async => 'save-id-123');
+
+      final result = await foodTextInputService.saveFoodAnalysis(testFoodAnalysis);
+
+      expect(result, 'Food analysis saved successfully');
+
+      verify(mockFoodTextInputRepository.save(
+        argThat(
+          isA<FoodAnalysisResult>().having((a) => a.id, 'id', '123')
+                                    .having((a) => a.userId, 'userId', 'test-user-id'),
+        ),
+        '123',
+      )).called(1);
+    });
   });
 }

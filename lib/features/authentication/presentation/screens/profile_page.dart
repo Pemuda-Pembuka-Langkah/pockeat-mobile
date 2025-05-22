@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Project imports:
 import 'package:pockeat/component/navigation.dart';
@@ -12,6 +14,8 @@ import 'package:pockeat/features/authentication/domain/model/user_model.dart';
 import 'package:pockeat/features/authentication/services/bug_report_service.dart';
 import 'package:pockeat/features/authentication/services/login_service.dart';
 import 'package:pockeat/features/authentication/services/logout_service.dart';
+import 'package:pockeat/features/home_screen_widget/controllers/food_tracking_client_controller.dart';
+import 'package:pockeat/features/user_preferences/services/user_preferences_service.dart';
 
 // Widget Manager Screen is now accessed via named route
 
@@ -36,13 +40,23 @@ class _ProfilePageState extends State<ProfilePage> {
   final Color primaryPink = const Color(0xFFFF6B6B);
   final Color primaryGreen = const Color(0xFF4ECDC4);
   final Color bgColor = const Color(0xFFF9F9F9);
+  final Color redColor = const Color(0xFFFF4C4C);
+  final Color orangeColor = const Color(0xFFFFA500);
 
   late final LoginService _loginService;
   late final LogoutService _logoutService;
   late final BugReportService _bugReportService;
+  late final UserPreferencesService _preferencesService;
   UserModel? _currentUser;
   bool _isLoading = true;
   String? _errorMessage;
+  late Future<bool> _exerciseCalorieCompensationEnabled;
+  late Future<bool> _rolloverCaloriesEnabled;
+  bool _loadingExerciseCompensation =
+      false; // Separate loading state for exercise toggle
+  bool _loadingRolloverCalories =
+      false; // Separate loading state for rollover toggle
+  bool _loadingPreferences = true; // Initial loading state for both preferences
 
   // Getter for FirebaseAuth access
   FirebaseAuth get _auth => widget.firebaseAuth ?? FirebaseAuth.instance;
@@ -53,7 +67,9 @@ class _ProfilePageState extends State<ProfilePage> {
     _loginService = GetIt.instance<LoginService>();
     _logoutService = GetIt.instance<LogoutService>();
     _bugReportService = GetIt.instance<BugReportService>();
+    _preferencesService = GetIt.instance<UserPreferencesService>();
     _loadUserData();
+    _loadPreferences();
   }
 
   /// Load user data
@@ -74,6 +90,136 @@ class _ProfilePageState extends State<ProfilePage> {
         _errorMessage = 'Failed to load profile: ${e.toString()}';
         _isLoading = false;
       });
+    }
+  }
+
+  // Method to load user preferences
+  Future<void> _loadPreferences() async {
+    setState(() {
+      _loadingPreferences = true;
+    });
+
+    try {
+      _exerciseCalorieCompensationEnabled =
+          _preferencesService.isExerciseCalorieCompensationEnabled();
+      _rolloverCaloriesEnabled =
+          _preferencesService.isRolloverCaloriesEnabled();
+
+      // Wait for preferences to load before setting _loadingPreferences to false
+      await Future.wait([
+        _exerciseCalorieCompensationEnabled,
+        _rolloverCaloriesEnabled,
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _loadingPreferences = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loadingPreferences = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load preferences: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Method to toggle exercise calorie compensation
+  Future<void> _toggleExerciseCalorieCompensation(bool value) async {
+    setState(() {
+      _loadingExerciseCompensation = true; // Only set exercise loading state
+    });
+
+    try {
+      await _preferencesService.setExerciseCalorieCompensationEnabled(value);
+      final widgetController = GetIt.instance<FoodTrackingClientController>();
+      await widgetController.forceUpdate();
+      debugPrint('Home screen widgets updated with new exercise data');
+      setState(() {
+        _exerciseCalorieCompensationEnabled = Future.value(value);
+        _loadingExerciseCompensation = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value
+                ? 'Burned calories will be compensated in your remaining calories'
+                : 'Burned calories will not be counted in your remaining calories'),
+            backgroundColor: primaryGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _loadingExerciseCompensation = false;
+      });
+      //coverage:ignore-start
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to change settings: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      //coverage:ignore-end
+    }
+  }
+
+  // Method to toggle calorie rollover
+  Future<void> _toggleCalorieRollover(bool value) async {
+    setState(() {
+      _loadingRolloverCalories = true; // Only set rollover loading state
+    });
+
+    try {
+      await _preferencesService.setRolloverCaloriesEnabled(value);
+      setState(() {
+        _rolloverCaloriesEnabled = Future.value(value);
+        _loadingRolloverCalories = false;
+      });
+
+      // If rollover calories are enabled, we should also call getRolloverCalories to update UI
+      if (value) {
+        // No need to wait for this result, just trigger the calculation
+        _preferencesService.getRolloverCalories();
+        final widgetController = GetIt.instance<FoodTrackingClientController>();
+        await widgetController.forceUpdate();
+        debugPrint('Home screen widgets updated with new exercise data');
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value
+                ? 'Unused calories will be accumulated to the next day'
+                : 'Unused calories will not be accumulated'),
+            backgroundColor: primaryGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _loadingRolloverCalories = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to change settings: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -114,7 +260,7 @@ class _ProfilePageState extends State<ProfilePage> {
         await _logoutService.logout();
 
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/login');
+          Navigator.of(context).pushReplacementNamed('/welcome');
         }
       }
     } catch (e) {
@@ -138,6 +284,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return PopScope(
       canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          Navigator.of(context).pushReplacementNamed('/');
+        }
+      },
       child: Scaffold(
         backgroundColor: bgColor,
         appBar: AppBar(
@@ -152,13 +303,6 @@ class _ProfilePageState extends State<ProfilePage> {
           foregroundColor: Colors.black87,
           elevation: 0,
           automaticallyImplyLeading: false,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _loadUserData,
-              tooltip: 'Refresh',
-            ),
-          ],
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -211,18 +355,188 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Widget to display profile view
   Widget _buildProfileView() {
-    return SingleChildScrollView(
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Reload profile data
+        setState(() {
+          // Add code to refresh user data, stats, settings, etc.
+          _loadUserData(); // Assuming this method exists to load user data
+        });
+        return Future.delayed(const Duration(milliseconds: 500));
+      },
+      color: const Color(0xFFFF6B6B), // Using primary pink color
+      child: LayoutBuilder(builder: (context, constraints) {
+        // Get the available height to ensure there's enough scrollable space
+        final availableHeight = MediaQuery.of(context).size.height - 100;
+
+        return SingleChildScrollView(
+          physics:
+              const AlwaysScrollableScrollPhysics(), // Ensure it's scrollable even with little content
+          child: Container(
+            constraints: BoxConstraints(
+              minHeight:
+                  availableHeight, // Make sure content takes up enough space for scrolling
+            ),
+            child: Column(
+              children: [
+                _buildProfileHeader(),
+                const SizedBox(height: 16),
+                _buildProfileStats(),
+                const SizedBox(height: 16),
+                // Add free trial status section if user is in trial
+                if (_currentUser != null &&
+                    _currentUser!.freeTrialEndsAt != null)
+                  Column(
+                    children: [
+                      _buildFreeTrialStatus(),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                _buildCalorieSettings(),
+                const SizedBox(height: 16),
+                _buildProfileActions(),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  /// Widget to display free trial status
+  Widget _buildFreeTrialStatus() {
+    // Calculate days left
+    final daysLeft = _currentUser?.daysLeftInFreeTrial ?? 0;
+    final isInFreeTrial = _currentUser?.isInFreeTrial ?? false;
+
+    // Determine status color based on days left
+    final Color statusColor = !isInFreeTrial
+        ? redColor
+        : daysLeft <= 2
+            ? redColor
+            : daysLeft <= 4
+                ? orangeColor
+                : primaryGreen;
+
+    // Text to display
+    final statusText = !isInFreeTrial
+        ? 'Trial Expired'
+        : daysLeft == 1
+            ? 'Final day of trial'
+            : '$daysLeft days left in trial';
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildProfileHeader(),
-          const SizedBox(height: 16),
-          _buildProfileStats(),
-          const SizedBox(height: 16),
-          _buildProfileActions(),
-          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Free Trial Status',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    statusText,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (isInFreeTrial) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  // Progress bar for trial
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: 1 - (daysLeft / 7), // 7 day trial assumed
+                      backgroundColor: Colors.grey.withOpacity(0.2),
+                      valueColor: AlwaysStoppedAnimation(statusColor),
+                      minHeight: 8,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Started: ${formatDate(_currentUser?.createdAt)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      Text(
+                        'Ends: ${formatDate(_currentUser?.freeTrialEndsAt)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: statusColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+          _buildActionTile(
+            title: 'Free Trial Details',
+            subtitle: isInFreeTrial
+                ? 'Check your status and become a beta tester'
+                : 'Become a beta tester to regain access',
+            icon: Icons.access_time_filled,
+            iconColor: statusColor,
+            onTap: () {
+              Navigator.of(context).pushNamed('/free-trial-status');
+            },
+          ),
         ],
       ),
     );
+  }
+
+  // Helper method to format dates
+  String formatDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    return DateFormat('dd MMM yyyy').format(date);
   }
 
   /// Widget to display profile header
@@ -579,6 +893,170 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Widget for calorie tracking preferences
+  Widget _buildCalorieSettings() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 20, top: 16, bottom: 8),
+            child: Text(
+              'Calorie Tracking Preferences',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.local_fire_department_outlined,
+                            color: primaryGreen,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Count Burned Calories',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Burned calories will be added to your daily remaining calories',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _loadingPreferences
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : _loadingExerciseCompensation // Check exercise-specific loading state
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : FutureBuilder<bool>(
+                            future: _exerciseCalorieCompensationEnabled,
+                            builder: (context, snapshot) {
+                              final isEnabled = snapshot.data ?? false;
+                              return Switch(
+                                value: isEnabled,
+                                onChanged: _toggleExerciseCalorieCompensation,
+                                activeColor: primaryGreen,
+                              );
+                            },
+                          ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.update,
+                            color: primaryGreen,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Rollover Calories',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Unused calories will be accumulated to the next day (max 1000)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _loadingPreferences
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : _loadingRolloverCalories // Check rollover-specific loading state
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : FutureBuilder<bool>(
+                            future: _rolloverCaloriesEnabled,
+                            builder: (context, snapshot) {
+                              final isEnabled = snapshot.data ?? false;
+                              return Switch(
+                                value: isEnabled,
+                                onChanged: _toggleCalorieRollover,
+                                activeColor: primaryGreen,
+                              );
+                            },
+                          ),
+              ],
+            ),
+          ),
+          _buildDivider(),
+        ],
+      ),
+    );
+  }
+
   /// Widget for profile action menu
   Widget _buildProfileActions() {
     // Check if user logged in using Google
@@ -638,6 +1116,16 @@ class _ProfilePageState extends State<ProfilePage> {
               }
             },
           ),
+          _buildDivider(),
+          _buildActionTile(
+            title: 'Edit Health and Information',
+            subtitle: 'Edit your health and pet information',
+            icon: Icons.monitor_weight_outlined,
+            onTap: () {
+              // Navigate to height-weight page
+              Navigator.of(context).pushNamed('/height-weight');
+            },
+          ),
           if (!isGoogleLogin) ...[
             _buildDivider(),
             _buildActionTile(
@@ -675,32 +1163,72 @@ class _ProfilePageState extends State<ProfilePage> {
             subtitle: 'Help us improve the app',
             icon: Icons.bug_report_outlined,
             onTap: () async {
-              // Ensure user data is set correctly before showing bug reporting UI
+              // Get current user data for the email body
+              String emailBody = '';
               if (_currentUser != null) {
-                // Set current user data for context in the bug report
-                await _bugReportService.setUserData(_currentUser!);
+                emailBody = 'User ID: ${_currentUser?.uid}\n';
+                emailBody += 'Email: ${_currentUser?.email}\n';
+                emailBody += 'Device Info: ${await _getDeviceInfo()}\n\n';
+                emailBody += 'Please describe the issue below:\n';
+                emailBody += '--------------------------------\n';
+              }
 
-                // Show the bug reporting UI
-                final result = await _bugReportService.show();
+              // Email address and subject for bug report
+              const String emailAddress = 'pockeat.service@gmail.com';
+              const String subject = 'Bug Report - Pockeat App';
 
-                if (!result && mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Failed to open bug reporting'),
-                      behavior: SnackBarBehavior.floating,
-                      backgroundColor: Colors.red,
-                    ),
+              try {
+                // Create a properly structured mailto Uri with query parameters
+                final Uri emailUri = Uri(
+                  scheme: 'mailto',
+                  path: emailAddress,
+                  query:
+                      'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(emailBody)}',
+                );
+
+                if (await canLaunchUrl(emailUri)) {
+                  await launchUrl(emailUri, mode: LaunchMode.platformDefault);
+                } else {
+                  // Try alternate approach with just the email address
+                  final Uri simpleUri = Uri(
+                    scheme: 'mailto',
+                    path: emailAddress,
                   );
+
+                  if (await canLaunchUrl(simpleUri)) {
+                    await launchUrl(simpleUri,
+                        mode: LaunchMode.platformDefault);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Email app opened. Please add "Bug Report - Pockeat App" as the subject.'),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } else {
+                    // If both approaches fail, show manual instructions
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Could not open email app. Please manually send an email to pockeat.service@gmail.com'),
+                          behavior: SnackBarBehavior.floating,
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
                 }
-              } else {
-                // Handle case when user data is not available
+              } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content:
-                          Text('User data not available for bug reporting'),
+                    SnackBar(
+                      content: Text('Error: ${e.toString()}'),
                       behavior: SnackBarBehavior.floating,
-                      backgroundColor: Colors.orange,
+                      backgroundColor: Colors.red,
                     ),
                   );
                 }
@@ -796,20 +1324,35 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Helper untuk mendapatkan inisial dari nama pengguna
   String _getInitials() {
-    final name = _currentUser?.displayName;
-    if (name == null || name.isEmpty) {
-      return 'P'; // Default for Pockeat User
+    final displayName = _currentUser?.displayName;
+    if (displayName == null || displayName.isEmpty) {
+      return 'P'; // Default untuk Pockeat
     }
 
-    final nameParts = name.trim().split(' ');
-    if (nameParts.length >= 2) {
-      // Get initials from first and last name
-      return '${nameParts[0][0]}${nameParts[1][0]}';
-    } else if (nameParts.isNotEmpty) {
-      // If only one word, use the first letter
-      return nameParts[0][0];
+    final nameParts = displayName.trim().split(' ');
+    if (nameParts.length > 1) {
+      return '${nameParts[0][0]}${nameParts[1][0]}'; // Inisial dari 2 kata pertama
     } else {
-      return 'P';
+      return nameParts[0][0]; // Inisial dari kata pertama saja
+    }
+  }
+
+  /// Helper to encode query parameters for email URI
+  String encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+  }
+
+  /// Helper to get basic device information for bug reports
+  Future<String> _getDeviceInfo() async {
+    try {
+      // Get platform information from Theme
+      final platform = Theme.of(context).platform;
+      return 'Platform: ${platform.toString().split('.').last}\n';
+    } catch (e) {
+      return 'Platform information not available';
     }
   }
 }

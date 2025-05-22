@@ -41,7 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _errorMessage;
 
   // State for registration flow
-  bool _isRegistrationSuccess = false;
+  final bool _isRegistrationSuccess = false;
 
   // Colors
   final Color primaryPink = const Color(0xFFFF6B6B);
@@ -115,18 +115,11 @@ class _RegisterPageState extends State<RegisterPage> {
           formCubit.setUserId(uid);
           await formCubit.submit();
         }
-
-        setState(() {
-          _isRegistrationSuccess = true;
-        });
-
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                  'Registration successful! Please verify your email.'),
-              backgroundColor: primaryGreen,
-            ),
+          // Navigate to email verification page
+          Navigator.of(context).pushReplacementNamed(
+            '/email-verification',
+            arguments: {'email': _emailController.text.trim()},
           );
         }
       } else {
@@ -211,13 +204,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        if (didPop) return;
-        // Jika user menekan tombol back, arahkan ke halaman login
-        // daripada ke halaman utama yang memerlukan auth
-        Navigator.pushReplacementNamed(context, '/login');
-      },
+      canPop: true,
       child: Scaffold(
         backgroundColor: bgColor,
         body: SafeArea(
@@ -298,7 +285,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: primaryPink),
+                borderSide: BorderSide(color: primaryGreen),
               ),
             ),
             validator: (value) {
@@ -328,7 +315,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: primaryPink),
+                borderSide: BorderSide(color: primaryGreen),
               ),
             ),
             validator: (value) {
@@ -377,7 +364,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: primaryPink),
+                borderSide: BorderSide(color: primaryGreen),
               ),
             ),
             validator: (value) {
@@ -442,7 +429,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: primaryPink),
+                borderSide: BorderSide(color: primaryGreen),
               ),
             ),
             validator: (value) {
@@ -469,7 +456,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 height: 24,
                 width: 24,
                 child: Checkbox(
-                  activeColor: primaryPink,
+                  activeColor: primaryGreen,
                   value: _termsAccepted,
                   onChanged: (value) {
                     setState(() {
@@ -491,7 +478,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       TextSpan(
                         text: 'Terms and Conditions',
                         style: TextStyle(
-                          color: primaryPink,
+                          color: primaryGreen,
                           fontWeight: FontWeight.bold,
                         ),
                         recognizer: TapGestureRecognizer()
@@ -518,11 +505,11 @@ class _RegisterPageState extends State<RegisterPage> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _register,
               style: ElevatedButton.styleFrom(
-                backgroundColor: primaryPink,
+                backgroundColor: primaryGreen,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                disabledBackgroundColor: primaryPink.withOpacity(0.5),
+                disabledBackgroundColor: primaryGreen.withOpacity(0.5),
               ),
               child: _isLoading
                   ? const CircularProgressIndicator(
@@ -578,31 +565,7 @@ class _RegisterPageState extends State<RegisterPage> {
             isRegister: true, // Set to register mode
           ),
 
-          const SizedBox(height: 20),
-
-          // Link to login page
-          Center(
-            child: RichText(
-              text: TextSpan(
-                text: 'Already have an account? ',
-                style: TextStyle(color: Colors.grey[700]),
-                children: [
-                  TextSpan(
-                    text: 'Sign In',
-                    style: TextStyle(
-                      color: primaryPink,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        // Navigate to login page
-                        Navigator.pushReplacementNamed(context, '/login');
-                      },
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // Removed login link
         ],
       ),
     );
@@ -614,66 +577,101 @@ class _RegisterPageState extends State<RegisterPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Panda image
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Image.asset(
+            'assets/images/panda_get_started_commision.png',
+            width: 110,
+            height: 110,
+          ),
+        ),
         // Icon
-        Icon(Icons.mark_email_read, size: 100, color: primaryGreen),
+        Icon(Icons.mark_email_read, size: 80, color: primaryGreen),
 
-        const SizedBox(height: 30),
+        const SizedBox(height: 24),
 
         // Title
         Text(
-          'Verify Your Email',
+          'Check Your Email',
           style: TextStyle(
-            fontSize: 28,
+            fontSize: 26,
             fontWeight: FontWeight.bold,
             color: primaryPink,
           ),
           textAlign: TextAlign.center,
         ),
 
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
 
         // Description
         Text(
-          'We have sent a verification email to ${_emailController.text}. Please check your inbox or spam folder to verify.',
+          'We\'ve sent a verification link to:',
           style: TextStyle(fontSize: 16, color: Colors.grey[700]),
           textAlign: TextAlign.center,
         ),
+        const SizedBox(height: 6),
+        Text(
+          _emailController.text,
+          style: TextStyle(
+              fontSize: 16, color: primaryGreen, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 18),
+        const Text(
+          'It may take a while to receive the email. Please access the app through the link in your inbox.',
+          style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.4),
+          textAlign: TextAlign.center,
+        ),
 
-        const SizedBox(height: 40),
+        const SizedBox(height: 32),
 
         // Resend email verification button
         SizedBox(
-          height: 55,
+          height: 50,
           child: OutlinedButton(
             onPressed: _isLoading ? null : _resendVerificationEmail,
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: primaryPink),
+              side: BorderSide(color: primaryGreen),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
             child: Text(
-              'RESEND EMAIL',
+              'Resend Verification Email',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
-                color: primaryPink,
+                color: primaryGreen,
               ),
             ),
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
 
-        // Back to login button
-        TextButton(
-          onPressed: () {
-            Navigator.pushReplacementNamed(context, '/login');
-          },
-          child: Text(
-            'Back to Sign In',
-            style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+        // Go Back button
+        SizedBox(
+          height: 50,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/welcome');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryPink,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Go Back',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
           ),
         ),
       ],
