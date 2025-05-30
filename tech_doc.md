@@ -36,22 +36,22 @@
 - **Manajemen State**: Pola BLoC dengan Provider
 - **Dependency Injection**: GetIt service locator
 - **Pengujian**: Unit tests dengan mockito, Widget tests, Integration tests
-- **Platform Target**: Android (prioritas utama), iOS (pengembangan masa depan)
+- **Platform Target**: Android (fokus pengembangan utama)
 
 #### Backend API (FastAPI)
 - **Framework**: FastAPI (Python)
 - **Runtime**: Python 3.12
-- **Server**: Uvicorn dengan support async/await
-- **Authentication Middleware**: Firebase Admin SDK dengan custom middleware
-- **API Documentation**: OpenAPI/Swagger UI otomatis
+- **Server**: Uvicorn dengan dukungan async/await
+- **Middleware Autentikasi**: Firebase Admin SDK dengan custom middleware
+- **Dokumentasi API**: OpenAPI/Swagger UI otomatis
 - **CORS**: Konfigurasi cross-origin untuk aplikasi mobile
 - **Testing**: pytest, pytest-asyncio, pytest-cov dengan coverage reporting
 - **Code Quality**: black (formatting), flake8 (linting)
 
 #### Layanan AI & Backend
-- **AI Integration**: Google Gemini Pro Vision API melalui LangChain
+- **Integrasi AI**: Google Gemini Pro Vision API melalui LangChain
 - **Layanan Backend**: Firebase (Authentication, Firestore, Cloud Messaging)
-- **Database**: Supabase PostgreSQL (primer), Firebase Firestore (sekunder)
+- **Database**: Firebase Firestore (aplikasi mobile), Supabase PostgreSQL (dataset makanan di API)
 - **Payment Gateway**: DOKU untuk pemrosesan pembayaran dan langganan
 
 #### Infrastructure & DevOps
@@ -59,7 +59,7 @@
 - **Deployment**: Firebase App Distribution, Docker containerization
 - **Monitoring**: Firebase Analytics, Performance Monitoring, dan Crash Reporting
 - **Notifikasi**: Firebase Cloud Messaging dengan flutter_local_notifications
-- **Environment Management**: dotenv untuk konfigurasi environment-specific
+- **Manajemen Environment**: dotenv untuk konfigurasi environment-specific
 
 ---
 
@@ -67,34 +67,37 @@
 
 ### Diagram Konteks Sistem C4 Level 1
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        PockEat Ecosystem                        │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────┐  │
-│  │                 │    │                 │    │             │  │
-│  │   Pengguna Mobile   │───▶│  Aplikasi Mobile    │───▶│ Google Gemini │  │
-│  │                     │    │     PockEat         │    │    API        │  │
-│  └─────────────────────┘    └─────────────────────┘    └─────────────┘  │
-│                                     │                                  │
-│                                     ▼                                  │
-│  ┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────┐  │
-│  │                     │    │                     │    │             │  │
-│  │   Suite Firebase    │◀───│  FastAPI Backend    │───▶│  Supabase   │  │
-│  │  (Auth, Firestore)  │    │   (Python 3.12)    │    │ (Database)  │  │
-│  └─────────────────────┘    └─────────────────────┘    └─────────────┘  │
-│                                     │                                  │
-│                                     ▼                                  │
-│                              ┌─────────────────────┐                   │
-│                              │                     │                   │
-│                              │   DOKU Payment      │                   │
-│                              │     Gateway         │                   │
-│                              └─────────────────────┘                   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                           Ekosistem PockEat                            │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  ┌──────────────────┐         ┌──────────────────┐         ┌─────────┐ │
+│  │                  │         │                  │         │         │ │
+│  │  Pengguna Mobile │ ──────▶ │ Aplikasi Mobile  │ ──────▶│ Google  │ │
+│  │                  │         │     PockEat      │         │ Gemini  │ │
+│  └──────────────────┘         └──────────────────┘         │   AI    │ │
+│                                         │                  └─────────┘ │
+│                                         │                              │
+│                                         ▼                              │
+│  ┌──────────────────┐         ┌──────────────────┐         ┌─────────┐ │
+│  │                  │         │                  │         │         │ │
+│  │    Firebase      │ ◀────── │  FastAPI Backend │ ──────▶│Supabase │ │
+│  │(Auth, Firestore, │         │   (Python 3.12)  │         │(Dataset)│ │
+│  │   FCM, Storage)  │         │                  │         └─────────┘ │
+│  └──────────────────┘         └──────────────────┘                     │
+│                                         │                              │
+│                                         ▼                              │
+│                               ┌──────────────────┐                     │
+│                               │                  │                     │
+│                               │ DOKU Payment     │                     │
+│                               │   Gateway        │                     │
+│                               └──────────────────┘                     │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Diagram Container C4 Level 2
+
+#### Aplikasi Mobile PockEat (Flutter)
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                   Aplikasi Mobile PockEat                       │
@@ -108,9 +111,19 @@
 │ │ • Widget        │  │ • BLoC/Cubit    │  │ • Sumber Data   │   │
 │ │ • Komponen      │  │ • Use Cases     │  │ • Model         │   │
 │ └─────────────────┘  └─────────────────┘  └─────────────────┘   │
+│                                                                 │
+│ ┌─────────────────────────────────────────────────────────────┐ │
+│ │                Infrastruktur Inti                           │ │
+│ │                                                             │ │
+│ │ • Dependency Injection (GetIt)                              │ │
+│ │ • Layanan Navigasi                                          │ │
+│ │ • Layanan Analitik                                          │ │
+│ │ • Layanan Notifikasi                                        │ │
+│ │ • Layanan Background                                        │ │
+│ └─────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼ HTTP/HTTPS API Calls
+                              │
+                              ▼ HTTP/HTTPS API Calls
 ┌─────────────────────────────────────────────────────────────────┐
 │                    FastAPI Backend Server                       │
 ├─────────────────────────────────────────────────────────────────┤
@@ -124,20 +137,6 @@
 │ │ • Health Module │  │ • Email Service │  │ • Logging       │   │
 │ │ • Payment       │  │                 │  │                 │   │
 │ └─────────────────┘  └─────────────────┘  └─────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-│ └─────────────────┘  └─────────────────┘  └─────────────────┘   │
-│         │                      │                      │         │
-│         └──────────────────────┼──────────────────────┘         │
-│                                │                                │
-│ ┌─────────────────────────────────────────────────────────────┐ │
-│ │                Infrastruktur Inti                           │ │
-│ │                                                             │ │
-│ │ • Dependency Injection (GetIt)                             │ │
-│ │ • Layanan Navigasi                                          │ │
-│ │ • Layanan Analitik                                          │ │
-│ │ • Layanan Notifikasi                                        │ │
-│ │ • Layanan Background                                        │ │
-│ └─────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -195,20 +194,20 @@ pockeat-api/
 - **Payment Gateway**: Integrasi DOKU untuk pembayaran langganan dengan webhook support
 - **Health Monitoring**: Endpoint kesehatan sistem dan monitoring performa server
 - **CORS Support**: Konfigurasi cross-origin untuk aplikasi mobile development
-- **Auto Documentation**: OpenAPI/Swagger UI otomatis di `/docs` dan `/redoc`
+- **Dokumentasi Otomatis**: OpenAPI/Swagger UI otomatis di `/docs` dan `/redoc`
 - **Error Handling**: Global exception handling dan logging dengan structured output
 - **Testing Suite**: Comprehensive testing dengan pytest, coverage, dan CI/CD integration
 
 #### Teknologi Backend
-- **Framework**: FastAPI dengan support async/await
-- **Python Version**: 3.12
-- **AI Integration**: Google Gemini Pro Vision API melalui LangChain
-- **Authentication**: Firebase Admin SDK dengan custom middleware
-- **Database**: Supabase PostgreSQL untuk data persistence
-- **Payment**: DOKU Payment Gateway dengan webhook notifications
+- **Framework**: FastAPI dengan dukungan async/await
+- **Versi Python**: 3.12
+- **Integrasi AI**: Google Gemini Pro Vision API melalui LangChain
+- **Autentikasi**: Firebase Admin SDK dengan custom middleware
+- **Database**: Supabase PostgreSQL untuk penyimpanan dataset makanan
+- **Payment**: DOKU Payment Gateway dengan notifikasi webhook
 - **Testing**: pytest, pytest-asyncio, pytest-cov untuk comprehensive testing
 - **Code Quality**: black untuk formatting, flake8 untuk linting
-- **Deployment**: Uvicorn server dengan Docker containerization support
+- **Deployment**: Uvicorn server dengan dukungan Docker containerization
 
 ---
 
@@ -425,47 +424,75 @@ Buat file `.env` di root proyek untuk kedua aplikasi:
 
 ##### Frontend (.env di pockeat-mobile/)
 ```env
-# Konfigurasi Firebase
-FIREBASE_API_KEY=your_api_key
-FIREBASE_APP_ID=your_app_id
-FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-FIREBASE_PROJECT_ID=your_project_id
+# Environment Configuration
+FLAVOR="staging"
 
-# Konfigurasi Supabase
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
+# Firebase Configuration (Staging)
+STAGING_FIREBASE_PROJECT_ID="your-project-id"
+STAGING_FIREBASE_MESSAGING_SENDER_ID="123456789"
+STAGING_FIREBASE_STORAGE_BUCKET="your-project.firebasestorage.app"
+
+# Android Configuration
+STAGING_FIREBASE_ANDROID_APP_ID="1:123456789:android:abcdef123456"
+STAGING_FIREBASE_ANDROID_API_KEY="AIzaSyExampleKey123456789"
+
+# iOS Configuration (untuk implementasi masa depan)
+STAGING_FIREBASE_IOS_APP_ID="1:123456789:ios:abcdef123456"
+STAGING_FIREBASE_IOS_API_KEY="AIzaSyExampleKey123456789"
+STAGING_FIREBASE_IOS_BUNDLE_ID="com.example.pockeat"
+
+# macOS Configuration (untuk implementasi masa depan)
+STAGING_FIREBASE_MACOS_APP_ID="1:123456789:ios:abcdef123456"
+STAGING_FIREBASE_MACOS_API_KEY="AIzaSyExampleKey123456789"
+STAGING_FIREBASE_MACOS_BUNDLE_ID="com.example.pockeat"
+
+# Web Configuration (untuk implementasi masa depan)
+STAGING_FIREBASE_WEB_APP_ID="1:123456789:web:abcdef123456"
+STAGING_FIREBASE_WEB_API_KEY="AIzaSyExampleKey123456789"
 
 # Backend API Configuration
-API_BASE_URL=http://localhost:8080
+API_BASE_URL="https://your-api-domain.com/api"
 
-# Environment
-FLAVOR=development
+# Supabase Configuration (digunakan oleh API untuk dataset makanan)
+SUPABASE_URL="https://your-project.supabase.co"
+SUPABASE_ANON_KEY="your_supabase_anon_key_here"
+
+# Google Services Configuration
+GOOGLE_GEMINI_PROJECT_ID="your_project_id"
+GOOGLE_GEMINI_API_KEY="your_gemini_api_key_here"
 ```
 
 ##### Backend (.env di pockeat-api/)
 ```env
-# Google Gemini API
-GEMINI_API_KEY=your_gemini_api_key
+# Google Gemini API Configuration
+GOOGLE_API_KEY="your_google_gemini_api_key_here"
 
-# Firebase Admin
-FIREBASE_SERVICE_ACCOUNT_KEY_PATH=path/to/service-account.json
+# Firebase Configuration
+FIREBASE_WEB_API_KEY="your_firebase_web_api_key"
+FIREBASE_CREDENTIALS_JSON={"type": "service_account","project_id": "your-project-id","private_key_id": "your_private_key_id","private_key": "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n","client_email": "firebase-adminsdk-xxx@your-project.iam.gserviceaccount.com","client_id": "your_client_id","auth_uri": "https://accounts.google.com/o/oauth2/auth","token_uri": "https://oauth2.googleapis.com/token","auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-xxx%40your-project.iam.gserviceaccount.com","universe_domain": "googleapis.com"}
 
-# Supabase Configuration
-SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-# DOKU Payment Gateway
-DOKU_CLIENT_ID=your_doku_client_id
-DOKU_SECRET_KEY=your_doku_secret_key
-DOKU_ENVIRONMENT=sandbox  # atau production
+# API Configuration
+SECRET_KEY="your_secret_key_here"
+DATABASE_URL="sqlite:///app.db"
 
 # Server Configuration
-HOST=127.0.0.1
-PORT=8080
-ENVIRONMENT=development
-
-# Authentication
+PORT=8000
+ENVIRONMENT="development"
 GLOBAL_AUTH_ENABLED=true
+
+# Email Configuration
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="465"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASSWORD="your_app_password_here"
+SMTP_FROM_EMAIL="your-email@gmail.com"
+
+# DOKU Payment Gateway
+DOKU_API_URL="https://api-sandbox.doku.com"
+DOKU_CLIENT_ID="your_doku_client_id"
+DOKU_SECRET_KEY="your_doku_secret_key"
+DOKU_CALLBACK_URL="https://your-domain.com/api/payment/callback"
+DOKU_NOTIFICATION_URL="https://your-domain.com/payment/notification"
 ```
 
 #### 4. Pengaturan Spesifik Platform
@@ -515,8 +542,128 @@ GLOBAL_AUTH_ENABLED=true
 3. Siapkan template reset password
 
 #### Pengaturan Database Firestore
+
+##### Struktur Koleksi Firestore
+
+Aplikasi PockEat menggunakan struktur koleksi Firestore berikut:
+
+**1. Koleksi `users`**
+- **Path**: `/users/{userId}`
+- **Fungsi**: Menyimpan profil pengguna dan informasi autentikasi
+- **Field Utama**:
+  - `uid`: ID unik pengguna
+  - `email`: Email pengguna
+  - `displayName`: Nama tampilan
+  - `photoURL`: URL foto profil
+  - `emailVerified`: Status verifikasi email
+  - `createdAt`: Timestamp pembuatan akun
+
+**2. Koleksi `health_metrics`**
+- **Path**: `/health_metrics/{userId}`
+- **Fungsi**: Menyimpan data kesehatan pengguna
+- **Field Utama**:
+  - `height`: Tinggi badan (cm)
+  - `weight`: Berat badan (kg)
+  - `age`: Usia
+  - `gender`: Jenis kelamin
+  - `activityLevel`: Tingkat aktivitas
+  - `fitnessGoal`: Tujuan kebugaran
+  - `bmi`: Body Mass Index
+  - `bmiCategory`: Kategori BMI
+  - `desiredWeight`: Target berat badan
+
+**3. Koleksi `caloric_requirements`**
+- **Path**: `/caloric_requirements/{userId}`
+- **Fungsi**: Menyimpan kebutuhan kalori harian pengguna
+- **Field Utama**:
+  - `basalMetabolicRate`: Metabolisme basal
+  - `dailyCaloricNeeds`: Kebutuhan kalori harian
+  - `proteinNeeds`: Kebutuhan protein
+  - `carbNeeds`: Kebutuhan karbohidrat
+  - `fatNeeds`: Kebutuhan lemak
+
+**4. Koleksi `calorie_stats`**
+- **Path**: `/calorie_stats/{docId}`
+- **Fungsi**: Menyimpan statistik kalori harian
+- **Field Utama**:
+  - `userId`: ID pengguna
+  - `date`: Tanggal statistik
+  - `targetCalories`: Target kalori
+  - `consumedCalories`: Kalori yang dikonsumsi
+  - `burnedCalories`: Kalori yang dibakar
+  - `netCalories`: Kalori bersih
+
+**5. Koleksi `food_analysis`**
+- **Path**: `/food_analysis/{docId}`
+- **Fungsi**: Menyimpan hasil analisis makanan (scan foto, input teks, database)
+- **Field Utama**:
+  - `foodName`: Nama makanan
+  - `calories`: Kalori
+  - `protein`: Protein (g)
+  - `carbohydrates`: Karbohidrat (g)
+  - `fat`: Lemak (g)
+  - `sodium`: Sodium (mg)
+  - `fiber`: Serat (g)
+  - `sugar`: Gula (g)
+  - `timestamp`: Waktu analisis
+  - `userId`: ID pengguna
+
+**6. Koleksi `saved_meals`**
+- **Path**: `/saved_meals/{docId}`
+- **Fungsi**: Menyimpan makanan favorit pengguna
+- **Field Utama**:
+  - `userId`: ID pengguna
+  - `name`: Nama makanan yang disimpan
+  - `foodAnalysis`: Data analisis makanan lengkap
+  - `createdAt`: Waktu penyimpanan
+  - `updatedAt`: Waktu update terakhir
+
+**7. Koleksi `exerciseAnalysis`**
+- **Path**: `/exerciseAnalysis/{docId}`
+- **Fungsi**: Menyimpan hasil analisis olahraga dari input teks
+- **Field Utama**:
+  - `exerciseType`: Jenis olahraga
+  - `duration`: Durasi olahraga
+  - `intensity`: Intensitas (Rendah/Sedang/Tinggi)
+  - `estimatedCalories`: Estimasi kalori yang dibakar
+  - `timestamp`: Waktu logging
+  - `originalInput`: Input asli pengguna
+  - `userId`: ID pengguna
+
+**8. Koleksi `weight_lifting_logs`**
+- **Path**: `/weight_lifting_logs/{docId}`
+- **Fungsi**: Menyimpan log latihan beban
+- **Field Utama**:
+  - `name`: Nama latihan
+  - `bodyPart`: Bagian tubuh yang dilatih
+  - `metValue`: Nilai MET untuk kalkulasi kalori
+  - `userId`: ID pengguna
+  - `sets`: Array set latihan
+    - `weight`: Berat (kg)
+    - `reps`: Repetisi
+    - `duration`: Durasi set (detik)
+
+**9. Koleksi `cardioActivities`**
+- **Path**: `/cardioActivities/{docId}`
+- **Fungsi**: Menyimpan aktivitas kardio
+- **Field Utama**:
+  - `activityType`: Jenis aktivitas kardio
+  - `duration`: Durasi (menit)
+  - `intensity`: Intensitas aktivitas
+  - `caloriesBurned`: Kalori yang dibakar
+  - `date`: Tanggal aktivitas
+  - `userId`: ID pengguna
+
+**10. Sub-koleksi `weights_history`**
+- **Path**: `/health_metrics/{userId}/weights_history/{docId}`
+- **Fungsi**: Menyimpan riwayat perubahan berat badan
+- **Field Utama**:
+  - `weight`: Berat badan (kg)
+  - `timestamp`: Waktu pencatatan
+
+##### Aturan Keamanan Firestore
 ```javascript
-// Contoh Security Rules
+// Security Rules untuk Firebase Firestore
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -528,6 +675,52 @@ service cloud.firestore {
     // Metrik kesehatan bersifat spesifik pengguna
     match /health_metrics/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // Sub-koleksi riwayat berat badan
+      match /weights_history/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Kebutuhan kalori pengguna
+    match /caloric_requirements/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Statistik kalori - hanya untuk pengguna sendiri
+    match /calorie_stats/{docId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Analisis makanan - hanya untuk pengguna sendiri
+    match /food_analysis/{docId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Makanan tersimpan - hanya untuk pengguna sendiri
+    match /saved_meals/{docId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Analisis olahraga - hanya untuk pengguna sendiri
+    match /exerciseAnalysis/{docId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Log latihan beban - hanya untuk pengguna sendiri
+    match /weight_lifting_logs/{docId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Aktivitas kardio - hanya untuk pengguna sendiri
+    match /cardioActivities/{docId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
     }
   }
 }
@@ -538,40 +731,74 @@ service cloud.firestore {
 2. Download service account key untuk notifikasi server-side
 3. Siapkan notification channels untuk Android
 
-### Konfigurasi Supabase
+### Konfigurasi Supabase (hanya untuk API)
 
-#### Skema Database
+**Catatan**: Supabase hanya digunakan oleh pockeat-api untuk menyimpan dataset makanan. Aplikasi Flutter menggunakan Firebase Firestore untuk semua data pengguna.
+
+#### Skema Database (khusus untuk dataset makanan)
 ```sql
--- Tabel users
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  firebase_uid TEXT UNIQUE NOT NULL,
-  email TEXT UNIQUE NOT NULL,  display_name TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-);
-
--- Tabel health metrics
-CREATE TABLE health_metrics (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id),
-  height DECIMAL,
-  weight DECIMAL,
-  age INTEGER,
-  activity_level TEXT,
-  goal TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-);
-
--- Tabel food logs
-CREATE TABLE food_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id),
-  food_name TEXT NOT NULL,
-  calories DECIMAL,
+-- Tabel nutrition_data untuk dataset makanan lengkap dengan informasi nutrisi
+CREATE TABLE nutrition_data (
+  id INTEGER PRIMARY KEY,
+  food TEXT NOT NULL,
+  
+  -- Makronutrien utama
+  caloric_value DECIMAL,
   protein DECIMAL,
-  carbs DECIMAL,
+  carbohydrates DECIMAL,
   fat DECIMAL,
-  logged_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+  saturated_fats DECIMAL,
+  
+  -- Nutrisi penting
+  sodium DECIMAL,
+  dietary_fiber DECIMAL,
+  sugars DECIMAL,
+  cholesterol DECIMAL,
+  nutrition_density DECIMAL,
+  
+  -- Vitamin
+  vitamin_a DECIMAL,
+  vitamin_b1 DECIMAL,
+  vitamin_b2 DECIMAL,
+  vitamin_b3 DECIMAL,
+  vitamin_b5 DECIMAL,
+  vitamin_b6 DECIMAL,
+  vitamin_b11 DECIMAL,
+  vitamin_b12 DECIMAL,
+  vitamin_c DECIMAL,
+  vitamin_d DECIMAL,
+  vitamin_e DECIMAL,
+  vitamin_k DECIMAL,
+  
+  -- Mineral
+  calcium DECIMAL,
+  copper DECIMAL,
+  iron DECIMAL,
+  magnesium DECIMAL,
+  manganese DECIMAL,
+  phosphorus DECIMAL,
+  potassium DECIMAL,
+  selenium DECIMAL,
+  zinc DECIMAL,
+  
+  -- Informasi tambahan
+  water DECIMAL,
+  monounsaturated_fats DECIMAL,
+  polyunsaturated_fats DECIMAL,
+  
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Index untuk pencarian makanan
+CREATE INDEX idx_nutrition_data_food ON nutrition_data(food);
+CREATE INDEX idx_nutrition_data_caloric_value ON nutrition_data(caloric_value);
+
+-- Tabel food_synonyms untuk pencarian alternatif (opsional)
+CREATE TABLE food_synonyms (
+  id SERIAL PRIMARY KEY,
+  food_id INTEGER REFERENCES nutrition_data(id),
+  synonym TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 ```
 
@@ -857,42 +1084,19 @@ android {
 }
 ```
 
-#### Play Store Deployment (Future Implementation)
-**Status**: Not yet implemented. The application has not been deployed to Google Play Store.
+#### Deploy Play Store (Implementasi Masa Depan)
+**Status**: Belum diimplementasikan. Aplikasi belum di-deploy ke Google Play Store.
 
-**Future deployment steps will include**:
-1. Create signed app bundle
-2. Upload to Play Console
-3. Configure store listing
-4. Set up release tracks (internal, alpha, beta, production)
-5. Configure App Signing by Google Play
+**Langkah-langkah deployment masa depan**:
+1. Buat signed app bundle
+2. Upload ke Play Console
+3. Konfigurasi store listing
+4. Setup release tracks (internal, alpha, beta, production)
+5. Konfigurasi App Signing by Google Play
 
-### iOS Deployment (Not Currently Implemented)
+### Deployment iOS (Belum Diimplementasikan)
 
-**Status**: The development team has not actively pursued iOS development. While Flutter's project structure includes iOS configuration files, these have not been properly configured, tested, or deployed.
-
-#### Future iOS Implementation Plan
-When iOS development is pursued in the future, the following steps will be required:
-
-```bash
-# Build iOS archive (future implementation)
-flutter build ios --release
-
-# Open in Xcode for further processing
-open ios/Runner.xcworkspace
-```
-
-#### App Store Deployment (Future Implementation)
-**Prerequisites for future iOS deployment**:
-1. Apple Developer Account setup
-2. Configure provisioning profiles
-3. Konfigurasi `ios/Runner.xcodeproj` dengan team dan bundle ID
-4. Tambahkan GoogleService-Info.plist ke proyek iOS
-5. Konfigurasi pengaturan App Transport Security
-6. Build dan archive di Xcode
-7. Upload ke App Store Connect
-8. Konfigurasi metadata aplikasi
-9. Submit untuk review
+**Status**: Tim belum secara aktif mengembangkan untuk platform iOS. Meskipun struktur proyek Flutter menyertakan file konfigurasi iOS, file-file tersebut belum dikonfigurasi, diuji, atau di-deploy secara aktif.
 
 ### Pipeline CI/CD
 
@@ -986,10 +1190,10 @@ firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.ap
 
 #### Keterbatasan Teknis
 1. **Kemampuan Offline**: Fungsionalitas offline terbatas, memerlukan internet untuk sebagian besar fitur
-2. **Dukungan Platform**: Saat ini mendukung iOS dan Android saja
+2. **Dukungan Platform**: Saat ini terfokus pada pengembangan Android, iOS belum diimplementasikan
 3. **Performa Kamera**: Pemindaian makanan mungkin kesulitan dalam kondisi cahaya rendah
 4. **Sinkronisasi Database**: Potensi konflik sinkronisasi antara Firebase dan Supabase
-5. **Platform Widget**: Widget layar utama terbatas pada iOS 14+ dan Android 8+
+5. **Platform Widget**: Widget layar utama terbatas pada Android 8+ (iOS belum diimplementasikan)
 
 #### Keterbatasan Fungsional
 1. **Akurasi AI**: Akurasi pengenalan makanan bergantung pada kualitas gambar dan cakupan database
@@ -1006,7 +1210,7 @@ firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.ap
 
 ### Roadmap Pengembangan Masa Depan
 
-#### Fase 1: Peningkatan Inti (Q1 2024)
+#### Fase 1: Peningkatan Inti (Q3-Q4 2025)
 **Prioritas: Tinggi**
 
 1. **Peningkatan Fungsionalitas Offline**
@@ -1016,14 +1220,15 @@ firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.ap
 
 2. **Optimasi Performa**
    - Kompresi gambar untuk pemindaian makanan
-   - Optimasi layanan background   - Peningkatan penggunaan memori
+   - Optimasi layanan background
+   - Peningkatan penggunaan memori
 
 3. **Peningkatan UI/UX**
    - Dukungan dark mode
    - Peningkatan aksesibilitas
    - Alur onboarding yang diperbaiki
 
-#### Fase 2: Ekspansi Fitur (Q2 2024)
+#### Fase 2: Ekspansi Fitur (Q1-Q2 2026)
 **Prioritas: Sedang**
 
 1. **Analitik Lanjutan**
@@ -1041,7 +1246,7 @@ firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.ap
    - Sinkronisasi fitness tracker
    - Integrasi aplikasi diet pihak ketiga
 
-#### Fase 3: Ekspansi Platform (Q3 2024)
+#### Fase 3: Ekspansi Platform (Q3-Q4 2026)
 **Prioritas: Sedang**
 
 1. **Aplikasi Web**
@@ -1059,7 +1264,7 @@ firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.ap
    - Integrasi peralatan dapur
    - Sinkronisasi perangkat IoT
 
-#### Fase 4: Fitur Lanjutan (Q4 2024)
+#### Fase 4: Fitur Lanjutan (Q1-Q2 2027)
 **Prioritas: Rendah**
 
 1. **AI dan Machine Learning**
@@ -1158,36 +1363,24 @@ firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.ap
 echo "✅ Deployment Android selesai!"
 ```
 
-#### Script Release iOS
+#### Script Release iOS (Implementasi Masa Depan)
 ```bash
 #!/bin/bash
-# scripts/deploy_ios.sh
+# scripts/deploy_ios.sh (belum diimplementasikan)
 
 set -e
 
 echo "🚀 Memulai iOS Release Build..."
 
-# Bersihkan build sebelumnya
+# Catatan: Script ini belum diimplementasikan dan diuji
+# Akan dikembangkan ketika tim mulai mengerjakan platform iOS
+
 flutter clean
 flutter pub get
-
-# Generate file yang diperlukan
 flutter packages pub run build_runner build --delete-conflicting-outputs
-
-# Build iOS
-echo "🍎 Building iOS..."
 flutter build ios --release --no-codesign
 
-# Archive dan upload (memerlukan Xcode)
-echo "📦 Archiving dengan Xcode..."
-cd ios
-xcodebuild -workspace Runner.xcworkspace \
-  -scheme Runner \
-  -configuration Release \
-  -archivePath build/Runner.xcarchive \
-  archive
-
-echo "✅ Build iOS selesai! Silakan upload ke App Store Connect secara manual."
+echo "✅ iOS deployment belum tersedia."
 ```
 
 ### Template Konfigurasi
@@ -1407,13 +1600,13 @@ Response:
 
 #### Masalah Umum
 
-1. **Build Failures (Kegagalan Build)**
+1. **Kegagalan Build**
    ```bash
    # Clear Flutter cache
    flutter clean
    flutter pub get
    
-   # Clear iOS build cache
+   # Clear iOS build cache (untuk implementasi masa depan)
    cd ios && rm -rf build/ && cd ..
    
    # Clear Android build cache
@@ -1425,7 +1618,7 @@ Response:
    - Periksa konfigurasi proyek Firebase
    - Pastikan SHA-1 fingerprints telah dikonfigurasi
 
-3. **Masalah Widget Testing**
+3. **Masalah Testing Widget**
    ```dart
    // Setup test umum
    testWidgets('should render correctly', (tester) async {
