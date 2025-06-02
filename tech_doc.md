@@ -672,7 +672,7 @@ PockEat uses the following Firestore collections to store user data:
     - `reps`: Number of repetitions performed
     - `duration`: Duration of the set in seconds
 
-**9. Koleksi `cardioActivities`**
+**9. `cardioActivities` Collection**
 - **Path**: `/cardioActivities/{docId}`
 - **Purpose**: Stores logs of cardiovascular activities such as running, cycling, or swimming
 - **Key Fields**:
