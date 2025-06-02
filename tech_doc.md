@@ -1,125 +1,132 @@
-# Aplikasi Mobile PockEat - Dokumentasi Teknis
+# PockEat - Technical Document
 
-## Daftar Isi
-1. [Gambaran Sistem](#gambaran-sistem)
-2. [Arsitektur Sistem](#arsitektur-sistem)
-3. [Modul Implementasi](#modul-implementasi)
-4. [Pengaturan Lingkungan Pengembangan](#pengaturan-lingkungan-pengembangan)
-5. [Panduan Konfigurasi](#panduan-konfigurasi)
-6. [Instruksi Menjalankan & Pengujian](#instruksi-menjalankan--pengujian)
-7. [Panduan Deployment](#panduan-deployment)
-8. [Keterbatasan Proyek & Pengembangan Masa Depan](#keterbatasan-proyek--pengembangan-masa-depan)
-9. [Lampiran](#lampiran)
+## Table of Contents
+1. [System Overview](#system-overview)
+2. [System Architecture](#system-architecture)
+3. [Implementation Modules](#implementation-modules)
+4. [Development Environment Setup](#development-environment-setup)
+5. [Configuration Guide](#configuration-guide)
+6. [Run & Testing Instructions](#run--testing-instructions)
+7. [Deployment Guide](#deployment-guide)
+8. [Project Limitations & Future Development](#project-limitations--future-development)
+9. [Appendix](#appendix)
 
 ---
 
-## Gambaran Sistem
+## System Overview
 
-### Deskripsi Proyek
-**PockEat** adalah aplikasi mobile pelacakan kesehatan dan kebugaran yang komprehensif yang dibangun dengan Flutter/Dart. Aplikasi ini berfungsi sebagai pendamping digital bagi pengguna yang ingin melacak nutrisi, olahraga, dan perjalanan kesehatan mereka secara keseluruhan dengan bantuan sistem pendamping hewan peliharaan bertenaga AI.
+### Project Description
+**PockEat** is a mobile application for health and fitness tracking, built with Flutter/Dart. It acts as a digital companion that helps users monitor their nutritional intake, physical activities, and overall health progress, enhanced by AI-powered analysis. To further encourage user engagement, PockEat features a virtual pet companion that motivates and accompanies users on their wellness journey.
 
-### Fitur Utama
-- **Pelacakan Metrik Kesehatan**: Proses onboarding yang komprehensif untuk menangkap data kesehatan pengguna
-- **Pencatatan Makanan Bertenaga AI**: Pengenalan makanan pintar melalui pemindaian gambar, input teks, dan analisis label nutrisi
-- **Pelacakan Olahraga**: Dukungan untuk kardio, latihan beban, dan pencatatan olahraga pintar
-- **Sistem Pendamping Hewan Peliharaan**: Sistem motivasi gamifikasi dengan interaksi hewan peliharaan virtual
-- **Analitik Kemajuan**: Grafik dan diagram visual untuk melacak kemajuan kesehatan
-- **Widget Layar Utama**: Akses cepat ke data nutrisi dari layar utama perangkat
-- **Notifikasi**: Pengingat cerdas dan pesan motivasi
-- **Makanan Tersimpan**: Menyimpan dan menggunakan kembali makanan yang sering dikonsumsi
-- **Fitur Sosial**: Berbagi makanan dan interaksi komunitas
+### Key Features
+- **AI-Powered Food Logging**: Smart food analysis using AI through image scanning, text input, or nutrition label recognition.
+- **Physical Activity Tracking**: Log cardio, strength training, and other workouts with burned calories analysis and activity recognition using AI.
+- **Virtual Pet Companion**: A gamified system that motivates users through interactions with a virtual pet that evolves with your health progress.
+- **Health Tracking & Analytics**: Record key health metrics like height, weight, age, and fitness goals. Visualize progress with trend graphs, including weight fluctuations.
+- **Homescreen Widget**: Instantly view users' nutrition summaries and progress directly from their device’s homescreen.
+- **Smart Notifications**: Scheduled reminders and personalized motivational messages based on users' activity patterns.
+- **Favorite Foods Library**: Save frequently consumed foods for quicker and easier logging in the future.
+- **Social Sharing**: Share food logs and activity records on social media to celebrate progress.
 
-### Stack Teknologi
+### Tech Stack
 
 #### Frontend Mobile (Flutter)
-- **Framework**: Flutter 3.x dengan Dart
-- **Manajemen State**: Pola BLoC dengan Provider
+- **Framework**: Flutter 3.x with Dart
+- **State Management**: BLoC Pattern combined with Provider
 - **Dependency Injection**: GetIt service locator
-- **Pengujian**: Unit tests dengan mockito, Widget tests, Integration tests
-- **Platform Target**: Android (fokus pengembangan utama)
+- **Testing**: Unit testing with Mockito, widget tests, and integration tests
+- **Target Platform**: Android (primary development focus)
+
+PockEat uses BLoC architecture to separate UI and business logic cleanly. Provider handles lightweight dependency injection at the widget level, while GetIt serves as a global service locator in the core layer to enhance modularity and facilitate testing.
 
 #### Backend API (FastAPI)
 - **Framework**: FastAPI (Python)
 - **Runtime**: Python 3.12
-- **Server**: Uvicorn dengan dukungan async/await
-- **Middleware Autentikasi**: Firebase Admin SDK dengan custom middleware
-- **Dokumentasi API**: OpenAPI/Swagger UI otomatis
-- **CORS**: Konfigurasi cross-origin untuk aplikasi mobile
-- **Testing**: pytest, pytest-asyncio, pytest-cov dengan coverage reporting
-- **Code Quality**: black (formatting), flake8 (linting)
+- **Server**: Uvicorn with full async/await support
+- **Authentication Middleware**: Firebase Admin SDK with custom middleware
+- **API Documentation**: Auto-generated via OpenAPI/Swagger UI
+- **CORS**: Configured for cross-origin requests from the mobile app
+- **Testing**: `pytest`, `pytest-asyncio`, and `pytest-cov` for test coverage report
+- **Code Quality**: Enforced using `black` (formatter) and `flake8` (linter)
 
-#### Layanan AI & Backend
-- **Integrasi AI**: Google Gemini Pro Vision API melalui LangChain
-- **Layanan Backend**: Firebase (Authentication, Firestore, Cloud Messaging)
-- **Database**: Firebase Firestore (aplikasi mobile), Supabase PostgreSQL (dataset makanan di API)
-- **Payment Gateway**: DOKU untuk pemrosesan pembayaran dan langganan
+#### AI Services & Backend Integrations
+- **AI Integration**: Google Gemini Pro Vision API via LangChain
+- **Backend Services**: Firebase (Authentication, Firestore, Cloud Messaging)
+- **Database**: Firebase Firestore for mobile app data and Supabase PostgreSQL for food dataset queries via the API
+- **Payment Gateway**: DOKU for payment processing and subscription handling
 
 #### Infrastructure & DevOps
-- **CI/CD**: GitHub Actions dengan automated testing dan deployment
-- **Deployment**: Firebase App Distribution, Docker containerization
-- **Monitoring**: Firebase Analytics, Performance Monitoring, dan Crash Reporting
-- **Notifikasi**: Firebase Cloud Messaging dengan flutter_local_notifications
-- **Manajemen Environment**: dotenv untuk konfigurasi environment-specific
+- **CI/CD**: GitHub Actions for automated testing and deployment
+- **Deployment Targets**: Firebase App Distribution & Docker containers
+- **Monitoring Tools**: Firebase Analytics, Performance Monitoring, and Crash Reporting
+- **Notifications System**: Firebase Cloud Messaging integrated with `flutter_local_notifications`
+- **Environment Management**: `dotenv` for environment-specific configurations
 
 ---
 
-## Arsitektur Sistem
+## System Architecture
 
-### Diagram Konteks Sistem C4 Level 1
+### C4 Level 1 – System Context Diagram
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                           Ekosistem PockEat                            │
+│                           PockEat Ecosystem                            │
 ├────────────────────────────────────────────────────────────────────────┤
 │                                                                        │
 │  ┌──────────────────┐         ┌──────────────────┐         ┌─────────┐ │
 │  │                  │         │                  │         │         │ │
-│  │  Pengguna Mobile │ ──────▶ │ Aplikasi Mobile  │ ──────▶│ Google  │ │
-│  │                  │         │     PockEat      │         │ Gemini  │ │
+│  │   Mobile User    │ ──────▶   PockEat Mobile   ──────▶  | Google  │ │
+│  │                  │         │   Application    │         │ Gemini  │ │
 │  └──────────────────┘         └──────────────────┘         │   AI    │ │
 │                                         │                  └─────────┘ │
 │                                         │                              │
 │                                         ▼                              │
 │  ┌──────────────────┐         ┌──────────────────┐         ┌─────────┐ │
 │  │                  │         │                  │         │         │ │
-│  │    Firebase      │ ◀────── │  FastAPI Backend │ ──────▶│Supabase │ │
-│  │(Auth, Firestore, │         │   (Python 3.12)  │         │(Dataset)│ │
-│  │   FCM, Storage)  │         │                  │         └─────────┘ │
+│  │    Firebase      │ ◀──────   FastAPI Backend  ──────▶  │Supabase │ │
+│  │ (Auth, Firestore,│         │   (Python 3.12)  |         │ Dataset │ │
+│  │  FCM, Storage)   │         │                  │         └─────────┘ │
 │  └──────────────────┘         └──────────────────┘                     │
 │                                         │                              │
 │                                         ▼                              │
 │                               ┌──────────────────┐                     │
 │                               │                  │                     │
-│                               │ DOKU Payment     │                     │
-│                               │   Gateway        │                     │
+│                               │   DOKU Payment   │                     │
+│                               │     Gateway      │                     │
 │                               └──────────────────┘                     │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Diagram Container C4 Level 2
+### C4 Level 2 - Container Diagram
 
-#### Aplikasi Mobile PockEat (Flutter)
+#### PockEat Mobile App (Flutter)
+
+The mobile app follows Clean Architecture principles with the following layered structure:
+- **Presentation Layer**: Handles UI rendering and user interaction.
+- **Business Logic Layer**: Manages application logic using BLoC and service classes.
+- **Data Layer**: Interfaces with external data sources such as APIs and local storage.
+
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                   Aplikasi Mobile PockEat                       │
+│                   PockEat Mobile Application                    │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │ ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐   │
-│ │     Layer       │  │     Logika      │  │     Layer       │   │
-│ │   Presentasi    │  │     Bisnis      │  │      Data       │   │
-│ │                 │  │                 │  │                 │   │
-│ │ • Layar/Halaman │  │ • Layanan       │  │ • Repository    │   │
-│ │ • Widget        │  │ • BLoC/Cubit    │  │ • Sumber Data   │   │
-│ │ • Komponen      │  │ • Use Cases     │  │ • Model         │   │
+│ │ Presentation    │  │ Business Logic  │  │      Data       │   │
+│ │ Layer           │  │ Layer           │  │ Layer           │   │
+│ │ • Screens       │  │ • Services      │  │ • Repositories  │   │
+│ │ • Widgets       │  │ • BLoC/Cubits   │  │ • Data Sources  │   │
+│ │ • Components    │  │ • Use Cases     │  │ • Models        │   │
 │ └─────────────────┘  └─────────────────┘  └─────────────────┘   │
 │                                                                 │
 │ ┌─────────────────────────────────────────────────────────────┐ │
-│ │                Infrastruktur Inti                           │ │
+│ │                    Core Infrastructure                      │ │
 │ │                                                             │ │
 │ │ • Dependency Injection (GetIt)                              │ │
-│ │ • Layanan Navigasi                                          │ │
-│ │ • Layanan Analitik                                          │ │
-│ │ • Layanan Notifikasi                                        │ │
-│ │ • Layanan Background                                        │ │
+│ │ • Navigation Service                                        │ │
+│ │ • Analytics Service                                         │ │
+│ │ • Notification Service                                      │ │
+│ │ • Background Services                                       │ │
 │ └─────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -129,300 +136,317 @@
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │ ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐   │
-│ │   API Routes    │  │     Services    │  │   Dependencies  │   │
-│ │                 │  │                 │  │                 │   │
-│ │ • Food Module   │  │ • Gemini Service│  │ • Authentication│   │
-│ │ • Exercise      │  │ • Database Svc  │  │ • Database      │   │
+│ │    API Routes   │  │     Services    │  │   Dependencies  │   │
+│ │ • Food Module   │  │ • Gemini AI     │  │ • Auth Layer    │   │
+│ │ • Exercise      │  │ • Database Ops  │  │ • Database ORM  │   │
 │ │ • User Module   │  │ • Payment Svc   │  │ • Configuration │   │
-│ │ • Health Module │  │ • Email Service │  │ • Logging       │   │
+│ │ • Health Module │  │ • Email Svc     │  │ • Logging       │   │
 │ │ • Payment       │  │                 │  │                 │   │
 │ └─────────────────┘  └─────────────────┘  └─────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
+
 ```
 
-### Pola Arsitektur
-- **Clean Architecture**: Pemisahan yang jelas antara layer presentasi, logika bisnis, dan data
-- **Struktur Modul Berbasis Fitur**: Setiap fitur berdiri sendiri dengan layer presentasi, domain, dan data masing-masing
-- **Pola Repository**: Layer abstraksi antara logika bisnis dan sumber data
-- **Pola Service Locator**: Manajemen dependency terpusat menggunakan GetIt
-- **Pola BLoC**: Manajemen state reaktif untuk komponen UI
+### Software Architecture Patterns
+- **Clean Architecture**: Clear separation between presentation, business logic, and data layers to promote testability and scalability.
+- **Feature-Based Modular Structure**: Each feature is self-contained, consisting of its own presentation, domain, and data layers.
+- **Repository Pattern**: Acts as an abstraction between the business logic and data sources (remote or local).
+- **Service Locator Pattern**: Uses GetIt for centralized and test-friendly dependency management.
+- **BLoC Pattern**: Enables reactive state management and predictable UI behavior.
 
-### Arsitektur Backend API (FastAPI)
+### Backend API Architecture (FastAPI)
 
-#### Struktur API Backend
+#### API Backend Structure Overview
 ```
 pockeat-api/
-├── main.py                 # Entry point aplikasi FastAPI dengan middleware
-├── requirements.txt        # Dependencies Python
-├── runtime.txt            # Runtime specification untuk deployment
-├── nixpacks.toml          # Konfigurasi deployment
-├── pytest.ini            # Konfigurasi testing
-├── Procfile               # Process file untuk deployment
+├── main.py                 # Application entry point with FastAPI and middleware setup
+├── requirements.txt        # Python dependencies
+├── runtime.txt            # Runtime specification for deployment
+├── nixpacks.toml          # Deployment configuration (e.g., for Railway)
+├── pytest.ini            # Pytest configuration
+├── Procfile               # Process specification for deployment
 ├── api/
-│   ├── routes.py          # Router utama yang menggabungkan semua route
+│   ├── routes.py          # Central router that aggregates all route modules
 │   ├── dependencies/
-│   │   └── auth.py        # Middleware autentikasi Firebase
+│   │   └── auth.py        # Firebase authentication middleware
 │   ├── route_modules/
-│   │   ├── food_module.py      # Endpoint analisis makanan
-│   │   ├── exercise_module.py  # Endpoint analisis olahraga
-│   │   ├── user_module.py      # Endpoint manajemen pengguna
-│   │   ├── health_module.py    # Endpoint kesehatan sistem
-│   │   └── payment_module.py   # Endpoint gateway pembayaran DOKU
+│   │   ├── food_module.py      # Endpoints for food analysis
+│   │   ├── exercise_module.py  # Endpoints for exercise analysis
+│   │   ├── user_module.py      # Endpoints for user account management
+│   │   ├── health_module.py    # Endpoints for system health monitoring
+│   │   └── payment_module.py   # Endpoints for DOKU payment gateway integration
 │   ├── services/
-│   │   ├── gemini_service.py   # Service Google Gemini AI
-│   │   ├── database/          # Service database Supabase
-│   │   ├── email/             # Service notifikasi email
-│   │   ├── gemini/            # Service Gemini dengan exceptions
-│   │   └── payment/           # Service DOKU payment gateway
+│   │   ├── gemini_service.py   # Google Gemini service logic
+│   │   ├── database/          # Supabase database service
+│   │   ├── email/             # Email notification service
+│   │   ├── gemini/            # Gemini service with error handling exceptions
+│   │   └── payment/           # DOKU payment service
 │   └── models/
-│       ├── food_analysis.py    # Model analisis makanan
-│       ├── exercise_analysis.py # Model analisis olahraga
-│       └── subscription.py     # Model langganan pengguna
-├── tests/                      # Test suite dengan pytest
-│   ├── conftest.py            # Konfigurasi pytest
-│   ├── fixtures/              # Test fixtures
+│       ├── food_analysis.py    # Data model for food analysis
+│       ├── exercise_analysis.py # Data model for exercise analysis
+│       └── subscription.py     # Data model for user subscriptions
+├── tests/                      # Full testing suite using pytest
+│   ├── conftest.py            # Pytest configuration and shared fixtures
+│   ├── fixtures/              # Test data fixtures
 │   ├── integration/           # Integration tests
 │   ├── middleware/            # Middleware tests
 │   └── unit/                  # Unit tests
-└── scripts/                   # Deployment dan utility scripts
+└── scripts/                   # Deployment and utility scripts
 ```
 
-#### Fitur API Backend
-- **Analisis Makanan AI**: Endpoint untuk analisis gambar, teks, dan label nutrisi menggunakan Google Gemini
-- **Analisis Olahraga AI**: Pemrosesan data olahraga dengan Google Gemini Pro Vision
-- **Autentikasi Firebase**: Middleware autentikasi terintegrasi dengan authentication bypass untuk dokumentasi
-- **Payment Gateway**: Integrasi DOKU untuk pembayaran langganan dengan webhook support
-- **Health Monitoring**: Endpoint kesehatan sistem dan monitoring performa server
-- **CORS Support**: Konfigurasi cross-origin untuk aplikasi mobile development
-- **Dokumentasi Otomatis**: OpenAPI/Swagger UI otomatis di `/docs` dan `/redoc`
-- **Error Handling**: Global exception handling dan logging dengan structured output
-- **Testing Suite**: Comprehensive testing dengan pytest, coverage, dan CI/CD integration
+#### Backend API Features
+- **AI-Powered Food Analysis**: Endpoints for analyzing food from images, text, and nutrition labels using Google Gemini API.
 
-#### Teknologi Backend
-- **Framework**: FastAPI dengan dukungan async/await
-- **Versi Python**: 3.12
-- **Integrasi AI**: Google Gemini Pro Vision API melalui LangChain
-- **Autentikasi**: Firebase Admin SDK dengan custom middleware
-- **Database**: Supabase PostgreSQL untuk penyimpanan dataset makanan
-- **Payment**: DOKU Payment Gateway dengan notifikasi webhook
-- **Testing**: pytest, pytest-asyncio, pytest-cov untuk comprehensive testing
-- **Code Quality**: black untuk formatting, flake8 untuk linting
-- **Deployment**: Uvicorn server dengan dukungan Docker containerization
+- **AI-Powered Workout Analysis**: Exercise analysis processing using Gemini Pro Vision, including calorie estimation and classification.
+
+- **Firebase Authentication**: Integrated authentication middleware with documentation bypass for Swagger access.
+
+- **Payment Integration**: DOKU gateway for subscription payments, including support for webhook-based notifications.
+
+- **Server Health Monitoring**: Dedicated endpoints to monitor server health and performance.
+
+- **CORS Configuration**: Cross-origin support for mobile development environments.
+
+- **Auto-Generated Documentation**: OpenAPI-compliant interactive documentation available at /docs and /redoc.
+
+- **Robust Error Handling**: Global exception management and structured logging for consistent API behavior.
+
+- **Comprehensive Testing**: Full suite of unit, integration, and middleware tests with code coverage reports and CI/CD integration.
+
+
+#### Backend Technologies
+- **Framework**: FastAPI with full async/await support
+- **Python Version**: 3.12
+- **AI Integration**: Google Gemini Pro Vision API via LangChain
+- **Authentication**: Firebase Admin SDK with custom middleware
+- **Database**: Supabase PostgreSQL for food dataset storage and retrieval
+- **Payments**: DOKU Payment Gateway with webhook support
+- **Testing Tools**: `pytest`, `pytest-asyncio`, `pytest-cov` for thorough testing and coverage reporting
+- **Code Quality**: `black` for formatting and `flake8` for linting
+- **Deployment**: Uvicorn server with Docker container support for flexible deployment
 
 ---
 
-## Modul Implementasi
+## Implementation Modules
 
-### Modul Inti
+### Core Modules
 
-#### 1. Modul Autentikasi (`lib/features/authentication/`)
-**Tujuan**: Registrasi pengguna, login, manajemen profil, dan fitur keamanan.
+#### 1. Authentication Module (`lib/features/authentication/`)
+**Purpose**: Handles user registration, login, profile management, and basic security features.
 
-**Komponen Utama**:
-- `LoginService`: Menangani autentikasi pengguna dengan Firebase Auth
-- `UserRepository`: Mengelola operasi data pengguna
-- `ProfilePage`: Interface manajemen profil pengguna
-- `BugReportService`: Integrasi dengan Instabug untuk umpan balik pengguna
+**Key Components**:
+- `LoginService`: Handles user authentication using Firebase Auth
+- `UserRepository`: Manages user data operations
+- `ProfilePage`: UI for user profile management
+- `BugReportService`: Integrates Instabug for in-app user feedback and bug reporting
 
-**Dependencies**: Firebase Auth, Instabug Flutter
+**Dependencies**: Firebase Auth, Instabug Flutter SDK
 
-#### 2. Modul Metrik Kesehatan (`lib/features/health_metrics/`)
-**Tujuan**: Pengumpulan data kesehatan yang komprehensif dan proses onboarding.
+#### 2. Health Metrics Module (`lib/features/health_metrics/`)
+**Purpose**: Collects comprehensive user health data and manages the onboarding flow.
 
-**Komponen Utama**:
-- `HealthMetricsService`: Manajemen data kesehatan inti
-- `HealthMetricsFormCubit`: Manajemen state untuk form kesehatan
-- Layar onboarding: Tinggi/Berat, Level Aktivitas, Tujuan, Preferensi diet
-- `OnboardingProgressIndicator`: Pelacakan progres visual
+**Key Components**:
+- `HealthMetricsService`: Core health data management logic
+- `HealthMetricsFormCubit`: State management for health input forms
+- Onboarding screens: Height/Weight, Activity Level, Goals, Dietary Preferences
+- `OnboardingProgressIndicator`: Visual progress tracker for onboarding steps
 
 **Dependencies**: BLoC, SharedPreferences
 
-#### 3. Modul Pencatatan Makanan
+#### 3. Food Logging & AI Analysis Modules
 
-##### Food Scan AI (`lib/features/food_scan_ai/`)
-**Tujuan**: Pengenalan dan analisis makanan bertenaga AI.
+This group of modules enables food input through three methods: image scanning, manual text entry, and food database search. All input types are processed through AI-powered nutrition analysis.
 
-**Komponen Utama**:
-- `FoodScanPage`: Interface kamera untuk pemindaian makanan
-- `FoodImageAnalysisService`: Pengenalan makanan berbasis gambar
-- `NutritionLabelAnalysisService`: Parsing label nutrisi
-- Kontrol kamera dengan flash dan switching mode
+##### a. Food Scan AI (`lib/features/food_scan_ai/`)
+**Purpose**: Identify and analyze food using AI via camera input.
 
-##### Food Text Input (`lib/features/food_text_input/`)
-**Tujuan**: Input makanan manual melalui input teks.
+**Key Components**:
+- `FoodScanPage`: Camera interface for food scanning
+- `FoodImageAnalysisService`: Image-based food recognition
+- `NutritionLabelAnalysisService`: Parses nutrition labels
+- Camera controls including flash and mode toggling
 
-**Komponen Utama**:
-- `FoodTextInputPage`: Interface pencatatan makanan berbasis teks
-- `FoodTextAnalysisService`: Analisis makanan berbasis teks
-- `FoodTextInputRepository`: Persistensi data
+##### b. Food Text Input (`lib/features/food_text_input/`)
+**Purpose**: Log food intake via manual text input.
 
-##### Food Database Input (`lib/features/food_database_input/`)
-**Tujuan**: Pencarian dan pemilihan makanan dari database.
+**Key Components**:
+- `FoodTextInputPage`: UI for text-based food entry
+- `FoodTextAnalysisService`: AI-based food description analysis
+- `FoodTextInputRepository`: Handles data persistence
 
-**Komponen Utama**:
-- `FoodDatabasePage`: Interface tab untuk pencarian makanan dan pembuatan meal
-- Fungsionalitas pencarian dengan integrasi database makanan
-- Komposisi meal dan manajemen porsi
+##### c. Food Database Input (`lib/features/food_database_input/`)
+**Purpose**: Browse and log foods from Pockeat's food database.
 
-#### 4. Modul Pencatatan Olahraga
+**Key Components**:
+- `FoodDatabasePage`: Tabbed UI for searching food and building meals
+- Search functionality integrated with food dataset
+- Meal composition and portion management
+
+#### 4. Exercise Logging Modules
 
 ##### Cardio Log (`lib/features/cardio_log/`)
-**Tujuan**: Pelacakan olahraga kardiovaskular.
+**Purpose**: Track cardiovascular activities.
 
-**Komponen Utama**:
-- `CardioInputPage`: Input data olahraga
-- `CardioRepository`: Persistensi dan pengambilan data
-- `CalorieCalculator`: Perhitungan pembakaran kalori olahraga
-- Dukungan untuk lari, bersepeda, berenang
+**Key Components**:
+- `CardioInputPage`: Input form for cardio activities
+- `CardioRepository`: Data persistence and retrieval
+- `CalorieCalculator`: Calorie burn estimation engine
+- Supports running, cycling, and swimming
 
 ##### Weight Training Log (`lib/features/weight_training_log/`)
-**Tujuan**: Pelacakan latihan kekuatan dan angkat beban.
+**Purpose**: Log strength training and weightlifting sessions.
 
-**Komponen Utama**:
-- `WeightliftingPage`: Manajemen sesi workout
-- Pemilihan olahraga berdasarkan bagian tubuh
-- Pelacakan set dan repetisi
-- Generasi ringkasan workout
+**Key Components**:
+- `WeightliftingPage`: Manages workout sessions
+- Exercise selection by muscle group
+- Set and repetition tracking
+- Workout summary generation
 
 ##### Smart Exercise Log (`lib/features/smart_exercise_log/`)
-**Tujuan**: Pengenalan dan pencatatan olahraga bertenaga AI.
+**Purpose**: AI-based detection and logging of workouts.
 
-**Komponen Utama**:
-- `SmartExerciseLogPage`: Deteksi olahraga cerdas
-- `ExerciseAnalysisService`: Analisis olahraga berbasis AI
-- Integrasi dengan metrik kesehatan untuk perhitungan kalori
+**Key Components**:
+- `SmartExerciseLogPage`: Smart exercise detection interface
+- `ExerciseAnalysisService`: AI-based exercise recognition and analysis
+- Integration with health metrics for calorie computation
 
-#### 5. Modul Pelacakan Kemajuan (`lib/features/progress_charts_and_graphs/`)
-**Tujuan**: Pelacakan kemajuan visual dan analitik.
+#### 5. Progress Tracking Module (`lib/features/progress_charts_and_graphs/`)
+Purpose: Provide visual analytics and track user progress over time.
 
-**Komponen Utama**:
-- `ProgressPage`: Dashboard analitik utama
-- `FoodLogDataService`: Agregasi data untuk grafik
-- Pelacakan kemajuan berat badan
-- Visualisasi asupan kalori
-- Perhitungan dan tren BMI
+**Key Components**:
+- `ProgressPage`: Main analytics dashboard
+- `FoodLogDataService`: Aggregates data for visual graphs
+- Tracks weight progression
+- Visualizes daily/weekly calorie intake
+- Displays BMI trends and calculations
 
-#### 6. Modul Pendamping Hewan Peliharaan (`lib/features/pet_companion/`)
-**Tujuan**: Sistem motivasi gamifikasi dengan hewan peliharaan virtual.
+#### 6. Virtual Pet Companion Module (`lib/features/pet_companion/`)
+**Purpose**: Gamified motivation system using a virtual pet companion.
 
-**Komponen Utama**:
-- `PetService`: Manajemen state dan interaksi hewan peliharaan
-- `PetStorePage`: Toko virtual untuk aksesoris hewan peliharaan
-- Mekanik pemberian makan dan perawatan hewan peliharaan
-- Sistem motivasi dan reward
+**Key Components**:
+- `PetService`: Manages pet state and interactions
+- Motivation system with reward triggers
 
-#### 7. Modul Widget Layar Utama (`lib/features/home_screen_widget/`)
-**Tujuan**: Integrasi widget perangkat native.
+#### 7. Home Screen Widget Module (`lib/features/home_screen_widget/`)
+**Purpose**: Native integration with device home screen widgets.
 
-**Komponen Utama**:
-- `WidgetManagerScreen`: Interface konfigurasi widget
-- `SimpleFoodTrackingController`: Widget kalori dasar
-- `DetailedFoodTrackingController`: Widget nutrisi komprehensif
-- `WidgetInstallationService`: Manajemen lifecycle widget
+**Key Components**:
+- `WidgetManagerScreen`: UI for widget setup and configuration
+- `SimpleFoodTrackingController`: Basic calorie tracking widget
+- `DetailedFoodTrackingController`: Advanced nutritional summary widget
+- `WidgetInstallationService`: Handles widget lifecycle and system integration
 
-#### 8. Modul Notifikasi (`lib/features/notifications/`)
-**Tujuan**: Push notifications dan keterlibatan pengguna.
+#### 8. Notification Module (`lib/features/notifications/`)
+**Purpose**: Push notifications and user engagement.
 
-**Komponen Utama**:
-- `NotificationService`: Penanganan notifikasi lokal dan push
-- `UserActivityService`: Pemicu notifikasi berbasis aktivitas
-- `NotificationSettingsScreen`: Preferensi notifikasi pengguna
-- Penjadwalan notifikasi background
+**Key Components**:
+- `NotificationService`: Handles both local and push notifications
+- `UserActivityService`: Triggers notifications based on user behavior
+- `NotificationSettingsScreen`: User preferences for notification settings
+- Background notification scheduling and logic
 
-### Infrastruktur Inti
+### Core Infrastructure
 
 #### Dependency Injection (`lib/core/di/service_locator.dart`)
-**Tujuan**: Manajemen dependency terpusat menggunakan GetIt.
+**Purpose**: Centralized dependency management using the GetIt service locator.
 
-**Fitur Utama**:
-- Registrasi dan resolusi layanan
-- Pola singleton dan factory
-- Registrasi berbasis modul
-- Isolasi lingkungan pengujian
+**Key Features**:
+- Service registration and resolution
 
-#### Layanan Background (`lib/core/service/`)
-**Tujuan**: Manajemen tugas background dan integrasi sistem.
+- Support for both singleton and factory patterns
 
-**Komponen Utama**:
-- `BackgroundServiceManager`: Koordinasi tugas background
-- `PermissionService`: Manajemen izin perangkat
-- `AnalyticsService`: Pelacakan perilaku pengguna
-- Layanan update widget
+- Modular registration structure for maintainability
+
+- Test environment isolation for easier mocking and unit testing
+
+This setup ensures loose coupling between components, improves scalability, and enhances testability across modules.
+
+#### Background Services (`lib/core/service/`)
+**Purpose**: Manage background tasks and integrate with system-level services.
+
+**Key Components**:
+- `BackgroundServiceManager`: Orchestrates background task scheduling and execution
+- `PermissionService`: Handles runtime device permissions (e.g., location, notifications)
+- `AnalyticsService`: Tracks user behavior and app usage patterns
+- Widget update service: Triggers background updates for home screen widgets
 
 ---
 
-## Pengaturan Lingkungan Pengembangan
+## Development Environment Setup
 
-### Prasyarat
+### Prerequisites
+To contribute or run the project locally, ensure the following tools and environments are installed:
 
-#### Frontend Mobile (Flutter)
-- **Flutter SDK**: Versi 3.16.0 atau lebih tinggi
-- **Dart SDK**: Versi 3.2.0 atau lebih tinggi
-- **Android Studio** atau **VS Code** dengan ekstensi Flutter
-- **Git** untuk version control
+#### Frontend - Mobile App (Flutter)
+- **Flutter SDK**: Version 3.16.0 or higher
+- **Dart SDK**: Version 3.2.0 or higher
+- **Android Studio** or **VS Code** with Flutter and Dart extensions
+- **Git** for version control and source code management
 
-#### Backend API (FastAPI)
-- **Python**: Versi 3.12 atau lebih tinggi
-- **pip**: Package manager untuk Python
-- **Virtual Environment**: Untuk isolasi dependencies Python
-- **Docker** (opsional): Untuk containerization
+#### Backend - API Server (FastAPI)
+- **Python**: Version 3.12 or higher
+- **pip**: Python package manager
+- **Virtual Environment**: For managing isolated Python dependencies
+- **Docker** (optional): For containerized development and deployment
 
-**Catatan**: Pengembangan saat ini terfokus pada platform Android saja. Pengembangan iOS belum secara aktif dilakukan oleh tim.
+**Note**: Development is currently focused on Android. iOS support has not been actively developed by the team at this stage.
 
-### Konfigurasi Lingkungan
 
-#### 1. Instalasi Flutter
+### Environment Configuration
+This section outlines how to configure both the frontend (Flutter) and backend (FastAPI) environments for local development.
+
+#### 1. Flutter Installation
 ```bash
-# Install Flutter (macOS/Linux)
+# Clone the Flutter SDK (macOS/Linux)
 git clone https://github.com/flutter/flutter.git
 export PATH="$PATH:`pwd`/flutter/bin"
 
-# Verifikasi instalasi
+# Verify installation
 flutter doctor
 ```
 
-#### 2. Pengaturan Proyek
+#### 2. Project Setup
 
-##### Pengaturan Frontend (Flutter)
+##### Frontend (Flutter) Settings
 ```bash
-# Clone repository
+# Clone the repository
 git clone <repository-url>
 cd pockeat-mobile
 
 # Install dependencies
 flutter pub get
 
-# Generate file kode
+# Generate necessary code (e.g., freezed, json_serializable)
 flutter packages pub run build_runner build --delete-conflicting-outputs
 ```
 
-##### Pengaturan Backend (FastAPI)
+##### Backend (FastAPI) Settings
 ```bash
-# Navigate ke folder backend
+# Navigate to the backend folder
 cd pockeat-api
 
-# Buat virtual environment
+# Create a virtual environment
 python -m venv venv
 
-# Aktifkan virtual environment
-# Windows
+# Activate the virtual environment
+# For Windows
 venv\Scripts\activate
-# macOS/Linux
+# For macOS/Linux
 source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Jalankan server development
+# Run the development server
 python main.py
-# atau
+# or using Uvicorn
 uvicorn main:app --reload --host 0.0.0.0 --port 8080
 ```
 
-#### 3. File Environment
-Buat file `.env` di root proyek untuk kedua aplikasi:
+#### 3. Environment Files
+Both the frontend and backend require environment variable configuration using a `.env` file located in their respective project roots.
 
-##### Frontend (.env di pockeat-mobile/)
+##### Frontend `.env` located in `pockeat-mobile/`
 ```env
 # Environment Configuration
 FLAVOR="staging"
@@ -436,38 +460,38 @@ STAGING_FIREBASE_STORAGE_BUCKET="your-project.firebasestorage.app"
 STAGING_FIREBASE_ANDROID_APP_ID="1:123456789:android:abcdef123456"
 STAGING_FIREBASE_ANDROID_API_KEY="AIzaSyExampleKey123456789"
 
-# iOS Configuration (untuk implementasi masa depan)
+# iOS Configuration (for future implementation)
 STAGING_FIREBASE_IOS_APP_ID="1:123456789:ios:abcdef123456"
 STAGING_FIREBASE_IOS_API_KEY="AIzaSyExampleKey123456789"
 STAGING_FIREBASE_IOS_BUNDLE_ID="com.example.pockeat"
 
-# macOS Configuration (untuk implementasi masa depan)
+# macOS Configuration (for future implementation)
 STAGING_FIREBASE_MACOS_APP_ID="1:123456789:ios:abcdef123456"
 STAGING_FIREBASE_MACOS_API_KEY="AIzaSyExampleKey123456789"
 STAGING_FIREBASE_MACOS_BUNDLE_ID="com.example.pockeat"
 
-# Web Configuration (untuk implementasi masa depan)
+# Web Configuration (for future implementation)
 STAGING_FIREBASE_WEB_APP_ID="1:123456789:web:abcdef123456"
 STAGING_FIREBASE_WEB_API_KEY="AIzaSyExampleKey123456789"
 
 # Backend API Configuration
 API_BASE_URL="https://your-api-domain.com/api"
 
-# Supabase Configuration (digunakan oleh API untuk dataset makanan)
+# Supabase Configuration (used by API for food dataset)
 SUPABASE_URL="https://your-project.supabase.co"
 SUPABASE_ANON_KEY="your_supabase_anon_key_here"
 
-# Google Services Configuration
+# Google Gemini Configuration
 GOOGLE_GEMINI_PROJECT_ID="your_project_id"
 GOOGLE_GEMINI_API_KEY="your_gemini_api_key_here"
 ```
 
-##### Backend (.env di pockeat-api/)
+##### Backend `.env` located in `pockeat-api/`
 ```env
 # Google Gemini API Configuration
 GOOGLE_API_KEY="your_google_gemini_api_key_here"
 
-# Firebase Configuration
+# Firebase Admin Configuration
 FIREBASE_WEB_API_KEY="your_firebase_web_api_key"
 FIREBASE_CREDENTIALS_JSON={"type": "service_account","project_id": "your-project-id","private_key_id": "your_private_key_id","private_key": "-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n","client_email": "firebase-adminsdk-xxx@your-project.iam.gserviceaccount.com","client_id": "your_client_id","auth_uri": "https://accounts.google.com/o/oauth2/auth","token_uri": "https://oauth2.googleapis.com/token","auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-xxx%40your-project.iam.gserviceaccount.com","universe_domain": "googleapis.com"}
 
@@ -495,26 +519,29 @@ DOKU_CALLBACK_URL="https://your-domain.com/api/payment/callback"
 DOKU_NOTIFICATION_URL="https://your-domain.com/payment/notification"
 ```
 
-#### 4. Pengaturan Spesifik Platform
+#### 4. Platform-Specific Configuration
 
-##### Pengaturan Android
-1. Konfigurasi `android/app/build.gradle` dengan konfigurasi signing
-2. Tambahkan file konfigurasi Google Services (`google-services.json`)
-3. Konfigurasi aturan ProGuard untuk build release
+##### Android Setup
+To enable full Android functionality and prepare for release builds, follow these steps:
+1. Configure signing in `android/app/build.gradle` for release builds (include `signingConfigs` and `buildTypes`).
+2. Add Firebase configuration file `google-services.json` to the `android/app/` directory.
+3. Set up ProGuard rules to avoid stripping essential classes during release builds (especially for Firebase, Retrofit, or third-party SDKs).
 
-##### Pengaturan iOS (Tidak Diimplementasikan Saat Ini)
-**Catatan**: Meskipun file konfigurasi iOS ada dalam struktur proyek, pengembangan iOS aktif belum dilakukan oleh tim pengembang. File-file terkait iOS dihasilkan oleh struktur proyek default Flutter tetapi belum dikonfigurasi atau diuji secara aktif.
+##### iOS Setup (Currently Not Implemented)
+**Note**: Although iOS-related files exist in the project structure (as part of Flutter's default project generation), active iOS development has not been carried out by the team. These files have not been configured or tested and are not part of the current deployment target.
 
-### Konfigurasi IDE
+### IDE Configuration
+To ensure a smooth and consistent development experience, we recommend using **Visual Studio Code (VS Code)** with the following setup:
 
-#### Ekstensi VS Code
+#### Recommended VS Code Extensions
 - Flutter
 - Dart
 - GitLens
 - Flutter Widget Snippets
 - Bracket Pair Colorizer
 
-#### Pengaturan VS Code yang Direkomendasikan
+#### Suggested VS Code Settings
+Add the following to your project’s or personal VS Code settings (settings.json) to standardize formatting and improve development workflow:
 ```json
 {
   "dart.flutterSdkPath": "/path/to/flutter",
@@ -527,197 +554,199 @@ DOKU_NOTIFICATION_URL="https://your-domain.com/payment/notification"
   }
 }
 ```
+**Tip**: Set `"dart.flutterSdkPath"` to the full path of your local Flutter SDK directory.
 
 ---
 
-## Panduan Konfigurasi
+## Configuration Guide
 
-### Konfigurasi Firebase
+### Firebase Configuration
 
-#### Pengaturan Autentikasi
-1. Aktifkan provider Autentikasi di Firebase Console:
+#### Authentication Setup
+To enable user authentication:
+1. In the Firebase Console, activate the following sign-in providers:
    - Email/Password
-   - Google Sign-In (opsional)
-2. Konfigurasi domain yang diotorisasi
-3. Siapkan template reset password
+   - Google Sign-In (optional)
+2. Configure the authorized domains under the Authentication settings.
+3. Set up the password reset email template for user recovery.
 
-#### Pengaturan Database Firestore
+#### Firestore Database Setup
 
-##### Struktur Koleksi Firestore
+##### Firestore Collection Structure
 
-Aplikasi PockEat menggunakan struktur koleksi Firestore berikut:
+PockEat uses the following Firestore collections to store user data:
 
-**1. Koleksi `users`**
+**1. `users` Collection**
 - **Path**: `/users/{userId}`
-- **Fungsi**: Menyimpan profil pengguna dan informasi autentikasi
-- **Field Utama**:
-  - `uid`: ID unik pengguna
-  - `email`: Email pengguna
-  - `displayName`: Nama tampilan
-  - `photoURL`: URL foto profil
-  - `emailVerified`: Status verifikasi email
-  - `createdAt`: Timestamp pembuatan akun
+- **Purpose**: Stores user profile and authentication data
+- **Key Fields**:
+  - `uid`: User's unique identifier, generated by Firebase Authentication. Used as the document ID.
+  - `email`: Email address used for login and verification.
+  - `displayName`: User’s display name, typically filled in during signup or profile editing.
+  - `photoURL`: URL to the user's profile photo, can be uploaded via Firebase Storage or a third-party provider.
+  - `emailVerified`: Boolean indicating whether the email has been verified through a confirmation link.
+  - `createdAt`: Timestamp of account creation, used to track when the user first registered.
 
-**2. Koleksi `health_metrics`**
+**2. `health_metrics` Collection**
 - **Path**: `/health_metrics/{userId}`
-- **Fungsi**: Menyimpan data kesehatan pengguna
-- **Field Utama**:
-  - `height`: Tinggi badan (cm)
-  - `weight`: Berat badan (kg)
-  - `age`: Usia
-  - `gender`: Jenis kelamin
-  - `activityLevel`: Tingkat aktivitas
-  - `fitnessGoal`: Tujuan kebugaran
-  - `bmi`: Body Mass Index
-  - `bmiCategory`: Kategori BMI
-  - `desiredWeight`: Target berat badan
+- **Purpose**: Stores user health metrics
+- **Key Fields**:
+  - `height`: User's height in centimeters (cm)
+  - `weight`: User's weight in kilograms (kg)
+  - `age`: User's age in years 
+  - `gender`: User's gender identity
+  - `activityLevel`: User’s average daily physical activity level (e.g., sedentary, moderate, active)
+  - `fitnessGoal`: User’s overall fitness goal (e.g., lose weight, maintain, gain weight)
+  - `bmi`: Calculated Body Mass Index (BMI) based on height and weight
+  - `bmiCategory`: Category derived from BMI (e.g., underweight, normal, overweight)
+  - `desiredWeight`: Target weight the user wants to achieve
 
-**3. Koleksi `caloric_requirements`**
+**3. `caloric_requirements` Collection**
 - **Path**: `/caloric_requirements/{userId}`
-- **Fungsi**: Menyimpan kebutuhan kalori harian pengguna
-- **Field Utama**:
-  - `basalMetabolicRate`: Metabolisme basal
-  - `dailyCaloricNeeds`: Kebutuhan kalori harian
-  - `proteinNeeds`: Kebutuhan protein
-  - `carbNeeds`: Kebutuhan karbohidrat
-  - `fatNeeds`: Kebutuhan lemak
+- **Purpose**: Stores the user’s calculated daily caloric and macronutrient requirements
+- **Key Fields**:
+  - `basalMetabolicRate`: User’s basal metabolic rate (BMR), in kilocalories/day
+  - `dailyCaloricNeeds`: Total daily energy expenditure (TDEE), in kilocalories/day
+  - `proteinNeeds`: Daily protein requirement, in grams (g)
+  - `carbNeeds`: Daily carbohydrate requirement, in grams (g)
+  - `fatNeeds`: Daily fat requirement, in grams (g)
 
-**4. Koleksi `calorie_stats`**
+**4. `calorie_stats` Collection**
 - **Path**: `/calorie_stats/{docId}`
-- **Fungsi**: Menyimpan statistik kalori harian
-- **Field Utama**:
-  - `userId`: ID pengguna
-  - `date`: Tanggal statistik
-  - `targetCalories`: Target kalori
-  - `consumedCalories`: Kalori yang dikonsumsi
-  - `burnedCalories`: Kalori yang dibakar
-  - `netCalories`: Kalori bersih
+- **Purpose**: Tracks daily calorie intake, calories burned, and net calorie balance for each user
+- **Key Fields**:
+  - `userId`: Unique identifier of the user associated with the log
+  - `date`: Date of the calorie log (format: DD-MM-YYYY)
+  - `targetCalories`:  Daily calorie target set for the user
+  - `consumedCalories`: Total calories consumed on that day
+  - `burnedCalories`: Total calories burned through physical activity
+  - `netCalories`: Net calorie value (`consumedCalories` - `burnedCalories`)
 
-**5. Koleksi `food_analysis`**
+**5. `food_analysis` Collection**
 - **Path**: `/food_analysis/{docId}`
-- **Fungsi**: Menyimpan hasil analisis makanan (scan foto, input teks, database)
-- **Field Utama**:
-  - `foodName`: Nama makanan
-  - `calories`: Kalori
-  - `protein`: Protein (g)
-  - `carbohydrates`: Karbohidrat (g)
-  - `fat`: Lemak (g)
-  - `sodium`: Sodium (mg)
-  - `fiber`: Serat (g)
-  - `sugar`: Gula (g)
-  - `timestamp`: Waktu analisis
-  - `userId`: ID pengguna
+- **Purpose**: Stores results of AI-powered food analysis from images, text input, or database lookup
+- **Key Fields**:
+  - `foodName`: Name of the analyzed food item
+  - `calories`: Total energy content (kcal)
+  - `protein`: Protein content in grams (g)
+  - `carbohydrates`: Carbohydrate content in grams (g)
+  - `fat`: Fat content in grams (g)
+  - `sodium`: Sodium content in milligrams (mg)
+  - `fiber`: Dietary fiber content in grams (g)
+  - `sugar`: Sugar content in grams (g)
+  - `timestamp`: Date and time of the analysis
+  - `userId`: ID of the user associated with the food entry 
 
-**6. Koleksi `saved_meals`**
+**6. `saved_meals` Collection**
 - **Path**: `/saved_meals/{docId}`
-- **Fungsi**: Menyimpan makanan favorit pengguna
-- **Field Utama**:
-  - `userId`: ID pengguna
-  - `name`: Nama makanan yang disimpan
-  - `foodAnalysis`: Data analisis makanan lengkap
-  - `createdAt`: Waktu penyimpanan
-  - `updatedAt`: Waktu update terakhir
+- **Purpose**: Stores users’ favorite or frequently consumed meals for easy reuse
+- **Key Fields**:
+  - `userId`: Unique identifier of the user who saved the meal
+  - `name`: Name of the saved meal
+  - `foodAnalysis`: Full nutritional breakdown of the meal (calories, macros, etc.)
+  - `createdAt`: Timestamp indicating when the meal was saved
+  - `updatedAt`: Timestamp of the most recent update to the meal entry
 
-**7. Koleksi `exerciseAnalysis`**
+**7. `exerciseAnalysis` Collection**
 - **Path**: `/exerciseAnalysis/{docId}`
-- **Fungsi**: Menyimpan hasil analisis olahraga dari input teks
-- **Field Utama**:
-  - `exerciseType`: Jenis olahraga
-  - `duration`: Durasi olahraga
-  - `intensity`: Intensitas (Rendah/Sedang/Tinggi)
-  - `estimatedCalories`: Estimasi kalori yang dibakar
-  - `timestamp`: Waktu logging
-  - `originalInput`: Input asli pengguna
-  - `userId`: ID pengguna
+- **Purpose**: Stores AI-generated exercise analysis based on user-provided text input
+- **Key Fields**:
+  - `exerciseType`: Type of exercise (e.g., running, cycling)
+  - `duration`: Duration of the exercise session (in minutes)
+  - `intensity`: Intensity level of the activity (Low, Medium, or High)
+  - `estimatedCalories`: Estimated number of calories burned
+  - `timestamp`: Date and time when the log was created
+  - `originalInput`: Raw text input provided by the user
+  - `userId`: Unique identifier of the user who logged the activity
 
-**8. Koleksi `weight_lifting_logs`**
+**8. `weight_lifting_logs` Collection**
 - **Path**: `/weight_lifting_logs/{docId}`
-- **Fungsi**: Menyimpan log latihan beban
-- **Field Utama**:
-  - `name`: Nama latihan
-  - `bodyPart`: Bagian tubuh yang dilatih
-  - `metValue`: Nilai MET untuk kalkulasi kalori
-  - `userId`: ID pengguna
-  - `sets`: Array set latihan
-    - `weight`: Berat (kg)
-    - `reps`: Repetisi
-    - `duration`: Durasi set (detik)
+- **Purpose**: Stores logs of strength training and weightlifting sessions
+- **Key Fields**:
+  - `name`: Name of the workout or exercise
+  - `bodyPart`: Targeted body part or muscle group (e.g., chest, legs)
+  - `metValue`: MET (Metabolic Equivalent of Task) value used for calorie calculation
+  - `userId`: Unique identifier of the user who performed the workout
+  - `sets`: Array of workout sets, each containing:
+    - `weight`: Weight lifted in kilograms (kg)
+    - `reps`: Number of repetitions performed
+    - `duration`: Duration of the set in seconds
 
 **9. Koleksi `cardioActivities`**
 - **Path**: `/cardioActivities/{docId}`
-- **Fungsi**: Menyimpan aktivitas kardio
-- **Field Utama**:
-  - `activityType`: Jenis aktivitas kardio
-  - `duration`: Durasi (menit)
-  - `intensity`: Intensitas aktivitas
-  - `caloriesBurned`: Kalori yang dibakar
-  - `date`: Tanggal aktivitas
-  - `userId`: ID pengguna
+- **Purpose**: Stores logs of cardiovascular activities such as running, cycling, or swimming
+- **Key Fields**:
+  - `activityType`: Type of cardio activity (e.g., running, walking, swimming)
+  - `duration`: Duration of the activity in minutes
+  - `intensity`: Intensity level of the activity (e.g., low, moderate, high)
+  - `caloriesBurned`: Estimated calories burned during the session
+  - `date`: Date of the activity (format: DD-MM-YYYY)
+  - `userId`: Unique identifier of the user who performed the activity
 
-**10. Sub-koleksi `weights_history`**
+**10. `weights_history` Subcollection**
 - **Path**: `/health_metrics/{userId}/weights_history/{docId}`
-- **Fungsi**: Menyimpan riwayat perubahan berat badan
-- **Field Utama**:
-  - `weight`: Berat badan (kg)
-  - `timestamp`: Waktu pencatatan
+- **Purpose**: Stores the historical log of the user's body weight changes over time
+- **Key Fields**:
+  - `weight`: Recorded body weight in kilograms (kg)
+  - `timestamp`: Date and time when the weight was logged
 
-##### Aturan Keamanan Firestore
+##### Firestore Security Rules
+To secure user data, apply the following rules in your Firebase console under Firestore Rules:
 ```javascript
-// Security Rules untuk Firebase Firestore
+// Security Rules for Firebase Firestore
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Pengguna hanya dapat mengakses data mereka sendiri
+    // Users can only access their own profile
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Metrik kesehatan bersifat spesifik pengguna
+    // Health metrics and weight history
     match /health_metrics/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       
-      // Sub-koleksi riwayat berat badan
       match /weights_history/{docId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
     }
     
-    // Kebutuhan kalori pengguna
+    // Caloric Requirements
     match /caloric_requirements/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Statistik kalori - hanya untuk pengguna sendiri
+    // Calorie Stats
     match /calorie_stats/{docId} {
       allow read, write: if request.auth != null && 
         resource.data.userId == request.auth.uid;
     }
     
-    // Analisis makanan - hanya untuk pengguna sendiri
+    // Food Analysis
     match /food_analysis/{docId} {
       allow read, write: if request.auth != null && 
         resource.data.userId == request.auth.uid;
     }
     
-    // Makanan tersimpan - hanya untuk pengguna sendiri
+    // Saved Meals
     match /saved_meals/{docId} {
       allow read, write: if request.auth != null && 
         resource.data.userId == request.auth.uid;
     }
     
-    // Analisis olahraga - hanya untuk pengguna sendiri
+    // Exercise Analysis
     match /exerciseAnalysis/{docId} {
       allow read, write: if request.auth != null && 
         resource.data.userId == request.auth.uid;
     }
     
-    // Log latihan beban - hanya untuk pengguna sendiri
+    // Weight Lifting Logs
     match /weight_lifting_logs/{docId} {
       allow read, write: if request.auth != null && 
         resource.data.userId == request.auth.uid;
     }
     
-    // Aktivitas kardio - hanya untuk pengguna sendiri
+    // Cardio Activities
     match /cardioActivities/{docId} {
       allow read, write: if request.auth != null && 
         resource.data.userId == request.auth.uid;
@@ -726,37 +755,39 @@ service cloud.firestore {
 }
 ```
 
-#### Pengaturan Cloud Messaging
-1. Konfigurasi FCM di Firebase Console
-2. Download service account key untuk notifikasi server-side
-3. Siapkan notification channels untuk Android
+#### Firebase Cloud Messaging (FCM) Configuration
+To enable push notifications within the app:
+1. Configure FCM in the Firebase Console for this project.
+2. Download the Firebase service account key. This is required for sending notifications from the backend (server-side).
+3. Set up notification channels for Android to support grouped notifications and control importance levels.
 
-### Konfigurasi Supabase (hanya untuk API)
+### Supabase Configuration (Backend-Only)
 
-**Catatan**: Supabase hanya digunakan oleh pockeat-api untuk menyimpan dataset makanan. Aplikasi Flutter menggunakan Firebase Firestore untuk semua data pengguna.
+**Note**: Supabase is used exclusively by the `pockeat-api` backend service to store a structured nutrition dataset. All user-related data in the Flutter app is managed through Firebase Firestore.
 
-#### Skema Database (khusus untuk dataset makanan)
+#### Database Schema (Nutrition Dataset Only)
+The following schema defines the structure of the food and nutrition dataset stored in Supabase:
 ```sql
--- Tabel nutrition_data untuk dataset makanan lengkap dengan informasi nutrisi
+-- Table: nutrition_data – complete food dataset with detailed nutritional information
 CREATE TABLE nutrition_data (
   id INTEGER PRIMARY KEY,
   food TEXT NOT NULL,
   
-  -- Makronutrien utama
+  -- Macronutrients
   caloric_value DECIMAL,
   protein DECIMAL,
   carbohydrates DECIMAL,
   fat DECIMAL,
   saturated_fats DECIMAL,
   
-  -- Nutrisi penting
+  -- Key Nutritional Info
   sodium DECIMAL,
   dietary_fiber DECIMAL,
   sugars DECIMAL,
   cholesterol DECIMAL,
   nutrition_density DECIMAL,
   
-  -- Vitamin
+  -- Vitamins
   vitamin_a DECIMAL,
   vitamin_b1 DECIMAL,
   vitamin_b2 DECIMAL,
@@ -770,7 +801,7 @@ CREATE TABLE nutrition_data (
   vitamin_e DECIMAL,
   vitamin_k DECIMAL,
   
-  -- Mineral
+  -- Minerals
   calcium DECIMAL,
   copper DECIMAL,
   iron DECIMAL,
@@ -781,7 +812,7 @@ CREATE TABLE nutrition_data (
   selenium DECIMAL,
   zinc DECIMAL,
   
-  -- Informasi tambahan
+  -- Additional Information
   water DECIMAL,
   monounsaturated_fats DECIMAL,
   polyunsaturated_fats DECIMAL,
@@ -789,11 +820,11 @@ CREATE TABLE nutrition_data (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Index untuk pencarian makanan
+-- Indexes for food search optimization
 CREATE INDEX idx_nutrition_data_food ON nutrition_data(food);
 CREATE INDEX idx_nutrition_data_caloric_value ON nutrition_data(caloric_value);
 
--- Tabel food_synonyms untuk pencarian alternatif (opsional)
+-- Table: food_synonyms – optional synonyms for alternative search queries
 CREATE TABLE food_synonyms (
   id SERIAL PRIMARY KEY,
   food_id INTEGER REFERENCES nutrition_data(id),
@@ -802,27 +833,38 @@ CREATE TABLE food_synonyms (
 );
 ```
 
-### Konfigurasi Spesifik Environment
+### Environment-Specific Configuration
+Properly separating development environments helps ensure stability, security, and scalability across your app lifecycle. Below are the key settings and behaviors configured for each environment.
 
-#### Environment Development
-- Aktifkan debug mode
-- Gunakan proyek Firebase staging
-- Aktifkan verbose logging
-- Mock panggilan API eksternal untuk pengujian
+#### Development Environment
+- Debug mode is enabled for easier testing and hot reload
 
-#### Environment Staging
-- Konfigurasi mirip production
-- Panggilan API eksternal terbatas
-- Monitoring performa diaktifkan
-- Akses user beta testing
+- Uses a Firebase staging project with mock/test data
 
-#### Environment Production
-- Build yang dioptimasi dengan ProGuard/R8
-- Proyek Firebase production
-- Analitik dan crash reporting diaktifkan
-- **Masa Depan**: Distribusi App Store/Play Store (belum diimplementasikan)
+- Verbose logging is enabled for detailed debugging
+
+- External API calls are mocked to isolate test behavior and avoid rate limits
+
+#### Staging Environment
+- Configured to mirror production settings closely
+
+- External API access is limited or throttled
+
+- Performance monitoring is enabled for pre-release evaluations
+
+- Only accessible to beta testers or internal QA users
+
+#### Production Environment
+- Release builds are optimized using ProGuard or R8
+
+- Uses the official Firebase production project
+
+- Analytics and crash reporting are fully enabled
+
+**Future Plan**: Deployment to App Store and Google Play (not yet implemented)
 
 ### Feature Flags
+Feature flags are used to toggle app features dynamically for testing, gradual rollout, or beta access:
 ```dart
 class FeatureFlags {
   static const bool enablePetStore = true;
@@ -846,21 +888,22 @@ class FeatureFlags {
 
 ---
 
-## Instruksi Menjalankan & Pengujian
+## Run & Testing Instructions
+This section outlines how to run and test both the frontend (Flutter) and backend (FastAPI) components of the PockEat project across different environments and use cases.
 
-### Menjalankan Aplikasi
+### Running the Application
 
-#### Frontend Mobile (Flutter)
+#### Frontend - Mobile App (Flutter)
 
-##### Mode Development
+##### Development Mode
 ```bash
-# Jalankan pada perangkat/emulator yang terhubung
+# Run on a connected device or emulator
 flutter run
 
-# Jalankan dengan flavor spesifik
+# Run with a specific flavor
 flutter run --flavor development -t lib/main.dart
 
-# Jalankan dengan hot reload diaktifkan (default di debug mode)
+# Run with hot reload enabled (default in debug mode)
 flutter run --hot
 ```
 
@@ -869,124 +912,126 @@ flutter run --hot
 # Debug build (default)
 flutter run --debug
 
-# Profile build (pengujian performa)
+# Profile build (for performance testing)
 flutter run --profile
 
 # Release build
 flutter run --release
 ```
 
-##### Perintah Spesifik Platform
+##### Platform-Specific Commands
 ```bash
-# Android (Platform pengembangan utama)
+# Run on Android (primary development platform)
 flutter run -d android
 
-# Perangkat spesifik
+# Run on a specific device
 flutter run -d device_id
 ```
 
-**Catatan**: Perintah iOS dihilangkan karena tim belum secara aktif mengembangkan untuk platform iOS.
+**Note**: iOS commands are excluded as the team has not yet actively developed for iOS.
 
-#### Backend API (FastAPI)
+#### Backend - API Server (FastAPI)
 
-##### Development Server
+##### Running The Development Server
 ```bash
-# Navigate ke direktori backend
+# Navigate to the backend directory
 cd pockeat-api
 
-# Aktifkan virtual environment
+# Activate virtual environment
 # Windows
 venv\Scripts\activate
 # macOS/Linux
 source venv/bin/activate
 
-# Jalankan development server dengan hot reload
+# Start the development server with hot reload
 python main.py
-# atau menggunakan uvicorn langsung
+# Or using Uvicorn directly
 uvicorn main:app --reload --host 0.0.0.0 --port 8080
 
-# Jalankan dengan environment spesifik
+# Run with environment variable
 ENVIRONMENT=development python main.py
 ```
 
-##### Production Server
+##### Running The Production Server
 ```bash
-# Jalankan dengan gunicorn (production)
+# Using Gunicorn for production
 gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8080
 
-# Dengan Docker
+# Using Docker
 docker build -t pockeat-api .
 docker run -p 8080:8080 pockeat-api
 ```
 
-##### API Documentation
-Setelah server berjalan, akses dokumentasi API di:
+##### API Documentation Access
+Once the server is running, API documentation can be accessed at:
 - Swagger UI: `http://localhost:8080/docs`
 - ReDoc: `http://localhost:8080/redoc`
 - OpenAPI JSON: `http://localhost:8080/openapi.json`
 
-### Strategi Pengujian
+### Testing Strategy
 
 #### Unit Tests
 ```bash
-# Jalankan semua unit tests
+# Run all unit tests
 flutter test
 
-# Jalankan file test spesifik
+# Run a specific test file
 flutter test test/features/authentication/services/login_service_test.dart
 
-# Jalankan tests dengan coverage
+# Run with test coverage
 flutter test --coverage
 
-# Generate laporan coverage
+# Generate HTML coverage report
 genhtml coverage/lcov.info -o coverage/html
 ```
 
 #### Widget Tests
 ```bash
-# Jalankan widget tests
+# Run all widget tests
 flutter test test/features/*/presentation/screens/*_test.dart
 
-# Jalankan dengan output verbose
+# Run with verbose output
 flutter test --verbose
 ```
 
 #### Integration Tests
 ```bash
-# Jalankan integration tests
+# Run integration tests with Flutter Driver
 flutter drive --target=test_driver/app.dart
 ```
 
-### Konfigurasi Test
+### Test Configuration
+This section describes the structure of the test directory and the utilities used to facilitate mocking and widget testing across the PockEat project.
 
-#### Struktur Test
+#### Test Directory Structure
 ```
 test/
 ├── features/
 │   ├── authentication/
 │   │   ├── services/
-│   │   │   └── login_service_test.dart
+│   │   │   └── login_service_test.dart # Unit test for login logic
 │   │   └── presentation/
 │   │       └── screens/
-│   │           └── login_page_test.dart
-│   ├── health_metrics/
-│   └── food_scan_ai/
+│   │           └── login_page_test.dart # Widget test for login UI
+│   ├── health_metrics/ # Tests related to health metrics input
+│   └── food_scan_ai/ # Tests for AI-based food scanning
 ├── core/
-│   ├── services/
-│   └── di/
+│   ├── services/ # Tests for core services (e.g., analytics)
+│   └── di/ # Tests for dependency injection
 └── test_helpers/
-    ├── mock_services.dart
-    └── test_utils.dart
+    ├── mock_services.dart # Mock implementations for dependencies
+    └── test_utils.dart # Shared utility functions for tests
 ```
 
-#### Test Helpers dan Mocks
+#### Test Helpers & Mock Services
+To enable isolated and efficient testing, we use mockito-based mocks for services, and shared utility functions for widget pumping and navigation handling.
 ```dart
 // test_helpers/mock_services.dart
 class MockFirebaseAuth extends Mock implements FirebaseAuth {}
 class MockFirestore extends Mock implements FirebaseFirestore {}
 class MockUserRepository extends Mock implements UserRepository {}
 
-// Utilitas test
+/// Pumps a widget into the test environment with optional navigation observer
 Future<void> pumpTestWidget(
   WidgetTester tester,
   Widget widget, {
@@ -1001,68 +1046,92 @@ Future<void> pumpTestWidget(
 }
 ```
 
-### Pengujian Performa
+### Performance Testing
+This section outlines the tools and techniques used to evaluate and optimize the performance of PockEat, including UI rendering, memory usage, and app size.
 
-#### Tools Performa Flutter
+#### Flutter Performance Tools
+Use the following commands to analyze and monitor the performance of PockEat:
 ```bash
-# Jalankan dengan performance overlay
+# # Run with performance overlay to visualize rendering stats (e.g., FPS, frame times)
 flutter run --enable-software-rendering
 
-# Profile widget builds
+# Run in profile mode with startup tracing enabled
 flutter run --profile --trace-startup
 
-# Analisis ukuran bundle
+# Analyze the build size of the APK
 flutter build apk --analyze-size
 ```
 
-#### Profiling Memory dan CPU
-1. Gunakan Flutter Inspector di IDE
-2. Aktifkan performance overlay di debug mode
-3. Gunakan DevTools untuk profiling detail
-4. Monitor memory leaks dengan `flutter memory`
+#### Memory & CPU Profiling
+To inspect runtime performance in more detail:
+1. Use Flutter Inspector in Android Studio or VS Code to view widget rebuilds and layout performance.
+2. Enable the performance overlay while running in debug mode to monitor rendering performance in real time.
+3. Open DevTools (automatically available when running flutter run) for advanced profiling of:
+    - Widget rebuilds
+
+    - Frame timings
+
+    - Memory allocations
+
+    - CPU usage
+4. Monitor memory leaks and allocation spikes using:
+    ``` bash
+    flutter pub global activate devtools
+    flutter pub global run devtools
+    ```
+    or directly:
+    ``` bash
+    flutter memory
+    ```
+
 
 ---
 
-## Panduan Deployment
+## Deployment Guide
+This section outlines how to prepare and deploy PockEat specifically for Android. iOS deployment is not yet implemented.
 
-### Persiapan Build
+### Build Preparation
 
-#### Manajemen Versi
+#### Version Management
+Versioning should follow semantic versioning (`major.minor.patch+build_number`) in `pubspec.yaml`:
 ```yaml
 # pubspec.yaml
-version: 1.0.0+1  # versi+build_number
+# Initial release
+version: 1.0.0+1  # version+build_number
 
-# Update untuk releases
+# Update example for the next release
 version: 1.1.0+2
 ```
 
-#### Optimasi Build
+#### Build Optimization
+Before building the app, always perform a clean and regenerate required files:
 ```bash
-# Bersihkan build artifacts
+# Clean previous build artifacts
 flutter clean
 
-# Dapatkan dependencies
+# Fetch dependencies
 flutter pub get
 
-# Generate file yang diperlukan
+# Generate necessary files
 flutter packages pub run build_runner build --delete-conflicting-outputs
 ```
 
-### Deployment Android
+### Android Deployment
 
-#### Release Build
+#### Release Builds
 ```bash
-# Build APK
+# Build a release APK
 flutter build apk --release
 
-# Build App Bundle (untuk submission Play Store masa depan)
+# Build an Android App Bundle (AAB) for future Play Store submission
 flutter build appbundle --release
 
-# Build dengan split per ABI
+# Build APKs split by ABI (smaller APK sizes)
 flutter build apk --release --split-per-abi
 ```
 
-#### Konfigurasi Signing
+#### Signing Configuration
+Make sure your signing credentials are properly configured in `android/app/build.gradle`:
 ```gradle
 // android/app/build.gradle
 android {
@@ -1084,25 +1153,31 @@ android {
 }
 ```
 
-#### Deploy Play Store (Implementasi Masa Depan)
-**Status**: Belum diimplementasikan. Aplikasi belum di-deploy ke Google Play Store.
+#### Play Store Deployment (Planned)
+**Status**: Not yet implemented. The app has not been published to the Google Play Store.
 
-**Langkah-langkah deployment masa depan**:
-1. Buat signed app bundle
-2. Upload ke Play Console
-3. Konfigurasi store listing
-4. Setup release tracks (internal, alpha, beta, production)
-5. Konfigurasi App Signing by Google Play
+**Planned deployment steps**:
+1. Generate a signed App Bundle (`.aab`)
 
-### Deployment iOS (Belum Diimplementasikan)
+2. Upload to Google Play Console
 
-**Status**: Tim belum secara aktif mengembangkan untuk platform iOS. Meskipun struktur proyek Flutter menyertakan file konfigurasi iOS, file-file tersebut belum dikonfigurasi, diuji, atau di-deploy secara aktif.
+3. Configure store listing (app name, screenshots, description)
 
-### Pipeline CI/CD
+4. Set up release tracks (internal, alpha, beta, production)
 
-#### Workflow GitHub Actions
+5. Enable Google Play App Signing
+
+### iOS Deployment (Not Yet Implemented)
+
+**Status**: iOS development has not been actively pursued by the team.
+While the Flutter project structure includes iOS configuration files, they have not been configured, tested, or prepared for deployment.
+
+### CI/CD Pipeline
+This section outlines the automated testing and deployment workflow using GitHub Actions and Firebase App Distribution. It ensures consistency, test reliability, and smooth delivery across development, staging, and production environments.
+
+#### GitHub Actions Workflow
 ```yaml
-# .github/workflows/ci.yml
+# File: .github/workflows/ci.yml
 name: Pipeline CI/CD
 
 on:
@@ -1155,197 +1230,215 @@ jobs:
 
 ### Firebase App Distribution
 
-#### Setup
+#### Setup Instructions
 ```bash
 # Install Firebase CLI
 npm install -g firebase-tools
 
-# Login dan initialize
+# Login to Firebase
 firebase login
+
+# Initialize Firebase (if not already done)
 firebase init hosting
 
-# Deploy ke App Distribution
+# Manually distribute APK to testers
 firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
   --app 1:123456789:android:abcd1234 \
   --groups "testers"
 ```
 
-### Strategi Deployment Environment
+### Environment Deployment Strategy
 
-#### Strategi Branch
-- `main`: Rilis production
-- `develop`: Environment staging
-- `feature/*`: Branch development
+#### Branching Model
+- `main`: Production release branch
+- `develop`: Active staging environment
+- `feature/*`: Feature-specific development branches
 
-#### Environment Deployment
-1. **Development**: Deployment berkelanjutan dari branch `develop`
-2. **Staging**: Rilis mingguan untuk pengujian QA
-3. **Production**: Rilis dua mingguan setelah validasi staging
+#### Environment Deployment Flow
+1. **Development**: 
+- Auto-deployed from the `develop` branch
+
+- Used for internal testing and rapid iteration
+2. **Staging**: 
+- Weekly releases for QA validation
+
+- Triggered from `develop` after manual or scheduled merge
+3. **Production**: 
+- Bi-weekly releases post-staging approval
+
+- Deployed from `main` after successful QA validation
 
 ---
 
-## Keterbatasan Proyek & Pengembangan Masa Depan
+## Project Limitations & Future Development
 
-### Keterbatasan Saat Ini
+### Current Limitations
 
-#### Keterbatasan Teknis
-1. **Kemampuan Offline**: Fungsionalitas offline terbatas, memerlukan internet untuk sebagian besar fitur
-2. **Dukungan Platform**: Saat ini terfokus pada pengembangan Android, iOS belum diimplementasikan
-3. **Performa Kamera**: Pemindaian makanan mungkin kesulitan dalam kondisi cahaya rendah
-4. **Sinkronisasi Database**: Potensi konflik sinkronisasi antara Firebase dan Supabase
-5. **Platform Widget**: Widget layar utama terbatas pada Android 8+ (iOS belum diimplementasikan)
+#### Technical Constraints
+1. **Offline Capability**: Most features require an internet connection; offline support is limited.
+2. **Platform Support**: Android is the primary target platform; iOS is not yet implemented.
+3. **Camera Performance**: Food scanning may be slightly unreliable in low-light conditions.
+4. **Database Synchronization**: Potential conflicts between Firebase and Supabase during sync operations
+5. **Widget Platform Support**: Homescreen widget support is limited to Android 8+; iOS support is not available.
 
-#### Keterbatasan Fungsional
-1. **Akurasi AI**: Akurasi pengenalan makanan bergantung pada kualitas gambar dan cakupan database
-2. **Perpustakaan Olahraga**: Database olahraga terbatas dibandingkan aplikasi fitness khusus
-3. **Fitur Sosial**: Fungsionalitas sosial dasar tanpa fitur komunitas lanjutan
-4. **Internasionalisasi**: Saat ini hanya mendukung bahasa Inggris
-5. **Aksesibilitas**: Fitur aksesibilitas terbatas untuk pengguna dengan disabilitas
+#### Functional Limitations
+1. **AI Accuracy**: Food recognition accuracy depends on image quality and dataset coverage.
+2. **Exercise Library**: More limited than dedicated fitness apps in terms of available activities.
+3. **Social Media Sharing Features**: Basic social media sharing functionality; no advanced community features yet.
+4. **Internationalization**: Currently supports English only.
+5. **Accessibility**: Limited support for users with disabilities.
 
-#### Keterbatasan Performa
-1. **Penggunaan Memori**: Pemrosesan gambar besar dapat menyebabkan masalah memori pada perangkat lama
-2. **Konsumsi Baterai**: Layanan background dapat berdampak pada daya tahan baterai
-3. **Ketergantungan Jaringan**: Sangat bergantung pada konektivitas jaringan
-4. **Storage**: Keterbatasan penyimpanan lokal untuk data cache
+#### Performance Constraints
+1. **Memory Usage**: Processing large food images may cause memory issues on older devices.
+2. **Battery Consumption**: Background services may impact battery life.
+3. **Network Dependency**: Strong reliance on active internet connection.
+4. **Storage Constraints**: Limited local caching for offline use.
 
-### Roadmap Pengembangan Masa Depan
+### Future Development Roadmap
 
-#### Fase 1: Peningkatan Inti (Q3-Q4 2025)
-**Prioritas: Tinggi**
+#### Phase 1: Core Enhancements (Q3–Q4 2025)
+**Priority Level: High**
 
-1. **Peningkatan Fungsionalitas Offline**
-   - Caching database lokal
-   - Pencatatan makanan offline dengan sinkronisasi
-   - Fungsionalitas dasar tanpa internet
+1. **Offline Capabilities**
+   - Local database caching
+   - Offline food logging with sync support
+   - Basic functionality without internet access
 
-2. **Optimasi Performa**
-   - Kompresi gambar untuk pemindaian makanan
-   - Optimasi layanan background
-   - Peningkatan penggunaan memori
+2. **Performance Optimization**
+   - Image compression for scanning
+   - Background service optimization
+   - Improved memory management
 
-3. **Peningkatan UI/UX**
-   - Dukungan dark mode
-   - Peningkatan aksesibilitas
-   - Alur onboarding yang diperbaiki
+3. **UI/UX Improvements**
+   - Dark mode support
+   - Accessibility enhancements
+   - Streamlined onboarding experience
 
-#### Fase 2: Ekspansi Fitur (Q1-Q2 2026)
-**Prioritas: Sedang**
+#### Phase 2: Feature Expansion (Q1–Q2 2026)
+**Priority Level: Medium**
 
-1. **Analitik Lanjutan**
-   - Wawasan berbasis machine learning
-   - Analitik kesehatan prediktif
-   - Generasi laporan kustom
+1. **Advanced Analytics**
+   - ML (Machine Learning)-powered health insights
+   - Predictive wellness analysis
+   - Custom health report generation
 
-2. **Peningkatan Fitur Sosial**
-   - Koneksi teman
-   - Sistem tantangan
-   - Berbagi resep komunitas
+2. **Enhanced Social Features**
+   - Friend connections for users
+   - Challenge & reward system
+   - Community food recipe sharing
 
-3. **Ekspansi Integrasi**
-   - Integrasi aplikasi kesehatan (Apple Health, Google Fit)
-   - Sinkronisasi fitness tracker
-   - Integrasi aplikasi diet pihak ketiga
+3. **Integration Ecosystem**
+   - Integration with Apple Health and Google Fit
+   - Fitness tracker sync
+   - Third-party diet app integrations
 
-#### Fase 3: Ekspansi Platform (Q3-Q4 2026)
-**Prioritas: Sedang**
+#### Phase 3: Platform Expansion (Q3–Q4 2026)
+**Priority Level: Medium**
 
-1. **Aplikasi Web**
+1. **Web Application**
    - Progressive Web App (PWA)
-   - Aplikasi pendamping desktop
-   - Dashboard admin
+   - Companion desktop dashboard
+   - Admin analytics panel
 
-2. **Dukungan Wearable**
-   - Integrasi Apple Watch
-   - Dukungan Android Wear
-   - Kompatibilitas smart fitness tracker
+2. **Wearable Device Support**
+   - Apple Watch integration
+   - Android Wear support
+   - Smart fitness tracker compatibility
 
-3. **Integrasi Smart Home**
-   - Konektivitas smart scale
-   - Integrasi peralatan dapur
-   - Sinkronisasi perangkat IoT
+#### Phase 4: Advanced Capabilities (Q1–Q2 2027)
+**Priority Level: Low**
 
-#### Fase 4: Fitur Lanjutan (Q1-Q2 2027)
-**Prioritas: Rendah**
+1. **AI & Machine Learning**
+   - Personalized food recommendations
+   - Predictive health insights
+   - Enhanced food recognition capabilities
 
-1. **AI dan Machine Learning**
-   - Rekomendasi makanan yang dipersonalisasi
-   - Wawasan kesehatan prediktif
-   - Pengenalan makanan lanjutan
+2. **Healthcare Integration**
+   - Healthcare provider portals
+   - User medical records data syncing
+   - Telehealth support features
 
-2. **Integrasi Healthcare**
-   - Portal penyedia layanan kesehatan
-   - Integrasi data medis
-   - Fitur telehealth
+3. **Enterprise Features**
+   - Corporate wellness program tools
+   - Bulk user management
+   - Advanced analytics for organizational health
 
-3. **Fitur Enterprise**
-   - Program wellness korporat
-   - Manajemen pengguna bulk
-   - Dashboard analitik lanjutan
+### Technology Upgrade Path
 
-### Path Upgrade Teknologi
+#### Flutter Framework
+- **Current**: Flutter 3.16.x
+- **Target**: Flutter 4.x (once stable)
+- **Benefits**: Performance gains, new widgets, improved web support
 
-#### Framework Flutter
-- **Saat Ini**: Flutter 3.16.x
-- **Target**: Flutter 4.x (ketika tersedia)
-- **Manfaat**: Peningkatan performa, widget baru, dukungan web yang lebih baik
+#### State Management Evolution
+- **Current**: BLoC + Provider
+- **Future Consideration**: Migration to Riverpod
+- **Benefits**: Improved testability, reduced boilerplate, better performance
 
-#### Evolusi State Management
-- **Saat Ini**: BLoC + Provider
-- **Pertimbangan**: Migrasi Riverpod
-- **Manfaat**: Testing yang lebih baik, boilerplate berkurang, performa meningkat
+#### Backend Architecture
+- **Current**: Hybrid Firebase + Supabase
+- **Future Plan**: Microservices architecture
+- **Benefits**: Greater scalability, service isolation, tech stack flexibility
 
-#### Arsitektur Backend
-- **Saat Ini**: Hybrid Firebase + Supabase
-- **Masa Depan**: Arsitektur microservices
-- **Manfaat**: Skalabilitas lebih baik, isolasi layanan, fleksibilitas teknologi
+#### Database Strategy
+- **Current**: Firestore (for user data) + PostgreSQL via Supabase (for nutrition data)
+- **Future Plan**: Multi-database strategy with caching layers
+- **Benefits**: Improved performance, data redundancy, cost optimization
 
-#### Strategi Database
-- **Saat Ini**: Firestore + PostgreSQL (Supabase)
-- **Masa Depan**: Strategi multi-database dengan caching layers
-- **Manfaat**: Performa meningkat, redundansi data, optimasi biaya
+### Scalability Considerations
 
-### Pertimbangan Skalabilitas
+#### User Growth Projections
+- **Year 1**: 10.000 active users (projected)
+- **Year 2**: 100.000 active users (projected)
+- **Year 3**: 1.000.000 active users (projected)
 
-#### Proyeksi Pertumbuhan Pengguna
-- **Tahun 1**: 10.000 pengguna aktif
-- **Tahun 2**: 100.000 pengguna aktif
-- **Tahun 3**: 1.000.000 pengguna aktif
+#### Infrastructure Scaling Plan
+1. **Database Scaling**: 
+    - Sharding and horizontal scaling
 
-#### Scaling Infrastruktur
-1. **Scaling Database**: Implementasi database sharding dan read replicas
-2. **Scaling API**: Arsitektur microservices dengan auto-scaling
-3. **Implementasi CDN**: Content delivery global untuk gambar dan aset
-4. **Strategi Caching**: Implementasi Redis untuk data yang sering diakses
+    - Read replicas for high-throughput reads
+2. **API SCaling**: Microservices architecture with auto-scaling deployment
+3. **Content Delivery**: CDN integration for faster image and asset delivery worldwide
+4. **Caching Strategy**: Implement Redis for frequently accessed data
 
-#### Optimasi Biaya
-1. **Penggunaan Firebase**: Optimasi query Firestore dan storage
-2. **Scaling Supabase**: Implementasi connection pooling dan optimasi query
-3. **Cloud Functions**: Optimasi waktu eksekusi dan penggunaan memori
-4. **Optimasi Storage**: Kompresi gambar dan integrasi CDN
+#### Cost Optimization Strategies
+1. **Firestore Usage**: 
+    - Optimize query patterns and indexing
+
+    - Efficient storage structuring
+2. **Supabase Scaling**: 
+    - Enable connection pooling
+
+    - Query optimization and view indexing
+3. **Cloud Functions**: Optimize execution time and memory usage
+4. **Storage Optimization**: 
+    - Image compression
+
+    - CDN integration for static asset delivery
 
 ---
 
-## Lampiran
+## Appendix
 
-### Script Deployment
+### Deployment Scripts
 
-#### Script Release Android
+#### Android Release Script
 ```bash
 #!/bin/bash
 # scripts/deploy_android.sh
 
 set -e
 
-echo "🚀 Memulai Android Release Build..."
+echo "🚀 Starting Android Release Build..."
 
-# Bersihkan build sebelumnya
+# Clean previous builds
 flutter clean
 flutter pub get
 
-# Generate file yang diperlukan
+# Generate necessary files
 flutter packages pub run build_runner build --delete-conflicting-outputs
 
-# Build release APK
+# Build APK
 echo "📱 Building APK..."
 flutter build apk --release
 
@@ -1353,39 +1446,38 @@ flutter build apk --release
 echo "📦 Building App Bundle..."
 flutter build appbundle --release
 
-# Upload ke Firebase App Distribution
+# Upload to Firebase App Distribution
 echo "🔥 Uploading ke Firebase App Distribution..."
 firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk \
   --app "$FIREBASE_ANDROID_APP_ID" \
   --groups "internal-testers" \
   --release-notes "Release build $(date)"
 
-echo "✅ Deployment Android selesai!"
+echo "✅ Android deployment complete!"
 ```
 
-#### Script Release iOS (Implementasi Masa Depan)
+#### iOS Release Script (Planned for Future Implementation)
 ```bash
 #!/bin/bash
-# scripts/deploy_ios.sh (belum diimplementasikan)
+# scripts/deploy_ios.sh (not implemented yet)
 
 set -e
 
 echo "🚀 Memulai iOS Release Build..."
 
-# Catatan: Script ini belum diimplementasikan dan diuji
-# Akan dikembangkan ketika tim mulai mengerjakan platform iOS
+# Note: This script is a placeholder for future iOS support
 
 flutter clean
 flutter pub get
 flutter packages pub run build_runner build --delete-conflicting-outputs
 flutter build ios --release --no-codesign
 
-echo "✅ iOS deployment belum tersedia."
+echo "✅ iOS deployment is not yet available."
 ```
 
-### Template Konfigurasi
+### Configuration Templates
 
-#### Template Konfigurasi Firebase
+#### Firebase Configuration Templates 
 ```json
 {
   "project_info": {
@@ -1428,7 +1520,7 @@ echo "✅ iOS deployment belum tersedia."
 }
 ```
 
-#### Template Konfigurasi Environment
+#### Environment Configuration Templates
 ```yaml
 # config/environments/development.yaml
 environment: development
@@ -1455,9 +1547,9 @@ api_limits:
   max_concurrent_uploads: 3
 ```
 
-### Konfigurasi Testing
+### Testing Configuration
 
-#### Pengaturan Environment Test
+#### Test Environment Setup
 ```dart
 // test/test_config.dart
 import 'package:flutter_test/flutter_test.dart';
@@ -1480,7 +1572,7 @@ class TestConfig {
     // Register mocks
     getIt.registerSingleton<MockFirebaseAuth>(MockFirebaseAuth());
     getIt.registerSingleton<MockFirestore>(MockFirestore());
-    // ... layanan mock lainnya
+    // Add additional mock services as needed
   }
   
   static void tearDown() {
@@ -1488,7 +1580,7 @@ class TestConfig {
   }
 }
 
-// Test helper untuk widget tests
+// Widget test helper
 Widget createTestWidget(Widget child) {
   return MaterialApp(
     home: Scaffold(body: child),
@@ -1497,9 +1589,9 @@ Widget createTestWidget(Widget child) {
 }
 ```
 
-### Monitoring dan Analitik
+### Monitoring & Analytics
 
-#### Analytics Events Configuration
+#### Analytics Events Definition
 ```dart
 // lib/core/analytics/analytics_events.dart
 class AnalyticsEvents {
@@ -1513,7 +1605,7 @@ class AnalyticsEvents {
   static const String foodLogged = 'food_logged';
   static const String mealSaved = 'meal_saved';
   
-  // Exercise events
+  // Exercise logging events
   static const String exerciseLogged = 'exercise_logged';
   static const String workoutCompleted = 'workout_completed';
   
@@ -1554,11 +1646,10 @@ class PerformanceMonitor {
 }
 ```
 
-### Dokumentasi API
+### API Documentation Example
 
-#### API Analisis Makanan
+#### Food Analysis Endpoint
 ```dart
-// Dokumentasi endpoint API contoh
 /*
 POST /api/v1/food/analyze
 Content-Type: application/json
@@ -1596,31 +1687,31 @@ Response:
 */
 ```
 
-### Panduan Troubleshooting
+### Troubleshooting Guide
 
-#### Masalah Umum
+#### Common Issues
 
-1. **Kegagalan Build**
+1. **Build Failures**
    ```bash
    # Clear Flutter cache
    flutter clean
    flutter pub get
    
-   # Clear iOS build cache (untuk implementasi masa depan)
+   # Clear iOS build cache (For future iOS support)
    cd ios && rm -rf build/ && cd ..
    
-   # Clear Android build cache
+   # Clear Android build cache (Android-specific cleanup)
    cd android && ./gradlew clean && cd ..
    ```
 
-2. **Masalah Koneksi Firebase**
-   - Verifikasi `google-services.json` berada di lokasi yang benar
-   - Periksa konfigurasi proyek Firebase
-   - Pastikan SHA-1 fingerprints telah dikonfigurasi
+2. **Firebase Connection Issues**
+   - Ensure `google-services.json` is correctly placed
+   - Check Firebase project settings
+   - Verify SHA-1 fingerprint configuration
 
-3. **Masalah Testing Widget**
+3. **Widget Testing Errors**
    ```dart
-   // Setup test umum
+   // Common test setup
    testWidgets('should render correctly', (tester) async {
      await tester.pumpWidget(createTestWidget(MyWidget()));
      await tester.pumpAndSettle(); // Wait for animations
@@ -1629,29 +1720,31 @@ Response:
    });
    ```
 
-4. **Masalah Performa**
-   - Gunakan `flutter run --profile` untuk testing performa
-   - Aktifkan performance overlay: `flutter run --enable-software-rendering`
-   - Monitor penggunaan memori dengan DevTools
+4. **Performance Issues**
+    - Use `flutter run --profile` for profiling
 
-### Pertimbangan Keamanan
+    - Enable performance overlay with `flutter run --enable-software-rendering`
 
-#### Perlindungan Data
-1. **Enkripsi**: Semua data sensitif dienkripsi saat rest dan in transit
-2. **Autentikasi**: Dukungan multi-factor authentication
-3. **Keamanan API**: Rate limiting dan validasi request
-4. **Privasi**: Langkah-langkah kepatuhan GDPR dan CCPA
+    - Use DevTools to monitor memory usage
 
-#### Keamanan Kode
-1. **Manajemen Secret**: Environment variables untuk data sensitif
-2. **Code Obfuscation**: Aturan ProGuard untuk Android release builds
-3. **Certificate Pinning**: Validasi sertifikat SSL/TLS
-4. **Dependency Scanning**: Pemindaian kerentanan keamanan secara berkala
+### Security Considerations
+
+#### Data Protection
+1. **Encryption**: All sensitive data is encrypted both at rest and in transit
+2. **Authentication**: Supports multi-factor authentication (MFA)
+3. **API Security**: Rate limiting and request validation
+4. **Privacy Compliance**: GDPR and CCPA aligned
+
+#### Code Security
+1. **Secret Management**: Uses environment variables for sensitive data
+2. **Code Obfuscation**: Enabled via ProGuard for Android builds
+3. **Certificate Pinning**: Ensures secure SSL/TLS connections
+4. **Dependency Scanning**: Regular vulnerability scans
 
 ---
 
-*Dokumentasi ini dipelihara dan diperbarui secara berkala. Untuk informasi terbaru, silakan merujuk ke repository proyek dan sistem dokumentasi internal.*
+*This documentation is actively maintained and updated. For the latest details, refer to the project repository and internal documentation system.*
 
-**Terakhir Diperbarui**: Mei 2025
-**Versi**: 1.0.0  
-**Maintainers**: Tim Pengembangan PockEat
+* **Last Updated**: June 2025
+* **Version**: 1.0.1  
+* **Maintainers**: PockEat Development Team
