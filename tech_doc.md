@@ -1743,7 +1743,7 @@ Response:
 
 ---
 
-*This documentation is actively maintained and updated. For the latest details, refer to the project repository and internal documentation system.*
+*This documentation is actively maintained and updated. For the latest details, please refer to the project repository and internal documentation system.*
 
 * **Last Updated**: June 2025
 * **Version**: 1.0.1  
