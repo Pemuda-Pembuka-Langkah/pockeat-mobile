@@ -275,7 +275,7 @@ This group of modules enables food input through three methods: image scanning, 
 - `FoodTextInputRepository`: Handles data persistence
 
 ##### c. Food Database Input (`lib/features/food_database_input/`)
-**Purpose**: Browse and log foods from Pockeat's food database.
+**Purpose**: Browse and log foods from PockEat's food database.
 
 **Key Components**:
 - `FoodDatabasePage`: Tabbed UI for searching food and building meals
@@ -1397,7 +1397,7 @@ firebase appdistribution:distribute build/app/outputs/flutter-apk/app-release.ap
     - Sharding and horizontal scaling
 
     - Read replicas for high-throughput reads
-2. **API SCaling**: Microservices architecture with auto-scaling deployment
+2. **API Scaling**: Microservices architecture with auto-scaling deployment
 3. **Content Delivery**: CDN integration for faster image and asset delivery worldwide
 4. **Caching Strategy**: Implement Redis for frequently accessed data
 
