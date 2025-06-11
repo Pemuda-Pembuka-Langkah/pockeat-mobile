@@ -126,11 +126,11 @@ jobs:
       # Setup keystore
       - name: Setup keystore
         run: |
-          echo "${{ secrets.STAGING_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
           echo "storeFile=keystore.jks" > android/key.properties
-          echo "storePassword=${{ secrets.STAGING_KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
           echo "keyAlias=upload" >> android/key.properties
-          echo "keyPassword=${{ secrets.STAGING_KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
 
       - name: Build Release APK
         run: flutter build apk --release
