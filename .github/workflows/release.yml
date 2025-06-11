@@ -25,22 +25,22 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "FLAVOR=production" > .env
+          echo "FLAVOR=staging" > .env
           echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
           echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
           echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_PROJECT_ID=${{ secrets.PRODUCTION_FIREBASE_PROJECT_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PRODUCTION_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_STORAGE_BUCKET=${{ secrets.PRODUCTION_FIREBASE_STORAGE_BUCKET }}" >> .env
-          echo "PRODUCTION_FIREBASE_ANDROID_APP_ID=${{ secrets.PRODUCTION_FIREBASE_ANDROID_APP_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_ANDROID_API_KEY=${{ secrets.PRODUCTION_FIREBASE_ANDROID_API_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_IOS_APP_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_APP_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_IOS_API_KEY=${{ secrets.PRODUCTION_FIREBASE_IOS_API_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_IOS_BUNDLE_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_BUNDLE_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
-          echo "INSTABUG_TOKEN=${{ secrets.PRODUCTION_INSTABUG_TOKEN }}" >> .env
+          echo "STAGING_FIREBASE_PROJECT_ID=${{ secrets.STAGING_FIREBASE_PROJECT_ID }}" >> .env
+          echo "STAGING_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.STAGING_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "STAGING_FIREBASE_STORAGE_BUCKET=${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_APP_ID=${{ secrets.STAGING_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_API_KEY=${{ secrets.STAGING_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_APP_ID=${{ secrets.STAGING_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_IOS_API_KEY=${{ secrets.STAGING_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_BUNDLE_ID=${{ secrets.STAGING_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "INSTABUG_TOKEN=${{ secrets.STAGING_INSTABUG_TOKEN }}" >> .env
 
       - name: Get dependencies
         run: flutter pub get
@@ -95,22 +95,22 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "FLAVOR=production" > .env
+          echo "FLAVOR=staging" > .env
           echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> .env
           echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
           echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_PROJECT_ID=${{ secrets.PRODUCTION_FIREBASE_PROJECT_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.PRODUCTION_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_STORAGE_BUCKET=${{ secrets.PRODUCTION_FIREBASE_STORAGE_BUCKET }}" >> .env
-          echo "PRODUCTION_FIREBASE_ANDROID_APP_ID=${{ secrets.PRODUCTION_FIREBASE_ANDROID_APP_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_ANDROID_API_KEY=${{ secrets.PRODUCTION_FIREBASE_ANDROID_API_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_IOS_APP_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_APP_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_IOS_API_KEY=${{ secrets.PRODUCTION_FIREBASE_IOS_API_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_IOS_BUNDLE_ID=${{ secrets.PRODUCTION_FIREBASE_IOS_BUNDLE_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_WEB_APP_ID=${{ secrets.PRODUCTION_FIREBASE_WEB_APP_ID }}" >> .env
-          echo "PRODUCTION_FIREBASE_WEB_API_KEY=${{ secrets.PRODUCTION_FIREBASE_WEB_API_KEY }}" >> .env
-          echo "PRODUCTION_FIREBASE_AUTH_DOMAIN=${{ secrets.PRODUCTION_FIREBASE_AUTH_DOMAIN }}" >> .env
-          echo "INSTABUG_TOKEN=${{ secrets.PRODUCTION_INSTABUG_TOKEN }}" >> .env
+          echo "STAGING_FIREBASE_PROJECT_ID=${{ secrets.STAGING_FIREBASE_PROJECT_ID }}" >> .env
+          echo "STAGING_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.STAGING_FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+          echo "STAGING_FIREBASE_STORAGE_BUCKET=${{ secrets.STAGING_FIREBASE_STORAGE_BUCKET }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_APP_ID=${{ secrets.STAGING_FIREBASE_ANDROID_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_ANDROID_API_KEY=${{ secrets.STAGING_FIREBASE_ANDROID_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_APP_ID=${{ secrets.STAGING_FIREBASE_IOS_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_IOS_API_KEY=${{ secrets.STAGING_FIREBASE_IOS_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_IOS_BUNDLE_ID=${{ secrets.STAGING_FIREBASE_IOS_BUNDLE_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_APP_ID=${{ secrets.STAGING_FIREBASE_WEB_APP_ID }}" >> .env
+          echo "STAGING_FIREBASE_WEB_API_KEY=${{ secrets.STAGING_FIREBASE_WEB_API_KEY }}" >> .env
+          echo "STAGING_FIREBASE_AUTH_DOMAIN=${{ secrets.STAGING_FIREBASE_AUTH_DOMAIN }}" >> .env
+          echo "INSTABUG_TOKEN=${{ secrets.STAGING_INSTABUG_TOKEN }}" >> .env
 
       - name: Get dependencies
         run: flutter pub get
@@ -121,16 +121,16 @@ jobs:
       # Setup Google Services JSON
       - name: Setup Google Services JSON
         run: |
-          echo '${{ secrets.PRODUCTION_GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
+          echo '${{ secrets.STAGING_GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
 
       # Setup keystore
       - name: Setup keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          echo "${{ secrets.STAGING_KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
           echo "storeFile=keystore.jks" > android/key.properties
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "storePassword=${{ secrets.STAGING_KEYSTORE_PASSWORD }}" >> android/key.properties
           echo "keyAlias=upload" >> android/key.properties
-          echo "keyPassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "keyPassword=${{ secrets.STAGING_KEYSTORE_PASSWORD }}" >> android/key.properties
 
       - name: Build Release APK
         run: flutter build apk --release
@@ -192,7 +192,7 @@ jobs:
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: ${{ secrets.PRODUCTION_FIREBASE_ANDROID_APP_ID }}
+          appId: ${{ secrets.STAGING_FIREBASE_ANDROID_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           file: build/app/outputs/flutter-apk/app-release.apk
           releaseNotes: ${{ steps.extract_changelog.outputs.CHANGELOG }}
