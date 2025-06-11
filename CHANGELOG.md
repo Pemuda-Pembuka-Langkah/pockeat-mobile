@@ -1,4 +1,39 @@
 # Changelog
+## v1.3.4
+**Release Date: June 11, 2025**
+
+### Features
+- **Technical Documentation**
+  - Translated technical documentation from Indonesian to English
+  - Updated content with revised information
+  - Refined documentation based on review feedback
+
+### Improvements
+- **Food Database Management**
+  - Refactored food database input method
+  - Changed portion input method for better usability
+  - Enhanced UI/UX for food input page
+
+### Bug Fixes
+- **Onboarding and Navigation**
+  - Fixed navigation handling on food input page
+  - Resolved issue with duplicate entry for vitamin and mineral section in nutrition page
+  - Fixed initial day and week bugs on progress page
+  - Fixed issue where app would unexpectedly navigate to welcome page
+
+### Technical
+- **Free Trial Implementation**
+  - Added free trial checker service
+  - Implemented free trial field trigger function in database
+  - Created dedicated free trial page
+  - Handled edge cases for free trial functionality when user is not completing onboarding
+
+- **Widget and Performance**
+  - Improved homepage performance from 6.7 seconds to 2.7 seconds
+  - Updated calculation logic in widget background service
+  - Added triggers to update app widget after data changes
+  - Integrated calorie preferences and rollover for app widget
+
 ## v1.3.3
 **Release Date: May 11, 2025**
 
