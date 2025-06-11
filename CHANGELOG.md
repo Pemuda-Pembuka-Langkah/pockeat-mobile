@@ -1,4 +1,19 @@
 # Changelog
+## v1.3.5
+**Release Date: June 11, 2025**
+
+# CHANGELOG
+
+## v1.3.5
+**Release Date: June 11, 2025**
+
+### Technical
+- **Dependency Management**
+  - Updated dependencies in pubspec.yaml
+  - Improved CI/CD pipeline with updated release workflow
+
+Since the commit messages are brief and technical in nature, the changelog entry focuses on the technical updates made to the project's dependencies and build process. There were no explicit feature additions or bug fixes mentioned in the provided commit messages.
+
 ## v1.3.4
 **Release Date: June 11, 2025**
 
