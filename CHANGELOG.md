@@ -1,4 +1,41 @@
 # Changelog
+## v1.3.4
+**Release Date: June 11, 2025**
+
+### Features
+- **Technical Documentation**
+  - Added comprehensive technical documentation in English
+  - Translated tech documentation from Indonesian to English
+
+### Improvements
+- **Performance Optimization**
+  - Improved homepage performance from 6.7 seconds to 2.7 seconds
+  - Enhanced skeleton loading with skeletonizer for better user experience
+
+### Bug Fixes
+- **Onboarding and Navigation**
+  - Fixed free trial page edge cases
+  - Corrected navigation handling on food input page
+  - Fixed duplicate entry for vitamin and mineral section in nutrition page
+  - Resolved issue with pop navigation to welcome page
+  - Added proper back button functionality to registration flow
+
+### Technical
+- **Health Metrics Integration**
+  - Implemented health metrics service with service locator
+  - Added user health metrics to smart exercise log page
+  - Integrated BMI auto-update when updating current weight
+  - Improved caloric requirements calculation with auto-updates
+  - Added macronutrient (protein, carbs, fat) requirements calculation
+
+### Refactoring
+- **UI/UX Enhancements**
+  - Refactored pet name handling in user preferences
+  - Updated food database input method for portion selection
+  - Improved weight progress and goals calculation
+  - Refined widget background service calculation logic
+  - Added widget update triggers for various user actions
+
 ## v1.3.3
 **Release Date: May 11, 2025**
 
