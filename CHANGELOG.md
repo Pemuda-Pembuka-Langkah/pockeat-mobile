@@ -1,4 +1,11 @@
 # Changelog
+## v1.3.6
+**Release Date: June 16, 2025**
+
+### Technical
+- **Dependency Management**
+  - Updated dependencies in pubspec.yaml
+
 ## v1.3.5
 **Release Date: June 11, 2025**
 
